@@ -18,7 +18,7 @@ resource "minikube_cluster" "terraform-cluster" {
   addons       = ["default-storageclass", "storage-provisioner"]
 }
 
-# This resource starts Minikube and mounts (idempotent)
+# This resource starts Minikube (idempotent)
 resource "null_resource" "start_minikube" {
   depends_on = [minikube_cluster.terraform-cluster]
 
@@ -32,7 +32,7 @@ resource "null_resource" "start_minikube" {
   }
 }
 
-# This resource ensures the minikube mount command is run after the cluster starts or restarts.
+# This resource ensures the minikube mount command is run after the cluster starts or restarts  (idempotent)
 resource "null_resource" "minikube_mount" {
   depends_on = [
     minikube_cluster.terraform-cluster,
@@ -53,7 +53,6 @@ resource "null_resource" "minikube_mount" {
 
 provider "kubernetes" {
   host = minikube_cluster.terraform-cluster.host
-
   client_certificate     = minikube_cluster.terraform-cluster.client_certificate
   client_key             = minikube_cluster.terraform-cluster.client_key
   cluster_ca_certificate = minikube_cluster.terraform-cluster.cluster_ca_certificate
