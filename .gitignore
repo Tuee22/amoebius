@@ -1,0 +1,34 @@
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+
+# Terraform variable override files
+*.tfvars
+*.tfvars.json
+
+# Packer specific files
+packer_cache/
+*.pkr.hcl.lock
+
+# Provider-related lock files
+.terraform.lock.hcl
+
+# Sensitive files
+*.auto.tfvars
+
+# Ignore any secret or private key files
+*.pem
+*.key
+
+# Ignore .DS_Store (macOS specific)
+.DS_Store
+
+# ignore zip files
+*.zip
+*.log

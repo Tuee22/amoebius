@@ -1,26 +1,53 @@
 terraform {
   required_providers {
     minikube = {
-      source = "scott-the-programmer/minikube"
+      source  = "scott-the-programmer/minikube"
       version = "0.4.0"
     }
   }
 }
 
 provider "minikube" {
-  kubernetes_version = "v1.30.0"
+  kubernetes_version = "v1.31.0"
 }
 
+# Main Minikube cluster resource
 resource "minikube_cluster" "terraform-cluster" {
   driver       = "docker"
   cluster_name = var.cluster_name
+  addons       = ["default-storageclass", "storage-provisioner"]
 }
 
-resource "null_resource" "minikube_mount" {
+# This resource starts Minikube and mounts (idempotent)
+resource "null_resource" "start_minikube" {
   depends_on = [minikube_cluster.terraform-cluster]
 
   provisioner "local-exec" {
-    command = "nohup minikube mount -p ${var.cluster_name} ${var.local_folder}:/data > minikube-mount.log 2>&1 &"
+    # Start Minikube
+    command = "minikube start -p ${var.cluster_name}"
+  }
+
+  triggers = {
+    start_minikube = "${timestamp()}"
+  }
+}
+
+# This resource ensures the minikube mount command is run after the cluster starts or restarts.
+resource "null_resource" "minikube_mount" {
+  depends_on = [
+    minikube_cluster.terraform-cluster,
+    null_resource.start_minikube
+  ]
+
+  provisioner "local-exec" {
+    # Run the mount command after Minikube starts
+    command = <<EOT
+      nohup minikube mount -p ${var.cluster_name} ${var.local_folder}:${var.mount_folder} > minikube-mount.log 2>&1 &
+    EOT
+  }
+
+  triggers = {
+    mount = "${timestamp()}"
   }
 }
 
