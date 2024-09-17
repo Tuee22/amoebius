@@ -23,31 +23,16 @@ resource "null_resource" "start_minikube" {
   depends_on = [minikube_cluster.terraform-cluster]
 
   provisioner "local-exec" {
-    # Start Minikube
-    command = "minikube start -p ${var.cluster_name}"
+    command = <<-EOF
+      minikube -p ${var.cluster_name} stop
+      minikube -p ${var.cluster_name} start
+      nohup minikube mount -p ${var.cluster_name} ${var.local_folder}:${var.mount_folder} > minikube-mount.log 2>&1 &
+    EOF
   }
-
+  
+  // trigger so we always restart and mount minikube on terraform apply
   triggers = {
     start_minikube = "${timestamp()}"
-  }
-}
-
-# This resource ensures the minikube mount command is run after the cluster starts or restarts  (idempotent)
-resource "null_resource" "minikube_mount" {
-  depends_on = [
-    minikube_cluster.terraform-cluster,
-    null_resource.start_minikube
-  ]
-
-  provisioner "local-exec" {
-    # Run the mount command after Minikube starts
-    command = <<EOT
-      nohup minikube mount -p ${var.cluster_name} ${var.local_folder}:${var.mount_folder} > minikube-mount.log 2>&1 &
-    EOT
-  }
-
-  triggers = {
-    mount = "${timestamp()}"
   }
 }
 
