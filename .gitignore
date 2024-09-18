@@ -21,6 +21,7 @@ packer_cache/
 
 # Sensitive files
 *.auto.tfvars
+*.tfvars
 
 # Ignore any secret or private key files
 *.pem
@@ -29,6 +30,6 @@ packer_cache/
 # Ignore .DS_Store (macOS specific)
 .DS_Store
 
-# ignore zip files
+# ignore zip and log files
 *.zip
 *.log
