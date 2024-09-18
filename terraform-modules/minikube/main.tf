@@ -5,9 +5,6 @@ terraform {
       version = "0.4.0"
     }
   }
-  kubernetes = {
-    source  = "hashicorp/kubernetes"
-  }
 }
 
 provider "minikube" {
@@ -21,8 +18,8 @@ resource "minikube_cluster" "terraform-cluster" {
   addons       = ["default-storageclass", "storage-provisioner"]
 }
 
-# This resource starts Minikube (idempotent after restart)
-# NB: the stop/start is to account for 
+# This resource starts Minikube and mounts storage into the minikube container (idempotent after restart)
+# NB: the stop/start is to ensure a previous mount isn't still active when we create a new mount 
 resource "null_resource" "start_minikube" {
   depends_on = [minikube_cluster.terraform-cluster]
 
@@ -38,11 +35,4 @@ resource "null_resource" "start_minikube" {
   triggers = {
     start_minikube = "${timestamp()}"
   }
-}
-
-provider "kubernetes" {
-  host = minikube_cluster.terraform-cluster.host
-  client_certificate     = minikube_cluster.terraform-cluster.client_certificate
-  client_key             = minikube_cluster.terraform-cluster.client_key
-  cluster_ca_certificate = minikube_cluster.terraform-cluster.cluster_ca_certificate
 }
