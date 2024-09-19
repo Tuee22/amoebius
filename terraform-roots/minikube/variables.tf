@@ -7,6 +7,7 @@ variable "cluster_name" {
 variable "local_folder" {
   description = "The local folder to mount into Minikube"
   type        = string 
+  default     = "~/minikube_data"
 }
 
 variable "mount_folder" {
