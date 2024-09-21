@@ -16,6 +16,17 @@ resource "minikube_cluster" "terraform-cluster" {
   driver       = "docker"
   cluster_name = var.cluster_name
   addons       = ["default-storageclass", "storage-provisioner"]
+
+  # Keep the same IP range across restarts
+  host_only_cidr = "192.168.99.1/24"
+
+  # Specify the apiserver IP and port to keep them consistent
+  apiserver_ips  = ["192.168.99.100"]
+  apiserver_port = 8444
+
+  # Other optional Minikube settings
+  cpus    = 2
+  memory  = "4096"
 }
 
 # This resource starts Minikube and mounts storage into the minikube container (idempotent after restart)
