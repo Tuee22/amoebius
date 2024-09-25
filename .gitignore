@@ -33,3 +33,4 @@ packer_cache/
 # ignore zip and log files
 *.zip
 *.log
+*.txt
