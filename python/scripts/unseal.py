@@ -16,16 +16,16 @@ def ensure_package(package_name):
 ensure_package('aiohttp')
 ensure_package('cryptography')
 
-import amoebius.encrypted_dict as enc_dict
-import unseal_vault
+from amoebius.secrets.encrypted_dict import get_password, decrypt_dict_from_file
+from amoebius.secrets import unseal_vault
 
 def main():
     # Get user-supplied password
-    password = enc_dict.get_password("Enter password to decrypt vault secrets: ")
+    password = get_password("Enter password to decrypt vault secrets: ")
 
     # Open and decrypt the vault_secrets.bin file
     try:
-        secrets_dict = enc_dict.decrypt_dict_from_file(password, 'vault_secrets.bin')
+        secrets_dict = decrypt_dict_from_file(password, '/amoebius/data/vault_secrets.bin')
     except FileNotFoundError:
         print("Error: vault_secrets.bin file not found.")
         return

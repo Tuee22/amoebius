@@ -35,7 +35,7 @@ provider "helm" {
 
 locals {
   home_dir = pathexpand("~")
-  data_dir = "${local.home_dir}/data/kind"
+  data_dir = "${local.home_dir}/.local/share/kind-data"
 }
 
 resource "kind_cluster" "default" {
@@ -43,25 +43,18 @@ resource "kind_cluster" "default" {
   wait_for_ready = true
   kind_config {
     kind        = "Cluster"
-    api_version = "kind.x-k8s.io/v1alpha3"
+    api_version = "kind.x-k8s.io/v1alpha4"
     node {
       role = "control-plane"
       extra_mounts {
         host_path      = "${local.data_dir}"
         container_path = "/data"            
       }
+      extra_mounts {
+        host_path      = "${local.home_dir}/amoebius"
+        container_path = "/amoebius"
+      }
     }
-  }
-}
-
-resource "null_resource" "create_vault_data_dir" {
-  depends_on = [kind_cluster.default]
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      mkdir -p ${local.data_dir}/vault
-      docker exec kind-cluster-control-plane mkdir -p /data/vault
-    EOT
   }
 }
 
@@ -110,10 +103,7 @@ resource "kubernetes_persistent_volume" "vault_storage" {
       }
     }
   }
-  depends_on = [
-    kubernetes_storage_class.local_storage,
-    null_resource.create_vault_data_dir
-  ]
+  depends_on = [kubernetes_storage_class.local_storage]
 }
 
 resource "helm_release" "vault" {
@@ -163,7 +153,7 @@ resource "helm_release" "vault" {
         cluster_address = "[::]:8201"
       }
       storage "file" {
-        path = "/vault/data"  # Ensure this aligns with the mount
+        path = "/vault/data"
       }
     EOT
   }
