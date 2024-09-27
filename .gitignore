@@ -30,7 +30,8 @@ packer_cache/
 # Ignore .DS_Store (macOS specific)
 .DS_Store
 
-# ignore zip and log files
+# other extensions to ignore
 *.zip
 *.log
 *.txt
+*.bin
