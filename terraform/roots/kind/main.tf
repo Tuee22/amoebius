@@ -210,7 +210,7 @@ resource "kubernetes_pod" "script_runner" {
 
       env {
         name  = "PYTHONPATH"
-        value = "/amoebius:/amoebius/python"
+        value = "$PYTHONPATH:/amoebius/python"
       }
 
       # Add any additional packages you might need
