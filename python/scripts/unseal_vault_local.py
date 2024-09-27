@@ -1,20 +1,11 @@
 import subprocess
 import sys
-import importlib.util
 
-def install(package):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+# Install or upgrade pip, wheel, and setuptools
+subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "pip", "wheel", "setuptools"])
 
-def ensure_package(package_name):
-    if importlib.util.find_spec(package_name) is None:
-        print(f"{package_name} not found. Installing...")
-        install(package_name)
-    else:
-        print(f"{package_name} is already installed.")
-
-# Ensure required packages are installed
-ensure_package('aiohttp')
-ensure_package('cryptography')
+# Install or upgrade aiohttp and cryptography
+subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "aiohttp", "cryptography"])
 
 from amoebius.secrets.encrypted_dict import get_password, decrypt_dict_from_file
 from amoebius.secrets import unseal_vault
@@ -40,7 +31,7 @@ def main():
         return
 
     # Define the Vault pod URL (using the default from the official Helm chart)
-    vault_pod = "vault-0"
+    vault_pod = "http://vault-0.vault.vault.svc.cluster.local:8200/"
 
     # Run the vault unseal function
     print(f"Unsealing Vault pod: {vault_pod}")

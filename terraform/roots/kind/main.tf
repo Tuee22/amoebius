@@ -48,7 +48,7 @@ resource "kind_cluster" "default" {
       role = "control-plane"
       extra_mounts {
         host_path      = "${local.data_dir}"
-        container_path = "/data"            
+        container_path = "/persistent-data"            
       }
       extra_mounts {
         host_path      = "${local.home_dir}/amoebius"
@@ -88,7 +88,7 @@ resource "kubernetes_persistent_volume" "vault_storage" {
     storage_class_name = kubernetes_storage_class.local_storage.metadata[0].name
     persistent_volume_source {
       local {
-        path = "/data/vault"
+        path = "/persistent-data/vault"
       }
     }
     node_affinity {
@@ -186,6 +186,54 @@ resource "null_resource" "vault_port_forward" {
   }
 }
 
+resource "kubernetes_pod" "script_runner" {
+  metadata {
+    name = "script-runner"
+    labels = {
+      app = "script-runner"
+    }
+  }
+
+  spec {
+    restart_policy = "Always"
+
+    container {
+      image = "python:3.11-alpine"  # Lightweight Alpine-based Python image
+      name  = "script-runner"
+      
+      command = ["/bin/sh", "-c", "tail -f /dev/null"]
+      
+      volume_mount {
+        name       = "amoebius-volume"
+        mount_path = "/amoebius"
+      }
+
+      env {
+        name  = "PYTHONPATH"
+        value = "/amoebius:/amoebius/python"
+      }
+
+      # Add any additional packages you might need
+      # For example, if you need git:
+      # command = ["/bin/sh", "-c", "tail -f /dev/null"]
+    }
+
+    volume {
+      name = "amoebius-volume"
+      host_path {
+        path = "/amoebius"
+        type = "Directory"
+      }
+    }
+
+    node_selector = {
+      "kubernetes.io/hostname" = "kind-cluster-control-plane"
+    }
+  }
+
+  depends_on = [kind_cluster.default]
+}
+
 output "vault_api_addr" {
   value = "http://localhost:8200"
 }
@@ -198,35 +246,4 @@ output "vault_ui_url" {
 output "kubeconfig" {
   value     = kind_cluster.default.kubeconfig
   sensitive = true
-}
-
-output "next_steps" {
-  value = <<EOT
-Vault has been deployed to your Kind cluster. To interact with Vault:
-
-1. Ensure port forwarding is active (should be handled by Terraform)
-2. Access the Vault UI at: http://localhost:8200/ui
-3. To use Vault CLI:
-   export VAULT_ADDR='http://localhost:8200'
-
-4. Initialize Vault if this is the first deployment:
-   vault operator init
-
-5. Unseal Vault:
-   vault operator unseal
-
-Remember to securely store the unseal keys and root token!
-EOT
-}
-
-output "port_forward_note" {
-  value = <<EOT
-Port forwarding has been set up for Vault.
-If you need to manually restart it, run:
-kubectl port-forward -n vault service/vault 8200:8200
-
-To stop it, find the process and kill it:
-ps aux | grep "kubectl port-forward -n vault service/vault" | grep -v grep
-kill <PID>
-EOT
 }
