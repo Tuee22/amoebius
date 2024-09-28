@@ -1,3 +1,5 @@
+# Terraform Providers and Settings
+
 terraform {
   required_providers {
     kind = {
@@ -33,13 +35,10 @@ provider "helm" {
   }
 }
 
-locals {
-  home_dir = pathexpand("~")
-  data_dir = "${local.home_dir}/.local/share/kind-data"
-}
+# Kind Cluster
 
 resource "kind_cluster" "default" {
-  name           = "kind-cluster"
+  name           = var.cluster_name
   wait_for_ready = true
   kind_config {
     kind        = "Cluster"
@@ -47,48 +46,62 @@ resource "kind_cluster" "default" {
     node {
       role = "control-plane"
       extra_mounts {
-        host_path      = "${local.data_dir}"
-        container_path = "/persistent-data"            
+        host_path      = pathexpand(var.data_dir)
+        container_path = "/persistent-data"
       }
       extra_mounts {
-        host_path      = "${local.home_dir}/amoebius"
+        host_path      = pathexpand(var.amoebius_dir)
         container_path = "/amoebius"
       }
     }
   }
 }
 
+# Kubernetes Namespace
+
 resource "kubernetes_namespace" "vault" {
   metadata {
-    name = "vault"
+    name = var.vault_namespace
   }
 
   depends_on = [kind_cluster.default]
 }
+
+# Storage Class
 
 resource "kubernetes_storage_class" "local_storage" {
   metadata {
-    name = "local-storage"
+    name = var.storage_class_name
   }
-  storage_provisioner  = "kubernetes.io/no-provisioner"
-  volume_binding_mode  = "WaitForFirstConsumer"
+  storage_provisioner = "kubernetes.io/no-provisioner"
+  volume_binding_mode = "WaitForFirstConsumer"
 
   depends_on = [kind_cluster.default]
 }
 
+# Persistent Volumes
+
+
+
+
 resource "kubernetes_persistent_volume" "vault_storage" {
+  for_each = { for idx in range(var.vault_replicas) : idx => idx }
+
   metadata {
-    name = "vault-pv"
+    name = "vault-pv-${each.key}"
+    labels = {
+      pvIndex = "${each.key}"
+    }
   }
   spec {
     capacity = {
-      storage = "10Gi"
+      storage = var.vault_storage_size
     }
     access_modes       = ["ReadWriteOnce"]
     storage_class_name = kubernetes_storage_class.local_storage.metadata[0].name
     persistent_volume_source {
       local {
-        path = "/persistent-data/vault"
+        path = "/persistent-data/vault/vault-${each.key}"
       }
     }
     node_affinity {
@@ -97,7 +110,7 @@ resource "kubernetes_persistent_volume" "vault_storage" {
           match_expressions {
             key      = "kubernetes.io/hostname"
             operator = "In"
-            values   = ["kind-cluster-control-plane"]
+            values   = ["${var.cluster_name}-control-plane"]
           }
         }
       }
@@ -106,56 +119,41 @@ resource "kubernetes_persistent_volume" "vault_storage" {
   depends_on = [kubernetes_storage_class.local_storage]
 }
 
+# Helm Release for Vault
+
 resource "helm_release" "vault" {
-  name       = "vault"
+  name       = var.vault_service_name
   repository = "https://helm.releases.hashicorp.com"
   chart      = "vault"
-  version    = "0.23.0"
+  version    = var.vault_helm_chart_version
   namespace  = kubernetes_namespace.vault.metadata[0].name
 
+  dynamic "set" {
+    for_each = var.vault_values
+    content {
+      name  = set.key
+      value = set.value
+    }
+  }
+
   set {
-    name  = "server.dataStorage.enabled"
-    value = "true"
+    name  = "server.ha.raft.config"
+    value = var.vault_ha_config
+  }
+
+  set {
+    name  = "server.service.type"
+    value = "ClusterIP"
+  }
+
+  set {
+    name  = "server.ha.raft.replicas"
+    value = tostring(var.vault_replicas)
   }
 
   set {
     name  = "server.dataStorage.storageClass"
     value = kubernetes_storage_class.local_storage.metadata[0].name
-  }
-
-  set {
-    name  = "server.dataStorage.size"
-    value = "10Gi"
-  }
-
-  set {
-    name  = "server.dataStorage.accessMode"
-    value = "ReadWriteOnce"
-  }
-
-  set {
-    name  = "server.dataStorage.volumeName"
-    value = kubernetes_persistent_volume.vault_storage.metadata[0].name
-  }
-
-  set {
-    name  = "server.standalone.enabled"
-    value = "true"
-  }
-
-  set {
-    name  = "server.standalone.config"
-    value = <<-EOT
-      ui = true
-      listener "tcp" {
-        tls_disable = 1
-        address = "[::]:8200"
-        cluster_address = "[::]:8201"
-      }
-      storage "file" {
-        path = "/vault/data"
-      }
-    EOT
   }
 
   depends_on = [
@@ -164,31 +162,12 @@ resource "helm_release" "vault" {
   ]
 }
 
-resource "null_resource" "vault_port_forward" {
-  depends_on = [helm_release.vault]
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      nohup kubectl port-forward -n vault service/vault 8200:8200 > /dev/null 2>&1 &
-      echo $! > ${path.module}/vault_port_forward.pid
-    EOT
-  }
-
-  provisioner "local-exec" {
-    when    = destroy
-    command = <<-EOT
-      if [ -f ${path.module}/vault_port_forward.pid ]; then
-        pid=$(cat ${path.module}/vault_port_forward.pid)
-        kill $pid || true
-        rm ${path.module}/vault_port_forward.pid
-      fi
-    EOT
-  }
-}
+# Script Runner Pod
 
 resource "kubernetes_pod" "script_runner" {
   metadata {
-    name = "script-runner"
+    name      = "script-runner"
+    namespace = var.vault_namespace  # Place the pod in the 'vault' namespace
     labels = {
       app = "script-runner"
     }
@@ -198,8 +177,8 @@ resource "kubernetes_pod" "script_runner" {
     restart_policy = "Always"
 
     container {
-      image = "python:3.11-alpine"  # Lightweight Alpine-based Python image
-      name  = "script-runner"
+      image   = var.script_runner_image
+      name    = "script-runner"
       
       command = ["/bin/sh", "-c", "tail -f /dev/null"]
       
@@ -212,10 +191,6 @@ resource "kubernetes_pod" "script_runner" {
         name  = "PYTHONPATH"
         value = "$PYTHONPATH:/amoebius/python"
       }
-
-      # Add any additional packages you might need
-      # For example, if you need git:
-      # command = ["/bin/sh", "-c", "tail -f /dev/null"]
     }
 
     volume {
@@ -227,23 +202,38 @@ resource "kubernetes_pod" "script_runner" {
     }
 
     node_selector = {
-      "kubernetes.io/hostname" = "kind-cluster-control-plane"
+      "kubernetes.io/hostname" = "${var.cluster_name}-control-plane"
     }
   }
 
-  depends_on = [kind_cluster.default]
+  depends_on = [kind_cluster.default,kubernetes_namespace.vault]
 }
 
-output "vault_api_addr" {
-  value = "http://localhost:8200"
-}
+# Port Forwarding
 
-output "vault_ui_url" {
-  value       = "http://localhost:8200/ui"
-  description = "URL for accessing the Vault UI"
-}
+resource "null_resource" "port_forward" {
+  for_each = {
+    for pf in var.port_forwards :
+    "${pf.namespace}-${pf.service_name}-${pf.local_port}-${pf.remote_port}" => pf
+  }
 
-output "kubeconfig" {
-  value     = kind_cluster.default.kubeconfig
-  sensitive = true
+  depends_on = [helm_release.vault]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      nohup kubectl port-forward -n ${each.value.namespace} service/${each.value.service_name} ${each.value.local_port}:${each.value.remote_port} > /dev/null 2>&1 &
+      echo $! > ${path.module}/port_forward_${each.key}.pid
+    EOT
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = <<-EOT
+      if [ -f ${path.module}/port_forward_${each.key}.pid ]; then
+        pid=$(cat ${path.module}/port_forward_${each.key}.pid)
+        kill $pid || true
+        rm ${path.module}/port_forward_${each.key}.pid
+      fi
+    EOT
+  }
 }
