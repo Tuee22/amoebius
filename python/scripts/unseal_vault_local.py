@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import subprocess
 import sys
 
@@ -9,6 +10,7 @@ subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "aio
 
 from amoebius.secrets.encrypted_dict import get_password, decrypt_dict_from_file
 from amoebius.secrets import unseal_vault
+from amoebius.secrets.terraform import get_terraform_output
 
 def main():
     # Get user-supplied password
@@ -31,11 +33,13 @@ def main():
         return
 
     # Define the Vault pod URL (using the default from the official Helm chart)
-    vault_pod = "http://vault-0.vault.vault.svc.cluster.local:8200/"
+    terraform_dir='/amoebius/terraform/roots/kind'
+    output_name='vault_raft_pod_dns_names'
+    local_vault_hosts = get_terraform_output(terraform_dir, output_name)
 
     # Run the vault unseal function
-    print(f"Unsealing Vault pod: {vault_pod}")
-    unseal_vault.run_unseal_concurrently([vault_pod], [unseal_key])
+    print(f"Unsealing Vault pods: {local_vault_hosts}")
+    unseal_vault.run_unseal_concurrently(local_vault_hosts, [unseal_key])
 
 if __name__ == "__main__":
     main()

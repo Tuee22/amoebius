@@ -19,22 +19,6 @@ terraform {
 
 provider "kind" {}
 
-provider "kubernetes" {
-  host                   = kind_cluster.default.endpoint
-  cluster_ca_certificate = kind_cluster.default.cluster_ca_certificate
-  client_certificate     = kind_cluster.default.client_certificate
-  client_key             = kind_cluster.default.client_key
-}
-
-provider "helm" {
-  kubernetes {
-    host                   = kind_cluster.default.endpoint
-    cluster_ca_certificate = kind_cluster.default.cluster_ca_certificate
-    client_certificate     = kind_cluster.default.client_certificate
-    client_key             = kind_cluster.default.client_key
-  }
-}
-
 # Kind Cluster
 
 resource "kind_cluster" "default" {
@@ -54,6 +38,22 @@ resource "kind_cluster" "default" {
         container_path = "/amoebius"
       }
     }
+  }
+}
+
+provider "kubernetes" {
+  host                   = kind_cluster.default.endpoint
+  cluster_ca_certificate = kind_cluster.default.cluster_ca_certificate
+  client_certificate     = kind_cluster.default.client_certificate
+  client_key             = kind_cluster.default.client_key
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = kind_cluster.default.endpoint
+    cluster_ca_certificate = kind_cluster.default.cluster_ca_certificate
+    client_certificate     = kind_cluster.default.client_certificate
+    client_key             = kind_cluster.default.client_key
   }
 }
 
@@ -80,9 +80,6 @@ resource "kubernetes_storage_class" "local_storage" {
 }
 
 # Persistent Volumes
-
-
-
 
 resource "kubernetes_persistent_volume" "vault_storage" {
   for_each = { for idx in range(var.vault_replicas) : idx => idx }
@@ -138,12 +135,27 @@ resource "helm_release" "vault" {
 
   set {
     name  = "server.ha.raft.config"
-    value = var.vault_ha_config
-  }
+    value = <<-EOT
+      ui = true
 
-  set {
-    name  = "server.service.type"
-    value = "ClusterIP"
+      listener "tcp" {
+        tls_disable = 1
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+      }
+
+      storage "raft" {
+        path    = "/vault/data"
+        node_id = "{{ .NodeID }}"
+        %{for i in range(var.vault_replicas)}
+        retry_join {
+          leader_api_addr = "http://${var.vault_service_name}-${i}.${var.vault_service_name}-internal:8200"
+        }
+        %{endfor}
+      }
+
+      service_registration "kubernetes" {}
+    EOT
   }
 
   set {

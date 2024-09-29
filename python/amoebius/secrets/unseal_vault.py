@@ -16,7 +16,7 @@ async def unseal_vault_pod(
         if response.status == 200:
             print(f"Successfully sent unseal key to {pod}")
         else:
-            print(f"Failed to unseal {pod}, status code: {response.status}")
+            print(f"Failed to unseal {pod}, status code: {response.status} test: {response.text}")
 
 # Define the main unsealing function
 async def unseal_vault_pods_concurrently(vault_pods: List[str], unseal_keys: List[str]) -> None:

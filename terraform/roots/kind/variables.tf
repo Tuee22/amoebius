@@ -21,7 +21,7 @@ variable "vault_namespace" {
 variable "storage_class_name" {
   description = "Name of the Kubernetes storage class"
   type        = string
-  default     = "local-storage"
+  default     = "vault-storage"
 }
 variable "vault_storage_size" {
   description = "Size of the Vault storage"
@@ -48,23 +48,6 @@ variable "vault_values" {
     "server.dataStorage.accessMode" = "ReadWriteOnce"
     "server.affinity"               = ""
   }
-}
-variable "vault_ha_config" {
-  description = "HA configuration for Vault using Raft"
-  type        = string
-  default     = <<-EOT
-    ui = true
-    listener "tcp" {
-      tls_disable = 1
-      address = "[::]:8200"
-      cluster_address = "[::]:8201"
-    }
-    storage "raft" {
-      path    = "/vault/data"
-      node_id = "{{ .NodeID }}"
-    }
-    service_registration "kubernetes" {}
-  EOT
 }
 variable "script_runner_image" {
   description = "Docker image for the script runner"
