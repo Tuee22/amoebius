@@ -134,6 +134,11 @@ resource "helm_release" "vault" {
   }
 
   set {
+    name  = "server.dataStorage.size"
+    value = var.vault_storage_size
+  }
+
+  set {
     name  = "server.ha.raft.config"
     value = <<-EOT
       ui = true

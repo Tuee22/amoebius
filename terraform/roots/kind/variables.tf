@@ -26,7 +26,7 @@ variable "storage_class_name" {
 variable "vault_storage_size" {
   description = "Size of the Vault storage"
   type        = string
-  default     = "10Gi"
+  default     = "1Gi"
 }
 variable "vault_helm_chart_version" {
   description = "Version of the Vault Helm chart"
