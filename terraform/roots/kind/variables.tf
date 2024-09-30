@@ -45,6 +45,7 @@ variable "vault_values" {
     "server.ha.enabled"             = "true"
     "server.ha.raft.enabled"        = "true"
     "server.dataStorage.enabled"    = "true"
+    "injector.enabled"              = "true"
     "server.dataStorage.accessMode" = "ReadWriteOnce"
     "server.affinity"               = ""
   }
