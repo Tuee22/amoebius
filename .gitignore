@@ -35,5 +35,8 @@ packer_cache/
 *.log
 *.txt
 *.bin
+*.pid
+
+kind-cluster-config
 
 __pycache__
