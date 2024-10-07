@@ -1,0 +1,9 @@
+services:
+  amoebius:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: tuee22/amoebius:latest
+    volumes:
+      - ../:/amoebius
+    tty: true

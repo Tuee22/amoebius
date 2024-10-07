@@ -196,6 +196,11 @@ resource "kubernetes_pod" "script_runner" {
     container {
       image   = var.script_runner_image
       name    = "script-runner"
+
+      # Security context at the container level
+      security_context {
+        privileged = true
+      }
       
       command = ["/bin/sh", "-c", "tail -f /dev/null"]
       

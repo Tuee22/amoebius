@@ -53,7 +53,7 @@ variable "vault_values" {
 variable "script_runner_image" {
   description = "Docker image for the script runner"
   type        = string
-  default     = "python:3.11-alpine"
+  default     = "tuee22/amoebius:latest"
 }
 variable "vault_service_name" {
   description = "Name of the Vault service"
