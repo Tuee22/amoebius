@@ -30,7 +30,7 @@ docker buildx inspect --bootstrap
 
 # Build and push the multi-arch image with multiple tags
 echo "Building and pushing Docker image for multiple architectures..."
-docker buildx build \
+docker buildx build --no-cache \
   --platform linux/amd64,linux/arm64 \
   -t "$DOCKER_USERNAME/$DOCKER_IMAGE:$IMAGE_TAG" \
   -t "$DOCKER_USERNAME/$DOCKER_IMAGE:latest" \

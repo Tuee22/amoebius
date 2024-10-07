@@ -31,16 +31,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tini \
     && rm -rf /var/lib/apt/lists/*
 
-# Add Docker’s official GPG key
-RUN mkdir -m 0755 -p /etc/apt/keyrings && \
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | tee /etc/apt/keyrings/docker.gpg > /dev/null
+# Add Docker’s official GPG key manually using curl and store it in /usr/share/keyrings
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 
-# Set up the Docker APT repository
+# Set up the Docker repository with the correct GPG key reference
 RUN echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | \
-    tee /etc/apt/sources.list.d/docker.list > /dev/null
+    "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-# Install Docker Engine
+# Install Docker Engine and plugins
 RUN apt-get update && apt-get install -y \
     docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin \
     && rm -rf /var/lib/apt/lists/*
@@ -133,16 +131,14 @@ RUN curl -sSL https://install.python-poetry.org | python3.12 -
 RUN poetry config virtualenvs.create false
 
 # Install Python packages with semantic versioning
-RUN mkdir /app
-WORKDIR /app
-COPY ./docker/pyproject.toml /app/
+RUN mkdir /poetry
+WORKDIR /poetry
+COPY ./docker/pyproject.toml /poetry/
 RUN poetry install --no-interaction
 
 # Copy the entire amoebius folder to /amoebius
 COPY ./ /amoebius
+WORKDIR /amoebius
 
-# Use tini as the init system
-ENTRYPOINT ["/usr/bin/tini", "--"]
-
-# Start the entrypoint script by default
-CMD ["/usr/local/bin/start.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/bin/bash", "-c", "/usr/local/bin/start.sh && exec \"$@\"", "--"]
+CMD ["bash"]
