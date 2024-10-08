@@ -116,6 +116,19 @@ RUN set -eux; \
     curl -L https://github.com/rancher/rke/releases/download/${RKE_VERSION}/rke_linux-${RKE_ARCH} -o /usr/local/bin/rke; \
     chmod +x /usr/local/bin/rke
 
+# Install Kind
+RUN set -eux; \
+    cd /tmp; \
+    KIND_VERSION=$(curl -s https://api.github.com/repos/kubernetes-sigs/kind/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")'); \
+    if [ "$TARGETARCH" = "arm64" ]; then \
+        KIND_ARCH="arm64"; \
+    else \
+        KIND_ARCH="amd64"; \
+    fi; \
+    wget -q https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-${KIND_ARCH}; \
+    chmod +x kind-linux-${KIND_ARCH}; \
+    mv kind-linux-${KIND_ARCH} /usr/local/bin/kind
+
 # Install Python 3.12
 RUN add-apt-repository ppa:deadsnakes/ppa -y && \
     apt-get update && apt-get install -y --no-install-recommends \
