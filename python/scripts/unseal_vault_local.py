@@ -1,13 +1,4 @@
 #!/usr/bin/env python
-import subprocess
-import sys
-
-# Install or upgrade pip, wheel, and setuptools
-subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "pip", "wheel", "setuptools"])
-
-# Install or upgrade aiohttp and cryptography
-subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "aiohttp", "cryptography"])
-
 from amoebius.secrets.encrypted_dict import get_password, decrypt_dict_from_file
 from amoebius.secrets import unseal_vault
 from amoebius.secrets.terraform import get_terraform_output
