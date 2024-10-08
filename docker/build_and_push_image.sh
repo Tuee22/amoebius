@@ -16,7 +16,7 @@ echo "Building Docker image..."
 docker build \
   -t "$DOCKER_USERNAME/$DOCKER_IMAGE:$IMAGE_TAG" \
   -t "$DOCKER_USERNAME/$DOCKER_IMAGE:latest" \
-  -f ./Dockerfile \
+  -f ./amoebius/Dockerfile \
   ../
 
 # Push the Docker image

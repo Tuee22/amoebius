@@ -44,7 +44,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the entrypoint script
-COPY ./docker/start.sh /usr/local/bin/start.sh
+COPY ./docker/amoebius/start.sh /usr/local/bin/start.sh
 
 # Make sure the entrypoint script is executable
 RUN chmod +x /usr/local/bin/start.sh
@@ -149,7 +149,7 @@ RUN poetry config virtualenvs.create false
 # Install Python packages with semantic versioning
 RUN mkdir /poetry
 WORKDIR /poetry
-COPY ./docker/pyproject.toml /poetry/
+COPY ./docker/amoebius/pyproject.toml /poetry/
 RUN poetry install --no-interaction
 
 # Copy the entire amoebius folder to /amoebius
