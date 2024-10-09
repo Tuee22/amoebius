@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 from amoebius.secrets.encrypted_dict import get_password, decrypt_dict_from_file
-from amoebius.secrets import unseal_vault
+from amoebius.secrets.vault import unseal_vault_pods_concurrently
 from amoebius.secrets.terraform import get_terraform_output
+import asyncio
 
 def main():
     # Get user-supplied password
@@ -30,7 +31,7 @@ def main():
 
     # Run the vault unseal function
     print(f"Unsealing Vault pods: {local_vault_hosts}")
-    unseal_vault.run_unseal_concurrently(local_vault_hosts, [unseal_key])
+    asyncio.run(unseal_vault_pods_concurrently(local_vault_hosts, [unseal_key]))
 
 if __name__ == "__main__":
     main()

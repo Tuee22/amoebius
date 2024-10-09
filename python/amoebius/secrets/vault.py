@@ -54,12 +54,16 @@ async def unseal_vault_pod(
 async def unseal_vault_pods_concurrently(vault_pods: List[str], unseal_keys: List[str]) -> None:
     """Unseal multiple Vault pods concurrently."""
     async with aiohttp.ClientSession() as session:
-        tasks = [unseal_vault_pod(session, pod, key) for pod in vault_pods for key in unseal_keys]
+        tasks = [
+            unseal_vault_pod(session, pod, key)
+            for pod in vault_pods
+            for key in unseal_keys
+        ]
         await asyncio.gather(*tasks)
 
-def run_unseal_concurrently(vault_pods: List[str], unseal_keys: List[str]) -> None:
-    """Run the unseal process for Vault pods concurrently using asyncio."""
-    asyncio.run(unseal_vault_pods_concurrently(vault_pods, unseal_keys))
+#def run_unseal_concurrently(vault_pods: List[str], unseal_keys: List[str]) -> None:
+#    """Run the unseal process for Vault pods concurrently using asyncio."""
+#    asyncio.run(unseal_vault_pods_concurrently(vault_pods, unseal_keys))
 
 async def main_vault_workflow(vault_url: str, vault_pods: List[str], secret_shares: int, secret_threshold: int):
     """Main function demonstrating the initialization and unsealing of Vault pods."""
