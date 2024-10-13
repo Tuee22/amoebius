@@ -13,7 +13,6 @@ from amoebius.secrets.vault import unseal_vault_pods_concurrently, initialize_va
 from amoebius.secrets.terraform import get_terraform_output
 from amoebius.utils.async_command_runner import CommandError
 from typing import List, Callable
-from pydantic import BaseModel
 
 def get_int_input(prompt, min_value=1):
     def helper():
@@ -30,7 +29,6 @@ def get_int_input(prompt, min_value=1):
     return helper()
 
 async def handle_vault_initialization(secrets_file_path):
-    import pdb; pdb.set_trace()
     password = get_new_password()
     secret_shares = get_int_input("Enter the number of key shares to create: ", 1)
     secret_threshold = get_int_input(
@@ -53,15 +51,18 @@ async def handle_vault_initialization(secrets_file_path):
     terraform_dir = "/amoebius/terraform/roots/kind"
     output_name = "vault_raft_pod_dns_names"
     local_vault_hosts: List[str] = get_terraform_output(terraform_dir, output_name)
-    first_leader = local_vault_hosts[0]
 
     try:
         secrets_dict = await initialize_vault(
-            first_leader, secret_shares, secret_threshold
+            local_vault_hosts[0], secret_shares, secret_threshold
         )
         unseal_keys = secrets_dict["unseal_keys_b64"]
         await unseal_vault_pods_concurrently(
-            first_leader, random.sample(unseal_keys, secret_threshold)
+            local_vault_hosts[:1], random.sample(unseal_keys, secret_threshold)
+        )
+        await asyncio.sleep(3)
+        await unseal_vault_pods_concurrently(
+            local_vault_hosts[1:], random.sample(unseal_keys, secret_threshold)
         )
         encrypt_dict_to_file(secrets_dict, password, secrets_file_path)
         print("Vault initialized and secrets saved.")
@@ -75,7 +76,6 @@ async def handle_vault_initialization(secrets_file_path):
         sys.exit(1)
 
 async def handle_vault_unsealing(secrets_file_path):
-    import pdb; pdb.set_trace()
     password = get_password("Enter password to decrypt vault secrets: ")
     try:
         secrets_dict = decrypt_dict_from_file(password, secrets_file_path)
