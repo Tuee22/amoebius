@@ -3,9 +3,9 @@ import os
 from typing import List, Optional, Dict
 
 class CommandError(Exception):
-    def __init__(self, message: str, return_code: int) -> None:
+    def __init__(self, message: str, return_code: int | None) -> None:
         super().__init__(message)
-        self.return_code: int = return_code
+        self.return_code: int | None = return_code
 
 async def run_command(
     command: List[str], 

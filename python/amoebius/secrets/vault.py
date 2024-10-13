@@ -2,7 +2,7 @@ import asyncio
 import json
 import aiohttp
 from typing import List, Dict, Any, Optional
-from ..async_command_runner import run_command, CommandError
+from ..utils.async_command_runner import run_command, CommandError
 
 async def check_if_initialized(vault_url: str) -> Optional[bool]:
     """Check if the Vault server is initialized."""
@@ -43,30 +43,20 @@ async def unseal_vault_pod(
 ) -> None:
     """Send an unseal key to a single Vault pod asynchronously."""
     url = f'http://{pod}:{port}{unseal_url}'
+    print('unseal command',url)
     try:
         async with session.put(url, json={"key": key}) as response:
             print(f"{'Successfully unsealed' if response.status == 200 else 'Failed to unseal'} {pod}")
     except aiohttp.ClientError:
         print(f"Failed to connect to {pod}")
 
-async def unseal_vault_pods_concurrently(vault_pods: List[str], unseal_keys: List[str]) -> None:
+async def unseal_vault_pods_concurrently(vault_pods: List[str] | str, unseal_keys: List[str]) -> None:
     """Unseal multiple Vault pods concurrently."""
+    vault_pods_list = [vault_pods] if isinstance(vault_pods,str) else vault_pods
     async with aiohttp.ClientSession() as session:
         tasks = [
             unseal_vault_pod(session, pod, key)
-            for pod in vault_pods
+            for pod in vault_pods_list
             for key in unseal_keys
         ]
         await asyncio.gather(*tasks)
-
-if __name__ == "__main__":
-    VAULT_URL = "http://127.0.0.1:8200"
-    VAULT_PODS = [
-        "vault-0.vault.default.svc.cluster.local",
-        "vault-1.vault.default.svc.cluster.local",
-        "vault-2.vault.default.svc.cluster.local"
-    ]
-    SECRET_SHARES = 5
-    SECRET_THRESHOLD = 3
-    
-    asyncio.run(main_vault_workflow(VAULT_URL, VAULT_PODS, SECRET_SHARES, SECRET_THRESHOLD))
