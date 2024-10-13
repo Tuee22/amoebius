@@ -79,6 +79,25 @@ resource "kubernetes_storage_class" "local_storage" {
   depends_on = [kind_cluster.default]
 }
 
+# Folders for Persistent Volumes
+
+resource "null_resource" "create_pv_directories" {
+  count = var.vault_replicas
+
+  triggers = {
+    cluster_name = var.cluster_name
+    data_dir     = var.data_dir
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      mkdir -p ${pathexpand(var.data_dir)}/vault/vault-${count.index}
+    EOT
+  }
+
+  depends_on = [kind_cluster.default]
+}
+
 # Persistent Volumes
 
 resource "kubernetes_persistent_volume" "vault_storage" {
@@ -113,7 +132,10 @@ resource "kubernetes_persistent_volume" "vault_storage" {
       }
     }
   }
-  depends_on = [kubernetes_storage_class.local_storage]
+  depends_on = [
+    kubernetes_storage_class.local_storage,
+    null_resource.create_pv_directories
+  ]
 }
 
 # Helm Release for Vault

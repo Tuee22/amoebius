@@ -70,6 +70,15 @@ def decrypt_dict_from_file(password: str, file_path: str) -> dict:
 def get_password(prompt: str = "Enter password: ") -> str:
     return getpass.getpass(prompt)
 
+def get_new_password():
+    while True:
+        password = get_password("Enter a new password to encrypt vault secrets: ")
+        confirm_password = get_password("Confirm the password: ")
+        if password == confirm_password:
+            return password
+        else:
+            print("Passwords do not match. Please try again.")
+
 # Example usage
 if __name__ == "__main__":
     my_dict = {"username": "user1", "password": "my_secure_password"}
