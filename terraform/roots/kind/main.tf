@@ -79,7 +79,40 @@ resource "kubernetes_storage_class" "local_storage" {
   depends_on = [kind_cluster.default]
 }
 
-# Persistent Volumes
+# Folders for Persistent Volumes
+
+# Add these resources before the kubernetes_persistent_volume resource
+
+resource "local_file" "create_directories_script" {
+  filename = "${path.module}/create_directories.sh"
+  content  = <<-EOT
+    #!/bin/bash
+    set -e
+    BASE_DIR="${pathexpand(var.data_dir)}/vault"
+    sudo mkdir -p "$BASE_DIR"
+    sudo chown $USER:$USER "$BASE_DIR"
+    for i in {0..${var.vault_replicas - 1}}; do
+      DIR="$BASE_DIR/vault-$i"
+      sudo mkdir -p "$DIR"
+      sudo chown $USER:$USER "$DIR"
+      sudo chmod 750 "$DIR"
+    done
+  EOT
+}
+
+resource "null_resource" "create_pv_directories" {
+  triggers = {
+    script_content = local_file.create_directories_script.content
+  }
+
+  provisioner "local-exec" {
+    command = "sudo bash ${local_file.create_directories_script.filename}"
+  }
+
+  depends_on = [kind_cluster.default, local_file.create_directories_script]
+}
+
+# Update the kubernetes_persistent_volume resource
 
 resource "kubernetes_persistent_volume" "vault_storage" {
   for_each = { for idx in range(var.vault_replicas) : idx => idx }
@@ -113,7 +146,10 @@ resource "kubernetes_persistent_volume" "vault_storage" {
       }
     }
   }
-  depends_on = [kubernetes_storage_class.local_storage]
+  depends_on = [
+    kubernetes_storage_class.local_storage,
+    null_resource.create_pv_directories
+  ]
 }
 
 # Helm Release for Vault
