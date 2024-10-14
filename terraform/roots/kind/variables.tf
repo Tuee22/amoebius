@@ -60,6 +60,11 @@ variable "vault_service_name" {
   type        = string
   default     = "vault"
 }
+variable "create_vault_directories" {
+  description = "Flag set to true means attempt to create folders for vault storage (linux)"
+  type        = bool
+  default     = "false"
+}
 variable "port_forwards" {
   description = "List of port forwarding configurations"
   type = list(object({

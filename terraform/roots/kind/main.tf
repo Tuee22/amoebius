@@ -84,6 +84,7 @@ resource "kubernetes_storage_class" "local_storage" {
 # Add these resources before the kubernetes_persistent_volume resource
 
 resource "local_file" "create_directories_script" {
+  count = var.create_vault_directories ? 1 : 0
   filename = "${path.module}/create_directories.sh"
   content  = <<-EOT
     #!/bin/bash
@@ -101,12 +102,13 @@ resource "local_file" "create_directories_script" {
 }
 
 resource "null_resource" "create_pv_directories" {
+  count = var.create_vault_directories ? 1 : 0
   triggers = {
-    script_content = local_file.create_directories_script.content
+    script_content = local_file.create_directories_script[count.index].content
   }
 
   provisioner "local-exec" {
-    command = "sudo bash ${local_file.create_directories_script.filename}"
+    command = "sudo bash ${local_file.create_directories_script[count.index].filename}"
   }
 
   depends_on = [kind_cluster.default, local_file.create_directories_script]
