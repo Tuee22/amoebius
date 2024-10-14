@@ -40,3 +40,4 @@ packer_cache/
 kind-cluster-config
 
 __pycache__
+.mypy_cache
