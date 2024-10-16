@@ -40,8 +40,8 @@ packer_cache/
 **/*.tfstate
 **/*.tfstate.backup
 
-
 __pycache__
 
 .git
 .gitignore
+**/.mypy_cache

@@ -2,52 +2,64 @@
 
 import os
 import json
-from typing import Any, Dict, Optional
+from typing import Any, Optional, Type, TypeVar
+from pydantic import parse_obj_as, ValidationError
+from amoebius.models.terraform_state import TerraformState
 
-def read_terraform_state(terraform_dir: str) -> Optional[Dict[str, Any]]:
+T = TypeVar('T')
+
+def read_terraform_state(terraform_dir: str) -> Optional[TerraformState]:
     """
-    Read the Terraform state file from the specified directory.
-    
+    Read the Terraform state file from the specified directory and parse it into a TerraformState object.
+
     Args:
-    terraform_dir (str): Path to the directory containing the Terraform state file.
-    
+        terraform_dir (str): Path to the directory containing the Terraform state file.
+
     Returns:
-    Optional[Dict[str, Any]]: The parsed Terraform state as a dictionary, or None if an error occurs.
+        Optional[TerraformState]: The parsed Terraform state as a TerraformState object, or None if an error occurs.
     """
     state_file_path = os.path.join(terraform_dir, "terraform.tfstate")
-    
+
     try:
         with open(state_file_path, 'r') as state_file:
-            return json.load(state_file)
+            state_json = json.load(state_file)
+            return TerraformState.parse_obj(state_json)
     except FileNotFoundError:
         print(f"Error: Terraform state file not found at {state_file_path}")
     except json.JSONDecodeError:
         print(f"Error: Unable to parse Terraform state file at {state_file_path}")
+    except ValidationError as ve:
+        print(f"Error: Terraform state validation failed: {ve}")
     except Exception as e:
         print(f"An unexpected error occurred: {str(e)}")
-    
+
     return None
 
-def get_terraform_output(terraform_dir: str, output_name: str) -> Optional[Any]:
+def get_output_from_state(state: TerraformState, output_name: str, output_type: Type[T]) -> Optional[T]:
     """
-    Get a specific output from the Terraform state.
-    
+    Get a specific output from a TerraformState object, parsed as the specified type.
+
     Args:
-    terraform_dir (str): Path to the directory containing the Terraform state file.
-    output_name (str): Name of the output to retrieve.
-    
+        state (TerraformState): The TerraformState object.
+        output_name (str): Name of the output to retrieve.
+        output_type (Type[T]): The expected type of the output value.
+
     Returns:
-    Optional[Any]: The value of the specified output, or None if not found or an error occurs.
+        Optional[T]: The value of the specified output, parsed as type T, or None if not found or an error occurs.
     """
-    state_data = read_terraform_state(terraform_dir)
-    if not state_data:
-        return None
-    
-    outputs = state_data.get('outputs', {})
-    output_data = outputs.get(output_name)
-    
-    if output_data is None:
+    output_value = state.outputs.get(output_name)
+
+    if output_value is None:
         print(f"Error: Output '{output_name}' not found in Terraform state")
         return None
-    
-    return output_data.get('value')
+
+    try:
+        # Use parse_obj_as to parse and validate the output value as the specified type
+        result: T = parse_obj_as(output_type, output_value.value)
+        return result
+    except ValidationError as ve:
+        print(f"Error: Output '{output_name}' could not be parsed as {output_type}: {ve}")
+    except Exception as e:
+        print(f"An unexpected error occurred while parsing output '{output_name}': {str(e)}")
+
+    return None

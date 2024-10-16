@@ -1,13 +1,14 @@
 import json
 import os
 import getpass
+from typing import Dict, Any, Optional
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.backends import default_backend
 
 # Function to serialize and encrypt the dictionary
-def encrypt_dict(data: dict, password: str) -> bytes:
+def encrypt_dict(data: Dict[str, Any], password: str) -> bytes:
     # 1. Serialize the dictionary to a JSON string
     json_data = json.dumps(data).encode('utf-8')
 
@@ -31,7 +32,7 @@ def encrypt_dict(data: dict, password: str) -> bytes:
     return salt + iv + encrypted_data
 
 # Function to decrypt the data back into a dictionary
-def decrypt_dict(encrypted_data: bytes, password: str) -> dict:
+def decrypt_dict(encrypted_data: bytes, password: str) -> Dict[str, Any]:
     # 1. Extract the salt, iv, and encrypted data from the input
     salt = encrypted_data[:16]
     iv = encrypted_data[16:28]
@@ -55,13 +56,13 @@ def decrypt_dict(encrypted_data: bytes, password: str) -> dict:
     return json.loads(decrypted_data.decode('utf-8'))
 
 # Function to write encrypted data to a file
-def encrypt_dict_to_file(data: dict, password: str, file_path: str) -> None:
+def encrypt_dict_to_file(data: Dict[str, Any], password: str, file_path: str) -> None:
     encrypted_data = encrypt_dict(data, password)
     with open(file_path, 'wb') as file:
         file.write(encrypted_data)
 
 # Function to read encrypted data from a file and decrypt it
-def decrypt_dict_from_file(password: str, file_path: str) -> dict:
+def decrypt_dict_from_file(password: str, file_path: str) -> Dict[str, Any]:
     with open(file_path, 'rb') as file:
         encrypted_data = file.read()
     return decrypt_dict(encrypted_data, password)
@@ -70,7 +71,7 @@ def decrypt_dict_from_file(password: str, file_path: str) -> dict:
 def get_password(prompt: str = "Enter password: ") -> str:
     return getpass.getpass(prompt)
 
-def get_new_password():
+def get_new_password() -> str:
     while True:
         password = get_password("Enter a new password to encrypt vault secrets: ")
         confirm_password = get_password("Confirm the password: ")
