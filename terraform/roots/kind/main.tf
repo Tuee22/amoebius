@@ -83,36 +83,6 @@ resource "kubernetes_storage_class" "local_storage" {
 
 # Add these resources before the kubernetes_persistent_volume resource
 
-resource "local_file" "create_directories_script" {
-  count = var.create_vault_directories ? 1 : 0
-  filename = "${path.module}/create_directories.sh"
-  content  = <<-EOT
-    #!/bin/bash
-    set -e
-    BASE_DIR="${pathexpand(var.data_dir)}/vault"
-    sudo mkdir -p "$BASE_DIR"
-    sudo chown $USER:$USER "$BASE_DIR"
-    for i in {0..${var.vault_replicas - 1}}; do
-      DIR="$BASE_DIR/vault-$i"
-      sudo mkdir -p "$DIR"
-      sudo chown $USER:$USER "$DIR"
-      sudo chmod 750 "$DIR"
-    done
-  EOT
-}
-
-resource "null_resource" "create_pv_directories" {
-  count = var.create_vault_directories ? 1 : 0
-  triggers = {
-    script_content = local_file.create_directories_script[count.index].content
-  }
-
-  provisioner "local-exec" {
-    command = "sudo bash ${local_file.create_directories_script[count.index].filename}"
-  }
-
-  depends_on = [kind_cluster.default, local_file.create_directories_script]
-}
 
 # Update the kubernetes_persistent_volume resource
 
@@ -149,8 +119,7 @@ resource "kubernetes_persistent_volume" "vault_storage" {
     }
   }
   depends_on = [
-    kubernetes_storage_class.local_storage,
-    null_resource.create_pv_directories
+    kubernetes_storage_class.local_storage
   ]
 }
 

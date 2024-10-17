@@ -169,5 +169,8 @@ RUN poetry install --no-interaction
 COPY ./ /amoebius
 WORKDIR /amoebius
 
+# validate code with mypy
+RUN mypy /amoebius/python --strict --no-incremental
+
 ENTRYPOINT ["/usr/bin/tini", "--", "/bin/bash", "-c", "/usr/local/bin/start.sh && exec \"$@\"", "--"]
 CMD ["bash"]
