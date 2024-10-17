@@ -44,4 +44,5 @@ __pycache__
 
 .git
 .gitignore
+.dockerignore
 **/.mypy_cache
