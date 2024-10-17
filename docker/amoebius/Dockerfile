@@ -170,7 +170,7 @@ COPY ./ /amoebius
 WORKDIR /amoebius
 
 # validate code with mypy
-RUN mypy /amoebius/python --strict --no-incremental
+RUN mypy /amoebius/python --strict --no-incremental --cache_dir=/dev/null
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/bin/bash", "-c", "/usr/local/bin/start.sh && exec \"$@\"", "--"]
 CMD ["bash"]
