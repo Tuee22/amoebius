@@ -1,27 +1,31 @@
 #!/bin/bash
 
-set -e  # Exit immediately if a command exits with a non-zero status
+# Set your Docker Hub username and image name
+DOCKER_HUB_USERNAME="tuee22"
+IMAGE_NAME="amoebius"
+VERSION="0.0.1"  # Set your version
 
-# Variables - replace these with your own Docker Hub username and image name
-DOCKER_USERNAME="tuee22"
-DOCKER_IMAGE="amoebius"
-IMAGE_TAG="0.0.1"
+# Login to Docker Hub
+echo "Logging in to Docker Hub..."
+docker login
 
-# Login to Docker Hub (ensure you have Docker credentials set up)
-echo "Logging into Docker Hub..."
-docker login || { echo "Docker login failed"; exit 1; }
+# Create a new builder instance
+echo "Creating a new builder instance..."
+docker buildx create --name amoebiusbuilder --use
 
-# Build the Docker image
-echo "Building Docker image..."
-docker build \
-  -t "$DOCKER_USERNAME/$DOCKER_IMAGE:$IMAGE_TAG" \
-  -t "$DOCKER_USERNAME/$DOCKER_IMAGE:latest" \
+# Inspect the builder to ensure it's ready
+echo "Inspecting the builder..."
+docker buildx inspect --bootstrap
+
+# Build and push multi-arch image
+echo "Building and pushing multi-arch image..."
+docker buildx build --platform linux/amd64,linux/arm64 \
+  -t ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${VERSION} \
+  -t ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:latest \
+  --push \
   -f ./amoebius/Dockerfile \
-  ../
+  ..
 
-# Push the Docker image
-echo "Pushing Docker image..."
-docker push "$DOCKER_USERNAME/$DOCKER_IMAGE:$IMAGE_TAG"
-docker push "$DOCKER_USERNAME/$DOCKER_IMAGE:latest"
-
-echo "Done!"
+# Remove the builder instance
+echo "Removing the builder instance..."
+docker buildx rm amoebiusbuilder
