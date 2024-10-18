@@ -202,17 +202,17 @@ resource "kubernetes_secret" "kubeconfig" {
       apiVersion: v1
       kind: Config
       clusters:
-      - name: kind-${var.cluster_name}
+      - name: ${var.cluster_name}
         cluster:
           certificate-authority-data: ${base64encode(kind_cluster.default.cluster_ca_certificate)}
-          server: ${kind_cluster.default.endpoint}
+          server: https://kubernetes.default.svc
       users:
-      - name: kind-${var.cluster_name}-user
+      - name: ${var.cluster_name}-user
         user:
           client-certificate-data: ${base64encode(kind_cluster.default.client_certificate)}
           client-key-data: ${base64encode(kind_cluster.default.client_key)}
       contexts:
-      - name: kind-${var.cluster_name}
+      - name: ${var.cluster_name}
         context:
           cluster: kind-${var.cluster_name}
           user: kind-${var.cluster_name}-user
