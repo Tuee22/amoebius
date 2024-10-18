@@ -57,11 +57,19 @@ provider "helm" {
   }
 }
 
-# Kubernetes Namespace
+# Kubernetes Namespaces
 
 resource "kubernetes_namespace" "vault" {
   metadata {
     name = var.vault_namespace
+  }
+
+  depends_on = [kind_cluster.default]
+}
+
+resource "kubernetes_namespace" "amoebius" {
+  metadata {
+    name = "amoebius"
   }
 
   depends_on = [kind_cluster.default]
@@ -79,12 +87,7 @@ resource "kubernetes_storage_class" "local_storage" {
   depends_on = [kind_cluster.default]
 }
 
-# Folders for Persistent Volumes
-
-# Add these resources before the kubernetes_persistent_volume resource
-
-
-# Update the kubernetes_persistent_volume resource
+# Persistent Volumes
 
 resource "kubernetes_persistent_volume" "vault_storage" {
   for_each = { for idx in range(var.vault_replicas) : idx => idx }
@@ -186,14 +189,48 @@ resource "helm_release" "vault" {
   ]
 }
 
-# Script Runner Pod
+# Kubeconfig Secret
 
-resource "kubernetes_pod" "script_runner" {
+resource "kubernetes_secret" "kubeconfig" {
   metadata {
-    name      = "script-runner"
-    namespace = var.vault_namespace  # Place the pod in the 'vault' namespace
+    name      = "kubeconfig-secret-${var.cluster_name}"
+    namespace = kubernetes_namespace.amoebius.metadata[0].name
+  }
+
+  data = {
+    "config" = <<-EOT
+      apiVersion: v1
+      kind: Config
+      clusters:
+      - name: kind-${var.cluster_name}
+        cluster:
+          certificate-authority-data: ${base64encode(kind_cluster.default.cluster_ca_certificate)}
+          server: ${kind_cluster.default.endpoint}
+      users:
+      - name: kind-${var.cluster_name}-user
+        user:
+          client-certificate-data: ${base64encode(kind_cluster.default.client_certificate)}
+          client-key-data: ${base64encode(kind_cluster.default.client_key)}
+      contexts:
+      - name: kind-${var.cluster_name}
+        context:
+          cluster: kind-${var.cluster_name}
+          user: kind-${var.cluster_name}-user
+      current-context: kind-${var.cluster_name}
+    EOT
+  }
+
+  depends_on = [kind_cluster.default, kubernetes_namespace.amoebius]
+}
+
+# Amoebius Pod
+
+resource "kubernetes_pod" "amoebius" {
+  metadata {
+    name      = "amoebius"
+    namespace = kubernetes_namespace.amoebius.metadata[0].name
     labels = {
-      app = "script-runner"
+      app = "amoebius"
     }
   }
 
@@ -202,9 +239,8 @@ resource "kubernetes_pod" "script_runner" {
 
     container {
       image   = var.script_runner_image
-      name    = "script-runner"
+      name    = "amoebius"
 
-      # Security context at the container level
       security_context {
         privileged = true
       }
@@ -216,9 +252,20 @@ resource "kubernetes_pod" "script_runner" {
         mount_path = "/amoebius"
       }
 
+      volume_mount {
+        name       = "kubeconfig"
+        mount_path = "/root/.kube"
+        read_only  = true
+      }
+
       env {
         name  = "PYTHONPATH"
         value = "$PYTHONPATH:/amoebius/python"
+      }
+
+      env {
+        name  = "KUBECONFIG"
+        value = "/root/.kube/config"
       }
     }
 
@@ -230,39 +277,21 @@ resource "kubernetes_pod" "script_runner" {
       }
     }
 
+    volume {
+      name = "kubeconfig"
+      secret {
+        secret_name = kubernetes_secret.kubeconfig.metadata[0].name
+        items {
+          key  = "config"
+          path = "config"
+        }
+      }
+    }
+
     node_selector = {
       "kubernetes.io/hostname" = "${var.cluster_name}-control-plane"
     }
   }
 
-  depends_on = [kind_cluster.default,kubernetes_namespace.vault]
-}
-
-# Port Forwarding
-
-resource "null_resource" "port_forward" {
-  for_each = {
-    for pf in var.port_forwards :
-    "${pf.namespace}-${pf.service_name}-${pf.local_port}-${pf.remote_port}" => pf
-  }
-
-  depends_on = [helm_release.vault]
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      nohup kubectl port-forward -n ${each.value.namespace} service/${each.value.service_name} ${each.value.local_port}:${each.value.remote_port} > /dev/null 2>&1 &
-      echo $! > ${path.module}/port_forward_${each.key}.pid
-    EOT
-  }
-
-  provisioner "local-exec" {
-    when    = destroy
-    command = <<-EOT
-      if [ -f ${path.module}/port_forward_${each.key}.pid ]; then
-        pid=$(cat ${path.module}/port_forward_${each.key}.pid)
-        kill $pid || true
-        rm ${path.module}/port_forward_${each.key}.pid
-      fi
-    EOT
-  }
+  depends_on = [kind_cluster.default, kubernetes_namespace.amoebius, kubernetes_secret.kubeconfig]
 }
