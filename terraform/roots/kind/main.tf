@@ -214,9 +214,9 @@ resource "kubernetes_secret" "kubeconfig" {
       contexts:
       - name: ${var.cluster_name}
         context:
-          cluster: kind-${var.cluster_name}
-          user: kind-${var.cluster_name}-user
-      current-context: kind-${var.cluster_name}
+          cluster: ${var.cluster_name}
+          user: ${var.cluster_name}-user
+      current-context: ${var.cluster_name}
     EOT
   }
 
