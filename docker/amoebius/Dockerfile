@@ -162,7 +162,7 @@ RUN poetry install --no-interaction
 # Copy the entire amoebius folder to /amoebius
 COPY ./ /amoebius
 WORKDIR /amoebius
-ENV PYTHONPATH="${PYTHONPATH}:/amoebius/python"
+ENV PYTHONPATH="/amoebius/python"
 
 # validate code with mypy
 RUN mypy /amoebius/python --strict --no-incremental && rm -rf .mypy_cache
