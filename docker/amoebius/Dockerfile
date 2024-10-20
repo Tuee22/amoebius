@@ -43,12 +43,6 @@ RUN apt-get update && apt-get install -y \
     docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the entrypoint script
-COPY ./docker/amoebius/start.sh /usr/local/bin/start.sh
-
-# Make sure the entrypoint script is executable
-RUN chmod +x /usr/local/bin/start.sh
-
 # Install Terraform
 RUN set -eux; \
     cd /tmp; \
@@ -168,6 +162,7 @@ RUN poetry install --no-interaction
 # Copy the entire amoebius folder to /amoebius
 COPY ./ /amoebius
 WORKDIR /amoebius
+ENV PYTHONPATH="/amoebius/python"
 
 # validate code with mypy
 RUN mypy /amoebius/python --strict --no-incremental && rm -rf .mypy_cache
