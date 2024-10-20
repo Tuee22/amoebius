@@ -15,18 +15,15 @@ from amoebius.utils.async_command_runner import CommandError
 from typing import List, Callable, Dict, Any
 
 def get_int_input(prompt: str, min_value: int = 1) -> int:
-    def helper() -> int:
+    while True:
         try:
             value = int(input(prompt))
             if value >= min_value:
                 return value
             else:
                 print(f"Please enter a value of at least {min_value}.")
-                return helper()
         except ValueError:
             print("Please enter a valid integer.")
-            return helper()
-    return helper()
 
 async def handle_vault_initialization(secrets_file_path: str) -> None:
     password: str = get_new_password()
