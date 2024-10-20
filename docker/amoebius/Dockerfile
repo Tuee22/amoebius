@@ -172,5 +172,8 @@ WORKDIR /amoebius
 # validate code with mypy
 RUN mypy /amoebius/python --strict --no-incremental && rm -rf .mypy_cache
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/bin/bash", "-c", "/usr/local/bin/start.sh && exec \"$@\"", "--"]
-CMD ["bash"]
+# Use tini as the init system (reaps zombie processes)
+ENTRYPOINT ["/usr/bin/tini", "--"]
+
+# Run the daemon inside the package
+CMD ["python", "-m", "amoebius.daemon"]
