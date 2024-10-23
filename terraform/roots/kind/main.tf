@@ -84,19 +84,17 @@ resource "kubernetes_secret" "kubeconfig" {
   depends_on = [kind_cluster.default, kubernetes_namespace.amoebius]
 }
 
-# Amoebius Deployment
+# Amoebius Stateful Set
 
-resource "kubernetes_deployment" "amoebius" {
+resource "kubernetes_stateful_set" "amoebius" {
   metadata {
     name      = "amoebius"
     namespace = kubernetes_namespace.amoebius.metadata[0].name
-    labels = {
-      app = "amoebius"
-    }
   }
 
   spec {
-    replicas = 1
+    service_name = "amoebius" # This must match the Service name below
+    replicas     = 1
 
     selector {
       match_labels = {
@@ -112,69 +110,21 @@ resource "kubernetes_deployment" "amoebius" {
       }
 
       spec {
-        restart_policy = "Always"
-
         container {
-          image   = var.amoebius_image
-          name    = "amoebius"
+          name  = "amoebius"
+          image = var.amoebius_image
 
-          security_context {
-            privileged = true
+          # Add ports if necessary
+          port {
+            container_port = 8080
           }
-
-          command = ["/bin/sh", "-c", "tail -f /dev/null"]
-
-          volume_mount {
-            name       = "amoebius-volume"
-            mount_path = "/amoebius"
-          }
-
-          volume_mount {
-            name       = "kubeconfig"
-            mount_path = "/root/.kube"
-            read_only  = true
-          }
-
-          env {
-            name  = "PYTHONPATH"
-            value = "$PYTHONPATH:/amoebius/python"
-          }
-
-          env {
-            name  = "KUBECONFIG"
-            value = "/root/.kube/config"
-          }
-        }
-
-        volume {
-          name = "amoebius-volume"
-          host_path {
-            path = "/amoebius"
-            type = "Directory"
-          }
-        }
-
-        volume {
-          name = "kubeconfig"
-          secret {
-            secret_name = kubernetes_secret.kubeconfig.metadata[0].name
-            items {
-              key  = "config"
-              path = "config"
-            }
-          }
-        }
-
-        node_selector = {
-          "kubernetes.io/hostname" = "${var.cluster_name}-control-plane"
         }
       }
     }
   }
-
-  depends_on = [kind_cluster.default, kubernetes_namespace.amoebius, kubernetes_secret.kubeconfig]
 }
 
+# ClusterIP Service for StatefulSet
 resource "kubernetes_service" "amoebius" {
   metadata {
     name      = "amoebius"
@@ -194,6 +144,6 @@ resource "kubernetes_service" "amoebius" {
       target_port = 8080
     }
 
-    type = "ClusterIP" # Can be "NodePort", "LoadBalancer", or "ClusterIP"
+    type = "ClusterIP"
   }
 }
