@@ -167,6 +167,8 @@ ENV PYTHONPATH="/amoebius/python"
 # validate code with mypy
 RUN mypy /amoebius/python --strict --no-incremental && rm -rf .mypy_cache
 
+EXPOSE 8080
+
 # Use tini as the init system (reaps zombie processes)
 ENTRYPOINT ["/usr/bin/tini", "--"]
 
