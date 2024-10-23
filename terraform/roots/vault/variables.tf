@@ -1,23 +1,4 @@
-
-variable "kind_version" {
-  description = "Version of the Kind provider"
-  type        = string
-  default     = "~> 0.2.0"
-}
-
-variable "kubernetes_version" {
-  description = "Version of the Kubernetes provider"
-  type        = string
-  default     = "~> 2.20.0"
-}
-
-variable "helm_version" {
-  description = "Version of the Helm provider"
-  type        = string
-  default     = "~> 2.9.0"
-}
-
-variable "kubeconfig_path" {
+ variable "kubeconfig_path" {
   description = "Path to the kubeconfig file"
   type        = string
   default     = "~/.kube/config"
@@ -29,6 +10,12 @@ variable "vault_namespace" {
   default     = "vault"
 }
 
+variable "cluster_name" {
+  description = "Kubernetes namespace for Vault"
+  type        = string
+  default     = "kind-cluster"
+}
+
 variable "storage_class_name" {
   description = "Name of the Kubernetes storage class"
   type        = string
@@ -36,7 +23,7 @@ variable "storage_class_name" {
 }
 
 variable "vault_storage_size" {
-  description = "Size of the Vault storage"
+  description = "Size of the Va sult storage"
   type        = string
   default     = "1Gi"
 }

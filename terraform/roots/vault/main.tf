@@ -2,14 +2,15 @@ terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = var.kubernetes_version
+      version = "~> 2.20.0"
     }
     helm = {
       source  = "hashicorp/helm"
-      version = var.helm_version
+      version = "~> 2.9.0"
     }
   }
 }
+
 
 provider "kubernetes" {
   config_path = var.kubeconfig_path
@@ -26,8 +27,6 @@ resource "kubernetes_namespace" "vault" {
   metadata {
     name = var.vault_namespace
   }
-
-  depends_on = [kind_cluster.default]
 }
 
 # Storage Class
@@ -38,8 +37,6 @@ resource "kubernetes_storage_class" "local_storage" {
   }
   storage_provisioner = "kubernetes.io/no-provisioner"
   volume_binding_mode = "WaitForFirstConsumer"
-
-  depends_on = [kind_cluster.default]
 }
 
 # Persistent Volumes

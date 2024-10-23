@@ -1,22 +1,3 @@
-
-variable "kind_version" {
-  description = "Version of the Kind provider"
-  type        = string
-  default     = "~> 0.2.0"
-}
-
-variable "kubernetes_version" {
-  description = "Version of the Kubernetes provider"
-  type        = string
-  default     = "~> 2.20.0"
-}
-
-variable "helm_version" {
-  description = "Version of the Helm provider"
-  type        = string
-  default     = "~> 2.9.0"
-}
-
 variable "cluster_name" {
   description = "Name of the Kind cluster"
   type        = string

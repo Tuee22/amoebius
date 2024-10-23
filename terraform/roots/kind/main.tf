@@ -2,15 +2,11 @@ terraform {
   required_providers {
     kind = {
       source  = "tehcyx/kind"
-      version = var.kind_version
+      version = "~> 0.2.0"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = var.kubernetes_version
-    }
-    helm = {
-      source  = "hashicorp/helm"
-      version = var.helm_version
+      version = "~> 2.20.0"
     }
   }
 }
@@ -119,7 +115,7 @@ resource "kubernetes_deployment" "amoebius" {
         restart_policy = "Always"
 
         container {
-          image   = var.script_runner_image
+          image   = var.amoebius_image
           name    = "amoebius"
 
           security_context {
@@ -147,85 +143,6 @@ resource "kubernetes_deployment" "amoebius" {
           env {
             name  = "KUBECONFIG"
             value = "/root/.kube/config"
-          }
-        }
-
-        volume {
-          name = "amoebius-volume"
-          host_path {
-            path = "/amoebius"
-            type = "Directory"
-          }
-        }
-
-        volume {
-          name = "kubeconfig"
-          secret {
-            secret_name = kubernetes_secret.kubeconfig.metadata[0].name
-            items {
-              key  = "config"
-              path = "config"
-            }
-          }
-        }
-
-        node_selector = {
-          "kubernetes.io/hostname" = "${var.cluster_name}-control-plane"
-        }
-      }
-    }
-  }
-
-  depends_on = [kind_cluster.default, kubernetes_namespace.amoebius, kubernetes_secret.kubeconfig]
-}
-
-# Amoebius Deployment
-
-resource "kubernetes_deployment" "amoebius" {
-  metadata {
-    name      = "amoebius"
-    namespace = kubernetes_namespace.amoebius.metadata[0].name
-    labels = {
-      app = "amoebius"
-    }
-  }
-
-  spec {
-    replicas = 1
-
-    selector {
-      match_labels = {
-        app = "amoebius"
-      }
-    }
-
-    template {
-      metadata {
-        labels = {
-          app = "amoebius"
-        }
-      }
-
-      spec {
-        restart_policy = "Always"
-
-        container {
-          image   = var.amoebius
-          name    = "amoebius"
-
-          security_context {
-            privileged = true
-          }
-
-          volume_mount {
-            name       = "amoebius-volume"
-            mount_path = "/amoebius"
-          }
-
-          volume_mount {
-            name       = "kubeconfig"
-            mount_path = "/root/.kube"
-            read_only  = true
           }
         }
 
