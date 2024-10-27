@@ -18,6 +18,7 @@ packer_cache/
 
 # Provider-related lock files
 .terraform.lock.hcl
+.terraform
 
 # Sensitive files
 *.auto.tfvars

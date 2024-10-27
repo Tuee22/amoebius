@@ -1,1 +1,0 @@
-kubectl exec -it -n amoebius amoebius -- /amoebius/python/scripts/unseal_vault_local.py
