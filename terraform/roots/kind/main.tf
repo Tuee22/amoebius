@@ -123,6 +123,36 @@ resource "kubernetes_stateful_set" "amoebius" {
           security_context {
             privileged = true
           }
+
+          volume_mount {
+            name       = "amoebius-volume"
+            mount_path = "/amoebius"
+          }
+
+          volume_mount {
+            name       = "kubeconfig"
+            mount_path = "/root/.kube"
+            read_only  = true
+          }
+        }
+
+        volume {
+          name = "amoebius-volume"
+          host_path {
+            path = "/amoebius"
+            type = "Directory"
+          }
+        }
+
+        volume {
+          name = "kubeconfig"
+          secret {
+            secret_name = kubernetes_secret.kubeconfig.metadata[0].name
+            items {
+              key  = "config"
+              path = "config"
+            }
+          }
         }
       }
     }

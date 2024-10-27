@@ -47,7 +47,7 @@ async def handle_vault_initialization(secrets_file_path: str) -> None:
             return validate_threshold(new_threshold, secret_shares, get_input)
 
     secret_threshold = validate_threshold(secret_threshold, secret_shares, get_int_input)
-    terraform_dir: str = "/amoebius/terraform/roots/kind"
+    terraform_dir: str = "/amoebius/terraform/roots/vault"
     output_name: str = "vault_raft_pod_dns_names"
     terraform_state = read_terraform_state(terraform_dir)
     if terraform_state is None:
