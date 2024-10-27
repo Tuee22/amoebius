@@ -104,7 +104,7 @@ async def handle_vault_unsealing(secrets_file_path: str) -> None:
     
     unseal_keys_str: List[str] = unseal_keys
 
-    terraform_dir: str = "/amoebius/terraform/roots/kind"
+    terraform_dir: str = "/amoebius/terraform/roots/vault"
     output_name: str = "vault_raft_pod_dns_names"
     terraform_state = read_terraform_state(terraform_dir)
     if terraform_state is None:
