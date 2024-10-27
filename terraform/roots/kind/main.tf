@@ -118,6 +118,11 @@ resource "kubernetes_stateful_set" "amoebius" {
           port {
             container_port = 8080
           }
+
+          # Enable privileged mode
+          security_context {
+            privileged = true
+          }
         }
       }
     }
