@@ -2,14 +2,14 @@
 
 import os
 import json
-from typing import Any, Optional, Type, TypeVar
+from typing import Any, Optional, Dict, Type, TypeVar
 from pydantic import ValidationError
 from ..models.terraform_state import TerraformState
-from ..models.validator import validate_type
+from ..models.validator import validate_type  # Import the unified validation function from validator.py
 
 T = TypeVar('T')
 
-def load_state_file(file_path: str) -> Optional[dict]:
+def load_state_file(file_path: str) -> Optional[Dict[str, Any]]:
     """
     Load and parse a Terraform state file from JSON format.
 
@@ -17,7 +17,7 @@ def load_state_file(file_path: str) -> Optional[dict]:
         file_path (str): Path to the Terraform state file.
 
     Returns:
-        Optional[dict]: The loaded JSON content as a dictionary, or None if an error occurs.
+        Optional[Dict[str, Any]]: The loaded JSON content as a dictionary, or None if an error occurs.
     """
     try:
         with open(file_path, 'r') as state_file:
@@ -30,9 +30,29 @@ def load_state_file(file_path: str) -> Optional[dict]:
         print(f"An unexpected error occurred: {str(e)}")
     return None
 
+def parse_terraform_state(state_json: Optional[Dict[str, Any]]) -> Optional[TerraformState]:
+    """
+    Parse the given dictionary into a TerraformState object.
+
+    Args:
+        state_json (Optional[Dict[str, Any]]): The JSON dictionary to parse.
+
+    Returns:
+        Optional[TerraformState]: The parsed Terraform state as a TerraformState object, or None if an error occurs.
+    """
+    if state_json is None:
+        print("Error: Provided state JSON is None.")
+        return None
+
+    try:
+        return TerraformState.parse_obj(state_json)
+    except ValidationError as ve:
+        print(f"Error: Terraform state validation failed: {ve}")
+    return None
+
 def read_terraform_state(terraform_dir: str) -> Optional[TerraformState]:
     """
-    Read and parse the Terraform state file from the specified directory into a TerraformState object.
+    Read the Terraform state file from the specified directory and parse it into a TerraformState object.
 
     Args:
         terraform_dir (str): Path to the directory containing the Terraform state file.
@@ -42,15 +62,7 @@ def read_terraform_state(terraform_dir: str) -> Optional[TerraformState]:
     """
     state_file_path = os.path.join(terraform_dir, "terraform.tfstate")
     state_json = load_state_file(state_file_path)
-    
-    if state_json is None:
-        return None
-
-    try:
-        return TerraformState.parse_obj(state_json)
-    except ValidationError as ve:
-        print(f"Error: Terraform state validation failed: {ve}")
-    return None
+    return parse_terraform_state(state_json)
 
 def get_output_from_state(state: TerraformState, output_name: str, output_type: Type[T]) -> Optional[T]:
     """
