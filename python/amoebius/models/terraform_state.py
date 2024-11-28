@@ -1,33 +1,16 @@
 from pydantic import BaseModel
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 class OutputValue(BaseModel):
+    sensitive: bool
     value: Any
-    type: Optional[Any] = None
-    sensitive: Optional[bool] = None
+    type: Union[str, List[Any], None] = None
 
-class Instance(BaseModel):
-    schema_version: int
-    attributes: Dict[str, Any]
-    private: Optional[str] = None
-    dependencies: Optional[List[str]] = None
-
-class Resource(BaseModel):
-    module: Optional[str] = None
-    mode: str
-    type: str
-    name: str
-    provider: Optional[str] = None
-    instances: List[Instance]
+class Values(BaseModel):
+    outputs: Dict[str, OutputValue]
+    root_module: Dict[str, Any]  # We could model this further if needed
 
 class TerraformState(BaseModel):
-    version: int
+    format_version: str
     terraform_version: str
-    serial: int
-    lineage: str
-    outputs: Dict[str, OutputValue]
-    resources: List[Resource]
-
-# Example usage:
-# json_data = '{"version": 4, "terraform_version": "1.0.0", ... }'
-# state = TerraformState.parse_raw(json_data)
+    values: Values

@@ -1,9 +1,3 @@
- variable "kubeconfig_path" {
-  description = "Path to the kubeconfig file"
-  type        = string
-  default     = "~/.kube/config"
-}
-
 variable "vault_namespace" {
   description = "Kubernetes namespace for Vault"
   type        = string
@@ -23,7 +17,7 @@ variable "storage_class_name" {
 }
 
 variable "vault_storage_size" {
-  description = "Size of the Va sult storage"
+  description = "Size of the Vault storage"
   type        = string
   default     = "1Gi"
 }
@@ -58,4 +52,3 @@ variable "vault_values" {
     "server.affinity"               = ""
   }
 }
-

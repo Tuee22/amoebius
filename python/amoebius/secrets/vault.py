@@ -4,15 +4,6 @@ import aiohttp
 from typing import List, Dict, Any, Optional, Tuple
 from ..utils.async_command_runner import run_command, CommandError
 
-async def check_if_initialized(vault_url: str) -> Optional[bool]:
-    """Check if the Vault server is initialized."""
-    try:
-        output = await run_command(['vault', 'status', '-address', vault_url], sensitive=True)
-        initialized_line = next((line for line in output.splitlines() if "Initialized" in line), "")
-        return "true" in initialized_line.lower() if initialized_line else None
-    except CommandError:
-        return None
-
 async def initialize_vault(
     vault: str,
     secret_shares: int,

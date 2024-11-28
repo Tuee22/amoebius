@@ -2,24 +2,33 @@ terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~> 2.20.0"
+      version = "~> 2.25.0"
     }
     helm = {
       source  = "hashicorp/helm"
-      version = "~> 2.9.0"
+      version = "~> 2.12.0"
     }
+  }
+
+  backend "kubernetes" {
+    secret_suffix     = "vault"
+    load_config_file  = false
+    namespace         = "amoebius"
+    in_cluster_config = true
   }
 }
 
-
 provider "kubernetes" {
-  config_path = var.kubeconfig_path
+  host                   = ""
+  cluster_ca_certificate = ""
+  token                  = ""
 }
 
-# Configure the Helm provider
 provider "helm" {
   kubernetes {
-    config_path = var.kubeconfig_path
+    host                   = ""
+    cluster_ca_certificate = ""
+    token                  = ""
   }
 }
 
@@ -29,8 +38,6 @@ resource "kubernetes_namespace" "vault" {
   }
 }
 
-# Storage Class
-
 resource "kubernetes_storage_class" "local_storage" {
   metadata {
     name = var.storage_class_name
@@ -39,11 +46,8 @@ resource "kubernetes_storage_class" "local_storage" {
   volume_binding_mode = "WaitForFirstConsumer"
 }
 
-# Persistent Volumes
-
 resource "kubernetes_persistent_volume" "vault_storage" {
   for_each = { for idx in range(var.vault_replicas) : idx => idx }
-
   metadata {
     name = "vault-pv-${each.key}"
     labels = {
@@ -78,8 +82,6 @@ resource "kubernetes_persistent_volume" "vault_storage" {
   ]
 }
 
-# Helm Release for Vault
-
 resource "helm_release" "vault" {
   name       = var.vault_service_name
   repository = "https://helm.releases.hashicorp.com"
@@ -104,13 +106,11 @@ resource "helm_release" "vault" {
     name  = "server.ha.raft.config"
     value = <<-EOT
       ui = true
-
       listener "tcp" {
         tls_disable = 1
         address = "[::]:8200"
         cluster_address = "[::]:8201"
       }
-
       storage "raft" {
         path    = "/vault/data"
         node_id = "{{ .NodeID }}"
@@ -120,7 +120,6 @@ resource "helm_release" "vault" {
         }
         %{endfor}
       }
-
       service_registration "kubernetes" {}
     EOT
   }

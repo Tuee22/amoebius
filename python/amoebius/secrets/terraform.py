@@ -1,94 +1,87 @@
-# terraform.py
-
 import os
-import json
 from typing import Any, Optional, Dict, Type, TypeVar
-from pydantic import ValidationError
 from ..models.terraform_state import TerraformState
-from ..models.validator import validate_type  # Import the unified validation function from validator.py
+from ..models.validator import validate_type
+from ..utils.async_command_runner import run_command
 
 T = TypeVar('T')
 
-def load_state_file(file_path: str) -> Optional[Dict[str, Any]]:
-    """
-    Load and parse a Terraform state file from JSON format.
+# Default path in container
+DEFAULT_TERRAFORM_ROOTS = "/amoebius/terraform/roots"
 
+async def read_terraform_state(
+    root_name: str, 
+    base_path: str = DEFAULT_TERRAFORM_ROOTS
+) -> TerraformState:
+    """
+    Read the Terraform state for a given root directory using terraform show.
+    
     Args:
-        file_path (str): Path to the Terraform state file.
-
+        root_name: Name of the Terraform root directory (no slashes allowed)
+        base_path: Base path where terraform roots are located. 
+                  Defaults to container path /amoebius/terraform/roots
+    
     Returns:
-        Optional[Dict[str, Any]]: The loaded JSON content as a dictionary, or None if an error occurs.
+        TerraformState object containing the parsed and validated terraform state
+        
+    Raises:
+        ValueError: If root_name contains invalid characters
+        CommandError: If terraform commands fail
+        ValidationError: If terraform state doesn't match expected schema
     """
-    try:
-        with open(file_path, 'r') as state_file:
-            return json.load(state_file)
-    except FileNotFoundError:
-        print(f"Error: Terraform state file not found at {file_path}")
-    except json.JSONDecodeError:
-        print(f"Error: Unable to parse Terraform state file at {file_path}")
-    except Exception as e:
-        print(f"An unexpected error occurred: {str(e)}")
-    return None
+    # Validate root_name to prevent directory traversal
+    if "/" in root_name or "\\" in root_name:
+        raise ValueError("Root name cannot contain slashes")
+        
+    if not root_name.strip():
+        raise ValueError("Root name cannot be empty")
 
-def parse_terraform_state(state_json: Optional[Dict[str, Any]]) -> Optional[TerraformState]:
-    """
-    Parse the given dictionary into a TerraformState object.
+    # Construct the path to the terraform root
+    terraform_path = os.path.join(base_path, root_name)
+    
+    # Verify the directory exists
+    if not os.path.isdir(terraform_path):
+        raise ValueError(f"Terraform root directory not found: {terraform_path}")
+    
+    # Initialize terraform if needed
+    await run_command(
+        ["terraform", "init", "-no-color"],
+        sensitive=False,
+        cwd=terraform_path
+    )
+    
+    # Get the state as JSON
+    state_json = await run_command(
+        ["terraform", "show", "-json"],
+        sensitive=False,
+        cwd=terraform_path
+    )
+    
+    # Parse and validate using Pydantic model
+    return TerraformState.parse_raw(state_json)
 
-    Args:
-        state_json (Optional[Dict[str, Any]]): The JSON dictionary to parse.
-
-    Returns:
-        Optional[TerraformState]: The parsed Terraform state as a TerraformState object, or None if an error occurs.
-    """
-    if state_json is None:
-        print("Error: Provided state JSON is None.")
-        return None
-
-    try:
-        return TerraformState.parse_obj(state_json)
-    except ValidationError as ve:
-        print(f"Error: Terraform state validation failed: {ve}")
-    return None
-
-def read_terraform_state(terraform_dir: str) -> Optional[TerraformState]:
-    """
-    Read the Terraform state file from the specified directory and parse it into a TerraformState object.
-
-    Args:
-        terraform_dir (str): Path to the directory containing the Terraform state file.
-
-    Returns:
-        Optional[TerraformState]: The parsed Terraform state as a TerraformState object, or None if an error occurs.
-    """
-    state_file_path = os.path.join(terraform_dir, "terraform.tfstate")
-    state_json = load_state_file(state_file_path)
-    return parse_terraform_state(state_json)
-
-def get_output_from_state(state: TerraformState, output_name: str, output_type: Type[T]) -> Optional[T]:
+def get_output_from_state(
+    state: TerraformState, 
+    output_name: str, 
+    output_type: Type[T]
+) -> T:
     """
     Retrieve a specific output from a TerraformState object, validating it against the expected type.
-
+    
     Args:
-        state (TerraformState): The TerraformState object.
-        output_name (str): Name of the output to retrieve.
-        output_type (Type[T]): The expected type of the output value.
-
+        state: The TerraformState object
+        output_name: Name of the output to retrieve
+        output_type: The expected type of the output value
+    
     Returns:
-        Optional[T]: The output value parsed as type T, or None if not found or an error occurs.
+        The output value parsed as type T
+        
+    Raises:
+        KeyError: If the output name is not found
+        ValueError: If the output value cannot be parsed as the expected type
     """
-    output_value = state.outputs.get(output_name)
-
+    output_value = state.values.outputs.get(output_name)
     if output_value is None:
-        print(f"Error: Output '{output_name}' not found in Terraform state")
-        return None
+        raise KeyError(f"Output '{output_name}' not found in Terraform state")
 
-    try:
-        # Use validate_type from validator.py for consistent validation
-        result: T = validate_type(output_value.value, output_type)
-        return result
-    except ValueError as ve:
-        print(f"Error: Output '{output_name}' could not be parsed as {output_type}: {ve}")
-    except Exception as e:
-        print(f"An unexpected error occurred while parsing output '{output_name}': {str(e)}")
-
-    return None
+    return validate_type(output_value.value, output_type)

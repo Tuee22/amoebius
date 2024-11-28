@@ -47,12 +47,9 @@ async def handle_vault_initialization(secrets_file_path: str) -> None:
             return validate_threshold(new_threshold, secret_shares, get_input)
 
     secret_threshold = validate_threshold(secret_threshold, secret_shares, get_int_input)
-    terraform_dir: str = "/amoebius/terraform/roots/vault"
+    state_name: str = "vault"
     output_name: str = "vault_raft_pod_dns_names"
-    terraform_state = read_terraform_state(terraform_dir)
-    if terraform_state is None:
-        print("Error: Failed to read Terraform state.")
-        sys.exit(1)
+    terraform_state = await read_terraform_state(state_name)
     local_vault_hosts = get_output_from_state(
         state=terraform_state, output_name=output_name, output_type=List[str]
     )
@@ -104,12 +101,9 @@ async def handle_vault_unsealing(secrets_file_path: str) -> None:
     
     unseal_keys_str: List[str] = unseal_keys
 
-    terraform_dir: str = "/amoebius/terraform/roots/vault"
+    state_name: str = "vault"
     output_name: str = "vault_raft_pod_dns_names"
-    terraform_state = read_terraform_state(terraform_dir)
-    if terraform_state is None:
-        print("Error: Failed to read Terraform state.")
-        sys.exit(1)
+    terraform_state = await read_terraform_state(state_name)
     local_vault_hosts = get_output_from_state(
         state=terraform_state, output_name=output_name, output_type=List[str]
     )

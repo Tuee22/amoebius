@@ -2,32 +2,49 @@ import asyncio
 import os
 from typing import List, Optional, Dict
 
+
 class CommandError(Exception):
     def __init__(self, message: str, return_code: Optional[int] = None) -> None:
         super().__init__(message)
         self.return_code = return_code
 
+
 async def run_command(
     command: List[str],
     sensitive: bool = True,
-    env: Optional[Dict[str, str]] = None
+    env: Optional[Dict[str, str]] = None,
+    cwd: Optional[str] = None
 ) -> str:
-    """Run a shell command asynchronously and return its output."""
+    """Run a shell command asynchronously and return its output.
+    
+    Args:
+        command: List of command arguments
+        sensitive: If True, hide command details in error messages
+        env: Optional dictionary of environment variables
+        cwd: Optional working directory where the command should be executed
+    
+    Returns:
+        The command output as a string
+        
+    Raises:
+        ValueError: If command is not a list
+        CommandError: If command execution fails
+    """
     if isinstance(command, str):
         raise ValueError("Command should be a list of arguments, not a string")
-    
-    complete_env = (
-        {**os.environ, **env} if env else None
-    )
-    
+
+    complete_env = {**os.environ, **env} if env else None
+
     process = await asyncio.create_subprocess_exec(
         *command,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
         env=complete_env,
+        cwd=cwd,
     )
+
     stdout_bytes, stderr_bytes = await process.communicate()
-    
+
     if process.returncode != 0:
         error_message = (
             f"Command failed with return code {process.returncode}" +
@@ -37,5 +54,5 @@ async def run_command(
             )
         )
         raise CommandError(error_message, process.returncode)
-    
+
     return stdout_bytes.decode().strip()
