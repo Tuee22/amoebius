@@ -1,6 +1,7 @@
 import asyncio
 import sys
 from typing import Optional
+from .utils.terraform import init_terraform, apply_terraform
 
 async def is_docker_running() -> bool:
     try:
@@ -20,7 +21,7 @@ async def start_dockerd() -> Optional[asyncio.subprocess.Process]:
             'dockerd',
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
-        )
+        )k
         # Wait for Docker to start (adjust timeout as needed)
         for _ in range(30):  # 30 second timeout
             if await is_docker_running():
@@ -31,6 +32,10 @@ async def start_dockerd() -> Optional[asyncio.subprocess.Process]:
     except Exception as e:
         print(f"Error starting Docker daemon: {e}", file=sys.stderr)
         return None
+
+async def run_amoebius() -> None:
+    await init_terraform(root_name='vault')
+    await apply_terraform(root_name='vault')
 
 async def main() -> None:
     print("Script started")
@@ -51,6 +56,7 @@ async def main() -> None:
         # Main loop
         while True:
             print("Daemon is running...")
+            await run_amoebius()
             await asyncio.sleep(5)  # Sleep for 5 seconds
     except asyncio.CancelledError:
         print("Daemon is shutting down...")
