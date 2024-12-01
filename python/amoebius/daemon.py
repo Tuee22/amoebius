@@ -21,7 +21,7 @@ async def start_dockerd() -> Optional[asyncio.subprocess.Process]:
             'dockerd',
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
-        )k
+        )
         # Wait for Docker to start (adjust timeout as needed)
         for _ in range(30):  # 30 second timeout
             if await is_docker_running():
