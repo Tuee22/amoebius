@@ -10,7 +10,6 @@ from amoebius.secrets.encrypted_dict import (
     encrypt_dict_to_file,
 )
 from amoebius.secrets.vault import unseal_vault_pods_concurrently, initialize_vault
-from amoebius.utils.terraform import read_terraform_state, get_output_from_state
 from amoebius.utils.async_command_runner import CommandError
 from typing import List, Callable, Dict, Any
 

@@ -126,10 +126,8 @@ RUN set -eux; \
 # Install Python 3.12
 RUN add-apt-repository ppa:deadsnakes/ppa -y && \
     apt-get update && apt-get install -y --no-install-recommends \
-    python3.12 \
     python3.12-venv \
     python3.12-dev \
-    python3.12-distutils \
     python3.12-lib2to3 \
     && rm -rf /var/lib/apt/lists/*
 
