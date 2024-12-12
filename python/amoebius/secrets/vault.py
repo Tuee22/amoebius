@@ -107,37 +107,6 @@ async def unseal_vault_pods(
     await asyncio.gather(*unseal_tasks)
 
 
-async def unseal_vault_pods_concurrently(
-    vault_addr_list: List[str],
-    unseal_keys: List[str],
-    namespace: str,
-    threshold: int
-) -> None:
-    """
-    Unseal multiple Vault pods concurrently in the specified namespace using the provided unseal keys.
-
-    Args:
-        vault_addr_list: List of pod names to unseal.
-        unseal_keys: List of unseal keys.
-        namespace: Kubernetes namespace where Vault is deployed.
-        threshold: Number of unseal keys required to unseal Vault.
-
-    Returns:
-        None
-    """
-    async def unseal_single_pod(vault_addr: str)->None:
-        await unseal_vault_pods(
-            vault_addr=vault_addr,
-            unseal_keys=unseal_keys,
-            namespace=namespace,
-            threshold=threshold
-        )
-
-    # Schedule unseal tasks concurrently for all pods in the list.
-    tasks = [unseal_single_pod(pod_name) for pod_name in vault_addr_list]
-    await asyncio.gather(*tasks)
-
-
 async def configure_vault_tls(
     vault_addr: str,
     vault_token: str,
