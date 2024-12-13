@@ -34,8 +34,8 @@ async def start_dockerd() -> Optional[asyncio.subprocess.Process]:
         return None
 
 async def run_amoebius() -> None:
-    #await init_terraform(root_name='vault')
-    #await apply_terraform(root_name='vault')
+    await init_terraform(root_name='vault-storage')
+    await apply_terraform(root_name='vault-storage')
     pass
 
 async def main() -> None:
