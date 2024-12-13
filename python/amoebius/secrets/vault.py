@@ -4,6 +4,7 @@ import json
 import os
 from typing import Any, Dict, List, Optional, Tuple
 from ..utils.async_command_runner import run_command, CommandError
+from ..secrets.encrypted_dict import get_new_password, encrypt_dict_to_file
 
 import yaml  # PyYAML library for YAML handling
 import aiohttp  # For making asynchronous HTTP requests
@@ -561,6 +562,7 @@ async def setup_vault_and_linkerd(
     Returns:
         A dictionary containing the Vault unseal keys and root token.
     """
+    import pdb; pdb.set_trace()
     vault_addr = f"https://{vault_common_name}:8200"
     vault_helm_values = {
         'server': {
@@ -701,12 +703,14 @@ async def main() -> None:
     Returns:
         None
     """
+    secrets_file_path: str = "/amoebius/data/vault_secrets.bin"
+    if os.path.exists(secrets_file_path):
+        print("Error: secrets file already exists")
+        return
     secrets = await setup_vault_and_linkerd()
     if secrets:
-        print("Vault Unseal Keys and Root Token:")
-        for idx, key in enumerate(secrets["vault_unseal_keys"], start=1):
-            print(f"Unseal Key {idx}: {key}")
-        print(f"Initial Root Token: {secrets['vault_root_token']}")
+        password: str = get_new_password()
+        encrypt_dict_to_file(secrets, password, secrets_file_path)
     else:
         print("Failed to retrieve Vault secrets.")
 
