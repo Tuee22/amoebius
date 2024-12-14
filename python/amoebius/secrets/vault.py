@@ -1,14 +1,16 @@
 import asyncio
 import os
 import json
-import subprocess
-from getpass import getpass
 import base64
+from getpass import getpass
+from typing import Any, Dict, List, Optional, cast
+
 import yaml
 import aiohttp
-from typing import Any, Dict, List, Optional, cast, Tuple
+
 from ..utils.async_command_runner import run_command
 from ..secrets.encrypted_dict import encrypt_dict_to_file, decrypt_dict_from_file
+from ..utils.terraform import read_terraform_state, get_output_from_state
 
 
 async def initialize_vault(vault_addr: str, num_shares: int, threshold: int) -> Dict[str, str]:
@@ -18,9 +20,6 @@ async def initialize_vault(vault_addr: str, num_shares: int, threshold: int) -> 
         env=env
     )
     init_data_any = json.loads(out)
-    if not isinstance(init_data_any, dict):
-        raise ValueError("Vault init returned non-dict JSON")
-
     init_data = cast(Dict[str, Any], init_data_any)
     unseal_keys_b64 = cast(List[str], init_data["unseal_keys_b64"])
     root_token = cast(str, init_data["root_token"])
@@ -40,7 +39,7 @@ async def get_vault_pods(namespace: str) -> List[str]:
     return pods_output.strip().split()
 
 
-async def unseal_vault_pods(unseal_keys: List[str], namespace: str, threshold: int) -> None:
+async def unseal_vault_pods(unseal_keys: List[str], namespace: str, threshold: int = 1) -> None:
     pod_names = await get_vault_pods(namespace)
 
     async def run_unseal(pod: str, key: str) -> str:
@@ -68,6 +67,7 @@ async def configure_vault_tls(
 ) -> Dict[str, str]:
     env = {"VAULT_ADDR": vault_addr, "VAULT_TOKEN": vault_token}
 
+    # Enable PKI if not enabled
     try:
         await run_command(["vault", "secrets", "enable", "pki"], env=env)
     except Exception:
@@ -76,38 +76,37 @@ async def configure_vault_tls(
     await run_command(["vault", "secrets", "tune", f"-max-lease-ttl={ttl}", "pki"], env=env)
 
     # Check if CA exists
-    ca_cert: str
     try:
         existing_ca = await run_command(["vault", "read", "pki/ca", "-format=json"], env=env)
         ca_data_any = json.loads(existing_ca)
-        if not isinstance(ca_data_any, dict):
-            raise ValueError("CA data not a dict")
         ca_data = cast(Dict[str, Any], ca_data_any)
         ca_cert = cast(str, ca_data["data"]["certificate"])
     except Exception:
+        # Generate a new CA
         out = await run_command([
             "vault", "write", "-field=certificate", "pki/root/generate/internal",
             f"common_name={common_name}", f"ttl={ttl}"
         ], env=env)
         ca_cert = out.strip()
 
+    # Configure URLs
     await run_command(["vault", "write", "pki/config/urls",
                        f"issuing_certificates={vault_addr}/v1/pki/ca",
                        f"crl_distribution_points={vault_addr}/v1/pki/crl"], env=env)
+
+    # Create a role for TLS
     await run_command(["vault", "write", f"pki/roles/{common_name}",
                        f"allowed_domains={common_name}",
                        "allow_subdomains=true",
                        f"max_ttl={ttl}"], env=env)
 
-    # If vault-server-tls doesn't exist, create it
+    # Issue TLS cert if not exists
     if not await secret_exists("vault-server-tls", namespace):
         vault_cert_json = await run_command(
             ["vault", "write", "-format=json", f"pki/issue/{common_name}", f"common_name={common_name}", f"ttl={ttl}"],
             env=env
         )
         vault_cert_data_any = json.loads(vault_cert_json)
-        if not isinstance(vault_cert_data_any, dict):
-            raise ValueError("Vault cert issue did not return dict")
         vault_cert_data = cast(Dict[str, Any], vault_cert_data_any)
         data_field = cast(Dict[str, Any], vault_cert_data["data"])
         vault_crt = data_field["certificate"] + "\n" + data_field["issuing_ca"]
@@ -136,7 +135,7 @@ async def install_cert_manager() -> None:
         async with session.get('https://api.github.com/repos/jetstack/cert-manager/releases/latest') as resp:
             latest_release = await resp.json()
     if not isinstance(latest_release, dict):
-        raise ValueError("Invalid release data")
+        raise ValueError("Invalid release data from cert-manager API")
     version = cast(str, latest_release["tag_name"])
     url = f"https://github.com/jetstack/cert-manager/releases/download/{version}/cert-manager.yaml"
     await run_command(["kubectl", "apply", "--validate=false", "-f", url])
@@ -205,6 +204,7 @@ async def create_linkerd_identity_certificate(
     try:
         await run_command(["kubectl", "create", "namespace", namespace], sensitive=False)
     except Exception:
+        # namespace may already exist
         pass
     cert_manifest: Dict[str, Any] = {
         'apiVersion': 'cert-manager.io/v1',
@@ -229,12 +229,8 @@ async def create_linkerd_identity_certificate(
     await run_command(["kubectl", "wait", "--for=condition=Ready", "certificate/linkerd-identity-issuer", "-n", namespace, "--timeout=300s"])
 
 
-async def get_kubernetes_secret_data(
-    secret_name: str,
-    namespace: str,
-    keys: List[str]
-) -> Dict[str, str]:
-    async def get_decoded_data(key: str) -> Tuple[str, str]:
+async def get_kubernetes_secret_data(secret_name: str, namespace: str, keys: List[str]) -> Dict[str, str]:
+    async def get_decoded_data(key: str) -> (str, str):
         base64_data = await run_command([
             "kubectl", "get", "secret", secret_name, "-n", namespace,
             "-o", f"jsonpath={{.data['{key}']}}"
@@ -295,33 +291,35 @@ async def setup_certificate_renewals(
 
 
 async def wait_for_vault_pods_ready(namespace: str, timeout: str = "300s") -> None:
-    # Using kubectl rollout status on the statefulset named 'vault'
     await run_command([
         "kubectl", "rollout", "status", "statefulset/vault", "-n", namespace, f"--timeout={timeout}"
     ])
 
 
-async def main(
-    vault_namespace: str = "vault",
-    vault_helm_release_name: str = "vault",
-    vault_chart_name: str = "hashicorp/vault",
-    vault_common_name: str = "vault.vault.svc.cluster.local",
-    pki_ttl: str = "8760h",
-    cert_duration: str = "8760h",
-    cert_renew_before: str = "720h",
-    pki_role_name: str = "linkerd-identity",
-    linkerd_namespace: str = "linkerd",
-    linkerd_common_name: str = "identity.linkerd.cluster.local",
-    shamir_shares: int = 5,
-    shamir_threshold: int = 3,
-    vault_replicas: int = 3
-) -> None:
-    # Check if TLS secret exists
+async def main(root_name: str = "default-root") -> None:
+    import pdb; pdb.set_trace()
+    # Read terraform state
+    state = await read_terraform_state(root_name)
+
+    # Retrieve values from terraform outputs
+    vault_namespace = get_output_from_state(state, "vault_namespace", str)
+    vault_storage_class_name = get_output_from_state(state, "vault_storage_class_name", str)  # not directly used below, but available
+    vault_replicas = get_output_from_state(state, "vault_replicas", int)
+
+    # Additional configuration values
+    pki_ttl = "8760h"
+    cert_duration = "8760h"
+    cert_renew_before = "720h"
+    shamir_shares = 5
+    shamir_threshold = 3
+    vault_common_name = "vault.vault.svc.cluster.local"
+
+    # Check if TLS secret exists (for idempotency)
     tls_secret_present = await secret_exists("vault-server-tls", vault_namespace)
 
     # Initial Helm install/upgrade
     helm_cmd = [
-        "helm", "upgrade", "--install", vault_helm_release_name, vault_chart_name,
+        "helm", "upgrade", "--install", "vault", "hashicorp/vault",
         "-n", vault_namespace,
         "--set", "server.ha.enabled=true",
         "--set", "server.ha.raft.enabled=true",
@@ -329,6 +327,7 @@ async def main(
         "--set", "injector.enabled=true",
         "--set", f"server.ha.raft.replicas={vault_replicas}"
     ]
+
     if tls_secret_present:
         helm_values: Dict[str, Any] = {
             'server': {
@@ -344,13 +343,13 @@ async def main(
         await run_command(helm_cmd)
 
     await wait_for_vault_pods_ready(vault_namespace)
+
     pods = await get_vault_pods(vault_namespace)
-    secrets_file_path = "/amoebius/data/vault_secrets.bin"
     vault_init_addr = f"http://{pods[0]}.{vault_namespace}.svc.cluster.local:8200"
     vault_tls_addr = f"https://{vault_common_name}:8200"
 
+    secrets_file_path = "/amoebius/data/vault_secrets.bin"
     if not os.path.exists(secrets_file_path):
-        # First run: initialize vault with given shamir parameters
         keys = await initialize_vault(vault_init_addr, shamir_shares, shamir_threshold)
         pw = getpass("Enter a new password to encrypt vault secrets: ")
         pw2 = getpass("Confirm password: ")
@@ -360,7 +359,6 @@ async def main(
             pw2 = getpass("Confirm password: ")
         encrypt_dict_to_file(keys, pw, secrets_file_path)
     else:
-        # Subsequent runs
         pw = getpass("Enter password to decrypt vault secrets: ")
         keys = decrypt_dict_from_file(pw, secrets_file_path)
 
@@ -376,7 +374,7 @@ async def main(
         vault_namespace
     )
 
-    # If TLS wasn't present before, now enable it
+    # If TLS wasn't present before, enable now
     if not tls_secret_present:
         helm_values = {
             'server': {
@@ -387,27 +385,25 @@ async def main(
             }
         }
         helm_values_yaml = yaml.dump(helm_values)
-        await run_command(["helm", "upgrade", vault_helm_release_name, vault_chart_name, "-n", vault_namespace, "-f", "-"], input_data=helm_values_yaml)
+        await run_command(["helm", "upgrade", "vault", "hashicorp/vault", "-n", vault_namespace, "-f", "-"], input_data=helm_values_yaml)
         await wait_for_vault_pods_ready(vault_namespace)
         await unseal_vault_pods(unseal_keys, vault_namespace, threshold=shamir_threshold)
 
     await install_cert_manager()
+    await configure_vault_for_cert_manager(vault_tls_addr, keys['initial_root_token'], "linkerd-identity")
 
-    await configure_vault_for_cert_manager(vault_tls_addr, keys['initial_root_token'], pki_role_name)
+    await create_cluster_issuer(vault_tls_addr, tls_info['ca_cert'], "linkerd-identity")
+    await create_linkerd_identity_certificate("linkerd", "identity.linkerd.cluster.local", cert_duration, cert_renew_before)
 
-    await create_cluster_issuer(vault_tls_addr, tls_info['ca_cert'], pki_role_name)
+    secret_data = await get_kubernetes_secret_data("linkerd-identity-issuer", "linkerd", ['ca\\.crt', 'tls\\.crt', 'tls\\.key'])
 
-    await create_linkerd_identity_certificate(linkerd_namespace, linkerd_common_name, cert_duration, cert_renew_before)
-
-    secret_data = await get_kubernetes_secret_data("linkerd-identity-issuer", linkerd_namespace, ['ca\\.crt', 'tls\\.crt', 'tls\\.key'])
-
-    await install_linkerd(linkerd_namespace, secret_data['ca\\.crt'], secret_data['tls\\.crt'], secret_data['tls\\.key'])
+    await install_linkerd("linkerd", secret_data['ca\\.crt'], secret_data['tls\\.crt'], secret_data['tls\\.key'])
 
     await run_command(["linkerd", "check"], sensitive=False)
 
     await setup_certificate_renewals(vault_namespace, vault_common_name, cert_duration, cert_renew_before)
 
-    # Re-upgrade Vault to ensure TLS and replicas are consistent
+    # Final helm upgrade to ensure TLS config stable
     helm_values = {
         'server': {
             'tls': {
@@ -417,12 +413,13 @@ async def main(
         }
     }
     helm_values_yaml = yaml.dump(helm_values)
-    await run_command(["helm", "upgrade", vault_helm_release_name, vault_chart_name, "-n", vault_namespace, "-f", "-"], input_data=helm_values_yaml)
+    await run_command(["helm", "upgrade", "vault", "hashicorp/vault", "-n", vault_namespace, "-f", "-"], input_data=helm_values_yaml)
     await wait_for_vault_pods_ready(vault_namespace)
     await unseal_vault_pods(unseal_keys, vault_namespace, threshold=shamir_threshold)
 
-    print("Vault and Linkerd setup is complete.")
+    print("Vault and Linkerd setup is complete using Terraform outputs.")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Adjust root_name if needed
+    asyncio.run(main(root_name="default-root"))

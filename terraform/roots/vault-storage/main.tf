@@ -1,4 +1,11 @@
 terraform {
+  required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.25.0"
+    }
+  }
+
   backend "kubernetes" {
     secret_suffix     = "vault"
     load_config_file  = false
@@ -23,8 +30,10 @@ resource "kubernetes_storage_class" "hostpath_storage_class" {
   metadata {
     name = var.storage_class_name
   }
+
   storage_provisioner = "kubernetes.io/no-provisioner"
-  volume_binding_mode  = "WaitForFirstConsumer"
+  volume_binding_mode = "WaitForFirstConsumer"
+  reclaim_policy      = "Retain"
 }
 
 resource "kubernetes_persistent_volume" "vault_storage" {
@@ -46,10 +55,13 @@ resource "kubernetes_persistent_volume" "vault_storage" {
 
     persistent_volume_source {
       host_path {
+        # Directory is created if it doesn't exist
         path = "/persistent-data/vault/vault-${each.key}"
         type = "DirectoryOrCreate"
       }
     }
+
+    persistent_volume_reclaim_policy = "Retain"  # Ensuring the reclaim policy is set correctly
 
     node_affinity {
       required {
