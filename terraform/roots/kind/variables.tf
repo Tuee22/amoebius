@@ -7,7 +7,7 @@ variable "cluster_name" {
 variable "data_dir" {
   description = "Data directory for Kind"
   type        = string
-  default     = "~/.local/share/kind-data"
+  default     = "~/amoebius/data/kind-data"
 }
 
 variable "amoebius_dir" {

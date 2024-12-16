@@ -3,7 +3,7 @@ import os
 import json
 import base64
 from getpass import getpass
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 import yaml
 import aiohttp
@@ -230,7 +230,7 @@ async def create_linkerd_identity_certificate(
 
 
 async def get_kubernetes_secret_data(secret_name: str, namespace: str, keys: List[str]) -> Dict[str, str]:
-    async def get_decoded_data(key: str) -> (str, str):
+    async def get_decoded_data(key: str) -> Tuple[str, str]:
         base64_data = await run_command([
             "kubectl", "get", "secret", secret_name, "-n", namespace,
             "-o", f"jsonpath={{.data['{key}']}}"
@@ -296,7 +296,7 @@ async def wait_for_vault_pods_ready(namespace: str, timeout: str = "300s") -> No
     ])
 
 
-async def main(root_name: str = "default-root") -> None:
+async def main(root_name: str = "vault-storage") -> None:
     import pdb; pdb.set_trace()
     # Read terraform state
     state = await read_terraform_state(root_name)
@@ -305,6 +305,7 @@ async def main(root_name: str = "default-root") -> None:
     vault_namespace = get_output_from_state(state, "vault_namespace", str)
     vault_storage_class_name = get_output_from_state(state, "vault_storage_class_name", str)  # not directly used below, but available
     vault_replicas = get_output_from_state(state, "vault_replicas", int)
+    
 
     # Additional configuration values
     pki_ttl = "8760h"
@@ -324,6 +325,7 @@ async def main(root_name: str = "default-root") -> None:
         "--set", "server.ha.enabled=true",
         "--set", "server.ha.raft.enabled=true",
         "--set", "server.dataStorage.enabled=true",
+        "--set", f"server.dataStorage.storageClass={vault_storage_class_name}",
         "--set", "injector.enabled=true",
         "--set", f"server.ha.raft.replicas={vault_replicas}"
     ]
@@ -422,4 +424,4 @@ async def main(root_name: str = "default-root") -> None:
 
 if __name__ == "__main__":
     # Adjust root_name if needed
-    asyncio.run(main(root_name="default-root"))
+    asyncio.run(main())

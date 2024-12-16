@@ -123,6 +123,9 @@ RUN set -eux; \
     chmod +x kind-linux-${KIND_ARCH}; \
     mv kind-linux-${KIND_ARCH} /usr/local/bin/kind
 
+# install helm repos
+RUN helm repo add hashicorp https://helm.releases.hashicorp.com
+
 # Install Python 3.12
 RUN add-apt-repository ppa:deadsnakes/ppa -y && \
     apt-get update && apt-get install -y --no-install-recommends \
