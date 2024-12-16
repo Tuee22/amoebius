@@ -1,6 +1,5 @@
 import json
 import os
-import getpass
 from typing import Dict, Any, cast
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
@@ -47,16 +46,3 @@ def decrypt_dict_from_file(password: str, file_path: str) -> Dict[str,Any]:
     """Read encrypted data from a file and decrypt it into a dictionary."""
     with open(file_path, 'rb') as file:
         return decrypt_dict(file.read(), password)
-
-def get_password(prompt: str = "Enter password: ") -> str:
-    """Prompt the user for a password without echoing."""
-    return getpass.getpass(prompt)
-
-def get_new_password() -> str:
-    """Prompt the user to enter and confirm a new password."""
-    password = get_password("Enter a new password to encrypt vault secrets: ")
-    confirm_password = get_password("Confirm the password: ")
-    return (
-        password if password == confirm_password
-        else get_new_password()
-    )
