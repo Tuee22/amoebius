@@ -296,7 +296,7 @@ async def wait_for_vault_pods_ready(namespace: str, timeout: str = "300s") -> No
     ])
 
 
-async def main(root_name: str = "vault-storage") -> None:
+async def main(root_name: str = "vault") -> None:
     import pdb; pdb.set_trace()
     # Read terraform state
     state = await read_terraform_state(root_name)
