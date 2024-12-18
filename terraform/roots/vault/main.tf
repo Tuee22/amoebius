@@ -65,7 +65,64 @@ resource "kubernetes_persistent_volume" "vault_storage" {
   }
 
   depends_on = [
-    kubernetes_storage_class.hostpath_sto rage_class
+    kubernetes_storage_class.hostpath_storage_class
   ]
 }
 
+resource "helm_release" "vault" {
+  name       = var.vault_service_name
+  repository = "https://helm.releases.hashicorp.com"
+  chart      = "vault"
+  version    = var.vault_helm_chart_version
+  namespace  = kubernetes_namespace.vault.metadata[0].name
+
+  dynamic "set" {
+    for_each = var.vault_values
+    content {
+      name  = set.key
+      value = set.value
+    }
+  }
+
+  set {
+    name  = "server.dataStorage.size"
+    value = var.vault_storage_size
+  }
+
+  set {
+    name  = "server.ha.raft.config"
+    value = <<-EOT
+      ui = true
+      listener "tcp" {
+        tls_disable = 1
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+      }
+      storage "raft" {
+        path    = "/vault/data"
+        node_id = "{{ .NodeID }}"
+        %{for i in range(var.vault_replicas)}
+        retry_join {
+          leader_api_addr = "http://${var.vault_service_name}-${i}.${var.vault_service_name}-internal:8200"
+        }
+        %{endfor}
+      }
+      service_registration "kubernetes" {}
+    EOT
+  }
+
+  set {
+    name  = "server.ha.raft.replicas"
+    value = tostring(var.vault_replicas)
+  }
+
+  set {
+    name  = "server.dataStorage.storageClass"
+    value = kubernetes_storage_class.local_storage.metadata[0].name
+  }
+
+  depends_on = [
+    kubernetes_persistent_volume.vault_storage,
+    kubernetes_namespace.vault
+  ]
+}
