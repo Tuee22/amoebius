@@ -38,6 +38,8 @@ packer_cache/
 *.bin
 *.pid
 
+data/
+
 kind-cluster-config
 
 __pycache__

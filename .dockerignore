@@ -16,6 +16,9 @@
 packer_cache/
 **/*.pkr.hcl.lock
 
+# data folder
+data/
+
 # Provider-related lock files
 **/.terraform.lock.hcl
 

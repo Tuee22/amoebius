@@ -118,7 +118,7 @@ resource "helm_release" "vault" {
 
   set {
     name  = "server.dataStorage.storageClass"
-    value = kubernetes_storage_class.local_storage.metadata[0].name
+    value = kubernetes_storage_class.hostpath_storage_class.metadata[0].name
   }
 
   depends_on = [
