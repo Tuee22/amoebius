@@ -28,8 +28,8 @@ resource "kubernetes_storage_class" "hostpath_storage_class" {
 }
 
 resource "kubernetes_persistent_volume" "vault_storage" {
-
   for_each = { for idx in range(var.vault_replicas) : idx => idx }
+
   metadata {
     name = "vault-pv-${each.key}"
     labels = {
@@ -44,7 +44,7 @@ resource "kubernetes_persistent_volume" "vault_storage" {
     access_modes       = ["ReadWriteOnce"]
     storage_class_name = kubernetes_storage_class.hostpath_storage_class.metadata[0].name
 
-   persistent_volume_source {
+    persistent_volume_source {
       host_path {
         path = "/persistent-data/vault/vault-${each.key}"
         type = "DirectoryOrCreate"
@@ -65,7 +65,7 @@ resource "kubernetes_persistent_volume" "vault_storage" {
   }
 
   depends_on = [
-    kubernetes_storage_class.hostpath_storage_class
+    kubernetes_storage_class.hostpath_sto rage_class
   ]
 }
 
