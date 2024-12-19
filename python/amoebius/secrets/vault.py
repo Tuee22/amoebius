@@ -4,25 +4,45 @@ import json
 import base64
 from getpass import getpass
 from typing import Any, Dict, List, Optional, Tuple, cast
+from ..models.vault import VaultInitData
 
 import yaml
 import aiohttp
 
-from ..utils.async_command_runner import run_command
-from ..secrets.encrypted_dict import encrypt_dict_to_file, decrypt_dict_from_file
+from ..utils.async_command_runner import run_command, CommandError
 from ..utils.terraform import read_terraform_state, get_output_from_state
+from .encrypted_dict import encrypt_dict_to_file, decrypt_dict_from_file
+
+async def is_vault_initialized() -> bool:
+    """Check if Vault is initialized by running `vault status -format=json`.
+
+    Returns:
+        True if Vault is initialized, False otherwise.
+
+    Raises:
+        CommandError: If the `vault status` command fails unexpectedly.
+    """
+    try:
+        env = {"VAULT_ADDR": vault_addr}
+        out = await run_command(
+            ["vault", "status", "-format=json"],
+            env=env,
+        )
+        status = json.loads(output)
+        return status.get("initialized", False)
+    except CommandError as e:
+        raise CommandError("Failed to determine Vault initialization status", e.return_code)
 
 
-async def initialize_vault(vault_addr: str, num_shares: int, threshold: int) -> Dict[str, str]:
+async def initialize_vault(vault_addr: str, num_shares: int, threshold: int) -> VaultInitData:
     env = {"VAULT_ADDR": vault_addr}
     out = await run_command(
         ["vault", "operator", "init", f"-key-shares={num_shares}", f"-key-threshold={threshold}", "-format=json"],
         env=env
     )
-    init_data_any = json.loads(out)
-    init_data = cast(Dict[str, Any], init_data_any)
-    unseal_keys_b64 = cast(List[str], init_data["unseal_keys_b64"])
-    root_token = cast(str, init_data["root_token"])
+    init_data = VaultInitData.parse_raw(out)
+    unseal_keys_b64 = init_data["unseal_keys_b64"]
+    root_token = init_data["root_token"]
 
     keys: Dict[str, str] = {f"unseal_key_{i+1}": k for i, k in enumerate(unseal_keys_b64)}
     keys["initial_root_token"] = root_token
@@ -296,27 +316,20 @@ async def wait_for_vault_pods_ready(namespace: str, timeout: str = "300s") -> No
     ])
 
 
-async def main(root_name: str = "vault") -> None:
-    import pdb; pdb.set_trace()
-    # Read terraform state
-    state = await read_terraform_state(root_name)
+async def main(
+    default_shamir_shares:int = 5
+    default_shamir_threshold:int = 3
+) -> None:
+    # Read terraform state for vault
+    state = await read_terraform_state(root_name="vault")
 
     # Retrieve values from terraform outputs
     vault_namespace = get_output_from_state(state, "vault_namespace", str)
-    vault_storage_class_name = get_output_from_state(state, "vault_storage_class_name", str)  # not directly used below, but available
     vault_replicas = get_output_from_state(state, "vault_replicas", int)
+    vault_service_name = get_output_from_state(state,"vault_service_name", str)
+    vault_common_name = get_output_from_state(state, "vault_common_name", str)
     
 
-    # Additional configuration values
-    pki_ttl = "8760h"
-    cert_duration = "8760h"
-    cert_renew_before = "720h"
-    shamir_shares = 5
-    shamir_threshold = 3
-    vault_common_name = "vault.vault.svc.cluster.local"
-
-    # Check if TLS secret exists (for idempotency)
-    tls_secret_present = await secret_exists("vault-server-tls", vault_namespace)
 
     # Initial Helm install/upgrade
     helm_cmd = [

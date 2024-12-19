@@ -15,3 +15,8 @@ output "vault_service_name" {
   value       = helm_release.vault.name
   description = "The name of the Vault service"
 }
+
+output "vault_common_name" {
+  value = "${var.vault_service_name}.${var.vault_namespace}.svc.cluster.local"
+
+}

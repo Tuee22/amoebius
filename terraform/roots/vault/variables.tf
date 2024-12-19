@@ -1,13 +1,19 @@
+variable "cluster_name" {
+  description = "Kubernetes namespace for Vault"
+  type        = string
+  default     = "kind-cluster"
+}
+
 variable "vault_namespace" {
   description = "Kubernetes namespace for Vault"
   type        = string
   default     = "vault"
 }
 
-variable "cluster_name" {
-  description = "Kubernetes namespace for Vault"
+variable "vault_service_name" {
+  description = "Name of the Vault service"
   type        = string
-  default     = "kind-cluster"
+  default     = "vault"
 }
 
 variable "storage_class_name" {
@@ -32,12 +38,6 @@ variable "vault_replicas" {
   description = "Number of Vault replicas"
   type        = number
   default     = 3
-}
-
-variable "vault_service_name" {
-  description = "Name of the Vault service"
-  type        = string
-  default     = "vault"
 }
 
 variable "vault_values" {

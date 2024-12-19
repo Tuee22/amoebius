@@ -25,6 +25,7 @@ resource "kubernetes_storage_class" "hostpath_storage_class" {
   }
   storage_provisioner = "kubernetes.io/no-provisioner"
   volume_binding_mode  = "WaitForFirstConsumer"
+  reclaim_policy = "Retain"
 }
 
 resource "kubernetes_persistent_volume" "vault_storage" {
