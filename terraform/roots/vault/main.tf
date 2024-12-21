@@ -13,21 +13,24 @@ provider "kubernetes" {
   token                  = ""
 }
 
+# Kubernetes namespace for Vault
 resource "kubernetes_namespace" "vault" {
   metadata {
     name = var.vault_namespace
   }
 }
 
+# Kubernetes storage class
 resource "kubernetes_storage_class" "hostpath_storage_class" {
   metadata {
     name = var.storage_class_name
   }
   storage_provisioner = "kubernetes.io/no-provisioner"
   volume_binding_mode  = "WaitForFirstConsumer"
-  reclaim_policy = "Retain"
+  reclaim_policy       = "Retain"
 }
 
+# Persistent volumes for Vault
 resource "kubernetes_persistent_volume" "vault_storage" {
   for_each = { for idx in range(var.vault_replicas) : idx => idx }
 
@@ -70,6 +73,7 @@ resource "kubernetes_persistent_volume" "vault_storage" {
   ]
 }
 
+# Vault Helm deployment
 resource "helm_release" "vault" {
   name       = var.vault_service_name
   repository = "https://helm.releases.hashicorp.com"
@@ -122,8 +126,68 @@ resource "helm_release" "vault" {
     value = kubernetes_storage_class.hostpath_storage_class.metadata[0].name
   }
 
+  set {
+    name  = "server.serviceAccount.name"
+    value = "${var.vault_service_name}"
+  }
+
   depends_on = [
     kubernetes_persistent_volume.vault_storage,
     kubernetes_namespace.vault
   ]
+}
+
+# Vault RBAC
+resource "kubernetes_cluster_role" "vault_admin" {
+  metadata {
+    name = "vault-admin"
+  }
+
+  rule {
+    api_groups = [""]
+    resources  = ["*"]
+    verbs      = ["*"]
+  }
+
+  rule {
+    api_groups = ["apps", "extensions"]
+    resources  = ["*"]
+    verbs      = ["*"]
+  }
+
+  rule {
+    api_groups = ["authentication.k8s.io"]
+    resources  = ["*"]
+    verbs      = ["*"]
+  }
+
+  rule {
+    api_groups = ["authorization.k8s.io"]
+    resources  = ["*"]
+    verbs      = ["*"]
+  }
+
+  rule {
+    api_groups = ["rbac.authorization.k8s.io"]
+    resources  = ["*"]
+    verbs      = ["*"]
+  }
+}
+
+resource "kubernetes_cluster_role_binding" "vault_admin_binding" {
+  metadata {
+    name = "vault-admin-binding"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = kubernetes_cluster_role.vault_admin.metadata[0].name
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = "${var.vault_service_name}"
+    namespace = kubernetes_namespace.vault.metadata[0].name
+  }
 }

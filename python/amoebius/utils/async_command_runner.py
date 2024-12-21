@@ -1,7 +1,8 @@
+import os
 import asyncio
 import socket
 from contextlib import asynccontextmanager
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, AsyncGenerator
 
 
 class CommandError(Exception):
@@ -48,7 +49,7 @@ async def run_command(
             stdin=asyncio.subprocess.PIPE if input_data else None,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
-            env=env,
+            env={**os.environ, **env} if env else None,
             cwd=cwd,
         )
         stdout_bytes, stderr_bytes = await process.communicate(
@@ -108,7 +109,7 @@ async def ssh_kubectl_port_forward(
     namespace: str,
     local_port: int,
     service_port: int,
-) -> None:
+) -> AsyncGenerator[None, None]:
     """Context manager to forward a Kubernetes ClusterIP service port over SSH using kubectl.
 
     This sets up an SSH tunnel to a remote host, which runs `kubectl port-forward`
