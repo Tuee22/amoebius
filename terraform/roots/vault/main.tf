@@ -73,6 +73,58 @@ resource "kubernetes_persistent_volume" "vault_storage" {
   ]
 }
 
+resource "kubernetes_service_account_v1" "vault_service_account" {
+  metadata {
+    name      = "${var.vault_service_name}-service-account"
+    namespace = kubernetes_namespace.vault.metadata[0].name
+    labels = {
+      "app.kubernetes.io/managed-by" = "Helm"
+    }
+    annotations = {
+      "meta.helm.sh/release-name"      = "vault"
+      "meta.helm.sh/release-namespace" = "vault"
+    }
+  }
+}
+
+resource "kubernetes_cluster_role" "vault_cluster_role" {
+  metadata {
+    name = "${var.vault_service_name}-cluster-role"
+  }
+
+  rule {
+    api_groups = ["authentication.k8s.io"]
+    resources  = ["tokenrequests"]
+    verbs      = ["create"]
+  }
+
+  rule {
+    api_groups = [""]
+    resources  = ["secrets"]
+    verbs      = ["get"]
+  }
+
+  # Add any other specific permissions as needed
+}
+
+resource "kubernetes_cluster_role_binding" "vault_cluster_role_binding" {
+  metadata {
+    name = "${var.vault_service_name}-cluster-role-binding"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = kubernetes_cluster_role.vault_cluster_role.metadata[0].name
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account_v1.vault_service_account.metadata[0].name
+    namespace = kubernetes_namespace.vault.metadata[0].name
+  }
+}
+
 # Vault Helm deployment
 resource "helm_release" "vault" {
   name       = var.vault_service_name
@@ -128,66 +180,11 @@ resource "helm_release" "vault" {
 
   set {
     name  = "server.serviceAccount.name"
-    value = "${var.vault_service_name}"
+    value = kubernetes_service_account_v1.vault_service_account.metadata[0].name
   }
 
   depends_on = [
     kubernetes_persistent_volume.vault_storage,
     kubernetes_namespace.vault
   ]
-}
-
-# Vault RBAC
-resource "kubernetes_cluster_role" "vault_admin" {
-  metadata {
-    name = "vault-admin"
-  }
-
-  rule {
-    api_groups = [""]
-    resources  = ["*"]
-    verbs      = ["*"]
-  }
-
-  rule {
-    api_groups = ["apps", "extensions"]
-    resources  = ["*"]
-    verbs      = ["*"]
-  }
-
-  rule {
-    api_groups = ["authentication.k8s.io"]
-    resources  = ["*"]
-    verbs      = ["*"]
-  }
-
-  rule {
-    api_groups = ["authorization.k8s.io"]
-    resources  = ["*"]
-    verbs      = ["*"]
-  }
-
-  rule {
-    api_groups = ["rbac.authorization.k8s.io"]
-    resources  = ["*"]
-    verbs      = ["*"]
-  }
-}
-
-resource "kubernetes_cluster_role_binding" "vault_admin_binding" {
-  metadata {
-    name = "vault-admin-binding"
-  }
-
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = kubernetes_cluster_role.vault_admin.metadata[0].name
-  }
-
-  subject {
-    kind      = "ServiceAccount"
-    name      = "${var.vault_service_name}"
-    namespace = kubernetes_namespace.vault.metadata[0].name
-  }
 }

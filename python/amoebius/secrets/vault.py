@@ -38,7 +38,7 @@ async def is_vault_initialized(vault_addr: str) -> bool:
             successful_return_codes=[0,1,2],
         )
         status = json.loads(out)["initialized"]
-r        return validate_type(status,bool)
+        return validate_type(status,bool)
     except CommandError as e:
         raise CommandError("Failed to determine Vault initialization status", e.return_code)
 
@@ -93,7 +93,7 @@ async def unseal_vault_pods(pod_names: List[str], vault_init_data: VaultInitData
     unseal_keys = random.sample(vault_init_data.unseal_keys_b64, vault_init_data.unseal_threshold)
 
     async def run_unseal(pod: str, key: str) -> str:
-        env = {"VAULT_ADDR": vault_addr}
+        env = {"VAULT_ADDR": pod}
         return await run_command(["vault", "operator", "unseal", key], env=env)
 
     tasks = [run_unseal(pod, key) for pod in pod_names for key in unseal_keys]
@@ -110,58 +110,48 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
         vault_init_data: Vault init secrets
         terraform_state: Terraform state containing deployment details for Vault and Kubernetes.
     """
-    sa_name = get_output_from_state(terraform_state, "vault_service_account_name", str)
-    sa_namespace = get_output_from_state(terraform_state, "vault_namespace", str)
+    vault_sa_name = get_output_from_state(terraform_state, "vault_service_account_name", str)
+    vault_service_name = get_output_from_state(terraform_state, "vault_service_name", str)
+    vault_sa_namespace = get_output_from_state(terraform_state, "vault_namespace", str)
     vault_common_name = get_output_from_state(terraform_state,"vault_common_name",str)
-    vault_role = get_output_from_state(terraform_state, "vault_role", str)
-    policy_name = get_output_from_state(terraform_state, "vault_policy_name", str)
-    secret_path = get_output_from_state(terraform_state, "vault_secret_path", str)
+    vault_cluster_role = get_output_from_state(terraform_state, "vault_cluster_role", str)
+    vault_secret_path = get_output_from_state(terraform_state, "vault_secret_path", str)
     kubernetes_host = "https://kubernetes.default.svc:6443"
     env = {"VAULT_ADDR":vault_common_name, "VAULT_TOKEN":vault_init_data.root_token}
 
-    print("Enabling Kubernetes authentication in Vault...")
-    await run_command(["vault", "auth", "enable", "kubernetes"], env=env)
+    print("Checking if Kubernetes authentication is already enabled in Vault...")
+    auth_methods_output = await run_command(["vault", "auth", "list", "-format=json"], env=env)
+    auth_methods = json.loads(auth_methods_output)
+    
+    if "kubernetes/" not in auth_methods:
+        print("Enabling Kubernetes authentication in Vault...")
+        await run_command(["vault", "auth", "enable", "kubernetes"], sensitive=False, env=env)
+    else:
+        print("Kubernetes authentication is already enabled in Vault. Skipping enable step.")
 
-    print("Configuring Kubernetes auth method...")
-    sa_secret_name = await run_command(
+    sa_token = await run_command(
+        [
+            "kubectl",
+            "create",
+            "token",
+            vault_sa_name,
+            "--duration=600s",
+            "-n",
+            vault_sa_namespace
+        ])
+    # get root CA cert
+    print("Configuring Kubernetes auth method in Vault")
+    ca_cert = await run_command(
         [
             "kubectl",
             "get",
-            "serviceaccount",
-            sa_name,
+            "configmap",
+            "kube-root-ca.crt",
             "-n",
-            sa_namespace,
+            "kube-public",
             "-o",
-            "jsonpath={.secrets[0].name}",
-        ]
-    )
-    sa_token_b64 = await run_command(
-        [
-            "kubectl",
-            "get",
-            "secret",
-            sa_secret_name,
-            "-n",
-            sa_namespace,
-            "-o",
-            "jsonpath={.data.token}",
-        ]
-    )
-    sa_token = base64.b64decode(sa_token_b64).decode()
-
-    ca_cert_b64 = await run_command(
-        [
-            "kubectl",
-            "get",
-            "secret",
-            sa_secret_name,
-            "-n",
-            sa_namespace,
-            "-o",
-            "jsonpath={.data['ca\\.crt']}",
-        ]
-    )
-    ca_cert = base64.b64decode(ca_cert_b64).decode()
+            "jsonpath={.data['ca\\.crt']}"
+        ])
 
     await run_command(
         [
@@ -172,34 +162,49 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
             f"kubernetes_host={kubernetes_host}",
             f"kubernetes_ca_cert={ca_cert}",
         ],
-        env=env,
+        env=env
     )
 
-    print(f"Creating policy {policy_name} in Vault...")
-    policy = f"""
-    path "{secret_path}/*" {{
+    print("Configured Kubernetes auth method in Vault.")
+
+    print("\n=== Creating Vault Policy ===")
+    # Define Vault policy
+    vault_policy_name = f"{vault_service_name}-policy"
+    vault_policy = f"""
+    path "{vault_secret_path}/*" {{
         capabilities = ["read"]
     }}
     """
-    await run_command(
-        ["vault", "policy", "write", policy_name, "-"],
-        input_data=policy,
-        env=env,
-    )
 
-    print(f"Creating role {vault_role} in Vault...")
+    # Write the Vault policy
+    await run_command(
+        ["vault", "policy", "write", vault_policy_name, "-"],
+        env=env,
+        input_data=vault_policy
+    )
+    print(f"Created Vault policy '{vault_policy_name}'.")
+
+    print("\n=== Creating Vault Role ===")
+    # Define Vault role
+    vault_role = f"{vault_service_name}-role"
+
+    # Write the Vault role configuration
     await run_command(
         [
             "vault",
             "write",
             f"auth/kubernetes/role/{vault_role}",
-            f"bound_service_account_names={sa_name}",
-            f"bound_service_account_namespaces={sa_namespace}",
-            f"policies={policy_name}",
+            f"bound_service_account_names={vault_sa_name}",
+            f"bound_service_account_namespaces={vault_sa_namespace}",
+            f"policies={vault_policy_name}",
             "ttl=24h",
         ],
         env=env,
+        input_data=None
     )
+    print(f"Created Vault role '{vault_role}'.")
+
+    print("\n=== Vault Kubernetes Authentication Configuration Completed Successfully ===")
 
 
 async def init_unseal_configure_vault(
@@ -219,7 +224,7 @@ async def init_unseal_configure_vault(
         """Retrieve secrets from an encrypted file."""
         password = getpass("Enter the password to decrypt Vault secrets: ")
         decrypted_data = decrypt_dict_from_file(password=password, file_path=secrets_file_path)
-        return VaultInitData.parse_obj(decrypted_data)
+        return VaultInitData.model_validate(decrypted_data)
 
     async def initialize_vault_and_save_secrets() -> VaultInitData:
         """Initialize Vault and save secrets to an encrypted file."""
@@ -241,7 +246,6 @@ async def init_unseal_configure_vault(
 
     # Check if Vault is already initialized
     is_initialized = await is_vault_initialized(vault_addr=vault_init_addr)
-    import pdb; pdb.set_trace()
     vault_init_data_getter = (
         get_initialized_secrets_from_file if is_initialized else initialize_vault_and_save_secrets
     )
