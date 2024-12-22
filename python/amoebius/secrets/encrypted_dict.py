@@ -39,8 +39,9 @@ def decrypt_dict(encrypted_data: bytes, password: str) -> Dict[str,Any]:
 
 def encrypt_dict_to_file(data: Dict[str,Any], password: str, file_path: str) -> None:
     """Encrypt a dictionary and write it to a file."""
+    dict_bytes=encrypt_dict(data, password)
     with open(file_path, 'wb') as file:
-        file.write(encrypt_dict(data, password))
+        file.write(dict_bytes)
 
 def decrypt_dict_from_file(password: str, file_path: str) -> Dict[str,Any]:
     """Read encrypted data from a file and decrypt it into a dictionary."""

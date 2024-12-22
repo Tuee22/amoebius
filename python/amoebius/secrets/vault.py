@@ -29,15 +29,16 @@ async def is_vault_initialized(vault_addr: str) -> bool:
     Raises:
         CommandError: If the `vault status` command fails unexpectedly.
     """
-    import pdb; pdb.set_trace()
     try:
         env = {"VAULT_ADDR": vault_addr}
         out = await run_command(
             ["vault", "status", "-format=json"],
+            sensitive=False,
             env=env,
+            successful_return_codes=[0,1,2],
         )
-        status = json.loads(out).get("initialized", False)
-        return validate_type(status,bool)
+        status = json.loads(out)["initialized"]
+r        return validate_type(status,bool)
     except CommandError as e:
         raise CommandError("Failed to determine Vault initialization status", e.return_code)
 
@@ -82,18 +83,17 @@ async def get_vault_pods(namespace: str) -> List[str]:
     return pods_output.strip().split()
 
 
-async def unseal_vault_pods(vault_init_data: VaultInitData, namespace: str) -> None:
+async def unseal_vault_pods(pod_names: List[str], vault_init_data: VaultInitData) -> None:
     """Unseal all Vault pods using unseal keys.
 
     Args:
+        pod_names: list of DNS names for pods
         vault_init_data: Vault initialization data containing unseal keys.
-        namespace: Kubernetes namespace where Vault pods are deployed.
     """
-    pod_names = await get_vault_pods(namespace)
     unseal_keys = random.sample(vault_init_data.unseal_keys_b64, vault_init_data.unseal_threshold)
 
     async def run_unseal(pod: str, key: str) -> str:
-        env = {"VAULT_ADDR": f"http://{pod}.{namespace}.svc.cluster.local:8200"}
+        env = {"VAULT_ADDR": vault_addr}
         return await run_command(["vault", "operator", "unseal", key], env=env)
 
     tasks = [run_unseal(pod, key) for pod in pod_names for key in unseal_keys]
@@ -112,7 +112,7 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
     """
     sa_name = get_output_from_state(terraform_state, "vault_service_account_name", str)
     sa_namespace = get_output_from_state(terraform_state, "vault_namespace", str)
-    vault_common_name = f"https://{get_output_from_state(terraform_state,"vault_common_name",str)}:8200"
+    vault_common_name = get_output_from_state(terraform_state,"vault_common_name",str)
     vault_role = get_output_from_state(terraform_state, "vault_role", str)
     policy_name = get_output_from_state(terraform_state, "vault_policy_name", str)
     secret_path = get_output_from_state(terraform_state, "vault_secret_path", str)
@@ -212,13 +212,13 @@ async def init_unseal_configure_vault(
     # Retrieve values from Terraform outputs
     vault_namespace = get_output_from_state(terraform_state, "vault_namespace", str)
     vault_raft_pod_dns_names = get_output_from_state(terraform_state, "vault_raft_pod_dns_names", List[str])
-    vault_init_addr = f"http://{vault_raft_pod_dns_names[0]}:8200"
+    vault_init_addr = vault_raft_pod_dns_names[0]
     secrets_file_path = "/amoebius/data/vault_secrets.bin"
 
     async def get_initialized_secrets_from_file() -> VaultInitData:
         """Retrieve secrets from an encrypted file."""
         password = getpass("Enter the password to decrypt Vault secrets: ")
-        decrypted_data = decrypt_dict_from_file(secrets_file_path, password)
+        decrypted_data = decrypt_dict_from_file(password=password, file_path=secrets_file_path)
         return VaultInitData.parse_obj(decrypted_data)
 
     async def initialize_vault_and_save_secrets() -> VaultInitData:
@@ -236,19 +236,19 @@ async def init_unseal_configure_vault(
             num_shares=default_shamir_shares,
             threshold=default_shamir_threshold
         )
-        
-        encrypt_dict_to_file(vault_init_data.dict(), secrets_file_path, password)
-        return VaultInitData.parse_obj(vault_init_data)
+        encrypt_dict_to_file(data=vault_init_data.model_dump(), password=password, file_path=secrets_file_path)
+        return VaultInitData.model_validate(vault_init_data)
 
     # Check if Vault is already initialized
     is_initialized = await is_vault_initialized(vault_addr=vault_init_addr)
+    import pdb; pdb.set_trace()
     vault_init_data_getter = (
         get_initialized_secrets_from_file if is_initialized else initialize_vault_and_save_secrets
     )
     vault_init_data: VaultInitData = await vault_init_data_getter()
 
     # Unseal Vault pods
-    await unseal_vault_pods(vault_init_data, vault_namespace)
+    await unseal_vault_pods(pod_names=vault_raft_pod_dns_names,vault_init_data=vault_init_data)
 
     # Configure Vault for Kubernetes integration
     await configure_vault_kubernetes_for_k8s_auth_and_sidecar(vault_init_data, terraform_state)

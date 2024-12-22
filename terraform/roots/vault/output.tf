@@ -2,7 +2,7 @@
 output "vault_raft_pod_dns_names" {
   value = [
     for i in range(var.vault_replicas) :
-    "${var.vault_service_name}-${i}.${var.vault_service_name}-internal.${var.vault_namespace}.svc.cluster.local"
+    "http://${var.vault_service_name}-${i}.${var.vault_service_name}-internal.${var.vault_namespace}.svc.cluster.local:8200"
   ]
   description = "DNS names of the Vault Raft pods"
 }
@@ -38,6 +38,6 @@ output "vault_secret_path" {
 }
 
 output "vault_common_name" {
-  value       = "${var.vault_service_name}.${var.vault_namespace}.svc.cluster.local"
+  value       = "http://${var.vault_service_name}.${var.vault_namespace}.svc.cluster.local:8200"
   description = "FQDN for vault service"
 }

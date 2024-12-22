@@ -25,6 +25,7 @@ async def run_command(
     input_data: Optional[str] = None,
     retries: int = 3,
     retry_delay: int = 1,
+    successful_return_codes: List[int] = [0],
 ) -> str:
     """Run a shell command asynchronously and return its stdout output.
 
@@ -36,6 +37,7 @@ async def run_command(
         input_data: Optional string to pass to the process's stdin.
         retries: Number of times to retry the command if it fails.
         retry_delay: Delay in seconds between retries.
+        successful_return_codes: List of all return codes to be treated as success.
 
     Returns:
         The stdout output of the command as a string.
@@ -55,7 +57,7 @@ async def run_command(
         stdout_bytes, stderr_bytes = await process.communicate(
             input=input_data.encode() if input_data else None
         )
-        if process.returncode != 0:
+        if process.returncode not in successful_return_codes:
             raise CommandError(
                 (
                     f"Command failed with return code {process.returncode}"
