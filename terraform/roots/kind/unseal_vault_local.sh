@@ -1,0 +1,1 @@
+kubectl exec -it -n amoebius amoebius-0 -- python -m amoebius.secrets.vault

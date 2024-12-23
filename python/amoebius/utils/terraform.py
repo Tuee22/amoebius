@@ -111,7 +111,7 @@ async def read_terraform_state(
     )
 
     # Parse and validate using Pydantic model
-    return TerraformState.parse_raw(state_json)
+    return TerraformState.model_validate_json(state_json)
 
 
 def get_output_from_state(

@@ -73,7 +73,7 @@ async def initialize_vault(
         ],
         env=env,
     )
-    return VaultInitData.parse_raw(out)
+    return VaultInitData.model_validate_json(out)
 
 
 async def get_vault_pods(namespace: str) -> List[str]:

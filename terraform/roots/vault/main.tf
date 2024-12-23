@@ -183,6 +183,8 @@ resource "helm_release" "vault" {
     value = kubernetes_service_account_v1.vault_service_account.metadata[0].name
   }
 
+  wait = true
+
   depends_on = [
     kubernetes_persistent_volume.vault_storage,
     kubernetes_namespace.vault

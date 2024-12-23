@@ -15,7 +15,6 @@ pydantic = ">=2.9.0,<3.0.0"
 PyYAML = ">=6.0.2,<7.0.0"
 types-PyYAML = ">=6.0.12,<7.0.0"
 black = ">=24.10.0,<25.0.0"
-pylint = ">=3.3.2,<4.0.0"
 
 # Add other dependencies as needed
 
