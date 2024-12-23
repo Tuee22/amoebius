@@ -1,7 +1,8 @@
 from typing import Any, Type, TypeVar
 from pydantic import ValidationError, TypeAdapter
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 def validate_type(obj: Any, expected_type: Type[T]) -> T:
     """

@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import List
 
+
 class VaultInitData(BaseModel):
     unseal_keys_b64: List[str]
     unseal_keys_hex: List[str]

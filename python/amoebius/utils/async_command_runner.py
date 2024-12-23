@@ -12,6 +12,7 @@ class CommandError(Exception):
         message: A description of the error.
         return_code: The return code of the failed command, if applicable.
     """
+
     def __init__(self, message: str, return_code: Optional[int] = None) -> None:
         super().__init__(message)
         self.return_code = return_code
@@ -65,7 +66,8 @@ async def run_command(
                         f"\nCommand: {' '.join(command)}"
                         f"\nStdout: {stdout_bytes.decode()}"
                         f"\nStderr: {stderr_bytes.decode()}"
-                        if not sensitive else ""
+                        if not sensitive
+                        else ""
                     )
                 ),
                 process.returncode,
@@ -74,12 +76,16 @@ async def run_command(
     except CommandError as e:
         if retries > 0:
             await asyncio.sleep(retry_delay)
-            return await run_command(command, sensitive, env, cwd, input_data, retries - 1, retry_delay)
+            return await run_command(
+                command, sensitive, env, cwd, input_data, retries - 1, retry_delay
+            )
         else:
             raise e
 
 
-async def is_port_forward_active(local_port: int, retries: int = 5, delay: int = 1) -> bool:
+async def is_port_forward_active(
+    local_port: int, retries: int = 5, delay: int = 1
+) -> bool:
     """Check if the locally forwarded port is reachable.
 
     Tries to connect to localhost:<local_port> multiple times.
@@ -167,7 +173,9 @@ async def ssh_kubectl_port_forward(
         # Test if the port forward is active.
         # If it's not active after a few attempts, we assume it failed.
         if not await is_port_forward_active(local_port):
-            raise CommandError(f"Port forward to localhost:{local_port} could not be established")
+            raise CommandError(
+                f"Port forward to localhost:{local_port} could not be established"
+            )
 
         yield
     finally:
@@ -188,9 +196,13 @@ async def run_command_with_port_forward() -> None:
     service_port = 80  # Change to the actual port of your service
 
     # Set up the ephemeral port forward context
-    async with ssh_kubectl_port_forward(ssh_host, ssh_user, ssh_key, service_name, namespace, local_port, service_port):
+    async with ssh_kubectl_port_forward(
+        ssh_host, ssh_user, ssh_key, service_name, namespace, local_port, service_port
+    ):
         # Now we can access the service at localhost:local_port
-        output = await run_command(["curl", f"http://localhost:{local_port}"], sensitive=False)
+        output = await run_command(
+            ["curl", f"http://localhost:{local_port}"], sensitive=False
+        )
         print(f"Command output: {output}")
 
 
