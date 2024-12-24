@@ -1,10 +1,10 @@
 import asyncio
 import os
 import json
-import base64
 import random
 from getpass import getpass
 from typing import Any, Dict, List, Optional, Tuple
+
 from ..models.vault import VaultInitData
 from ..models.terraform_state import TerraformState
 from ..models.validator import validate_type
@@ -16,6 +16,13 @@ from ..utils.async_command_runner import run_command, CommandError
 from ..utils.terraform import read_terraform_state, get_output_from_state
 from .encrypted_dict import encrypt_dict_to_file, decrypt_dict_from_file
 
+DEFAULT_SECRETS_FILE_PATH = "/amoebius/data/vault_secrets.bin"
+DEFAULT_KUBERNETES_HOST = "https://kubernetes.default.svc:6443"
+
+
+# ------------------------
+# Vault Operations Module
+# ------------------------
 
 async def is_vault_initialized(vault_addr: str) -> bool:
     """Check if Vault is initialized by running `vault status -format=json`.
@@ -76,38 +83,13 @@ async def initialize_vault(
     return VaultInitData.model_validate_json(out)
 
 
-async def get_vault_pods(namespace: str) -> List[str]:
-    """Retrieve the names of Vault pods in the given namespace.
-
-    Args:
-        namespace: Kubernetes namespace where Vault is deployed.
-
-    Returns:
-        List[str]: List of Vault pod names.
-    """
-    pods_output = await run_command(
-        [
-            "kubectl",
-            "get",
-            "pods",
-            "-l",
-            "app.kubernetes.io/name=vault",
-            "-n",
-            namespace,
-            "-o",
-            "jsonpath={.items[*].metadata.name}",
-        ]
-    )
-    return pods_output.strip().split()
-
-
 async def unseal_vault_pods(
     pod_names: List[str], vault_init_data: VaultInitData
 ) -> None:
     """Unseal all Vault pods using unseal keys.
 
     Args:
-        pod_names: list of DNS names for pods
+        pod_names: List of Vault pod DNS names.
         vault_init_data: Vault initialization data containing unseal keys.
     """
     unseal_keys = random.sample(
@@ -125,11 +107,12 @@ async def unseal_vault_pods(
 async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
     vault_init_data: VaultInitData,
     terraform_state: TerraformState,
+    kubernetes_host: str = DEFAULT_KUBERNETES_HOST,
 ) -> None:
     """Configure Vault for Kubernetes authentication and sidecar injection.
 
     Args:
-        vault_init_data: Vault init secrets
+        vault_init_data: Vault init secrets.
         terraform_state: Terraform state containing deployment details for Vault and Kubernetes.
     """
     vault_sa_name = get_output_from_state(
@@ -144,7 +127,6 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
         terraform_state, "vault_cluster_role", str
     )
     vault_secret_path = get_output_from_state(terraform_state, "vault_secret_path", str)
-    kubernetes_host = "https://kubernetes.default.svc:6443"
     env = {"VAULT_ADDR": vault_common_name, "VAULT_TOKEN": vault_init_data.root_token}
 
     print("Checking if Kubernetes authentication is already enabled in Vault...")
@@ -174,7 +156,7 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
             vault_sa_namespace,
         ]
     )
-    # get root CA cert
+    # Get root CA cert
     print("Configuring Kubernetes auth method in Vault")
     ca_cert = await run_command(
         [
@@ -245,8 +227,92 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
     )
 
 
+# ------------------------
+# File Operations Module
+# ------------------------
+
+def save_vault_init_data_to_file(
+    vault_init_data: VaultInitData, file_path: str, password: str
+) -> None:
+    """Save Vault initialization data to an encrypted file.
+
+    Args:
+        vault_init_data: The Vault initialization data.
+        file_path: Path to the file where data will be saved.
+        password: Password to encrypt the data.
+    """
+    encrypt_dict_to_file(
+        data=vault_init_data.model_dump(),
+        password=password,
+        file_path=file_path,
+    )
+
+
+def load_vault_init_data_from_file(file_path: str, password: str) -> VaultInitData:
+    """Load Vault initialization data from an encrypted file.
+
+    Args:
+        file_path: Path to the encrypted secrets file.
+        password: Password to decrypt the data.
+
+    Returns:
+        VaultInitData: The decrypted Vault initialization data.
+    """
+    decrypted_data = decrypt_dict_from_file(
+        password=password, file_path=file_path
+    )
+    return VaultInitData.model_validate(decrypted_data)
+
+
+# ------------------------
+# Intermediary Function
+# ------------------------
+
+async def retrieve_vault_init_data(
+    password: str,
+    vault_addr: str,
+    num_shares: int,
+    threshold: int,
+    secrets_file_path: str,
+) -> VaultInitData:
+    """Retrieve Vault initialization data either from file or by initializing Vault.
+
+    Args:
+        password: Password for encryption/decryption.
+        vault_addr: The Vault server address.
+        num_shares: Number of unseal keys to generate.
+        threshold: Minimum number of keys required to unseal Vault.
+        secrets_file_path: Path to the encrypted secrets file.
+
+    Returns:
+        VaultInitData: The Vault initialization data.
+    """
+    if os.path.exists(secrets_file_path):
+        return load_vault_init_data_from_file(
+            file_path=secrets_file_path, password=password
+        )
+    else:
+        vault_init_data = await initialize_vault(
+            vault_addr=vault_addr,
+            num_shares=num_shares,
+            threshold=threshold,
+        )
+        save_vault_init_data_to_file(
+            vault_init_data=vault_init_data,
+            file_path=secrets_file_path,
+            password=password,
+        )
+        return vault_init_data
+
+
+# ------------------------
+# Main Initialization
+# ------------------------
+
 async def init_unseal_configure_vault(
-    default_shamir_shares: int = 5, default_shamir_threshold: int = 3
+    default_shamir_shares: int = 5, 
+    default_shamir_threshold: int = 3,
+    secrets_file_path: str = DEFAULT_SECRETS_FILE_PATH,
 ) -> None:
     """Initialize, unseal, and configure Vault for Kubernetes integration."""
     terraform_state = await read_terraform_state(root_name="vault")
@@ -257,48 +323,28 @@ async def init_unseal_configure_vault(
         terraform_state, "vault_raft_pod_dns_names", List[str]
     )
     vault_init_addr = vault_raft_pod_dns_names[0]
-    secrets_file_path = "/amoebius/data/vault_secrets.bin"
 
-    async def get_initialized_secrets_from_file() -> VaultInitData:
-        """Retrieve secrets from an encrypted file."""
+    # Check if Vault is already initialized
+    is_initialized = await is_vault_initialized(vault_addr=vault_init_addr)
+
+    if is_initialized:
+        # Prompt for password to decrypt existing secrets
         password = getpass("Enter the password to decrypt Vault secrets: ")
-        decrypted_data = decrypt_dict_from_file(
-            password=password, file_path=secrets_file_path
-        )
-        return VaultInitData.model_validate(decrypted_data)
-
-    async def initialize_vault_and_save_secrets() -> VaultInitData:
-        """Initialize Vault and save secrets to an encrypted file."""
-        if os.path.exists(secrets_file_path):
-            raise FileExistsError(
-                f"Secrets file already exists at {secrets_file_path}."
-            )
-
+    else:
+        # Prompt for password with confirmation to encrypt new secrets
         password = getpass("Enter a password to encrypt Vault secrets: ")
         confirm_password = getpass("Confirm the password: ")
         if password != confirm_password:
             raise ValueError("Passwords do not match. Aborting initialization.")
 
-        vault_init_data = await initialize_vault(
-            vault_addr=vault_init_addr,
-            num_shares=default_shamir_shares,
-            threshold=default_shamir_threshold,
-        )
-        encrypt_dict_to_file(
-            data=vault_init_data.model_dump(),
-            password=password,
-            file_path=secrets_file_path,
-        )
-        return VaultInitData.model_validate(vault_init_data)
-
-    # Check if Vault is already initialized
-    is_initialized = await is_vault_initialized(vault_addr=vault_init_addr)
-    vault_init_data_getter = (
-        get_initialized_secrets_from_file
-        if is_initialized
-        else initialize_vault_and_save_secrets
+    # Retrieve Vault initialization data
+    vault_init_data: VaultInitData = await retrieve_vault_init_data(
+        password=password,
+        vault_addr=vault_init_addr,
+        num_shares=default_shamir_shares,
+        threshold=default_shamir_threshold,
+        secrets_file_path=secrets_file_path,
     )
-    vault_init_data: VaultInitData = await vault_init_data_getter()
 
     # Unseal Vault pods
     await unseal_vault_pods(
