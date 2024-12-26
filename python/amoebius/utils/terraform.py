@@ -64,6 +64,7 @@ async def apply_terraform(
 
 async def destroy_terraform(
     root_name: str,
+    variables: Optional[Dict[str, Any]] = None,
     base_path: str = DEFAULT_TERRAFORM_ROOTS,
 ) -> None:
     """
@@ -71,6 +72,7 @@ async def destroy_terraform(
 
     Args:
         root_name: Name of the Terraform root directory (no slashes allowed)
+        variables: Optional dictionary of variables to pass to terraform
         base_path: Base path where terraform roots are located
 
     Raises:
@@ -80,6 +82,10 @@ async def destroy_terraform(
     terraform_path = _validate_root_name(root_name, base_path)
 
     cmd = ["terraform", "destroy", "-no-color", "-auto-approve"]
+
+    if variables:
+        for key, value in variables.items():
+            cmd.extend(["-var", f"{key}={value}"])
 
     await run_command(cmd, sensitive=False, cwd=terraform_path)
 
@@ -152,8 +158,6 @@ def _validate_root_name(root_name: str, base_path: str) -> str:
     Raises:
         ValueError: If root_name contains invalid characters or directory not found
     """
-    if "/" in root_name or "\\" in root_name:
-        raise ValueError("Root name cannot contain slashes")
     if not root_name.strip():
         raise ValueError("Root name cannot be empty")
 

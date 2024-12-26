@@ -24,6 +24,7 @@ DEFAULT_KUBERNETES_HOST = "https://kubernetes.default.svc:6443"
 # Vault Operations Module
 # ------------------------
 
+
 async def is_vault_initialized(vault_addr: str) -> bool:
     """Check if Vault is initialized by running `vault status -format=json`.
 
@@ -106,29 +107,23 @@ async def unseal_vault_pods(
 
 async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
     vault_init_data: VaultInitData,
-    terraform_state: TerraformState,
+    tfs: TerraformState,
     kubernetes_host: str = DEFAULT_KUBERNETES_HOST,
 ) -> None:
     """Configure Vault for Kubernetes authentication and sidecar injection.
 
     Args:
         vault_init_data: Vault init secrets.
-        terraform_state: Terraform state containing deployment details for Vault and Kubernetes.
+        tfs: Terraform state containing deployment details for Vault and Kubernetes.
     """
-    vault_sa_name = get_output_from_state(
-        terraform_state, "vault_service_account_name", str
-    )
-    vault_service_name = get_output_from_state(
-        terraform_state, "vault_service_name", str
-    )
-    vault_sa_namespace = get_output_from_state(terraform_state, "vault_namespace", str)
-    vault_common_name = get_output_from_state(terraform_state, "vault_common_name", str)
-    vault_cluster_role = get_output_from_state(
-        terraform_state, "vault_cluster_role", str
-    )
-    vault_secret_path = get_output_from_state(terraform_state, "vault_secret_path", str)
+    vault_sa_name = get_output_from_state(tfs, "vault_service_account_name", str)
+    vault_service_name = get_output_from_state(tfs, "vault_service_name", str)
+    vault_sa_namespace = get_output_from_state(tfs, "vault_namespace", str)
+    vault_common_name = get_output_from_state(tfs, "vault_common_name", str)
+    vault_cluster_role = get_output_from_state(tfs, "vault_cluster_role", str)
+    vault_secret_path = get_output_from_state(tfs, "vault_secret_path", str)
     env = {"VAULT_ADDR": vault_common_name, "VAULT_TOKEN": vault_init_data.root_token}
-
+    print(env) # test code
     print("Checking if Kubernetes authentication is already enabled in Vault...")
     auth_methods_output = await run_command(
         ["vault", "auth", "list", "-format=json"], env=env
@@ -231,6 +226,7 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
 # File Operations Module
 # ------------------------
 
+
 def save_vault_init_data_to_file(
     vault_init_data: VaultInitData, file_path: str, password: str
 ) -> None:
@@ -248,7 +244,9 @@ def save_vault_init_data_to_file(
     )
 
 
-def load_vault_init_data_from_file(file_path: str, password: str) -> VaultInitData:
+def load_vault_init_data_from_file(
+    password: str, file_path: str = DEFAULT_SECRETS_FILE_PATH
+) -> VaultInitData:
     """Load Vault initialization data from an encrypted file.
 
     Args:
@@ -258,15 +256,14 @@ def load_vault_init_data_from_file(file_path: str, password: str) -> VaultInitDa
     Returns:
         VaultInitData: The decrypted Vault initialization data.
     """
-    decrypted_data = decrypt_dict_from_file(
-        password=password, file_path=file_path
-    )
+    decrypted_data = decrypt_dict_from_file(password=password, file_path=file_path)
     return VaultInitData.model_validate(decrypted_data)
 
 
 # ------------------------
 # Intermediary Function
 # ------------------------
+
 
 async def retrieve_vault_init_data(
     password: str,
@@ -309,18 +306,19 @@ async def retrieve_vault_init_data(
 # Main Initialization
 # ------------------------
 
+
 async def init_unseal_configure_vault(
-    default_shamir_shares: int = 5, 
+    default_shamir_shares: int = 5,
     default_shamir_threshold: int = 3,
     secrets_file_path: str = DEFAULT_SECRETS_FILE_PATH,
 ) -> None:
     """Initialize, unseal, and configure Vault for Kubernetes integration."""
-    terraform_state = await read_terraform_state(root_name="vault")
+    tfs = await read_terraform_state(root_name="vault")
 
     # Retrieve values from Terraform outputs
-    vault_namespace = get_output_from_state(terraform_state, "vault_namespace", str)
+    vault_namespace = get_output_from_state(tfs, "vault_namespace", str)
     vault_raft_pod_dns_names = get_output_from_state(
-        terraform_state, "vault_raft_pod_dns_names", List[str]
+        tfs, "vault_raft_pod_dns_names", List[str]
     )
     vault_init_addr = vault_raft_pod_dns_names[0]
 
@@ -352,9 +350,7 @@ async def init_unseal_configure_vault(
     )
 
     # Configure Vault for Kubernetes integration
-    await configure_vault_kubernetes_for_k8s_auth_and_sidecar(
-        vault_init_data, terraform_state
-    )
+    await configure_vault_kubernetes_for_k8s_auth_and_sidecar(vault_init_data, tfs)
 
 
 if __name__ == "__main__":
