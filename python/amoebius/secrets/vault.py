@@ -166,6 +166,7 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
         ]
     )
 
+    # configure the auth
     await run_command(
         [
             "vault",
@@ -178,45 +179,30 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
         env=env,
     )
 
-    print("Configured Kubernetes auth method in Vault.")
-
-    print("\n=== Creating Vault Policy ===")
-    # Define Vault policy
-    vault_policy_name = f"{vault_service_name}-policy"
-    vault_policy = f"""
-    path "{vault_secret_path}/*" {{
-        capabilities = ["read"]
-    }}
-    """
-
-    # Write the Vault policy
-    await run_command(
-        ["vault", "policy", "write", vault_policy_name, "-"],
-        env=env,
-        input_data=vault_policy,
+    # Enable KV secrets engine in an idempotent way
+    print("Checking if KV (v2) is already enabled at path=secret/")
+    secrets_list_output = await run_command(
+        ["vault", "secrets", "list", "-format=json"], env=env
     )
-    print(f"Created Vault policy '{vault_policy_name}'.")
+    secrets_list = json.loads(secrets_list_output)
 
-    print("\n=== Creating Vault Role ===")
-    # Define Vault role
-    vault_role = f"{vault_service_name}-role"
-
-    # Write the Vault role configuration
-    await run_command(
-        [
-            "vault",
-            "write",
-            f"auth/kubernetes/role/{vault_role}",
-            f"bound_service_account_names={vault_sa_name}",
-            f"bound_service_account_namespaces={vault_sa_namespace}",
-            f"policies={vault_policy_name}",
-            "ttl=24h",
-        ],
-        env=env,
-        input_data=None,
-    )
-    print(f"Created Vault role '{vault_role}'.")
-
+    if "secret/" not in secrets_list:
+        print("Enabling KV v2 at path=secret/")
+        await run_command(
+            [
+                "vault",
+                "secrets",
+                "enable",
+                "-path=secret",
+                "-version=2",
+                "kv",
+            ],
+            env=env,
+        )
+    else:
+        print(
+            "KV v2 at path=secret/ is already enabled. Skipping secrets enable step."
+        )
     print(
         "\n=== Vault Kubernetes Authentication Configuration Completed Successfully ==="
     )

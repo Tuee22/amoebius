@@ -44,9 +44,8 @@ resource "vault_kv_secret_v2" "app_secret" {
   })
 }
 
-# Create a Kubernetes auth role in Vault
 resource "vault_kubernetes_auth_backend_role" "app_role" {
-  backend               = "auth/kubernetes"
+  backend               = "kubernetes"
   role_name             = "vault-test-role"
   bound_service_account_names      = [kubernetes_service_account.app_sa.metadata[0].name]
   bound_service_account_namespaces = [kubernetes_namespace.vault_test.metadata[0].name]
@@ -73,7 +72,6 @@ resource "kubernetes_deployment" "app_deployment" {
         labels = {
           app = "vault-test-app"
         }
-
         annotations = {
           "vault.hashicorp.com/agent-inject"                = "true"
           "vault.hashicorp.com/role"                       = "vault-test-role"

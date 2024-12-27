@@ -31,13 +31,13 @@ variable "vault_storage_size" {
 variable "vault_helm_chart_version" {
   description = "Version of the Vault Helm chart"
   type        = string
-  default     = "0.23.0"
+  default     = "0.29.1"
 }
 
 variable "vault_replicas" {
   description = "Number of Vault replicas"
   type        = number
-  default     = 3
+  default     = 1
 }
 
 variable "vault_values" {
