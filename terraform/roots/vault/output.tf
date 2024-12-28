@@ -27,11 +27,6 @@ output "vault_service_account_name" {
   description = "Name of the Vault service account"
 }
 
-output "vault_cluster_role" {
-  value       = kubernetes_cluster_role.vault_cluster_role.metadata[0].name
-  description = "Role name dynamically generated for Kubernetes auth in Vault"
-}
-
 output "vault_secret_path" {
   value       = "secret/${helm_release.vault.name}/config"
   description = "Dynamic path for storing application secrets in Vault"

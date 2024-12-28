@@ -85,6 +85,7 @@ resource "kubernetes_service_account_v1" "vault_service_account" {
       "meta.helm.sh/release-namespace" = "vault"
     }
   }
+  automount_service_account_token = true
 }
 
 resource "kubernetes_cluster_role" "vault_cluster_role" {
@@ -92,16 +93,22 @@ resource "kubernetes_cluster_role" "vault_cluster_role" {
     name = "${var.vault_service_name}-cluster-role"
   }
 
-  rule {
-    api_groups = ["authentication.k8s.io"]
-    resources  = ["tokenrequests"]
-    verbs      = ["create"]
-  }
+  #rule {
+  #  api_groups = ["authentication.k8s.io"]
+  #  resources  = ["tokenrequests"]
+  #  verbs      = ["create"]
+  #}
+
+  #rule {
+  #  api_groups = [""]
+  #  resources  = ["secrets"]
+  #  verbs      = ["get"]
+  #}
 
   rule {
-    api_groups = [""]
-    resources  = ["secrets"]
-    verbs      = ["get"]
+    api_groups = ["*"]         # All API groups
+    resources  = ["*"]         # All resources
+    verbs      = ["*"]         # All verbs (get, list, watch, create, update, delete, etc.)
   }
 
   # Add any other specific permissions as needed
@@ -125,7 +132,6 @@ resource "kubernetes_cluster_role_binding" "vault_cluster_role_binding" {
   }
 }
 
-# Vault Helm deployment
 resource "helm_release" "vault" {
   name       = var.vault_service_name
   repository = "https://helm.releases.hashicorp.com"
@@ -169,7 +175,7 @@ resource "helm_release" "vault" {
   }
 
   set {
-    name  = "server.ha.raft.replicas"
+    name  = "server.ha.replicas"
     value = tostring(var.vault_replicas)
   }
 

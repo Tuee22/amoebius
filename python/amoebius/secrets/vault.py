@@ -120,10 +120,10 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
     vault_service_name = get_output_from_state(tfs, "vault_service_name", str)
     vault_sa_namespace = get_output_from_state(tfs, "vault_namespace", str)
     vault_common_name = get_output_from_state(tfs, "vault_common_name", str)
-    vault_cluster_role = get_output_from_state(tfs, "vault_cluster_role", str)
     vault_secret_path = get_output_from_state(tfs, "vault_secret_path", str)
     env = {"VAULT_ADDR": vault_common_name, "VAULT_TOKEN": vault_init_data.root_token}
     print(env) # test code
+    
     print("Checking if Kubernetes authentication is already enabled in Vault...")
     auth_methods_output = await run_command(
         ["vault", "auth", "list", "-format=json"], env=env
@@ -146,7 +146,7 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
             "create",
             "token",
             vault_sa_name,
-            "--duration=600s",
+            "--duration=315360000s", # ten years 
             "-n",
             vault_sa_namespace,
         ]
