@@ -37,7 +37,7 @@ variable "vault_helm_chart_version" {
 variable "vault_replicas" {
   description = "Number of Vault replicas"
   type        = number
-  default     = 1
+  default     = 3
 }
 
 variable "vault_values" {

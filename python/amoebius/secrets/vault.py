@@ -152,7 +152,7 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
     )
     # Get root CA cert
     print("Configuring Kubernetes auth method in Vault")
-    ca_cert_1 = await run_command(
+    ca_cert = await run_command(
         [
             "kubectl",
             "get",
@@ -165,14 +165,7 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
         ]
     )
 
-    # Read the CA certificate from the mounted file
-    ca_cert_path = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-    with open(ca_cert_path, "r") as f:
-        ca_cert_2 = f.read().strip()
-
     # configure the auth
-    print("ca_cert_1:\n", ca_cert_2,"\nca_cert_2:\n",ca_cert_2)
-    assert ca_cert_1==ca_cert_2, 'Error: ca_cert_1 not equal to ca_cert_2'
     await run_command(
         [
             "vault",
@@ -180,7 +173,7 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
             "auth/kubernetes/config",
             f"token_reviewer_jwt={sa_token}",
             f"kubernetes_host={kubernetes_host}",
-            f"kubernetes_ca_cert={ca_cert_2}",
+            f"kubernetes_ca_cert={ca_cert}",
         ],
         env=env,
     )
