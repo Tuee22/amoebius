@@ -2,7 +2,13 @@ import asyncio
 from getpass import getpass
 import argparse
 from ..secrets.vault import load_vault_init_data_from_file
-from ..utils.terraform import init_terraform, apply_terraform, destroy_terraform, read_terraform_state, get_output_from_state
+from ..utils.terraform import (
+    init_terraform,
+    apply_terraform,
+    destroy_terraform,
+    read_terraform_state,
+    get_output_from_state,
+)
 
 TERRAFORM_ROOT_NAME = "tests/vault"
 
@@ -29,13 +35,13 @@ async def main() -> None:
     vault_init_data = load_vault_init_data_from_file(password=password)
 
     tfs = await read_terraform_state(root_name="vault")
-    vault_addr=get_output_from_state(tfs, "vault_common_name", str)
+    vault_addr = get_output_from_state(tfs, "vault_common_name", str)
 
     # Check if the --print-root-token flag is set
     if args.print_root_token:
         print(f"Vault root token: {vault_init_data.root_token}")
 
-    variables = {"vault_addr":vault_addr,"vault_token": vault_init_data.root_token}
+    variables = {"vault_addr": vault_addr, "vault_token": vault_init_data.root_token}
 
     # Define local functions for apply and destroy
     async def tf_apply() -> None:

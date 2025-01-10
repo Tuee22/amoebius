@@ -122,7 +122,7 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
     vault_common_name = get_output_from_state(tfs, "vault_common_name", str)
     vault_secret_path = get_output_from_state(tfs, "vault_secret_path", str)
     env = {"VAULT_ADDR": vault_common_name, "VAULT_TOKEN": vault_init_data.root_token}
-    
+
     print("Checking if Kubernetes authentication is already enabled in Vault...")
     auth_methods_output = await run_command(
         ["vault", "auth", "list", "-format=json"], env=env
@@ -145,7 +145,7 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
             "create",
             "token",
             vault_sa_name,
-            "--duration=315360000s", # ten years 
+            "--duration=315360000s",  # ten years
             "-n",
             vault_sa_namespace,
         ]
@@ -199,9 +199,7 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
             env=env,
         )
     else:
-        print(
-            "KV v2 at path=secret/ is already enabled. Skipping secrets enable step."
-        )
+        print("KV v2 at path=secret/ is already enabled. Skipping secrets enable step.")
     print(
         "\n=== Vault Kubernetes Authentication Configuration Completed Successfully ==="
     )

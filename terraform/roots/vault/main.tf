@@ -48,6 +48,12 @@ resource "kubernetes_persistent_volume" "vault_storage" {
     access_modes       = ["ReadWriteOnce"]
     storage_class_name = kubernetes_storage_class.hostpath_storage_class.metadata[0].name
 
+    # this ensures each PV can only bind with the PVC it was intended for
+    claim_ref {
+      name      = "${var.pvc_name_prefix}-${each.key}"  
+      namespace = var.vault_namespace
+    }
+
     persistent_volume_source {
       host_path {
         path = "/persistent-data/vault/vault-${each.key}"

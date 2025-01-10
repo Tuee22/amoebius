@@ -22,6 +22,12 @@ variable "storage_class_name" {
   default     = "vault-storage"
 }
 
+variable "pvc_name_prefix" {
+  description = "Prefix for the Vault PVC name each PV will bind to (will become e.g. data-vault-0)"
+  type        = string
+  default     = "data-vault"
+}
+
 variable "vault_storage_size" {
   description = "Size of the Vault storage"
   type        = string
