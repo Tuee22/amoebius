@@ -99,25 +99,18 @@ resource "kubernetes_cluster_role" "vault_cluster_role" {
     name = "${var.vault_service_name}-cluster-role"
   }
 
-  #rule {
-  #  api_groups = ["authentication.k8s.io"]
-  #  resources  = ["tokenrequests"]
-  #  verbs      = ["create"]
-  #}
-
-  #rule {
-  #  api_groups = [""]
-  #  resources  = ["secrets"]
-  #  verbs      = ["get"]
-  #}
-
   rule {
-    api_groups = ["*"]         # All API groups
-    resources  = ["*"]         # All resources
-    verbs      = ["*"]         # All verbs (get, list, watch, create, update, delete, etc.)
+    api_groups = ["authentication.k8s.io"]
+    resources  = ["tokenrequests"]
+    verbs      = ["create"]
   }
 
-  # Add any other specific permissions as needed
+  rule {
+    api_groups = [""]
+    resources  = ["secrets"]
+    verbs      = ["get"]
+  }
+
 }
 
 resource "kubernetes_cluster_role_binding" "vault_cluster_role_binding" {

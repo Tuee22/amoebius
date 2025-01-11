@@ -1,3 +1,12 @@
+terraform {
+  backend "kubernetes" {
+    secret_suffix     = "test-vault-agent"
+    load_config_file  = false
+    namespace         = "amoebius"
+    in_cluster_config = true
+  }
+}
+
 provider "vault" {
   address = var.vault_addr
   token   = var.vault_token
