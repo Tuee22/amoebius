@@ -1,8 +1,10 @@
 import os
+import asyncio
 from typing import Any, Optional, Dict, Type, TypeVar
 from ..models.terraform_state import TerraformState
 from ..models.validator import validate_type
 from ..utils.async_command_runner import run_command
+from pydantic import ValidationError
 
 T = TypeVar("T")
 
@@ -91,23 +93,30 @@ async def destroy_terraform(
 
 
 async def read_terraform_state(
-    root_name: str, base_path: str = DEFAULT_TERRAFORM_ROOTS
+    root_name: str,
+    base_path: str = DEFAULT_TERRAFORM_ROOTS,
+    attempt: int = 1,
+    max_attempts: int = 30,
 ) -> TerraformState:
     """
-    Read the Terraform state for a given root directory using terraform show.
+    Read the Terraform state for a given root directory using terraform show,
+    with up to 30 recursive retries (1 second apart) if model validation fails.
 
     Args:
-        root_name: Name of the Terraform root directory (no slashes allowed)
+        root_name: Name of the Terraform root directory (no slashes allowed).
         base_path: Base path where terraform roots are located.
-            Defaults to container path /amoebius/terraform/roots
+                   Defaults to container path /amoebius/terraform/roots
+        attempt: Current attempt number (internal use for recursion).
+        max_attempts: Maximum allowed attempts before giving up.
 
     Returns:
-        TerraformState object containing the parsed and validated terraform state
+        TerraformState object containing the parsed and validated terraform state.
 
     Raises:
-        ValueError: If root_name contains invalid characters or directory not found
-        CommandError: If terraform commands fail
-        ValidationError: If terraform state doesn't match expected schema
+        ValueError: If root_name contains invalid characters or directory not found.
+        CommandError: If terraform commands fail.
+        ValidationError: If terraform state doesn't match the expected schema
+                         after all retries.
     """
     terraform_path = _validate_root_name(root_name, base_path)
 
@@ -117,7 +126,18 @@ async def read_terraform_state(
     )
 
     # Parse and validate using Pydantic model
-    return TerraformState.model_validate_json(state_json)
+    try:
+        return TerraformState.model_validate_json(state_json)
+    except ValidationError as e:
+        if attempt < max_attempts:
+            await asyncio.sleep(1)
+            # Recursively call the same function with incremented attempt count
+            return await read_terraform_state(
+                root_name, base_path, attempt + 1, max_attempts
+            )
+        else:
+            # If we've exhausted all attempts, re-raise the error
+            raise e
 
 
 def get_output_from_state(

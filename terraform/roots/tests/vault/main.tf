@@ -5,6 +5,17 @@ terraform {
     namespace         = "amoebius"
     in_cluster_config = true
   }
+  required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.25"
+    }
+    vault = {
+      source  = "hashicorp/vault"
+      version = "~> 3.10"
+    }
+  }
+
 }
 
 provider "vault" {
