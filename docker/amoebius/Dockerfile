@@ -31,6 +31,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tini \
     && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install -y wget && \
+    wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && \
+    chmod +x /usr/bin/yq && \
+    apt-get clean
+
 # Add Docker’s official GPG key manually using curl and store it in /usr/share/keyrings
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 
@@ -158,7 +163,7 @@ RUN poetry config virtualenvs.create false
 RUN mkdir /poetry
 WORKDIR /poetry
 COPY ./docker/amoebius/pyproject.toml /poetry/
-RUN poetry install --no-interaction
+RUN poetry install --no-interaction --no-root
 
 # Copy the entire amoebius folder to /amoebius
 COPY ./ /amoebius
