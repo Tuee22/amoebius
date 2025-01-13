@@ -11,6 +11,7 @@ from ..models.validator import validate_type
 
 import yaml
 import aiohttp
+import base64
 
 from ..utils.async_command_runner import run_command, CommandError
 from ..utils.terraform import read_terraform_state, get_output_from_state
@@ -18,6 +19,7 @@ from .encrypted_dict import encrypt_dict_to_file, decrypt_dict_from_file
 
 DEFAULT_SECRETS_FILE_PATH = "/amoebius/data/vault_secrets.bin"
 DEFAULT_KUBERNETES_HOST = "https://kubernetes.default.svc.cluster.local/"
+DEFAULT_VAULT_CACERT_PATH = "/tmp/vault_ca.crt"
 
 
 # ------------------------
@@ -25,7 +27,7 @@ DEFAULT_KUBERNETES_HOST = "https://kubernetes.default.svc.cluster.local/"
 # ------------------------
 
 
-async def is_vault_initialized(vault_addr: str) -> bool:
+async def is_vault_initialized(vault_addr: str, ca_cert: str) -> bool:
     """Check if Vault is initialized by running `vault status -format=json`.
 
     Args:
@@ -38,7 +40,7 @@ async def is_vault_initialized(vault_addr: str) -> bool:
         CommandError: If the `vault status` command fails unexpectedly.
     """
     try:
-        env = {"VAULT_ADDR": vault_addr}
+        env = {"VAULT_ADDR": vault_addr, "VAULT_CACERT": ca_cert}
         out = await run_command(
             ["vault", "status", "-format=json"],
             sensitive=False,
@@ -54,7 +56,7 @@ async def is_vault_initialized(vault_addr: str) -> bool:
 
 
 async def initialize_vault(
-    vault_addr: str, num_shares: int, threshold: int
+    vault_addr: str, ca_cert: str, num_shares: int, threshold: int
 ) -> VaultInitData:
     """Initialize Vault with Shamir's secret sharing.
 
@@ -69,7 +71,7 @@ async def initialize_vault(
     Raises:
         CommandError: If the initialization command fails.
     """
-    env = {"VAULT_ADDR": vault_addr}
+    env = {"VAULT_ADDR": vault_addr, "VAULT_CACERT": ca_cert}
     out = await run_command(
         [
             "vault",
@@ -85,7 +87,7 @@ async def initialize_vault(
 
 
 async def unseal_vault_pods(
-    pod_names: List[str], vault_init_data: VaultInitData
+    pod_names: List[str], ca_cert: str, vault_init_data: VaultInitData
 ) -> None:
     """Unseal all Vault pods using unseal keys.
 
@@ -98,7 +100,8 @@ async def unseal_vault_pods(
     )
 
     async def run_unseal(pod: str, key: str) -> str:
-        env = {"VAULT_ADDR": pod}
+        env = {"VAULT_ADDR": pod, "VAULT_CACERT": ca_cert}
+        print(env,key)
         return await run_command(["vault", "operator", "unseal", key], env=env)
 
     tasks = [run_unseal(pod, key) for pod in pod_names for key in unseal_keys]
@@ -108,6 +111,7 @@ async def unseal_vault_pods(
 async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
     vault_init_data: VaultInitData,
     tfs: TerraformState,
+    ca_cert: str,
     kubernetes_host: str = DEFAULT_KUBERNETES_HOST,
 ) -> None:
     """Configure Vault for Kubernetes authentication and sidecar injection.
@@ -121,7 +125,11 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
     vault_sa_namespace = get_output_from_state(tfs, "vault_namespace", str)
     vault_common_name = get_output_from_state(tfs, "vault_common_name", str)
     vault_secret_path = get_output_from_state(tfs, "vault_secret_path", str)
-    env = {"VAULT_ADDR": vault_common_name, "VAULT_TOKEN": vault_init_data.root_token}
+    env = {
+        "VAULT_ADDR": vault_common_name,
+        "VAULT_TOKEN": vault_init_data.root_token,
+        "VAULT_CACERT": ca_cert,
+    }
 
     print("Checking if Kubernetes authentication is already enabled in Vault...")
     auth_methods_output = await run_command(
@@ -251,6 +259,7 @@ def load_vault_init_data_from_file(
 async def retrieve_vault_init_data(
     password: str,
     vault_addr: str,
+    ca_cert: str,
     num_shares: int,
     threshold: int,
     secrets_file_path: str,
@@ -274,6 +283,7 @@ async def retrieve_vault_init_data(
     else:
         vault_init_data = await initialize_vault(
             vault_addr=vault_addr,
+            ca_cert=ca_cert,
             num_shares=num_shares,
             threshold=threshold,
         )
@@ -300,13 +310,34 @@ async def init_unseal_configure_vault(
 
     # Retrieve values from Terraform outputs
     vault_namespace = get_output_from_state(tfs, "vault_namespace", str)
+
+    # get vault ca_cert from kubernetes secret
+    ca_cert_b64 = await run_command(
+        [
+            "kubectl",
+            "get",
+            "secret",
+            "vault-tls",
+            "-n",
+            vault_namespace,
+            "-o",
+            "jsonpath={.data.ca\\.crt}",
+        ]
+    )
+    ca_cert_decoded = base64.b64decode(ca_cert_b64.encode("utf-8")).decode("utf-8")
+    with open(DEFAULT_VAULT_CACERT_PATH, "w") as f:
+        f.write(ca_cert_decoded)
+    # then can do eg export VAULT_CACERT=/tmp/vault_ca.crt
+
     vault_raft_pod_dns_names = get_output_from_state(
         tfs, "vault_raft_pod_dns_names", List[str]
     )
     vault_init_addr = vault_raft_pod_dns_names[0]
 
     # Check if Vault is already initialized
-    is_initialized = await is_vault_initialized(vault_addr=vault_init_addr)
+    is_initialized = await is_vault_initialized(
+        vault_addr=vault_init_addr, ca_cert=DEFAULT_VAULT_CACERT_PATH
+    )
 
     if is_initialized:
         # Prompt for password to decrypt existing secrets
@@ -322,6 +353,7 @@ async def init_unseal_configure_vault(
     vault_init_data: VaultInitData = await retrieve_vault_init_data(
         password=password,
         vault_addr=vault_init_addr,
+        ca_cert=DEFAULT_VAULT_CACERT_PATH,
         num_shares=default_shamir_shares,
         threshold=default_shamir_threshold,
         secrets_file_path=secrets_file_path,
@@ -329,12 +361,15 @@ async def init_unseal_configure_vault(
 
     # Unseal Vault pods
     await unseal_vault_pods(
-        pod_names=vault_raft_pod_dns_names, vault_init_data=vault_init_data
+        pod_names=vault_raft_pod_dns_names,
+        ca_cert=DEFAULT_VAULT_CACERT_PATH,
+        vault_init_data=vault_init_data,
     )
 
     # Configure Vault for Kubernetes integration
-    await configure_vault_kubernetes_for_k8s_auth_and_sidecar(vault_init_data, tfs)
-
+    await configure_vault_kubernetes_for_k8s_auth_and_sidecar(
+        vault_init_data=vault_init_data, tfs=tfs, ca_cert=DEFAULT_VAULT_CACERT_PATH
+    )
 
 if __name__ == "__main__":
     asyncio.run(init_unseal_configure_vault())

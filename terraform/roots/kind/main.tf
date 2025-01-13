@@ -4,9 +4,13 @@ terraform {
       source  = "tehcyx/kind"
       version = "~> 0.2.1"
     }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.17"
+    }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~> 2.23.0"
+      version = "~> 2.25"
     }
   }
 }
@@ -144,4 +148,35 @@ resource "kubernetes_service_v1" "amoebius" {
     }
     type = "ClusterIP"
   }
+}
+
+# install CRDs
+provider "helm" {
+  kubernetes {
+    host                   = kind_cluster.default.endpoint
+    cluster_ca_certificate = kind_cluster.default.cluster_ca_certificate
+    client_certificate     = kind_cluster.default.client_certificate
+    client_key             = kind_cluster.default.client_key
+  }
+}
+
+resource "kubernetes_namespace" "cert-manager" {
+  metadata {
+    name = "cert-manager"
+  }
+  depends_on = [kind_cluster.default]
+}
+
+resource "helm_release" "cert_manager" {
+  name       = "cert-manager"
+  repository = "https://charts.jetstack.io"
+  chart      = "cert-manager"
+  version    = "v1.14.1"
+  namespace  = kubernetes_namespace.cert-manager.metadata[0].name
+
+  set {
+    name  = "installCRDs"
+    value = "true"
+  }
+  wait = true
 }

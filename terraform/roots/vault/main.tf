@@ -5,6 +5,16 @@ terraform {
     namespace         = "amoebius"
     in_cluster_config = true
   }
+  required_providers {
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.17"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.25"
+    }
+  }  
 }
 
 provider "kubernetes" {
@@ -13,14 +23,12 @@ provider "kubernetes" {
   token                  = ""
 }
 
-# Kubernetes namespace for Vault
 resource "kubernetes_namespace" "vault" {
   metadata {
     name = var.vault_namespace
   }
 }
 
-# Kubernetes storage class
 resource "kubernetes_storage_class" "hostpath_storage_class" {
   metadata {
     name = var.storage_class_name
@@ -30,12 +38,11 @@ resource "kubernetes_storage_class" "hostpath_storage_class" {
   reclaim_policy       = "Retain"
 }
 
-# Persistent volumes for Vault
 resource "kubernetes_persistent_volume" "vault_storage" {
   for_each = { for idx in range(var.vault_replicas) : idx => idx }
 
   metadata {
-    name = "vault-pv-${each.key}"
+    name = "${var.vault_namespace}-pv-${each.key}"
     labels = {
       pvIndex = "${each.key}"
     }
@@ -48,9 +55,8 @@ resource "kubernetes_persistent_volume" "vault_storage" {
     access_modes       = ["ReadWriteOnce"]
     storage_class_name = kubernetes_storage_class.hostpath_storage_class.metadata[0].name
 
-    # this ensures each PV can only bind with the PVC it was intended for
     claim_ref {
-      name      = "${var.pvc_name_prefix}-${each.key}"  
+      name      = "${var.pvc_name_prefix}-${each.key}"
       namespace = var.vault_namespace
     }
 
@@ -101,7 +107,7 @@ resource "kubernetes_cluster_role" "vault_cluster_role" {
 
   rule {
     api_groups = ["authentication.k8s.io"]
-    resources  = ["tokenrequests"]
+    resources  = ["tokenrequests","tokenreviews"]
     verbs      = ["create"]
   }
 
@@ -110,7 +116,6 @@ resource "kubernetes_cluster_role" "vault_cluster_role" {
     resources  = ["secrets"]
     verbs      = ["get"]
   }
-
 }
 
 resource "kubernetes_cluster_role_binding" "vault_cluster_role_binding" {
@@ -130,6 +135,117 @@ resource "kubernetes_cluster_role_binding" "vault_cluster_role_binding" {
     namespace = kubernetes_namespace.vault.metadata[0].name
   }
 }
+
+resource "kubernetes_manifest" "vault_root_issuer" {
+  # This Issuer is purely for generating a one-off self-signed root.
+  manifest = {
+    "apiVersion" = "cert-manager.io/v1"
+    "kind"       = "Issuer"
+    "metadata" = {
+      "name"      = "vault-root-selfsigned"
+      "namespace" = var.vault_namespace
+    }
+    "spec" = {
+      "selfSigned" = {}
+    }
+  }
+}
+
+resource "kubernetes_manifest" "vault_root_ca_cert" {
+  # This is the "root CA" certificate, self-signed.
+  manifest = {
+    "apiVersion" = "cert-manager.io/v1"
+    "kind"       = "Certificate"
+    "metadata" = {
+      "name"      = "vault-root-ca-cert"
+      "namespace" = var.vault_namespace
+    }
+    "spec" = {
+      "secretName" = "vault-root-ca-secret"
+      "isCA"       = true
+
+      # The root is signed by our selfSigned Issuer:
+      "issuerRef" = {
+        "name" = "vault-root-selfsigned"
+        "kind" = "Issuer"
+      }
+
+      # Common Name (optional, but recommended):
+      "commonName" = "Vault Root CA"
+    }
+  }
+
+  depends_on = [
+    kubernetes_manifest.vault_root_issuer
+  ]
+}
+
+resource "kubernetes_manifest" "vault_ca_issuer" {
+  manifest = {
+    "apiVersion" = "cert-manager.io/v1"
+    "kind"       = "Issuer"
+    "metadata" = {
+      "name"      = "vault-ca-issuer"
+      "namespace" = var.vault_namespace
+    }
+    "spec" = {
+      "ca" = {
+        # The secret from step #2
+        "secretName" = "vault-root-ca-secret"
+      }
+    }
+  }
+
+  depends_on = [
+    kubernetes_manifest.vault_root_ca_cert
+  ]
+}
+
+resource "kubernetes_manifest" "vault_leaf_certificate" {
+  manifest = {
+    "apiVersion" = "cert-manager.io/v1"
+    "kind"       = "Certificate"
+    "metadata"   = {
+      "name"      = "vault-leaf-certificate"
+      "namespace" = var.vault_namespace
+    }
+    "spec" = {
+      "secretName" = "vault-tls"
+      "isCA"        = false
+
+      "issuerRef" = {
+        # The CA Issuer from step #3
+        "name" = "vault-ca-issuer"
+        "kind" = "Issuer"
+      }
+
+      # All the DNS names needed for Vault
+      "dnsNames" = concat(
+        [
+          "${var.vault_service_name}.${var.vault_namespace}.svc",
+          "${var.vault_service_name}.${var.vault_namespace}.svc.cluster.local"
+        ],
+        [
+          for i in range(var.vault_replicas) : 
+          "${var.vault_service_name}-${i}.${var.vault_service_name}-internal.${var.vault_namespace}"
+        ],
+        [
+          for i in range(var.vault_replicas) : 
+          "${var.vault_service_name}-${i}.${var.vault_service_name}-internal.${var.vault_namespace}.svc"
+        ],
+        [
+          for i in range(var.vault_replicas) : 
+          "${var.vault_service_name}-${i}.${var.vault_service_name}-internal.${var.vault_namespace}.svc.cluster.local"
+        ]
+      )
+    }
+  }
+
+  depends_on = [
+    kubernetes_manifest.vault_ca_issuer
+  ]
+}
+
 
 resource "helm_release" "vault" {
   name       = var.vault_service_name
@@ -152,33 +268,6 @@ resource "helm_release" "vault" {
   }
 
   set {
-    name  = "server.ha.raft.config"
-    value = <<-EOT
-      ui = true
-      listener "tcp" {
-        tls_disable = 1
-        address = "[::]:8200"
-        cluster_address = "[::]:8201"
-      }
-      storage "raft" {
-        path    = "/vault/data"
-        node_id = "{{ .NodeID }}"
-        %{for i in range(var.vault_replicas)}
-        retry_join {
-          leader_api_addr = "http://${var.vault_service_name}-${i}.${var.vault_service_name}-internal:8200"
-        }
-        %{endfor}
-      }
-      service_registration "kubernetes" {}
-    EOT
-  }
-
-  set {
-    name  = "server.ha.replicas"
-    value = tostring(var.vault_replicas)
-  }
-
-  set {
     name  = "server.dataStorage.storageClass"
     value = kubernetes_storage_class.hostpath_storage_class.metadata[0].name
   }
@@ -188,10 +277,80 @@ resource "helm_release" "vault" {
     value = kubernetes_service_account_v1.vault_service_account.metadata[0].name
   }
 
+  set {
+    name  = "server.ha.replicas"
+    value = tostring(var.vault_replicas)
+  }
+
+  set {
+    name  = "global.tlsDisable"
+    value = "false"
+  }
+
+  set {
+    name  = "server.volumes[0].name"
+    value = "vault-tls"
+  }
+
+  set {
+    name  = "server.volumes[0].secret.secretName"
+    value = "vault-tls"
+  }
+
+  set {
+    name  = "server.volumeMounts[0].name"
+    value = "vault-tls"
+  }
+
+  set {
+    name  = "server.volumeMounts[0].mountPath"
+    value = "/vault/userconfig/tls"
+  }
+
+  set {
+    name  = "server.volumeMounts[0].readOnly"
+    value = "true"
+  }
+
+  set {
+    name  = "injector.enabled"
+    value = "true"
+  }
+
+  set {
+    name  = "injector.certs.secretName"
+    value = "vault-tls"
+  }
+
+  set {
+    name  = "server.ha.raft.config"
+    value = <<-EOT
+      ui = true
+      listener "tcp" {
+        address          = "[::]:8200"
+        cluster_address  = "[::]:8201"
+        tls_cert_file    = "/vault/userconfig/tls/tls.crt"
+        tls_key_file     = "/vault/userconfig/tls/tls.key"
+        tls_client_ca_file = "/vault/userconfig/tls/ca.crt"
+      }
+      storage "raft" {
+        path    = "/vault/data"
+        node_id = "{{ .NodeID }}"
+        %{for i in range(var.vault_replicas)}
+        retry_join {
+          leader_api_addr = "https://${var.vault_service_name}-${i}.${var.vault_service_name}-internal.vault.svc.cluster.local:8200"
+        }
+        %{endfor}
+      }
+      service_registration "kubernetes" {}
+    EOT
+  }
+
   wait = true
 
   depends_on = [
     kubernetes_persistent_volume.vault_storage,
-    kubernetes_namespace.vault
+    kubernetes_namespace.vault,
+    kubernetes_manifest.vault_leaf_certificate
   ]
 }

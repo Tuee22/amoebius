@@ -1,5 +1,5 @@
 variable "cluster_name" {
-  description = "Kubernetes namespace for Vault"
+  description = "Kubernetes hostname label, used in node affinity"
   type        = string
   default     = "kind-cluster"
 }
@@ -23,7 +23,7 @@ variable "storage_class_name" {
 }
 
 variable "pvc_name_prefix" {
-  description = "Prefix for the Vault PVC name each PV will bind to (will become e.g. data-vault-0)"
+  description = "Prefix for the Vault PVC name"
   type        = string
   default     = "data-vault"
 }
@@ -47,9 +47,9 @@ variable "vault_replicas" {
 }
 
 variable "vault_values" {
-  description = "Values for the Vault Helm chart"
+  description = "Base values for the Vault Helm chart"
   type        = map(any)
-  default     = {
+  default = {
     "server.ha.enabled"             = "true"
     "server.ha.raft.enabled"        = "true"
     "server.dataStorage.enabled"    = "true"
