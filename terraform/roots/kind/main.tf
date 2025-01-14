@@ -45,11 +45,16 @@ provider "kubernetes" {
   client_key             = kind_cluster.default.client_key
 }
 
-resource "kubernetes_namespace" "amoebius" {
-  metadata {
-    name = "amoebius"
-  }
-  depends_on = [kind_cluster.default]
+# resource "kubernetes_namespace" "amoebius" {
+#   metadata {
+#     name = "amoebius"
+#   }
+#   depends_on = [kind_cluster.default]
+# }
+
+resource "linkerd_annotated_namespace" {
+  source = "/amoebius/terraform/modules/linkerd_annotated_namespace"
+  namespace_name = "amoebius"
 }
 
 # Service Account for Amoebius with admin privileges

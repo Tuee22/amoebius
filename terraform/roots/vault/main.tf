@@ -27,11 +27,16 @@ provider "kubernetes" {
   token                  = ""
 }
 
-# Kubernetes namespace for Vault
-resource "kubernetes_namespace" "vault" {
-  metadata {
-    name = var.vault_namespace
-  }
+# # Kubernetes namespace for Vault
+# resource "kubernetes_namespace" "vault" {
+#   metadata {
+#     name = var.vault_namespace
+#   }
+# }
+
+resource "linkerd_annotated_namespace" {
+  source = "/amoebius/terraform/modules/linkerd_annotated_namespace"
+  namespace_name = var.vault_namespace
 }
 
 # Kubernetes storage class
