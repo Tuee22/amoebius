@@ -343,6 +343,7 @@ async def init_unseal_configure_vault(
     vault_init_addr = vault_raft_pod_dns_names[0]
 
     # Check if Vault is already initialized
+    print("Waiting for vault raft to be online ...")
     is_initialized = await is_vault_initialized(vault_addr=vault_init_addr)
 
     if is_initialized:
