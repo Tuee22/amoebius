@@ -165,7 +165,7 @@ resource "helm_release" "vault" {
 
   set {
     name  = "server.ha.raft.config"
-    value = <<-EOT
+    value = <<-HCL
       ui = true
       listener "tcp" {
         tls_disable = 1
@@ -182,7 +182,7 @@ resource "helm_release" "vault" {
         %{endfor}
       }
       service_registration "kubernetes" {}
-    EOT
+    HCL
   }
 
   set {

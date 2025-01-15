@@ -98,11 +98,6 @@ resource "kubernetes_deployment" "app_deployment" {
         labels = {
           app = "vault-test-app"
         }
-        annotations = {
-          "vault.hashicorp.com/agent-inject"                = "true"
-          "vault.hashicorp.com/role"                       = "vault-test-role"
-          "vault.hashicorp.com/agent-inject-secret-config" = "secret/data/vault-test/hello"
-        }
       }
 
       spec {

@@ -138,7 +138,6 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
     auth_methods_output = await run_command(
         ["vault", "auth", "list", "-format=json"],
         env=env,
-        retries=30,  # longer retry interval is to give raft a chance to sync
     )
     auth_methods = json.loads(auth_methods_output)
 
