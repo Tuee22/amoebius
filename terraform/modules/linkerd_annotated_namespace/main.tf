@@ -40,7 +40,7 @@ resource "kubernetes_manifest" "linkerd_server" {
     }
     spec = {
       podSelector   = {}
-      port          = var.server_port
+      port = var.server_port_range
       proxyProtocol = var.proxy_protocol
     }
   }

@@ -27,13 +27,6 @@ provider "kubernetes" {
   token                  = ""
 }
 
-# # Kubernetes namespace for Vault
-# resource "kubernetes_namespace" "vault" {
-#   metadata {
-#     name = var.vault_namespace
-#   }
-# }
-
 module "vault_namespace" {
   source = "/amoebius/terraform/modules/linkerd_annotated_namespace"
   namespace_name = var.vault_namespace
@@ -70,7 +63,7 @@ resource "kubernetes_persistent_volume" "vault_storage" {
     # this ensures each PV can only bind with the PVC it was intended for
     claim_ref {
       name      = "${var.pvc_name_prefix}-${each.key}"  
-      namespace = vault_namespace.vault_namespace
+      namespace = module.vault_namespace.namespace
     }
 
     persistent_volume_source {
@@ -101,7 +94,7 @@ resource "kubernetes_persistent_volume" "vault_storage" {
 resource "kubernetes_service_account_v1" "vault_service_account" {
   metadata {
     name      = "${var.vault_service_name}-service-account"
-    namespace = kubernetes_namespace.vault.metadata[0].name
+    namespace = module.vault_namespace.namespace
     labels = {
       "app.kubernetes.io/managed-by" = "Helm"
     }
@@ -146,7 +139,7 @@ resource "kubernetes_cluster_role_binding" "vault_cluster_role_binding" {
   subject {
     kind      = "ServiceAccount"
     name      = kubernetes_service_account_v1.vault_service_account.metadata[0].name
-    namespace = kubernetes_namespace.vault.metadata[0].name
+    namespace = module.vault_namespace.namespace
   }
 }
 
@@ -155,7 +148,7 @@ resource "helm_release" "vault" {
   repository = "https://helm.releases.hashicorp.com"
   chart      = "vault"
   version    = var.vault_helm_chart_version
-  namespace  = kubernetes_namespace.vault.metadata[0].name
+  namespace  = module.vault_namespace.namespace
 
   dynamic "set" {
     for_each = var.vault_values
@@ -211,6 +204,6 @@ resource "helm_release" "vault" {
 
   depends_on = [
     kubernetes_persistent_volume.vault_storage,
-    kubernetes_namespace.vault
+    module.vault_namespace
   ]
 }

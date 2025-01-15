@@ -57,10 +57,10 @@ variable "server_name" {
   description = "Name for the Linkerd Server resource."
 }
 
-variable "server_port" {
-  type        = number
-  default     = 0
-  description = "Port for the Linkerd Server resource. Use 0 to match all ports."
+variable "server_port_range" {
+  type        = string
+  default     = "1-65535"
+  description = "All ports for the Linkerd Server resource."
 }
 
 variable "proxy_protocol" {

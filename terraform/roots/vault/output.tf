@@ -18,7 +18,7 @@ output "vault_service_name" {
 }
 
 output "vault_namespace" {
-  value       = kubernetes_namespace.vault.metadata[0].name
+  value       = module.vault_namespace.namespace
   description = "The namespace where Vault is deployed"
 }
 
