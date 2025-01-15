@@ -35,7 +35,7 @@ variable "namespace_name" {
 
 variable "linkerd_inject" {
   type        = bool
-  default     = true
+  default     = false
   description = "Whether to annotate the namespace for automatic Linkerd proxy injection."
 }
 
@@ -47,7 +47,7 @@ variable "labels" {
 
 variable "apply_linkerd_policy" {
   type        = bool
-  default     = true
+  default     = false
   description = "Whether to create Server and ServerAuthorization resources to enforce mTLS-only traffic."
 }
 

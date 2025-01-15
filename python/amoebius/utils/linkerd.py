@@ -1,4 +1,4 @@
-from __future__ import annotations
+# from __future__ import annotations
 
 import asyncio
 import json
@@ -35,7 +35,7 @@ async def linkerd_sidecar_attached(namespace: str, pod_name: str) -> bool:
     Returns True if the named pod has a 'linkerd-proxy' container.
     """
     try:
-        output: str = await run_command(
+        output = await run_command(
             ["kubectl", "get", "pod", pod_name, "-n", namespace, "-o", "json"]
         )
         # Use dict[str, Any] to accommodate arbitrary JSON structure
@@ -54,7 +54,7 @@ async def uninstall_linkerd() -> None:
     """
     print("Uninstalling Linkerd (linkerd uninstall)...")
     try:
-        uninstall_yaml: str = await run_command(["linkerd", "uninstall"])
+        uninstall_yaml = await run_command(["linkerd", "uninstall"])
         await run_command(["kubectl", "delete", "-f", "-"], input_data=uninstall_yaml)
         print("Linkerd uninstalled successfully.")
     except CommandError as e:
@@ -79,16 +79,20 @@ async def install_linkerd() -> None:
     # 1) Detect partial or full installs by checking for the config map
     cm_exists: bool = await configmap_exists("linkerd-config", "linkerd")
     if not cm_exists:
-        print("No 'linkerd-config' found. Assuming Linkerd is not installed. Doing a fresh install...")
+        print(
+            "No 'linkerd-config' found. Assuming Linkerd is not installed. Doing a fresh install..."
+        )
         try:
             # Step 1a: Install CRDs
-            crds_yaml: str = await run_command(["linkerd", "install", "--crds"])
+            crds_yaml = await run_command(["linkerd", "install", "--crds"])
             await run_command(["kubectl", "apply", "-f", "-"], input_data=crds_yaml)
             print("Linkerd CRDs installed successfully.")
 
             # Step 1b: Install the control plane
-            control_plane_yaml: str = await run_command(["linkerd", "install"])
-            await run_command(["kubectl", "apply", "-f", "-"], input_data=control_plane_yaml)
+            control_plane_yaml = await run_command(["linkerd", "install"])
+            await run_command(
+                ["kubectl", "apply", "-f", "-"], input_data=control_plane_yaml
+            )
             print("Linkerd control plane installed successfully.")
 
         except CommandError as e:
@@ -104,18 +108,24 @@ async def install_linkerd() -> None:
         print("'linkerd-config' found. Checking Linkerd health with 'linkerd check'...")
         healthy: bool = await linkerd_check_ok()
         if healthy:
-            print("Linkerd appears healthy (linkerd check passed). Skipping re-install.")
+            print(
+                "Linkerd appears healthy (linkerd check passed). Skipping re-install."
+            )
         else:
-            print("Linkerd check failed. We'll uninstall Linkerd, then do a fresh install.")
+            print(
+                "Linkerd check failed. We'll uninstall Linkerd, then do a fresh install."
+            )
             await uninstall_linkerd()
 
             print("Re-installing Linkerd...")
             try:
-                crds_yaml: str = await run_command(["linkerd", "install", "--crds"])
+                crds_yaml = await run_command(["linkerd", "install", "--crds"])
                 await run_command(["kubectl", "apply", "-f", "-"], input_data=crds_yaml)
 
-                control_plane_yaml: str = await run_command(["linkerd", "install"])
-                await run_command(["kubectl", "apply", "-f", "-"], input_data=control_plane_yaml)
+                control_plane_yaml = await run_command(["linkerd", "install"])
+                await run_command(
+                    ["kubectl", "apply", "-f", "-"], input_data=control_plane_yaml
+                )
                 print("Linkerd control plane re-installed successfully.")
             except CommandError as e:
                 print(f"Error during re-install: {e}")
@@ -148,16 +158,20 @@ async def install_linkerd() -> None:
     )
 
     print("Linkerd is ready. Adding annotation to amoebius")
-    await init_terraform('annotate_amoebius_linkerd')
-    await apply_terraform('annotate_amoebius_linkerd')
+    await init_terraform("annotate_amoebius_linkerd")
+    await apply_terraform("annotate_amoebius_linkerd")
 
     # 3) Delete 'amoebius-0' if sidecar is missing
     print("Checking if 'amoebius-0' has a 'linkerd-proxy' container...")
     sidecar_present: bool = await linkerd_sidecar_attached("amoebius", "amoebius-0")
     if not sidecar_present:
-        print("Sidecar missing. Deleting 'amoebius-0' so it can restart with injection...")
+        print(
+            "Sidecar missing. Deleting 'amoebius-0' so it can restart with injection..."
+        )
         try:
-            await run_command(["kubectl", "delete", "pod", "amoebius-0", "-n", "amoebius"])
+            await run_command(
+                ["kubectl", "delete", "pod", "amoebius-0", "-n", "amoebius"]
+            )
             print("'amoebius-0' deleted; a new pod should appear with the sidecar.")
 
             print("Linkerd install/validation complete. Waiting forever...")
@@ -169,14 +183,9 @@ async def install_linkerd() -> None:
         print("Sidecar is already attached. No need to delete 'amoebius-0'.")
 
 
-def main() -> None:
+if __name__ == "__main__":
     """
     Entry point for script usage. Runs install_linkerd() to ensure
     Linkerd is installed in an idempotent manner.
     """
     asyncio.run(install_linkerd())
-
-
-# If this file is run as a script, call main().
-if __name__ == "__main__":
-    main()
