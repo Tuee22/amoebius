@@ -34,7 +34,7 @@ provider "kubernetes" {
 #   }
 # }
 
-resource "linkerd_annotated_namespace" {
+module "vault_namespace" {
   source = "/amoebius/terraform/modules/linkerd_annotated_namespace"
   namespace_name = var.vault_namespace
 }
@@ -70,7 +70,7 @@ resource "kubernetes_persistent_volume" "vault_storage" {
     # this ensures each PV can only bind with the PVC it was intended for
     claim_ref {
       name      = "${var.pvc_name_prefix}-${each.key}"  
-      namespace = var.vault_namespace
+      namespace = vault_namespace.vault_namespace
     }
 
     persistent_volume_source {

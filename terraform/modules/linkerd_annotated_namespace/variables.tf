@@ -1,17 +1,41 @@
+variable "host" {
+  type        = string
+  default     = ""
+  description = "Kubernetes API server endpoint."
+}
+
+variable "cluster_ca_certificate" {
+  type        = string
+  default     = ""
+  description = "Base64-encoded CA certificate for the Kubernetes cluster."
+}
+
+variable "client_certificate" {
+  type        = string
+  default     = ""
+  description = "Base64-encoded client certificate for Kubernetes authentication."
+}
+
+variable "client_key" {
+  type        = string
+  default     = ""
+  description = "Base64-encoded client key for Kubernetes authentication."
+}
+
 variable "create_namespace" {
-  type    = bool
-  default = true
+  type        = bool
+  default     = true
   description = "Whether to create the namespace."
 }
 
 variable "namespace_name" {
   type        = string
-  description = "Name of the namespace to create or to apply policies to."
+  description = "Name of the namespace to create or apply policies to."
 }
 
 variable "linkerd_inject" {
-  type    = bool
-  default = true
+  type        = bool
+  default     = true
   description = "Whether to annotate the namespace for automatic Linkerd proxy injection."
 }
 
@@ -22,9 +46,9 @@ variable "labels" {
 }
 
 variable "apply_linkerd_policy" {
-  type    = bool
-  default = true
-  description = "Whether to create Server + ServerAuthorization to enforce mTLS-only traffic."
+  type        = bool
+  default     = true
+  description = "Whether to create Server and ServerAuthorization resources to enforce mTLS-only traffic."
 }
 
 variable "server_name" {
@@ -36,11 +60,11 @@ variable "server_name" {
 variable "server_port" {
   type        = number
   default     = 0
-  description = "Port for the Linkerd Server resource. 0 = match all ports."
+  description = "Port for the Linkerd Server resource. Use 0 to match all ports."
 }
 
 variable "proxy_protocol" {
   type        = string
   default     = "opaque"
-  description = "Proxy protocol (e.g., 'opaque', 'HTTP/1.x', 'HTTP/2')."
+  description = "Proxy protocol, for example 'opaque', 'HTTP/1.x', 'HTTP/2'."
 }

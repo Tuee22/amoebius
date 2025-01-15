@@ -29,9 +29,7 @@ import asyncio
 import json
 
 
-async def is_vault_initialized(
-    vault_addr: str, retries: int = 30
-) -> bool:
+async def is_vault_initialized(vault_addr: str, retries: int = 30) -> bool:
     """
     Check if Vault is initialized by running `vault status -format=json`. If any step in
     the try block fails, this function retries up to `retries` times (waiting `delay`
@@ -77,10 +75,10 @@ async def is_vault_initialized(
         # Any error triggers a retry (unless we're out of retries)
         print(
             f"[Retry {31 - retries}/30] Vault status check failed: {exc}\n"
-            f"Waiting {delay}s before retry..."
+            f"Waiting 1s before retry..."
         )
         await asyncio.sleep(1.0)
-        return await is_vault_initialized(vault_addr, retries - 1, delay)
+        return await is_vault_initialized(vault_addr, retries - 1)
 
 
 async def initialize_vault(

@@ -45,23 +45,23 @@ provider "kubernetes" {
   client_key             = kind_cluster.default.client_key
 }
 
-# resource "kubernetes_namespace" "amoebius" {
-#   metadata {
-#     name = "amoebius"
-#   }
-#   depends_on = [kind_cluster.default]
-# }
+module "amoebius_namespace" {
+  source = "../../modules/linkerd_annotated_namespace"
+  host                   = kind_cluster.default.endpoint
+  cluster_ca_certificate = kind_cluster.default.cluster_ca_certificate
+  client_certificate     = kind_cluster.default.client_certificate
+  client_key             = kind_cluster.default.client_key
 
-resource "linkerd_annotated_namespace" {
-  source = "/amoebius/terraform/modules/linkerd_annotated_namespace"
   namespace_name = "amoebius"
+  apply_linkerd_policy = false
+
 }
 
 # Service Account for Amoebius with admin privileges
 resource "kubernetes_service_account_v1" "amoebius_admin" {
   metadata {
     name      = "amoebius-admin"
-    namespace = kubernetes_namespace.amoebius.metadata[0].name
+    namespace = module.amoebius_namespace.namespace
   }
 }
 
@@ -78,7 +78,7 @@ resource "kubernetes_cluster_role_binding_v1" "amoebius_admin_binding" {
   subject {
     kind      = "ServiceAccount"
     name      = kubernetes_service_account_v1.amoebius_admin.metadata[0].name
-    namespace = kubernetes_namespace.amoebius.metadata[0].name
+    namespace = module.amoebius_namespace.namespace
   }
 }
 
@@ -86,7 +86,7 @@ resource "kubernetes_cluster_role_binding_v1" "amoebius_admin_binding" {
 resource "kubernetes_stateful_set_v1" "amoebius" {
   metadata {
     name      = "amoebius"
-    namespace = kubernetes_namespace.amoebius.metadata[0].name
+    namespace = module.amoebius_namespace.namespace
   }
   spec {
     service_name = "amoebius"
@@ -138,7 +138,7 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
 resource "kubernetes_service_v1" "amoebius" {
   metadata {
     name      = "amoebius"
-    namespace = kubernetes_namespace.amoebius.metadata[0].name
+    namespace = module.amoebius_namespace.namespace
     labels = {
       app = "amoebius"
     }

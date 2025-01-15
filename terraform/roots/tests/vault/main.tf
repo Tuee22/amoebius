@@ -29,18 +29,24 @@ provider "kubernetes" {
   token                  = ""
 }
 
-# Create namespace for the app
-resource "kubernetes_namespace" "vault_test" {
-  metadata {
-    name = "vault-test"
-  }
+# # Create namespace for the app
+# resource "kubernetes_namespace" "vault_test" {
+#   metadata {
+#     name = "vault-test"
+#   }
+# }
+
+module "linkerd_annotated_namespace" "vault-test" {
+  source = "/amoebius/terraform/modules/linkerd_annotated_namespace"
+  namespace_name = "vault-test"
 }
+
 
 # Create a service account for the app
 resource "kubernetes_service_account" "app_sa" {
   metadata {
     name      = "vault-test-sa"
-    namespace = kubernetes_namespace.vault_test.metadata[0].name
+    namespace = vault-test.namespace_name
   }
 }
 

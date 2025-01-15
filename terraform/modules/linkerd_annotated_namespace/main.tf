@@ -1,13 +1,25 @@
-###################################################
-# 1. (Optional) Create Namespace with Linkerd Injection
-###################################################
+terraform {
+  required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.25"
+    }
+  }
+}
+
+provider "kubernetes" {
+  host                   = var.host
+  cluster_ca_certificate = var.cluster_ca_certificate
+  client_certificate     = var.client_certificate
+  client_key             = var.client_key
+}
+
 resource "kubernetes_namespace" "this" {
   count = var.create_namespace ? 1 : 0
 
   metadata {
     name = var.namespace_name
 
-    # Annotate for Linkerd injection if enabled
     annotations = var.linkerd_inject ? {
       "linkerd.io/inject" = "enabled"
     } : {}
@@ -16,13 +28,10 @@ resource "kubernetes_namespace" "this" {
   }
 }
 
-###################################################
-# 2. (Optional) Create Server + ServerAuthorization (Policy)
-###################################################
 resource "kubernetes_manifest" "linkerd_server" {
   count = var.apply_linkerd_policy ? 1 : 0
 
-  manifest = yamlencode({
+  manifest = {
     apiVersion = "policy.linkerd.io/v1beta1"
     kind       = "Server"
     metadata = {
@@ -30,23 +39,21 @@ resource "kubernetes_manifest" "linkerd_server" {
       namespace = var.namespace_name
     }
     spec = {
-      # matches all pods in this namespace (empty podSelector)
-      podSelector    = {}
-      port           = var.server_port
-      proxyProtocol  = var.proxy_protocol
+      podSelector   = {}
+      port          = var.server_port
+      proxyProtocol = var.proxy_protocol
     }
-  })
+  }
 
   depends_on = [
-    # Make sure the namespace is created before applying this resource
     kubernetes_namespace.this
   ]
 }
 
-resource "kubernetes_manifest" "linkerd_server_authz" {
+resource "kubernetes_manifest" "linkerd_server_auth" {
   count = var.apply_linkerd_policy ? 1 : 0
 
-  manifest = yamlencode({
+  manifest = {
     apiVersion = "policy.linkerd.io/v1beta1"
     kind       = "ServerAuthorization"
     metadata = {
@@ -59,13 +66,11 @@ resource "kubernetes_manifest" "linkerd_server_authz" {
       }
       client = {
         meshTLS = {
-          # identities = [] => empty means any Linkerd identity is allowed
-          # i.e. only Linkerd-injected pods with valid identity are allowed
           identities = []
         }
       }
     }
-  })
+  }
 
   depends_on = [
     kubernetes_manifest.linkerd_server
