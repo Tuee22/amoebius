@@ -122,9 +122,7 @@ async def install_linkerd() -> None:
                 crds_yaml = await run_command(["linkerd", "install", "--crds"])
                 await run_command(["kubectl", "apply", "-f", "-"], input_data=crds_yaml)
 
-                control_plane_yaml = await run_command(
-                    ["linkerd", "install"]
-                )
+                control_plane_yaml = await run_command(["linkerd", "install"])
                 await run_command(
                     ["kubectl", "apply", "-f", "-"], input_data=control_plane_yaml
                 )

@@ -26,8 +26,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openssh-client \
     ca-certificates \
     jq \
-    lsb-release \
     gnupg \
+    nano \
     tini \
     && rm -rf /var/lib/apt/lists/*
 

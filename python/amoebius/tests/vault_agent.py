@@ -1,7 +1,7 @@
 import asyncio
 from getpass import getpass
 import argparse
-from ..secrets.vault import load_vault_init_data_from_file
+from ..secrets.vault_unseal import load_vault_init_data_from_file
 from ..utils.terraform import (
     init_terraform,
     apply_terraform,
