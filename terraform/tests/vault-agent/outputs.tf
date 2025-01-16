@@ -1,5 +1,5 @@
 output "namespace" {
-  value = kubernetes_namespace.vault_test.metadata[0].name
+  value = module.vault_test_namespace.namespace
 }
 
 output "service_account_name" {

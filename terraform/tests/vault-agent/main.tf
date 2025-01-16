@@ -15,7 +15,6 @@ terraform {
       version = "~> 3.10"
     }
   }
-
 }
 
 provider "vault" {
@@ -29,18 +28,17 @@ provider "kubernetes" {
   token                  = ""
 }
 
-# Create namespace for the app
-resource "kubernetes_namespace" "vault_test" {
-  metadata {
-    name = "vault-test"
-  }
+module "vault_test_namespace" {
+  source = "/amoebius/terraform/modules/linkerd_annotated_namespace"
+  namespace_name = "vault-agent-test"
 }
+
 
 # Create a service account for the app
 resource "kubernetes_service_account" "app_sa" {
   metadata {
     name      = "vault-test-sa"
-    namespace = kubernetes_namespace.vault_test.metadata[0].name
+    namespace = module.vault_test_namespace.namespace
   }
 }
 
@@ -68,14 +66,14 @@ resource "vault_kubernetes_auth_backend_role" "app_role" {
   backend               = "kubernetes"
   role_name             = "vault-test-role"
   bound_service_account_names      = [kubernetes_service_account.app_sa.metadata[0].name]
-  bound_service_account_namespaces = [kubernetes_namespace.vault_test.metadata[0].name]
+  bound_service_account_namespaces = [module.vault_test_namespace.namespace]
   token_policies                   = [vault_policy.app_policy.name]
 }
 
 resource "kubernetes_deployment" "app_deployment" {
   metadata {
     name      = "vault-test-app"
-    namespace = kubernetes_namespace.vault_test.metadata[0].name
+    namespace = module.vault_test_namespace.namespace
   }
 
   spec {
@@ -91,11 +89,6 @@ resource "kubernetes_deployment" "app_deployment" {
       metadata {
         labels = {
           app = "vault-test-app"
-        }
-        annotations = {
-          "vault.hashicorp.com/agent-inject"                = "true"
-          "vault.hashicorp.com/role"                       = "vault-test-role"
-          "vault.hashicorp.com/agent-inject-secret-config" = "secret/data/vault-test/hello"
         }
       }
 

@@ -1,8 +1,9 @@
 import os
 import asyncio
-import socket
-from contextlib import asynccontextmanager
 from typing import Dict, List, Optional
+
+# Import your retry decorator
+from .async_retry import async_retry
 
 
 class CommandError(Exception):
@@ -24,11 +25,13 @@ async def run_command(
     env: Optional[Dict[str, str]] = None,
     cwd: Optional[str] = None,
     input_data: Optional[str] = None,
-    retries: int = 3,
-    retry_delay: int = 1,
     successful_return_codes: List[int] = [0],
+    *,
+    retries: int = 30,
+    retry_delay: float = 1.0,
 ) -> str:
-    """Run a shell command asynchronously and return its stdout output.
+    """Run a shell command asynchronously and return its stdout output,
+    with built-in retry logic.
 
     Args:
         command: The command and arguments to execute.
@@ -36,9 +39,9 @@ async def run_command(
         env: Optional environment variables to set for the process.
         cwd: Optional working directory for the process.
         input_data: Optional string to pass to the process's stdin.
-        retries: Number of times to retry the command if it fails.
-        retry_delay: Delay in seconds between retries.
-        successful_return_codes: List of all return codes to be treated as success.
+        successful_return_codes: List of return codes to treat as success.
+        retries: Number of times to retry the command if it fails (default: 30).
+        retry_delay: Delay in seconds between retries (default: 1).
 
     Returns:
         The stdout output of the command as a string.
@@ -46,7 +49,9 @@ async def run_command(
     Raises:
         CommandError: If the command fails after the given number of retries.
     """
-    try:
+
+    @async_retry(retries=retries, delay=retry_delay)
+    async def _inner_run_command() -> str:
         process = await asyncio.create_subprocess_exec(
             *command,
             stdin=asyncio.subprocess.PIPE if input_data else None,
@@ -73,11 +78,6 @@ async def run_command(
                 process.returncode,
             )
         return stdout_bytes.decode().strip()
-    except CommandError as e:
-        if retries > 0:
-            await asyncio.sleep(retry_delay)
-            return await run_command(
-                command, sensitive, env, cwd, input_data, retries - 1, retry_delay
-            )
-        else:
-            raise e
+
+    # Run the decorated function
+    return await _inner_run_command()
