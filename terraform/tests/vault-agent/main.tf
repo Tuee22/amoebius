@@ -15,7 +15,6 @@ terraform {
       version = "~> 3.10"
     }
   }
-
 }
 
 provider "vault" {
@@ -29,16 +28,9 @@ provider "kubernetes" {
   token                  = ""
 }
 
-# # Create namespace for the app
-# resource "kubernetes_namespace" "vault_test" {
-#   metadata {
-#     name = "vault-test"
-#   }
-# }
-
 module "vault_test_namespace" {
   source = "/amoebius/terraform/modules/linkerd_annotated_namespace"
-  namespace_name = "vault-test"
+  namespace_name = "vault-agent-test"
 }
 
 
