@@ -52,7 +52,7 @@ module "amoebius_namespace" {
   client_certificate     = kind_cluster.default.client_certificate
   client_key             = kind_cluster.default.client_key
 
-  namespace_name = "amoebius"
+  namespace = "amoebius"
   apply_linkerd_policy = false
 
 }
