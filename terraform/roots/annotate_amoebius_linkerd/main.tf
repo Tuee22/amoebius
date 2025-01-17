@@ -21,6 +21,6 @@ provider "kubernetes" {
 
 module "vault_namespace" {
   source = "/amoebius/terraform/modules/linkerd_annotated_namespace"
-  namespace_name = "amoebius"
+  namespace = "amoebius"
   create_namespace = false
 }

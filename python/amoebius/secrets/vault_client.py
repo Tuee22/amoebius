@@ -9,7 +9,7 @@ import asyncio
 from typing import Any, Dict, Optional, Type
 
 from ..models.validator import validate_type
-from ..models.vault_settings import VaultSettings
+from ..models.vault import VaultSettings
 
 
 class AsyncVaultClient:
@@ -254,7 +254,7 @@ async def example_usage() -> None:
     """
     # This will read environment variables: VAULT_ROLE_NAME, VAULT_ADDR, etc.
     # For example, VAULT_ROLE_NAME="my-k8s-role".
-    settings = VaultSettings()
+    settings = VaultSettings(vault_role_name="example_role")
 
     async with AsyncVaultClient(settings) as vault_client:
         secret_data = await vault_client.read_secret("secret/data/my-app")

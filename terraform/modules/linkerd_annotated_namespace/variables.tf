@@ -28,7 +28,7 @@ variable "create_namespace" {
   description = "Whether to create the namespace."
 }
 
-variable "namespace_name" {
+variable "namespace" {
   type        = string
   description = "Name of the namespace to create or apply policies to."
 }

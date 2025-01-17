@@ -29,7 +29,7 @@ provider "kubernetes" {
 
 module "vault_namespace" {
   source = "/amoebius/terraform/modules/linkerd_annotated_namespace"
-  namespace_name = var.vault_namespace
+  namespace = var.vault_namespace
 }
 
 # Kubernetes storage class

@@ -1,6 +1,6 @@
 output "namespace" {
   description = "The created (or referenced) Namespace name."
-  value       = var.namespace_name
+  value       = var.namespace
 }
 
 output "server_name" {

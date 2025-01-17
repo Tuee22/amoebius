@@ -28,9 +28,9 @@ provider "kubernetes" {
   token                  = ""
 }
 
-module "vault_test_namespace" {
+module "vault_agent_test_namespace" {
   source = "/amoebius/terraform/modules/linkerd_annotated_namespace"
-  namespace_name = "vault-agent-test"
+  namespace = "vault-agent-test"
 }
 
 
@@ -38,7 +38,7 @@ module "vault_test_namespace" {
 resource "kubernetes_service_account" "app_sa" {
   metadata {
     name      = "vault-test-sa"
-    namespace = module.vault_test_namespace.namespace
+    namespace = module.vault_agent_test_namespace.namespace
   }
 }
 
@@ -66,14 +66,14 @@ resource "vault_kubernetes_auth_backend_role" "app_role" {
   backend               = "kubernetes"
   role_name             = "vault-test-role"
   bound_service_account_names      = [kubernetes_service_account.app_sa.metadata[0].name]
-  bound_service_account_namespaces = [module.vault_test_namespace.namespace]
+  bound_service_account_namespaces = [module.vault_agent_test_namespace.namespace]
   token_policies                   = [vault_policy.app_policy.name]
 }
 
 resource "kubernetes_deployment" "app_deployment" {
   metadata {
     name      = "vault-test-app"
-    namespace = module.vault_test_namespace.namespace
+    namespace = module.vault_agent_test_namespace.namespace
   }
 
   spec {

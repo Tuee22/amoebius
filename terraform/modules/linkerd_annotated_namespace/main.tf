@@ -18,7 +18,7 @@ resource "kubernetes_namespace" "this" {
   count = var.create_namespace ? 1 : 0
 
   metadata {
-    name = var.namespace_name
+    name = var.namespace
 
     annotations = var.linkerd_inject ? {
       "linkerd.io/inject" = "enabled"
@@ -36,7 +36,7 @@ resource "kubernetes_manifest" "linkerd_server" {
     kind       = "Server"
     metadata = {
       name      = var.server_name
-      namespace = var.namespace_name
+      namespace = var.namespace
     }
     spec = {
       podSelector   = {}
@@ -58,7 +58,7 @@ resource "kubernetes_manifest" "linkerd_server_auth" {
     kind       = "ServerAuthorization"
     metadata = {
       name      = "mesh-only"
-      namespace = var.namespace_name
+      namespace = var.namespace
     }
     spec = {
       server = {

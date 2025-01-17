@@ -1,5 +1,5 @@
 output "namespace" {
-  value = module.vault_test_namespace.namespace
+  value = module.vault_agent_test_namespace.namespace
 }
 
 output "service_account_name" {

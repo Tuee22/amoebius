@@ -10,7 +10,7 @@ from ..utils.terraform import (
     get_output_from_state,
 )
 
-TERRAFORM_ROOT_NAME = "tests/vault"
+TERRAFORM_ROOT_NAME = "tests/vault-agent"
 
 
 async def main() -> None:
