@@ -1,7 +1,7 @@
 import asyncio
 from getpass import getpass
 import argparse
-from ..secrets.vault import load_vault_init_data_from_file
+from ..secrets.vault_unseal import load_vault_init_data_from_file
 from ..utils.terraform import (
     init_terraform,
     apply_terraform,
@@ -10,7 +10,7 @@ from ..utils.terraform import (
     get_output_from_state,
 )
 
-TERRAFORM_ROOT_NAME = "tests/vault"
+TERRAFORM_ROOT_NAME = "tests/vault-agent"
 
 
 async def main() -> None:

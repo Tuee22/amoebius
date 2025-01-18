@@ -306,6 +306,7 @@ async def init_unseal_configure_vault(
     default_shamir_shares: int = 5,
     default_shamir_threshold: int = 3,
     secrets_file_path: str = DEFAULT_SECRETS_FILE_PATH,
+    user_supplied_password: Optional[str] = None,
 ) -> None:
     """Initialize, unseal, and configure Vault for Kubernetes integration."""
     try:
@@ -316,6 +317,7 @@ async def init_unseal_configure_vault(
         )
 
     # Retrieve values from Terraform outputs
+    print("Attempting to retrieve vault terraform state...")
     vault_namespace = get_output_from_state(tfs, "vault_namespace", str)
     vault_raft_pod_dns_names = get_output_from_state(
         tfs, "vault_raft_pod_dns_names", List[str]
@@ -324,17 +326,28 @@ async def init_unseal_configure_vault(
 
     # Check if Vault is already initialized
     print("Waiting for vault raft to be online ...")
-    is_initialized = await is_vault_initialized(vault_addr=vault_init_addr)
 
-    if is_initialized:
-        # Prompt for password to decrypt existing secrets
-        password = getpass("Enter the password to decrypt Vault secrets: ")
-    else:
-        # Prompt for password with confirmation to encrypt new secrets
-        password = getpass("Enter a password to encrypt Vault secrets: ")
-        confirm_password = getpass("Confirm the password: ")
-        if password != confirm_password:
-            raise ValueError("Passwords do not match. Aborting initialization.")
+    async def get_manual_password() -> str:
+        def get_password_once() -> str:
+            # Prompt for password to decrypt existing secrets
+            return getpass("Enter the password to decrypt Vault secrets: ")
+
+        def get_password_twice() -> str:
+            # Prompt for password with confirmation to encrypt new secrets
+            password = getpass("Enter a password to encrypt Vault secrets: ")
+            confirm_password = getpass("Confirm the password: ")
+            if password != confirm_password:
+                raise ValueError("Passwords do not match. Aborting initialization.")
+            return password
+
+        vault_is_initialized = await is_vault_initialized(vault_addr=vault_init_addr)
+        return get_password_once() if vault_is_initialized else get_password_twice()
+
+    password = (
+        user_supplied_password
+        if user_supplied_password
+        else await get_manual_password()
+    )
 
     # Retrieve Vault initialization data
     vault_init_data: VaultInitData = await retrieve_vault_init_data(

@@ -26,9 +26,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openssh-client \
     ca-certificates \
     jq \
-    lsb-release \
     gnupg \
+    nano \
     tini \
+    bash-completion \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get install -y wget && \
@@ -84,6 +85,10 @@ RUN if [ "$TARGETARCH" = "arm64" ]; then \
     fi; \
     curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/${KUBECTL_ARCH}/kubectl"; \
     chmod +x kubectl && mv kubectl /usr/local/bin/
+
+# Add kubectl completion
+RUN echo "source /usr/share/bash-completion/bash_completion" >> /root/.bashrc && \
+    echo "source <(kubectl completion bash)" >> /root/.bashrc
 
 # Install Helm
 RUN set -eux; \
