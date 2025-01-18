@@ -16,14 +16,14 @@ from amoebius.utils.terraform import (
 )
 
 from amoebius.models.vault import VaultSettings
-from amoebius.utils.terraform import read_terraform_state, get_output_from_state
 
 TERRAFORM_ROOT_NAME = "tests/vault-client"
+VAULT_ROLE_NAME = "vault-client-role"
 
 
 async def vault_daemon(
-    vault_addr: str = "http://vault.vault.svc.cluster.local:8200",
-    secret_path: str = "secret/data/vault-test/hello",
+    vault_addr: str,
+    secret_path: str,
     interval_seconds: float = 5.0,
 ) -> None:
     """
@@ -32,13 +32,11 @@ async def vault_daemon(
     """
     print("Starting Vault daemon. Will fetch and print secret every 5 seconds...")
 
-    tfs = await read_terraform_state(root_name=TERRAFORM_ROOT_NAME)
-    vault_role_name: str = get_output_from_state(tfs, "vault_role_name", str)
-
     # Construct a VaultSettings object with the CLI args
     settings = VaultSettings(
         vault_addr=vault_addr,
-        vault_role_name=vault_role_name,
+        vault_role_name=VAULT_ROLE_NAME,
+        verify_ssl=False,
     )
 
     # Provide the settings to our new AsyncVaultClient
@@ -87,8 +85,13 @@ async def main() -> None:
     )
     parser.add_argument(
         "--secret-path",
-        default="secret/data/vault-test/hello",
+        default="secret/data/vault-client/hello",
         help='Which secret path to read (default: "secret/data/vault-test/hello")',
+    )
+    parser.add_argument(
+        "--override-lock",
+        action="store_true",
+        help="If true overrides the terraform lock",
     )
     args = parser.parse_args()
 
@@ -123,10 +126,18 @@ async def main() -> None:
 
     async def tf_apply() -> None:
         await init_terraform(root_name=TERRAFORM_ROOT_NAME)
-        await apply_terraform(root_name=TERRAFORM_ROOT_NAME, variables=variables)
+        await apply_terraform(
+            root_name=TERRAFORM_ROOT_NAME,
+            variables=variables,
+            override_lock=args.override_lock,
+        )
 
     async def tf_destroy() -> None:
-        await destroy_terraform(root_name=TERRAFORM_ROOT_NAME, variables=variables)
+        await destroy_terraform(
+            root_name=TERRAFORM_ROOT_NAME,
+            variables=variables,
+            override_lock=args.override_lock,
+        )
 
     selected_action = tf_destroy if args.destroy else tf_apply
     print(

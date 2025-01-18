@@ -40,6 +40,7 @@ async def apply_terraform(
     root_name: str,
     variables: Optional[Dict[str, Any]] = None,
     base_path: str = DEFAULT_TERRAFORM_ROOTS,
+    override_lock: bool = False,
 ) -> None:
     """
     Apply Terraform configuration with auto-approve.
@@ -56,6 +57,8 @@ async def apply_terraform(
     terraform_path = _validate_root_name(root_name, base_path)
 
     cmd = ["terraform", "apply", "-no-color", "-auto-approve"]
+    if override_lock:
+        cmd.append("-lock=false")
 
     if variables:
         for key, value in variables.items():
@@ -68,6 +71,7 @@ async def destroy_terraform(
     root_name: str,
     variables: Optional[Dict[str, Any]] = None,
     base_path: str = DEFAULT_TERRAFORM_ROOTS,
+    override_lock: bool = False,
 ) -> None:
     """
     Destroy Terraform-managed infrastructure with auto-approve.
@@ -84,6 +88,8 @@ async def destroy_terraform(
     terraform_path = _validate_root_name(root_name, base_path)
 
     cmd = ["terraform", "destroy", "-no-color", "-auto-approve"]
+    if override_lock:
+        cmd.append("-lock=false")
 
     if variables:
         for key, value in variables.items():
