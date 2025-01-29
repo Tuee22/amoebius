@@ -113,7 +113,7 @@ resource "kubernetes_cluster_role" "vault_cluster_role" {
 
   rule {
     api_groups = ["authentication.k8s.io"]
-    resources  = ["tokenrequests"]
+    resources  = ["tokenreviews"]
     verbs      = ["create"]
   }
 

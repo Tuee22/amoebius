@@ -116,12 +116,12 @@ async def unseal_vault_pods(
     await asyncio.gather(*tasks)
 
 
-async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
+async def configure_vault(
     vault_init_data: VaultInitData,
     tfs: TerraformState,
     kubernetes_host: str = DEFAULT_KUBERNETES_HOST,
 ) -> None:
-    """Configure Vault for Kubernetes authentication and sidecar injection.
+    """Configure Vault for Kubernetes authentication, transit engine, and policies.
 
     Args:
         vault_init_data: Vault init secrets.
@@ -212,8 +212,60 @@ async def configure_vault_kubernetes_for_k8s_auth_and_sidecar(
         )
     else:
         print("KV v2 at path=secret/ is already enabled. Skipping secrets enable step.")
+
+    # Enable Transit secrets engine in an idempotent way
+    print("Checking if Transit engine is already enabled at path=transit/")
+    if "transit/" not in secrets_list:
+        print("Enabling Transit engine at path=transit/")
+        await run_command(
+            [
+                "vault",
+                "secrets",
+                "enable",
+                "-path=transit",
+                "transit",
+            ],
+            env=env,
+        )
+    else:
+        print(
+            "Transit engine at path=transit/ is already enabled. Skipping enable step."
+        )
+
+    # Create the amoebius-policy
+    print("Creating policy 'amoebius-policy'...")
+    policy_hcl = """
+    path "transit/*" {
+        capabilities = ["read", "create", "update", "delete", "list"]
+    }
+
+    path "secret/data/amoebius/*" {
+        capabilities = ["read", "create", "update", "delete", "list"]
+    }
+    """
+    await run_command(
+        ["vault", "policy", "write", "amoebius-policy", "-"],
+        input_data=policy_hcl,
+        env=env,
+    )
+
+    # Create auth role for amoebius-admin
+    print("Configuring auth role for 'amoebius-admin' service account...")
+    await run_command(
+        [
+            "vault",
+            "write",
+            "auth/kubernetes/role/amoebius-admin",
+            "bound_service_account_names=amoebius-admin",
+            f"bound_service_account_namespaces=amoebius",
+            "policies=amoebius-policy",
+            "ttl=1h",
+        ],
+        env=env,
+    )
+
     print(
-        "\n=== Vault Kubernetes Authentication Configuration Completed Successfully ==="
+        "\n=== Vault Configuration Completed: Kubernetes Auth, Transit Engine, and Policies ==="
     )
 
 
@@ -310,6 +362,7 @@ async def init_unseal_configure_vault(
 ) -> None:
     """Initialize, unseal, and configure Vault for Kubernetes integration."""
     try:
+        print("Attempting to retrieve vault terraform state...")
         tfs = await read_terraform_state(root_name="vault")
     except:
         raise RuntimeError(
@@ -317,7 +370,6 @@ async def init_unseal_configure_vault(
         )
 
     # Retrieve values from Terraform outputs
-    print("Attempting to retrieve vault terraform state...")
     vault_namespace = get_output_from_state(tfs, "vault_namespace", str)
     vault_raft_pod_dns_names = get_output_from_state(
         tfs, "vault_raft_pod_dns_names", List[str]
@@ -325,7 +377,6 @@ async def init_unseal_configure_vault(
     vault_init_addr = vault_raft_pod_dns_names[0]
 
     # Check if Vault is already initialized
-    print("Waiting for vault raft to be online ...")
 
     async def get_manual_password() -> str:
         def get_password_once() -> str:
@@ -340,6 +391,7 @@ async def init_unseal_configure_vault(
                 raise ValueError("Passwords do not match. Aborting initialization.")
             return password
 
+        print("Waiting for vault raft to be online ...")
         vault_is_initialized = await is_vault_initialized(vault_addr=vault_init_addr)
         return get_password_once() if vault_is_initialized else get_password_twice()
 
@@ -364,7 +416,7 @@ async def init_unseal_configure_vault(
     )
 
     # Configure Vault for Kubernetes integration
-    await configure_vault_kubernetes_for_k8s_auth_and_sidecar(vault_init_data, tfs)
+    await configure_vault(vault_init_data, tfs)
 
 
 if __name__ == "__main__":
