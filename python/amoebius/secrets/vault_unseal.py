@@ -138,6 +138,7 @@ async def configure_vault(
     auth_methods_output = await run_command(
         ["vault", "auth", "list", "-format=json"],
         env=env,
+        retries=30,
     )
     auth_methods = json.loads(auth_methods_output)
 

@@ -29,7 +29,7 @@ class AmoebiusTree(BaseModel):
     """
 
     name: str
-    cluster_config: Dict[AmoebiusService, Dict[str,TerraformValue]] = Field(
+    cluster_config: Dict[AmoebiusService, Dict[str, TerraformValue]] = Field(
         default_factory=dict
     )
     children: List[AmoebiusTree] = Field(default_factory=list)
@@ -89,34 +89,34 @@ if __name__ == "__main__":
     example_data = {
         "name": "root",
         "cluster_config": {
-            "vault": {'config':"root_vault_config",'oscillates':True},
-            "minio": {'rankings':[1, 2, 3]},
-            "pulsar": {'something':[]},
+            "vault": {"config": "root_vault_config", "oscillates": True},
+            "minio": {"rankings": [1, 2, 3]},
+            "pulsar": {"something": []},
         },
         "children": [
             {
                 "name": "child1",
                 "cluster_config": {
-                    "vault": {'a':["child1_vault"]},
-                    "minio": {'b':[]},
-                    "pulsar": {'c':["child1_pulsar"]},
+                    "vault": {"a": ["child1_vault"]},
+                    "minio": {"b": []},
+                    "pulsar": {"c": ["child1_pulsar"]},
                 },
                 "children": [],
             },
             {
                 "name": "child2",
                 "cluster_config": {
-                    "vault": {'d':[]},
-                    "minio": {'e':["child2_minio"]},
-                    "pulsar": {'f':[]},
+                    "vault": {"d": []},
+                    "minio": {"e": ["child2_minio"]},
+                    "pulsar": {"f": []},
                 },
                 "children": [
                     {
                         "name": "grandchild1",
                         "cluster_config": {
-                            "vault": {'g':[]},
-                            "minio": {'h':["grandchild_minio"]},
-                            "pulsar": {'i':[False]},
+                            "vault": {"g": []},
+                            "minio": {"h": ["grandchild_minio"]},
+                            "pulsar": {"i": [False]},
                         },
                         "children": [],
                     }

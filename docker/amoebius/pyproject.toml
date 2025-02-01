@@ -17,7 +17,9 @@ PyYAML = ">=6.0.2,<7.0.0"
 types-PyYAML = ">=6.0.12,<7.0.0"
 black = ">=24.10.0,<25.0.0"
 aiofiles = ">=24.1.0,<25.0.0"
-types-aiofiles = ">24.1.0,<25.0.0"
+types-aiofiles = ">=24.1.0,<25.0.0"
+asyncssh = ">=2.19.0,<3.0.0"
+
 
 [build-system]
 requires = ["poetry-core>=1.1.0"]
