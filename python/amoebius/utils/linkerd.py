@@ -21,10 +21,39 @@ async def configmap_exists(name: str, namespace: str) -> bool:
 
 async def linkerd_check_ok() -> bool:
     """
+    Waits for Linkerd deployments/pods to be ready, then runs 'linkerd check'.
     Returns True if 'linkerd check' passes, meaning Linkerd is healthy.
     """
     try:
-        await run_command(["linkerd", "check"])
+        # First, wait for the control plane's key resources to become Available/Ready
+        await run_command(
+            [
+                "kubectl",
+                "wait",
+                "-n",
+                "linkerd",
+                "--for=condition=Available",
+                "deployment/linkerd-proxy-injector",
+                "--timeout=300s",
+            ],
+            sensitive=False,
+        )
+        await run_command(
+            [
+                "kubectl",
+                "wait",
+                "-n",
+                "linkerd",
+                "--for=condition=Ready",
+                "pod",
+                "--all",
+                "--timeout=300s",
+            ],
+            sensitive=False,
+        )
+
+        # Then check overall Linkerd health
+        await run_command(["linkerd", "check"], sensitive=False)
         return True
     except CommandError:
         return False
@@ -71,7 +100,7 @@ async def install_linkerd() -> None:
       2) If it does exist, run 'linkerd check':
          - If it passes, assume Linkerd is fully installed; do nothing.
          - If it fails, 'linkerd uninstall' then re-install.
-      3) Wait for resources to be ready.
+      3) Wait for resources to be ready (via linkerd_check_ok()).
       4) Delete 'amoebius-0' only if sidecar is missing.
       5) Wait forever (but only if we actually delete the pod).
     """
@@ -131,33 +160,15 @@ async def install_linkerd() -> None:
                 print(f"Error during re-install: {e}")
                 raise
 
-    # 2) Wait for Linkerd control plane resources
-    print("Waiting for Linkerd deployments to become Available/Ready...")
-    await run_command(
-        [
-            "kubectl",
-            "wait",
-            "-n",
-            "linkerd",
-            "--for=condition=Available",
-            "deployment/linkerd-proxy-injector",
-            "--timeout=300s",
-        ]
+    # 2) Now wait for Linkerd to be ready (via linkerd_check_ok())
+    print(
+        "Waiting for Linkerd deployments/pods to become Ready, then verifying with 'linkerd check'..."
     )
-    await run_command(
-        [
-            "kubectl",
-            "wait",
-            "-n",
-            "linkerd",
-            "--for=condition=Ready",
-            "pod",
-            "--all",
-            "--timeout=300s",
-        ]
-    )
+    is_ok = await linkerd_check_ok()
+    assert is_ok, "Error: linkerd health check failed"
+    print("Linkerd is ready and healthy.")
 
-    print("Linkerd is ready. Adding annotation to amoebius")
+    print("Adding linkerd annotation to amoebius...")
     await init_terraform("annotate_amoebius_linkerd")
     await apply_terraform("annotate_amoebius_linkerd")
 
