@@ -1,12 +1,10 @@
-# amoebius/secrets/vault_client.py
-
 from __future__ import annotations
 
 import time
 import aiohttp
 import aiofiles
 import asyncio
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, Optional, Type, List
 
 from ..models.validator import validate_type
 from ..models.vault import VaultSettings
@@ -15,10 +13,9 @@ from ..models.vault import VaultSettings
 class AsyncVaultClient:
     """
     An asynchronous Vault client using Kubernetes Auth with automatic token management.
-    Configuration is provided via a Pydantic `VaultSettings` object.
+    This implementation is designed for KV v2 usage.
     """
 
-    # We declare the attributes so Mypy recognizes them as instance variables
     _session: Optional[aiohttp.ClientSession]
     _client_token: Optional[str]
     _last_token_check: float
@@ -28,7 +25,7 @@ class AsyncVaultClient:
         Initializes the Vault client using a `VaultSettings` instance.
 
         Args:
-            settings: A Pydantic model containing Vault config (addr, role_name, etc.)
+            settings: A Pydantic model containing Vault config (vault_addr, vault_role_name, etc.)
         """
         self._vault_addr: str = settings.vault_addr
         self._vault_role_name: str = settings.vault_role_name
@@ -42,10 +39,6 @@ class AsyncVaultClient:
         self._last_token_check = 0.0
 
     async def __aenter__(self) -> AsyncVaultClient:
-        """
-        Allows usage as an async context manager. When entering,
-        an aiohttp session is created.
-        """
         self._session = aiohttp.ClientSession()
         return self
 
@@ -55,17 +48,23 @@ class AsyncVaultClient:
         exc_val: Optional[BaseException],
         exc_tb: Optional[Any],
     ) -> None:
-        """
-        Closes the aiohttp session on context exit.
-        """
         if self._session:
             await self._session.close()
         self._session = None
 
+    #
+    # ---------------------------
+    # Public Methods (KV v2)
+    # ---------------------------
+    #
+
     async def read_secret(self, path: str) -> Dict[str, Any]:
         """
-        Reads a secret from Vault, automatically ensuring the token is
-        valid or renewed beforehand.
+        Reads a secret from KV v2 at: GET /v1/secret/data/<path>
+        Returns the data under "data.data".
+
+        Raises:
+            RuntimeError if Vault returns a non-200 status (including 404).
         """
         await self._ensure_valid_token()
         session = await self._ensure_session()
@@ -73,31 +72,25 @@ class AsyncVaultClient:
         if self._client_token is None:
             raise RuntimeError("Vault token unavailable after ensuring validity.")
 
-        url = f"{self._vault_addr}/v1/{path}"
+        url = f"{self._vault_addr}/v1/secret/data/{path}"
         headers = {"X-Vault-Token": self._client_token}
 
         async with session.get(url, headers=headers, ssl=self._verify_ssl) as resp:
             raw_resp = await resp.json()
-            resp_json = validate_type(
-                raw_resp, Dict[str, Any]
-            )  # Raises ValueError if invalid
-
+            resp_json = validate_type(raw_resp, Dict[str, Any])
             if resp.status != 200:
                 raise RuntimeError(f"Error reading secret: {resp.status}, {resp_json}")
 
-        # For KV v2, often the actual data is under resp_json["data"]["data"]
-        data_field = resp_json.get("data")
-        if isinstance(data_field, dict):
-            sub_data = data_field.get("data")
-            if isinstance(sub_data, dict):
-                return sub_data
-
+        data_field = resp_json.get("data", {})
+        sub_data = data_field.get("data")
+        if isinstance(sub_data, dict):
+            return sub_data
         return resp_json
 
     async def write_secret(self, path: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Writes data to a Vault secret path, ensuring the token is
-        valid or renewed beforehand.
+        Writes data to KV v2 at: POST /v1/secret/data/<path>
+        The payload structure is {"data": <your_data>}.
         """
         await self._ensure_valid_token()
         session = await self._ensure_session()
@@ -105,41 +98,168 @@ class AsyncVaultClient:
         if self._client_token is None:
             raise RuntimeError("Vault token unavailable after ensuring validity.")
 
-        url = f"{self._vault_addr}/v1/{path}"
+        url = f"{self._vault_addr}/v1/secret/data/{path}"
         headers = {"X-Vault-Token": self._client_token}
         payload: Dict[str, Any] = {"data": data}
 
         async with session.post(
             url, json=payload, headers=headers, ssl=self._verify_ssl
         ) as resp:
+            raw_resp: Dict[str, Any] = {}
+            try:
+                raw_resp = await resp.json()
+            except aiohttp.ContentTypeError:
+                pass  # Some responses may have an empty body
+
             if resp.status not in (200, 204):
-                raw_error = await resp.json()
-                err_json = validate_type(raw_error, Dict[str, Any])
+                err_json = validate_type(raw_resp, Dict[str, Any])
                 raise RuntimeError(f"Error writing secret: {resp.status}, {err_json}")
 
             if resp.status == 200:
-                raw_resp = await resp.json()
                 resp_json = validate_type(raw_resp, Dict[str, Any])
                 return resp_json
-
         return {}
 
-    # --------------------------------
-    #       Private methods
-    # --------------------------------
+    async def list_secrets(self, path: str) -> List[str]:
+        """
+        Lists keys in KV v2: GET /v1/secret/metadata/<path>?list=true
+        Returns child keys if any. 404 => empty list.
+        """
+        await self._ensure_valid_token()
+        session = await self._ensure_session()
+
+        if self._client_token is None:
+            raise RuntimeError("Vault token unavailable after ensuring validity.")
+
+        if not path.endswith("/"):
+            path += "/"
+
+        url = f"{self._vault_addr}/v1/secret/metadata/{path}?list=true"
+        headers = {"X-Vault-Token": self._client_token}
+
+        async with session.get(url, headers=headers, ssl=self._verify_ssl) as resp:
+            raw_resp = await resp.json()
+            resp_json = validate_type(raw_resp, Dict[str, Any])
+
+            if resp.status == 404:
+                return []
+            elif resp.status != 200:
+                raise RuntimeError(f"Error listing secrets: {resp.status}, {resp_json}")
+
+        data_field = resp_json.get("data", {})
+        keys = data_field.get("keys", [])
+        if not isinstance(keys, list):
+            return []
+        return keys
+
+    async def write_secret_idempotent(
+        self, path: str, data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Idempotent write for KV v2. Only writes if the current contents differ.
+        """
+        existing_data = None
+        try:
+            existing_data = await self.read_secret(path)
+        except RuntimeError as ex:
+            if "404" in str(ex):
+                existing_data = None
+            else:
+                raise
+
+        if existing_data == data:
+            return {}
+        return await self.write_secret(path, data)
+
+    async def delete_secret(self, path: str, hard: bool = False) -> None:
+        """
+        Deletes a secret in KV v2.
+
+        - By default, it performs a "soft delete" (DELETE /v1/secret/data/<path>),
+          which marks the latest version as deleted but retains version history.
+        - If 'hard=True', it performs a "hard delete" (DELETE /v1/secret/metadata/<path>),
+          removing all version history/metadata entirely.
+        """
+        await self._ensure_valid_token()
+        session = await self._ensure_session()
+
+        if self._client_token is None:
+            raise RuntimeError("Vault token unavailable after ensuring validity.")
+
+        if hard:
+            url = f"{self._vault_addr}/v1/secret/metadata/{path}"
+            method_label = "Hard"
+        else:
+            url = f"{self._vault_addr}/v1/secret/data/{path}"
+            method_label = "Soft"
+
+        headers = {"X-Vault-Token": self._client_token}
+        async with session.delete(url, headers=headers, ssl=self._verify_ssl) as resp:
+            if resp.status not in (200, 204, 404):
+                raw_resp = await resp.json()
+                raise RuntimeError(
+                    f"{method_label} delete failed: {resp.status}, {raw_resp}"
+                )
+
+    async def secret_history(self, path: str) -> Dict[str, Any]:
+        """
+        Shows metadata (versions, etc.) for a KV v2 secret:
+          GET /v1/secret/metadata/<path>
+        Returns a dict with metadata or empty if not found (404).
+        """
+        await self._ensure_valid_token()
+        session = await self._ensure_session()
+
+        if self._client_token is None:
+            raise RuntimeError("Vault token unavailable after ensuring validity.")
+
+        url = f"{self._vault_addr}/v1/secret/metadata/{path}"
+        headers = {"X-Vault-Token": self._client_token}
+
+        async with session.get(url, headers=headers, ssl=self._verify_ssl) as resp:
+            raw_resp = await resp.json()
+            if resp.status == 404:
+                return {}
+            elif resp.status != 200:
+                raise RuntimeError(f"Error reading metadata: {resp.status}, {raw_resp}")
+
+        return validate_type(raw_resp, Dict[str, Any])
+
+    async def revoke_self_token(self) -> None:
+        """
+        (Optional) Revoke the current token. Must have policy permission:
+          path "auth/token/revoke-self" { capabilities = ["update"] }
+        On success, the next call triggers a re-login.
+        """
+        await self._ensure_valid_token()
+        session = await self._ensure_session()
+
+        if self._client_token is None:
+            return  # nothing to revoke
+
+        url = f"{self._vault_addr}/v1/auth/token/revoke-self"
+        headers = {"X-Vault-Token": self._client_token}
+
+        async with session.post(url, headers=headers, ssl=self._verify_ssl) as resp:
+            if resp.status not in (200, 204):
+                detail = await resp.json()
+                raise RuntimeError(f"Failed to revoke token: {resp.status}, {detail}")
+
+        # Invalidate local token
+        self._client_token = None
+
+    #
+    # ---------------------------
+    # Private Token Management
+    # ---------------------------
+    #
+
     async def _ensure_session(self) -> aiohttp.ClientSession:
-        """
-        Ensures an aiohttp ClientSession exists and returns it.
-        """
         if self._session is None:
             self._session = aiohttp.ClientSession()
         return self._session
 
     async def _ensure_valid_token(self) -> None:
-        """
-        Checks the token TTL. If it does not exist or is near expiration,
-        attempts to renew or re-authenticate using Kubernetes Auth.
-        """
         now = time.time()
         if (
             self._last_token_check
@@ -148,7 +268,6 @@ class AsyncVaultClient:
             return
 
         self._last_token_check = now
-
         if self._client_token is None:
             await self._login()
             return
@@ -170,13 +289,7 @@ class AsyncVaultClient:
             await self._renew_token()
 
     async def _login(self) -> None:
-        """
-        Authenticates to Vault using Kubernetes service account token
-        and updates the stored Vault token upon success.
-        """
         session = await self._ensure_session()
-
-        # Read the service account token file
         async with aiofiles.open(self._token_path, "r") as f:
             jwt = await f.read()
 
@@ -198,10 +311,6 @@ class AsyncVaultClient:
         self._last_token_check = 0.0
 
     async def _renew_token(self) -> None:
-        """
-        Attempts to renew the current Vault token. If renewal fails,
-        re-authenticates via Kubernetes Auth.
-        """
         if self._client_token is None:
             await self._login()
             return
@@ -220,17 +329,13 @@ class AsyncVaultClient:
                     self._client_token = auth_data["client_token"]
                     return
 
-        # If renewal fails, do a full login again
         await self._login()
 
     async def _get_token_info(self) -> Dict[str, Any]:
-        """
-        Retrieves metadata about the current Vault token (including TTL).
-        """
         if self._client_token is None:
             raise RuntimeError("Vault token is not set.")
-
         session = await self._ensure_session()
+
         url = f"{self._vault_addr}/v1/auth/token/lookup-self"
         headers = {"X-Vault-Token": self._client_token}
 
@@ -244,24 +349,158 @@ class AsyncVaultClient:
         data_obj = resp_json.get("data")
         if not isinstance(data_obj, dict):
             raise RuntimeError("Token lookup did not return a valid 'data' object.")
-
         return data_obj
+
+
+#
+# ---------------------------
+# Example Usage with Comprehensive Tests
+# ---------------------------
+#
 
 
 async def example_usage() -> None:
     """
-    Demonstrates usage of the AsyncVaultClient with Pydantic settings.
+    Comprehensive Tests (No mocking):
+
+    1) Basic read/write/idempotent write
+    2) Soft vs. Hard delete
+    3) Secret history checks
+    4) Concurrency test (parallel writes)
+    5) Force token revoke to test automatic re-login (requires policy permission)
+    6) Attempt to read a path we don't have access to => 403
     """
-    # This will read environment variables: VAULT_ROLE_NAME, VAULT_ADDR, etc.
-    # For example, VAULT_ROLE_NAME="my-k8s-role".
-    settings = VaultSettings(vault_role_name="example_role")
+
+    settings = VaultSettings(
+        vault_role_name="amoebius-admin-role",  # or set via env var
+        verify_ssl=False,  # e.g., local/dev usage
+    )
 
     async with AsyncVaultClient(settings) as vault_client:
-        secret_data = await vault_client.read_secret("secret/data/my-app")
-        print("Read secret:", secret_data)
+        # 1) Basic Testing
+        secret_path = "amoebius/test/test_secret"
 
-        resp = await vault_client.write_secret("secret/data/my-app", {"some": "value"})
-        print("Wrote secret:", resp)
+        # Attempt to remove any leftover secret from a previous run
+        try:
+            await vault_client.delete_secret(secret_path, hard=True)
+        except RuntimeError as ex:
+            # If the path didn’t exist, you may see a 404 or so. Ignore it.
+            if "404" not in str(ex):
+                raise
+
+        # 1a) List secrets under "amoebius/test" (expect none initially, or maybe leftover)
+        keys = await vault_client.list_secrets("amoebius/test")
+        print("[1a] Current keys under 'amoebius/test':", keys)
+
+        # 1b) Write a secret
+        test_data = {"value": 12345}
+        await vault_client.write_secret(secret_path, test_data)
+        print("[1b] Wrote secret:", secret_path, "=", test_data)
+
+        # 1c) Read the secret & assert
+        current = await vault_client.read_secret(secret_path)
+        print("[1c] Current secret data:", current)
+        assert current == test_data, f"Expected {test_data}, got {current}"
+
+        # 1d) Idempotent write (same data) => no new version
+        await vault_client.write_secret_idempotent(secret_path, {"value": 12345})
+        meta1 = await vault_client.secret_history(secret_path)
+        cv1 = meta1.get("data", {}).get("current_version")
+        print("[1d] Metadata after no-op update:", meta1)
+        assert cv1 == 1, f"Expected version=1 after no-op, got {cv1}"
+
+        # 1e) Idempotent write (new data) => version increments to 2
+        await vault_client.write_secret_idempotent(secret_path, {"value": "abc"})
+        updated = await vault_client.read_secret(secret_path)
+        assert updated == {"value": "abc"}, f"Expected {{'value':'abc'}}, got {updated}"
+        meta2 = await vault_client.secret_history(secret_path)
+        cv2 = meta2.get("data", {}).get("current_version")
+        print("[1e] Metadata after new data:", meta2)
+        assert cv2 == 2, f"Expected version=2 after change, got {cv2}"
+
+        #
+        # 2) Soft delete => secret is gone, but history remains
+        #
+        await vault_client.delete_secret(secret_path, hard=False)
+        print("[2] Soft deleted the secret.")
+        # Reading it should yield a 404
+        try:
+            await vault_client.read_secret(secret_path)
+            raise AssertionError(
+                "Expected 404 after soft delete, but no exception occurred."
+            )
+        except RuntimeError as ex:
+            assert "404" in str(ex), f"Expected 404, got: {ex}"
+
+        meta_soft = await vault_client.secret_history(secret_path)
+        print("[2] Metadata after soft delete:", meta_soft)
+        versions_soft = meta_soft.get("data", {}).get("versions", {})
+        v2_info = versions_soft.get("2", {})
+        deletion_time = v2_info.get("deletion_time", "")
+        assert (
+            deletion_time != ""
+        ), "Expected a non-empty deletion_time for version 2 after soft delete."
+
+        #
+        # 3) Hard delete => removes metadata entirely
+        #
+        await vault_client.delete_secret(secret_path, hard=True)
+        meta_hard = await vault_client.secret_history(secret_path)
+        print("[3] Metadata after hard delete:", meta_hard)
+        assert (
+            meta_hard == {}
+        ), f"Expected empty metadata after hard delete, got {meta_hard}"
+
+        #
+        # 4) Concurrency Test: parallel writes on the same path
+        #
+        concurrency_path = "amoebius/test/concurrent"
+
+        async def writer_task(name: str) -> None:
+            for i in range(3):
+                data_conc = {"written_by": name, "count": i}
+                await vault_client.write_secret(concurrency_path, data_conc)
+                await asyncio.sleep(0.1)
+
+        print("[4] Starting concurrency test: parallel writes to", concurrency_path)
+        await asyncio.gather(writer_task("task1"), writer_task("task2"))
+
+        final_data = await vault_client.read_secret(concurrency_path)
+        print("[4] Final data after concurrency test:", final_data)
+        assert (
+            "written_by" in final_data and "count" in final_data
+        ), f"Expected 'written_by' and 'count' in final_data, got {final_data}"
+
+        #
+        # 5) Force token revoke => next read should re-login
+        #
+        try:
+            print("[5] Forcing token revoke-self (requires policy permission).")
+            await vault_client.revoke_self_token()
+            # Attempt a read => triggers re-login behind the scenes
+            after_revoke_data = await vault_client.read_secret(concurrency_path)
+            print(
+                "[5] Successfully re-logged in after revoke. Data:", after_revoke_data
+            )
+        except RuntimeError as ex:
+            # If your policy doesn't allow revoke-self, you'll get 403
+            print("[5] Could not revoke token (policy might not allow). Error:", ex)
+
+        #
+        # 6) Permission-denied check => read a path we don't have access to
+        #
+        forbidden_path = "forbidden_path/test_secret"
+        try:
+            print("[6] Attempting to read a forbidden path => expecting 403.")
+            await vault_client.read_secret(forbidden_path)
+            raise AssertionError(
+                "Expected 403 reading forbidden path, but request succeeded."
+            )
+        except RuntimeError as ex:
+            if "403" in str(ex):
+                print("[6] Confirmed forbidden path => 403 as expected.")
+            else:
+                print("[6] Unexpected error reading forbidden path:", ex)
 
 
 def main() -> None:

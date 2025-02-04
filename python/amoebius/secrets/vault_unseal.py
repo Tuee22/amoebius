@@ -26,7 +26,7 @@ DEFAULT_KUBERNETES_HOST = "https://kubernetes.default.svc.cluster.local/"
 # ------------------------
 
 
-@async_retry()
+@async_retry(retries=30)
 async def is_vault_initialized(vault_addr: str) -> bool:
     """
     Check if Vault is initialized by running `vault status -format=json`.
@@ -243,6 +243,25 @@ async def configure_vault(
     path "secret/data/amoebius/*" {
         capabilities = ["read", "create", "update", "delete", "list"]
     }
+
+    path "secret/metadata/amoebius/*" {
+        capabilities = ["read", "create", "update", "delete", "list"]
+    }
+
+    # Allows reading token metadata (TTL, etc.) to see if renewal is needed
+    path "auth/token/lookup-self" {
+        capabilities = ["read"]
+    }
+
+    # Allows renewing the token if it's near expiry
+    path "auth/token/renew-self" {
+        capabilities = ["update"]
+    }
+
+    # Allows revoking the current token
+    path "auth/token/revoke-self" {
+        capabilities = ["update"]
+    }    
     """
     await run_command(
         ["vault", "policy", "write", "amoebius-policy", "-"],
@@ -251,12 +270,12 @@ async def configure_vault(
     )
 
     # Create auth role for amoebius-admin
-    print("Configuring auth role for 'amoebius-admin' service account...")
+    print("Configuring auth role for 'amoebius-admin-role' service account...")
     await run_command(
         [
             "vault",
             "write",
-            "auth/kubernetes/role/amoebius-admin",
+            "auth/kubernetes/role/amoebius-admin-role",
             "bound_service_account_names=amoebius-admin",
             f"bound_service_account_namespaces=amoebius",
             "policies=amoebius-policy",
