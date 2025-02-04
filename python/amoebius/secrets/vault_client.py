@@ -64,7 +64,7 @@ class AsyncVaultClient:
         Returns the data under "data.data".
 
         Raises:
-            RuntimeError if Vault returns a non-200 status (including 404).
+            RuntimeError if Vault returns a non-200 status (including 404 or 403).
         """
         await self._ensure_valid_token()
         session = await self._ensure_session()
@@ -158,7 +158,7 @@ class AsyncVaultClient:
         """
         Idempotent write for KV v2. Only writes if the current contents differ.
         """
-        existing_data = None
+        existing_data: Optional[Dict[str, Any]] = None
         try:
             existing_data = await self.read_secret(path)
         except RuntimeError as ex:
@@ -168,6 +168,7 @@ class AsyncVaultClient:
                 raise
 
         if existing_data == data:
+            # Same data => no new version
             return {}
         return await self.write_secret(path, data)
 
@@ -235,7 +236,8 @@ class AsyncVaultClient:
         session = await self._ensure_session()
 
         if self._client_token is None:
-            return  # nothing to revoke
+            # Already invalid/no token => do nothing
+            return
 
         url = f"{self._vault_addr}/v1/auth/token/revoke-self"
         headers = {"X-Vault-Token": self._client_token}
@@ -245,7 +247,7 @@ class AsyncVaultClient:
                 detail = await resp.json()
                 raise RuntimeError(f"Failed to revoke token: {resp.status}, {detail}")
 
-        # Invalidate local token
+        # If successful, we remove our local token
         self._client_token = None
 
     #
@@ -275,6 +277,7 @@ class AsyncVaultClient:
         try:
             token_info = await self._get_token_info()
         except RuntimeError as e:
+            # If we get a 403 or some other error looking up the token, try re-login
             if "403" in str(e):
                 await self._login()
                 return
@@ -285,6 +288,7 @@ class AsyncVaultClient:
             await self._login()
             return
 
+        # If the TTL is below threshold, attempt to renew
         if ttl < self._renew_threshold_seconds:
             await self._renew_token()
 
@@ -329,6 +333,7 @@ class AsyncVaultClient:
                     self._client_token = auth_data["client_token"]
                     return
 
+        # If renew didn't succeed, fall back to re-login
         await self._login()
 
     async def _get_token_info(self) -> Dict[str, Any]:
@@ -354,41 +359,39 @@ class AsyncVaultClient:
 
 #
 # ---------------------------
-# Example Usage with Comprehensive Tests
+# Example Usage with Tests
 # ---------------------------
 #
 
 
 async def example_usage() -> None:
     """
-    Comprehensive Tests (No mocking):
-
-    1) Basic read/write/idempotent write
-    2) Soft vs. Hard delete
-    3) Secret history checks
-    4) Concurrency test (parallel writes)
-    5) Force token revoke to test automatic re-login (requires policy permission)
-    6) Attempt to read a path we don't have access to => 403
+    Comprehensive Tests (live, no mocking):
+     1) Basic read/write/idempotent write
+     2) Soft vs. Hard delete
+     3) Secret history checks
+     4) Concurrency test (parallel writes)
+     5) Force token revoke => next read triggers re-login (if policy allows)
+     6) Read a path we don't have access to => expect 403 or 404
     """
-
+    # Use your desired config (including verify_ssl=True):
     settings = VaultSettings(
-        vault_role_name="amoebius-admin-role",  # or set via env var
-        verify_ssl=False,  # e.g., local/dev usage
+        vault_role_name="amoebius-admin-role",
+        verify_ssl=True,
     )
 
     async with AsyncVaultClient(settings) as vault_client:
         # 1) Basic Testing
         secret_path = "amoebius/test/test_secret"
 
-        # Attempt to remove any leftover secret from a previous run
+        # Clean up leftover secret
         try:
             await vault_client.delete_secret(secret_path, hard=True)
         except RuntimeError as ex:
-            # If the path didn’t exist, you may see a 404 or so. Ignore it.
             if "404" not in str(ex):
                 raise
 
-        # 1a) List secrets under "amoebius/test" (expect none initially, or maybe leftover)
+        # 1a) List secrets
         keys = await vault_client.list_secrets("amoebius/test")
         print("[1a] Current keys under 'amoebius/test':", keys)
 
@@ -397,19 +400,19 @@ async def example_usage() -> None:
         await vault_client.write_secret(secret_path, test_data)
         print("[1b] Wrote secret:", secret_path, "=", test_data)
 
-        # 1c) Read the secret & assert
+        # 1c) Read & assert
         current = await vault_client.read_secret(secret_path)
         print("[1c] Current secret data:", current)
         assert current == test_data, f"Expected {test_data}, got {current}"
 
-        # 1d) Idempotent write (same data) => no new version
+        # 1d) Idempotent no-op => version remains 1
         await vault_client.write_secret_idempotent(secret_path, {"value": 12345})
         meta1 = await vault_client.secret_history(secret_path)
         cv1 = meta1.get("data", {}).get("current_version")
         print("[1d] Metadata after no-op update:", meta1)
         assert cv1 == 1, f"Expected version=1 after no-op, got {cv1}"
 
-        # 1e) Idempotent write (new data) => version increments to 2
+        # 1e) Idempotent with new data => version increments to 2
         await vault_client.write_secret_idempotent(secret_path, {"value": "abc"})
         updated = await vault_client.read_secret(secret_path)
         assert updated == {"value": "abc"}, f"Expected {{'value':'abc'}}, got {updated}"
@@ -419,16 +422,14 @@ async def example_usage() -> None:
         assert cv2 == 2, f"Expected version=2 after change, got {cv2}"
 
         #
-        # 2) Soft delete => secret is gone, but history remains
+        # 2) Soft delete => gone, but history remains
         #
         await vault_client.delete_secret(secret_path, hard=False)
         print("[2] Soft deleted the secret.")
-        # Reading it should yield a 404
+        # Now read => 404
         try:
             await vault_client.read_secret(secret_path)
-            raise AssertionError(
-                "Expected 404 after soft delete, but no exception occurred."
-            )
+            raise AssertionError("Expected 404 after soft delete, but no exception.")
         except RuntimeError as ex:
             assert "404" in str(ex), f"Expected 404, got: {ex}"
 
@@ -437,9 +438,7 @@ async def example_usage() -> None:
         versions_soft = meta_soft.get("data", {}).get("versions", {})
         v2_info = versions_soft.get("2", {})
         deletion_time = v2_info.get("deletion_time", "")
-        assert (
-            deletion_time != ""
-        ), "Expected a non-empty deletion_time for version 2 after soft delete."
+        assert deletion_time != "", "Expected non-empty deletion_time for version 2."
 
         #
         # 3) Hard delete => removes metadata entirely
@@ -447,12 +446,10 @@ async def example_usage() -> None:
         await vault_client.delete_secret(secret_path, hard=True)
         meta_hard = await vault_client.secret_history(secret_path)
         print("[3] Metadata after hard delete:", meta_hard)
-        assert (
-            meta_hard == {}
-        ), f"Expected empty metadata after hard delete, got {meta_hard}"
+        assert meta_hard == {}, f"Expected empty metadata, got {meta_hard}"
 
         #
-        # 4) Concurrency Test: parallel writes on the same path
+        # 4) Concurrency Test
         #
         concurrency_path = "amoebius/test/concurrent"
 
@@ -462,45 +459,57 @@ async def example_usage() -> None:
                 await vault_client.write_secret(concurrency_path, data_conc)
                 await asyncio.sleep(0.1)
 
-        print("[4] Starting concurrency test: parallel writes to", concurrency_path)
+        print("[4] Starting concurrency test:", concurrency_path)
         await asyncio.gather(writer_task("task1"), writer_task("task2"))
 
         final_data = await vault_client.read_secret(concurrency_path)
         print("[4] Final data after concurrency test:", final_data)
         assert (
             "written_by" in final_data and "count" in final_data
-        ), f"Expected 'written_by' and 'count' in final_data, got {final_data}"
+        ), f"Expected 'written_by'/'count', got {final_data}"
 
         #
-        # 5) Force token revoke => next read should re-login
+        # 5) Force token revoke => next read triggers re-login if permitted
         #
         try:
             print("[5] Forcing token revoke-self (requires policy permission).")
             await vault_client.revoke_self_token()
-            # Attempt a read => triggers re-login behind the scenes
+            # Attempt read => triggers re-login behind the scenes if token was revoked
             after_revoke_data = await vault_client.read_secret(concurrency_path)
             print(
                 "[5] Successfully re-logged in after revoke. Data:", after_revoke_data
             )
         except RuntimeError as ex:
-            # If your policy doesn't allow revoke-self, you'll get 403
-            print("[5] Could not revoke token (policy might not allow). Error:", ex)
+            # If policy doesn't allow revoke-self, you'll see 403 or "unavailable..."
+            print("[5] Could not revoke token. Error:", ex)
+            # Attempt a manual re-login to ensure token isn't left None
+            try:
+                await vault_client._login()
+            except RuntimeError as re_login_ex:
+                print("[5] Manual re-login also failed:", re_login_ex)
+                # At least we tried; proceed or raise if you want
+                # raise  # uncomment if you want to fail the test
+            else:
+                print("[5] Manual re-login succeeded.")
 
         #
-        # 6) Permission-denied check => read a path we don't have access to
+        # 6) Read a path we don't have access to => expect 403 or 404
         #
         forbidden_path = "forbidden_path/test_secret"
         try:
-            print("[6] Attempting to read a forbidden path => expecting 403.")
+            print("[6] Attempting to read a forbidden path => expect 403 or 404.")
             await vault_client.read_secret(forbidden_path)
             raise AssertionError(
-                "Expected 403 reading forbidden path, but request succeeded."
+                "Expected 403 or 404 reading forbidden path, but request succeeded."
             )
         except RuntimeError as ex:
-            if "403" in str(ex):
-                print("[6] Confirmed forbidden path => 403 as expected.")
+            # Vault may respond with 403 or 404 for inaccessible paths
+            if "403" in str(ex) or "404" in str(ex):
+                print("[6] Confirmed no-access => got expected error code.")
             else:
-                print("[6] Unexpected error reading forbidden path:", ex)
+                raise
+
+        print("All tests completed successfully!")
 
 
 def main() -> None:

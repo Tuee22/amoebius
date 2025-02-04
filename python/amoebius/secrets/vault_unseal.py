@@ -247,21 +247,6 @@ async def configure_vault(
     path "secret/metadata/amoebius/*" {
         capabilities = ["read", "create", "update", "delete", "list"]
     }
-
-    # Allows reading token metadata (TTL, etc.) to see if renewal is needed
-    path "auth/token/lookup-self" {
-        capabilities = ["read"]
-    }
-
-    # Allows renewing the token if it's near expiry
-    path "auth/token/renew-self" {
-        capabilities = ["update"]
-    }
-
-    # Allows revoking the current token
-    path "auth/token/revoke-self" {
-        capabilities = ["update"]
-    }    
     """
     await run_command(
         ["vault", "policy", "write", "amoebius-policy", "-"],
