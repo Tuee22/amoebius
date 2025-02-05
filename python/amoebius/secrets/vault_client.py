@@ -397,7 +397,7 @@ async def example_usage() -> None:
 
         # 1b) Write a secret
         test_data = {"value": 12345}
-        await vault_client.write_secret(secret_path, test_data)
+        await vault_client.write_secret_idempotent(secret_path, test_data)
         print("[1b] Wrote secret:", secret_path, "=", test_data)
 
         # 1c) Read & assert
