@@ -57,6 +57,6 @@ variable "vault_values" {
     "server.serviceAccount.create"  = "false"
     "server.dataStorage.accessMode" = "ReadWriteOnce"
     "server.affinity"               = ""
-    "global.tlsDisable"             = "false"
+    "global.tlsDisable"             = "true"
   }
 }
