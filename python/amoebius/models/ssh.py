@@ -24,6 +24,27 @@ class SSHConfig(BaseModel):
         return val
 
 
+class SSHVaultData(BaseModel):
+    """
+    A container model for how SSH-related secrets are stored in Vault.
+
+    Attributes:
+        ssh_config: The `SSHConfig` instance with user, hostname, port, keys, etc.
+        expires_at: An optional float epoch timestamp. If set and in the past,
+            this secret is considered expired and should be removed.
+    """
+
+    ssh_config: SSHConfig
+    expires_at: Optional[float] = None
+
+    @field_validator("expires_at")
+    @classmethod
+    def validate_expires_at(cls, val: Optional[float]) -> Optional[float]:
+        if val is not None and val < 0:
+            raise ValueError("expires_at must not be negative.")
+        return val
+
+
 class KubectlCommand(BaseModel):
     """
     Describes a 'kubectl exec' command: namespace, pod, container, etc.

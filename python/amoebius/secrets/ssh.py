@@ -60,33 +60,12 @@ import sys
 import time
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, ValidationError, field_validator
+from pydantic import ValidationError
 
-from ..models.ssh import SSHConfig
+from ..models.ssh import SSHConfig, SSHVaultData
 from ..models.vault import VaultSettings
 from ..utils.ssh_runner import ssh_get_server_key
 from .vault_client import AsyncVaultClient
-
-
-class SSHVaultData(BaseModel):
-    """
-    A container model for how SSH-related secrets are stored in Vault.
-
-    Attributes:
-        ssh_config: The `SSHConfig` instance with user, hostname, port, keys, etc.
-        expires_at: An optional float epoch timestamp. If set and in the past,
-            this secret is considered expired and should be removed.
-    """
-
-    ssh_config: SSHConfig
-    expires_at: Optional[float] = None
-
-    @field_validator("expires_at")
-    @classmethod
-    def validate_expires_at(cls, val: Optional[float]) -> Optional[float]:
-        if val is not None and val < 0:
-            raise ValueError("expires_at must not be negative.")
-        return val
 
 
 def _is_expired(expiry: Optional[float]) -> bool:
@@ -159,13 +138,6 @@ async def get_ssh_config(
                 f"Failed to re-parse SSHVaultData after TOFU at path '{path}': {e}"
             ) from e
 
-        # If it somehow expired after the TOFU step (edge case)
-        if _is_expired(data_obj.expires_at):
-            await vault.delete_secret(path, hard=True)
-            raise RuntimeError(
-                f"SSHConfig at path '{path}' expired after TOFU; removed from Vault."
-            )
-
     return data_obj.ssh_config
 
 
@@ -211,7 +183,7 @@ async def store_ssh_config(
     )
 
     # Convert the model to dict for Vault storage
-    await vault.write_secret_idempotent(path, vault_data.dict(exclude_unset=True))
+    await vault.write_secret_idempotent(path, vault_data.model_dump(exclude_unset=True))
 
 
 async def tofu_populate_ssh_config(vault: AsyncVaultClient, path: str) -> None:
@@ -254,7 +226,7 @@ async def tofu_populate_ssh_config(vault: AsyncVaultClient, path: str) -> None:
     cfg_no_tofu.host_keys = lines
 
     # 4) Overwrite data, ensuring expires_at=None
-    updated_data = SSHVaultData(ssh_config=cfg_no_tofu, expires_at=None).dict()
+    updated_data = SSHVaultData(ssh_config=cfg_no_tofu, expires_at=None).model_dump()
 
     # 5) Write the updated record back to Vault
     await vault.write_secret(path, updated_data)

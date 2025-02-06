@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from pydantic_settings import BaseSettings
 from typing import List
 
 
@@ -15,7 +14,7 @@ class VaultInitData(BaseModel):
     root_token: str
 
 
-class VaultSettings(BaseSettings):
+class VaultSettings(BaseModel):
     """
     Pydantic settings for configuring the Vault client.
     By default, these fields map to environment variables prefixed with `VAULT_`.
@@ -28,9 +27,3 @@ class VaultSettings(BaseSettings):
     verify_ssl: bool = True
     renew_threshold_seconds: float = 60.0
     check_interval_seconds: float = 60.0
-
-    class Config:
-        # This means if you set `VAULT_ROLE_NAME="my-role"`,
-        # it populates vault_role_name automatically.
-        env_prefix = "VAULT_"
-        # You can also parse .env files by setting `env_file = ".env"` etc.
