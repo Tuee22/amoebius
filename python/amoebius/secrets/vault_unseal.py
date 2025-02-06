@@ -419,7 +419,7 @@ async def init_unseal_configure_vault(
     """
     try:
         print("Attempting to retrieve vault terraform state...")
-        tfs = await read_terraform_state(root_name="vault")
+        tfs = await read_terraform_state(root_name="vault",max_attempts=90)
     except Exception as ex:
         raise RuntimeError(
             "Failed to read vault terraform state. Has terraform deploy completed?"
