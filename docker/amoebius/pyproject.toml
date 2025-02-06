@@ -19,6 +19,8 @@ black = ">=24.10.0,<25.0.0"
 aiofiles = ">=24.1.0,<25.0.0"
 types-aiofiles = ">=24.1.0,<25.0.0"
 
+[tool.poetry.scripts]
+ameobctl = "amoebius.cli.ameobctl:main"
 
 [build-system]
 requires = ["poetry-core>=1.1.0"]
