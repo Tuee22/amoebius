@@ -4,6 +4,13 @@ version = "0.0.1"
 description = "A brief description of your project."
 authors = ["tuee22"]
 
+packages = [
+  { include = "amoebius" , from="python"}
+]
+
+[tool.poetry.scripts]
+ameobctl = "amoebius.cli.ameobctl:main"
+
 [tool.poetry.dependencies]
 python = "^3.12"
 jupyterlab = ">=4.0.0,<5.0.0"
@@ -18,9 +25,6 @@ types-PyYAML = ">=6.0.12,<7.0.0"
 black = ">=24.10.0,<25.0.0"
 aiofiles = ">=24.1.0,<25.0.0"
 types-aiofiles = ">=24.1.0,<25.0.0"
-
-[tool.poetry.scripts]
-ameobctl = "amoebius.cli.ameobctl:main"
 
 [build-system]
 requires = ["poetry-core>=1.1.0"]

@@ -164,16 +164,11 @@ RUN curl -sSL https://install.python-poetry.org | python3.12 -
 # Configure Poetry to not use virtual environments
 RUN poetry config virtualenvs.create false
 
-# Install Python packages with semantic versioning
-RUN mkdir /poetry
-WORKDIR /poetry
-COPY ./docker/amoebius/pyproject.toml /poetry/
-RUN poetry install --no-interaction --no-root
-
 # Copy the entire amoebius folder to /amoebius
 COPY ./ /amoebius
 WORKDIR /amoebius
-ENV PYTHONPATH="/amoebius/python"
+
+RUN poetry install --no-interaction
 
 # validate code with mypy
 RUN mypy /amoebius/python --strict --no-incremental && rm -rf .mypy_cache
