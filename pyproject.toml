@@ -9,7 +9,7 @@ packages = [
 ]
 
 [tool.poetry.scripts]
-ameobctl = "amoebius.cli.amoebctl:main"
+amoebctl = "amoebius.cli.amoebctl:main"
 
 [tool.poetry.dependencies]
 python = "^3.12"

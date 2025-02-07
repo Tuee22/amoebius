@@ -1,9 +1,10 @@
 import sys
 import subprocess
 
+
 def main() -> None:
     if len(sys.argv) < 2:
-        print("Usage: ameobctl <subcommand> [args...]")
+        print("Usage: amoebctl <subcommand> [args...]")
         sys.exit(1)
 
     subcommand = sys.argv[1]
