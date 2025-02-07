@@ -12,23 +12,27 @@ Usage example:
       --path secrets/amoebius/aws_key \
       --vault-role-name amoebius-admin-role
 
-CSV columns typically include:
-  "Access key ID", "Secret access key", and optionally "Session token".
+CSV columns typically include exactly two columns:
+  "Access key ID", "Secret access key"
+
+We enforce a strict 2×2 CSV shape:
+  - Row 0: The column headers (e.g., "Access key ID", "Secret access key")
+  - Row 1: The credential values
 """
 
 from __future__ import annotations
 
 import argparse
 import asyncio
-import csv
-import json
-import os
 import sys
-import tempfile
-from typing import Dict, Optional, Any, List, Mapping, NoReturn
+import os
+from typing import NoReturn
 
-from amoebius.cli.secrets.vault import run_write_idempotent
+import pandas as pd
+
 from amoebius.models.api_keys.aws import AWSApiKey
+from amoebius.models.vault import VaultSettings
+from amoebius.secrets.vault_client import AsyncVaultClient
 
 
 def main() -> NoReturn:
@@ -36,7 +40,7 @@ def main() -> NoReturn:
     Entry point for 'store-key-from-csv' subcommand usage.
     """
     parser = argparse.ArgumentParser(
-        prog="amoebius.cli.secrets.aws",
+        prog="amoebius.cli.secrets.api_keys.aws",
         description="CLI to store AWS credentials in Vault from a CSV file.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -99,100 +103,59 @@ def main() -> NoReturn:
 
 async def _store_key_from_csv(args: argparse.Namespace) -> None:
     """
-    Parse a CSV file of AWS credentials into a dict, then call
-    run_write_idempotent(...) to store it in Vault with AWSApiKey validation.
+    Parse a CSV file of AWS credentials into an AWSApiKey, then directly call
+    write_secret(...) on an AsyncVaultClient using that data.
     """
-    creds_dict = _parse_aws_csv(csv_file_path=args.csv_file)
+    # 1) Parse/validate CSV into a Pydantic model
+    aws_api_key = _parse_aws_csv(csv_file_path=args.csv_file)
 
-    # Prepare the JSON in a temporary file for run_write_idempotent
-    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as tmpf:
-        tmp_file_path = tmpf.name
-        json.dump(creds_dict, tmpf, indent=2)
-
-    # Construct new argparse.Namespace to pass to run_write_idempotent
-    new_args = argparse.Namespace(
-        command="write-idempotent",  # Not really used inside run_write_idempotent
-        path=args.path,
-        json_file=tmp_file_path,
-        pydantic_model="amoebius.models.api_keys.aws.AWSApiKey",
-        vault_role_name=args.vault_role_name,
-        vault_token=args.vault_token,
+    # 2) Build Vault settings from CLI args
+    vault_settings = VaultSettings(
         vault_addr=args.vault_addr,
-        vault_token_path=args.vault_token_path,
-        no_verify_ssl=args.no_verify_ssl,
+        vault_role_name=args.vault_role_name,
+        direct_vault_token=args.vault_token,
+        token_path=args.vault_token_path,
+        verify_ssl=(not args.no_verify_ssl),
     )
 
-    try:
-        await run_write_idempotent(new_args)
-    finally:
-        if os.path.exists(tmp_file_path):
-            os.remove(tmp_file_path)
+    # 3) Write the secret to Vault
+    async with AsyncVaultClient(vault_settings) as client:
+        await client.write_secret_idempotent(args.path, aws_api_key.model_dump())
 
 
-def _parse_aws_csv(csv_file_path: str) -> Dict[str, Optional[str]]:
+def _parse_aws_csv(csv_file_path: str) -> AWSApiKey:
     """
-    Return a dict matching AWSApiKey fields:
-      {
-        "access_key_id": ...,
-        "secret_access_key": ...,
-        "session_token": ...
-      }
+    Reads the CSV with pandas (header=None) and enforces a strict 2×2 shape:
+      - Row 0: Headers ("Access key ID", "Secret access key")
+      - Row 1: Values (the actual credentials)
 
-    We parse the first row that contains valid "Access key ID" and
-    "Secret access key". If "Session token" is present and non-empty,
-    include it; otherwise it's None.
+    Then constructs an AWSApiKey with access_key_id and secret_access_key.
 
-    Raises ValueError if no row has the required columns.
+    Raises ValueError if:
+      - The file isn't found
+      - The DataFrame isn't exactly 2×2
+      - Required headers are missing
     """
     if not os.path.isfile(csv_file_path):
         raise ValueError(f"CSV file not found: {csv_file_path}")
 
-    with open(csv_file_path, "r", newline="", encoding="utf-8") as f:
-        # Read all rows via comprehension (instead of a for loop)
-        rows: List[Mapping[str, str]] = [row for row in csv.DictReader(f)]
+    # Read with no header, so the first row is row 0, second row is row 1
+    df = pd.read_csv(csv_file_path, header=None)
 
-    # Use a generator expression to parse each row, yielding either a creds dict or None
-    parsed_rows = (_try_parse_row(row) for row in rows)
-    # Filter out any None results, then return the first valid dict
-    first_valid = next((d for d in parsed_rows if d is not None), None)
-    if first_valid is None:
-        raise ValueError(
-            "No CSV row has valid 'Access key ID' and 'Secret access key'."
-        )
-    return first_valid
+    # Must be exactly 2x2
+    if df.shape != (2, 2):
+        raise ValueError(f"Expected CSV to be 2×2, but got shape {df.shape}.")
 
+    # Create a Series where row 0 is the index, row 1 is the data
+    series = df.iloc[1].copy()
+    # Convert the first row into a pandas.Index
+    series.index = pd.Index(df.iloc[0].to_list())
 
-def _try_parse_row(row: Mapping[str, str]) -> Optional[Dict[str, Optional[str]]]:
-    """
-    Attempt to extract the AWS credential fields from a single CSV row.
-    Returns the dict if successful, or None if invalid.
-    """
-    # Potential column names
-    akid_candidates = ["Access key ID", "Access Key ID"]
-    sak_candidates = ["Secret access key", "Secret Access Key"]
-    st_candidates = ["Session token", "Session Token"]
-
-    # Use generator expressions & next(...) to pick the first non-empty match
-    akid_col: str = next(
-        (col for col in akid_candidates if col in row and row[col].strip()), ""
+    # Construct and return the AWSApiKey
+    return AWSApiKey(
+        access_key_id=str(series["Access key ID"]),
+        secret_access_key=str(series["Secret access key"]),
     )
-    sak_col: str = next(
-        (col for col in sak_candidates if col in row and row[col].strip()), ""
-    )
-
-    if not akid_col or not sak_col:
-        return None
-
-    # Session token is optional
-    st_col: Optional[str] = next(
-        (col for col in st_candidates if col in row and row[col].strip()), None
-    )
-
-    return {
-        "access_key_id": row[akid_col].strip(),
-        "secret_access_key": row[sak_col].strip(),
-        "session_token": row[st_col].strip() if st_col else None,
-    }
 
 
 if __name__ == "__main__":
