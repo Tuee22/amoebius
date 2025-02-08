@@ -40,8 +40,8 @@ async def run_command(
 
     @async_retry(retries=retries, delay=retry_delay)
     async def _inner_run_command() -> str:
-        proc_env = dict(os.environ)
         if env:
+            proc_env = os.environ.copy()
             proc_env.update(env)
 
         proc = await asyncio.create_subprocess_exec(
@@ -49,7 +49,7 @@ async def run_command(
             stdin=asyncio.subprocess.PIPE if input_data else None,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
-            env=proc_env,
+            env=proc_env if env else None,
             cwd=cwd,
         )
         stdout_bytes, stderr_bytes = await proc.communicate(

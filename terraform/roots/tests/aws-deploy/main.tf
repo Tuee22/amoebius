@@ -1,257 +1,297 @@
-############################################
-# 1. Variables & Provider Configuration
-############################################
+###############################################################################
+# main.tf - Full Terraform Module
+###############################################################################
+
+###############################################################################
+# 1) Terraform Settings & Kubernetes Backend
+###############################################################################
+terraform {
+  backend "kubernetes" {
+    secret_suffix     = "test-aws-deploy"
+    load_config_file  = false
+    namespace         = "amoebius"
+    in_cluster_config = true
+  }
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
+    }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
+  }
+}
+
+###############################################################################
+# 2) Variables
+###############################################################################
+variable "region" {
+  type        = string
+  description = "The AWS region to deploy in."
+  default     = "us-east-1"
+}
 
 variable "aws_access_key_id" {
-  type      = string
-  sensitive = true
-  description = "Your AWS Access Key ID (long-lived credential)."
+  type        = string
+  description = "AWS Access Key ID."
+  sensitive   = true
 }
 
 variable "aws_secret_access_key" {
-  type      = string
-  sensitive = true
-  description = "Your AWS Secret Access Key (long-lived credential)."
-}
-
-variable "region" {
-  type    = string
-  default = "us-east-1"
-  description = "AWS region to deploy into."
+  type        = string
+  description = "AWS Secret Access Key."
+  sensitive   = true
 }
 
 variable "availability_zones" {
-  type    = list(string)
-  default = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  description = "List of AZs in the chosen region. One subnet + instance per AZ."
+  type        = list(string)
+  description = "List of Availability Zones in which to create subnets and EC2 instances."
+  default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
 }
 
-variable "vault_addr" {
+# ------------------------------------------------------------------
+# Variables for Vault usage
+# ------------------------------------------------------------------
+variable "vault_role_name" {
   type        = string
-  default     = "http://vault.vault.svc.cluster.local:8200"
-  description = "Base address of Vault (if needed for the ssh_vault_secret module)."
+  description = "Vault Kubernetes auth role name used by the ssh_vault_secret module."
+  default     = "amoebius-admin-role"
 }
 
-# This is the 'ssh_vault_secret' module you already have.
-# Adjust the source path to wherever you store that module code.
+variable "ssh_user" {
+  type        = string
+  description = "SSH username to configure on the remote host."
+  default     = "ubuntu"
+}
+
 variable "no_verify_ssl" {
-  type    = bool
-  default = false
-  description = "Disable Vault SSL verification if needed."
+  type        = bool
+  description = "Disable SSL certificate verification for Vault calls."
+  default     = true
 }
 
-# The default Ubuntu ARM64 AMI lookup for Focal 20.04 (owner Canonical).
-# You can customize the filters for a different Ubuntu release or region.
-data "aws_ami" "ubuntu_arm" {
+###############################################################################
+# 3) AWS Provider
+###############################################################################
+provider "aws" {
+  region     = var.region
+  access_key = var.aws_access_key_id
+  secret_key = var.aws_secret_access_key
+}
+
+###############################################################################
+# 4) Data Sources
+###############################################################################
+data "aws_ami" "ubuntu" {
   most_recent = true
   owners      = ["099720109477"] # Canonical
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-arm64-server-*"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
   }
   filter {
-    name   = "architecture"
-    values = ["arm64"]
-  }
-  filter {
-    name   = "root-device-type"
-    values = ["ebs"]
+    name   = "virtualization-type"
+    values = ["hvm"]
   }
 }
 
-provider "aws" {
-  region                  = var.region
-  access_key             = var.aws_access_key_id
-  secret_key             = var.aws_secret_access_key
-  # Or set credentials in your environment instead of storing them in TF variables
-}
-
-# If needed, configure the rke provider (assuming a local run).
-# Make sure you have 'provider "rke" {}' in your required_providers block.
-provider "rke" {}
-
-############################################
-# 2. Create a VPC with subnets in each AZ
-############################################
-
-resource "aws_vpc" "main" {
-  cidr_block = "10.10.0.0/16"
-
-  tags = {
-    Name = "example-vpc"
-  }
-}
-
-resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.main.id
-
-  tags = {
-    Name = "example-igw"
-  }
-}
-
-resource "aws_route_table" "public_rt" {
-  vpc_id = aws_vpc.main.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
-
-  tags = {
-    Name = "example-public-rt"
-  }
-}
-
-# One subnet per AZ in var.availability_zones
-resource "aws_subnet" "public_subnet" {
-  count             = length(var.availability_zones)
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = cidrsubnet("10.10.0.0/16", 4, count.index)
-  availability_zone = var.availability_zones[count.index]
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "example-subnet-${var.availability_zones[count.index]}"
-  }
-}
-
-resource "aws_route_table_association" "public_assoc" {
-  count          = length(var.availability_zones)
-  route_table_id = aws_route_table.public_rt.id
-  subnet_id      = aws_subnet.public_subnet[count.index].id
-}
-
-############################################
-# 3. Create one EC2 instance (Ubuntu ARM) per subnet, each with its own key
-############################################
-
-# Generate a separate SSH keypair per instance
-resource "tls_private_key" "vm_key" {
-  count = length(var.availability_zones)
+###############################################################################
+# 5) Generate an SSH Key Pair Per AZ
+###############################################################################
+resource "tls_private_key" "ssh" {
+  count     = length(var.availability_zones)
   algorithm = "RSA"
-  rsa_bits  = 2048
+  rsa_bits  = 4096
 }
 
-resource "aws_key_pair" "vm_key" {
-  count = length(var.availability_zones)
-  key_name   = "my_vm_key_${count.index}"
-  public_key = tls_private_key.vm_key[count.index].public_key_openssh
+resource "aws_key_pair" "ssh" {
+  count      = length(var.availability_zones)
+  key_name   = "${terraform.workspace}-ec2-key-${count.index}"
+  public_key = tls_private_key.ssh[count.index].public_key_openssh
 }
 
-resource "aws_instance" "vm" {
-  count         = length(var.availability_zones)
-  ami           = data.aws_ami.ubuntu_arm.id
-  instance_type = "t4g.small"  # an ARM instance type
-  subnet_id     = aws_subnet.public_subnet[count.index].id
-  vpc_security_group_ids = [aws_vpc.main.default_security_group_id]
-  key_name      = aws_key_pair.vm_key[count.index].key_name
-  associate_public_ip_address = true  # So we can SSH from the internet if needed
+###############################################################################
+# 6) VPC & Networking
+###############################################################################
+resource "aws_vpc" "this" {
+  cidr_block = "10.0.0.0/16"
+  tags = {
+    Name = "${terraform.workspace}-vpc"
+  }
+}
+
+resource "aws_internet_gateway" "this" {
+  vpc_id = aws_vpc.this.id
+  tags = {
+    Name = "${terraform.workspace}-igw"
+  }
+}
+
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.this.id
+  tags = {
+    Name = "${terraform.workspace}-public-rt"
+  }
+}
+
+resource "aws_route" "public_internet_access" {
+  route_table_id         = aws_route_table.public.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.this.id
+}
+
+resource "aws_subnet" "public" {
+  count                   = length(var.availability_zones)
+  vpc_id                  = aws_vpc.this.id
+  cidr_block             = "10.0.${count.index}.0/24"
+  availability_zone       = var.availability_zones[count.index]
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "${terraform.workspace}-public-subnet-${count.index}"
+  }
+}
+
+resource "aws_route_table_association" "public_subnet" {
+  count          = length(var.availability_zones)
+  subnet_id      = aws_subnet.public[count.index].id
+  route_table_id = aws_route_table.public.id
+}
+
+###############################################################################
+# 7) Custom Security Group (Avoid AWS Default SG)
+###############################################################################
+resource "aws_security_group" "this" {
+  name        = "${terraform.workspace}-custom-sg"
+  description = "Security group for SSH ingress"
+  vpc_id      = aws_vpc.this.id
+
+  # Allow SSH Inbound from anywhere (adjust as needed)
+  ingress {
+    description = "SSH from anywhere"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow all outbound
+  egress {
+    description = "Allow all outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   tags = {
-    Name = "example-ubuntu-arm-${count.index}"
+    Name = "${terraform.workspace}-custom-sg"
   }
 }
 
-############################################
-# 4. Wait for each VM to be "SSH up",
-#    then store the private key in Vault
-############################################
+###############################################################################
+# 8) Create EC2 Instances (One Per AZ) With Unique SSH Keys
+###############################################################################
+resource "aws_instance" "ubuntu" {
+  count         = length(var.availability_zones)
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t2.micro"
+  subnet_id     = aws_subnet.public[count.index].id
+  key_name      = aws_key_pair.ssh[count.index].key_name
 
-# Wait for each instance to be responsive (a simplistic approach).
-# We use remote-exec to do a quick "echo" or "uptime" test.
-# This ensures the instance is truly up & listening on SSH.
-resource "null_resource" "wait_for_ssh" {
-  count = length(var.availability_zones)
+  # Use our custom security group
+  vpc_security_group_ids = [aws_security_group.this.id]
 
-  connection {
-    type        = "ssh"
-    user        = "ubuntu"
-    host        = aws_instance.vm[count.index].public_ip
-    private_key = tls_private_key.vm_key[count.index].private_key_pem
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "echo 'SSH is up!'"
-    ]
+  tags = {
+    Name = "${terraform.workspace}-test-aws-deployment-${count.index}"
   }
 }
 
-# Now that each VM is definitely up,
-# we run the "ssh_vault_secret" module to store the private key in Vault.
-module "ssh_secrets" {
-  source = "./modules/ssh_vault_secret" # Adjust path as needed
+###############################################################################
+# 9) Wait for Instances to be SSH-Accessible
+###############################################################################
+# This resource ensures the instance is fully started, networked, and listening
+# on port 22 before we do anything that requires live SSH connectivity.
+# resource "null_resource" "wait_for_ssh" {
+#   count = length(var.availability_zones)
 
-  for_each         = toset([for i in range(length(var.availability_zones)) : tostring(i)])
-  vault_role_name  = "my_k8s_role"   # or whatever your Vault K8s role is
-  path             = "secrets/ssh/server-${each.key}"
-  user             = "ubuntu"
-  hostname         = aws_instance.vm[tonumber(each.key)].public_ip
+
+#   connection {
+#     type        = "ssh"
+#     host        = aws_instance.ubuntu[count.index].public_ip
+#     user        = var.ssh_user
+#     private_key = tls_private_key.ssh[count.index].private_key_pem
+#   }
+
+#   provisioner "remote-exec" {
+#     inline = [
+#       "echo 'Instance is up and SSH connection successful.'"
+#     ]
+#   }
+# }
+
+###############################################################################
+# 10) Store Each Private Key in Vault
+###############################################################################
+module "ssh_vault_secret" {
+  source = "/amoebius/terraform/modules/ssh_vault_secret"
+
+  count            = length(var.availability_zones)
+  vault_role_name  = var.vault_role_name
+  user             = var.ssh_user
+  hostname         = aws_instance.ubuntu[count.index].public_ip
   port             = 22
-  private_key      = tls_private_key.vm_key[tonumber(each.key)].private_key_pem
+  private_key      = tls_private_key.ssh[count.index].private_key_pem
   no_verify_ssl    = var.no_verify_ssl
 
+  # Construct a unique path for each key
+  path = "amoebius/tests/aws-test-deploy/ssh/${terraform.workspace}-ec2-key-${count.index}"
+
+  # Ensure we only run after the instance is confirmed accessible by SSH
+  #depends_on = [null_resource.wait_for_ssh]
   depends_on = [
-    null_resource.wait_for_ssh[tonumber(each.key)]
-  ]
-}
-
-############################################
-# 5. Use the RKE provider to configure a k8s cluster
-#    with each VM as a control plane node
-############################################
-
-# We define one "rke_cluster" with multi-node, fully HA setup:
-resource "rke_cluster" "k8s" {
-  # We'll create a node definition for each VM, specifying:
-  #   - public IP address
-  #   - SSH user
-  #   - SSH key (the same key Terraform created earlier)
-  #   - roles: controlplane, etcd, worker
-  nodes = [
-    for i in range(length(var.availability_zones)) : {
-      address          = aws_instance.vm[i].public_ip
-      user             = "ubuntu"
-      ssh_key          = tls_private_key.vm_key[i].private_key_pem
-      role             = ["controlplane", "etcd", "worker"]
-    }
+    aws_instance.ubuntu, 
+    aws_security_group.this
   ]
 
-  # For a real cluster, you'd also specify:
-  # network {
-  #   plugin = "canal"
-  # }
-  # services {
-  #   etcd {
-  #     snapshot        = true
-  #     creation        = 6
-  #     retention       = 24
-  #   }
-  # }
 }
 
-############################################
-# Outputs (Optional)
-############################################
-
+###############################################################################
+# 11) Outputs
+###############################################################################
 output "vpc_id" {
-  description = "ID of the created VPC"
-  value       = aws_vpc.main.id
+  description = "The ID of the created VPC."
+  value       = aws_vpc.this.id
 }
 
-output "public_subnets" {
-  description = "IDs of the created public subnets"
-  value       = [for s in aws_subnet.public_subnet : s.id]
+output "subnet_ids" {
+  description = "List of subnet IDs, one per AZ."
+  value       = [for subnet in aws_subnet.public : subnet.id]
 }
 
-output "instance_public_ips" {
-  description = "Public IP addresses of the created instances"
-  value       = [for vm in aws_instance.vm : vm.public_ip]
+output "instance_ids" {
+  description = "List of all Ubuntu instance IDs created, one per AZ."
+  value       = [for instance in aws_instance.ubuntu : instance.id]
 }
 
-output "rke_kube_config" {
-  description = "Kubeconfig for the RKE cluster"
-  value       = rke_cluster.k8s.kube_config_yaml
-  sensitive   = true
+output "public_ips" {
+  description = "List of public IP addresses for the Ubuntu instances."
+  value       = [for instance in aws_instance.ubuntu : instance.public_ip]
+}
+
+output "private_ips" {
+  description = "List of private IP addresses for the Ubuntu instances."
+  value       = [for instance in aws_instance.ubuntu : instance.private_ip]
+}
+
+output "security_group_id" {
+  description = "The ID of the custom security group used by the instances."
+  value       = aws_security_group.this.id
+}
+
+output "vault_ssh_keys" {
+  description = "Vault paths where each SSH private key is stored."
+  value       = [for vault_secret in module.ssh_vault_secret : vault_secret.vault_path]
 }

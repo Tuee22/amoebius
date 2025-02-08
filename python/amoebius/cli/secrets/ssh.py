@@ -40,7 +40,6 @@ async def run_store(args: argparse.Namespace) -> None:
         private_key=args.private_key,
         host_keys=None,  # Do not allow CLI input of host_keys
     )
-
     async with AsyncVaultClient(vault_settings) as vault:
         # Step 1: Store
         await store_ssh_config(vault, args.path, ssh_config)
@@ -143,7 +142,8 @@ def main() -> None:
 
 def _add_vault_cli_args(subparser: argparse.ArgumentParser) -> None:
     """
-    Add mutually exclusive flags for K8s role vs direct token, plus vault address and token path.
+    Add mutually exclusive flags for K8s role vs direct token, plus vault address, token path,
+    and SSL verification toggle.
     """
     group = subparser.add_mutually_exclusive_group()
     group.add_argument(
@@ -164,11 +164,16 @@ def _add_vault_cli_args(subparser: argparse.ArgumentParser) -> None:
         default="/var/run/secrets/kubernetes.io/serviceaccount/token",
         help="Path to JWT token for K8s auth (default: /var/run/secrets/kubernetes.io/serviceaccount/token).",
     )
+    subparser.add_argument(
+        "--no-verify-ssl",
+        action="store_true",
+        help="Disable SSL certificate verification (default: verify SSL).",
+    )
 
 
 def _build_vault_settings(args: argparse.Namespace) -> VaultSettings:
     """
-    Construct a VaultSettings from CLI args, ensuring mutual exclusivity is respected.
+    Construct a VaultSettings from CLI args, respecting mutual exclusivity and SSL verification.
     """
     if args.vault_token and args.vault_role_name:
         print(
@@ -182,7 +187,7 @@ def _build_vault_settings(args: argparse.Namespace) -> VaultSettings:
         vault_role_name=args.vault_role_name,
         direct_vault_token=args.vault_token,
         token_path=args.vault_token_path,
-        verify_ssl=True,  # Overridden if user sets --no-verify-ssl, see below.
+        verify_ssl=not args.no_verify_ssl,
         renew_threshold_seconds=60.0,
         check_interval_seconds=30.0,
     )

@@ -3,7 +3,7 @@
 aws_deploy_test.py
 
 An async end-to-end script that:
-  - Reads AWS credentials from Vault at path "secrets/amoebius/tests/aws_key"
+  - Reads AWS credentials from Vault at path "amoebius/tests/aws_key"
   - Validates them with AWSApiKey
   - Depending on the CLI flags, either:
       A) init + apply (default)
@@ -17,7 +17,7 @@ Requirements:
   - "amoebius/utils/terraform.py" with init_terraform, apply_terraform, destroy_terraform
   - "amoebius/secrets/vault_client.py" with AsyncVaultClient for reading from Vault
   - "amoebius/models/api_keys/aws.py" with AWSApiKey
-  - A Vault secret at "secrets/amoebius/tests/aws_key" containing:
+  - A Vault secret at "amoebius/tests/aws_key" containing:
       {
         "access_key_id": "AKIA...",
         "secret_access_key": "...",
@@ -48,7 +48,7 @@ from amoebius.utils.terraform import (
 )
 
 VAULT_ROLE_NAME = "amoebius-admin-role"
-VAULT_PATH = "secrets/amoebius/tests/aws_key"
+VAULT_PATH = "amoebius/tests/aws_key"
 TERRAFORM_ROOT_NAME = "tests/aws-deploy"  # Folder in /amoebius/terraform/roots
 
 
@@ -67,6 +67,7 @@ async def run_aws_deploy_test(destroy_only: bool = False) -> None:
     )
 
     async with AsyncVaultClient(vault_settings) as vault:
+        # Read AWS credentials
         try:
             secret_data = await vault.read_secret(VAULT_PATH)
         except RuntimeError as exc:
@@ -74,34 +75,46 @@ async def run_aws_deploy_test(destroy_only: bool = False) -> None:
                 f"Failed to read AWS credentials from '{VAULT_PATH}': {exc}"
             ) from exc
 
-    # 2) Validate with AWSApiKey
-    try:
-        aws_key = AWSApiKey(**secret_data)
-    except ValidationError as ve:
-        raise RuntimeError(
-            f"Vault data at '{VAULT_PATH}' failed AWSApiKey validation: {ve}"
-        ) from ve
+        # 2) Validate them with AWSApiKey
+        try:
+            aws_key = AWSApiKey(**secret_data)
+        except ValidationError as ve:
+            raise RuntimeError(
+                f"Vault data at '{VAULT_PATH}' failed AWSApiKey validation: {ve}"
+            ) from ve
 
-    # Terraform variables
-    tf_vars = {
-        "aws_access_key_id": aws_key.access_key_id,
-        "aws_secret_access_key": aws_key.secret_access_key,
-    }
-    if aws_key.session_token is not None:
-        tf_vars["aws_session_token"] = aws_key.session_token
+        # Prepare Terraform variables
+        tf_vars = {
+            "aws_access_key_id": aws_key.access_key_id,
+            "aws_secret_access_key": aws_key.secret_access_key,
+        }
+        if aws_key.session_token is not None:
+            tf_vars["aws_session_token"] = aws_key.session_token
 
-    # 3) Depending on the flag, either do apply flow or destroy only
-    if destroy_only:
-        print("Skipping init/apply. Proceeding with terraform destroy only...")
-        await destroy_terraform(root_name=TERRAFORM_ROOT_NAME, variables=tf_vars)
-    else:
-        print(f"Initializing Terraform for root '{TERRAFORM_ROOT_NAME}'...")
-        await init_terraform(root_name=TERRAFORM_ROOT_NAME, reconfigure=True)
+        # 3) Either destroy only, or init+apply
+        if destroy_only:
+            print("Skipping init/apply. Proceeding with terraform destroy only...")
+            await destroy_terraform(
+                root_name=TERRAFORM_ROOT_NAME,
+                variables=tf_vars,
+                vault_client=vault,  # pass the Vault client
+            )
+        else:
+            print(f"Initializing Terraform for root '{TERRAFORM_ROOT_NAME}'...")
+            await init_terraform(
+                root_name=TERRAFORM_ROOT_NAME,
+                reconfigure=True,
+                vault_client=vault,  # pass the Vault client
+            )
 
-        print("Applying Terraform configuration (auto-approve)...")
-        await apply_terraform(root_name=TERRAFORM_ROOT_NAME, variables=tf_vars)
+            print("Applying Terraform configuration (auto-approve)...")
+            await apply_terraform(
+                root_name=TERRAFORM_ROOT_NAME,
+                variables=tf_vars,
+                vault_client=vault,  # pass the Vault client
+            )
 
-        print("Terraform apply completed (no destroy unless --destroy is given).")
+            print("Terraform apply completed (no destroy unless --destroy is given).")
 
 
 def main() -> NoReturn:

@@ -12,7 +12,7 @@ async def is_docker_running() -> bool:
     try:
         # Uses run_command() for idempotent check. If Docker isn't running,
         # CommandError is raised, and we return False.
-        await run_command(["docker", "info"], sensitive=True, retries=1)
+        await run_command(["docker", "info"], sensitive=False, retries=1)
         return True
     except CommandError:
         return False

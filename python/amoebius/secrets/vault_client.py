@@ -4,9 +4,7 @@ amoebius/secrets/vault_client.py
 An asynchronous Vault client supporting KV v2 operations, with optional
 Kubernetes Auth or direct token usage.
 
-Designed for usage with:
-  - K8s Auth (if VaultSettings.vault_role_name is set), or
-  - A direct Vault token (if VaultSettings.direct_vault_token is provided).
+Modified to include `get_active_token()` for Terraform usage.
 """
 
 from __future__ import annotations
@@ -34,13 +32,6 @@ class AsyncVaultClient:
     _last_token_check: float
 
     def __init__(self, settings: VaultSettings) -> None:
-        """
-        Initializes the Vault client.
-
-        Args:
-            settings: A VaultSettings instance, possibly with direct_vault_token
-                      or vault_role_name for K8s auth.
-        """
         self._vault_addr: str = settings.vault_addr
         self._vault_role_name: Optional[str] = settings.vault_role_name
         self._token_path: str = settings.token_path
@@ -67,19 +58,23 @@ class AsyncVaultClient:
             await self._session.close()
         self._session = None
 
+    # --------------------------------------------------------------------------
+    # NEW: Provide a way to get the currently active Vault token for Terraform, etc.
+    # --------------------------------------------------------------------------
+    async def get_active_token(self) -> str:
+        """
+        Ensures we have a valid token, then returns it.
+        If token cannot be retrieved, raises RuntimeError.
+        """
+        await self._ensure_valid_token()
+        if not self._client_token:
+            raise RuntimeError("Unable to obtain a Vault token.")
+        return self._client_token
+
+    # ------------------
+    # KV V2 Methods
+    # ------------------
     async def read_secret(self, path: str) -> Dict[str, Any]:
-        """
-        Read a secret from KV v2 (GET /v1/secret/data/<path>).
-
-        Args:
-            path: The path under Vault's KV engine.
-
-        Returns:
-            A dict of the secret data (stored under "data.data").
-
-        Raises:
-            RuntimeError: If Vault returns non-200 status (e.g., 404, 403, etc.).
-        """
         await self._ensure_valid_token()
         session = await self._ensure_session()
         if self._client_token is None:
@@ -100,19 +95,6 @@ class AsyncVaultClient:
         return resp_json
 
     async def write_secret(self, path: str, data: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Write data to KV v2 (POST /v1/secret/data/<path>).
-
-        Args:
-            path: The path under Vault's KV engine.
-            data: The data dict to store.
-
-        Returns:
-            The JSON response if status == 200, or {} if status == 204.
-
-        Raises:
-            RuntimeError: If Vault returns an error status.
-        """
         await self._ensure_valid_token()
         session = await self._ensure_session()
         if self._client_token is None:
@@ -129,7 +111,7 @@ class AsyncVaultClient:
             try:
                 raw_resp = await resp.json()
             except aiohttp.ContentTypeError:
-                pass  # Some responses may be 204 with no content
+                pass  # 204 No Content possible
 
             if resp.status not in (200, 204):
                 err_json = validate_type(raw_resp, Dict[str, Any])
@@ -143,20 +125,6 @@ class AsyncVaultClient:
     async def write_secret_idempotent(
         self, path: str, data: Dict[str, Any]
     ) -> Dict[str, Any]:
-        """
-        Idempotent write for KV v2. Only writes if current contents differ.
-
-        Args:
-            path: The path under Vault's KV engine.
-            data: The data dict to store.
-
-        Returns:
-            - An empty dict if the data is unchanged.
-            - The Vault response dict if a write actually occurred.
-
-        Raises:
-            RuntimeError: If reading or writing fails.
-        """
         existing_data: Optional[Dict[str, Any]] = None
         try:
             existing_data = await self.read_secret(path)
@@ -171,16 +139,6 @@ class AsyncVaultClient:
         return await self.write_secret(path, data)
 
     async def delete_secret(self, path: str, hard: bool = False) -> None:
-        """
-        Delete a secret from KV v2.
-
-        Args:
-            path: The Vault KV path.
-            hard: If True, perform a hard delete (metadata + all versions).
-
-        Raises:
-            RuntimeError: If Vault returns an error (non-200, non-404).
-        """
         await self._ensure_valid_token()
         session = await self._ensure_session()
         if self._client_token is None:
@@ -202,14 +160,6 @@ class AsyncVaultClient:
                 )
 
     async def list_secrets(self, path: str) -> List[str]:
-        """
-        List child keys under a KV v2 prefix.
-
-        Args:
-            path: The Vault KV path prefix (should end with '/').
-        Returns:
-            A list of keys (could be empty if none found or 404).
-        """
         await self._ensure_valid_token()
         session = await self._ensure_session()
         if self._client_token is None:
@@ -237,17 +187,6 @@ class AsyncVaultClient:
         return keys
 
     async def secret_history(self, path: str) -> Dict[str, Any]:
-        """
-        Retrieve metadata for a KV v2 secret (version info, etc.).
-
-        Args:
-            path: The Vault KV path (not including /data/).
-        Returns:
-            The metadata dict or {} if not found (404).
-
-        Raises:
-            RuntimeError: For non-200, non-404 responses.
-        """
         await self._ensure_valid_token()
         session = await self._ensure_session()
         if self._client_token is None:
@@ -266,12 +205,6 @@ class AsyncVaultClient:
         return validate_type(raw_resp, Dict[str, Any])
 
     async def revoke_self_token(self) -> None:
-        """
-        Revoke the current token if policy allows (POST /v1/auth/token/revoke-self).
-
-        If using direct token, typically not renewed or revoked in the same sense,
-        so this is mostly relevant to K8s-auth tokens.
-        """
         await self._ensure_valid_token()
         session = await self._ensure_session()
         if self._client_token is None:
@@ -287,12 +220,9 @@ class AsyncVaultClient:
 
         self._client_token = None
 
-    #
     # ------------
     # Private Token Management
     # ------------
-    #
-
     async def _ensure_session(self) -> aiohttp.ClientSession:
         if self._session is None:
             self._session = aiohttp.ClientSession()
@@ -302,15 +232,15 @@ class AsyncVaultClient:
         """
         Ensure we have a valid token:
           - If direct_vault_token is set, we use that and skip any renew logic.
-          - Else, we do K8s-based login/renew as needed.
+          - Else, do K8s-based login + renewal as needed.
         """
-        # If direct token is provided, just set it once and skip everything else
+        # If direct token is provided, just use it
         if self._direct_token is not None:
             if self._client_token is None:
                 self._client_token = self._direct_token
             return
 
-        # Otherwise, do K8s login + renewal
+        # Otherwise, K8s login + renewal
         now = time.time()
         if (
             self._last_token_check > 0
@@ -320,7 +250,6 @@ class AsyncVaultClient:
 
         self._last_token_check = now
 
-        # If we have no token yet => login
         if self._client_token is None:
             await self._login()
             return
@@ -330,7 +259,7 @@ class AsyncVaultClient:
             token_info = await self._get_token_info()
         except RuntimeError as e:
             if "403" in str(e):
-                # Possibly token has expired or is invalid; re-login
+                # Possibly token expired or invalid
                 await self._login()
                 return
             raise
@@ -344,11 +273,7 @@ class AsyncVaultClient:
             await self._renew_token()
 
     async def _login(self) -> None:
-        """Perform a K8s login (if vault_role_name is set)."""
-        if self._direct_token is not None:
-            self._client_token = self._direct_token
-            return
-
+        # If we had a direct token, we'd just set it. (Already handled above)
         if not self._vault_role_name:
             raise RuntimeError(
                 "Cannot login via K8s auth because vault_role_name is not set."
@@ -375,7 +300,6 @@ class AsyncVaultClient:
         self._last_token_check = 0.0
 
     async def _renew_token(self) -> None:
-        """Attempt to renew the current token if it's K8s-based."""
         if self._direct_token is not None:
             self._client_token = self._direct_token
             return
@@ -397,11 +321,10 @@ class AsyncVaultClient:
                     self._client_token = auth_data["client_token"]
                     return
 
-        # If renewal fails, attempt a fresh login
+        # Renewal failed, re-login
         await self._login()
 
     async def _get_token_info(self) -> Dict[str, Any]:
-        """Lookup self token info for TTL checks, etc."""
         if self._client_token is None:
             raise RuntimeError("Vault token is not set.")
 
