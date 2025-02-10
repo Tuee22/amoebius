@@ -2,10 +2,10 @@ import asyncio
 import sys
 import json
 from typing import Optional
-from .utils.terraform import init_terraform, apply_terraform
-from .utils.async_command_runner import run_command, CommandError
-from .utils.linkerd import install_linkerd
-from .utils.docker import is_docker_running, start_dockerd
+from amoebius.utils.terraform import init_terraform, apply_terraform
+from amoebius.utils.async_command_runner import run_command, CommandError
+from amoebius.utils.linkerd import install_linkerd
+from amoebius.utils.docker import is_docker_running, start_dockerd
 
 
 async def run_amoebius() -> None:

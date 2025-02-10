@@ -82,7 +82,6 @@ async def apply_terraform(
         for key, value in variables.items():
             cmd.extend(["-var", f'{key}="{value}"'])
     print(" ".join(cmd))
-    import pdb; pdb.set_trace()
 
     await run_command(cmd, sensitive=sensitive, cwd=terraform_path)
 

@@ -4,8 +4,8 @@ import asyncio
 import json
 from typing import Any
 
-from .async_command_runner import run_command, CommandError
-from .terraform import init_terraform, apply_terraform
+from amoebius.utils.async_command_runner import run_command, CommandError
+from amoebius.utils.terraform import init_terraform, apply_terraform
 
 
 async def configmap_exists(name: str, namespace: str) -> bool:
@@ -104,7 +104,6 @@ async def install_linkerd() -> None:
       4) Delete 'amoebius-0' only if sidecar is missing.
       5) Wait forever (but only if we actually delete the pod).
     """
-
     # 1) Detect partial or full installs by checking for the config map
     cm_exists: bool = await configmap_exists("linkerd-config", "linkerd")
     if not cm_exists:
