@@ -4,7 +4,6 @@ from getpass import getpass
 import sys
 from typing import Optional
 
-# The new AsyncVaultClient (expects a VaultSettings object)
 from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.secrets.vault_unseal import load_vault_init_data_from_file
 from amoebius.utils.terraform import (
@@ -27,8 +26,8 @@ async def vault_daemon(
     interval_seconds: float = 5.0,
 ) -> None:
     """
-    Periodically retrieve and print a secret from Vault using an AsyncVaultClient
-    with Pydantic-based settings. This function never returns unless interrupted.
+    Periodically retrieve and print a secret from Vault.
+    This function never returns unless interrupted.
     """
     print("Starting Vault daemon. Will fetch and print secret every 5 seconds...")
 
@@ -39,12 +38,10 @@ async def vault_daemon(
         verify_ssl=False,
     )
 
-    # Provide the settings to our new AsyncVaultClient
     async with AsyncVaultClient(settings=settings) as client:
         while True:
             try:
                 secret_data = await client.read_secret(secret_path)
-                # The Terraform code stores { "message": "hello world" }
                 message = secret_data.get("message", "No message found")
                 print(f"Vault secret message: {message}", flush=True)
             except Exception as e:
@@ -58,7 +55,7 @@ async def main() -> None:
     Main entrypoint that can:
     1. Apply or destroy Terraform resources using the Vault root token.
     2. Print the Vault root token if requested.
-    3. Run a daemon that fetches and prints secrets from Vault every 5 seconds.
+    3. Run a daemon that fetches secrets from Vault every 5 seconds.
     """
     parser = argparse.ArgumentParser(
         description="Terraform operations with Vault secrets, or run the Vault daemon."
@@ -85,7 +82,7 @@ async def main() -> None:
     )
     parser.add_argument(
         "--secret-path",
-        default="secret/data/vault-client/hello",
+        default="vault-client/hello",
         help='Which secret path to read (default: "secret/data/vault-test/hello")',
     )
     parser.add_argument(
@@ -118,24 +115,26 @@ async def main() -> None:
         print(f"Vault root token: {vault_init_data.root_token}")
         return
 
-    # We'll pass these variables to the Terraform apply/destroy
-    variables = {
-        "vault_addr": vault_addr,
-        "vault_token": vault_init_data.root_token,
+    # We'll set environment variables for Terraform
+    # so that the Vault provider can read them directly.
+    env_vars = {
+        "VAULT_ADDR": vault_addr,
+        "VAULT_TOKEN": vault_init_data.root_token,
     }
 
     async def tf_apply() -> None:
-        await init_terraform(root_name=TERRAFORM_ROOT_NAME)
+        # Pass env=env_vars to init_terraform so it knows about these at init time
+        await init_terraform(root_name=TERRAFORM_ROOT_NAME, env=env_vars)
         await apply_terraform(
             root_name=TERRAFORM_ROOT_NAME,
-            variables=variables,
+            env=env_vars,
             override_lock=args.override_lock,
         )
 
     async def tf_destroy() -> None:
         await destroy_terraform(
             root_name=TERRAFORM_ROOT_NAME,
-            variables=variables,
+            env=env_vars,
             override_lock=args.override_lock,
         )
 

@@ -1,6 +1,9 @@
+#####################################################
+# main.tf
+#####################################################
+
 terraform {
   backend "kubernetes" {
-    # Customize as needed for your cluster
     secret_suffix     = "test-vault-client"
     load_config_file  = false
     namespace         = "amoebius"
@@ -19,11 +22,12 @@ terraform {
   }
 }
 
+# Let the Vault provider read VAULT_ADDR and VAULT_TOKEN from the environment
 provider "vault" {
-  address = var.vault_addr
-  token   = var.vault_token
+  # No explicit address/token – will use env vars: VAULT_ADDR, VAULT_TOKEN
 }
 
+# Same for Kubernetes – typically uses KUBECONFIG or in-cluster config.
 provider "kubernetes" {
   host                   = ""
   token                  = ""
@@ -31,7 +35,7 @@ provider "kubernetes" {
 }
 
 module "vault_client_test_namespace" {
-  source = "/amoebius/terraform/modules/linkerd_annotated_namespace"
+  source    = "/amoebius/terraform/modules/linkerd_annotated_namespace"
   namespace = "vault-client-test"
 }
 
@@ -72,8 +76,6 @@ resource "vault_kubernetes_auth_backend_role" "app_role" {
   token_policies = [
     vault_policy.app_policy.name
   ]
-
-  # Optionally, token period, TTL, etc. can be set here if desired
 }
 
 #####################################################
@@ -91,8 +93,7 @@ resource "kubernetes_service_account" "app_sa" {
 }
 
 #####################################################
-# Deploy the container (tuee22/amoebius:latest)
-# that runs the vault_client test daemon
+# Deploy the container that runs the vault_client test daemon
 #####################################################
 resource "kubernetes_deployment" "app_deployment" {
   metadata {
@@ -102,7 +103,6 @@ resource "kubernetes_deployment" "app_deployment" {
 
   spec {
     replicas = 1
-
     selector {
       match_labels = {
         app = "vault-client-app"
@@ -122,7 +122,7 @@ resource "kubernetes_deployment" "app_deployment" {
           name = "amoebius-volume"
           host_path {
             path = "/amoebius"
-            type = "Directory" # or "DirectoryOrCreate", etc. if needed
+            type = "Directory"
           }
         }
 
