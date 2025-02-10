@@ -26,6 +26,8 @@ variable "service_account_key_json" {
   type        = string
   description = "Entire GCP service account JSON key, as a single string."
   sensitive   = true
+  default     = <<EOF
+EOF
 }
 
 variable "ssh_user" {

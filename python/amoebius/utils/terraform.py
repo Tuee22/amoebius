@@ -80,8 +80,7 @@ async def apply_terraform(
 
     if variables:
         for key, value in variables.items():
-            cmd.extend(["-var", f'{key}="{value}"'])
-    print(" ".join(cmd))
+            cmd.extend(["-var", f'{key}={value}'])
 
     await run_command(cmd, sensitive=sensitive, cwd=terraform_path)
 
