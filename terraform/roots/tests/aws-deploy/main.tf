@@ -1,5 +1,5 @@
 ###############################################################################
-# main.tf - Full Terraform Module
+# main.tf - Full Terraform Module (Updated to use environment variables)
 ###############################################################################
 
 ###############################################################################
@@ -34,18 +34,6 @@ variable "region" {
   default     = "us-east-1"
 }
 
-variable "aws_access_key_id" {
-  type        = string
-  description = "AWS Access Key ID."
-  sensitive   = true
-}
-
-variable "aws_secret_access_key" {
-  type        = string
-  description = "AWS Secret Access Key."
-  sensitive   = true
-}
-
 variable "availability_zones" {
   type        = list(string)
   description = "List of Availability Zones in which to create subnets and EC2 instances."
@@ -77,9 +65,9 @@ variable "no_verify_ssl" {
 # 3) AWS Provider
 ###############################################################################
 provider "aws" {
-  region     = var.region
-  access_key = var.aws_access_key_id
-  secret_key = var.aws_secret_access_key
+  # We only specify the region here; Terraform automatically picks up
+  # AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY / etc. from environment variables.
+  region = var.region
 }
 
 ###############################################################################
@@ -146,7 +134,7 @@ resource "aws_route" "public_internet_access" {
 resource "aws_subnet" "public" {
   count                   = length(var.availability_zones)
   vpc_id                  = aws_vpc.this.id
-  cidr_block             = "10.0.${count.index}.0/24"
+  cidr_block              = "10.0.${count.index}.0/24"
   availability_zone       = var.availability_zones[count.index]
   map_public_ip_on_launch = true
   tags = {
@@ -210,21 +198,19 @@ resource "aws_instance" "ubuntu" {
 }
 
 ###############################################################################
-# 9) Wait for Instances to be SSH-Accessible
+# 9) (Optional) Wait for Instances to be SSH-Accessible
 ###############################################################################
-# This resource ensures the instance is fully started, networked, and listening
-# on port 22 before we do anything that requires live SSH connectivity.
+# If you need to wait for SSH connectivity in a single run:
 # resource "null_resource" "wait_for_ssh" {
 #   count = length(var.availability_zones)
-
-
+#
 #   connection {
 #     type        = "ssh"
 #     host        = aws_instance.ubuntu[count.index].public_ip
 #     user        = var.ssh_user
 #     private_key = tls_private_key.ssh[count.index].private_key_pem
 #   }
-
+#
 #   provisioner "remote-exec" {
 #     inline = [
 #       "echo 'Instance is up and SSH connection successful.'"
@@ -236,26 +222,25 @@ resource "aws_instance" "ubuntu" {
 # 10) Store Each Private Key in Vault
 ###############################################################################
 module "ssh_vault_secret" {
-  source = "/amoebius/terraform/modules/ssh_vault_secret"
+  source          = "/amoebius/terraform/modules/ssh_vault_secret"
 
-  count            = length(var.availability_zones)
-  vault_role_name  = var.vault_role_name
-  user             = var.ssh_user
-  hostname         = aws_instance.ubuntu[count.index].public_ip
-  port             = 22
-  private_key      = tls_private_key.ssh[count.index].private_key_pem
-  no_verify_ssl    = var.no_verify_ssl
+  count           = length(var.availability_zones)
+  vault_role_name = var.vault_role_name
+  user            = var.ssh_user
+  hostname        = aws_instance.ubuntu[count.index].public_ip
+  port            = 22
+  private_key     = tls_private_key.ssh[count.index].private_key_pem
+  no_verify_ssl   = var.no_verify_ssl
 
   # Construct a unique path for each key
   path = "amoebius/tests/aws-test-deploy/ssh/${terraform.workspace}-ec2-key-${count.index}"
 
   # Ensure we only run after the instance is confirmed accessible by SSH
-  #depends_on = [null_resource.wait_for_ssh]
+  # depends_on = [null_resource.wait_for_ssh]
   depends_on = [
-    aws_instance.ubuntu, 
+    aws_instance.ubuntu,
     aws_security_group.this
   ]
-
 }
 
 ###############################################################################

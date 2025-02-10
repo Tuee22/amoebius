@@ -62,10 +62,10 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import ValidationError
 
-from ..models.ssh import SSHConfig, SSHVaultData
-from ..models.vault import VaultSettings
-from ..utils.ssh_runner import ssh_get_server_key
-from .vault_client import AsyncVaultClient
+from amoebius.models.ssh import SSHConfig, SSHVaultData
+from amoebius.models.vault import VaultSettings
+from ameobius.utils.ssh_runner import ssh_get_server_key
+from amoebius.secrets.vault_client import AsyncVaultClient
 
 
 def _is_expired(expiry: Optional[float]) -> bool:
@@ -145,7 +145,6 @@ async def store_ssh_config(
     vault: AsyncVaultClient,
     path: str,
     config: SSHConfig,
-    set_expiry_if_no_keys: bool = True,
 ) -> None:
     """
     Store an `SSHConfig` instance in Vault at the specified KV `path` using the
@@ -177,7 +176,7 @@ async def store_ssh_config(
         ssh_config=config,
         expires_at=(
             time.time() + 3600.0
-            if set_expiry_if_no_keys and not config.host_keys
+            if not config.host_keys
             else None
         ),
     )
@@ -230,100 +229,6 @@ async def tofu_populate_ssh_config(vault: AsyncVaultClient, path: str) -> None:
 
     # 5) Write the updated record back to Vault
     await vault.write_secret(path, updated_data)
-
-
-async def mass_tofu_for_role(
-    vault: AsyncVaultClient,
-    base_path: str,
-) -> None:
-    """
-    For each secret under `base_path` that contains an `SSHConfig` with no `host_keys`,
-    perform the TOFU process to retrieve the server's public key and update Vault.
-    Expired secrets are hard-deleted automatically.
-
-    This function uses :func:`asyncio.gather` to process all matching secrets concurrently.
-
-    :param vault: An active :class:`AsyncVaultClient`.
-    :param base_path: The path prefix under which SSH secrets are stored. If it
-        lacks a trailing slash, one is appended automatically.
-    :return: None.
-    :raises RuntimeError: If any individual read or TOFU step fails unexpectedly.
-    """
-    if not base_path.endswith("/"):
-        base_path += "/"
-
-    keys = await vault.list_secrets(base_path)
-    if not keys:
-        return
-
-    async def _maybe_tofu(k: str) -> None:
-        full_path = base_path + k
-        try:
-            # We retrieve the config with tofu_if_missing_host_keys=False
-            # to see if it's missing host keys, expired, etc.
-            cfg = await get_ssh_config(
-                vault, full_path, tofu_if_missing_host_keys=False
-            )
-            if not cfg.host_keys:
-                await tofu_populate_ssh_config(vault, full_path)
-        except RuntimeError as ex:
-            # If "404" in the error, the item may have been removed in the interim; ignore.
-            if "404" in str(ex):
-                return
-            raise
-
-    tasks = [asyncio.create_task(_maybe_tofu(k)) for k in keys]
-    await asyncio.gather(*tasks)
-
-
-async def cleanup_expired_ssh_configs(
-    vault: AsyncVaultClient, base_path: str, hard: bool = True
-) -> None:
-    """
-    Remove stale `SSHConfig` secrets that are considered expired and do not have
-    host keys.
-
-    **Automatic Expiry**:
-      - If a secret was stored without host keys and has an `expires_at` value
-        in the past, this function deletes it from Vault.
-      - By default, a **hard delete** is performed. If `hard=False`, only the
-        latest version is deleted (soft-delete).
-
-    :param vault: An active :class:`AsyncVaultClient`.
-    :param base_path: The path prefix where SSH secrets are stored. If missing
-        a trailing slash, it is appended.
-    :param hard: If True, fully remove all versions/metadata. If False, only
-        soft-delete the latest version. Defaults to True.
-    :return: None.
-    :raises RuntimeError: If reading or deleting from Vault fails unexpectedly.
-    """
-    if not base_path.endswith("/"):
-        base_path += "/"
-
-    keys = await vault.list_secrets(base_path)
-    if not keys:
-        return
-
-    async def _maybe_delete(k: str) -> None:
-        full_path = base_path + k
-        try:
-            raw = await vault.read_secret(full_path)
-            # We parse it to ensure we can read the SSHConfig
-            data_obj = SSHVaultData(**raw)
-
-            # Only remove if expired AND no host keys
-            if _is_expired(data_obj.expires_at) and not data_obj.ssh_config.host_keys:
-                await vault.delete_secret(full_path, hard=hard)
-        except RuntimeError as ex:
-            if "404" in str(ex):
-                return
-            raise
-        except ValidationError:
-            # If the data is invalid, might as well skip or optionally try a hard-delete
-            pass
-
-    tasks = [asyncio.create_task(_maybe_delete(k)) for k in keys]
-    await asyncio.gather(*tasks)
 
 
 async def delete_ssh_config(

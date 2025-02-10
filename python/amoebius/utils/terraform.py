@@ -24,6 +24,7 @@ async def init_terraform(
     base_path: str = DEFAULT_TERRAFORM_ROOTS,
     reconfigure: bool = False,
     sensitive: bool = True,
+    env: Optional[Dict[str,Any]] = None,
 ) -> None:
     """
     Initialize a Terraform working directory, possibly using Vault as backend.
@@ -48,7 +49,7 @@ async def init_terraform(
     if reconfigure:
         cmd.append("-reconfigure")
 
-    await run_command(cmd, sensitive=sensitive, cwd=terraform_path)
+    await run_command(cmd, sensitive=sensitive, env=env, cwd=terraform_path)
 
 
 async def apply_terraform(
@@ -57,6 +58,7 @@ async def apply_terraform(
     base_path: str = DEFAULT_TERRAFORM_ROOTS,
     override_lock: bool = False,
     sensitive: bool = True,
+    env: Optional[Dict[str,Any]] = None,
 ) -> None:
     """
     Apply Terraform configuration with auto-approve.
@@ -82,7 +84,7 @@ async def apply_terraform(
         for key, value in variables.items():
             cmd.extend(["-var", f'{key}={value}'])
 
-    await run_command(cmd, sensitive=sensitive, cwd=terraform_path)
+    await run_command(cmd, sensitive=sensitive, env=env, cwd=terraform_path)
 
 
 async def destroy_terraform(
@@ -91,6 +93,7 @@ async def destroy_terraform(
     base_path: str = DEFAULT_TERRAFORM_ROOTS,
     override_lock: bool = False,
     sensitive: bool = True,
+    env: Optional[Dict[str,Any]] = None,
 ) -> None:
     """
     Destroy Terraform-managed infrastructure with auto-approve.
@@ -116,7 +119,7 @@ async def destroy_terraform(
         for key, value in variables.items():
             cmd.extend(["-var", f"{key}={value}"])
 
-    await run_command(cmd, sensitive=sensitive, cwd=terraform_path)
+    await run_command(cmd, sensitive=sensitive, env=env, cwd=terraform_path)
 
 
 @async_retry(retries=30, delay=1.0)
