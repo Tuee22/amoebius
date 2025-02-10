@@ -8,8 +8,8 @@ import tempfile
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from .async_command_runner import run_command, CommandError
-from ..models.ssh import SSHConfig, KubectlCommand
+from amoebius.utils.async_command_runner import run_command, CommandError
+from amoebius.models.ssh import SSHConfig, KubectlCommand
 
 
 async def ssh_get_server_key(

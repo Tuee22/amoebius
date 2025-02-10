@@ -24,7 +24,7 @@ async def init_terraform(
     base_path: str = DEFAULT_TERRAFORM_ROOTS,
     reconfigure: bool = False,
     sensitive: bool = True,
-    env: Optional[Dict[str,Any]] = None,
+    env: Optional[Dict[str, Any]] = None,
 ) -> None:
     """
     Initialize a Terraform working directory, possibly using Vault as backend.
@@ -58,7 +58,7 @@ async def apply_terraform(
     base_path: str = DEFAULT_TERRAFORM_ROOTS,
     override_lock: bool = False,
     sensitive: bool = True,
-    env: Optional[Dict[str,Any]] = None,
+    env: Optional[Dict[str, Any]] = None,
 ) -> None:
     """
     Apply Terraform configuration with auto-approve.
@@ -82,7 +82,7 @@ async def apply_terraform(
 
     if variables:
         for key, value in variables.items():
-            cmd.extend(["-var", f'{key}={value}'])
+            cmd.extend(["-var", f"{key}={value}"])
 
     await run_command(cmd, sensitive=sensitive, env=env, cwd=terraform_path)
 
@@ -93,7 +93,7 @@ async def destroy_terraform(
     base_path: str = DEFAULT_TERRAFORM_ROOTS,
     override_lock: bool = False,
     sensitive: bool = True,
-    env: Optional[Dict[str,Any]] = None,
+    env: Optional[Dict[str, Any]] = None,
 ) -> None:
     """
     Destroy Terraform-managed infrastructure with auto-approve.
@@ -149,11 +149,10 @@ async def read_terraform_state(
     terraform_path = _validate_root_name(root_name, base_path)
 
     cmd = ["terraform", "show", "-json"]
-    state_json = await run_command(
-        cmd, sensitive=sensitive, cwd=terraform_path
-    )
+    state_json = await run_command(cmd, sensitive=sensitive, cwd=terraform_path)
 
     return TerraformState.model_validate_json(state_json)
+
 
 def get_output_from_state(
     state: TerraformState, output_name: str, output_type: Type[T]

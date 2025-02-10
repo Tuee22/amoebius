@@ -93,7 +93,9 @@ async def run_gcp_deploy_test(destroy_only: bool = False) -> None:
         #      for the google provider "credentials" param.
         tf_vars = {
             "project_id": gcp_key.project_id,
-            "service_account_key_json": json.dumps(gcp_key.model_dump())#.encode("unicode_escape").decode("utf-8"),
+            "service_account_key_json": json.dumps(
+                gcp_key.model_dump()
+            ),  # .encode("unicode_escape").decode("utf-8"),
         }
 
         # 4) Either destroy only, or init+apply

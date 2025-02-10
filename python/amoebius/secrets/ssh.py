@@ -64,7 +64,7 @@ from pydantic import ValidationError
 
 from amoebius.models.ssh import SSHConfig, SSHVaultData
 from amoebius.models.vault import VaultSettings
-from ameobius.utils.ssh_runner import ssh_get_server_key
+from amoebius.utils.ssh_runner import ssh_get_server_key
 from amoebius.secrets.vault_client import AsyncVaultClient
 
 
@@ -292,8 +292,6 @@ async def demo_lifecycle(
     path = base_path + "demo_ssh"
 
     async with AsyncVaultClient(settings) as vault:
-        print("=== 1) Cleanup any expired configs first ===")
-        await cleanup_expired_ssh_configs(vault, base_path=base_path, hard=True)
 
         print("=== 2) Store SSHConfig with no host keys (one-hour expiry) ===")
         config_in = SSHConfig(
@@ -303,7 +301,7 @@ async def demo_lifecycle(
             private_key=private_key,
             host_keys=None,
         )
-        await store_ssh_config(vault, path, config_in, set_expiry_if_no_keys=True)
+        await store_ssh_config(vault, path, config_in)
 
         print("=== 3) Retrieve => confirm no host keys ===")
         cfg = await get_ssh_config(vault, path, tofu_if_missing_host_keys=False)
