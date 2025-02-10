@@ -1,275 +1,162 @@
-###############################################################################
-# main.tf - Full Terraform Module (Using Vault Backend with vault_address variable)
-###############################################################################
+#!/usr/bin/env python3
+"""
+amoebius/cli/secrets/aws.py
 
-###############################################################################
-# 1) Variables for Vault
-###############################################################################
-variable "vault_address" {
-  type        = string
-  description = "URL to the Vault server for Terraform backend."
-  default     = "http://vault.vault.svc.cluster.local:8200"
-}
+Adds a 'store-key-from-csv' subcommand for uploading AWS credentials
+(from a CSV file downloaded via the AWS console) into Vault, with
+Pydantic validation using AWSApiKey.
 
-variable "vault_role_name" {
-  type        = string
-  description = "Vault Kubernetes auth role name used by the ssh_vault_secret module."
-  default     = "amoebius-admin-role"
-}
+Usage example:
+  python -m amoebius.cli.secrets.aws store-key-from-csv \
+      --csv-file my_aws_creds.csv \
+      --path secrets/amoebius/aws_key \
+      --vault-role-name amoebius-admin-role
 
-###############################################################################
-# 2) Terraform Settings & Vault Backend
-###############################################################################
-terraform {
-  backend "vault" {
-    address         = var.vault_address
-    skip_tls_verify = true
-    path            = "secret/amoebius/tests/test-aws-deploy/tf"
-  }
+CSV columns typically include exactly two columns:
+  "Access key ID", "Secret access key"
 
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.0"
-    }
-    tls = {
-      source  = "hashicorp/tls"
-      version = "~> 4.0"
-    }
-  }
-}
+We enforce a strict 2×2 CSV shape:
+  - Row 0: The column headers (e.g., "Access key ID", "Secret access key")
+  - Row 1: The credential values
+"""
 
-###############################################################################
-# Additional Variables
-###############################################################################
-variable "region" {
-  type        = string
-  description = "The AWS region to deploy in."
-  default     = "us-east-1"
-}
+from __future__ import annotations
 
-variable "aws_access_key_id" {
-  type        = string
-  description = "AWS Access Key ID."
-  sensitive   = true
-}
+import argparse
+import asyncio
+import sys
+import os
+from typing import NoReturn
 
-variable "aws_secret_access_key" {
-  type        = string
-  description = "AWS Secret Access Key."
-  sensitive   = true
-}
+import pandas as pd
 
-variable "availability_zones" {
-  type        = list(string)
-  description = "List of Availability Zones in which to create subnets and EC2 instances."
-  default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
-}
+from amoebius.models.api_keys.aws import AWSApiKey
+from amoebius.models.vault import VaultSettings
+from amoebius.secrets.vault_client import AsyncVaultClient
 
-variable "ssh_user" {
-  type        = string
-  description = "SSH username to configure on the remote host."
-  default     = "ubuntu"
-}
 
-variable "no_verify_ssl" {
-  type        = bool
-  description = "Disable SSL certificate verification when storing SSH keys in Vault."
-  default     = true
-}
+def main() -> NoReturn:
+    """
+    Entry point for 'store-key-from-csv' subcommand usage.
+    """
+    parser = argparse.ArgumentParser(
+        prog="amoebius.cli.secrets.api_keys.aws",
+        description="CLI to store AWS credentials in Vault from a CSV file.",
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
-###############################################################################
-# 3) AWS Provider
-###############################################################################
-provider "aws" {
-  region     = var.region
-  access_key = var.aws_access_key_id
-  secret_key = var.aws_secret_access_key
-}
+    store_csv_parser = subparsers.add_parser(
+        "store-key-from-csv",
+        help="Parse an AWS credentials CSV file and store in Vault with AWSApiKey validation.",
+    )
 
-###############################################################################
-# 4) Data Sources
-###############################################################################
-data "aws_ami" "ubuntu" {
-  most_recent = true
-  owners      = ["099720109477"] # Canonical
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
-  }
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-}
+    store_csv_parser.add_argument(
+        "--csv-file",
+        required=True,
+        help="Path to the AWS credentials CSV (with 'Access key ID' and 'Secret access key').",
+    )
+    store_csv_parser.add_argument(
+        "--path",
+        required=True,
+        help="Vault path to write the JSON data (e.g. 'secrets/amoebius/aws_key').",
+    )
 
-###############################################################################
-# 5) Generate an SSH Key Pair Per AZ
-###############################################################################
-resource "tls_private_key" "ssh" {
-  count     = length(var.availability_zones)
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
+    # Vault auth arguments (mirroring vault.py style)
+    group = store_csv_parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "--vault-role-name",
+        help="Vault K8s auth role name (mutually exclusive with --vault-token).",
+    )
+    group.add_argument(
+        "--vault-token",
+        help="A direct Vault token (mutually exclusive with --vault-role-name).",
+    )
+    store_csv_parser.add_argument(
+        "--vault-addr",
+        default="http://vault.vault.svc.cluster.local:8200",
+        help="Vault address (default: http://vault.vault.svc.cluster.local:8200).",
+    )
+    store_csv_parser.add_argument(
+        "--vault-token-path",
+        default="/var/run/secrets/kubernetes.io/serviceaccount/token",
+        help="Path to JWT token for K8s auth (default: /var/run/secrets/kubernetes.io/serviceaccount/token).",
+    )
+    store_csv_parser.add_argument(
+        "--no-verify-ssl",
+        action="store_true",
+        default=False,
+        help="Disable SSL certificate verification (default: verify).",
+    )
 
-resource "aws_key_pair" "ssh" {
-  count      = length(var.availability_zones)
-  key_name   = "${terraform.workspace}-ec2-key-${count.index}"
-  public_key = tls_private_key.ssh[count.index].public_key_openssh
-}
+    store_csv_parser.set_defaults(func=_store_key_from_csv)
 
-###############################################################################
-# 6) VPC & Networking
-###############################################################################
-resource "aws_vpc" "this" {
-  cidr_block = "10.0.0.0/16"
-  tags = {
-    Name = "${terraform.workspace}-vpc"
-  }
-}
+    args = parser.parse_args()
 
-resource "aws_internet_gateway" "this" {
-  vpc_id = aws_vpc.this.id
-  tags = {
-    Name = "${terraform.workspace}-igw"
-  }
-}
+    try:
+        asyncio.run(args.func(args))
+    except Exception as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        sys.exit(1)
+    else:
+        sys.exit(0)
 
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.this.id
-  tags = {
-    Name = "${terraform.workspace}-public-rt"
-  }
-}
 
-resource "aws_route" "public_internet_access" {
-  route_table_id         = aws_route_table.public.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.this.id
-}
+async def _store_key_from_csv(args: argparse.Namespace) -> None:
+    """
+    Parse a CSV file of AWS credentials into an AWSApiKey, then directly call
+    write_secret(...) on an AsyncVaultClient using that data.
+    """
+    # 1) Parse/validate CSV into a Pydantic model
+    aws_api_key = _parse_aws_csv(csv_file_path=args.csv_file)
 
-resource "aws_subnet" "public" {
-  count                   = length(var.availability_zones)
-  vpc_id                  = aws_vpc.this.id
-  cidr_block             = "10.0.${count.index}.0/24"
-  availability_zone       = var.availability_zones[count.index]
-  map_public_ip_on_launch = true
-  tags = {
-    Name = "${terraform.workspace}-public-subnet-${count.index}"
-  }
-}
+    # 2) Build Vault settings from CLI args
+    vault_settings = VaultSettings(
+        vault_addr=args.vault_addr,
+        vault_role_name=args.vault_role_name,
+        direct_vault_token=args.vault_token,
+        token_path=args.vault_token_path,
+        verify_ssl=(not args.no_verify_ssl),
+    )
 
-resource "aws_route_table_association" "public_subnet" {
-  count          = length(var.availability_zones)
-  subnet_id      = aws_subnet.public[count.index].id
-  route_table_id = aws_route_table.public.id
-}
+    # 3) Write the secret to Vault
+    async with AsyncVaultClient(vault_settings) as client:
+        await client.write_secret_idempotent(args.path, aws_api_key.model_dump())
 
-###############################################################################
-# 7) Custom Security Group (Avoid AWS Default SG)
-###############################################################################
-resource "aws_security_group" "this" {
-  name        = "${terraform.workspace}-custom-sg"
-  description = "Security group for SSH ingress"
-  vpc_id      = aws_vpc.this.id
 
-  # Allow SSH Inbound from anywhere
-  ingress {
-    description = "SSH from anywhere"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+def _parse_aws_csv(csv_file_path: str) -> AWSApiKey:
+    """
+    Reads the CSV with pandas (header=None) and enforces a strict 2×2 shape:
+      - Row 0: Headers ("Access key ID", "Secret access key")
+      - Row 1: Values (the actual credentials)
 
-  # Allow all outbound
-  egress {
-    description = "Allow all outbound traffic"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+    Then constructs an AWSApiKey with access_key_id and secret_access_key.
 
-  tags = {
-    Name = "${terraform.workspace}-custom-sg"
-  }
-}
+    Raises ValueError if:
+      - The file isn't found
+      - The DataFrame isn't exactly 2×2
+      - Required headers are missing
+    """
+    if not os.path.isfile(csv_file_path):
+        raise ValueError(f"CSV file not found: {csv_file_path}")
 
-###############################################################################
-# 8) Create EC2 Instances (One Per AZ) With Unique SSH Keys
-###############################################################################
-resource "aws_instance" "ubuntu" {
-  count         = length(var.availability_zones)
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = "t2.micro"
-  subnet_id     = aws_subnet.public[count.index].id
-  key_name      = aws_key_pair.ssh[count.index].key_name
+    # Read with no header, so the first row is row 0, second row is row 1
+    df = pd.read_csv(csv_file_path, header=None)
 
-  vpc_security_group_ids = [aws_security_group.this.id]
+    # Must be exactly 2x2
+    if df.shape != (2, 2):
+        raise ValueError(f"Expected CSV to be 2×2, but got shape {df.shape}.")
 
-  tags = {
-    Name = "${terraform.workspace}-test-aws-deployment-${count.index}"
-  }
-}
+    # Create a Series where row 0 is the index, row 1 is the data
+    series = df.iloc[1].copy()
+    # Convert the first row into a pandas.Index
+    series.index = pd.Index(df.iloc[0].to_list())
 
-###############################################################################
-# 9) Store Each Private Key in Vault
-###############################################################################
-module "ssh_vault_secret" {
-  source = "/amoebius/terraform/modules/ssh_vault_secret"
+    # Construct and return the AWSApiKey
+    return AWSApiKey(
+        access_key_id=str(series["Access key ID"]),
+        secret_access_key=str(series["Secret access key"]),
+    )
 
-  count            = length(var.availability_zones)
-  vault_role_name  = var.vault_role_name
-  user             = var.ssh_user
-  hostname         = aws_instance.ubuntu[count.index].public_ip
-  port             = 22
-  private_key      = tls_private_key.ssh[count.index].private_key_pem
-  no_verify_ssl    = var.no_verify_ssl
 
-  # Construct a unique path for each key
-  path = "amoebius/tests/aws-test-deploy/ssh/${terraform.workspace}-ec2-key-${count.index}"
-
-  depends_on = [
-    aws_instance.ubuntu, 
-    aws_security_group.this
-  ]
-}
-
-###############################################################################
-# 10) Outputs
-###############################################################################
-output "vpc_id" {
-  description = "The ID of the created VPC."
-  value       = aws_vpc.this.id
-}
-
-output "subnet_ids" {
-  description = "List of subnet IDs, one per AZ."
-  value       = [for subnet in aws_subnet.public : subnet.id]
-}
-
-output "instance_ids" {
-  description = "List of all Ubuntu instance IDs created, one per AZ."
-  value       = [for instance in aws_instance.ubuntu : instance.id]
-}
-
-output "public_ips" {
-  description = "List of public IP addresses for the Ubuntu instances."
-  value       = [for instance in aws_instance.ubuntu : instance.public_ip]
-}
-
-output "private_ips" {
-  description = "List of private IP addresses for the Ubuntu instances."
-  value       = [for instance in aws_instance.ubuntu : instance.private_ip]
-}
-
-output "security_group_id" {
-  description = "The ID of the custom security group used by the instances."
-  value       = aws_security_group.this.id
-}
-
-output "vault_ssh_keys" {
-  description = "Vault paths where each SSH private key is stored."
-  value       = [for vault_secret in module.ssh_vault_secret : vault_secret.vault_path]
-}
+if __name__ == "__main__":
+    main()

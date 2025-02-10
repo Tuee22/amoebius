@@ -1,45 +1,49 @@
 #!/usr/bin/env python3
 """
-aws_deploy_test.py
+gcp_deploy_test.py
 
 An async end-to-end script that:
-  - Reads AWS credentials from Vault at path "amoebius/tests/api_keys/aws"
-  - Validates them with AWSApiKey
+  - Reads GCP service account credentials from Vault at path "amoebius/tests/api_keys/gcp"
+  - Validates them with GCPServiceAccountKey (the full JSON key)
   - Depending on the CLI flags, either:
       A) init + apply (default)
       B) only destroy if --destroy is passed
 
 Usage:
-    python aws_deploy_test.py            # init + apply
-    python aws_deploy_test.py --destroy  # only destroy
+    python gcp_deploy_test.py            # init + apply
+    python gcp_deploy_test.py --destroy  # only destroy
 
 Requirements:
   - "amoebius/utils/terraform.py" with init_terraform, apply_terraform, destroy_terraform
   - "amoebius/secrets/vault_client.py" with AsyncVaultClient for reading from Vault
-  - "amoebius/models/api_keys/aws.py" with AWSApiKey
-  - A Vault secret at "amoebius/tests/api_keys/aws" containing:
+  - "amoebius/models/api_keys/gcp.py" with GCPServiceAccountKey (shown above)
+  - A Vault secret at "amoebius/tests/api_keys/gcp" containing the standard GCP SA key JSON:
       {
-        "access_key_id": "AKIA...",
-        "secret_access_key": "...",
-        "session_token": null
+        "type": "service_account",
+        "project_id": "my-gcp-project",
+        "private_key_id": "...",
+        "private_key": "...",
+        "client_email": "...",
+        ...
       }
-    validated against AWSApiKey
+    validated against GCPServiceAccountKey
   - Terraform CLI installed and in PATH
-  - Terraform root "amoebius/terraform/roots/tests/aws-deploy" referencing
-    var.aws_access_key_id, var.aws_secret_access_key, var.aws_session_token, etc.
+  - Terraform root "amoebius/terraform/roots/tests/gcp-deploy" referencing
+    var.project_id, var.service_account_key_json, etc.
 """
 
 from __future__ import annotations
 
 import sys
+import json
 import asyncio
 import argparse
 from typing import NoReturn
-
 from pydantic import ValidationError
 
+# Vault + Terraform
 from amoebius.models.vault import VaultSettings
-from amoebius.models.api_keys.aws import AWSApiKey
+from amoebius.models.api_keys.gcp import GCPServiceAccountKey
 from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.utils.terraform import (
     init_terraform,
@@ -48,13 +52,13 @@ from amoebius.utils.terraform import (
 )
 
 VAULT_ROLE_NAME = "amoebius-admin-role"
-VAULT_PATH = "amoebius/tests/api_keys/aws"
-TERRAFORM_ROOT_NAME = "tests/aws-deploy"  # Folder in /amoebius/terraform/roots
+VAULT_PATH = "amoebius/tests/api_keys/gcp"
+TERRAFORM_ROOT_NAME = "tests/gcp-deploy"  # Folder in /amoebius/terraform/roots
 
 
-async def run_aws_deploy_test(destroy_only: bool = False) -> None:
+async def run_gcp_deploy_test(destroy_only: bool = False) -> None:
     """
-    Reads AWS creds from Vault, validates them, then either:
+    Reads GCP creds from Vault, validates them, then either:
       - (default) run terraform init + apply, or
       - (if destroy_only=True) skip init/apply and run terraform destroy.
 
@@ -63,35 +67,36 @@ async def run_aws_deploy_test(destroy_only: bool = False) -> None:
     # 1) Read credentials from Vault
     vault_settings = VaultSettings(
         vault_role_name=VAULT_ROLE_NAME,
-        verify_ssl=True,  # or False if self-signed
+        verify_ssl=True,  # or False if self-signed or dev environment
     )
 
     async with AsyncVaultClient(vault_settings) as vault:
-        # Read AWS credentials
         try:
+            # Vault should return a dict that matches the GCP SA JSON structure
             secret_data = await vault.read_secret(VAULT_PATH)
         except RuntimeError as exc:
             raise RuntimeError(
-                f"Failed to read AWS credentials from '{VAULT_PATH}': {exc}"
+                f"Failed to read GCP credentials from '{VAULT_PATH}': {exc}"
             ) from exc
 
-        # 2) Validate them with AWSApiKey
+        # 2) Validate them with GCPServiceAccountKey
         try:
-            aws_key = AWSApiKey(**secret_data)
+            gcp_key = GCPServiceAccountKey(**secret_data)
         except ValidationError as ve:
             raise RuntimeError(
-                f"Vault data at '{VAULT_PATH}' failed AWSApiKey validation: {ve}"
+                f"Vault data at '{VAULT_PATH}' failed GCPServiceAccountKey validation: {ve}"
             ) from ve
 
-        # Prepare Terraform variables
+        # 3) Prepare Terraform variables
+        #    - We'll pass 'project_id' by itself,
+        #    - and re-serialize the ENTIRE SA JSON as a single string
+        #      for the google provider "credentials" param.
         tf_vars = {
-            "aws_access_key_id": aws_key.access_key_id,
-            "aws_secret_access_key": aws_key.secret_access_key,
+            "project_id": gcp_key.project_id,
+            "service_account_key_json": json.dumps(gcp_key.model_dump())#.encode("unicode_escape").decode("utf-8"),
         }
-        if aws_key.session_token is not None:
-            tf_vars["aws_session_token"] = aws_key.session_token
 
-        # 3) Either destroy only, or init+apply
+        # 4) Either destroy only, or init+apply
         if destroy_only:
             print("Skipping init/apply. Proceeding with terraform destroy only...")
             await destroy_terraform(
@@ -123,9 +128,9 @@ def main() -> NoReturn:
     """
     parser = argparse.ArgumentParser(
         description=(
-            "Perform an async test to read AWS credentials from Vault, then either "
-            "init+apply (default) or only destroy (--destroy) the Terraform root "
-            "'tests/aws-deploy'."
+            "Perform an async test to read GCP service account credentials from Vault, "
+            "then either init+apply (default) or only destroy (--destroy) "
+            "the Terraform root 'tests/gcp-deploy'."
         )
     )
     parser.add_argument(
@@ -136,7 +141,7 @@ def main() -> NoReturn:
     args = parser.parse_args()
 
     try:
-        asyncio.run(run_aws_deploy_test(destroy_only=args.destroy))
+        asyncio.run(run_gcp_deploy_test(destroy_only=args.destroy))
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         sys.exit(1)

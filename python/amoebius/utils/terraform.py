@@ -6,10 +6,12 @@ from typing import Any, Optional, Dict, Type, TypeVar
 
 from pydantic import ValidationError
 
-from ..models.terraform_state import TerraformState
-from ..models.validator import validate_type
-from ..utils.async_command_runner import run_command, CommandError
-from amoebius.secrets.vault_client import AsyncVaultClient  # for type hints
+from amoebius.models.terraform_state import TerraformState
+from amoebius.models.validator import validate_type
+from amoebius.utils.async_command_runner import run_command, CommandError
+from amoebius.secrets.vault_client import AsyncVaultClient
+from amoebius.utils.async_retry import async_retry
+
 
 T = TypeVar("T")
 
@@ -21,7 +23,6 @@ async def init_terraform(
     root_name: str,
     base_path: str = DEFAULT_TERRAFORM_ROOTS,
     reconfigure: bool = False,
-    vault_client: Optional[AsyncVaultClient] = None,
     sensitive: bool = True,
 ) -> None:
     """
@@ -43,15 +44,11 @@ async def init_terraform(
     """
     terraform_path = _validate_root_name(root_name, base_path)
 
-    env = (
-        {"VAULT_TOKEN": await vault_client.get_active_token()} if vault_client else None
-    )
-
     cmd = ["terraform", "init", "-no-color"]
     if reconfigure:
         cmd.append("-reconfigure")
 
-    await run_command(cmd, sensitive=sensitive, cwd=terraform_path, env=env)
+    await run_command(cmd, sensitive=sensitive, cwd=terraform_path)
 
 
 async def apply_terraform(
@@ -59,7 +56,6 @@ async def apply_terraform(
     variables: Optional[Dict[str, Any]] = None,
     base_path: str = DEFAULT_TERRAFORM_ROOTS,
     override_lock: bool = False,
-    vault_client: Optional[AsyncVaultClient] = None,
     sensitive: bool = True,
 ) -> None:
     """
@@ -78,19 +74,17 @@ async def apply_terraform(
     """
     terraform_path = _validate_root_name(root_name, base_path)
 
-    env = (
-        {"VAULT_TOKEN": await vault_client.get_active_token()} if vault_client else None
-    )
-
     cmd = ["terraform", "apply", "-no-color", "-auto-approve"]
     if override_lock:
         cmd.append("-lock=false")
 
     if variables:
         for key, value in variables.items():
-            cmd.extend(["-var", f"{key}={value}"])
+            cmd.extend(["-var", f'{key}="{value}"'])
+    print(" ".join(cmd))
+    import pdb; pdb.set_trace()
 
-    await run_command(cmd, sensitive=sensitive, cwd=terraform_path, env=env)
+    await run_command(cmd, sensitive=sensitive, cwd=terraform_path)
 
 
 async def destroy_terraform(
@@ -98,7 +92,6 @@ async def destroy_terraform(
     variables: Optional[Dict[str, Any]] = None,
     base_path: str = DEFAULT_TERRAFORM_ROOTS,
     override_lock: bool = False,
-    vault_client: Optional[AsyncVaultClient] = None,
     sensitive: bool = True,
 ) -> None:
     """
@@ -117,10 +110,6 @@ async def destroy_terraform(
     """
     terraform_path = _validate_root_name(root_name, base_path)
 
-    env = (
-        {"VAULT_TOKEN": await vault_client.get_active_token()} if vault_client else None
-    )
-
     cmd = ["terraform", "destroy", "-no-color", "-auto-approve"]
     if override_lock:
         cmd.append("-lock=false")
@@ -129,31 +118,23 @@ async def destroy_terraform(
         for key, value in variables.items():
             cmd.extend(["-var", f"{key}={value}"])
 
-    await run_command(cmd, sensitive=sensitive, cwd=terraform_path, env=env)
+    await run_command(cmd, sensitive=sensitive, cwd=terraform_path)
 
 
+@async_retry(retries=30, delay=1.0)
 async def read_terraform_state(
     root_name: str,
     base_path: str = DEFAULT_TERRAFORM_ROOTS,
-    attempt: int = 1,
-    max_attempts: int = 30,
-    vault_client: Optional[AsyncVaultClient] = None,
     sensitive: bool = True,
 ) -> TerraformState:
     """
     Read the current Terraform state as JSON, parse it into a TerraformState object.
 
-    If vault_client is provided, fetch the Vault token and set VAULT_TOKEN
-    in the environment. Otherwise pass None.
-
-    Retries up to max_attempts if model validation fails.
+    Retries up to 30 times if model validation fails.
 
     Args:
         root_name:    Name of the Terraform root directory (no slashes allowed).
         base_path:    Base path where terraform roots are located.
-        attempt:      Current attempt number (for recursion).
-        max_attempts: Maximum attempts before failing.
-        vault_client: Optional AsyncVaultClient to obtain VAULT_TOKEN from.
         sensitive:    If True, hides detailed output on command failure.
 
     Returns:
@@ -166,31 +147,12 @@ async def read_terraform_state(
     """
     terraform_path = _validate_root_name(root_name, base_path)
 
-    env = (
-        {"VAULT_TOKEN": await vault_client.get_active_token()} if vault_client else None
-    )
-
     cmd = ["terraform", "show", "-json"]
     state_json = await run_command(
-        cmd, sensitive=sensitive, cwd=terraform_path, env=env
+        cmd, sensitive=sensitive, cwd=terraform_path
     )
 
-    try:
-        return TerraformState.model_validate_json(state_json)
-    except ValidationError as e:
-        if attempt < max_attempts:
-            await asyncio.sleep(1)
-            return await read_terraform_state(
-                root_name,
-                base_path,
-                attempt + 1,
-                max_attempts,
-                vault_client=vault_client,
-                sensitive=sensitive,
-            )
-        else:
-            raise e
-
+    return TerraformState.model_validate_json(state_json)
 
 def get_output_from_state(
     state: TerraformState, output_name: str, output_type: Type[T]

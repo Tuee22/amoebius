@@ -77,7 +77,7 @@ async def run_write_idempotent(args: argparse.Namespace) -> None:
 
         try:
             obj = model_cls(**raw_data)
-            data_for_vault = obj.dict()
+            data_for_vault = obj.model_dump()
         except Exception as exc:
             print(f"Validation failed: {exc}", file=sys.stderr)
             sys.exit(1)
@@ -267,6 +267,7 @@ def _add_vault_cli_args(subparser: argparse.ArgumentParser) -> None:
     group.add_argument(
         "--vault-role-name",
         help="Vault K8s auth role name (mutually exclusive with --vault-token).",
+        default="amoebius-admin-role",
     )
     group.add_argument(
         "--vault-token",
