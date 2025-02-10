@@ -1,10 +1,11 @@
 """
 amoebius/cli/secrets/ssh.py
 
-CLI to store (with immediate TOFU) or hard-delete SSH configurations in Vault.
-Supports:
-  - K8s auth (--vault-role-name), or
-  - Direct token (--vault-token).
+Thin CLI wrapper around the SSH Vault operations. Each CLI function
+invokes exactly one function from /amoebius/secrets/ssh.py:
+
+  - `store` subcommand -> calls `store_ssh_config_with_tofu`
+  - `delete` subcommand -> calls `delete_ssh_config`
 """
 
 from __future__ import annotations
@@ -18,49 +19,46 @@ from amoebius.models.ssh import SSHConfig
 from amoebius.models.vault import VaultSettings
 from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.secrets.ssh import (
-    store_ssh_config,
+    store_ssh_config_with_tofu,
     delete_ssh_config,
-    tofu_populate_ssh_config,
 )
 
 
 async def run_store(args: argparse.Namespace) -> None:
     """
-    Store an SSHConfig in Vault, then run TOFU (if host_keys are missing).
-
-    1) Store SSHConfig
-    2) Attempt TOFU
-    3) If TOFU fails, hard-delete the secret and exit(1).
+    Store an SSHConfig in Vault (with potential TOFU), by calling a single
+    function `store_ssh_config_with_tofu`. If TOFU fails, that function
+    will do a hard-delete automatically and raise an error.
     """
     vault_settings = _build_vault_settings(args)
+
+    # You can either treat --private-key as a path or inline string.
+    # Example: read from a file, or assume it's already the key content.
+    try:
+        with open(args.private_key, "r", encoding="utf-8") as fpk:
+            key_data = fpk.read()
+    except OSError:
+        # Fall back if it's not a file path; treat as inline
+        key_data = args.private_key
+
     ssh_config = SSHConfig(
         user=args.user,
         hostname=args.hostname,
         port=args.port,
-        private_key=args.private_key,
-        host_keys=None,  # Do not allow CLI input of host_keys
+        private_key=key_data,
+        host_keys=None,  # We rely on TOFU to populate these
     )
-    async with AsyncVaultClient(vault_settings) as vault:
-        # Step 1: Store
-        await store_ssh_config(vault, args.path, ssh_config)
 
-        # Step 2: TOFU
-        try:
-            await tofu_populate_ssh_config(vault, args.path)
-        except Exception as exc:
-            print(
-                f"Error: TOFU failed for path '{args.path}': {exc}\nRemoving the SSH config...",
-                file=sys.stderr,
-            )
-            await delete_ssh_config(vault, args.path, hard_delete=True)
-            sys.exit(1)
+    async with AsyncVaultClient(vault_settings) as vault:
+        await store_ssh_config_with_tofu(vault, args.path, ssh_config)
 
     print(f"Successfully stored SSH config & performed TOFU at '{args.path}'")
 
 
 async def run_delete(args: argparse.Namespace) -> None:
     """
-    Permanently (hard) delete an SSH config from Vault.
+    Hard-delete an SSH config from Vault by calling a single function:
+    `delete_ssh_config`.
     """
     vault_settings = _build_vault_settings(args)
     async with AsyncVaultClient(vault_settings) as vault:
@@ -70,46 +68,19 @@ async def run_delete(args: argparse.Namespace) -> None:
 
 def main() -> None:
     """
-    CLI entry point for storing or deleting SSH configs in Vault.
-
-    Subcommands:
-      - store
-      - delete
-
-    Examples:
-      # Store via K8s auth
-      python -m amoebius.cli.secrets.ssh store \
-        --vault-role-name my_role \
-        --path secrets/ssh/my_server \
-        --user ubuntu \
-        --hostname 1.2.3.4 \
-        --port 22 \
-        --private-key /path/to/id_rsa
-
-      # Store via direct token
-      python -m amoebius.cli.secrets.ssh store \
-        --vault-token s.abcdefg \
-        --path secrets/ssh/my_server \
-        --user ubuntu \
-        --hostname 1.2.3.4 \
-        --port 22 \
-        --private-key /path/to/id_rsa
-
-      # Delete
-      python -m amoebius.cli.secrets.ssh delete \
-        --vault-role-name my_role \
-        --path secrets/ssh/my_server
+    CLI entry point for storing or deleting SSH configs in Vault,
+    relying on the high-level functions from amoebius.secrets.ssh.
     """
     parser = argparse.ArgumentParser(
         prog="amoebius.cli.secrets.ssh",
-        description="CLI to store (with immediate TOFU) or hard-delete SSH configs in Vault.",
+        description="CLI to store (with TOFU) or hard-delete SSH configs in Vault.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # store
     store_parser = subparsers.add_parser(
         "store",
-        help="Store an SSH config in Vault, then run TOFU.",
+        help="Store an SSH config in Vault, then run TOFU automatically.",
     )
     _add_vault_cli_args(store_parser)
     store_parser.add_argument(
@@ -121,7 +92,9 @@ def main() -> None:
         "--port", type=int, default=22, help="SSH port (default: 22)."
     )
     store_parser.add_argument(
-        "--private-key", required=True, help="Path or inline private key."
+        "--private-key",
+        required=True,
+        help="Path or inline text for the SSH private key (PEM).",
     )
     store_parser.set_defaults(func=run_store)
 
@@ -142,8 +115,9 @@ def main() -> None:
 
 def _add_vault_cli_args(subparser: argparse.ArgumentParser) -> None:
     """
-    Add mutually exclusive flags for K8s role vs direct token, plus vault address, token path,
-    and SSL verification toggle.
+    Add CLI arguments for Vault connectivity:
+      - Mutually exclusive: K8s auth role vs direct token
+      - Vault address, token path, SSL verification toggles
     """
     group = subparser.add_mutually_exclusive_group()
     group.add_argument(
@@ -173,7 +147,8 @@ def _add_vault_cli_args(subparser: argparse.ArgumentParser) -> None:
 
 def _build_vault_settings(args: argparse.Namespace) -> VaultSettings:
     """
-    Construct a VaultSettings from CLI args, respecting mutual exclusivity and SSL verification.
+    Build a VaultSettings object from CLI arguments. Enforces mutual exclusivity
+    of K8s role vs direct token.
     """
     if args.vault_token and args.vault_role_name:
         print(

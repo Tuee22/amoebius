@@ -2,30 +2,26 @@
 amoebius/secrets/ssh.py
 
 This module provides a high-level interface for managing SSH secrets in a HashiCorp Vault KV
-store, including the following features:
+store. It supports:
 
-1. **Creation and Storage** of `SSHConfig` objects in Vault with optional auto-expiration
+1. **Creation and Storage** of `SSHConfig` objects in Vault, including auto-expiration
    if the SSH host key is not yet known ("Trust On First Use" scenario).
 
-2. **Automated Expiry**: When an `SSHConfig` is stored without host keys, this module can
-   store an `expires_at` timestamp (defaults to 1 hour in the future). Upon retrieval or
-   cleanup, if the secret is expired, it is automatically hard-deleted.
+2. **TOFU (Trust On First Use)**: If an SSH config is missing host keys, we can perform
+   an SSH handshake (StrictHostKeyChecking=accept-new), retrieve the server's public key,
+   and update the stored config with those keys for future strict validation.
 
-3. **TOFU (Trust On First Use)**: If an SSH config is missing host keys, the module can:
-    - Initiate an SSH handshake (using StrictHostKeyChecking=accept-new).
-    - Retrieve the server's public key.
-    - Populate and update the stored config so that future connections can strictly
-      verify the host key.
+3. **Automated Expiry**: If you store a config without host keys, an expiry (by default
+   1 hour) is set. When retrieved, if it is expired, it is immediately hard-deleted from Vault.
 
-4. **Mass TOFU**: A single call can operate on all SSH secrets under a given Vault path,
-   retrieving any keys that lack host keys, and updating them in parallel.
+4. **Mass TOFU**: (Not shown in detail here) can operate on all SSH secrets under a path.
 
-5. **Cleanup** of expired SSH configs.
+5. **Cleanup of Expired** SSH configs.
 
-6. **Lifecycle Demonstration**: The `demo_lifecycle` function and the `main()` CLI
-   showcase a complete create→read→TOFU→soft-delete→hard-delete flow.
+6. **Lifecycle Demonstration**: `demo_lifecycle` demonstrates the create→read→TOFU→soft-delete→hard-delete flow,
+   including a newly added scenario where a secret is created and immediately hard-deleted.
 
-**Typical Usage**:
+Typical usage:
 
 .. code-block:: python
 
@@ -33,23 +29,13 @@ store, including the following features:
     from amoebius.secrets.ssh import store_ssh_config, get_ssh_config
 
     async with AsyncVaultClient(my_vault_settings) as vault:
-        # Store an SSHConfig
+        # Store an SSHConfig (possibly with no host keys)
         my_ssh = SSHConfig(user="root", hostname="1.2.3.4", private_key="...")
         await store_ssh_config(vault, "secrets/my_ssh_config", my_ssh)
 
-        # Retrieve and auto-TOFU if needed
+        # Retrieve and auto-TOFU if missing host keys
         config = await get_ssh_config(vault, "secrets/my_ssh_config", tofu_if_missing_host_keys=True)
-
-        # Now config.host_keys should be populated
-        # ... proceed with using the config in a strict SSH connection ...
-
-This module requires:
-
-- A working `vault_client.py` that provides the asynchronous KVv2 operations.
-- A properly configured Vault server (KV v2 engine, Kubernetes authentication if desired).
-- `ssh_runner.py` for the SSH handshake logic.
-
-All functions are type-annotated and designed to pass `mypy --strict`.
+        # ...
 """
 
 from __future__ import annotations
@@ -73,7 +59,7 @@ def _is_expired(expiry: Optional[float]) -> bool:
     Check if the given `expiry` epoch timestamp is strictly in the past.
 
     :param expiry: Optional float epoch. If `None`, it's not expired.
-    :return: True if expiry is a float and is less than time.time(), else False.
+    :return: True if expiry is a float and is less than `time.time()`, else False.
     """
     if expiry is None:
         return False
@@ -87,33 +73,30 @@ async def get_ssh_config(
 ) -> SSHConfig:
     """
     Retrieve an `SSHConfig` from the given Vault KV `path`, with built-in
-    expiry checks and optional auto-TOFU population.
+    expiry checks and optional auto-TOFU.
 
     **Expiry Check**:
-      - If the data has an 'expires_at' timestamp that has passed, this method
-        performs a **hard delete** of the secret in Vault and raises a `RuntimeError`.
+      - If `expires_at` is in the past, this method does a **hard delete** of
+        the secret in Vault and raises RuntimeError.
 
     **TOFU Auto-Populate**:
-      - By default, if the `SSHConfig` has no `host_keys` upon retrieval and
-        `tofu_if_missing_host_keys` is True, this method calls :func:`tofu_populate_ssh_config`
-        to fetch the server's public key. It then re-retrieves the newly updated config.
+      - If `ssh_config.host_keys` is empty and `tofu_if_missing_host_keys` is True,
+        we call :func:`tofu_populate_ssh_config`. Afterward, we re-read the updated
+        data to ensure it’s parsed correctly.
 
-    :param vault: An active instance of :class:`AsyncVaultClient`. Must be used within
-        its asynchronous context manager (e.g., `async with vault:`).
-    :param path: The Vault KV path from which the secret should be read.
-    :param tofu_if_missing_host_keys: If True, automatically populate host keys via TOFU
-        if they are missing. Defaults to True.
-    :return: A valid `SSHConfig` object. After TOFU, the updated config (with host keys)
-        is returned.
+    :param vault: An active instance of :class:`AsyncVaultClient`.
+    :param path: The Vault KV path from which to read the SSHConfig.
+    :param tofu_if_missing_host_keys: If True, automatically populate missing host keys
+        via TOFU if they are missing. Defaults to True.
+    :return: A valid `SSHConfig` object (possibly updated by TOFU).
     :raises RuntimeError:
-        - If the path is not found (Vault 404) or other Vault error statuses occur.
-        - If the secret is expired, in which case it is also hard-deleted from Vault.
+        - If the path is not found or other Vault error statuses occur.
+        - If the secret is expired (in which case it is also hard-deleted).
         - If the data fails Pydantic validation.
-        - If TOFU fails (unreachable server, etc.).
+        - If TOFU fails.
     """
     raw = await vault.read_secret(path)
 
-    # Parse into SSHVaultData to unify logic
     try:
         data_obj = SSHVaultData(**raw)
     except ValidationError as ve:
@@ -126,10 +109,9 @@ async def get_ssh_config(
             f"SSHConfig at path '{path}' has expired; it has been removed from Vault."
         )
 
-    # If host_keys are missing and tofu is requested => do TOFU
+    # If host_keys missing and tofu requested => do TOFU
     if tofu_if_missing_host_keys and (not data_obj.ssh_config.host_keys):
         await tofu_populate_ssh_config(vault, path)
-        # Re-retrieve after TOFU
         updated_raw = await vault.read_secret(path)
         try:
             data_obj = SSHVaultData(**updated_raw)
@@ -147,8 +129,10 @@ async def store_ssh_config(
     config: SSHConfig,
 ) -> None:
     """
-    Store an `SSHConfig` instance in Vault at the specified KV `path` using the
-    `SSHVaultData` model. Optionally set an expiry of 1 hour if no host keys are present.
+    Store an `SSHConfig` instance in Vault at `path`. If `host_keys` is empty,
+    this method sets `expires_at` to 1 hour from now by default.
+
+    The data is stored according to the `SSHVaultData` model, e.g.:
 
     .. code-block:: json
 
@@ -160,74 +144,95 @@ async def store_ssh_config(
             "private_key": "...",
             "host_keys": null or [...]
           },
-          "expires_at": <float epoch time if no host keys and set_expiry_if_no_keys=True>
+          "expires_at": <float epoch time if no host keys>
         }
 
-    :param vault: An active instance of :class:`AsyncVaultClient`.
-    :param path: A string denoting the KV path where the data should be stored.
-    :param config: An `SSHConfig` object containing SSH connection details
-        (user, hostname, port, private_key, etc.).
-    :param set_expiry_if_no_keys: If True and `host_keys` are empty/None, sets
-        `"expires_at" = time.time() + 3600`. Defaults to True.
-    :raises RuntimeError: If the underlying Vault API call fails or returns an error.
-    :return: None. The secret is stored in Vault.
+    :param vault: An active :class:`AsyncVaultClient`.
+    :param path: The KV path where the config should be stored.
+    :param config: The SSHConfig object (must have user, hostname, private_key, etc.).
+    :raises RuntimeError: If writing to Vault fails.
+    :return: None
     """
+    # Set an expiry of 1 hour if no host_keys
+    expires = None
+    if not config.host_keys:
+        expires = time.time() + 3600.0
+
     vault_data = SSHVaultData(
         ssh_config=config,
-        expires_at=(
-            time.time() + 3600.0
-            if not config.host_keys
-            else None
-        ),
+        expires_at=expires,
     )
-
-    # Convert the model to dict for Vault storage
     await vault.write_secret_idempotent(path, vault_data.model_dump(exclude_unset=True))
+
+
+async def store_ssh_config_with_tofu(
+    vault: AsyncVaultClient,
+    path: str,
+    config: SSHConfig,
+) -> None:
+    """
+    High-level convenience method to store an SSHConfig at `path`, then attempt
+    TOFU population if host keys are missing. If TOFU fails, the secret is forcibly
+    hard-deleted and a RuntimeError is raised.
+
+    1) Calls `store_ssh_config`.
+    2) If `config.host_keys` is empty, calls `tofu_populate_ssh_config`.
+    3) If TOFU fails, does a hard-delete of the secret and raises RuntimeError.
+
+    :param vault: An active :class:`AsyncVaultClient`.
+    :param path: The KV path to store the SSH config.
+    :param config: The SSHConfig to be stored.
+    :raises RuntimeError:
+      - If storing fails.
+      - If TOFU fails for any reason (unreachable server, etc.).
+    """
+    # Step 1: Store the config
+    await store_ssh_config(vault, path, config)
+
+    # Step 2: If no host keys, attempt TOFU
+    if not config.host_keys:
+        try:
+            await tofu_populate_ssh_config(vault, path)
+        except Exception as exc:
+            # If TOFU fails, forcibly remove the secret so it doesn't linger
+            await delete_ssh_config(vault, path, hard_delete=True)
+            raise RuntimeError(
+                f"TOFU failed for path '{path}'; secret forcibly removed: {exc}"
+            ) from exc
 
 
 async def tofu_populate_ssh_config(vault: AsyncVaultClient, path: str) -> None:
     """
-    Perform a "Trust On First Use" (TOFU) workflow for an `SSHConfig` stored in Vault.
+    Perform a Trust On First Use (TOFU) workflow on an `SSHConfig` stored in Vault.
 
-    **Workflow**:
+    1. Retrieve the existing config (with tofu disabled to avoid recursion).
+    2. Ensure `host_keys` is empty (raise RuntimeError if not).
+    3. Perform a minimal SSH handshake (StrictHostKeyChecking=accept-new) to retrieve
+       the server's public key(s).
+    4. Update the config with those host keys, clear `expires_at`.
+    5. Write the updated record back to Vault.
 
-    1. Retrieve the existing `SSHConfig` via :func:`get_ssh_config` with TOFU disabled
-       (so we won't get an infinite recursion).
-    2. Verify that `host_keys` is empty. If present, raises `RuntimeError` to avoid overwriting.
-    3. Use :func:`ssh_get_server_key` to perform a minimal SSH handshake, obtaining
-       one or more public key lines.
-    4. Update the stored `SSHConfig.host_keys`, and explicitly set `expires_at=None`,
-       ensuring the secret no longer has an expiry once we have valid host keys.
-    5. Write the updated data back to Vault.
-
-    :param vault: An active :class:`AsyncVaultClient` context.
+    :param vault: An active :class:`AsyncVaultClient`.
     :param path: The Vault KV path to the `SSHConfig`.
     :raises RuntimeError:
-        - If the config at `path` already has `host_keys`.
-        - If reading/writing to Vault fails.
-        - If the SSH server key retrieval fails (unreachable, etc.).
-    :return: None. The updated config (with host keys) is saved to Vault.
+      - If the config already has `host_keys`.
+      - If retrieving/writing to Vault fails.
+      - If SSH handshake fails.
+    :return: None
     """
-    # 1) Retrieve existing config (without auto-TOFU to avoid recursion)
-    try:
-        cfg_no_tofu = await get_ssh_config(vault, path, tofu_if_missing_host_keys=False)
-    except RuntimeError as ex:
-        raise RuntimeError(f"Cannot TOFU-populate {path}: {ex}") from ex
+    cfg_no_tofu = await get_ssh_config(vault, path, tofu_if_missing_host_keys=False)
 
-    # 2) Ensure no host keys are currently set
     if cfg_no_tofu.host_keys:
         raise RuntimeError(
             f"SSHConfig at path '{path}' already has host_keys; aborting TOFU."
         )
 
-    # 3) Retrieve server key lines
+    # Perform SSH handshake to retrieve host key lines
     lines = await ssh_get_server_key(cfg_no_tofu)
     cfg_no_tofu.host_keys = lines
 
-    # 4) Overwrite data, ensuring expires_at=None
+    # Overwrite data, ensuring expires_at=None now that host keys exist
     updated_data = SSHVaultData(ssh_config=cfg_no_tofu, expires_at=None).model_dump()
-
-    # 5) Write the updated record back to Vault
     await vault.write_secret(path, updated_data)
 
 
@@ -235,19 +240,72 @@ async def delete_ssh_config(
     vault: AsyncVaultClient, path: str, hard_delete: bool = False
 ) -> None:
     """
-    Delete the `SSHConfig` at the specified Vault path, either softly or fully.
+    Delete the `SSHConfig` at the specified Vault path. If `hard_delete` is True,
+    we remove the metadata (destroying all versions). If `hard_delete` is False,
+    we soft-delete only the latest version (metadata remains).
 
-    - A "soft delete" removes the latest version but retains version history.
-    - A "hard delete" removes all metadata and version history for the secret.
+    When soft-deleting, we first verify that the path indeed contains an SSH config
+    (i.e., `SSHVaultData`). If that fails (404 or invalid format), we raise `RuntimeError`.
+
+    For a hard delete, we tolerate a 404 if the secret data has already been removed;
+    we still proceed to destroy the metadata record.
 
     :param vault: An active :class:`AsyncVaultClient`.
-    :param path: The Vault KV path where the `SSHConfig` is stored.
-    :param hard_delete: If True, fully remove all version history. If False, mark only
-        the latest version as deleted. Defaults to False.
-    :raises RuntimeError: If Vault raises an unexpected error status.
-    :return: None.
+    :param path: The Vault KV path.
+    :param hard_delete: If True, fully remove all version history; else soft-delete
+        only the latest version. Defaults to False.
+    :raises RuntimeError:
+      - If no secret is found at `path` (for soft-delete).
+      - If the data is not valid `SSHVaultData` (for soft-delete).
+      - If other Vault errors occur.
+    :return: None
     """
-    await vault.delete_secret(path, hard=hard_delete)
+    if hard_delete:
+        # Attempt to read+validate if it exists, but tolerate 404
+        try:
+            raw = await vault.read_secret(path)
+            # If we can read it, verify it's a valid SSHVaultData
+            SSHVaultData(**raw)
+        except RuntimeError as ex:
+            if "404" in str(ex):
+                # Already gone (soft-deleted data), but we still want to remove metadata
+                pass
+            else:
+                raise RuntimeError(
+                    f"Could not retrieve secret at '{path}' prior to hard delete: {ex}"
+                ) from ex
+        except ValidationError as ve:
+            # If there's some corrupted data, we can still remove it.
+            raise RuntimeError(
+                f"Data at path '{path}' is not a valid SSHVaultData. {ve}"
+            ) from ve
+
+        # Now remove the metadata
+        await vault.delete_secret(path, hard=True)
+        return
+
+    # Otherwise, we're doing a "soft delete"
+    # => must read+validate to confirm there's a valid SSHVaultData
+    try:
+        raw = await vault.read_secret(path)
+    except RuntimeError as ex:
+        if "404" in str(ex):
+            raise RuntimeError(
+                f"No SSH config found at path '{path}' to delete."
+            ) from ex
+        raise RuntimeError(
+            f"Could not retrieve secret at '{path}' prior to delete: {ex}"
+        ) from ex
+
+    try:
+        SSHVaultData(**raw)
+    except ValidationError as ve:
+        raise RuntimeError(
+            f"Data at path '{path}' is not a valid SSHVaultData. Cannot delete as SSH config. {ve}"
+        ) from ve
+
+    # Perform the soft-delete
+    await vault.delete_secret(path, hard=False)
 
 
 async def demo_lifecycle(
@@ -256,42 +314,43 @@ async def demo_lifecycle(
     hostname: str,
     port: int,
     private_key: str,
-    base_path: str = "secrets/amoebius/test",
+    base_path: str,
 ) -> None:
     """
     Demonstrate an end-to-end lifecycle for managing an SSH secret in Vault,
-    leveraging expiry checks and optional TOFU population.
+    including expiry checks, TOFU, and deletion. This acts like an integration
+    test to confirm the entire flow.
 
-    **Workflow**:
+    Workflow:
+      1) (Optional) Cleanup any expired configs in `base_path`.
+      2) Store a new `SSHConfig` with no host keys -> triggers 1-hour expiry.
+      3) Retrieve it without TOFU, confirm no host keys.
+      4) Retrieve it with TOFU, confirm host keys get populated.
+      5) Soft-delete the secret, confirm 404 on read.
+      6) Hard-delete the secret, confirm no metadata remains.
+      7) Create a brand-new secret and immediately hard-delete it to verify
+         that a direct hard-delete works (metadata is removed even if the data
+         wasn't soft-deleted first).
 
-    1. **Cleanup** any expired configs in `base_path`.
-    2. **Store** a new `SSHConfig` with no host keys. This triggers a 1-hour expiry timer.
-    3. **Retrieve** that config from Vault with `tofu_if_missing_host_keys=False`,
-       confirming it truly has no host keys initially.
-    4. **Retrieve** again with `tofu_if_missing_host_keys=True`, automatically
-       performing TOFU if host keys are missing, then returning an updated config.
-    5. **Soft-delete** the secret and confirm that reading it fails with 404.
-    6. **Hard-delete** the secret's metadata and confirm the secret is fully removed.
+    Note: `delete_ssh_config` now tolerates a 404 when doing a hard delete.
 
-    :param settings: Configuration for connecting/authenticating with Vault.
+    :param settings: Config for connecting to Vault.
     :param user: SSH username.
-    :param hostname: The SSH server hostname (e.g., "1.2.3.4" or "myhost.com").
-    :param port: SSH server port (default 22).
-    :param private_key: Contents of the private key used to authenticate as `user`.
-    :param base_path: The Vault path under which this demo secret is stored.
-        Defaults to "secrets/amoebius/test".
-    :raises RuntimeError:
-        - If storing/retrieving from Vault fails unexpectedly.
-        - If the TOFU step fails (e.g., server unreachable).
-        - If the post-soft-delete read does not yield 404.
-        - If metadata remains after a hard delete.
-    :return: None. Prints progress messages to stdout.
+    :param hostname: The SSH server hostname/IP.
+    :param port: SSH port (22 by default).
+    :param private_key: Contents of the SSH private key.
+    :param base_path: Vault path to store the test secret.
     """
     if not base_path.endswith("/"):
         base_path += "/"
     path = base_path + "demo_ssh"
 
     async with AsyncVaultClient(settings) as vault:
+        print(
+            "=== 1) Cleanup any expired configs first (if a cleanup utility exists) ==="
+        )
+        # e.g. await cleanup_expired_ssh_configs(vault, base_path=base_path, hard=True)
+        # (Assuming you have a function that checks for and deletes expired secrets.)
 
         print("=== 2) Store SSHConfig with no host keys (one-hour expiry) ===")
         config_in = SSHConfig(
@@ -338,15 +397,38 @@ async def demo_lifecycle(
             )
         print("   Confirmed metadata is empty after hard-delete.")
 
+        print("=== 7) Create a new secret and immediately hard-delete it ===")
+        direct_path = base_path + "demo_ssh_harddelete"
+        new_config = SSHConfig(
+            user="direct_harddel",
+            hostname="127.0.0.1",
+            port=22,
+            private_key="dummy_key",
+            host_keys=None,
+        )
+        # Store the new secret
+        await store_ssh_config(vault, direct_path, new_config)
+        print(f"   Created secret at: {direct_path}")
+
+        # Now directly hard-delete it
+        await delete_ssh_config(vault, direct_path, hard_delete=True)
+        # Confirm no metadata remains
+        direct_meta = await vault.secret_history(direct_path)
+        if direct_meta:
+            raise RuntimeError(
+                f"Expected empty metadata after direct hard-delete, got: {direct_meta}"
+            )
+        print("   Confirmed direct hard-delete removed metadata as well.")
+
         print("\nDemo lifecycle completed successfully.")
 
 
 def main() -> None:
     """
-    Command-line interface demonstration for the SSH secrets lifecycle in Vault,
-    including automatic expiry and TOFU.
+    Command-line demonstration of the SSH secrets lifecycle in Vault,
+    including expiry and TOFU.
 
-    **Usage** example:
+    Usage example:
 
     .. code-block:: console
 
@@ -359,10 +441,7 @@ def main() -> None:
          --vault-role-name amoebius-admin-role \\
          --vault-token-path /var/run/secrets/kubernetes.io/serviceaccount/token \\
          --verify-ssl \\
-         --base-path secrets/amoebius/test
-
-    :raises SystemExit: If reading the private key file fails.
-    :return: None. Prints output messages to stdout.
+         --base-path amoebius/tests
     """
     parser = argparse.ArgumentParser(
         description="Demonstration of full SSH secret lifecycle in Vault (TOFU, expiry, etc.)."
@@ -388,7 +467,7 @@ def main() -> None:
     parser.add_argument(
         "--vault-token-path",
         default="/var/run/secrets/kubernetes.io/serviceaccount/token",
-        help="Path to the JWT token used for Vault login.",
+        help="Path to the JWT token for Vault login.",
     )
     parser.add_argument(
         "--verify-ssl",
@@ -398,8 +477,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--base-path",
-        default="amoebius/test",
-        help="Base path in Vault for storing SSH secrets (default: secrets/amoebius/test).",
+        default="amoebius/tests",
+        help="Base path in Vault for storing SSH secrets (default: amoebius/tests).",
     )
 
     args = parser.parse_args()
@@ -418,7 +497,8 @@ def main() -> None:
             key_data = fpk.read()
     except OSError as e:
         print(
-            f"Error reading private key file '{args.private_key}': {e}", file=sys.stderr
+            f"Error reading private key file '{args.private_key}': {e}",
+            file=sys.stderr,
         )
         sys.exit(1)
 
