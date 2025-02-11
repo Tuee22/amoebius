@@ -43,7 +43,7 @@ async def run_azure_deploy_test(destroy_only: bool = False) -> None:
     """
     vault_settings = VaultSettings(
         vault_role_name=VAULT_ROLE_NAME,
-        verify_ssl=True,  # or False in dev environment
+        verify_ssl=False,
     )
 
     async with AsyncVaultClient(vault_settings) as vault:

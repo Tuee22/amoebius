@@ -1,28 +1,26 @@
 #!/usr/bin/env python3
 """
-gcp_deploy_test.py
+aws_deploy.py
 
 An async end-to-end script that:
-  - Reads GCP service account credentials from Vault at path "amoebius/tests/api_keys/gcp"
-  - Validates them with GCPServiceAccountKey (the full JSON key)
+  - Reads AWS credentials from Vault at path "amoebius/tests/api_keys/aws"
+  - Validates them with AWSApiKey
   - Depending on CLI flags, either:
       * init + apply (default)
       * only destroy if --destroy is passed
 
-We now set the JSON key as an environment variable (GOOGLE_CREDENTIALS)
-so that Terraform's Google provider picks it up implicitly.
+AWS credentials are *not* passed in as Terraform variables; we set them via
+environment variables: AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY / AWS_SESSION_TOKEN.
 """
 import sys
-import json
 import asyncio
 import argparse
 from typing import NoReturn
 
 from pydantic import ValidationError
 
-# Vault + Terraform
 from amoebius.models.vault import VaultSettings
-from amoebius.models.api_keys.gcp import GCPServiceAccountKey
+from amoebius.models.api_keys.aws import AWSApiKey
 from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.utils.terraform import (
     init_terraform,
@@ -31,59 +29,58 @@ from amoebius.utils.terraform import (
 )
 
 VAULT_ROLE_NAME = "amoebius-admin-role"
-VAULT_PATH = "amoebius/tests/api_keys/gcp"
-TERRAFORM_ROOT_NAME = "tests/gcp-deploy"  # in /amoebius/terraform/roots
+VAULT_PATH = "amoebius/tests/api_keys/aws"
+TERRAFORM_ROOT_NAME = "tests/aws-deploy"  # Subdir in /amoebius/terraform/roots
 
 
-async def run_gcp_deploy_test(destroy_only: bool = False) -> None:
+async def run_aws_deploy_test(destroy_only: bool = False) -> None:
     """
-    Reads GCP creds from Vault, validates them, then either:
+    Reads AWS creds from Vault, validates them, then either:
       - (default) run terraform init + apply
       - (if destroy_only=True) run terraform destroy.
     """
-    # 1) Fetch credentials from Vault
+    # 1) Read credentials from Vault
     vault_settings = VaultSettings(
         vault_role_name=VAULT_ROLE_NAME,
         verify_ssl=True,  # or False if self-signed
     )
 
     async with AsyncVaultClient(vault_settings) as vault:
+        # Read AWS credentials from Vault
         try:
-            # Vault should return a dict matching the standard GCP SA key structure
             secret_data = await vault.read_secret(VAULT_PATH)
         except RuntimeError as exc:
             raise RuntimeError(
-                f"Failed to read GCP credentials from '{VAULT_PATH}': {exc}"
+                f"Failed to read AWS credentials from '{VAULT_PATH}': {exc}"
             ) from exc
 
-        # 2) Validate them with GCPServiceAccountKey
+        # 2) Validate them with AWSApiKey
         try:
-            gcp_key = GCPServiceAccountKey(**secret_data)
+            aws_key = AWSApiKey(**secret_data)
         except ValidationError as ve:
             raise RuntimeError(
-                f"Vault data at '{VAULT_PATH}' failed GCPServiceAccountKey validation: {ve}"
+                f"Vault data at '{VAULT_PATH}' failed AWSApiKey validation: {ve}"
             ) from ve
 
-        # 3) Instead of passing key JSON via -var, pass it via environment variable
+        # Instead of passing as TF variables, set as environment variables:
         env_vars = {
-            # The standard variable the Google provider checks:
-            "GOOGLE_CREDENTIALS": json.dumps(gcp_key.model_dump()),
+            "AWS_ACCESS_KEY_ID": aws_key.access_key_id,
+            "AWS_SECRET_ACCESS_KEY": aws_key.secret_access_key,
         }
+        if aws_key.session_token is not None:
+            env_vars["AWS_SESSION_TOKEN"] = aws_key.session_token
 
-        # If you want, you can also set "CLOUDSDK_CORE_PROJECT" or "GOOGLE_PROJECT"
-        # to reflect the default project. But typically, Terraform uses var.project_id.
-        # env_vars["GOOGLE_PROJECT"] = gcp_key.project_id
+        # Optionally set the region if you want AWS CLI / AWS SDK to use the
+        # same region as Terraform. Typically, Terraform itself uses var.region,
+        # but environment variables also work:
+        # env_vars["AWS_DEFAULT_REGION"] = "us-east-1"  # or from your var.region
 
-        # We'll still pass 'project_id' to Terraform as a variable (non-sensitive),
-        # but the credentials are in the env only.
-        tf_vars = {"project_id": gcp_key.project_id}
-
-        # 4) Either destroy only, or init+apply
+        # 3) Either destroy only, or init+apply
         if destroy_only:
             print("Skipping init/apply. Proceeding with terraform destroy only...")
             await destroy_terraform(
                 root_name=TERRAFORM_ROOT_NAME,
-                variables=tf_vars,
+                # Do *not* pass these as -var, use env=env_vars
                 env=env_vars,
                 sensitive=False,
             )
@@ -92,14 +89,14 @@ async def run_gcp_deploy_test(destroy_only: bool = False) -> None:
             await init_terraform(
                 root_name=TERRAFORM_ROOT_NAME,
                 reconfigure=True,
-                env=env_vars,
                 sensitive=False,
+                env=env_vars,
             )
 
             print("Applying Terraform configuration (auto-approve)...")
             await apply_terraform(
                 root_name=TERRAFORM_ROOT_NAME,
-                variables=tf_vars,
+                # No -var usage for credentials
                 env=env_vars,
                 sensitive=False,
             )
@@ -113,9 +110,9 @@ def main() -> NoReturn:
     """
     parser = argparse.ArgumentParser(
         description=(
-            "Perform an async test to read GCP service account credentials from Vault, "
-            "then either init+apply (default) or only destroy (--destroy). "
-            "Credentials are passed to Terraform as env variables."
+            "Perform an async test to read AWS credentials from Vault, then either "
+            "init+apply (default) or only destroy (--destroy) the Terraform root "
+            "'tests/aws-deploy'. AWS creds are passed as environment variables."
         )
     )
     parser.add_argument(
@@ -126,7 +123,7 @@ def main() -> NoReturn:
     args = parser.parse_args()
 
     try:
-        asyncio.run(run_gcp_deploy_test(destroy_only=args.destroy))
+        asyncio.run(run_aws_deploy_test(destroy_only=args.destroy))
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         sys.exit(1)

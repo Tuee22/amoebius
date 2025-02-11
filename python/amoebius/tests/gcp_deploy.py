@@ -5,40 +5,19 @@ gcp_deploy_test.py
 An async end-to-end script that:
   - Reads GCP service account credentials from Vault at path "amoebius/tests/api_keys/gcp"
   - Validates them with GCPServiceAccountKey (the full JSON key)
-  - Depending on the CLI flags, either:
-      A) init + apply (default)
-      B) only destroy if --destroy is passed
+  - Depending on CLI flags, either:
+      * init + apply (default)
+      * only destroy if --destroy is passed
 
-Usage:
-    python gcp_deploy_test.py            # init + apply
-    python gcp_deploy_test.py --destroy  # only destroy
-
-Requirements:
-  - "amoebius/utils/terraform.py" with init_terraform, apply_terraform, destroy_terraform
-  - "amoebius/secrets/vault_client.py" with AsyncVaultClient for reading from Vault
-  - "amoebius/models/api_keys/gcp.py" with GCPServiceAccountKey (shown above)
-  - A Vault secret at "amoebius/tests/api_keys/gcp" containing the standard GCP SA key JSON:
-      {
-        "type": "service_account",
-        "project_id": "my-gcp-project",
-        "private_key_id": "...",
-        "private_key": "...",
-        "client_email": "...",
-        ...
-      }
-    validated against GCPServiceAccountKey
-  - Terraform CLI installed and in PATH
-  - Terraform root "amoebius/terraform/roots/tests/gcp-deploy" referencing
-    var.project_id, var.service_account_key_json, etc.
+We now set the JSON key as an environment variable (GOOGLE_CREDENTIALS)
+so that Terraform's Google provider picks it up implicitly.
 """
-
-from __future__ import annotations
-
 import sys
 import json
 import asyncio
 import argparse
 from typing import NoReturn
+
 from pydantic import ValidationError
 
 # Vault + Terraform
@@ -53,26 +32,24 @@ from amoebius.utils.terraform import (
 
 VAULT_ROLE_NAME = "amoebius-admin-role"
 VAULT_PATH = "amoebius/tests/api_keys/gcp"
-TERRAFORM_ROOT_NAME = "tests/gcp-deploy"  # Folder in /amoebius/terraform/roots
+TERRAFORM_ROOT_NAME = "tests/gcp-deploy"  # in /amoebius/terraform/roots
 
 
 async def run_gcp_deploy_test(destroy_only: bool = False) -> None:
     """
     Reads GCP creds from Vault, validates them, then either:
-      - (default) run terraform init + apply, or
-      - (if destroy_only=True) skip init/apply and run terraform destroy.
-
-    Raises RuntimeError on any failure.
+      - (default) run terraform init + apply
+      - (if destroy_only=True) run terraform destroy.
     """
-    # 1) Read credentials from Vault
+    # 1) Fetch credentials from Vault
     vault_settings = VaultSettings(
         vault_role_name=VAULT_ROLE_NAME,
-        verify_ssl=True,  # or False if self-signed or dev environment
+        verify_ssl=True,  # or False if self-signed
     )
 
     async with AsyncVaultClient(vault_settings) as vault:
         try:
-            # Vault should return a dict that matches the GCP SA JSON structure
+            # Vault should return a dict matching the standard GCP SA key structure
             secret_data = await vault.read_secret(VAULT_PATH)
         except RuntimeError as exc:
             raise RuntimeError(
@@ -87,16 +64,19 @@ async def run_gcp_deploy_test(destroy_only: bool = False) -> None:
                 f"Vault data at '{VAULT_PATH}' failed GCPServiceAccountKey validation: {ve}"
             ) from ve
 
-        # 3) Prepare Terraform variables
-        #    - We'll pass 'project_id' by itself,
-        #    - and re-serialize the ENTIRE SA JSON as a single string
-        #      for the google provider "credentials" param.
-        tf_vars = {
-            "project_id": gcp_key.project_id,
-            "service_account_key_json": json.dumps(
-                gcp_key.model_dump()
-            ),  # .encode("unicode_escape").decode("utf-8"),
+        # 3) Instead of passing key JSON via -var, pass it via environment variable
+        env_vars = {
+            # The standard variable the Google provider checks:
+            "GOOGLE_CREDENTIALS": json.dumps(gcp_key.model_dump()),
         }
+
+        # If you want, you can also set "CLOUDSDK_CORE_PROJECT" or "GOOGLE_PROJECT"
+        # to reflect the default project. But typically, Terraform uses var.project_id.
+        # env_vars["GOOGLE_PROJECT"] = gcp_key.project_id
+
+        # We'll still pass 'project_id' to Terraform as a variable (non-sensitive),
+        # but the credentials are in the env only.
+        tf_vars = {"project_id": gcp_key.project_id}
 
         # 4) Either destroy only, or init+apply
         if destroy_only:
@@ -104,6 +84,7 @@ async def run_gcp_deploy_test(destroy_only: bool = False) -> None:
             await destroy_terraform(
                 root_name=TERRAFORM_ROOT_NAME,
                 variables=tf_vars,
+                env=env_vars,
                 sensitive=False,
             )
         else:
@@ -111,6 +92,7 @@ async def run_gcp_deploy_test(destroy_only: bool = False) -> None:
             await init_terraform(
                 root_name=TERRAFORM_ROOT_NAME,
                 reconfigure=True,
+                env=env_vars,
                 sensitive=False,
             )
 
@@ -118,6 +100,7 @@ async def run_gcp_deploy_test(destroy_only: bool = False) -> None:
             await apply_terraform(
                 root_name=TERRAFORM_ROOT_NAME,
                 variables=tf_vars,
+                env=env_vars,
                 sensitive=False,
             )
 
@@ -131,8 +114,8 @@ def main() -> NoReturn:
     parser = argparse.ArgumentParser(
         description=(
             "Perform an async test to read GCP service account credentials from Vault, "
-            "then either init+apply (default) or only destroy (--destroy) "
-            "the Terraform root 'tests/gcp-deploy'."
+            "then either init+apply (default) or only destroy (--destroy). "
+            "Credentials are passed to Terraform as env variables."
         )
     )
     parser.add_argument(
