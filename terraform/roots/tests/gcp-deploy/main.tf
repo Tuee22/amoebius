@@ -39,7 +39,7 @@ variable "ssh_user" {
 variable "vault_role_name" {
   type        = string
   description = "Vault role name used to store SSH keys."
-  default     = "amoebius_admin_role"
+  default     = "amoebius-admin-role"
 }
 
 variable "no_verify_ssl" {

@@ -1,21 +1,59 @@
 ###############################################################################
-# main.tf - Full Terraform Module (Updated to use environment variables)
+# main.tf - Example GCP ARM Deploy in us-central1 (Updated for Env Credentials)
 ###############################################################################
 
 ###############################################################################
-# 1) Terraform Settings & Kubernetes Backend
+# 1) Variables
+###############################################################################
+variable "project_id" {
+  type        = string
+  description = "GCP project ID where resources will be created."
+}
+
+variable "region" {
+  type        = string
+  description = "The GCP region to deploy in."
+  default     = "us-central1"
+}
+
+variable "availability_zones" {
+  type        = list(string)
+  description = "Zones in us-central1 that support T2A."
+  default     = ["us-central1-a", "us-central1-b", "us-central1-f"]
+}
+
+variable "ssh_user" {
+  type        = string
+  description = "SSH username to configure on the VM instances."
+  default     = "ubuntu"
+}
+
+variable "vault_role_name" {
+  type        = string
+  description = "Vault role name used to store SSH keys."
+  default     = "amoebius-admin-role"
+}
+
+variable "no_verify_ssl" {
+  type        = bool
+  description = "Disable SSL verification for Vault."
+  default     = false
+}
+
+###############################################################################
+# 2) Terraform Settings & Provider
 ###############################################################################
 terraform {
   backend "kubernetes" {
-    secret_suffix     = "test-aws-deploy"
+    secret_suffix     = "test-gcp-deploy"
     load_config_file  = false
     namespace         = "amoebius"
     in_cluster_config = true
   }
 
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
+    google = {
+      source  = "hashicorp/google"
       version = "~> 4.0"
     }
     tls = {
@@ -25,258 +63,147 @@ terraform {
   }
 }
 
-###############################################################################
-# 2) Variables
-###############################################################################
-variable "region" {
-  type        = string
-  description = "The AWS region to deploy in."
-  default     = "us-east-1"
-}
-
-variable "availability_zones" {
-  type        = list(string)
-  description = "List of Availability Zones in which to create subnets and EC2 instances."
-  default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
-}
-
-# ------------------------------------------------------------------
-# Variables for Vault usage
-# ------------------------------------------------------------------
-variable "vault_role_name" {
-  type        = string
-  description = "Vault Kubernetes auth role name used by the ssh_vault_secret module."
-  default     = "amoebius-admin-role"
-}
-
-variable "ssh_user" {
-  type        = string
-  description = "SSH username to configure on the remote host."
-  default     = "ubuntu"
-}
-
-variable "no_verify_ssl" {
-  type        = bool
-  description = "Disable SSL certificate verification for Vault calls."
-  default     = true
+provider "google" {
+  project = var.project_id
+  region  = var.region
+  # Omit credentials here. The Google provider will pick up JSON from:
+  #   GOOGLE_CREDENTIALS or GOOGLE_CLOUD_KEYFILE_JSON environment variable
 }
 
 ###############################################################################
-# 3) AWS Provider
+# 3) Data Source: ARM64 Ubuntu Image
 ###############################################################################
-provider "aws" {
-  # We only specify the region here; Terraform automatically picks up
-  # AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY / etc. from environment variables.
-  region = var.region
+data "google_compute_image" "ubuntu_2204_arm64" {
+  family  = "ubuntu-2204-lts-arm64"
+  project = "ubuntu-os-cloud"
 }
 
 ###############################################################################
-# 4) Data Sources
+# 4) TLS Key Pairs (Per VM)
 ###############################################################################
-data "aws_ami" "ubuntu" {
-  most_recent = true
-  owners      = ["099720109477"] # Canonical
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
-  }
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-}
-
-###############################################################################
-# 5) Generate an SSH Key Pair Per AZ
-###############################################################################
-resource "tls_private_key" "ssh" {
+resource "tls_private_key" "ssh_keys" {
   count     = length(var.availability_zones)
   algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "aws_key_pair" "ssh" {
-  count      = length(var.availability_zones)
-  key_name   = "${terraform.workspace}-ec2-key-${count.index}"
-  public_key = tls_private_key.ssh[count.index].public_key_openssh
+  rsa_bits  = 2048
 }
 
 ###############################################################################
-# 6) VPC & Networking
+# 5) Create a Custom VPC & 3 Subnets
 ###############################################################################
-resource "aws_vpc" "this" {
-  cidr_block = "10.0.0.0/16"
-  tags = {
-    Name = "${terraform.workspace}-vpc"
-  }
+resource "google_compute_network" "vpc" {
+  name                    = "${terraform.workspace}-vpc"
+  auto_create_subnetworks = false
+  project                 = var.project_id
 }
 
-resource "aws_internet_gateway" "this" {
-  vpc_id = aws_vpc.this.id
-  tags = {
-    Name = "${terraform.workspace}-igw"
-  }
-}
-
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.this.id
-  tags = {
-    Name = "${terraform.workspace}-public-rt"
-  }
-}
-
-resource "aws_route" "public_internet_access" {
-  route_table_id         = aws_route_table.public.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.this.id
-}
-
-resource "aws_subnet" "public" {
-  count                   = length(var.availability_zones)
-  vpc_id                  = aws_vpc.this.id
-  cidr_block              = "10.0.${count.index}.0/24"
-  availability_zone       = var.availability_zones[count.index]
-  map_public_ip_on_launch = true
-  tags = {
-    Name = "${terraform.workspace}-public-subnet-${count.index}"
-  }
-}
-
-resource "aws_route_table_association" "public_subnet" {
-  count          = length(var.availability_zones)
-  subnet_id      = aws_subnet.public[count.index].id
-  route_table_id = aws_route_table.public.id
-}
-
-###############################################################################
-# 7) Custom Security Group (Avoid AWS Default SG)
-###############################################################################
-resource "aws_security_group" "this" {
-  name        = "${terraform.workspace}-custom-sg"
-  description = "Security group for SSH ingress"
-  vpc_id      = aws_vpc.this.id
-
-  # Allow SSH Inbound from anywhere (adjust as needed)
-  ingress {
-    description = "SSH from anywhere"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Allow all outbound
-  egress {
-    description = "Allow all outbound traffic"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "${terraform.workspace}-custom-sg"
-  }
-}
-
-###############################################################################
-# 8) Create EC2 Instances (One Per AZ) With Unique SSH Keys
-###############################################################################
-resource "aws_instance" "ubuntu" {
+resource "google_compute_subnetwork" "public_subnets" {
   count         = length(var.availability_zones)
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = "t2.micro"
-  subnet_id     = aws_subnet.public[count.index].id
-  key_name      = aws_key_pair.ssh[count.index].key_name
+  name          = "${terraform.workspace}-subnet-${count.index}"
+  network       = google_compute_network.vpc.self_link
+  ip_cidr_range = "10.0.${count.index}.0/24"
+  region        = var.region
+  project       = var.project_id
+}
 
-  # Use our custom security group
-  vpc_security_group_ids = [aws_security_group.this.id]
+###############################################################################
+# 6) Firewall Rule for SSH
+###############################################################################
+resource "google_compute_firewall" "allow_ssh" {
+  name    = "${terraform.workspace}-allow-ssh"
+  network = google_compute_network.vpc.self_link
+  project = var.project_id
 
-  tags = {
-    Name = "${terraform.workspace}-test-aws-deployment-${count.index}"
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["allow-ssh"]
+}
+
+###############################################################################
+# 7) Create T2A Instances (one in each zone)
+###############################################################################
+resource "google_compute_instance" "vms" {
+  count        = length(var.availability_zones)
+  name         = "${terraform.workspace}-vm-${count.index}"
+  machine_type = "t2a-standard-1"
+  zone         = var.availability_zones[count.index]
+  project      = var.project_id
+
+  network_interface {
+    subnetwork   = google_compute_subnetwork.public_subnets[count.index].self_link
+    access_config {}
+  }
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.ubuntu_2204_arm64.self_link
+    }
+  }
+
+  tags = ["allow-ssh"]
+
+  metadata = {
+    ssh-keys = "${var.ssh_user}:${tls_private_key.ssh_keys[count.index].public_key_openssh}"
   }
 }
 
 ###############################################################################
-# 9) (Optional) Wait for Instances to be SSH-Accessible
-###############################################################################
-# If you need to wait for SSH connectivity in a single run:
-# resource "null_resource" "wait_for_ssh" {
-#   count = length(var.availability_zones)
-#
-#   connection {
-#     type        = "ssh"
-#     host        = aws_instance.ubuntu[count.index].public_ip
-#     user        = var.ssh_user
-#     private_key = tls_private_key.ssh[count.index].private_key_pem
-#   }
-#
-#   provisioner "remote-exec" {
-#     inline = [
-#       "echo 'Instance is up and SSH connection successful.'"
-#     ]
-#   }
-# }
-
-###############################################################################
-# 10) Store Each Private Key in Vault
+# 8) Store SSH Keys in Vault (After VM Creation)
 ###############################################################################
 module "ssh_vault_secret" {
-  source          = "/amoebius/terraform/modules/ssh_vault_secret"
+  source = "/amoebius/terraform/modules/ssh_vault_secret"
 
-  count           = length(var.availability_zones)
-  vault_role_name = var.vault_role_name
-  user            = var.ssh_user
-  hostname        = aws_instance.ubuntu[count.index].public_ip
-  port            = 22
-  private_key     = tls_private_key.ssh[count.index].private_key_pem
-  no_verify_ssl   = var.no_verify_ssl
+  count            = length(var.availability_zones)
+  vault_role_name  = var.vault_role_name
+  user             = var.ssh_user
+  hostname         = google_compute_instance.vms[count.index].network_interface[0].access_config[0].nat_ip
+  port             = 22
+  private_key      = tls_private_key.ssh_keys[count.index].private_key_pem
+  no_verify_ssl    = var.no_verify_ssl
 
-  # Construct a unique path for each key
-  path = "amoebius/tests/aws-test-deploy/ssh/${terraform.workspace}-ec2-key-${count.index}"
+  path = "amoebius/tests/gcp-test-deploy/ssh/${terraform.workspace}-vm-key-${count.index}"
 
-  # Ensure we only run after the instance is confirmed accessible by SSH
-  # depends_on = [null_resource.wait_for_ssh]
   depends_on = [
-    aws_instance.ubuntu,
-    aws_security_group.this
+    google_compute_instance.vms,
+    google_compute_firewall.allow_ssh
   ]
 }
 
 ###############################################################################
-# 11) Outputs
+# 9) Outputs
 ###############################################################################
-output "vpc_id" {
-  description = "The ID of the created VPC."
-  value       = aws_vpc.this.id
+output "vpc_name" {
+  description = "The created VPC (network) name."
+  value       = google_compute_network.vpc.name
 }
 
-output "subnet_ids" {
-  description = "List of subnet IDs, one per AZ."
-  value       = [for subnet in aws_subnet.public : subnet.id]
+output "subnet_names" {
+  description = "Names of created subnets (one per zone)."
+  value       = [for s in google_compute_subnetwork.public_subnets : s.name]
 }
 
-output "instance_ids" {
-  description = "List of all Ubuntu instance IDs created, one per AZ."
-  value       = [for instance in aws_instance.ubuntu : instance.id]
+output "instance_names" {
+  description = "Names of the GCP Compute instances."
+  value       = [for vm in google_compute_instance.vms : vm.name]
 }
 
 output "public_ips" {
-  description = "List of public IP addresses for the Ubuntu instances."
-  value       = [for instance in aws_instance.ubuntu : instance.public_ip]
+  description = "Public IP addresses of instances."
+  value       = [for vm in google_compute_instance.vms : vm.network_interface[0].access_config[0].nat_ip]
 }
 
 output "private_ips" {
-  description = "List of private IP addresses for the Ubuntu instances."
-  value       = [for instance in aws_instance.ubuntu : instance.private_ip]
+  description = "Private IP addresses of instances."
+  value       = [for vm in google_compute_instance.vms : vm.network_interface[0].network_ip]
 }
 
-output "security_group_id" {
-  description = "The ID of the custom security group used by the instances."
-  value       = aws_security_group.this.id
-}
-
-output "vault_ssh_keys" {
-  description = "Vault paths where each SSH private key is stored."
-  value       = [for vault_secret in module.ssh_vault_secret : vault_secret.vault_path]
+output "vault_ssh_key_paths" {
+  description = "Vault paths where SSH keys are stored."
+  value       = [
+    for i in range(length(var.availability_zones)) :
+    "amoebius/tests/gcp-test-deploy/ssh/${terraform.workspace}-vm-key-${i}"
+  ]
 }
