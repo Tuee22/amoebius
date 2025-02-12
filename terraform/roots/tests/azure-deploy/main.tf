@@ -1,6 +1,6 @@
 ###############################################################################
 # main.tf - Azure Multi-Zone ARM64 VM Deploy with Vault SSH Storage
-# Using Kubernetes backend for state
+# Using Kubernetes backend for state, plus an explicitly-managed Network Watcher.
 ###############################################################################
 
 ###############################################################################
@@ -64,15 +64,31 @@ provider "azurerm" {
 }
 
 ###############################################################################
-# 3) Resource Group
+# 3) Resource Groups
 ###############################################################################
+# Main resource group for your VMs, network, etc.
 resource "azurerm_resource_group" "main" {
   name     = var.resource_group_name
   location = var.location
 }
 
+# Separate resource group for Network Watcher, so Terraform manages it explicitly
+resource "azurerm_resource_group" "network_watcher" {
+  name     = "${terraform.workspace}-NetworkWatcherRG"
+  location = var.location
+}
+
 ###############################################################################
-# 4) Virtual Network & Subnets
+# 4) Network Watcher (explicitly managed)
+###############################################################################
+resource "azurerm_network_watcher" "main" {
+  name                = "NetworkWatcher_${var.location}"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.network_watcher.name
+}
+
+###############################################################################
+# 5) Virtual Network & Subnets
 ###############################################################################
 resource "azurerm_virtual_network" "main" {
   name                = "${terraform.workspace}-vnet"
@@ -90,7 +106,7 @@ resource "azurerm_subnet" "public_subnets" {
 }
 
 ###############################################################################
-# 5) Network Security Group
+# 6) Network Security Group
 ###############################################################################
 resource "azurerm_network_security_group" "ssh" {
   name                = "${terraform.workspace}-ssh-nsg"
@@ -111,7 +127,7 @@ resource "azurerm_network_security_group" "ssh" {
 }
 
 ###############################################################################
-# 6) Public IPs & NICs
+# 7) Public IPs & NICs
 ###############################################################################
 resource "azurerm_public_ip" "main" {
   count               = length(var.availability_zones)
@@ -141,7 +157,6 @@ resource "azurerm_network_interface" "main" {
   }
 }
 
-# Associate each NIC with the SSH NSG
 resource "azurerm_network_interface_security_group_association" "main" {
   count = length(var.availability_zones)
 
@@ -150,7 +165,7 @@ resource "azurerm_network_interface_security_group_association" "main" {
 }
 
 ###############################################################################
-# 7) Generate SSH Keys
+# 8) Generate SSH Keys
 ###############################################################################
 resource "tls_private_key" "ssh_keys" {
   count    = length(var.availability_zones)
@@ -159,7 +174,7 @@ resource "tls_private_key" "ssh_keys" {
 }
 
 ###############################################################################
-# 8) ARM64 Ubuntu Virtual Machines
+# 9) ARM64 Ubuntu Virtual Machines
 ###############################################################################
 resource "azurerm_linux_virtual_machine" "vm" {
   count               = length(var.availability_zones)
@@ -201,7 +216,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
 }
 
 ###############################################################################
-# 9) Outputs
+# 10) Outputs
 ###############################################################################
 output "vm_public_ips" {
   description = "Public IP addresses of the created Azure VMs."
