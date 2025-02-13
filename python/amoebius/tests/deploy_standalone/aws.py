@@ -30,7 +30,7 @@ from amoebius.utils.terraform import (
 
 VAULT_ROLE_NAME = "amoebius-admin-role"
 VAULT_PATH = "amoebius/tests/api_keys/aws"
-TERRAFORM_ROOT_NAME = "tests/aws-deploy"  # Subdir in /amoebius/terraform/roots
+TERRAFORM_ROOT_NAME = "tests/deploy-standalone/aws"  # Subdir in /amoebius/terraform/roots
 
 
 async def run_aws_deploy_test(destroy_only: bool = False) -> None:

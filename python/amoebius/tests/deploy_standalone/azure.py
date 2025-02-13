@@ -31,7 +31,7 @@ from amoebius.models.api_keys.azure import AzureCredentials  # your Pydantic mod
 
 VAULT_ROLE_NAME = "amoebius-admin-role"
 VAULT_PATH = "amoebius/tests/api_keys/azure"
-TERRAFORM_ROOT_NAME = "tests/azure-deploy"  # In /amoebius/terraform/roots
+TERRAFORM_ROOT_NAME = "tests/deploy-standalone/azure"  # In /amoebius/terraform/roots
 
 
 async def run_azure_deploy_test(destroy_only: bool = False) -> None:

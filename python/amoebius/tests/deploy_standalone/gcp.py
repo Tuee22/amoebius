@@ -32,7 +32,7 @@ from amoebius.utils.terraform import (
 
 VAULT_ROLE_NAME = "amoebius-admin-role"
 VAULT_PATH = "amoebius/tests/api_keys/gcp"
-TERRAFORM_ROOT_NAME = "tests/gcp-deploy"  # in /amoebius/terraform/roots
+TERRAFORM_ROOT_NAME = "tests/deploy-standalone/gcp"  # in /amoebius/terraform/roots
 
 
 async def run_gcp_deploy_test(destroy_only: bool = False) -> None:
