@@ -76,7 +76,7 @@ async def run_gcp_deploy_test(destroy_only: bool = False) -> None:
 
         # We'll still pass 'project_id' to Terraform as a variable (non-sensitive),
         # but the credentials are in the env only.
-        tf_vars: Dict[str,Any] = {}
+        tf_vars: Dict[str, Any] = {}
 
         # 4) Either destroy only, or init+apply
         if destroy_only:

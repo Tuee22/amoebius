@@ -61,7 +61,7 @@ module "single_vm" {
 
 module "ssh_vm_secret" {
   count = length(local.all_items)
-  source = "/amoebius/terraform/modules/ssh_vm_secret"
+  source = "/amoebius/terraform/modules/ssh/vm_secret"
 
   public_ip       = module.single_vm[count.index].public_ip
   private_key_pem = tls_private_key.keys[count.index].private_key_pem

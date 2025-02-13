@@ -202,7 +202,7 @@ resource "aws_instance" "ubuntu" {
 # 10) Store Each Private Key in Vault
 ###############################################################################
 module "ssh_vault_secret" {
-  source          = "/amoebius/terraform/modules/ssh_vault_secret"
+  source          = "/amoebius/terraform/modules/ssh/vault_secret"
 
   count           = length(var.availability_zones)
   vault_role_name = var.vault_role_name

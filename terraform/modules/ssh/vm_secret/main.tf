@@ -26,7 +26,7 @@ resource "random_id" "vault_uuid" {
 }
 
 module "ssh_vault_secret" {
-  source = "/amoebius/terraform/modules/ssh_vault_secret"
+  source = "/amoebius/terraform/modules/ssh/vault_secret"
   depends_on = [random_id.vault_uuid]
 
   vault_role_name = var.vault_role_name
