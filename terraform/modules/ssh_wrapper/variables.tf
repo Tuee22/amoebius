@@ -1,6 +1,5 @@
 variable "vm_name" {
-  type        = string
-  description = "Friendly name for logs."
+  type = string
 }
 
 variable "public_ip" {
@@ -33,6 +32,5 @@ variable "no_verify_ssl" {
 }
 
 variable "vault_prefix" {
-  type        = string
-  description = "Prefix for the vault path, e.g. /amoebius/ssh/aws/<workspace>"
+  type = string
 }

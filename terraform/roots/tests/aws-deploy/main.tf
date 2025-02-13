@@ -15,33 +15,33 @@ terraform {
 }
 
 provider "aws" {
-  # region, credentials from environment
+  region = "us-east-1"
 }
 
 module "network" {
   source = "/amoebius/terraform/modules/network/aws"
-  # default cidr = 10.0.0.0/16
+  # Hard-coded defaults for vpc_cidr, availability_zones
 }
 
-module "compute" {
-  source = "/amoebius/terraform/modules/compute/universal"
+module "cluster" {
+  source = "/amoebius/terraform/modules/compute/cluster"
 
-  provider = "aws"
-
+  provider          = "aws"
+  region            = "us-east-1"
   availability_zones = ["us-east-1a","us-east-1b","us-east-1c"]
-  subnet_ids         = module.network.subnet_ids
-  security_group_id  = module.network.security_group_id
+  subnet_ids        = module.network.subnet_ids
+  security_group_id = module.network.security_group_id
 
   instance_groups = [
     {
       name           = "test_group"
       category       = "x86_small"
       count_per_zone = 1
-      # no custom image => default 24.04
+      image          = "" # Let the module default to 24.04 x86
     }
   ]
 }
 
 output "instances_by_group" {
-  value = module.compute.instances_by_group
+  value = module.cluster.instances_by_group
 }

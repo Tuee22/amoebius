@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "google" {
-  # project, region from environment or root
+  # project/region from environment or root
 }
 
 resource "google_compute_network" "vpc" {

@@ -1,7 +1,3 @@
-######################################
-# main.tf for ssh_vault_secret module
-######################################
-
 locals {
   triggers = {
     vault_role_name = var.vault_role_name
@@ -41,6 +37,5 @@ EOT
 }
 
 output "vault_path" {
-  description = "The Vault path where the SSH config was stored."
-  value       = var.path
+  value = var.path
 }

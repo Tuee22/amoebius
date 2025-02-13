@@ -15,31 +15,31 @@ terraform {
 }
 
 provider "google" {
-  # project from env
+  # project from environment
 }
 
 module "network" {
   source = "/amoebius/terraform/modules/network/gcp"
 }
 
-module "compute" {
-  source = "/amoebius/terraform/modules/compute/universal"
+module "cluster" {
+  source = "/amoebius/terraform/modules/compute/cluster"
 
-  provider = "gcp"
-
+  provider          = "gcp"
   availability_zones = ["us-central1-a","us-central1-b","us-central1-f"]
-  subnet_ids         = module.network.subnet_ids
-  security_group_id  = module.network.security_group_id
+  subnet_ids        = module.network.subnet_ids
+  security_group_id = module.network.security_group_id
 
   instance_groups = [
     {
-      name           = "test_group"
+      name           = "test_arm"
       category       = "arm_small"
       count_per_zone = 1
+      image          = ""
     }
   ]
 }
 
 output "instances_by_group" {
-  value = module.compute.instances_by_group
+  value = module.cluster.instances_by_group
 }

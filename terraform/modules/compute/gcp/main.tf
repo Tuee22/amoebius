@@ -8,12 +8,7 @@ terraform {
 }
 
 provider "google" {
-  # project, region from environment
-}
-
-locals {
-  # Hypothetical default 24.04 LTS
-  default_ubuntu_image = "projects/ubuntu-os-cloud/global/images/ubuntu-2404-lts"
+  # project from environment
 }
 
 resource "google_compute_instance" "this" {
@@ -22,13 +17,13 @@ resource "google_compute_instance" "this" {
   machine_type = var.instance_type
 
   network_interface {
-    subnetwork   = var.subnet_self_link
+    subnetwork   = var.subnet_id
     access_config {}
   }
 
   boot_disk {
     initialize_params {
-      image = length(var.image) > 0 ? var.image : local.default_ubuntu_image
+      image = var.image
     }
   }
 

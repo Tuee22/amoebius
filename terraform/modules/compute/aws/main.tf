@@ -8,12 +8,7 @@ terraform {
 }
 
 provider "aws" {
-  # region from env or root
-}
-
-# Hard-code a default 24.04 AMI (this is hypothetical!)
-locals {
-  default_ubuntu_ami = "ami-024404EXAMPLE"  # For demonstration
+  # region from environment or root
 }
 
 resource "aws_key_pair" "this" {
@@ -22,7 +17,7 @@ resource "aws_key_pair" "this" {
 }
 
 resource "aws_instance" "this" {
-  ami           = length(var.image) > 0 ? var.image : local.default_ubuntu_ami
+  ami           = var.image
   instance_type = var.instance_type
   subnet_id     = var.subnet_id
   vpc_security_group_ids = [var.security_group_id]
@@ -33,6 +28,7 @@ resource "aws_instance" "this" {
   }
 }
 
+# Overwrite the previously "UNIMPLEMENTED" outputs
 output "vm_name" {
   value = aws_instance.this.tags["Name"]
 }

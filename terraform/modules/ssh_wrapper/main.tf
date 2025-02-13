@@ -10,7 +10,7 @@ terraform {
 resource "null_resource" "wait_for_ssh" {
   provisioner "remote-exec" {
     inline = [
-      "echo 'SSH check succeeded for ${var.vm_name}'"
+      "echo 'SSH check for ${var.vm_name} succeeded!'"
     ]
     connection {
       type        = "ssh"

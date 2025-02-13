@@ -5,7 +5,6 @@ terraform {
     namespace         = "amoebius"
     in_cluster_config = true
   }
-
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -20,27 +19,28 @@ provider "azurerm" {
 
 module "network" {
   source = "/amoebius/terraform/modules/network/azure"
-  # region=eastus, plus watchers
+  region = "eastus"
 }
 
-module "compute" {
-  source = "/amoebius/terraform/modules/compute/universal"
+module "cluster" {
+  source = "/amoebius/terraform/modules/compute/cluster"
 
-  provider = "azure"
-
+  provider          = "azure"
+  region            = "eastus"  # might be used if we had data sources
   availability_zones = ["1","2","3"]
-  subnet_ids         = module.network.subnet_ids
-  security_group_id  = module.network.security_group_id
+  subnet_ids        = module.network.subnet_ids
+  security_group_id = module.network.security_group_id
 
   instance_groups = [
     {
-      name           = "test_group"
+      name           = "test_arm"
       category       = "arm_small"
       count_per_zone = 1
+      image          = ""
     }
   ]
 }
 
 output "instances_by_group" {
-  value = module.compute.instances_by_group
+  value = module.cluster.instances_by_group
 }

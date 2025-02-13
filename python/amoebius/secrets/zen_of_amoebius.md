@@ -31,3 +31,7 @@ Mom knows her children remember everything they see. Both in durable and ephemer
 Secrets can never be unseen, they can only be expired
 
 There’s probably never an ok time to manually expire a secret (it’s unreliable and error prone, and a suitably short-expiring secret is preferable-- but only for vault bootstrap reasons)
+
+The amoebius config is global. Parts of it are obfuscated because you don't need them.
+
+Provider-level defaults (regions, zones, instance types) are set here.
