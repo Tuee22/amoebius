@@ -13,8 +13,7 @@ variable "ssh_user" {
 
 variable "image" {
   type    = string
-  default = ""
-  # The cluster module sets a real default or passes a custom override
+  description = "Default or override image for this VM"
 }
 
 variable "instance_type" {
@@ -30,7 +29,7 @@ variable "security_group_id" {
 }
 
 variable "zone" {
-  type = string
+  type    = string
 }
 
 variable "workspace" {
@@ -38,17 +37,3 @@ variable "workspace" {
   default = "default"
 }
 
-output "vm_name" {
-  value = var.vm_name
-}
-
-output "private_ip" {
-  value = "UNIMPLEMENTED"
-}
-
-output "public_ip" {
-  value = "UNIMPLEMENTED"
-}
-
-
-# NOTE: for GCP we'll pass 'subnet_self_link' in the same variable 'subnet_id'

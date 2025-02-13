@@ -35,7 +35,3 @@ python -m amoebius.cli.secrets.ssh delete \
 EOT
   }
 }
-
-output "vault_path" {
-  value = var.path
-}

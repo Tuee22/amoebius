@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "google" {
-  # project from environment
+  # project / region from environment or root
 }
 
 resource "google_compute_instance" "this" {
@@ -34,6 +34,7 @@ resource "google_compute_instance" "this" {
   tags = ["allow-ssh"]
 }
 
+# Overwrite outputs
 output "vm_name" {
   value = google_compute_instance.this.name
 }

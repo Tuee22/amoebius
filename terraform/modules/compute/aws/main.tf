@@ -28,7 +28,7 @@ resource "aws_instance" "this" {
   }
 }
 
-# Overwrite the previously "UNIMPLEMENTED" outputs
+# Overwrite unimplemented outputs
 output "vm_name" {
   value = aws_instance.this.tags["Name"]
 }

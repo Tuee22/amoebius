@@ -1,7 +1,6 @@
 variable "region" {
   type        = string
-  default     = "eastus"
-  description = "Azure region"
+  description = "Azure region."
 }
 
 variable "vpc_cidr" {
@@ -11,5 +10,5 @@ variable "vpc_cidr" {
 
 variable "availability_zones" {
   type        = list(string)
-  default     = ["1","2","3"]
+  default     = []
 }

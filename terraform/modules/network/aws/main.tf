@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "aws" {
-  # region from environment or root
+  region = var.region
 }
 
 resource "aws_vpc" "this" {
@@ -78,16 +78,4 @@ resource "aws_security_group" "this" {
   tags = {
     Name = "${terraform.workspace}-ssh-sg"
   }
-}
-
-output "vpc_id" {
-  value = aws_vpc.this.id
-}
-
-output "subnet_ids" {
-  value = [for s in aws_subnet.public : s.id]
-}
-
-output "security_group_id" {
-  value = aws_security_group.this.id
 }

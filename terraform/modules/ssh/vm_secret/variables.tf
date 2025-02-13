@@ -7,8 +7,8 @@ variable "public_ip" {
 }
 
 variable "private_key_pem" {
-  type      = string
-  sensitive = true
+  type        = string
+  sensitive   = true
 }
 
 variable "ssh_user" {

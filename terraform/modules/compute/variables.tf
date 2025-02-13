@@ -1,28 +1,27 @@
 variable "provider" {
   type        = string
-  description = "Which cloud provider: 'aws', 'azure', or 'gcp'?"
+  description = "aws, azure, or gcp"
 }
 
 variable "availability_zones" {
   type        = list(string)
   default     = []
-  description = "List of zones. E.g. [\"us-east-1a\",\"us-east-1b\"] or [\"1\",\"2\",\"3\"], etc."
+  description = "Which zones to use."
 }
 
 variable "subnet_ids" {
   type        = list(string)
-  description = "One subnet per zone index, from the network module."
+  description = "One subnet per zone index."
 }
 
 variable "security_group_id" {
   type        = string
-  description = "Security group or firewall that allows SSH."
 }
 
 variable "instance_groups" {
   type = list(object({
     name           = string
-    category       = string   # e.g. 'arm_small','x86_small','nvidia_medium', etc.
+    category       = string   # e.g. 'arm_small','x86_small','nvidia_medium'
     count_per_zone = number
     image          = optional(string, "")
   }))
@@ -42,4 +41,10 @@ variable "vault_role_name" {
 variable "no_verify_ssl" {
   type    = bool
   default = false
+}
+
+variable "instance_type_map" {
+  type = map(string)
+  default = {}
+  description = "Map from category => instance_type. Provided by the root."
 }
