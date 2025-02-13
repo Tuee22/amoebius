@@ -5,10 +5,6 @@
 ###############################################################################
 # 1) Variables
 ###############################################################################
-variable "project_id" {
-  type        = string
-  description = "GCP project ID where resources will be created."
-}
 
 variable "region" {
   type        = string
@@ -20,14 +16,6 @@ variable "availability_zones" {
   type        = list(string)
   description = "Zones in us-central1 that support T2A."
   default     = ["us-central1-a", "us-central1-b", "us-central1-f"]
-}
-
-variable "service_account_key_json" {
-  type        = string
-  description = "Entire GCP service account JSON key, as a single string."
-  sensitive   = true
-  default     = <<EOF
-EOF
 }
 
 variable "ssh_user" {
@@ -72,8 +60,6 @@ terraform {
 }
 
 provider "google" {
-  project     = var.project_id
-  credentials = var.service_account_key_json
   region      = var.region
 }
 
@@ -100,7 +86,6 @@ resource "tls_private_key" "ssh_keys" {
 resource "google_compute_network" "vpc" {
   name                    = "${terraform.workspace}-vpc"
   auto_create_subnetworks = false
-  project                 = var.project_id
 }
 
 resource "google_compute_subnetwork" "public_subnets" {
@@ -109,7 +94,6 @@ resource "google_compute_subnetwork" "public_subnets" {
   network       = google_compute_network.vpc.self_link
   ip_cidr_range = "10.0.${count.index}.0/24"
   region        = var.region
-  project       = var.project_id
 }
 
 ###############################################################################
@@ -118,7 +102,6 @@ resource "google_compute_subnetwork" "public_subnets" {
 resource "google_compute_firewall" "allow_ssh" {
   name    = "${terraform.workspace}-allow-ssh"
   network = google_compute_network.vpc.self_link
-  project = var.project_id
 
   allow {
     protocol = "tcp"
@@ -137,7 +120,6 @@ resource "google_compute_instance" "vms" {
   name         = "${terraform.workspace}-vm-${count.index}"
   machine_type = "t2a-standard-1"  # 1 vCPU, 4 GB RAM (ARM64)
   zone         = var.availability_zones[count.index]
-  project      = var.project_id
 
   network_interface {
     subnetwork   = google_compute_subnetwork.public_subnets[count.index].self_link

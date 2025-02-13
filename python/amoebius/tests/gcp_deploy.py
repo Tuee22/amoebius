@@ -16,7 +16,7 @@ import sys
 import json
 import asyncio
 import argparse
-from typing import NoReturn
+from typing import NoReturn, Dict, Any
 
 from pydantic import ValidationError
 
@@ -72,11 +72,11 @@ async def run_gcp_deploy_test(destroy_only: bool = False) -> None:
 
         # If you want, you can also set "CLOUDSDK_CORE_PROJECT" or "GOOGLE_PROJECT"
         # to reflect the default project. But typically, Terraform uses var.project_id.
-        # env_vars["GOOGLE_PROJECT"] = gcp_key.project_id
+        env_vars["GOOGLE_PROJECT"] = gcp_key.project_id
 
         # We'll still pass 'project_id' to Terraform as a variable (non-sensitive),
         # but the credentials are in the env only.
-        tf_vars = {"project_id": gcp_key.project_id}
+        tf_vars: Dict[str,Any] = {}
 
         # 4) Either destroy only, or init+apply
         if destroy_only:
