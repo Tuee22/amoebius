@@ -41,7 +41,7 @@ variable "no_verify_ssl" {
 ###############################################################################
 terraform {
   backend "kubernetes" {
-    secret_suffix     = "test-gcp-deploy"
+    secret_suffix     = "test-gcp-deploy-standalone"
     load_config_file  = false
     namespace         = "amoebius"
     in_cluster_config = true

@@ -7,7 +7,7 @@
 ###############################################################################
 terraform {
   backend "kubernetes" {
-    secret_suffix     = "test-aws-deploy"
+    secret_suffix     = "test-aws-deploy-standalone"
     load_config_file  = false
     namespace         = "amoebius"
     in_cluster_config = true

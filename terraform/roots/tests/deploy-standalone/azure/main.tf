@@ -52,7 +52,7 @@ terraform {
   }
 
   backend "kubernetes" {
-    secret_suffix     = "test-azure-deploy"
+    secret_suffix     = "test-azure-deploy-standalone"
     load_config_file  = false
     namespace         = "amoebius"
     in_cluster_config = true
