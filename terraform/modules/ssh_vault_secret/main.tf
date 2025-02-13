@@ -1,3 +1,7 @@
+######################################
+# main.tf for ssh_vault_secret module
+######################################
+
 locals {
   triggers = {
     vault_role_name = var.vault_role_name
@@ -14,7 +18,7 @@ resource "null_resource" "vault_ssh_secret" {
 
   provisioner "local-exec" {
     command = <<EOT
-amoebctl secrets.ssh store \
+python -m amoebius.cli.secrets.ssh store \
   --vault-role-name="${self.triggers.vault_role_name}" \
   --path="${self.triggers.path}" \
   --user="${self.triggers.user}" \
@@ -28,10 +32,15 @@ EOT
   provisioner "local-exec" {
     when    = destroy
     command = <<EOT
-amoebctl secrets.ssh delete \
+python -m amoebius.cli.secrets.ssh delete \
   --vault-role-name="${self.triggers.vault_role_name}" \
   --path="${self.triggers.path}" \
   ${self.triggers.no_verify_ssl == "true" ? "--no-verify-ssl" : ""}
 EOT
   }
+}
+
+output "vault_path" {
+  description = "The Vault path where the SSH config was stored."
+  value       = var.path
 }

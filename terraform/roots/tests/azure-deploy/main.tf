@@ -5,6 +5,7 @@ terraform {
     namespace         = "amoebius"
     in_cluster_config = true
   }
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -15,15 +16,31 @@ terraform {
 
 provider "azurerm" {
   features {}
-  # We do NOT set location here; the cluster module defaults to "eastus" if not overridden.
 }
 
-module "cluster" {
-  source   = "/amoebius/terraform/modules/cluster"
+module "network" {
+  source = "/amoebius/terraform/modules/network/azure"
+  # region=eastus, plus watchers
+}
+
+module "compute" {
+  source = "/amoebius/terraform/modules/compute/universal"
+
   provider = "azure"
-  # Defaults from cluster module: region="eastus", zones=["1","2","3"], etc.
+
+  availability_zones = ["1","2","3"]
+  subnet_ids         = module.network.subnet_ids
+  security_group_id  = module.network.security_group_id
+
+  instance_groups = [
+    {
+      name           = "test_group"
+      category       = "arm_small"
+      count_per_zone = 1
+    }
+  ]
 }
 
 output "instances_by_group" {
-  value = module.cluster.instances_by_group
+  value = module.compute.instances_by_group
 }

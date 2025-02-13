@@ -9,12 +9,23 @@ terraform {
 
 provider "azurerm" {
   features {}
-  # region must be matched if we do data or resource group logic
 }
 
 resource "azurerm_resource_group" "main" {
   name     = "${terraform.workspace}-rg"
   location = var.region
+}
+
+# Manage a separate resource group for Network Watcher
+resource "azurerm_resource_group" "network_watcher" {
+  name     = "${terraform.workspace}-NetworkWatcherRG"
+  location = var.region
+}
+
+resource "azurerm_network_watcher" "main" {
+  name                = "NetworkWatcher_${var.location}"
+  location            = var.region
+  resource_group_name = azurerm_resource_group.network_watcher.name
 }
 
 resource "azurerm_virtual_network" "main" {
@@ -34,7 +45,7 @@ resource "azurerm_subnet" "subnets" {
 
 resource "azurerm_network_security_group" "ssh" {
   name                = "${terraform.workspace}-ssh-nsg"
-  location            = var.region
+  location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
 
   security_rule {
@@ -48,4 +59,20 @@ resource "azurerm_network_security_group" "ssh" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
+}
+
+output "vpc_id" {
+  value = azurerm_virtual_network.main.id
+}
+
+output "subnet_ids" {
+  value = [for s in azurerm_subnet.subnets : s.id]
+}
+
+output "security_group_id" {
+  value = azurerm_network_security_group.ssh.id
+}
+
+output "resource_group_name" {
+  value = azurerm_resource_group.main.name
 }

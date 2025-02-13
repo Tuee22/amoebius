@@ -5,6 +5,7 @@ terraform {
     namespace         = "amoebius"
     in_cluster_config = true
   }
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -14,19 +15,33 @@ terraform {
 }
 
 provider "aws" {
-  # We do NOT set region here; the cluster module has a default for AWS if not overridden.
+  # region, credentials from environment
 }
 
-module "cluster" {
-  source   = "/amoebius/terraform/modules/cluster"
+module "network" {
+  source = "/amoebius/terraform/modules/network/aws"
+  # default cidr = 10.0.0.0/16
+}
+
+module "compute" {
+  source = "/amoebius/terraform/modules/compute/universal"
+
   provider = "aws"
-  # This will use the defaults from the cluster module, i.e. region = "us-east-1", zones = ["us-east-1a","us-east-1b","us-east-1c"], etc.
+
+  availability_zones = ["us-east-1a","us-east-1b","us-east-1c"]
+  subnet_ids         = module.network.subnet_ids
+  security_group_id  = module.network.security_group_id
+
+  instance_groups = [
+    {
+      name           = "test_group"
+      category       = "x86_small"
+      count_per_zone = 1
+      # no custom image => default 24.04
+    }
+  ]
 }
 
-output "instances" {
-  value = module.cluster.instances_by_group
-}
-
-output "subnet_cidrs" {
-  value = module.cluster.subnet_cidrs
+output "instances_by_group" {
+  value = module.compute.instances_by_group
 }

@@ -9,7 +9,9 @@ terraform {
 
 resource "null_resource" "wait_for_ssh" {
   provisioner "remote-exec" {
-    inline = ["echo 'SSH check succeeded'"]
+    inline = [
+      "echo 'SSH check succeeded for ${var.vm_name}'"
+    ]
     connection {
       type        = "ssh"
       host        = var.public_ip
@@ -21,12 +23,13 @@ resource "null_resource" "wait_for_ssh" {
 }
 
 resource "random_id" "vault_uuid" {
-  byte_length = 32
+  byte_length = 4
   depends_on  = [null_resource.wait_for_ssh]
 }
 
-module "ssh_vault_secret" {
-  source = "/amoebius/terraform/modules/ssh/vault_secret"
+module "vault_secret" {
+  source = "/amoebius/terraform/modules/ssh_vault_secret"
+
   depends_on = [random_id.vault_uuid]
 
   vault_role_name = var.vault_role_name
@@ -36,5 +39,9 @@ module "ssh_vault_secret" {
   private_key     = var.private_key_pem
   no_verify_ssl   = var.no_verify_ssl
 
-  path = "/amoebius/ssh/${var.provider}/${terraform.workspace}/${random_id.vault_uuid.hex}"
+  path = "${var.vault_prefix}/${random_id.vault_uuid.hex}"
+}
+
+output "vault_path" {
+  value = module.vault_secret.vault_path
 }

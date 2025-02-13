@@ -1,34 +1,32 @@
+variable "provider" {
+  type        = string
+  description = "Which cloud provider: 'aws', 'azure', or 'gcp'?"
+}
+
 variable "availability_zones" {
-  type = list(string)
-  description = "Must be passed from the cluster module or user."
+  type        = list(string)
+  default     = []
+  description = "List of zones. E.g. [\"us-east-1a\",\"us-east-1b\"] or [\"1\",\"2\",\"3\"], etc."
+}
+
+variable "subnet_ids" {
+  type        = list(string)
+  description = "One subnet per zone index, from the network module."
+}
+
+variable "security_group_id" {
+  type        = string
+  description = "Security group or firewall that allows SSH."
 }
 
 variable "instance_groups" {
   type = list(object({
     name           = string
-    architecture   = string
-    size           = string
+    category       = string   # e.g. 'arm_small','x86_small','nvidia_medium', etc.
     count_per_zone = number
+    image          = optional(string, "")
   }))
-  description = "If empty, cluster might set a default. No defaults here."
-}
-
-variable "instance_type_map" {
-  type = map(string)
-  description = "Map from e.g. 'x86_small' => 't3.micro'. Must be passed in."
-}
-
-variable "subnet_ids" {
-  type = list(string)
-}
-
-variable "security_group_id" {
-  type = string
-}
-
-variable "disk_size_gb" {
-  type    = number
-  default = 30
+  default = []
 }
 
 variable "ssh_user" {
@@ -43,15 +41,5 @@ variable "vault_role_name" {
 
 variable "no_verify_ssl" {
   type    = bool
-  default = true
-}
-
-variable "region" {
-  type = string
-  description = "Region for the single_vm modules."
-}
-
-variable "provider" {
-  type = string
-  description = "Used by the single_vm submodule path and by ssh_vm_secret."
+  default = false
 }

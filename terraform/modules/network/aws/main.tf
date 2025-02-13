@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "aws" {
-  region = var.region
+  # Region/credentials from env or root
 }
 
 resource "aws_vpc" "this" {
@@ -56,8 +56,9 @@ resource "aws_route_table_association" "public_subnet" {
 }
 
 resource "aws_security_group" "this" {
-  name  = "${terraform.workspace}-ssh-sg"
-  vpc_id = aws_vpc.this.id
+  name        = "${terraform.workspace}-ssh-sg"
+  description = "SSH security group"
+  vpc_id      = aws_vpc.this.id
 
   ingress {
     description = "SSH from anywhere"
@@ -73,4 +74,20 @@ resource "aws_security_group" "this" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = {
+    Name = "${terraform.workspace}-ssh-sg"
+  }
+}
+
+output "vpc_id" {
+  value = aws_vpc.this.id
+}
+
+output "subnet_ids" {
+  value = [for s in aws_subnet.public : s.id]
+}
+
+output "security_group_id" {
+  value = aws_security_group.this.id
 }
