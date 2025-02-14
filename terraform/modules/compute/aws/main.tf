@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "aws" {
-  # region from environment or root
+  # region is set at root or from environment
 }
 
 resource "aws_key_pair" "this" {

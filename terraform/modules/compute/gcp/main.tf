@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "google" {
-  # project or region from env or root
+  # project or region from environment or root
 }
 
 resource "google_compute_instance" "this" {

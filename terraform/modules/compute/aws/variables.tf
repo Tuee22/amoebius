@@ -13,7 +13,7 @@ variable "ssh_user" {
 
 variable "image" {
   type        = string
-  description = "AMI override"
+  description = "AMI to use"
 }
 
 variable "instance_type" {
@@ -29,7 +29,7 @@ variable "security_group_id" {
 }
 
 variable "zone" {
-  type = string
+  type    = string
 }
 
 variable "workspace" {

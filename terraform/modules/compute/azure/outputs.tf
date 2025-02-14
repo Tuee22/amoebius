@@ -1,11 +1,14 @@
 output "vm_name" {
-  value = azurerm_linux_virtual_machine.this.name
+  description = "Name of this Azure VM"
+  value       = azurerm_linux_virtual_machine.this.name
 }
 
 output "private_ip" {
-  value = azurerm_network_interface.this.ip_configuration[0].private_ip_address
+  description = "Private IP address of this VM"
+  value       = azurerm_network_interface.this.ip_configuration[0].private_ip_address
 }
 
 output "public_ip" {
-  value = azurerm_public_ip.this.ip_address
+  description = "Public IP address of this VM"
+  value       = azurerm_public_ip.this.ip_address
 }

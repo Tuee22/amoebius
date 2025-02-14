@@ -13,7 +13,7 @@ variable "ssh_user" {
 
 variable "image" {
   type        = string
-  description = "Custom or default GCP image"
+  description = "Full image link for GCP"
 }
 
 variable "instance_type" {

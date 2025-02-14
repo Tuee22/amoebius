@@ -13,7 +13,7 @@ variable "ssh_user" {
 
 variable "image" {
   type        = string
-  description = "Custom or default image ID"
+  description = "Azure image (or shared gallery ID)"
 }
 
 variable "instance_type" {
@@ -37,8 +37,7 @@ variable "workspace" {
   default = "default"
 }
 
-# For real usage, we need the resource group name, so let's accept that:
 variable "resource_group_name" {
   type        = string
-  description = "Azure resource group name to place this VM"
+  description = "Resource group name in which to place this VM"
 }
