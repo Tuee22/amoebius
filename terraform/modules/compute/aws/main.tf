@@ -8,8 +8,11 @@ terraform {
 }
 
 provider "aws" {
-  # region is set at root or from environment
+  # region from environment or root
 }
+
+# This module expects variables to be passed from the top-level compute module:
+#   vm_name, public_key_openssh, ssh_user, image, instance_type, subnet_id, security_group_id, zone, workspace
 
 resource "aws_key_pair" "this" {
   key_name   = "${var.workspace}-${var.vm_name}"

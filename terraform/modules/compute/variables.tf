@@ -1,51 +1,60 @@
 variable "provider" {
   type        = string
-  description = "aws, azure, or gcp"
+  description = "Which provider (aws, azure, gcp)?"
 }
 
-variable "availability_zones" {
-  type        = list(string)
-  default     = []
-  description = "Which zones to use."
+variable "vm_name" {
+  type        = string
+  description = "Name for the VM instance"
 }
 
-variable "subnet_ids" {
-  type        = list(string)
-  description = "One subnet per zone index."
+variable "public_key_openssh" {
+  type        = string
+  description = "SSH public key in OpenSSH format"
+}
+
+variable "ssh_user" {
+  type        = string
+  default     = "ubuntu"
+}
+
+variable "image" {
+  type        = string
+  description = "Image/AMI to use"
+}
+
+variable "instance_type" {
+  type        = string
+}
+
+variable "subnet_id" {
+  type        = string
+  description = "Subnet or subnetwork to place this VM"
 }
 
 variable "security_group_id" {
   type        = string
-  description = "SG or firewall ID that allows SSH."
+  description = "Security group or firewall ID"
 }
 
-variable "instance_groups" {
-  type = list(object({
-    name           = string
-    category       = string   # e.g. 'arm_small','x86_small','nvidia_medium'
-    count_per_zone = number
-    image          = optional(string, "")
-  }))
-  default = []
+variable "zone" {
+  type        = string
+  description = "Which zone or AZ"
 }
 
-variable "instance_type_map" {
-  type    = map(string)
-  default = {}
-  description = "Maps from category => instance_type"
+variable "workspace" {
+  type        = string
+  default     = "default"
 }
 
-variable "ssh_user" {
-  type    = string
-  default = "ubuntu"
+# For Azure only, we might need a resource_group_name, location
+variable "resource_group_name" {
+  type        = string
+  default     = ""
 }
 
-variable "vault_role_name" {
-  type    = string
-  default = "amoebius-admin-role"
+variable "location" {
+  type        = string
+  default     = ""
 }
 
-variable "no_verify_ssl" {
-  type    = bool
-  default = true
-}

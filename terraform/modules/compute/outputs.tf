@@ -1,4 +1,14 @@
-output "instances_by_group" {
-  description = "Map of group_name => list of { name, private_ip, public_ip, vault_path }"
-  value       = local.instances_by_group
+output "vm_name" {
+  description = "VM name or ID"
+  value       = module.single_vm.vm_name
+}
+
+output "private_ip" {
+  description = "VM private IP"
+  value       = module.single_vm.private_ip
+}
+
+output "public_ip" {
+  description = "VM public IP"
+  value       = module.single_vm.public_ip
 }

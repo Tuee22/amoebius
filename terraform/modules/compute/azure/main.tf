@@ -14,7 +14,7 @@ provider "azurerm" {
 resource "azurerm_public_ip" "this" {
   name                = "${var.workspace}-${var.vm_name}-pip"
   resource_group_name = var.resource_group_name
-  location            = "PLACEHOLDER-LOCATION" # Typically you'd pass location if needed
+  location            = var.location
   allocation_method   = "Static"
   sku                 = "Standard"
   zones               = [var.zone]
@@ -22,8 +22,8 @@ resource "azurerm_public_ip" "this" {
 
 resource "azurerm_network_interface" "this" {
   name                = "${var.workspace}-${var.vm_name}-nic"
+  location            = var.location
   resource_group_name = var.resource_group_name
-  location            = "PLACEHOLDER-LOCATION"
 
   ip_configuration {
     name                          = "ipconfig"
@@ -41,7 +41,7 @@ resource "azurerm_network_interface_security_group_association" "sg_assoc" {
 resource "azurerm_linux_virtual_machine" "this" {
   name                = "${var.workspace}-${var.vm_name}"
   resource_group_name = var.resource_group_name
-  location            = "PLACEHOLDER-LOCATION"
+  location            = var.location
   size                = var.instance_type
   zone                = var.zone
 

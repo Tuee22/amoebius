@@ -1,6 +1,10 @@
 variable "provider" {
-  type        = string
-  description = "aws, azure, or gcp"
+  type = string
+}
+
+variable "availability_zones" {
+  type    = list(string)
+  default = []
 }
 
 variable "subnet_ids" {
@@ -8,15 +12,8 @@ variable "subnet_ids" {
   description = "One subnet per zone"
 }
 
-variable "availability_zones" {
-  type        = list(string)
-  default     = []
-  description = "List of zones in the region."
-}
-
 variable "security_group_id" {
   type        = string
-  description = "SG / firewall ID that allows SSH"
 }
 
 variable "instance_groups" {
@@ -24,7 +21,6 @@ variable "instance_groups" {
     name           = string
     category       = string
     count_per_zone = number
-    # optional custom image
     image          = optional(string, "")
   }))
   default = []
@@ -33,7 +29,6 @@ variable "instance_groups" {
 variable "instance_type_map" {
   type    = map(string)
   default = {}
-  description = "Maps category => instance_type"
 }
 
 variable "ssh_user" {
@@ -51,9 +46,13 @@ variable "no_verify_ssl" {
   default = true
 }
 
-# If Azure, we might also need resource_group_name. We'll accept it here
-variable "azure_resource_group_name" {
-  type        = string
-  default     = ""
-  description = "If provider=azure, pass the RG name here, so we can feed the single VM module"
+# For azure usage
+variable "resource_group_name" {
+  type    = string
+  default = ""
+}
+
+variable "location" {
+  type    = string
+  default = ""
 }
