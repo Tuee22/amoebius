@@ -5,22 +5,20 @@ variable "vault_role_name" {
 
 variable "path" {
   type        = string
-  description = "Vault path to store SSH config"
+  description = "Vault path for storing SSH keys"
 }
 
 variable "user" {
   type        = string
-  description = "SSH username"
 }
 
 variable "hostname" {
   type        = string
-  description = "IP or hostname"
 }
 
 variable "port" {
-  type        = number
-  default     = 22
+  type    = number
+  default = 22
 }
 
 variable "private_key" {
@@ -31,5 +29,5 @@ variable "private_key" {
 
 variable "no_verify_ssl" {
   type    = bool
-  default = false
+  default = true
 }

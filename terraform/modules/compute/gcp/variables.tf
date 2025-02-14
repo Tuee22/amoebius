@@ -12,8 +12,8 @@ variable "ssh_user" {
 }
 
 variable "image" {
-  type    = string
-  description = "Default or override image for this VM"
+  type        = string
+  description = "Custom or default GCP image"
 }
 
 variable "instance_type" {
@@ -29,11 +29,10 @@ variable "security_group_id" {
 }
 
 variable "zone" {
-  type    = string
+  type = string
 }
 
 variable "workspace" {
   type    = string
   default = "default"
 }
-

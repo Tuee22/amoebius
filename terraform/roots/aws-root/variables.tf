@@ -13,16 +13,26 @@ variable "availability_zones" {
   default = ["us-east-1a","us-east-1b","us-east-1c"]
 }
 
-# For each category we might have: arm_small, x86_small, x86_medium, nvidia_small, etc.
+# Default instance_type_map. The user can override if they want
 variable "instance_type_map" {
   type = map(string)
   default = {
-    "arm_small"     = "t4g.micro"
-    "arm_medium"    = "t4g.small"
-    "x86_small"     = "t3.micro"
-    "x86_medium"    = "t3.small"
-    "nvidia_small"  = "g4dn.xlarge"
+    "arm_small"  = "t4g.micro"
+    "x86_small"  = "t3.micro"
+    "x86_medium" = "t3.small"
+    "nvidia_small" = "g4dn.xlarge"
   }
+}
+
+variable "arm_default_image" {
+  type    = string
+  default = "ami-0faefad027f3b5de6" # e.g. hypothetical Ubuntu 24.04 ARM for us-east-1
+  # in reality you'll pick the official 24.04 once it's out
+}
+
+variable "x86_default_image" {
+  type    = string
+  default = "ami-0c8a4fc5fa843b2c2" # e.g. hypothetical Ubuntu 24.04 x86
 }
 
 variable "instance_groups" {
@@ -47,5 +57,5 @@ variable "vault_role_name" {
 
 variable "no_verify_ssl" {
   type    = bool
-  default = false
+  default = true
 }

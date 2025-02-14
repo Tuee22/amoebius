@@ -10,7 +10,7 @@ terraform {
 resource "null_resource" "wait_for_ssh" {
   provisioner "remote-exec" {
     inline = [
-      "echo 'SSH check for ${var.vm_name}'"
+      "echo 'Testing SSH for ${var.vm_name}'"
     ]
     connection {
       type        = "ssh"
@@ -41,4 +41,3 @@ module "vault" {
 
   path = "${var.vault_prefix}/${random_id.path_suffix.hex}"
 }
-

@@ -22,6 +22,16 @@ variable "instance_type_map" {
   }
 }
 
+variable "arm_default_image" {
+  type    = string
+  default = "/subscriptions/123abc/resourceGroups/myRG/providers/Microsoft.Compute/galleries/24_04_arm/images/latest"
+}
+
+variable "x86_default_image" {
+  type    = string
+  default = "/subscriptions/123abc/resourceGroups/myRG/providers/Microsoft.Compute/galleries/24_04_x86/images/latest"
+}
+
 variable "instance_groups" {
   type = list(object({
     name           = string
@@ -44,5 +54,5 @@ variable "vault_role_name" {
 
 variable "no_verify_ssl" {
   type    = bool
-  default = false
+  default = true
 }

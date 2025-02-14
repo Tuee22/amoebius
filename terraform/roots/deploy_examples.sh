@@ -1,49 +1,54 @@
 #!/usr/bin/env bash
 #
-# This script demonstrates how to deploy "simple" or "ha" clusters for each provider root
-# using separate Terraform workspaces. We override variables as needed, or keep defaults.
+# Simple demonstration of using the master roots with multiple workspaces.
+#
 
 set -e
 
-# Example: A "simple" AWS cluster
-echo "=== AWS: Simple cluster in workspace 'aws-simple' ==="
+# Example: AWS "simple" cluster
+echo "=== AWS SIMPLE ==="
 cd aws-root
-terraform workspace new aws-simple || terraform workspace select aws-simple
 terraform init
-terraform plan -var 'instance_groups=[{name="test_group",category="x86_small",count_per_zone=1}]'
-terraform apply -auto-approve -var 'instance_groups=[{name="test_group",category="x86_small",count_per_zone=1}]'
-# If you want to destroy:
-# terraform destroy -auto-approve -var 'instance_groups=[{name="test_group",category="x86_small",count_per_zone=1}]'
+terraform workspace new simple || terraform workspace select simple
+terraform apply -auto-approve -var 'instance_groups=[{
+  name           = "x86_demo",
+  category       = "x86_small",
+  count_per_zone = 1
+}]'
 cd ..
 
-# Example: A "HA" AWS cluster: arm + x86
-echo "=== AWS: HA cluster in workspace 'aws-ha' ==="
+# Example: AWS "ha" cluster with both ARM and x86
+echo "=== AWS HA ==="
 cd aws-root
-terraform workspace new aws-ha || terraform workspace select aws-ha
-terraform plan -var 'instance_groups=[
-  {name="arm_nodes",category="arm_small",count_per_zone=1},
-  {name="x86_nodes",category="x86_medium",count_per_zone=1}
-]'
+terraform workspace new ha || terraform workspace select ha
 terraform apply -auto-approve -var 'instance_groups=[
-  {name="arm_nodes",category="arm_small",count_per_zone=1},
-  {name="x86_nodes",category="x86_medium",count_per_zone=1}
+  { name="arm_nodes",category="arm_small",count_per_zone=1 },
+  { name="x86_nodes",category="x86_small",count_per_zone=2 }
 ]'
 cd ..
 
-echo "=== Azure: Simple ==="
-cd azure-root
-terraform workspace new azure-simple || terraform workspace select azure-simple
+# Example: Azure with a single ARM group
+echo "=== AZURE SIMPLE ==="
+cd ../azure-root
 terraform init
-terraform plan -var 'instance_groups=[{name="test_arm",category="arm_small",count_per_zone=1}]'
-# ... terraform apply ...
+terraform workspace new simple || terraform workspace select simple
+terraform apply -auto-approve -var 'instance_groups=[{
+  name="arm_machine",
+  category="arm_small",
+  count_per_zone=1
+}]'
 cd ..
 
-echo "=== GCP: Simple ==="
-cd gcp-root
-terraform workspace new gcp-simple || terraform workspace select gcp-simple
+# Example: GCP with an x86 group
+echo "=== GCP SIMPLE ==="
+cd ../gcp-root
 terraform init
-terraform plan -var 'instance_groups=[{name="test_arm",category="arm_small",count_per_zone=1}]'
-# ... terraform apply ...
+terraform workspace new simple || terraform workspace select simple
+terraform apply -auto-approve -var 'instance_groups=[{
+  name="x86_nodes",
+  category="x86_small",
+  count_per_zone=1
+}]'
 cd ..
 
-echo "Done with examples!"
+echo "=== Examples deployed! ==="

@@ -11,14 +11,10 @@ provider "azurerm" {
   features {}
 }
 
-# We might need a resource group name for real usage. For simplicity, let's assume
-# the user has provided a subnet with embedded RG info. Some advanced usage might differ.
-
 resource "azurerm_public_ip" "this" {
   name                = "${var.workspace}-${var.vm_name}-pip"
-  resource_group_name = "PLACEHOLDER-RG" # Typically you pass resource_group_name in 'subnet_id' or as a separate variable
-  location            = "PLACEHOLDER-LOCATION"
-
+  resource_group_name = var.resource_group_name
+  location            = "eastus"
   allocation_method   = "Static"
   sku                 = "Standard"
   zones               = [var.zone]
@@ -26,8 +22,8 @@ resource "azurerm_public_ip" "this" {
 
 resource "azurerm_network_interface" "this" {
   name                = "${var.workspace}-${var.vm_name}-nic"
-  location            = "PLACEHOLDER-LOCATION"
-  resource_group_name = "PLACEHOLDER-RG"
+  location            = "eastus"
+  resource_group_name = var.resource_group_name
 
   ip_configuration {
     name                          = "ipconfig"
@@ -44,8 +40,8 @@ resource "azurerm_network_interface_security_group_association" "sg_assoc" {
 
 resource "azurerm_linux_virtual_machine" "this" {
   name                = "${var.workspace}-${var.vm_name}"
-  resource_group_name = "PLACEHOLDER-RG"
-  location            = "PLACEHOLDER-LOCATION"
+  resource_group_name = var.resource_group_name
+  location            = "eastus"
   size                = var.instance_type
   zone                = var.zone
 
@@ -59,6 +55,7 @@ resource "azurerm_linux_virtual_machine" "this" {
     public_key = var.public_key_openssh
   }
 
+  # We assume var.image is an ID of a managed or gallery image
   source_image_id = var.image
 
   os_disk {
@@ -67,17 +64,4 @@ resource "azurerm_linux_virtual_machine" "this" {
     storage_account_type = "Premium_LRS"
     disk_size_gb         = 30
   }
-}
-
-# Overwrite outputs
-output "vm_name" {
-  value = azurerm_linux_virtual_machine.this.name
-}
-
-output "private_ip" {
-  value = azurerm_network_interface.this.ip_configuration[0].private_ip_address
-}
-
-output "public_ip" {
-  value = azurerm_public_ip.this.ip_address
 }

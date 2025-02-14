@@ -16,10 +16,20 @@ variable "availability_zones" {
 variable "instance_type_map" {
   type = map(string)
   default = {
-    "arm_small"     = "t2a-standard-1",
-    "x86_small"     = "e2-small",
-    "nvidia_small"  = "a2-highgpu-1g"
+    "arm_small"    = "t2a-standard-1",
+    "x86_small"    = "e2-small",
+    "nvidia_small" = "a2-highgpu-1g"
   }
+}
+
+variable "arm_default_image" {
+  type    = string
+  default = "projects/ubuntu-os-cloud/global/images/ubuntu-2404-lts-arm64"
+}
+
+variable "x86_default_image" {
+  type    = string
+  default = "projects/ubuntu-os-cloud/global/images/ubuntu-2404-lts"
 }
 
 variable "instance_groups" {
@@ -44,5 +54,5 @@ variable "vault_role_name" {
 
 variable "no_verify_ssl" {
   type    = bool
-  default = false
+  default = true
 }

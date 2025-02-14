@@ -28,7 +28,7 @@ variable "vault_role_name" {
 
 variable "no_verify_ssl" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "vault_prefix" {

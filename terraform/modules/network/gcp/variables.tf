@@ -1,6 +1,6 @@
 variable "region" {
   type        = string
-  description = "Optional region. We might rely on env or pass from root."
+  description = "GCP region, e.g. us-central1"
 }
 
 variable "vpc_cidr" {

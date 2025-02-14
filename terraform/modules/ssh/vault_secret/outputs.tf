@@ -1,4 +1,4 @@
 output "vault_path" {
-  description = "Path in Vault where SSH is stored"
+  description = "Vault path where SSH was stored."
   value       = var.path
 }

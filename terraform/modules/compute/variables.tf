@@ -16,6 +16,7 @@ variable "subnet_ids" {
 
 variable "security_group_id" {
   type        = string
+  description = "SG or firewall ID that allows SSH."
 }
 
 variable "instance_groups" {
@@ -26,6 +27,12 @@ variable "instance_groups" {
     image          = optional(string, "")
   }))
   default = []
+}
+
+variable "instance_type_map" {
+  type    = map(string)
+  default = {}
+  description = "Maps from category => instance_type"
 }
 
 variable "ssh_user" {
@@ -40,11 +47,5 @@ variable "vault_role_name" {
 
 variable "no_verify_ssl" {
   type    = bool
-  default = false
-}
-
-variable "instance_type_map" {
-  type = map(string)
-  default = {}
-  description = "Map from category => instance_type. Provided by the root."
+  default = true
 }

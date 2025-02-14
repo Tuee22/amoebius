@@ -1,6 +1,6 @@
 variable "region" {
   type        = string
-  description = "Azure region."
+  description = "Azure region, e.g. eastus"
 }
 
 variable "vpc_cidr" {

@@ -57,18 +57,19 @@ resource "aws_route_table_association" "public_subnet" {
 
 resource "aws_security_group" "this" {
   name        = "${terraform.workspace}-ssh-sg"
-  description = "SSH security group"
+  description = "Security group for SSH"
   vpc_id      = aws_vpc.this.id
 
   ingress {
+    description = "SSH from anywhere"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
-    description = "SSH from anywhere"
   }
 
   egress {
+    description = "Allow all outbound"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"

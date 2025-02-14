@@ -22,21 +22,36 @@ module "network" {
   availability_zones = var.availability_zones
 }
 
-module "compute" {
-  source           = "/amoebius/terraform/modules/compute"
+# We'll produce final instance_groups with defaults for ARM vs x86
+locals {
+  final_instance_groups = [
+    for g in var.instance_groups : {
+      name           = g.name
+      category       = g.category
+      count_per_zone = g.count_per_zone
+      image          = (
+        length(try(g.image,"")) > 0
+        ? g.image
+        : (
+          startswith(g.category, "arm_") ? var.arm_default_image : var.x86_default_image
+        )
+      )
+    }
+  ]
+}
 
-  provider         = "azure"
-  availability_zones = var.availability_zones
-  subnet_ids       = module.network.subnet_ids
-  security_group_id= module.network.security_group_id
+module "compute" {
+  source = "/amoebius/terraform/modules/compute"
+
+  provider          = "azure"
+  availability_zones= var.availability_zones
+  subnet_ids        = module.network.subnet_ids
+  security_group_id = module.network.security_group_id
+
+  instance_groups   = local.final_instance_groups
+  instance_type_map = var.instance_type_map
+
   ssh_user         = var.ssh_user
   vault_role_name  = var.vault_role_name
   no_verify_ssl    = var.no_verify_ssl
-
-  instance_groups   = var.instance_groups
-  instance_type_map = var.instance_type_map
-}
-
-output "instances_by_group" {
-  value = module.compute.instances_by_group
 }

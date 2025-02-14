@@ -11,5 +11,5 @@ variable "vpc_cidr" {
 variable "availability_zones" {
   type        = list(string)
   default     = []
-  description = "List of AZs in this region."
+  description = "List of AWS AZs in this region."
 }

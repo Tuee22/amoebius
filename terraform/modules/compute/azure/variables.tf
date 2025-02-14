@@ -8,12 +8,12 @@ variable "public_key_openssh" {
 
 variable "ssh_user" {
   type    = string
-  default = "ubuntu"
+  default = "azureuser"
 }
 
 variable "image" {
-  type    = string
-  description = "Default or override image for this VM"
+  type        = string
+  description = "Custom or default image ID"
 }
 
 variable "instance_type" {
@@ -29,7 +29,7 @@ variable "security_group_id" {
 }
 
 variable "zone" {
-  type    = string
+  type = string
 }
 
 variable "workspace" {
@@ -37,3 +37,8 @@ variable "workspace" {
   default = "default"
 }
 
+# For real usage, we need the resource group name, so let's accept that:
+variable "resource_group_name" {
+  type        = string
+  description = "Azure resource group name to place this VM"
+}
