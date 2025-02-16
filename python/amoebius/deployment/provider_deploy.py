@@ -2,12 +2,8 @@
 provider_deploy.py
 
 We define:
-  - get_provider_env_from_vault(provider, vault_client, vault_path)
-    -> environment variables from Vault credentials.
-
-  - deploy(provider, vault_client, vault_path, variables, destroy=False)
-    -> uses the environment from get_provider_env_from_vault,
-       runs terraform init/apply or destroy with the given dictionary of variables.
+  - get_provider_env_from_vault(...) -> Dict[str, Any]
+  - deploy(..., cluster_deploy: ClusterDeploy) -> None
 """
 
 import json
@@ -16,6 +12,7 @@ from typing import Dict, Any
 
 from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.models.api_keys import AWSApiKey, AzureCredentials, GCPServiceAccountKey
+from amoebius.models.cluster_deploy import ClusterDeploy
 from amoebius.utils.terraform import (
     init_terraform,
     apply_terraform,
@@ -31,25 +28,17 @@ class ProviderName(str, Enum):
 
 async def get_provider_env_from_vault(
     provider: ProviderName, vault_client: AsyncVaultClient, vault_path: str
-) -> Dict[str, str]:
-    """
-    Reads credentials from Vault at 'vault_path' for the given provider,
-    returns environment variables for Terraform.
-
-    E.g. for AWS, sets AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, [AWS_SESSION_TOKEN].
-    """
+) -> Dict[str, Any]:
     secret_data = await vault_client.read_secret(vault_path)
-
     if provider == ProviderName.aws:
         aws_creds = AWSApiKey(**secret_data)
-        env = {
+        env: Dict[str, Any] = {
             "AWS_ACCESS_KEY_ID": aws_creds.access_key_id,
             "AWS_SECRET_ACCESS_KEY": aws_creds.secret_access_key,
         }
         if aws_creds.session_token:
             env["AWS_SESSION_TOKEN"] = aws_creds.session_token
         return env
-
     elif provider == ProviderName.azure:
         az_creds = AzureCredentials(**secret_data)
         return {
@@ -58,14 +47,12 @@ async def get_provider_env_from_vault(
             "ARM_TENANT_ID": az_creds.tenant_id,
             "ARM_SUBSCRIPTION_ID": az_creds.subscription_id,
         }
-
     elif provider == ProviderName.gcp:
         gcp_creds = GCPServiceAccountKey(**secret_data)
         return {
             "GOOGLE_CREDENTIALS": json.dumps(gcp_creds.model_dump()),
             "GOOGLE_PROJECT": gcp_creds.project_id,
         }
-
     else:
         raise ValueError(f"Unknown provider: {provider}")
 
@@ -74,40 +61,28 @@ async def deploy(
     provider: ProviderName,
     vault_client: AsyncVaultClient,
     vault_path: str,
-    variables: Dict[str, Any],
+    cluster_deploy: ClusterDeploy,
     destroy: bool = False,
 ) -> None:
     """
-    1) environment = get_provider_env_from_vault
-    2) run terraform init+apply or destroy with 'variables'
-    3) The root directory is /amoebius/terraform/roots/providers/<provider>
-
-    The 'variables' param is typically cluster_config.model_dump() from your Pydantic model.
+    Exactly define the parameter cluster_deploy: ClusterDeploy
+    to match the call site usage "cluster_deploy=..."
     """
     env_vars = await get_provider_env_from_vault(provider, vault_client, vault_path)
+    tf_vars = cluster_deploy.model_dump()
+
     root_name = f"providers/{provider}"
 
     if destroy:
-        print(f"[{provider}] => running terraform destroy with variables = {variables}")
+        print(f"[{provider}] => Running destroy with variables = {tf_vars}")
         await destroy_terraform(
-            root_name=root_name,
-            env=env_vars,
-            variables=variables,
-            sensitive=False,
+            root_name, env=env_vars, variables=tf_vars, sensitive=False
         )
     else:
-        print(f"[{provider}] => init+apply with variables = {variables}")
-        await init_terraform(
-            root_name=root_name,
-            env=env_vars,
-            reconfigure=True,
-            sensitive=False,
-        )
+        print(f"[{provider}] => init+apply with variables = {tf_vars}")
+        await init_terraform(root_name, env=env_vars, reconfigure=True, sensitive=False)
         await apply_terraform(
-            root_name=root_name,
-            env=env_vars,
-            variables=variables,
-            sensitive=False,
+            root_name, env=env_vars, variables=tf_vars, sensitive=False
         )
 
-    print(f"[{provider}] => done. destroy={destroy}")
+    print(f"[{provider}] => done (destroy={destroy}).")

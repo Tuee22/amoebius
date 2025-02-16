@@ -21,7 +21,7 @@ from amoebius.models.providers import (
     AzureClusterDeploy,
     GCPClusterDeploy,
 )
-from amoebius.provider_deploy import deploy, ProviderName
+from amoebius.deployment.provider_deploy import deploy, ProviderName
 from amoebius.models.vault import VaultSettings
 from amoebius.secrets.vault_client import AsyncVaultClient
 
