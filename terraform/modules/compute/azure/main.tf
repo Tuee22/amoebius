@@ -7,8 +7,6 @@ terraform {
   }
 }
 
-provider "azurerm" {
-  features {}
 }
 
 resource "azurerm_public_ip" "this" {

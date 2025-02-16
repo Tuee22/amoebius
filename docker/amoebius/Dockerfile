@@ -42,7 +42,8 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /
 
 # Set up the Docker repository with the correct GPG key reference
 RUN echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+    "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
+    | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 # Install Docker Engine and plugins
 RUN apt-get update && apt-get install -y \
@@ -76,6 +77,20 @@ RUN set -eux; \
     unzip -o vault_${VAULT_VERSION}_linux_${VAULT_ARCH}.zip; \
     mv vault /usr/local/bin/; \
     rm vault_${VAULT_VERSION}_linux_${VAULT_ARCH}.zip
+
+# --- Install Packer ---
+RUN set -eux; \
+    cd /tmp; \
+    PACKER_VERSION=$(curl -s https://releases.hashicorp.com/packer/ | grep -o 'packer/[0-9\.]*/' | head -1 | cut -d'/' -f2); \
+    if [ "$TARGETARCH" = "arm64" ]; then \
+        PACKER_ARCH="arm64"; \
+    else \
+        PACKER_ARCH="amd64"; \
+    fi; \
+    wget -q https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_${PACKER_ARCH}.zip; \
+    unzip -o packer_${PACKER_VERSION}_linux_${PACKER_ARCH}.zip; \
+    mv packer /usr/local/bin/; \
+    rm packer_${PACKER_VERSION}_linux_${PACKER_ARCH}.zip
 
 # Install kubectl
 RUN if [ "$TARGETARCH" = "arm64" ]; then \

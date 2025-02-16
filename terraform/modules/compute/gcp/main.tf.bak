@@ -7,6 +7,9 @@ terraform {
   }
 }
 
+provider "google" {
+  # project or region from environment or root
+}
 
 resource "google_compute_instance" "this" {
   name         = "${var.workspace}-${var.vm_name}"

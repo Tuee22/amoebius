@@ -1,556 +1,341 @@
 #!/usr/bin/env bash
+#
+# deploy_python_changes.sh
+#
+# Creates or overwrites:
+#  1) /amoebius/python/amoebius/models/api_keys/__init__.py
+#  2) /amoebius/python/amoebius/deployment/provider_deploy.py
+#  3) /amoebius/python/amoebius/tests/provider_deployment.py
+#
+# Key changes:
+#  - A separate function get_provider_env_from_vault() does the provider-specific
+#    credential parsing & environment variable creation.
+#  - deploy_provider() now has a "variables: Optional[Dict[str,Any]]" param
+#    passed through to terraform apply/destroy.
+#  - We unify the Pydantic models in __init__.py for easy import.
+#
+# Usage:
+#   1) chmod +x deploy_python_changes.sh
+#   2) ./deploy_python_changes.sh
+#
 
 set -e
 
-echo "Overwriting compute and cluster modules with new final layout..."
+BASE_DIR="/amoebius/python/amoebius"
+API_KEYS_DIR="$BASE_DIR/models/api_keys"
+DEPLOY_DIR="$BASE_DIR/deployment"
+TESTS_DIR="$BASE_DIR/tests"
 
-###############################################################################
-# 1) Recreate /compute subfolders: aws, azure, gcp, plus top-level .tf
-###############################################################################
+echo "Ensuring directories exist..."
+mkdir -p "$API_KEYS_DIR"
+mkdir -p "$DEPLOY_DIR"
+mkdir -p "$TESTS_DIR"
 
-mkdir -p amoebius/terraform/modules/compute/aws
-mkdir -p amoebius/terraform/modules/compute/azure
-mkdir -p amoebius/terraform/modules/compute/gcp
+############################################
+# 1) /amoebius/python/amoebius/models/api_keys/__init__.py
+############################################
+cat << 'EOF' > "$API_KEYS_DIR/__init__.py"
+"""
+models/api_keys/__init__.py
 
-###############################################################################
-# 1A) Minimal provider subfolders
-###############################################################################
+Aggregate imports so these models can be accessed directly from this package.
 
-#################### AWS ####################
-cat <<'EOF' > amoebius/terraform/modules/compute/aws/main.tf
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.0"
-    }
-  }
-}
+Any new pydantic models should go in /amoebius/python/amoebius/models if they
+are not specifically for API keys.
+"""
 
-provider "aws" {
-  # region from environment or root
-}
+from amoebius.models.api_keys.aws import AWSApiKey
+from amoebius.models.api_keys.azure import AzureCredentials
+from amoebius.models.api_keys.gcp import GCPServiceAccountKey
 
-# This module expects variables to be passed from the top-level compute module:
-#   vm_name, public_key_openssh, ssh_user, image, instance_type, subnet_id, security_group_id, zone, workspace
-
-resource "aws_key_pair" "this" {
-  key_name   = "${var.workspace}-${var.vm_name}"
-  public_key = var.public_key_openssh
-}
-
-resource "aws_instance" "this" {
-  ami           = var.image
-  instance_type = var.instance_type
-  subnet_id     = var.subnet_id
-  vpc_security_group_ids = [var.security_group_id]
-  key_name               = aws_key_pair.this.key_name
-
-  tags = {
-    Name = "${var.workspace}-${var.vm_name}"
-  }
-}
+__all__ = [
+    "AWSApiKey",
+    "AzureCredentials",
+    "GCPServiceAccountKey",
+]
 EOF
 
-cat <<'EOF' > amoebius/terraform/modules/compute/aws/variables.tf
-# Minimal variables - only what's needed for the raw AWS resource.
-variable "vm_name" {}
-variable "public_key_openssh" {}
-variable "ssh_user" {}
-variable "image" {}
-variable "instance_type" {}
-variable "subnet_id" {}
-variable "security_group_id" {}
-variable "zone" {}
-variable "workspace" {}
+############################################
+# 2) /amoebius/python/amoebius/deployment/provider_deploy.py
+############################################
+cat << 'EOF' > "$DEPLOY_DIR/provider_deploy.py"
+"""
+provider_deploy.py
+
+This module provides:
+  - a standalone function get_provider_env_from_vault() that reads credentials from Vault,
+    parses them with the correct Pydantic model, and returns environment variables.
+  - deploy_provider(...): a generic function that calls get_provider_env_from_vault, then
+    runs terraform init+apply or destroy, optionally passing 'variables' to apply/destroy.
+"""
+
+import json
+from enum import Enum
+from typing import Dict, Any, Optional
+
+from amoebius.secrets.vault_client import AsyncVaultClient
+from amoebius.models.api_keys import AWSApiKey, AzureCredentials, GCPServiceAccountKey
+from amoebius.utils.terraform import (
+    init_terraform,
+    apply_terraform,
+    destroy_terraform,
+)
+
+
+class ProviderName(str, Enum):
+    aws = "aws"
+    azure = "azure"
+    gcp = "gcp"
+
+
+async def get_provider_env_from_vault(
+    provider: ProviderName,
+    vault_client: AsyncVaultClient,
+    vault_path: str
+) -> Dict[str, str]:
+    """
+    Reads credentials from 'vault_path', uses the correct Pydantic model
+    for 'provider', and returns a dict of environment variables suitable
+    for Terraform.
+
+    :param provider: ProviderName
+    :param vault_client: an already-authenticated Vault client
+    :param vault_path: Vault path containing the secret data
+    :return: dictionary of environment variables for Terraform
+    """
+    # 1) Read from Vault
+    secret_data = await vault_client.read_secret(vault_path)
+
+    # 2) Parse & build env
+    if provider == ProviderName.aws:
+        aws_creds = AWSApiKey(**secret_data)
+        env = {
+            "AWS_ACCESS_KEY_ID": aws_creds.access_key_id,
+            "AWS_SECRET_ACCESS_KEY": aws_creds.secret_access_key,
+        }
+        if aws_creds.session_token:
+            env["AWS_SESSION_TOKEN"] = aws_creds.session_token
+        return env
+
+    elif provider == ProviderName.azure:
+        az_creds = AzureCredentials(**secret_data)
+        return {
+            "ARM_CLIENT_ID": az_creds.client_id,
+            "ARM_CLIENT_SECRET": az_creds.client_secret,
+            "ARM_TENANT_ID": az_creds.tenant_id,
+            "ARM_SUBSCRIPTION_ID": az_creds.subscription_id,
+        }
+
+    elif provider == ProviderName.gcp:
+        gcp_creds = GCPServiceAccountKey(**secret_data)
+        return {
+            "GOOGLE_CREDENTIALS": json.dumps(gcp_creds.model_dump()),
+            "GOOGLE_PROJECT": gcp_creds.project_id,
+        }
+
+    else:
+        raise ValueError(f"Unknown provider: {provider}")
+
+
+async def deploy_provider(
+    provider: ProviderName,
+    vault_client: AsyncVaultClient,
+    vault_path: str,
+    variables: Optional[Dict[str, Any]] = None,
+    destroy: bool = False,
+) -> None:
+    """
+    1) get env = get_provider_env_from_vault(provider, vault_client, vault_path)
+    2) If destroy => destroy_terraform(..., env=env, variables=variables)
+       else => init_terraform(..., env=env), apply_terraform(..., env=env, variables=variables)
+    3) The root path is assumed /amoebius/terraform/roots/providers/<provider>.
+
+    :param provider: provider name
+    :param vault_client: existing, authenticated Vault client
+    :param vault_path: path in Vault for credentials
+    :param variables: optional dict of tf variables to pass to apply/destroy
+    :param destroy: if True, only run 'destroy'; else init+apply
+    """
+    # 1) Get environment variables from Vault
+    env_vars = await get_provider_env_from_vault(provider, vault_client, vault_path)
+
+    # 2) The terraform root name
+    root_name = f"providers/{provider}"
+
+    # 3) Run Terraform
+    if destroy:
+        print(f"[{provider}] destroy only, skipping init+apply ...")
+        await destroy_terraform(root_name=root_name, env=env_vars, variables=variables, sensitive=False)
+    else:
+        print(f"[{provider}] init + apply with optional variables ...")
+        await init_terraform(root_name=root_name, env=env_vars, reconfigure=True, sensitive=False)
+        await apply_terraform(root_name=root_name, env=env_vars, variables=variables, sensitive=False)
+
+    print(f"[{provider}] done (destroy={destroy}).")
 EOF
 
-cat <<'EOF' > amoebius/terraform/modules/compute/aws/outputs.tf
-output "vm_name" {
-  value = aws_instance.this.tags["Name"]
-}
+############################################
+# 3) /amoebius/python/amoebius/tests/provider_deployment.py
+############################################
+cat << 'EOF' > "$TESTS_DIR/provider_deployment.py"
+#!/usr/bin/env python3
+"""
+provider_deployment.py
 
-output "private_ip" {
-  value = aws_instance.this.private_ip
-}
+A Python script to deploy or destroy AWS, Azure, or GCP from credentials in Vault,
+using the generic 'deploy_provider' function which references the root
+/amoebius/terraform/roots/providers/<provider>.
 
-output "public_ip" {
-  value = aws_instance.this.public_ip
-}
+Usage examples:
+  python provider_deployment.py --provider aws --vault-path amoebius/tests/api_keys/aws
+  python provider_deployment.py --provider all --vault-path amoebius/tests/api_keys/aws --destroy
+  python provider_deployment.py --provider azure --vault-path amoebius/tests/api_keys/azure --vault-args verify_ssl=False
+
+You can also pass terraform variables via --tf-vars "key=val" "key2=val2" if you like.
+"""
+
+import sys
+import asyncio
+import argparse
+from typing import Dict, Any, NoReturn, Optional
+
+from amoebius.secrets.vault_client import AsyncVaultClient
+from amoebius.models.vault import VaultSettings
+from amoebius.deployment.provider_deploy import deploy_provider, ProviderName
+
+
+def parse_keyvals(args_list) -> Dict[str, str]:
+    """
+    Convert something like ["vault_role_name=amoebius-admin-role", "verify_ssl=False"]
+    or ["myvar=someval", "other_var=stuff"] into dicts. Everything is string.
+    """
+    output: Dict[str, str] = {}
+    for item in args_list:
+        if "=" in item:
+            key, val = item.split("=", 1)
+            output[key] = val
+        else:
+            output[item] = "True"
+    return output
+
+async def run_provider(
+    provider: ProviderName,
+    vault_settings: VaultSettings,
+    vault_path: str,
+    destroy: bool,
+    tf_variables: Optional[Dict[str, Any]] = None
+):
+    """
+    Create a single AsyncVaultClient, then call deploy_provider.
+    """
+    async with AsyncVaultClient(vault_settings) as vc:
+        await deploy_provider(
+            provider=provider,
+            vault_client=vc,
+            vault_path=vault_path,
+            variables=tf_variables,
+            destroy=destroy
+        )
+
+async def run_all(
+    vault_settings: VaultSettings,
+    vault_path: str,
+    destroy: bool,
+    tf_variables: Optional[Dict[str, Any]] = None
+):
+    """
+    Deploy or destroy all 3 providers in sequence: AWS, Azure, GCP
+    """
+    async with AsyncVaultClient(vault_settings) as vc:
+        for prov in [ProviderName.aws, ProviderName.azure, ProviderName.gcp]:
+            await deploy_provider(
+                provider=prov,
+                vault_client=vc,
+                vault_path=vault_path,
+                variables=tf_variables,
+                destroy=destroy
+            )
+
+def main() -> NoReturn:
+    parser = argparse.ArgumentParser(
+        description="Deploy or destroy AWS, Azure, or GCP with credentials from Vault."
+    )
+    parser.add_argument(
+        "--provider",
+        choices=["aws","azure","gcp","all"],
+        required=True,
+        help="Which provider to deploy/destroy, or 'all'"
+    )
+    parser.add_argument(
+        "--vault-path",
+        required=True,
+        help="Vault path containing the credentials, e.g. amoebius/tests/api_keys/aws"
+    )
+    parser.add_argument(
+        "--destroy",
+        action="store_true",
+        help="If set, skip apply and do terraform destroy only"
+    )
+    # Vault arguments
+    parser.add_argument(
+        "--vault-args",
+        nargs="*",
+        default=[],
+        help="Additional vault settings in key=val form, e.g. vault_role_name=amoebius-admin-role verify_ssl=False"
+    )
+    # Terraform variables
+    parser.add_argument(
+        "--tf-vars",
+        nargs="*",
+        default=[],
+        help="Additional terraform variables in key=val form, e.g. myvar=stuff region=us-east-1"
+    )
+
+    args = parser.parse_args()
+
+    # 1) Build vault settings
+    raw_vault_args = parse_keyvals(args.vault_args)
+    vault_settings = VaultSettings(**raw_vault_args)
+
+    # 2) Build a dict for tf variables
+    tf_var_dict: Dict[str, Any] = parse_keyvals(args.tf_vars) if args.tf_vars else {}
+
+    # 3) Decide single or all
+    try:
+        if args.provider == "all":
+            asyncio.run(
+                run_all(
+                    vault_settings=vault_settings,
+                    vault_path=args.vault_path,
+                    destroy=args.destroy,
+                    tf_variables=tf_var_dict if tf_var_dict else None
+                )
+            )
+        else:
+            prov_enum = ProviderName(args.provider)
+            asyncio.run(
+                run_provider(
+                    provider=prov_enum,
+                    vault_settings=vault_settings,
+                    vault_path=args.vault_path,
+                    destroy=args.destroy,
+                    tf_variables=tf_var_dict if tf_var_dict else None
+                )
+            )
+    except Exception as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        sys.exit(1)
+    else:
+        sys.exit(0)
+
+if __name__ == "__main__":
+    main()
 EOF
 
-#################### AZURE ####################
-cat <<'EOF' > amoebius/terraform/modules/compute/azure/main.tf
-terraform {
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.0"
-    }
-  }
-}
-
-provider "azurerm" {
-  features {}
-}
-
-resource "azurerm_public_ip" "this" {
-  name                = "${var.workspace}-${var.vm_name}-pip"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  allocation_method   = "Static"
-  sku                 = "Standard"
-  zones               = [var.zone]
-}
-
-resource "azurerm_network_interface" "this" {
-  name                = "${var.workspace}-${var.vm_name}-nic"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-
-  ip_configuration {
-    name                          = "ipconfig"
-    private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.this.id
-    subnet_id                     = var.subnet_id
-  }
-}
-
-resource "azurerm_network_interface_security_group_association" "sg_assoc" {
-  network_interface_id      = azurerm_network_interface.this.id
-  network_security_group_id = var.security_group_id
-}
-
-resource "azurerm_linux_virtual_machine" "this" {
-  name                = "${var.workspace}-${var.vm_name}"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  size                = var.instance_type
-  zone                = var.zone
-
-  admin_username                  = var.ssh_user
-  disable_password_authentication = true
-
-  network_interface_ids = [azurerm_network_interface.this.id]
-
-  admin_ssh_key {
-    username   = var.ssh_user
-    public_key = var.public_key_openssh
-  }
-
-  source_image_id = var.image
-
-  os_disk {
-    name                 = "${var.workspace}-${var.vm_name}-osdisk"
-    caching              = "ReadWrite"
-    storage_account_type = "Premium_LRS"
-    disk_size_gb         = 30
-  }
-}
-EOF
-
-cat <<'EOF' > amoebius/terraform/modules/compute/azure/variables.tf
-variable "vm_name" {}
-variable "public_key_openssh" {}
-variable "ssh_user" {}
-variable "image" {}
-variable "instance_type" {}
-variable "subnet_id" {}
-variable "security_group_id" {}
-variable "zone" {}
-variable "workspace" {}
-
-variable "resource_group_name" {}
-variable "location" {
-  default = "eastus"
-}
-EOF
-
-cat <<'EOF' > amoebius/terraform/modules/compute/azure/outputs.tf
-output "vm_name" {
-  value = azurerm_linux_virtual_machine.this.name
-}
-
-output "private_ip" {
-  value = azurerm_network_interface.this.ip_configuration[0].private_ip_address
-}
-
-output "public_ip" {
-  value = azurerm_public_ip.this.ip_address
-}
-EOF
-
-#################### GCP ####################
-cat <<'EOF' > amoebius/terraform/modules/compute/gcp/main.tf
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = "~> 4.0"
-    }
-  }
-}
-
-provider "google" {
-  # project or region from environment or root
-}
-
-resource "google_compute_instance" "this" {
-  name         = "${var.workspace}-${var.vm_name}"
-  zone         = var.zone
-  machine_type = var.instance_type
-
-  network_interface {
-    subnetwork   = var.subnet_id
-    access_config {}
-  }
-
-  boot_disk {
-    initialize_params {
-      image = var.image
-    }
-  }
-
-  metadata = {
-    ssh-keys = "${var.ssh_user}:${var.public_key_openssh}"
-  }
-
-  tags = ["allow-ssh"]
-}
-EOF
-
-cat <<'EOF' > amoebius/terraform/modules/compute/gcp/variables.tf
-variable "vm_name" {}
-variable "public_key_openssh" {}
-variable "ssh_user" {}
-variable "image" {}
-variable "instance_type" {}
-variable "subnet_id" {}
-variable "security_group_id" {}
-variable "zone" {}
-variable "workspace" {}
-EOF
-
-cat <<'EOF' > amoebius/terraform/modules/compute/gcp/outputs.tf
-output "vm_name" {
-  value = google_compute_instance.this.name
-}
-
-output "private_ip" {
-  value = google_compute_instance.this.network_interface[0].network_ip
-}
-
-output "public_ip" {
-  value = google_compute_instance.this.network_interface[0].access_config[0].nat_ip
-}
-EOF
-
-
-###############################################################################
-# 1B) The top-level /amoebius/terraform/modules/compute/* for single VM,
-#     but provider-agnostic logic
-###############################################################################
-
-# We'll create (or overwrite) variables.tf, main.tf, outputs.tf here
-mkdir -p amoebius/terraform/modules/compute
-
-cat <<'EOF' > amoebius/terraform/modules/compute/variables.tf
-variable "provider" {
-  type        = string
-  description = "Which provider (aws, azure, gcp)?"
-}
-
-variable "vm_name" {
-  type        = string
-  description = "Name for the VM instance"
-}
-
-variable "public_key_openssh" {
-  type        = string
-  description = "SSH public key in OpenSSH format"
-}
-
-variable "ssh_user" {
-  type        = string
-  default     = "ubuntu"
-}
-
-variable "image" {
-  type        = string
-  description = "Image/AMI to use"
-}
-
-variable "instance_type" {
-  type        = string
-}
-
-variable "subnet_id" {
-  type        = string
-  description = "Subnet or subnetwork to place this VM"
-}
-
-variable "security_group_id" {
-  type        = string
-  description = "Security group or firewall ID"
-}
-
-variable "zone" {
-  type        = string
-  description = "Which zone or AZ"
-}
-
-variable "workspace" {
-  type        = string
-  default     = "default"
-}
-
-# For Azure only, we might need a resource_group_name, location
-variable "resource_group_name" {
-  type        = string
-  default     = ""
-}
-
-variable "location" {
-  type        = string
-  default     = ""
-}
-
-EOF
-
-cat <<'EOF' > amoebius/terraform/modules/compute/main.tf
-terraform {
-  required_providers {
-    tls = {
-      source  = "hashicorp/tls"
-      version = "~> 4.0"
-    }
-  }
-}
-
-# We do minimal single-VM logic here, referencing the subfolder for actual resources
-locals {
-  provider_paths = {
-    "aws"   = "./aws"
-    "azure" = "./azure"
-    "gcp"   = "./gcp"
-  }
-}
-
-module "single_vm" {
-  source = local.provider_paths[var.provider]
-
-  vm_name            = var.vm_name
-  public_key_openssh = var.public_key_openssh
-  ssh_user           = var.ssh_user
-  image              = var.image
-  instance_type      = var.instance_type
-  subnet_id          = var.subnet_id
-  security_group_id  = var.security_group_id
-  zone               = var.zone
-  workspace          = var.workspace
-
-  resource_group_name = var.resource_group_name
-  location            = var.location
-}
-EOF
-
-cat <<'EOF' > amoebius/terraform/modules/compute/outputs.tf
-output "vm_name" {
-  description = "VM name or ID"
-  value       = module.single_vm.vm_name
-}
-
-output "private_ip" {
-  description = "VM private IP"
-  value       = module.single_vm.private_ip
-}
-
-output "public_ip" {
-  description = "VM public IP"
-  value       = module.single_vm.public_ip
-}
-EOF
-
-
-###############################################################################
-# 2) /amoebius/terraform/modules/cluster - the multi-VM fan-out
-###############################################################################
-
-mkdir -p amoebius/terraform/modules/cluster
-
-cat <<'EOF' > amoebius/terraform/modules/cluster/variables.tf
-variable "provider" {
-  type = string
-}
-
-variable "availability_zones" {
-  type    = list(string)
-  default = []
-}
-
-variable "subnet_ids" {
-  type        = list(string)
-  description = "One subnet per zone"
-}
-
-variable "security_group_id" {
-  type        = string
-}
-
-variable "instance_groups" {
-  type = list(object({
-    name           = string
-    category       = string
-    count_per_zone = number
-    image          = optional(string, "")
-  }))
-  default = []
-}
-
-variable "instance_type_map" {
-  type    = map(string)
-  default = {}
-}
-
-variable "ssh_user" {
-  type    = string
-  default = "ubuntu"
-}
-
-variable "vault_role_name" {
-  type    = string
-  default = "amoebius-admin-role"
-}
-
-variable "no_verify_ssl" {
-  type    = bool
-  default = true
-}
-
-# For azure usage
-variable "resource_group_name" {
-  type    = string
-  default = ""
-}
-
-variable "location" {
-  type    = string
-  default = ""
-}
-EOF
-
-cat <<'EOF' > amoebius/terraform/modules/cluster/main.tf
-terraform {
-  required_providers {
-    tls = {
-      source  = "hashicorp/tls"
-      version = "~> 4.0"
-    }
-  }
-}
-
-locals {
-  expanded = flatten([
-    for g in var.instance_groups : [
-      for z in var.availability_zones : {
-        group_name     = g.name
-        category       = g.category
-        zone           = z
-        count_per_zone = g.count_per_zone
-        custom_image   = try(g.image, "")
-      }
-    ]
-  ])
-
-  final_list = flatten([
-    for e in local.expanded : [
-      for i in range(e.count_per_zone) : {
-        group_name   = e.group_name
-        category     = e.category
-        zone         = e.zone
-        custom_image = e.custom_image
-      }
-    ]
-  ])
-}
-
-# Create a private key for each VM
-resource "tls_private_key" "all" {
-  count     = length(local.final_list)
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-# For each item, we look up the instance type from var.instance_type_map
-locals {
-  all_specs = [
-    for idx, item in local.final_list : {
-      group_name    = item.group_name
-      zone          = item.zone
-      instance_type = lookup(var.instance_type_map, item.category, "UNDEFINED_TYPE")
-      image         = item.custom_image
-    }
-  ]
-}
-
-module "compute_single" {
-  count  = length(local.all_specs)
-  source = "/amoebius/terraform/modules/compute"
-
-  provider           = var.provider
-  vm_name            = "${terraform.workspace}-${local.all_specs[count.index].group_name}-${count.index}"
-  public_key_openssh = tls_private_key.all[count.index].public_key_openssh
-  ssh_user           = var.ssh_user
-  image              = local.all_specs[count.index].image
-  instance_type      = local.all_specs[count.index].instance_type
-  zone               = local.all_specs[count.index].zone
-  workspace          = terraform.workspace
-
-  subnet_id         = element(var.subnet_ids, index(var.availability_zones, local.all_specs[count.index].zone))
-  security_group_id = var.security_group_id
-
-  resource_group_name = var.resource_group_name
-  location            = var.location
-}
-
-module "vm_secret" {
-  count  = length(local.all_specs)
-  source = "/amoebius/terraform/modules/ssh/vm_secret"
-
-  vm_name         = module.compute_single[count.index].vm_name
-  public_ip       = module.compute_single[count.index].public_ip
-  private_key_pem = tls_private_key.all[count.index].private_key_pem
-  ssh_user        = var.ssh_user
-  vault_role_name = var.vault_role_name
-  no_verify_ssl   = var.no_verify_ssl
-
-  vault_prefix = "/amoebius/ssh/${var.provider}/${terraform.workspace}"
-}
-
-locals {
-  results = [
-    for idx, s in local.all_specs : {
-      group_name = local.final_list[idx].group_name
-      name       = module.compute_single[idx].vm_name
-      private_ip = module.compute_single[idx].private_ip
-      public_ip  = module.compute_single[idx].public_ip
-      vault_path = module.vm_secret[idx].vault_path
-    }
-  ]
-
-  instances_by_group = {
-    for g in var.instance_groups : g.name => [
-      for r in results : r if r.group_name == g.name
-    ]
-  }
-}
-EOF
-
-cat <<'EOF' > amoebius/terraform/modules/cluster/outputs.tf
-output "instances_by_group" {
-  description = "Map of group_name => list of VM objects (name, private_ip, public_ip, vault_path)"
-  value       = local.instances_by_group
-}
-EOF
-
-echo "Done! /amoebius/terraform/modules/compute/* now has single-VM logic in main. The minimal code for each provider is in subfolders. The /amoebius/terraform/modules/cluster module does fan-out."
+chmod +x "$TESTS_DIR/provider_deployment.py"
+
+echo "Files have been updated with your requested changes:"
+echo "1) get_provider_env_from_vault(...) is a standalone function"
+echo "2) deploy_provider(...) now includes 'variables: Optional[Dict[str,Any]]'"
+echo "3) /amoebius/python/amoebius/tests/provider_deployment.py to run with optional tf vars."
+echo "Done!"
