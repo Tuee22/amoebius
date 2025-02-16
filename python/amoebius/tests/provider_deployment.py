@@ -1,92 +1,69 @@
 #!/usr/bin/env python3
 """
-provider_deployment.py
+A minimal usage script to pick AWS, Azure, or GCP, create the corresponding
+*ClusterDeploy object, call 'deploy(...)'.
 
-A minimal unit test or example script that:
-  1) Takes provider name, vault path, and optionally --destroy.
-  2) Creates a minimal provider-specific cluster config with defaults (AWSClusterDeploy, etc.).
-  3) Calls `deploy(...)` from provider_deploy.py to run terraform init+apply or destroy.
+All fields are strictly typed. Each provider subclass defines __init__
+with defaults. We store the final object in a variable typed as the base
+class `ClusterDeploy`, resolving Mypy conflicts.
 
-Usage examples:
+Usage:
   ./provider_deployment.py --provider aws --vault-path amoebius/tests/api_keys/aws
-  ./provider_deployment.py --provider gcp --vault-path amoebius/tests/api_keys/gcp --destroy
+  ./provider_deployment.py --provider azure --vault-path amoebius/tests/api_keys/azure --destroy
 """
 
 import sys
 import argparse
 import asyncio
 
-# Provider classes with default fields:
 from amoebius.models.providers import (
     AWSClusterDeploy,
     AzureClusterDeploy,
     GCPClusterDeploy,
 )
-
-# The main deploy function & provider enum:
 from amoebius.provider_deploy import deploy, ProviderName
-
-# Minimal Vault usage:
 from amoebius.models.vault import VaultSettings
 from amoebius.secrets.vault_client import AsyncVaultClient
+
+# The base class for any provider-specific cluster config:
+from amoebius.models.cluster_deploy import ClusterDeploy
 
 
 async def run_deployment(
     provider: ProviderName, vault_path: str, destroy: bool
 ) -> None:
-    """
-    1) Create a minimal provider-specific cluster config
-    2) Create a minimal VaultSettings
-    3) Call deploy(...)
-    """
-    # Step 1: create the cluster deploy object for this provider
+    # Minimal Vault settings
+    vs = VaultSettings(vault_role_name="amoebius-admin-role", verify_ssl=False)
+
+    # We define cluster_obj as the base type, so we can assign any subclass
+    cluster_obj: ClusterDeploy
+
     if provider == ProviderName.aws:
-        cluster_deploy = AWSClusterDeploy()
+        cluster_obj = AWSClusterDeploy()
     elif provider == ProviderName.azure:
-        cluster_deploy = AzureClusterDeploy()
+        cluster_obj = AzureClusterDeploy()
     elif provider == ProviderName.gcp:
-        cluster_deploy = GCPClusterDeploy()
+        cluster_obj = GCPClusterDeploy()
     else:
-        raise ValueError(f"Unknown provider '{provider}'")
+        raise ValueError("Unknown provider")
 
-    # Step 2: Minimal VaultSettings (assuming defaults or a known role name)
-    # Feel free to tweak if you have a self-signed Vault:
-    vs = VaultSettings(
-        vault_role_name="amoebius-admin-role",
-        verify_ssl=False,  # adjust if your environment requires SSL verification
-    )
-
-    # Step 3: Terraform deploy
     async with AsyncVaultClient(vs) as vc:
         await deploy(
             provider=provider,
             vault_client=vc,
             vault_path=vault_path,
-            cluster_deploy=cluster_deploy,
+            cluster_deploy=cluster_obj,
             destroy=destroy,
         )
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Minimal script to test AWS/Azure/GCP deployment logic."
+        description="Simple test script for cluster deploy via Mypy-friendly code."
     )
-    parser.add_argument(
-        "--provider",
-        choices=["aws", "azure", "gcp"],
-        required=True,
-        help="Which provider to deploy or destroy."
-    )
-    parser.add_argument(
-        "--vault-path",
-        required=True,
-        help="Path in Vault to retrieve credentials, e.g. amoebius/tests/api_keys/aws"
-    )
-    parser.add_argument(
-        "--destroy",
-        action="store_true",
-        help="If set, run terraform destroy instead of init+apply."
-    )
+    parser.add_argument("--provider", choices=["aws", "azure", "gcp"], required=True)
+    parser.add_argument("--vault-path", required=True)
+    parser.add_argument("--destroy", action="store_true")
     args = parser.parse_args()
 
     provider_enum = ProviderName(args.provider)

@@ -22,15 +22,15 @@ from amoebius.utils.terraform import (
     destroy_terraform,
 )
 
+
 class ProviderName(str, Enum):
     aws = "aws"
     azure = "azure"
     gcp = "gcp"
 
+
 async def get_provider_env_from_vault(
-    provider: ProviderName,
-    vault_client: AsyncVaultClient,
-    vault_path: str
+    provider: ProviderName, vault_client: AsyncVaultClient, vault_path: str
 ) -> Dict[str, str]:
     """
     Reads credentials from Vault at 'vault_path' for the given provider,
@@ -68,6 +68,7 @@ async def get_provider_env_from_vault(
 
     else:
         raise ValueError(f"Unknown provider: {provider}")
+
 
 async def deploy(
     provider: ProviderName,

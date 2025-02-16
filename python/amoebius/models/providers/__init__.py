@@ -1,16 +1,15 @@
 """
 __init__.py for amoebius.models.providers
 
-Exposes the provider-specific ClusterConfig classes so you can import, e.g.:
-    from amoebius.models.providers import AWSClusterConfig, AzureClusterConfig, GCPClusterConfig
+We define aggregator imports for AWSClusterDeploy, AzureClusterDeploy, GCPClusterDeploy
 """
 
-from .aws import AWSClusterConfig
-from .azure import AzureClusterConfig
-from .gcp import GCPClusterConfig
+from .aws import AWSClusterDeploy
+from .azure import AzureClusterDeploy
+from .gcp import GCPClusterDeploy
 
 __all__ = [
-    "AWSClusterConfig",
-    "AzureClusterConfig",
-    "GCPClusterConfig",
+    "AWSClusterDeploy",
+    "AzureClusterDeploy",
+    "GCPClusterDeploy",
 ]
