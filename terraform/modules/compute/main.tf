@@ -1,18 +1,11 @@
-###############################################
-# /amoebius/terraform/modules/compute/main.tf
-###############################################
 terraform {
   required_providers {
-    # You might also define others if needed
     tls = {
       source  = "hashicorp/tls"
       version = "~> 4.0"
     }
   }
 }
-
-# We cannot do "source = dynamicValue" in a module block. 
-# Instead, define 3 static module blocks (aws, azure, gcp) with count=1 or 0.
 
 module "aws_single_vm" {
   source = "./aws"
@@ -61,4 +54,3 @@ module "gcp_single_vm" {
   zone               = var.zone
   workspace          = var.workspace
 }
-

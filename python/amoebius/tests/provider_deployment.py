@@ -3,9 +3,8 @@
 A minimal usage script to pick AWS, Azure, or GCP, create the corresponding
 *ClusterDeploy object, call 'deploy(...)'.
 
-All fields are strictly typed. Each provider subclass defines __init__
-with defaults. We store the final object in a variable typed as the base
-class `ClusterDeploy`, resolving Mypy conflicts.
+All fields strictly typed, each provider subclass defines __init__ with defaults,
+so no defaults needed in the .tf roots.
 
 Usage:
   ./provider_deployment.py --provider aws --vault-path amoebius/tests/api_keys/aws
@@ -15,7 +14,6 @@ Usage:
 import sys
 import argparse
 import asyncio
-
 from amoebius.models.providers import (
     AWSClusterDeploy,
     AzureClusterDeploy,
@@ -24,20 +22,15 @@ from amoebius.models.providers import (
 from amoebius.deployment.provider_deploy import deploy, ProviderName
 from amoebius.models.vault import VaultSettings
 from amoebius.secrets.vault_client import AsyncVaultClient
-
-# The base class for any provider-specific cluster config:
 from amoebius.models.cluster_deploy import ClusterDeploy
 
 
 async def run_deployment(
     provider: ProviderName, vault_path: str, destroy: bool
 ) -> None:
-    # Minimal Vault settings
     vs = VaultSettings(vault_role_name="amoebius-admin-role", verify_ssl=False)
 
-    # We define cluster_obj as the base type, so we can assign any subclass
     cluster_obj: ClusterDeploy
-
     if provider == ProviderName.aws:
         cluster_obj = AWSClusterDeploy()
     elif provider == ProviderName.azure:
@@ -59,7 +52,7 @@ async def run_deployment(
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Simple test script for cluster deploy via Mypy-friendly code."
+        "Simple test script for cluster deploy with Mypy-friendly code."
     )
     parser.add_argument("--provider", choices=["aws", "azure", "gcp"], required=True)
     parser.add_argument("--vault-path", required=True)

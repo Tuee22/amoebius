@@ -5,11 +5,11 @@ variable "region" {
 
 variable "vpc_cidr" {
   type        = string
-  default     = "10.0.0.0/16"
+  description = "CIDR block for the AWS VPC."
 }
 
 variable "availability_zones" {
   type        = list(string)
   default     = []
-  description = "List of AWS AZs in this region."
+  description = "List of AZs for AWS."
 }

@@ -30,6 +30,7 @@ async def get_provider_env_from_vault(
     provider: ProviderName, vault_client: AsyncVaultClient, vault_path: str
 ) -> Dict[str, Any]:
     secret_data = await vault_client.read_secret(vault_path)
+
     if provider == ProviderName.aws:
         aws_creds = AWSApiKey(**secret_data)
         env: Dict[str, Any] = {
@@ -64,10 +65,6 @@ async def deploy(
     cluster_deploy: ClusterDeploy,
     destroy: bool = False,
 ) -> None:
-    """
-    Exactly define the parameter cluster_deploy: ClusterDeploy
-    to match the call site usage "cluster_deploy=..."
-    """
     env_vars = await get_provider_env_from_vault(provider, vault_client, vault_path)
     tf_vars = cluster_deploy.model_dump()
 

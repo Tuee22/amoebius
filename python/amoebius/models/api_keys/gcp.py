@@ -4,7 +4,7 @@ from typing import Literal
 
 class GCPServiceAccountKey(BaseModel):
     """
-    Model for a full GCP Service Account JSON key as downloaded from the console.
+    A full GCP Service Account JSON key
     """
 
     type: Literal["service_account"]

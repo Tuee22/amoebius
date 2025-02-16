@@ -46,7 +46,6 @@ variable "no_verify_ssl" {
   default = true
 }
 
-# For azure usage
 variable "resource_group_name" {
   type    = string
   default = ""

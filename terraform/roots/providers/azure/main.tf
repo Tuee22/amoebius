@@ -17,19 +17,18 @@ provider "azurerm" {
 module "network" {
   source = "/amoebius/terraform/modules/network/azure"
 
-  region            = var.region
-  vpc_cidr          = var.vpc_cidr
+  region             = var.region
+  vpc_cidr           = var.vpc_cidr
   availability_zones = var.availability_zones
 }
 
-# We'll produce final instance_groups with defaults for ARM vs x86
 locals {
   final_instance_groups = [
     for g in var.instance_groups : {
       name           = g.name
       category       = g.category
       count_per_zone = g.count_per_zone
-      image          = (
+      image = (
         length(try(g.image,"")) > 0
         ? g.image
         : (
@@ -41,8 +40,7 @@ locals {
 }
 
 module "compute" {
-  source = "/amoebius/terraform/modules/compute"
-
+  source            = "/amoebius/terraform/modules/compute"
   provider          = "azure"
   availability_zones= var.availability_zones
   subnet_ids        = module.network.subnet_ids
@@ -51,7 +49,7 @@ module "compute" {
   instance_groups   = local.final_instance_groups
   instance_type_map = var.instance_type_map
 
-  ssh_user         = var.ssh_user
-  vault_role_name  = var.vault_role_name
-  no_verify_ssl    = var.no_verify_ssl
+  ssh_user        = var.ssh_user
+  vault_role_name = var.vault_role_name
+  no_verify_ssl   = var.no_verify_ssl
 }

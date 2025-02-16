@@ -1,7 +1,7 @@
 """
 gcp.py
 
-GCPClusterDeploy -> define __init__ with defaults, call super().
+GCPClusterDeploy => define __init__ with defaults, call super().
 """
 
 from typing import List, Dict
@@ -30,7 +30,7 @@ class GCPClusterDeploy(ClusterDeploy):
         ssh_user: str = "ubuntu",
         vault_role_name: str = "amoebius-admin-role",
         no_verify_ssl: bool = True,
-    ) -> None:
+    ):
         super().__init__(
             region=region,
             vpc_cidr=vpc_cidr,

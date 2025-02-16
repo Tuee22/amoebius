@@ -11,14 +11,14 @@ terraform {
 }
 
 provider "google" {
-  project = var.region  # or set from env
+  project = var.region
 }
 
 module "network" {
   source = "/amoebius/terraform/modules/network/gcp"
 
-  region            = var.region
-  vpc_cidr          = var.vpc_cidr
+  region             = var.region
+  vpc_cidr           = var.vpc_cidr
   availability_zones = var.availability_zones
 }
 
@@ -40,8 +40,7 @@ locals {
 }
 
 module "compute" {
-  source = "/amoebius/terraform/modules/compute"
-
+  source            = "/amoebius/terraform/modules/compute"
   provider          = "gcp"
   availability_zones= var.availability_zones
   subnet_ids        = module.network.subnet_ids
@@ -50,7 +49,7 @@ module "compute" {
   instance_groups   = local.final_instance_groups
   instance_type_map = var.instance_type_map
 
-  ssh_user         = var.ssh_user
-  vault_role_name  = var.vault_role_name
-  no_verify_ssl    = var.no_verify_ssl
+  ssh_user        = var.ssh_user
+  vault_role_name = var.vault_role_name
+  no_verify_ssl   = var.no_verify_ssl
 }

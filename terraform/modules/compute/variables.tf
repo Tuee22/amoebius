@@ -1,21 +1,16 @@
-###############################################
-# /amoebius/terraform/modules/compute/variables.tf
-###############################################
-
-# Rename 'provider' to 'cloud_provider'
 variable "cloud_provider" {
-  type = string
-  description = "Which cloud provider to use: 'aws', 'azure', or 'gcp'."
+  type        = string
+  description = "aws, azure, or gcp"
 }
 
 variable "vm_name" {
   type        = string
-  description = "Name for the VM instance."
+  description = "VM instance name"
 }
 
 variable "public_key_openssh" {
   type        = string
-  description = "SSH public key in OpenSSH format."
+  description = "SSH public key"
 }
 
 variable "ssh_user" {
@@ -25,7 +20,7 @@ variable "ssh_user" {
 
 variable "image" {
   type        = string
-  description = "AMI/image to use (passed from the cluster or root)."
+  description = "Image/AMI"
 }
 
 variable "instance_type" {
@@ -34,17 +29,17 @@ variable "instance_type" {
 
 variable "subnet_id" {
   type        = string
-  description = "Subnet or subnetwork to place this VM in."
+  description = "Subnet or subnetwork"
 }
 
 variable "security_group_id" {
   type        = string
-  description = "Security group or firewall ID."
+  description = "Security group / firewall"
 }
 
 variable "zone" {
   type        = string
-  description = "Which AZ or zone to deploy in."
+  description = "AZ or zone"
 }
 
 variable "workspace" {
@@ -52,7 +47,6 @@ variable "workspace" {
   default = "default"
 }
 
-# If Azure, we might need these:
 variable "resource_group_name" {
   type    = string
   default = ""

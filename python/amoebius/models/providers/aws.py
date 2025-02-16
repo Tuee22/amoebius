@@ -1,7 +1,7 @@
 """
 aws.py
 
-AWSClusterDeploy -> override __init__ to allow no-arg usage. Must keep same field types.
+AWSClusterDeploy -> override __init__ to allow no-arg usage, must keep same field types.
 """
 
 from typing import List, Dict
@@ -26,7 +26,7 @@ class AWSClusterDeploy(ClusterDeploy):
         ssh_user: str = "ubuntu",
         vault_role_name: str = "amoebius-admin-role",
         no_verify_ssl: bool = True,
-    ) -> None:
+    ):
         super().__init__(
             region=region,
             vpc_cidr=vpc_cidr,

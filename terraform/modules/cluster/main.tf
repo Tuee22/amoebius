@@ -32,14 +32,12 @@ locals {
   ])
 }
 
-# Create a private key for each VM
 resource "tls_private_key" "all" {
   count     = length(local.final_list)
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
-# For each item, we look up the instance type from var.instance_type_map
 locals {
   all_specs = [
     for idx, item in local.final_list : {
@@ -52,10 +50,11 @@ locals {
 }
 
 module "compute_single" {
-  count  = length(local.all_specs)
+  count = length(local.all_specs)
+
   source = "/amoebius/terraform/modules/compute"
 
-  provider           = var.provider
+  cloud_provider     = var.provider
   vm_name            = "${terraform.workspace}-${local.all_specs[count.index].group_name}-${count.index}"
   public_key_openssh = tls_private_key.all[count.index].public_key_openssh
   ssh_user           = var.ssh_user

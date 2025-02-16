@@ -7,7 +7,6 @@ terraform {
   }
 }
 
-
 resource "google_compute_instance" "this" {
   name         = "${var.workspace}-${var.vm_name}"
   zone         = var.zone

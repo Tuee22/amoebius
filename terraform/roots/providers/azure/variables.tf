@@ -1,35 +1,31 @@
 variable "region" {
-  type    = string
-  default = "eastus"
+  type        = string
+  description = "Azure region (e.g. eastus). No default."
 }
 
 variable "vpc_cidr" {
-  type    = string
-  default = "10.0.0.0/16"
+  type        = string
+  description = "CIDR block for vnet."
 }
 
 variable "availability_zones" {
-  type    = list(string)
-  default = ["1","2","3"]
+  type        = list(string)
+  description = "List of zones (e.g. 1,2,3)."
 }
 
 variable "instance_type_map" {
-  type = map(string)
-  default = {
-    "arm_small"   = "Standard_D2ps_v5",
-    "x86_small"   = "Standard_D2s_v5",
-    "nvidia_small"= "Standard_NC4as_T4_v3"
-  }
+  type        = map(string)
+  description = "Map of category => instance type for Azure."
 }
 
 variable "arm_default_image" {
-  type    = string
-  default = "/subscriptions/123abc/resourceGroups/myRG/providers/Microsoft.Compute/galleries/24_04_arm/images/latest"
+  type        = string
+  description = "Default ARM image if not specified in group."
 }
 
 variable "x86_default_image" {
-  type    = string
-  default = "/subscriptions/123abc/resourceGroups/myRG/providers/Microsoft.Compute/galleries/24_04_x86/images/latest"
+  type        = string
+  description = "Default x86 image if not specified in group."
 }
 
 variable "instance_groups" {
@@ -39,20 +35,20 @@ variable "instance_groups" {
     count_per_zone = number
     image          = optional(string, "")
   }))
-  default = []
+  description = "All instance groups."
 }
 
 variable "ssh_user" {
-  type    = string
-  default = "azureuser"
+  type        = string
+  description = "SSH user for Azure VMs."
 }
 
 variable "vault_role_name" {
-  type    = string
-  default = "amoebius-admin-role"
+  type        = string
+  description = "Vault role name for SSH secrets."
 }
 
 variable "no_verify_ssl" {
-  type    = bool
-  default = true
+  type        = bool
+  description = "Skip SSL verify for Vault if true."
 }

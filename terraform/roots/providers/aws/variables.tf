@@ -1,38 +1,31 @@
 variable "region" {
-  type    = string
-  default = "us-east-1"
+  type        = string
+  description = "AWS region (no default)."
 }
 
 variable "vpc_cidr" {
-  type    = string
-  default = "10.0.0.0/16"
+  type        = string
+  description = "VPC CIDR block."
 }
 
 variable "availability_zones" {
-  type    = list(string)
-  default = ["us-east-1a","us-east-1b","us-east-1c"]
+  type        = list(string)
+  description = "List of availability zones."
 }
 
-# Default instance_type_map. The user can override if they want
 variable "instance_type_map" {
   type = map(string)
-  default = {
-    "arm_small"  = "t4g.micro"
-    "x86_small"  = "t3.micro"
-    "x86_medium" = "t3.small"
-    "nvidia_small" = "g4dn.xlarge"
-  }
+  description = "Map of category => instance type."
 }
 
 variable "arm_default_image" {
-  type    = string
-  default = "ami-0faefad027f3b5de6" # e.g. hypothetical Ubuntu 24.04 ARM for us-east-1
-  # in reality you'll pick the official 24.04 once it's out
+  type        = string
+  description = "Default ARM image if not set in instance_groups."
 }
 
 variable "x86_default_image" {
-  type    = string
-  default = "ami-0c8a4fc5fa843b2c2" # e.g. hypothetical Ubuntu 24.04 x86
+  type        = string
+  description = "Default x86 image if not set in instance_groups."
 }
 
 variable "instance_groups" {
@@ -42,20 +35,20 @@ variable "instance_groups" {
     count_per_zone = number
     image          = optional(string, "")
   }))
-  default = []
+  description = "All instance groups."
 }
 
 variable "ssh_user" {
-  type    = string
-  default = "ubuntu"
+  type        = string
+  description = "SSH username."
 }
 
 variable "vault_role_name" {
-  type    = string
-  default = "amoebius-admin-role"
+  type        = string
+  description = "Vault role name for storing SSH secrets."
 }
 
 variable "no_verify_ssl" {
-  type    = bool
-  default = true
+  type        = bool
+  description = "If true, skip Vault SSL verification."
 }

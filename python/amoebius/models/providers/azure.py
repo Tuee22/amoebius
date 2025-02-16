@@ -1,7 +1,7 @@
 """
 azure.py
 
-AzureClusterDeploy -> define __init__ with defaults, call super().
+AzureClusterDeploy => define __init__ with defaults, call super().
 """
 
 from typing import List, Dict
@@ -26,7 +26,7 @@ class AzureClusterDeploy(ClusterDeploy):
         ssh_user: str = "azureuser",
         vault_role_name: str = "amoebius-admin-role",
         no_verify_ssl: bool = True,
-    ) -> None:
+    ):
         super().__init__(
             region=region,
             vpc_cidr=vpc_cidr,

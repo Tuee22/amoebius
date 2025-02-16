@@ -1,35 +1,31 @@
 variable "region" {
-  type    = string
-  default = "us-central1"
+  type        = string
+  description = "GCP region (or project). No default."
 }
 
 variable "vpc_cidr" {
-  type    = string
-  default = "10.0.0.0/16"
+  type        = string
+  description = "CIDR for GCP VPC."
 }
 
 variable "availability_zones" {
-  type    = list(string)
-  default = ["us-central1-a","us-central1-b","us-central1-f"]
+  type        = list(string)
+  description = "List of GCP zones."
 }
 
 variable "instance_type_map" {
-  type = map(string)
-  default = {
-    "arm_small"    = "t2a-standard-1",
-    "x86_small"    = "e2-small",
-    "nvidia_small" = "a2-highgpu-1g"
-  }
+  type        = map(string)
+  description = "Map of category => instance type for GCP."
 }
 
 variable "arm_default_image" {
-  type    = string
-  default = "projects/ubuntu-os-cloud/global/images/ubuntu-2404-lts-arm64"
+  type        = string
+  description = "ARM image if not set in group."
 }
 
 variable "x86_default_image" {
-  type    = string
-  default = "projects/ubuntu-os-cloud/global/images/ubuntu-2404-lts"
+  type        = string
+  description = "x86 image if not set in group."
 }
 
 variable "instance_groups" {
@@ -39,20 +35,20 @@ variable "instance_groups" {
     count_per_zone = number
     image          = optional(string, "")
   }))
-  default = []
+  description = "All instance groups."
 }
 
 variable "ssh_user" {
-  type    = string
-  default = "ubuntu"
+  type        = string
+  description = "SSH user for GCP VM."
 }
 
 variable "vault_role_name" {
-  type    = string
-  default = "amoebius-admin-role"
+  type        = string
+  description = "Vault role name for storing SSH secrets."
 }
 
 variable "no_verify_ssl" {
-  type    = bool
-  default = true
+  type        = bool
+  description = "Skip SSL verify for Vault if true."
 }
