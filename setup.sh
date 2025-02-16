@@ -1,112 +1,232 @@
 #!/usr/bin/env bash
 #
-# deploy_python_changes.sh
+# rename_cluster_config.sh
 #
-# Creates or overwrites:
-#  1) /amoebius/python/amoebius/models/api_keys/__init__.py
-#  2) /amoebius/python/amoebius/deployment/provider_deploy.py
-#  3) /amoebius/python/amoebius/tests/provider_deployment.py
-#
-# Key changes:
-#  - A separate function get_provider_env_from_vault() does the provider-specific
-#    credential parsing & environment variable creation.
-#  - deploy_provider() now has a "variables: Optional[Dict[str,Any]]" param
-#    passed through to terraform apply/destroy.
-#  - We unify the Pydantic models in __init__.py for easy import.
+# This script:
+#   1) Replaces /amoebius/python/amoebius/models/cluster_config.py with /amoebius/python/amoebius/models/cluster_deploy.py
+#   2) In provider .py files (aws.py, azure.py, gcp.py), renames classes from *ClusterConfig -> *ClusterDeploy
+#      and updates the base import to from "cluster_deploy import ClusterDeploy".
+#   3) In /amoebius/python/amoebius/provider_deploy.py, renames references from "ClusterConfig" to "ClusterDeploy"
+#      and from "cluster_config" to "cluster_deploy".
+#   4) In /amoebius/python/amoebius/tests/provider_deployment.py, updates the references similarly, plus the provider-specific classes.
 #
 # Usage:
-#   1) chmod +x deploy_python_changes.sh
-#   2) ./deploy_python_changes.sh
-#
+#   1) chmod +x rename_cluster_config.sh
+#   2) ./rename_cluster_config.sh
 
 set -e
 
 BASE_DIR="/amoebius/python/amoebius"
-API_KEYS_DIR="$BASE_DIR/models/api_keys"
-DEPLOY_DIR="$BASE_DIR/deployment"
-TESTS_DIR="$BASE_DIR/tests"
+MODELS_DIR="$BASE_DIR/models"
+PROVIDERS_DIR="$MODELS_DIR/providers"
 
 echo "Ensuring directories exist..."
-mkdir -p "$API_KEYS_DIR"
-mkdir -p "$DEPLOY_DIR"
-mkdir -p "$TESTS_DIR"
+mkdir -p "$PROVIDERS_DIR"
 
-############################################
-# 1) /amoebius/python/amoebius/models/api_keys/__init__.py
-############################################
-cat << 'EOF' > "$API_KEYS_DIR/__init__.py"
+########################################
+# 1) cluster_deploy.py (rename from cluster_config.py)
+########################################
+# Overwrite the old file with the new name and updated class name "ClusterDeploy"
+cat << 'EOF' > "$MODELS_DIR/cluster_deploy.py"
 """
-models/api_keys/__init__.py
+cluster_deploy.py
 
-Aggregate imports so these models can be accessed directly from this package.
-
-Any new pydantic models should go in /amoebius/python/amoebius/models if they
-are not specifically for API keys.
+Contains:
+  - InstanceGroup: submodel
+  - ClusterDeploy: the base model (all fields required, no defaults).
 """
 
-from amoebius.models.api_keys.aws import AWSApiKey
-from amoebius.models.api_keys.azure import AzureCredentials
-from amoebius.models.api_keys.gcp import GCPServiceAccountKey
+from typing import List, Dict, Optional
+from pydantic import BaseModel
 
-__all__ = [
-    "AWSApiKey",
-    "AzureCredentials",
-    "GCPServiceAccountKey",
-]
+class InstanceGroup(BaseModel):
+    """
+    Submodel for instance_groups[]:
+      {
+        name           = string
+        category       = string
+        count_per_zone = number
+        image          = optional(string, "")
+      }
+    """
+    name: str
+    category: str
+    count_per_zone: int
+    image: Optional[str] = None
+
+class ClusterDeploy(BaseModel):
+    """
+    The base cluster "deploy" model, with all fields required, no defaults.
+
+    Fields:
+      region               : str
+      vpc_cidr             : str
+      availability_zones   : List[str]
+      instance_type_map    : Dict[str, str]
+      arm_default_image    : str
+      x86_default_image    : str
+      instance_groups      : List[InstanceGroup]
+      ssh_user             : str
+      vault_role_name      : str
+      no_verify_ssl        : bool
+    """
+    region: str
+    vpc_cidr: str
+    availability_zones: List[str]
+    instance_type_map: Dict[str, str]
+
+    arm_default_image: str
+    x86_default_image: str
+    instance_groups: List[InstanceGroup]
+
+    ssh_user: str
+    vault_role_name: str
+    no_verify_ssl: bool
 EOF
 
-############################################
-# 2) /amoebius/python/amoebius/deployment/provider_deploy.py
-############################################
-cat << 'EOF' > "$DEPLOY_DIR/provider_deploy.py"
+echo "Created/overwrote $MODELS_DIR/cluster_deploy.py"
+
+
+########################################
+# 2) Provider-specific classes in aws.py, azure.py, gcp.py
+#    rename them from *ClusterConfig -> *ClusterDeploy
+#    and change the import from cluster_config -> cluster_deploy
+########################################
+
+# 2A) AWS
+cat << 'EOF' > "$PROVIDERS_DIR/aws.py"
+"""
+aws.py
+
+AWSClusterDeploy inherits from ClusterDeploy but fields are optional + AWS defaults
+"""
+
+from typing import Optional, List, Dict
+from pydantic import Field
+
+# Updated import
+from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup
+
+class AWSClusterDeploy(ClusterDeploy):
+    region: Optional[str] = Field(default="us-east-1")
+    vpc_cidr: Optional[str] = Field(default="10.0.0.0/16")
+    availability_zones: Optional[List[str]] = Field(default=["us-east-1a","us-east-1b","us-east-1c"])
+    instance_type_map: Optional[Dict[str, str]] = Field(default={
+        "arm_small": "t4g.micro",
+        "x86_small": "t3.micro",
+        "x86_medium": "t3.small",
+        "nvidia_small": "g4dn.xlarge"
+    })
+    arm_default_image: Optional[str] = Field(default="ami-0faefad027f3b5de6")
+    x86_default_image: Optional[str] = Field(default="ami-0c8a4fc5fa843b2c2")
+    instance_groups: Optional[List[InstanceGroup]] = Field(default=[])
+    ssh_user: Optional[str] = Field(default="ubuntu")
+    vault_role_name: Optional[str] = Field(default="amoebius-admin-role")
+    no_verify_ssl: Optional[bool] = Field(default=True)
+EOF
+
+echo "Created/overwrote $PROVIDERS_DIR/aws.py"
+
+# 2B) Azure
+cat << 'EOF' > "$PROVIDERS_DIR/azure.py"
+"""
+azure.py
+
+AzureClusterDeploy inherits from ClusterDeploy with optional fields + Azure defaults
+"""
+
+from typing import Optional, List, Dict
+from pydantic import Field
+
+from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup
+
+class AzureClusterDeploy(ClusterDeploy):
+    region: Optional[str] = Field(default="eastus")
+    vpc_cidr: Optional[str] = Field(default="10.0.0.0/16")
+    availability_zones: Optional[List[str]] = Field(default=["1","2","3"])
+    instance_type_map: Optional[Dict[str, str]] = Field(default={
+        "arm_small":    "Standard_D2ps_v5",
+        "x86_small":    "Standard_D2s_v5",
+        "x86_medium":   "Standard_D4s_v5",
+        "nvidia_small": "Standard_NC4as_T4_v3"
+    })
+    arm_default_image: Optional[str] = Field(default="/subscriptions/123abc/.../24_04_arm")
+    x86_default_image: Optional[str] = Field(default="/subscriptions/123abc/.../24_04_x86")
+    instance_groups: Optional[List[InstanceGroup]] = Field(default=[])
+    ssh_user: Optional[str] = Field(default="azureuser")
+    vault_role_name: Optional[str] = Field(default="amoebius-admin-role")
+    no_verify_ssl: Optional[bool] = Field(default=True)
+EOF
+
+echo "Created/overwrote $PROVIDERS_DIR/azure.py"
+
+# 2C) GCP
+cat << 'EOF' > "$PROVIDERS_DIR/gcp.py"
+"""
+gcp.py
+
+GCPClusterDeploy inherits from ClusterDeploy with optional fields + GCP defaults
+"""
+
+from typing import Optional, List, Dict
+from pydantic import Field
+
+from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup
+
+class GCPClusterDeploy(ClusterDeploy):
+    region: Optional[str] = Field(default="us-central1")
+    vpc_cidr: Optional[str] = Field(default="10.0.0.0/16")
+    availability_zones: Optional[List[str]] = Field(default=["us-central1-a","us-central1-b","us-central1-f"])
+    instance_type_map: Optional[Dict[str, str]] = Field(default={
+        "arm_small": "t2a-standard-1",
+        "x86_small": "e2-small",
+        "x86_medium": "e2-standard-4",
+        "nvidia_small": "a2-highgpu-1g"
+    })
+    arm_default_image: Optional[str] = Field(default="projects/ubuntu-os-cloud/global/images/family/ubuntu-2404-lts-arm64")
+    x86_default_image: Optional[str] = Field(default="projects/ubuntu-os-cloud/global/images/family/ubuntu-2404-lts")
+    instance_groups: Optional[List[InstanceGroup]] = Field(default=[])
+    ssh_user: Optional[str] = Field(default="ubuntu")
+    vault_role_name: Optional[str] = Field(default="amoebius-admin-role")
+    no_verify_ssl: Optional[bool] = Field(default=True)
+EOF
+
+echo "Created/overwrote $PROVIDERS_DIR/gcp.py"
+
+########################################
+# 3) /amoebius/python/amoebius/provider_deploy.py
+#    rename references from "ClusterConfig" -> "ClusterDeploy"
+#    from "cluster_config" -> "cluster_deploy"
+########################################
+cat << 'EOF' > "$BASE_DIR/provider_deploy.py"
 """
 provider_deploy.py
 
-This module provides:
-  - a standalone function get_provider_env_from_vault() that reads credentials from Vault,
-    parses them with the correct Pydantic model, and returns environment variables.
-  - deploy_provider(...): a generic function that calls get_provider_env_from_vault, then
-    runs terraform init+apply or destroy, optionally passing 'variables' to apply/destroy.
+Now 'deploy(...)' expects a 'cluster_deploy: ClusterDeploy' param,
+and we do cluster_deploy.model_dump() to pass to terraform.
 """
 
 import json
+from typing import Any
 from enum import Enum
-from typing import Dict, Any, Optional
 
 from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.models.api_keys import AWSApiKey, AzureCredentials, GCPServiceAccountKey
+from amoebius.models.cluster_deploy import ClusterDeploy
 from amoebius.utils.terraform import (
     init_terraform,
     apply_terraform,
     destroy_terraform,
 )
 
-
 class ProviderName(str, Enum):
     aws = "aws"
     azure = "azure"
     gcp = "gcp"
 
-
-async def get_provider_env_from_vault(
-    provider: ProviderName,
-    vault_client: AsyncVaultClient,
-    vault_path: str
-) -> Dict[str, str]:
-    """
-    Reads credentials from 'vault_path', uses the correct Pydantic model
-    for 'provider', and returns a dict of environment variables suitable
-    for Terraform.
-
-    :param provider: ProviderName
-    :param vault_client: an already-authenticated Vault client
-    :param vault_path: Vault path containing the secret data
-    :return: dictionary of environment variables for Terraform
-    """
-    # 1) Read from Vault
+async def get_provider_env_from_vault(provider: ProviderName, vault_client: AsyncVaultClient, vault_path: str) -> dict:
     secret_data = await vault_client.read_secret(vault_path)
 
-    # 2) Parse & build env
     if provider == ProviderName.aws:
         aws_creds = AWSApiKey(**secret_data)
         env = {
@@ -136,192 +256,149 @@ async def get_provider_env_from_vault(
     else:
         raise ValueError(f"Unknown provider: {provider}")
 
-
-async def deploy_provider(
+async def deploy(
     provider: ProviderName,
     vault_client: AsyncVaultClient,
     vault_path: str,
-    variables: Optional[Dict[str, Any]] = None,
+    cluster_deploy: ClusterDeploy,
     destroy: bool = False,
 ) -> None:
     """
-    1) get env = get_provider_env_from_vault(provider, vault_client, vault_path)
-    2) If destroy => destroy_terraform(..., env=env, variables=variables)
-       else => init_terraform(..., env=env), apply_terraform(..., env=env, variables=variables)
-    3) The root path is assumed /amoebius/terraform/roots/providers/<provider>.
-
-    :param provider: provider name
-    :param vault_client: existing, authenticated Vault client
-    :param vault_path: path in Vault for credentials
-    :param variables: optional dict of tf variables to pass to apply/destroy
-    :param destroy: if True, only run 'destroy'; else init+apply
+    1) get env from get_provider_env_from_vault
+    2) cluster_deploy.model_dump() => dict for TF
+    3) run terraform init+apply or destroy
     """
-    # 1) Get environment variables from Vault
     env_vars = await get_provider_env_from_vault(provider, vault_client, vault_path)
+    tf_vars = cluster_deploy.model_dump()
 
-    # 2) The terraform root name
     root_name = f"providers/{provider}"
 
-    # 3) Run Terraform
     if destroy:
-        print(f"[{provider}] destroy only, skipping init+apply ...")
-        await destroy_terraform(root_name=root_name, env=env_vars, variables=variables, sensitive=False)
+        print(f"[{provider}] => Running destroy with variables = {tf_vars}")
+        await destroy_terraform(root_name, env=env_vars, variables=tf_vars, sensitive=False)
     else:
-        print(f"[{provider}] init + apply with optional variables ...")
-        await init_terraform(root_name=root_name, env=env_vars, reconfigure=True, sensitive=False)
-        await apply_terraform(root_name=root_name, env=env_vars, variables=variables, sensitive=False)
+        print(f"[{provider}] => init+apply with variables = {tf_vars}")
+        await init_terraform(root_name, env=env_vars, reconfigure=True, sensitive=False)
+        await apply_terraform(root_name, env=env_vars, variables=tf_vars, sensitive=False)
 
-    print(f"[{provider}] done (destroy={destroy}).")
+    print(f"[{provider}] => done (destroy={destroy}).")
 EOF
 
-############################################
-# 3) /amoebius/python/amoebius/tests/provider_deployment.py
-############################################
-cat << 'EOF' > "$TESTS_DIR/provider_deployment.py"
+echo "Overwrote $BASE_DIR/provider_deploy.py"
+
+########################################
+# 4) /amoebius/python/amoebius/tests/provider_deployment.py
+#    rename references from cluster_config -> cluster_deploy
+#    from *ClusterConfig -> *ClusterDeploy
+########################################
+cat << 'EOF' > "$BASE_DIR/tests/provider_deployment.py"
 #!/usr/bin/env python3
 """
 provider_deployment.py
 
-A Python script to deploy or destroy AWS, Azure, or GCP from credentials in Vault,
-using the generic 'deploy_provider' function which references the root
-/amoebius/terraform/roots/providers/<provider>.
-
-Usage examples:
-  python provider_deployment.py --provider aws --vault-path amoebius/tests/api_keys/aws
-  python provider_deployment.py --provider all --vault-path amoebius/tests/api_keys/aws --destroy
-  python provider_deployment.py --provider azure --vault-path amoebius/tests/api_keys/azure --vault-args verify_ssl=False
-
-You can also pass terraform variables via --tf-vars "key=val" "key2=val2" if you like.
+A script that parses CLI arguments, picks a provider-specific *ClusterDeploy class
+(AWSClusterDeploy, AzureClusterDeploy, GCPClusterDeploy), merges user overrides,
+and calls deploy(...).
 """
 
 import sys
-import asyncio
+import json
 import argparse
-from typing import Dict, Any, NoReturn, Optional
+import asyncio
+from typing import Dict, Any, NoReturn
 
 from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.models.vault import VaultSettings
-from amoebius.deployment.provider_deploy import deploy_provider, ProviderName
 
+# The base cluster deploy, plus provider-specific classes
+from amoebius.models.cluster_deploy import ClusterDeploy
+from amoebius.models.providers.aws import AWSClusterDeploy
+from amoebius.models.providers.azure import AzureClusterDeploy
+from amoebius.models.providers.gcp import GCPClusterDeploy
+
+from amoebius.provider_deploy import deploy, ProviderName
 
 def parse_keyvals(args_list) -> Dict[str, str]:
-    """
-    Convert something like ["vault_role_name=amoebius-admin-role", "verify_ssl=False"]
-    or ["myvar=someval", "other_var=stuff"] into dicts. Everything is string.
-    """
     output: Dict[str, str] = {}
     for item in args_list:
         if "=" in item:
-            key, val = item.split("=", 1)
-            output[key] = val
+            k,v = item.split("=",1)
+            output[k] = v
         else:
             output[item] = "True"
     return output
 
-async def run_provider(
+async def run_deployment(
     provider: ProviderName,
     vault_settings: VaultSettings,
     vault_path: str,
-    destroy: bool,
-    tf_variables: Optional[Dict[str, Any]] = None
+    cluster_deploy: ClusterDeploy,
+    destroy: bool
 ):
-    """
-    Create a single AsyncVaultClient, then call deploy_provider.
-    """
     async with AsyncVaultClient(vault_settings) as vc:
-        await deploy_provider(
+        await deploy(
             provider=provider,
             vault_client=vc,
             vault_path=vault_path,
-            variables=tf_variables,
+            cluster_deploy=cluster_deploy,
             destroy=destroy
         )
 
-async def run_all(
-    vault_settings: VaultSettings,
-    vault_path: str,
-    destroy: bool,
-    tf_variables: Optional[Dict[str, Any]] = None
-):
-    """
-    Deploy or destroy all 3 providers in sequence: AWS, Azure, GCP
-    """
-    async with AsyncVaultClient(vault_settings) as vc:
-        for prov in [ProviderName.aws, ProviderName.azure, ProviderName.gcp]:
-            await deploy_provider(
-                provider=prov,
-                vault_client=vc,
-                vault_path=vault_path,
-                variables=tf_variables,
-                destroy=destroy
-            )
-
 def main() -> NoReturn:
     parser = argparse.ArgumentParser(
-        description="Deploy or destroy AWS, Azure, or GCP with credentials from Vault."
+        description=(
+            "Deploy or destroy a cluster for AWS, Azure, or GCP with a cluster_deploy object "
+            "and provider-based defaults."
+        )
     )
-    parser.add_argument(
-        "--provider",
-        choices=["aws","azure","gcp","all"],
-        required=True,
-        help="Which provider to deploy/destroy, or 'all'"
-    )
-    parser.add_argument(
-        "--vault-path",
-        required=True,
-        help="Vault path containing the credentials, e.g. amoebius/tests/api_keys/aws"
-    )
-    parser.add_argument(
-        "--destroy",
-        action="store_true",
-        help="If set, skip apply and do terraform destroy only"
-    )
-    # Vault arguments
-    parser.add_argument(
-        "--vault-args",
-        nargs="*",
-        default=[],
-        help="Additional vault settings in key=val form, e.g. vault_role_name=amoebius-admin-role verify_ssl=False"
-    )
-    # Terraform variables
-    parser.add_argument(
-        "--tf-vars",
-        nargs="*",
-        default=[],
-        help="Additional terraform variables in key=val form, e.g. myvar=stuff region=us-east-1"
-    )
-
+    parser.add_argument("--provider", choices=["aws","azure","gcp"], required=True)
+    parser.add_argument("--vault-path", required=True)
+    parser.add_argument("--destroy", action="store_true")
+    parser.add_argument("--vault-args", nargs="*", default=[], help="Vault settings like verify_ssl=False, etc.")
+    parser.add_argument("--cluster-args", nargs="*", default=[], help="Override fields in cluster deploy, e.g. region=us-east-1")
     args = parser.parse_args()
 
-    # 1) Build vault settings
-    raw_vault_args = parse_keyvals(args.vault_args)
-    vault_settings = VaultSettings(**raw_vault_args)
+    # 1) Vault Settings
+    from amoebius.models.vault import VaultSettings
+    vdict = parse_keyvals(args.vault_args)
+    vs = VaultSettings(**vdict)
 
-    # 2) Build a dict for tf variables
-    tf_var_dict: Dict[str, Any] = parse_keyvals(args.tf_vars) if args.tf_vars else {}
-
-    # 3) Decide single or all
-    try:
-        if args.provider == "all":
-            asyncio.run(
-                run_all(
-                    vault_settings=vault_settings,
-                    vault_path=args.vault_path,
-                    destroy=args.destroy,
-                    tf_variables=tf_var_dict if tf_var_dict else None
-                )
-            )
+    # 2) Build a provider-specific cluster deploy object
+    # parse cluster-args as dict
+    cargs_str = parse_keyvals(args.cluster_args)
+    cargs: Dict[str, Any] = {}
+    for k,v in cargs_str.items():
+        val = v.strip()
+        if (val.startswith("{") and val.endswith("}")) or (val.startswith("[") and val.endswith("]")):
+            try:
+                cargs[k] = json.loads(val)
+            except:
+                cargs[k] = val
         else:
-            prov_enum = ProviderName(args.provider)
-            asyncio.run(
-                run_provider(
-                    provider=prov_enum,
-                    vault_settings=vault_settings,
-                    vault_path=args.vault_path,
-                    destroy=args.destroy,
-                    tf_variables=tf_var_dict if tf_var_dict else None
-                )
+            cargs[k] = val
+
+    provider_enum = ProviderName(args.provider)
+    if provider_enum == ProviderName.aws:
+        cluster_obj = AWSClusterDeploy(**cargs)
+    elif provider_enum == ProviderName.azure:
+        cluster_obj = AzureClusterDeploy(**cargs)
+    elif provider_enum == ProviderName.gcp:
+        cluster_obj = GCPClusterDeploy(**cargs)
+    else:
+        print(f"Unknown provider {provider_enum}", file=sys.stderr)
+        sys.exit(1)
+
+    # 3) Kick off deployment
+    try:
+        asyncio.run(
+            run_deployment(
+                provider=provider_enum,
+                vault_settings=vs,
+                vault_path=args.vault_path,
+                cluster_deploy=cluster_obj,
+                destroy=args.destroy
             )
+        )
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         sys.exit(1)
@@ -332,10 +409,12 @@ if __name__ == "__main__":
     main()
 EOF
 
-chmod +x "$TESTS_DIR/provider_deployment.py"
+chmod +x "$BASE_DIR/tests/provider_deployment.py"
 
-echo "Files have been updated with your requested changes:"
-echo "1) get_provider_env_from_vault(...) is a standalone function"
-echo "2) deploy_provider(...) now includes 'variables: Optional[Dict[str,Any]]'"
-echo "3) /amoebius/python/amoebius/tests/provider_deployment.py to run with optional tf vars."
-echo "Done!"
+echo ""
+echo "All done!"
+echo "Renamed references from 'cluster_config' to 'cluster_deploy', from 'ClusterConfig' to 'ClusterDeploy'."
+echo "Renamed provider classes from e.g. 'AWSClusterConfig' to 'AWSClusterDeploy'."
+echo "Updated /amoebius/python/amoebius/provider_deploy.py to accept 'cluster_deploy: ClusterDeploy'."
+echo "Updated /amoebius/python/amoebius/tests/provider_deployment.py accordingly."
+echo "Enjoy!"

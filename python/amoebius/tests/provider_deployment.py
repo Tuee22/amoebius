@@ -2,151 +2,102 @@
 """
 provider_deployment.py
 
-A Python script to deploy or destroy AWS, Azure, or GCP from credentials in Vault,
-using the generic 'deploy_provider' function which references the root
-/amoebius/terraform/roots/providers/<provider>.
+A minimal unit test or example script that:
+  1) Takes provider name, vault path, and optionally --destroy.
+  2) Creates a minimal provider-specific cluster config with defaults (AWSClusterDeploy, etc.).
+  3) Calls `deploy(...)` from provider_deploy.py to run terraform init+apply or destroy.
 
 Usage examples:
-  python provider_deployment.py --provider aws --vault-path amoebius/tests/api_keys/aws
-  python provider_deployment.py --provider all --vault-path amoebius/tests/api_keys/aws --destroy
-  python provider_deployment.py --provider azure --vault-path amoebius/tests/api_keys/azure --vault-args verify_ssl=False
-
-You can also pass terraform variables via --tf-vars "key=val" "key2=val2" if you like.
+  ./provider_deployment.py --provider aws --vault-path amoebius/tests/api_keys/aws
+  ./provider_deployment.py --provider gcp --vault-path amoebius/tests/api_keys/gcp --destroy
 """
 
 import sys
-import asyncio
 import argparse
-from typing import Dict, Any, NoReturn, Optional
+import asyncio
 
-from amoebius.secrets.vault_client import AsyncVaultClient
+# Provider classes with default fields:
+from amoebius.models.providers import (
+    AWSClusterDeploy,
+    AzureClusterDeploy,
+    GCPClusterDeploy,
+)
+
+# The main deploy function & provider enum:
+from amoebius.provider_deploy import deploy, ProviderName
+
+# Minimal Vault usage:
 from amoebius.models.vault import VaultSettings
-from amoebius.deployment.provider_deploy import deploy_provider, ProviderName
+from amoebius.secrets.vault_client import AsyncVaultClient
 
 
-def parse_keyvals(args_list) -> Dict[str, str]:
+async def run_deployment(
+    provider: ProviderName, vault_path: str, destroy: bool
+) -> None:
     """
-    Convert something like ["vault_role_name=amoebius-admin-role", "verify_ssl=False"]
-    or ["myvar=someval", "other_var=stuff"] into dicts. Everything is string.
+    1) Create a minimal provider-specific cluster config
+    2) Create a minimal VaultSettings
+    3) Call deploy(...)
     """
-    output: Dict[str, str] = {}
-    for item in args_list:
-        if "=" in item:
-            key, val = item.split("=", 1)
-            output[key] = val
-        else:
-            output[item] = "True"
-    return output
+    # Step 1: create the cluster deploy object for this provider
+    if provider == ProviderName.aws:
+        cluster_deploy = AWSClusterDeploy()
+    elif provider == ProviderName.azure:
+        cluster_deploy = AzureClusterDeploy()
+    elif provider == ProviderName.gcp:
+        cluster_deploy = GCPClusterDeploy()
+    else:
+        raise ValueError(f"Unknown provider '{provider}'")
 
-async def run_provider(
-    provider: ProviderName,
-    vault_settings: VaultSettings,
-    vault_path: str,
-    destroy: bool,
-    tf_variables: Optional[Dict[str, Any]] = None
-):
-    """
-    Create a single AsyncVaultClient, then call deploy_provider.
-    """
-    async with AsyncVaultClient(vault_settings) as vc:
-        await deploy_provider(
+    # Step 2: Minimal VaultSettings (assuming defaults or a known role name)
+    # Feel free to tweak if you have a self-signed Vault:
+    vs = VaultSettings(
+        vault_role_name="amoebius-admin-role",
+        verify_ssl=False,  # adjust if your environment requires SSL verification
+    )
+
+    # Step 3: Terraform deploy
+    async with AsyncVaultClient(vs) as vc:
+        await deploy(
             provider=provider,
             vault_client=vc,
             vault_path=vault_path,
-            variables=tf_variables,
-            destroy=destroy
+            cluster_deploy=cluster_deploy,
+            destroy=destroy,
         )
 
-async def run_all(
-    vault_settings: VaultSettings,
-    vault_path: str,
-    destroy: bool,
-    tf_variables: Optional[Dict[str, Any]] = None
-):
-    """
-    Deploy or destroy all 3 providers in sequence: AWS, Azure, GCP
-    """
-    async with AsyncVaultClient(vault_settings) as vc:
-        for prov in [ProviderName.aws, ProviderName.azure, ProviderName.gcp]:
-            await deploy_provider(
-                provider=prov,
-                vault_client=vc,
-                vault_path=vault_path,
-                variables=tf_variables,
-                destroy=destroy
-            )
 
-def main() -> NoReturn:
+def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Deploy or destroy AWS, Azure, or GCP with credentials from Vault."
+        description="Minimal script to test AWS/Azure/GCP deployment logic."
     )
     parser.add_argument(
         "--provider",
-        choices=["aws","azure","gcp","all"],
+        choices=["aws", "azure", "gcp"],
         required=True,
-        help="Which provider to deploy/destroy, or 'all'"
+        help="Which provider to deploy or destroy."
     )
     parser.add_argument(
         "--vault-path",
         required=True,
-        help="Vault path containing the credentials, e.g. amoebius/tests/api_keys/aws"
+        help="Path in Vault to retrieve credentials, e.g. amoebius/tests/api_keys/aws"
     )
     parser.add_argument(
         "--destroy",
         action="store_true",
-        help="If set, skip apply and do terraform destroy only"
+        help="If set, run terraform destroy instead of init+apply."
     )
-    # Vault arguments
-    parser.add_argument(
-        "--vault-args",
-        nargs="*",
-        default=[],
-        help="Additional vault settings in key=val form, e.g. vault_role_name=amoebius-admin-role verify_ssl=False"
-    )
-    # Terraform variables
-    parser.add_argument(
-        "--tf-vars",
-        nargs="*",
-        default=[],
-        help="Additional terraform variables in key=val form, e.g. myvar=stuff region=us-east-1"
-    )
-
     args = parser.parse_args()
 
-    # 1) Build vault settings
-    raw_vault_args = parse_keyvals(args.vault_args)
-    vault_settings = VaultSettings(**raw_vault_args)
+    provider_enum = ProviderName(args.provider)
 
-    # 2) Build a dict for tf variables
-    tf_var_dict: Dict[str, Any] = parse_keyvals(args.tf_vars) if args.tf_vars else {}
-
-    # 3) Decide single or all
     try:
-        if args.provider == "all":
-            asyncio.run(
-                run_all(
-                    vault_settings=vault_settings,
-                    vault_path=args.vault_path,
-                    destroy=args.destroy,
-                    tf_variables=tf_var_dict if tf_var_dict else None
-                )
-            )
-        else:
-            prov_enum = ProviderName(args.provider)
-            asyncio.run(
-                run_provider(
-                    provider=prov_enum,
-                    vault_settings=vault_settings,
-                    vault_path=args.vault_path,
-                    destroy=args.destroy,
-                    tf_variables=tf_var_dict if tf_var_dict else None
-                )
-            )
+        asyncio.run(run_deployment(provider_enum, args.vault_path, args.destroy))
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
-        sys.exit(1)
-    else:
-        sys.exit(0)
+        return 1
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

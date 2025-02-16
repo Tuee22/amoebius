@@ -1,21 +1,17 @@
 """
 provider_deploy.py
 
-We define:
-  - get_provider_env_from_vault(provider, vault_client, vault_path)
-    -> environment variables from Vault credentials.
-
-  - deploy(provider, vault_client, vault_path, variables, destroy=False)
-    -> uses the environment from get_provider_env_from_vault,
-       runs terraform init/apply or destroy with the given dictionary of variables.
+Now 'deploy(...)' expects a 'cluster_deploy: ClusterDeploy' param,
+and we do cluster_deploy.model_dump() to pass to terraform.
 """
 
 import json
+from typing import Any
 from enum import Enum
-from typing import Dict, Any
 
 from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.models.api_keys import AWSApiKey, AzureCredentials, GCPServiceAccountKey
+from amoebius.models.cluster_deploy import ClusterDeploy
 from amoebius.utils.terraform import (
     init_terraform,
     apply_terraform,
@@ -27,17 +23,7 @@ class ProviderName(str, Enum):
     azure = "azure"
     gcp = "gcp"
 
-async def get_provider_env_from_vault(
-    provider: ProviderName,
-    vault_client: AsyncVaultClient,
-    vault_path: str
-) -> Dict[str, str]:
-    """
-    Reads credentials from Vault at 'vault_path' for the given provider,
-    returns environment variables for Terraform.
-
-    E.g. for AWS, sets AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, [AWS_SESSION_TOKEN].
-    """
+async def get_provider_env_from_vault(provider: ProviderName, vault_client: AsyncVaultClient, vault_path: str) -> dict:
     secret_data = await vault_client.read_secret(vault_path)
 
     if provider == ProviderName.aws:
@@ -73,40 +59,25 @@ async def deploy(
     provider: ProviderName,
     vault_client: AsyncVaultClient,
     vault_path: str,
-    variables: Dict[str, Any],
+    cluster_deploy: ClusterDeploy,
     destroy: bool = False,
 ) -> None:
     """
-    1) environment = get_provider_env_from_vault
-    2) run terraform init+apply or destroy with 'variables'
-    3) The root directory is /amoebius/terraform/roots/providers/<provider>
-
-    The 'variables' param is typically cluster_config.model_dump() from your Pydantic model.
+    1) get env from get_provider_env_from_vault
+    2) cluster_deploy.model_dump() => dict for TF
+    3) run terraform init+apply or destroy
     """
     env_vars = await get_provider_env_from_vault(provider, vault_client, vault_path)
+    tf_vars = cluster_deploy.model_dump()
+
     root_name = f"providers/{provider}"
 
     if destroy:
-        print(f"[{provider}] => running terraform destroy with variables = {variables}")
-        await destroy_terraform(
-            root_name=root_name,
-            env=env_vars,
-            variables=variables,
-            sensitive=False,
-        )
+        print(f"[{provider}] => Running destroy with variables = {tf_vars}")
+        await destroy_terraform(root_name, env=env_vars, variables=tf_vars, sensitive=False)
     else:
-        print(f"[{provider}] => init+apply with variables = {variables}")
-        await init_terraform(
-            root_name=root_name,
-            env=env_vars,
-            reconfigure=True,
-            sensitive=False,
-        )
-        await apply_terraform(
-            root_name=root_name,
-            env=env_vars,
-            variables=variables,
-            sensitive=False,
-        )
+        print(f"[{provider}] => init+apply with variables = {tf_vars}")
+        await init_terraform(root_name, env=env_vars, reconfigure=True, sensitive=False)
+        await apply_terraform(root_name, env=env_vars, variables=tf_vars, sensitive=False)
 
-    print(f"[{provider}] => done. destroy={destroy}")
+    print(f"[{provider}] => done (destroy={destroy}).")

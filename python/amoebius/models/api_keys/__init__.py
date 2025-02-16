@@ -3,8 +3,8 @@ models/api_keys/__init__.py
 
 Aggregate imports so these models can be accessed directly from this package.
 
-Any new pydantic models should go in /amoebius/python/amoebius/models if they
-are not specifically for API keys.
+If you create new Pydantic models unrelated to these credentials,
+please put them in /amoebius/python/amoebius/models
 """
 
 from amoebius.models.api_keys.aws import AWSApiKey
