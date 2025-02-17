@@ -1,9 +1,3 @@
-"""
-aws.py
-
-AWSClusterDeploy -> override __init__ to allow no-arg usage, must keep same field types.
-"""
-
 from typing import List, Dict
 from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup
 
@@ -11,17 +5,22 @@ from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup
 class AWSClusterDeploy(ClusterDeploy):
     def __init__(
         self,
-        region: str = "us-east-1",
+        region: str = "us-west-2",
         vpc_cidr: str = "10.0.0.0/16",
-        availability_zones: List[str] = ["us-east-1a", "us-east-1b", "us-east-1c"],
+        availability_zones: List[str] = ["us-west-2a", "us-west-2b", "us-west-2c"],
         instance_type_map: Dict[str, str] = {
-            "arm_small": "t4g.micro",
-            "x86_small": "t3.micro",
-            "x86_medium": "t3.small",
+            "arm_small": "t4g.small",
+            "arm_medium": "t4g.medium",
+            "arm_large": "t4g.large",
+            "x86_small": "t3.small",
+            "x86_medium": "t3.medium",
+            "x86_large": "t3.large",
             "nvidia_small": "g4dn.xlarge",
+            "nvidia_medium": "g5.2xlarge",
+            "nvidia_large": "p4d.24xlarge",
         },
-        arm_default_image: str = "ami-0faefad027f3b5de6",
-        x86_default_image: str = "ami-0c8a4fc5fa843b2c2",
+        arm_default_image: str = "ami-04b70fa74e45c3917",  # Ubuntu 22.04 LTS ARM64
+        x86_default_image: str = "ami-053b0d53c279acc90",  # Ubuntu 22.04 LTS x86_64
         instance_groups: List[InstanceGroup] = [],
         ssh_user: str = "ubuntu",
         vault_role_name: str = "amoebius-admin-role",
