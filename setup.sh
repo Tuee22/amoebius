@@ -1,4 +1,98 @@
-###################################################################
+#!/usr/bin/env bash
+#
+# refactor_remove_submodule_map.sh
+#
+# This script refactors /amoebius/terraform/modules/compute/main.tf to:
+#   - dynamically set the module "vm" source = "./${var.cloud_provider}"
+#   - ensures all submodules (aws, azure, gcp) have the same variables
+#
+# Usage:
+#   cd /amoebius
+#   ./refactor_remove_submodule_map.sh
+
+set -euo pipefail
+
+backup_and_write() {
+  local target="$1"
+  local content="$2"
+
+  if [ -f "$target" ]; then
+    cp "$target" "${target}.bak.$(date +%Y%m%d-%H%M%S)"
+  fi
+  echo "$content" > "$target"
+  echo "Wrote $target"
+}
+
+###############################################################################
+# 1) Overwrite variables.tf in each of {aws, azure, gcp} submodules so they match
+###############################################################################
+UNIFIED_SUBMODULE_VARS='variable "vm_name" {
+  description = "The name to assign the VM."
+  type        = string
+}
+
+variable "public_key_openssh" {
+  description = "Public key in OpenSSH format."
+  type        = string
+}
+
+variable "ssh_user" {
+  description = "SSH username."
+  type        = string
+}
+
+variable "image" {
+  description = "AMI / Image reference for the VM."
+  type        = string
+}
+
+variable "instance_type" {
+  description = "EC2 instance type, Azure size, or GCP machine type."
+  type        = string
+}
+
+variable "subnet_id" {
+  description = "ID of the subnet/vNet subnetwork to place this VM in."
+  type        = string
+}
+
+variable "security_group_id" {
+  description = "ID of the security group / NSG / firewall to use."
+  type        = string
+}
+
+variable "zone" {
+  description = "AZ or zone in which to place the VM."
+  type        = string
+}
+
+variable "workspace" {
+  description = "Terraform workspace name, used to generate resource names."
+  type        = string
+}
+
+variable "resource_group_name" {
+  description = "For Azure usage; can be ignored by AWS/GCP."
+  type        = string
+  default     = ""
+}
+
+variable "location" {
+  description = "For Azure usage (location); can be ignored by AWS/GCP."
+  type        = string
+  default     = ""
+}
+'
+
+backup_and_write "terraform/modules/compute/aws/variables.tf"   "$UNIFIED_SUBMODULE_VARS"
+backup_and_write "terraform/modules/compute/azure/variables.tf" "$UNIFIED_SUBMODULE_VARS"
+backup_and_write "terraform/modules/compute/gcp/variables.tf"   "$UNIFIED_SUBMODULE_VARS"
+
+###############################################################################
+# 2) Overwrite /amoebius/terraform/modules/compute/main.tf so it uses
+#    "source = \"./${var.cloud_provider}\"" in a single module block
+###############################################################################
+MAIN_TF_CONTENT='###################################################################
 # /amoebius/terraform/modules/compute/main.tf
 #
 # Single module "vm" with "source = "./${var.cloud_provider}"
@@ -149,4 +243,9 @@ locals {
     ]
   }
 }
+'
 
+backup_and_write "terraform/modules/compute/main.tf" "${MAIN_TF_CONTENT}"
+
+echo "Successfully removed submodule_map. Now /amoebius/terraform/modules/compute/main.tf uses 'source = \"./${var.cloud_provider}\"' for a single VM module block."
+echo "Terraform 0.13+ is required. All submodules (aws, azure, gcp) have the same variable sets."

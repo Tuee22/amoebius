@@ -1,24 +1,33 @@
 ###################################################################
-# provider_root/variables.tf
+# /amoebius/terraform/modules/compute/variables.tf
+#
+# This single module expects:
+#   - cloud_provider: "aws" | "azure" | "gcp"
+#   - region, vpc_cidr, availability_zones
+#   - instance_groups
+#   - instance_type_map
+#   - arm_default_image, x86_default_image
+#   - ssh_user, vault_role_name, no_verify_ssl
 ###################################################################
-variable "provider" {
+
+variable "cloud_provider" {
   type        = string
-  description = "One of: aws, azure, gcp"
+  description = "Must be one of: aws, azure, gcp"
 }
 
 variable "region" {
   type        = string
-  description = "Cloud region / location"
+  description = "Cloud region (or project) e.g. us-east-1, eastus, us-central1"
 }
 
 variable "vpc_cidr" {
   type        = string
-  description = "CIDR block for the VPC / vNet"
+  description = "CIDR block for the VPC/vNet"
 }
 
 variable "availability_zones" {
   type        = list(string)
-  description = "List of AZs (or zones)."
+  description = "AZ or zone strings"
 }
 
 variable "instance_groups" {
@@ -28,51 +37,39 @@ variable "instance_groups" {
     count_per_zone = number
     image          = optional(string, "")
   }))
-  description = "List of instance groups (like in each provider root)."
-}
-
-variable "arm_default_image" {
-  type        = string
-  description = "Default ARM image to use if group doesn't define an image."
-}
-
-variable "x86_default_image" {
-  type        = string
-  description = "Default x86 image to use if group doesn't define an image."
+  description = "List of instance group definitions"
 }
 
 variable "instance_type_map" {
   type        = map(string)
-  description = "Map of category => instance type, e.g. 'arm_small' => 't4g.small'"
+  description = "Map of category => instance type, e.g. \"arm_small\" => \"t4g.small\""
+}
+
+variable "arm_default_image" {
+  type        = string
+  description = "Default ARM image if none is specified in the group"
+}
+
+variable "x86_default_image" {
+  type        = string
+  description = "Default x86 image if none is specified in the group"
 }
 
 variable "ssh_user" {
   type        = string
-  description = "SSH username for the VM"
   default     = "ubuntu"
+  description = "SSH user for the created VMs"
 }
 
 variable "vault_role_name" {
   type        = string
-  description = "Vault role name for storing SSH secrets"
   default     = "amoebius-admin-role"
+  description = "Vault role name to store the SSH key"
 }
 
 variable "no_verify_ssl" {
   type        = bool
-  description = "If true, skip SSL verification for Vault"
   default     = true
+  description = "If true, skip SSL verification for Vault"
 }
 
-# For Azure sub-module usage, or at least doesn't fail
-variable "resource_group_name" {
-  type        = string
-  default     = ""
-  description = "Used by Azure sub-module (ignored by others)."
-}
-
-variable "location" {
-  type        = string
-  default     = ""
-  description = "Azure location fallback"
-}

@@ -1,7 +1,9 @@
 ###################################################################
-# provider_root/outputs.tf
+# /amoebius/terraform/modules/compute/outputs.tf
 ###################################################################
+
 output "instances_by_group" {
-  description = "Map of group_name => list of VM objects from module.compute"
-  value       = module.compute.instances_by_group
+  description = "Map of group_name => list of instances (name, private_ip, public_ip, vault_path)"
+  value       = local.instances_by_group
 }
+
