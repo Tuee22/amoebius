@@ -19,11 +19,8 @@ from typing import List
 from amoebius.deployment.provider_deploy import deploy, ProviderName
 from amoebius.models.vault import VaultSettings
 from amoebius.secrets.vault_client import AsyncVaultClient
-from amoebius.models.cluster_deploy import (
-    ClusterDeploy,
-    InstanceGroup,
-    provider_model_map,
-)
+from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup
+from amoebius.models.provider_map import provider_model_map  # <-- import from provider_map
 
 # Define a list of InstanceGroup objects
 instance_groups: List[InstanceGroup] = [

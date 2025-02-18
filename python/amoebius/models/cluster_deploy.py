@@ -3,9 +3,7 @@ cluster_deploy.py
 
 We define a base Pydantic model (ClusterDeploy) with default fields so that
 calls won't fail mypy for missing named arguments. Also, we re-export 
-`provider_model_map` from `amoebius.models.providers`, so code can do:
 
-    from amoebius.models.cluster_deploy import provider_model_map
 
 without error.
 """
@@ -40,14 +38,10 @@ class ClusterDeploy(BaseModel):
 
 
 # ----------------------------------------------------------------------
-# 2) Re-export provider_model_map from providers
 # ----------------------------------------------------------------------
-from amoebius.models.providers import provider_model_map as _provider_model_map
 
-provider_model_map = _provider_model_map
 
 __all__ = [
     "InstanceGroup",
     "ClusterDeploy",
-    "provider_model_map",
 ]

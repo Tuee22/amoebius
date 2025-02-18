@@ -4,35 +4,25 @@ amoebius.models.providers
 Unified aggregator import for:
 - ProviderName
 - The environment dispatch
-- The cluster deploy classes (AWSClusterDeploy, etc.) and credentials (AWSApiKey, etc.)
-- A provider_model_map for tests (mapping ProviderName -> specific cluster class).
+- The cluster deploy classes (AWSClusterDeploy, etc.)
+- The credentials (AWSApiKey, etc.)
+(without referencing provider_model_map to avoid circular import).
 """
 
 from enum import Enum
-from typing import Dict, Any, Callable, Type
+from typing import Dict, Any, Callable
 
-# Deploy subpackage
-from amoebius.models.cluster_deploy import ClusterDeploy
-from amoebius.models.providers.deploy.aws import AWSClusterDeploy
-from amoebius.models.providers.deploy.azure import AzureClusterDeploy
-from amoebius.models.providers.deploy.gcp import GCPClusterDeploy
-from amoebius.models.providers.deploy.aws import AWSApiKey
-from amoebius.models.providers.deploy.azure import AzureCredentials
-from amoebius.models.providers.deploy.gcp import GCPServiceAccountKey
+from amoebius.models.providers.deploy.aws import AWSClusterDeploy, AWSApiKey
+from amoebius.models.providers.deploy.azure import AzureClusterDeploy, AzureCredentials
+from amoebius.models.providers.deploy.gcp import GCPClusterDeploy, GCPServiceAccountKey
 
 
-# --------------------------
-# 1) ProviderName
-# --------------------------
 class ProviderName(str, Enum):
     aws = "aws"
     azure = "azure"
     gcp = "gcp"
 
 
-# --------------------------
-# 2) Dictionary-based ENV dispatch
-# --------------------------
 def _aws_env(raw: Dict[str, Any]) -> Dict[str, str]:
     return AWSApiKey(**raw).to_env_dict()
 
@@ -60,16 +50,6 @@ def get_provider_env_from_secret_data(
     return ENV_MODEL_MAP[provider](raw_data)
 
 
-# --------------------------
-# 3) provider_model_map for test usage
-# --------------------------
-provider_model_map: Dict[ProviderName, Type[ClusterDeploy]] = {
-    ProviderName.aws: AWSClusterDeploy,
-    ProviderName.azure: AzureClusterDeploy,
-    ProviderName.gcp: GCPClusterDeploy,
-}
-
-
 __all__ = [
     "ProviderName",
     "AWSClusterDeploy",
@@ -79,5 +59,4 @@ __all__ = [
     "GCPClusterDeploy",
     "GCPServiceAccountKey",
     "get_provider_env_from_secret_data",
-    "provider_model_map",
 ]
