@@ -1,7 +1,8 @@
-#!/usr/bin/env python3
 """
-azure_deploy_test.py
-Reads Azure creds from Vault => sets env => init+apply or destroy.
+azure_deploy.py
+
+Reads Azure creds from Vault, uses AzureCredentials.to_env_dict() for environment vars,
+then runs terraform init+apply or destroy. This version has stable indentation.
 """
 
 import sys
@@ -9,7 +10,6 @@ import asyncio
 import argparse
 from typing import NoReturn, Dict, Any
 from pydantic import ValidationError
-
 from amoebius.models.vault import VaultSettings
 from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.utils.terraform import (
@@ -33,16 +33,9 @@ async def run_azure_deploy_test(destroy_only: bool = False) -> None:
             raise RuntimeError(f"Failed to read Azure creds: {exc}") from exc
 
         try:
-            azure_creds = AzureCredentials(**secret_data)
+            env_vars = AzureCredentials(**secret_data).to_env_dict()
         except ValidationError as ve:
             raise RuntimeError(f"Invalid Azure creds: {ve}") from ve
-
-        env_vars = {
-            "ARM_CLIENT_ID": azure_creds.client_id,
-            "ARM_CLIENT_SECRET": azure_creds.client_secret,
-            "ARM_TENANT_ID": azure_creds.tenant_id,
-            "ARM_SUBSCRIPTION_ID": azure_creds.subscription_id,
-        }
 
         tf_vars: Dict[str, Any] = {}
 
@@ -71,7 +64,7 @@ async def run_azure_deploy_test(destroy_only: bool = False) -> None:
 
 
 def main() -> NoReturn:
-    parser = argparse.ArgumentParser("Azure deploy test.")
+    parser = argparse.ArgumentParser("Azure deploy script sample.")
     parser.add_argument("--destroy", action="store_true")
     args = parser.parse_args()
 

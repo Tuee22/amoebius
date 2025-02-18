@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
 """
 aws_deploy.py
-Example that reads AWS creds from Vault => sets env => terraform init+apply or destroy
-No default region in TF. Mypy-friendly.
+
+Reads AWS creds from Vault, uses AWSApiKey.to_env_dict() for environment vars,
+then runs terraform init+apply or destroy.
 """
 
 import sys
@@ -33,16 +33,9 @@ async def run_aws_deploy_test(destroy_only: bool = False) -> None:
             raise RuntimeError(f"Failed to read AWS creds: {exc}") from exc
 
         try:
-            aws_key = AWSApiKey(**secret_data)
+            env_vars = AWSApiKey(**secret_data).to_env_dict()
         except ValidationError as ve:
             raise RuntimeError(f"Invalid AWS creds: {ve}") from ve
-
-        env_vars = {
-            "AWS_ACCESS_KEY_ID": aws_key.access_key_id,
-            "AWS_SECRET_ACCESS_KEY": aws_key.secret_access_key,
-        }
-        if aws_key.session_token:
-            env_vars["AWS_SESSION_TOKEN"] = aws_key.session_token
 
         if destroy_only:
             print("Terraform destroy only for AWS.")

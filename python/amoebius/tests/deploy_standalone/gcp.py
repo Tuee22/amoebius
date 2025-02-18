@@ -1,11 +1,11 @@
-#!/usr/bin/env python3
 """
-gcp_deploy_test.py
-Reads GCP service account from Vault => set GOOGLE_CREDENTIALS => init+apply or destroy
+gcp_deploy.py
+
+Reads GCP creds from Vault, uses GCPServiceAccountKey.to_env_dict() for environment vars,
+then runs terraform init+apply or destroy. This version has stable indentation.
 """
 
 import sys
-import json
 import asyncio
 import argparse
 from typing import NoReturn, Dict, Any
@@ -34,14 +34,9 @@ async def run_gcp_deploy_test(destroy_only: bool = False) -> None:
             raise RuntimeError(f"Failed to read GCP creds: {exc}") from exc
 
         try:
-            gcp_key = GCPServiceAccountKey(**secret_data)
+            env_vars = GCPServiceAccountKey(**secret_data).to_env_dict()
         except ValidationError as ve:
             raise RuntimeError(f"Invalid GCP key: {ve}") from ve
-
-        env_vars = {
-            "GOOGLE_CREDENTIALS": json.dumps(gcp_key.model_dump()),
-            "GOOGLE_PROJECT": gcp_key.project_id,
-        }
 
         tf_vars: Dict[str, Any] = {}
 
@@ -70,7 +65,7 @@ async def run_gcp_deploy_test(destroy_only: bool = False) -> None:
 
 
 def main() -> NoReturn:
-    parser = argparse.ArgumentParser("GCP deploy test.")
+    parser = argparse.ArgumentParser("GCP deploy script sample.")
     parser.add_argument("--destroy", action="store_true")
     args = parser.parse_args()
 
