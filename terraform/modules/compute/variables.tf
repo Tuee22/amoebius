@@ -1,58 +1,78 @@
-variable "cloud_provider" {
+###################################################################
+# provider_root/variables.tf
+###################################################################
+variable "provider" {
   type        = string
-  description = "aws, azure, or gcp"
+  description = "One of: aws, azure, gcp"
 }
 
-variable "vm_name" {
+variable "region" {
   type        = string
-  description = "VM instance name"
+  description = "Cloud region / location"
 }
 
-variable "public_key_openssh" {
+variable "vpc_cidr" {
   type        = string
-  description = "SSH public key"
+  description = "CIDR block for the VPC / vNet"
+}
+
+variable "availability_zones" {
+  type        = list(string)
+  description = "List of AZs (or zones)."
+}
+
+variable "instance_groups" {
+  type = list(object({
+    name           = string
+    category       = string
+    count_per_zone = number
+    image          = optional(string, "")
+  }))
+  description = "List of instance groups (like in each provider root)."
+}
+
+variable "arm_default_image" {
+  type        = string
+  description = "Default ARM image to use if group doesn't define an image."
+}
+
+variable "x86_default_image" {
+  type        = string
+  description = "Default x86 image to use if group doesn't define an image."
+}
+
+variable "instance_type_map" {
+  type        = map(string)
+  description = "Map of category => instance type, e.g. 'arm_small' => 't4g.small'"
 }
 
 variable "ssh_user" {
-  type    = string
-  default = "ubuntu"
-}
-
-variable "image" {
   type        = string
-  description = "Image/AMI"
+  description = "SSH username for the VM"
+  default     = "ubuntu"
 }
 
-variable "instance_type" {
-  type = string
-}
-
-variable "subnet_id" {
+variable "vault_role_name" {
   type        = string
-  description = "Subnet or subnetwork"
+  description = "Vault role name for storing SSH secrets"
+  default     = "amoebius-admin-role"
 }
 
-variable "security_group_id" {
-  type        = string
-  description = "Security group / firewall"
+variable "no_verify_ssl" {
+  type        = bool
+  description = "If true, skip SSL verification for Vault"
+  default     = true
 }
 
-variable "zone" {
-  type        = string
-  description = "AZ or zone"
-}
-
-variable "workspace" {
-  type    = string
-  default = "default"
-}
-
+# For Azure sub-module usage, or at least doesn't fail
 variable "resource_group_name" {
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
+  description = "Used by Azure sub-module (ignored by others)."
 }
 
 variable "location" {
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
+  description = "Azure location fallback"
 }

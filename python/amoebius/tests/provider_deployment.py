@@ -20,7 +20,7 @@ from amoebius.deployment.provider_deploy import deploy, ProviderName
 from amoebius.models.vault import VaultSettings
 from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup
-from amoebius.models.provider_map import provider_model_map  # <-- import from provider_map
+from amoebius.models.provider_map import provider_model_map
 
 # Define a list of InstanceGroup objects
 instance_groups: List[InstanceGroup] = [
@@ -35,18 +35,6 @@ instance_groups: List[InstanceGroup] = [
         category="x86_medium",
         count_per_zone=2,
         image=None,  # Use default x86 image
-    ),
-    InstanceGroup(
-        name="db-servers",
-        category="x86_large",
-        count_per_zone=1,
-        image=None,  # Use default x86 image
-    ),
-    InstanceGroup(
-        name="gpu-workers",
-        category="nvidia_small",
-        count_per_zone=1,
-        image=None,  # Use default GPU image
     ),
 ]
 
