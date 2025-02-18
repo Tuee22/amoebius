@@ -11,7 +11,7 @@ import argparse
 from typing import NoReturn
 from pydantic import ValidationError
 from amoebius.models.vault import VaultSettings
-from amoebius.models.api_keys.aws import AWSApiKey
+from amoebius.models.providers.api_keys.aws import AWSApiKey
 from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.utils.terraform import (
     init_terraform,

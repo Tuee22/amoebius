@@ -1,7 +1,14 @@
 from typing import List, Dict
+import json
+from pydantic import BaseModel, Field, ValidationError
+from typing import Literal
+
 from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup
 
 
+# ----------------------------------------
+# GCPClusterDeploy
+# ----------------------------------------
 class GCPClusterDeploy(ClusterDeploy):
     def __init__(
         self,
@@ -42,3 +49,26 @@ class GCPClusterDeploy(ClusterDeploy):
             vault_role_name=vault_role_name,
             no_verify_ssl=no_verify_ssl,
         )
+
+
+# ----------------------------------------
+# GCPServiceAccountKey
+# ----------------------------------------
+class GCPServiceAccountKey(BaseModel):
+    type: Literal["service_account"]
+    project_id: str
+    private_key_id: str
+    private_key: str
+    client_email: str
+    client_id: str
+    auth_uri: str
+    token_uri: str
+    auth_provider_x509_cert_url: str
+    client_x509_cert_url: str
+    universe_domain: str = Field(..., description="Typically 'googleapis.com'")
+
+    def to_env_dict(self) -> Dict[str, str]:
+        return {
+            "GOOGLE_CREDENTIALS": json.dumps(self.model_dump()),
+            "GOOGLE_PROJECT": self.project_id,
+        }

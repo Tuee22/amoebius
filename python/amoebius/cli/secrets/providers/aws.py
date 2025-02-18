@@ -30,7 +30,7 @@ from typing import NoReturn
 
 import pandas as pd
 
-from amoebius.models.api_keys.aws import AWSApiKey
+from amoebius.models.providers.api_keys.aws import AWSApiKey
 from amoebius.models.vault import VaultSettings
 from amoebius.secrets.vault_client import AsyncVaultClient
 

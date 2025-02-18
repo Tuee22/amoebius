@@ -4,15 +4,24 @@ provider_deploy.py
 We define:
   - get_provider_env_from_vault(...) -> Dict[str, Any]
   - deploy(..., cluster_deploy: ClusterDeploy) -> None
+
+Relies on ProviderName re-export, so we do:
+
+    from amoebius.models.providers import ProviderName as _ProviderName
+
+Then at bottom:
+    ProviderName = _ProviderName
+    __all__ = ["ProviderName", "get_provider_env_from_vault", "deploy"]
 """
 
-import json
-from enum import Enum
 from typing import Dict, Any
 
 from amoebius.secrets.vault_client import AsyncVaultClient
-from amoebius.models.api_keys import AWSApiKey, AzureCredentials, GCPServiceAccountKey
 from amoebius.models.cluster_deploy import ClusterDeploy
+
+# Import the real ProviderName under an alias, then re-export
+from amoebius.models.providers import ProviderName as _ProviderName
+from amoebius.models.providers import get_provider_env_from_secret_data
 from amoebius.utils.terraform import (
     init_terraform,
     apply_terraform,
@@ -20,46 +29,15 @@ from amoebius.utils.terraform import (
 )
 
 
-class ProviderName(str, Enum):
-    aws = "aws"
-    azure = "azure"
-    gcp = "gcp"
-
-
 async def get_provider_env_from_vault(
-    provider: ProviderName, vault_client: AsyncVaultClient, vault_path: str
-) -> Dict[str, Any]:
+    provider: _ProviderName, vault_client: AsyncVaultClient, vault_path: str
+) -> Dict[str, str]:
     secret_data = await vault_client.read_secret(vault_path)
-
-    if provider == ProviderName.aws:
-        aws_creds = AWSApiKey(**secret_data)
-        env: Dict[str, Any] = {
-            "AWS_ACCESS_KEY_ID": aws_creds.access_key_id,
-            "AWS_SECRET_ACCESS_KEY": aws_creds.secret_access_key,
-        }
-        if aws_creds.session_token:
-            env["AWS_SESSION_TOKEN"] = aws_creds.session_token
-        return env
-    elif provider == ProviderName.azure:
-        az_creds = AzureCredentials(**secret_data)
-        return {
-            "ARM_CLIENT_ID": az_creds.client_id,
-            "ARM_CLIENT_SECRET": az_creds.client_secret,
-            "ARM_TENANT_ID": az_creds.tenant_id,
-            "ARM_SUBSCRIPTION_ID": az_creds.subscription_id,
-        }
-    elif provider == ProviderName.gcp:
-        gcp_creds = GCPServiceAccountKey(**secret_data)
-        return {
-            "GOOGLE_CREDENTIALS": json.dumps(gcp_creds.model_dump()),
-            "GOOGLE_PROJECT": gcp_creds.project_id,
-        }
-    else:
-        raise ValueError(f"Unknown provider: {provider}")
+    return get_provider_env_from_secret_data(provider, secret_data)
 
 
 async def deploy(
-    provider: ProviderName,
+    provider: _ProviderName,
     vault_client: AsyncVaultClient,
     vault_path: str,
     cluster_deploy: ClusterDeploy,
@@ -68,7 +46,7 @@ async def deploy(
     env_vars = await get_provider_env_from_vault(provider, vault_client, vault_path)
     tf_vars = cluster_deploy.model_dump()
 
-    root_name = f"providers/{provider}"
+    root_name = f"providers/{provider.value}"
 
     if destroy:
         print(f"[{provider}] => Running destroy with variables = {tf_vars}")
@@ -83,3 +61,13 @@ async def deploy(
         )
 
     print(f"[{provider}] => done (destroy={destroy}).")
+
+
+# Re-export for mypy
+ProviderName = _ProviderName
+
+__all__ = [
+    "ProviderName",
+    "get_provider_env_from_vault",
+    "deploy",
+]

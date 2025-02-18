@@ -1,7 +1,12 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
+import json
+from pydantic import BaseModel
 from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup
 
 
+# ----------------------------------------
+# AWSClusterDeploy
+# ----------------------------------------
 class AWSClusterDeploy(ClusterDeploy):
     def __init__(
         self,
@@ -38,3 +43,21 @@ class AWSClusterDeploy(ClusterDeploy):
             vault_role_name=vault_role_name,
             no_verify_ssl=no_verify_ssl,
         )
+
+
+# ----------------------------------------
+# AWSApiKey
+# ----------------------------------------
+class AWSApiKey(BaseModel):
+    access_key_id: str
+    secret_access_key: str
+    session_token: Optional[str] = None
+
+    def to_env_dict(self) -> Dict[str, str]:
+        env = {
+            "AWS_ACCESS_KEY_ID": self.access_key_id,
+            "AWS_SECRET_ACCESS_KEY": self.secret_access_key,
+        }
+        if self.session_token:
+            env["AWS_SESSION_TOKEN"] = self.session_token
+        return env

@@ -22,7 +22,7 @@ from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.models.cluster_deploy import (
     ClusterDeploy,
     InstanceGroup,
-    provider_model_map
+    provider_model_map,
 )
 
 # Define a list of InstanceGroup objects
@@ -53,6 +53,7 @@ instance_groups: List[InstanceGroup] = [
     ),
 ]
 
+
 async def run_deployment(
     provider: ProviderName, vault_path: str, destroy: bool
 ) -> None:
@@ -74,6 +75,7 @@ async def run_deployment(
             destroy=destroy,
         )
 
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Simple test script for cluster deploy with Mypy-friendly code."
@@ -91,6 +93,7 @@ def main() -> int:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

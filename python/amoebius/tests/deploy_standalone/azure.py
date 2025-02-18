@@ -17,7 +17,7 @@ from amoebius.utils.terraform import (
     apply_terraform,
     destroy_terraform,
 )
-from amoebius.models.api_keys.azure import AzureCredentials
+from amoebius.models.providers.api_keys.azure import AzureCredentials
 
 VAULT_ROLE_NAME = "amoebius-admin-role"
 VAULT_PATH = "amoebius/tests/api_keys/azure"

@@ -20,7 +20,7 @@ import json
 from typing import NoReturn
 from pydantic import ValidationError
 
-from amoebius.models.api_keys.azure import AzureCredentials
+from amoebius.models.providers.api_keys.azure import AzureCredentials
 from amoebius.models.vault import VaultSettings
 from amoebius.secrets.vault_client import AsyncVaultClient
 

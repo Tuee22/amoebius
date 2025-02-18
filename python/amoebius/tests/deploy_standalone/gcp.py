@@ -12,7 +12,7 @@ from typing import NoReturn, Dict, Any
 from pydantic import ValidationError
 
 from amoebius.models.vault import VaultSettings
-from amoebius.models.api_keys.gcp import GCPServiceAccountKey
+from amoebius.models.providers.api_keys.gcp import GCPServiceAccountKey
 from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.utils.terraform import (
     init_terraform,

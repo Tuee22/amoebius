@@ -1,7 +1,11 @@
 from typing import List, Dict
+from pydantic import BaseModel, Field
 from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup
 
 
+# ----------------------------------------
+# AzureClusterDeploy
+# ----------------------------------------
 class AzureClusterDeploy(ClusterDeploy):
     def __init__(
         self,
@@ -38,3 +42,21 @@ class AzureClusterDeploy(ClusterDeploy):
             vault_role_name=vault_role_name,
             no_verify_ssl=no_verify_ssl,
         )
+
+
+# ----------------------------------------
+# AzureCredentials
+# ----------------------------------------
+class AzureCredentials(BaseModel):
+    client_id: str = Field(..., description="Azure Client ID")
+    client_secret: str = Field(..., description="Azure Client Secret")
+    tenant_id: str = Field(..., description="Azure Tenant ID")
+    subscription_id: str = Field(..., description="Azure Subscription ID")
+
+    def to_env_dict(self) -> Dict[str, str]:
+        return {
+            "ARM_CLIENT_ID": self.client_id,
+            "ARM_CLIENT_SECRET": self.client_secret,
+            "ARM_TENANT_ID": self.tenant_id,
+            "ARM_SUBSCRIPTION_ID": self.subscription_id,
+        }

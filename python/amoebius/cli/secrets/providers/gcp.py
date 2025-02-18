@@ -41,7 +41,7 @@ from typing import NoReturn
 
 from pydantic import ValidationError
 
-from amoebius.models.api_keys.gcp import GCPServiceAccountKey
+from amoebius.models.providers.api_keys.gcp import GCPServiceAccountKey
 from amoebius.models.vault import VaultSettings
 from amoebius.secrets.vault_client import AsyncVaultClient
 
