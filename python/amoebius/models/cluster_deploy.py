@@ -6,9 +6,11 @@ Provider-specific classes must define an __init__ with default arguments if they
 want no-arg usage. Mypy-friendly approach.
 """
 
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Type
 from pydantic import BaseModel
 
+from amoebius.deployment.provider_deploy import ProviderName
+from amoebius.models.providers import AWSClusterDeploy, AzureClusterDeploy, GCPClusterDeploy
 
 class InstanceGroup(BaseModel):
     name: str
@@ -30,3 +32,11 @@ class ClusterDeploy(BaseModel):
     ssh_user: str
     vault_role_name: str
     no_verify_ssl: bool
+
+
+# Mapping from ProviderName -> the corresponding provider-specific class
+provider_model_map: Dict[ProviderName, Type[ClusterDeploy]] = {
+    ProviderName.aws: AWSClusterDeploy,
+    ProviderName.azure: AzureClusterDeploy,
+    ProviderName.gcp: GCPClusterDeploy,
+}
