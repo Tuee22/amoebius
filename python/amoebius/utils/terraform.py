@@ -2,37 +2,27 @@
 terraform.py
 
 This module provides a declarative approach to managing Terraform workspaces
-and running Terraform commands asynchronously, while ensuring workspace creation
-is idempotent. If a workspace does not exist, it is automatically created.
-Otherwise, if it already exists, no error is raised.
+and running Terraform commands asynchronously. Notable behaviors:
 
-Key Points:
------------
-1) Local vs. Remote State:
-   Even if you configure Terraform to store its state remotely (e.g., in S3),
-   Terraform still requires a local .terraform folder for provider plugins,
-   backend configuration, and workspace metadata. If you run Terraform in a
-   fresh environment (like a new container), you must call 'init_terraform'
-   at least once to re-establish that local folder.
+1) Idempotent Workspace Creation:
+   - 'ensure_terraform_workspace' checks if a workspace exists and creates
+     it if missing.
 
-2) Workspace Handling:
-   - The 'ensure_terraform_workspace' function is idempotent: it checks if a
-     workspace already exists and only creates it if missing.
-   - Each core command (init, apply, destroy, read_state) takes an optional
-     'workspace' parameter. If provided, it calls 'ensure_terraform_workspace'
-     and then appends '-workspace=<NAME>' to the actual Terraform command.
+2) Skip Destroy if Workspace Doesn't Exist:
+   - In 'destroy_terraform', if a non-default workspace is requested but
+     not found, we skip the destroy entirely.
 
-3) No Hidden State Merging:
-   We pass 'env' (environment variables) directly to 'run_command'. If 'env' is
-   None, 'run_command' uses its defaults. If 'env' is a dict, 'run_command'
-   merges it with the current process environment on your behalf.
+3) Local vs. Remote State:
+   Even if you use a remote backend (e.g., S3), Terraform still needs a local
+   .terraform folder for provider plugins, backend configs, and workspace
+   metadata. So, you must run 'init_terraform' at least once in each fresh
+   environment.
 
 Requires:
 ---------
-- Terraform 1.3+ for the global '-workspace=<NAME>' flag (currently marked
-  “unstable” by HashiCorp).
-- Your existing 'run_command' function from 'amoebius.utils.async_command_runner'.
-- A 'TerraformState' model to deserialize JSON state output.
+- Terraform 1.3+ for the global '-workspace=<NAME>' CLI flag.
+- 'run_command' from amoebius.utils.async_command_runner for async command execution.
+- 'TerraformState' from amoebius.models.terraform_state for parsing JSON output.
 """
 
 import os
@@ -76,6 +66,40 @@ def _validate_root_name(root_name: str, base_path: str) -> str:
     return terraform_path
 
 
+async def _list_workspaces(
+    terraform_path: str, env: Optional[Dict[str, str]], sensitive: bool
+) -> list[str]:
+    """
+    Returns a list of existing Terraform workspace names for the given path.
+
+    Calls:
+        terraform workspace list -no-color
+
+    Then strips out the leading "*" from the currently selected workspace
+    and any leading/trailing whitespace.
+
+    Args:
+        terraform_path: Absolute path to the Terraform root directory.
+        env:            Environment variables for 'run_command'.
+        sensitive:      If True, hides detailed output when command fails.
+
+    Returns:
+        A list of workspace names (e.g. ["default", "staging", "prod"]).
+
+    Raises:
+        CommandError: If 'terraform workspace list' fails.
+    """
+    list_cmd = ["terraform", "workspace", "list", "-no-color"]
+    list_output = await run_command(
+        list_cmd, sensitive=sensitive, env=env, cwd=terraform_path
+    )
+
+    def strip_workspace_line(line: str) -> str:
+        return line.lstrip("*").strip()
+
+    return [strip_workspace_line(line) for line in list_output.splitlines()]
+
+
 async def ensure_terraform_workspace(
     root_name: str,
     workspace_name: str,
@@ -85,14 +109,13 @@ async def ensure_terraform_workspace(
 ) -> None:
     """
     Idempotently ensures that 'workspace_name' exists in the specified Terraform
-    root directory. If it doesn't exist, it is created. If it does exist,
-    this function returns without error.
+    root directory. If it doesn't exist, it is created. If it does exist, this
+    function does nothing.
 
     Implementation:
     ---------------
-    1) 'terraform workspace list' is called to check existing workspaces.
-    2) Transform each line to remove leading '*' and whitespace.
-    3) If 'workspace_name' is missing, call 'terraform workspace new <name>'.
+    1) Lists existing workspaces via '_list_workspaces(...)'.
+    2) If 'workspace_name' is missing, calls 'terraform workspace new <workspace_name>'.
 
     Args:
         root_name:      Name of the Terraform root directory (no slashes allowed).
@@ -107,21 +130,7 @@ async def ensure_terraform_workspace(
     """
     terraform_path = _validate_root_name(root_name, base_path)
 
-    # 1) List existing workspaces
-    list_cmd = ["terraform", "workspace", "list", "-no-color"]
-    list_output = await run_command(
-        list_cmd, sensitive=sensitive, env=env, cwd=terraform_path
-    )
-
-    # 2) Transform each line to remove leading '*' and whitespace
-    def strip_workspace_line(line: str) -> str:
-        return line.lstrip("*").strip()
-
-    existing_workspaces = [
-        strip_workspace_line(line) for line in list_output.splitlines()
-    ]
-
-    # 3) If not in the list, create it
+    existing_workspaces = await _list_workspaces(terraform_path, env, sensitive)
     if workspace_name not in existing_workspaces:
         new_cmd = ["terraform", "workspace", "new", workspace_name, "-no-color"]
         await run_command(new_cmd, sensitive=sensitive, env=env, cwd=terraform_path)
@@ -158,7 +167,6 @@ async def init_terraform(
     """
     terraform_path = _validate_root_name(root_name, base_path)
 
-    # If user requested a workspace, ensure it exists
     if workspace:
         await ensure_terraform_workspace(
             root_name, workspace, base_path, env, sensitive
@@ -206,7 +214,6 @@ async def apply_terraform(
     """
     terraform_path = _validate_root_name(root_name, base_path)
 
-    # Ensure workspace, if requested
     if workspace:
         await ensure_terraform_workspace(
             root_name, workspace, base_path, env, sensitive
@@ -238,8 +245,16 @@ async def destroy_terraform(
 ) -> None:
     """
     Runs 'terraform destroy' with -auto-approve on the specified root directory.
-    If 'workspace' is provided, ensures that workspace is present and uses
-    '-workspace=<NAME>'.
+    If 'workspace' is provided, we skip everything if that workspace does not
+    exist (no error raised). Otherwise, we proceed as normal.
+
+    Logic:
+    ------
+    1) If 'workspace' is given:
+       a) List all existing workspaces.
+       b) If 'workspace' isn't found, simply return (do nothing).
+       c) Otherwise, run 'terraform destroy -workspace=...'
+    2) If no 'workspace' is given, run a standard 'destroy' in the default workspace.
 
     Args:
         root_name:     Terraform root directory name (no slashes allowed).
@@ -248,19 +263,24 @@ async def destroy_terraform(
         override_lock: If True, adds '-lock=false' to skip Terraform state locking.
         sensitive:     If True, hides detailed output when command fails.
         env:           Environment variables passed to run_command.
-        workspace:     Optional workspace name to ensure and use for this command.
+        workspace:     Optional workspace name to check for and destroy.
 
     Raises:
         ValueError:   If the root directory is invalid.
-        CommandError: If Terraform commands fail.
+        CommandError: If Terraform commands fail for other reasons.
     """
     terraform_path = _validate_root_name(root_name, base_path)
 
-    # Ensure workspace, if requested
     if workspace:
-        await ensure_terraform_workspace(
-            root_name, workspace, base_path, env, sensitive
-        )
+        # List existing workspaces
+        existing_workspaces = await _list_workspaces(terraform_path, env, sensitive)
+        if workspace not in existing_workspaces:
+            # If the workspace doesn't exist, do nothing
+            print(
+                f"[destroy_terraform] Workspace '{workspace}' not found at '{root_name}' "
+                "=> skipping destroy."
+            )
+            return
 
     cmd = ["terraform"]
     if workspace:
@@ -284,7 +304,7 @@ async def read_terraform_state(
     sensitive: bool = True,
     env: Optional[Dict[str, str]] = None,
     workspace: Optional[str] = None,
-) -> "TerraformState":
+) -> TerraformState:
     """
     Reads and parses Terraform state from 'terraform show -json'. If 'workspace'
     is provided, ensures that workspace is present and uses '-workspace=<NAME>'.
@@ -311,7 +331,6 @@ async def read_terraform_state(
     """
     terraform_path = _validate_root_name(root_name, base_path)
 
-    # Ensure workspace, if requested
     if workspace:
         await ensure_terraform_workspace(
             root_name, workspace, base_path, env, sensitive
@@ -329,13 +348,13 @@ async def read_terraform_state(
 
 
 def get_output_from_state(
-    state: "TerraformState", output_name: str, output_type: Type[T]
+    state: TerraformState, output_name: str, output_type: Type[T]
 ) -> T:
     """
     Retrieves and validates a specific output from a TerraformState object.
 
     Args:
-        state:       A TerraformState object representing the current Terraform outputs.
+        state:       A TerraformState object representing current Terraform outputs.
         output_name: The name of the desired output variable.
         output_type: A Python type (e.g., str, list, dict) that the output should match.
 
