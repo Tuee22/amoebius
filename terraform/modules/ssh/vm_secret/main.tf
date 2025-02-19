@@ -28,7 +28,7 @@ resource "random_id" "path_suffix" {
 }
 
 module "vault" {
-  source = "../vault_secret"
+  source = "/amoebius/terraform/modules/ssh/vault_secret"
 
   depends_on = [random_id.path_suffix]
 

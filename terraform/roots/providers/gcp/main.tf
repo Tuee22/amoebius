@@ -29,8 +29,3 @@ module "compute" {
   vault_role_name     = var.vault_role_name
   no_verify_ssl       = var.no_verify_ssl
 }
-
-output "instances_by_group" {
-  value = module.compute.instances_by_group
-}
-
