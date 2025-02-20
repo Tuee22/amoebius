@@ -31,6 +31,14 @@ class AWSClusterDeploy(ClusterDeploy):
         vault_role_name: str = "amoebius-admin-role",
         no_verify_ssl: bool = True,
     ):
+        # If an InstanceGroup has image=None, fill with either ARM or x86 default:
+        for ig in instance_groups:
+            if ig.image is None:
+                if ig.category.startswith("arm_"):
+                    ig.image = arm_default_image
+                else:
+                    ig.image = x86_default_image
+
         super().__init__(
             region=region,
             vpc_cidr=vpc_cidr,
