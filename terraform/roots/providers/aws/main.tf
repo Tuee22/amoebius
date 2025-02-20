@@ -33,10 +33,7 @@ module "cluster" {
   vault_role_name     = var.vault_role_name
   no_verify_ssl       = var.no_verify_ssl
 
+  # For AWS, resource_group_name is typically unused, but we keep them for consistency
   resource_group_name = ""
   location            = var.region
-
-  arm_default_image = var.arm_default_image
-  x86_default_image = var.x86_default_image
 }
-

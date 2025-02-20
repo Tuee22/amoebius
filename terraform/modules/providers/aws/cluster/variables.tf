@@ -17,7 +17,8 @@ variable "instance_groups" {
     name           = string
     category       = string
     count_per_zone = number
-    image          = optional(string, "")
+    # image is mandatory
+    image          = string
   }))
   default = []
 }
@@ -42,7 +43,7 @@ variable "no_verify_ssl" {
   default = true
 }
 
-# For AWS, we might not need resource_group_name / location, but let's keep them to stay consistent
+# For AWS, we might not need resource_group_name / location, but let's keep them for consistency
 variable "resource_group_name" {
   type    = string
   default = ""

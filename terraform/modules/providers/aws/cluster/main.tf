@@ -7,7 +7,7 @@ terraform {
   }
 }
 
-# 1) Flatten out instance groups, one entry per zone
+# Flatten out instance groups (but no fallback for images)
 locals {
   expanded = flatten([
     for g in var.instance_groups : [
@@ -16,12 +16,11 @@ locals {
         category       = g.category
         zone           = z
         count_per_zone = g.count_per_zone
-        custom_image   = try(g.image, "")
+        custom_image   = g.image
       }
     ]
   ])
 
-  # 2) For each group + zone, replicate count_per_zone times
   final_list = flatten([
     for e in local.expanded : [
       for i in range(e.count_per_zone) : {
@@ -34,14 +33,12 @@ locals {
   ])
 }
 
-# 3) Generate an SSH key for each VM
 resource "tls_private_key" "all" {
   count     = length(local.final_list)
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
-# 4) Build final specs list (instance type, image, etc.)
 locals {
   all_specs = [
     for idx, item in local.final_list : {
@@ -53,7 +50,6 @@ locals {
   ]
 }
 
-# 5) For each VM, call the AWS-specific compute module
 module "compute_single" {
   count = length(local.all_specs)
 
@@ -74,7 +70,6 @@ module "compute_single" {
   location            = var.location
 }
 
-# 6) Store the private key in Vault using /amoebius/terraform/modules/ssh/vm_secret
 module "vm_secret" {
   count  = length(local.all_specs)
   source = "/amoebius/terraform/modules/ssh/vm_secret"
@@ -90,7 +85,6 @@ module "vm_secret" {
   vault_prefix = "/amoebius/ssh/aws/${terraform.workspace}"
 }
 
-# 7) Build a final "instances_by_group"
 locals {
   results = [
     for idx, s in local.all_specs : {

@@ -35,8 +35,4 @@ module "cluster" {
 
   resource_group_name = module.network.resource_group_name
   location            = var.region
-
-  arm_default_image = var.arm_default_image
-  x86_default_image = var.x86_default_image
 }
-

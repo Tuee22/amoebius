@@ -18,24 +18,15 @@ variable "instance_type_map" {
   description = "Map of category => instance type."
 }
 
-variable "arm_default_image" {
-  type        = string
-  description = "Default ARM image if none is specified."
-}
-
-variable "x86_default_image" {
-  type        = string
-  description = "Default x86 image if none is specified."
-}
-
+# 'image' is now mandatory
 variable "instance_groups" {
   type = list(object({
     name           = string
     category       = string
     count_per_zone = number
-    image          = optional(string, null)
+    image          = string
   }))
-  description = "All instance group definitions."
+  description = "All instance group definitions (image is now required)."
 }
 
 variable "ssh_user" {
@@ -52,4 +43,3 @@ variable "no_verify_ssl" {
   type        = bool
   description = "If true, skip SSL verification for Vault calls."
 }
-

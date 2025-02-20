@@ -15,7 +15,7 @@ locals {
         category       = g.category
         zone           = z
         count_per_zone = g.count_per_zone
-        custom_image   = try(g.image, "")
+        custom_image   = g.image
       }
     ]
   ])

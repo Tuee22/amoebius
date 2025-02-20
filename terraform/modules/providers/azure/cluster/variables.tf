@@ -17,7 +17,8 @@ variable "instance_groups" {
     name           = string
     category       = string
     count_per_zone = number
-    image          = optional(string, "")
+    # image required
+    image          = string
   }))
   default = []
 }
