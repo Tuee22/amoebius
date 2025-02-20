@@ -114,25 +114,23 @@ async def init_terraform(
 ) -> None:
     """
     Runs 'terraform init' in the specified root directory.
-
-    This function does NOT handle workspace creation or selection. You should:
-      1) run init_terraform(...)
-      2) optionally call ensure_terraform_workspace(...)
-      3) optionally set TF_WORKSPACE yourself
-
-    Example usage:
-      await init_terraform(...)
-      await ensure_terraform_workspace(...)
-      final_env = _set_tf_workspace(...)
-      await apply_terraform(..., env=final_env)
+    Ensures Terraform does not get stuck due to TF_WORKSPACE remnants.
     """
+
     terraform_path = _validate_root_name(root_name, base_path)
 
+    # 🔹 Step 1: Run Terraform init while suppressing TF_WORKSPACE
     cmd = ["terraform", "init", "-no-color"]
     if reconfigure:
         cmd.append("-reconfigure")
 
-    await run_command(cmd, sensitive=sensitive, env=env, cwd=terraform_path)
+    await run_command(
+        cmd,
+        sensitive=sensitive,
+        env=env,
+        cwd=terraform_path,
+        suppress_env_vars=["TF_WORKSPACE"],
+    )
 
 
 async def apply_terraform(
