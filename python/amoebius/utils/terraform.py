@@ -164,7 +164,9 @@ async def apply_terraform(
             cmd.extend(["-var-file", tfvars_path])
 
             # Run terraform apply
-            await run_command(cmd, sensitive=sensitive, env=final_env, cwd=terraform_path)
+            await run_command(
+                cmd, sensitive=sensitive, env=final_env, cwd=terraform_path
+            )
         finally:
             # Clean up the temp file
             if tfvars_path and os.path.exists(tfvars_path):
@@ -219,7 +221,9 @@ async def destroy_terraform(
                 await f.write(json.dumps(variables, indent=2))
 
             cmd.extend(["-var-file", tfvars_path])
-            await run_command(cmd, sensitive=sensitive, env=final_env, cwd=terraform_path)
+            await run_command(
+                cmd, sensitive=sensitive, env=final_env, cwd=terraform_path
+            )
         finally:
             if tfvars_path and os.path.exists(tfvars_path):
                 os.remove(tfvars_path)

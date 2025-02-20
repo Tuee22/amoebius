@@ -1,3 +1,16 @@
+#!/usr/bin/env bash
+#
+# remove_defaults_in_cluster_deploy.sh
+#
+# Overwrites python/amoebius/models/cluster_deploy.py to remove all default values
+# for both `InstanceGroup` and `ClusterDeploy`. Fields become fully required,
+# except for `image` in InstanceGroup, which remains Optional[str].
+#
+# Run from /amoebius directory.
+
+set -e
+
+cat > python/amoebius/models/cluster_deploy.py <<'EOF'
 """
 cluster_deploy.py
 
@@ -39,3 +52,6 @@ __all__ = [
     "InstanceGroup",
     "ClusterDeploy",
 ]
+EOF
+
+echo "Done. Removed all default values in cluster_deploy.py."

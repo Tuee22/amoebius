@@ -32,7 +32,7 @@ instance_groups: List[InstanceGroup] = [
     ),
     InstanceGroup(
         name="app-servers",
-        category="x86_medium",
+        category="arm_medium",
         count_per_zone=2,
         image=None,  # Use default x86 image
     ),
