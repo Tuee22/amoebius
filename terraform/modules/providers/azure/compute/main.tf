@@ -7,6 +7,13 @@ terraform {
   }
 }
 
+# 🔹 Detect if the image is a custom image or a Marketplace image
+locals {
+  is_custom_image = length(regexall("^/subscriptions/.*/resourceGroups/.*/providers/Microsoft.Compute/images/.*", var.image)) > 0
+  image_parts     = split(":", var.image) # For Marketplace images
+}
+
+# 🔹 Create Public IP
 resource "azurerm_public_ip" "this" {
   name                = "${var.workspace}-${var.vm_name}-pip"
   resource_group_name = var.resource_group_name
@@ -16,6 +23,7 @@ resource "azurerm_public_ip" "this" {
   zones               = [var.zone]
 }
 
+# 🔹 Create Network Interface
 resource "azurerm_network_interface" "this" {
   name                = "${var.workspace}-${var.vm_name}-nic"
   location            = var.location
@@ -29,11 +37,13 @@ resource "azurerm_network_interface" "this" {
   }
 }
 
+# 🔹 Associate NIC with Security Group
 resource "azurerm_network_interface_security_group_association" "sg_assoc" {
   network_interface_id      = azurerm_network_interface.this.id
   network_security_group_id = var.security_group_id
 }
 
+# 🔹 Create Virtual Machine
 resource "azurerm_linux_virtual_machine" "this" {
   name                = "${var.workspace}-${var.vm_name}"
   resource_group_name = var.resource_group_name
@@ -51,7 +61,18 @@ resource "azurerm_linux_virtual_machine" "this" {
     public_key = var.public_key_openssh
   }
 
-  source_image_id = var.image
+  # 🔹 Conditionally set the image type
+  dynamic "source_image_reference" {
+    for_each = local.is_custom_image ? [] : [1] # Empty if custom image
+    content {
+      publisher = local.image_parts[0]
+      offer     = local.image_parts[1]
+      sku       = local.image_parts[2]
+      version   = local.image_parts[3]
+    }
+  }
+
+  source_image_id = local.is_custom_image ? var.image : null # Only set if custom image
 
   os_disk {
     name                 = "${var.workspace}-${var.vm_name}-osdisk"

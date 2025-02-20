@@ -11,7 +11,7 @@ terraform {
 }
 
 provider "google" {
-  project = var.region
+  region = var.region
 }
 
 module "network" {

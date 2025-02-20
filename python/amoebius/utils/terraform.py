@@ -52,7 +52,7 @@ async def _list_workspaces(
         sensitive=sensitive,
         env=env,
         cwd=terraform_path,
-        suppress_env_vars=["TF_WORKSPACE"]  # << Key addition
+        suppress_env_vars=["TF_WORKSPACE"],  # << Key addition
     )
 
     def strip_workspace_line(line: str) -> str:
@@ -84,11 +84,13 @@ async def ensure_terraform_workspace(
             sensitive=sensitive,
             env=env,
             cwd=terraform_path,
-            suppress_env_vars=["TF_WORKSPACE"]  # << Key addition
+            suppress_env_vars=["TF_WORKSPACE"],  # << Key addition
         )
 
 
-def _set_tf_workspace(env: Optional[Dict[str, str]], workspace_name: str) -> Dict[str, str]:
+def _set_tf_workspace(
+    env: Optional[Dict[str, str]], workspace_name: str
+) -> Dict[str, str]:
     """
     Returns a *copy* of the environment dict with TF_WORKSPACE set to
     'workspace_name'. Raises ValueError if env already contains TF_WORKSPACE.
@@ -109,24 +111,28 @@ async def init_terraform(
     reconfigure: bool = False,
     sensitive: bool = True,
     env: Optional[Dict[str, str]] = None,
-    workspace: Optional[str] = None,
 ) -> None:
     """
-    Runs 'terraform init' in the specified root directory. If 'workspace' is
-    provided, it is created if missing, and TF_WORKSPACE is set in the environment.
+    Runs 'terraform init' in the specified root directory.
+
+    This function does NOT handle workspace creation or selection. You should:
+      1) run init_terraform(...)
+      2) optionally call ensure_terraform_workspace(...)
+      3) optionally set TF_WORKSPACE yourself
+
+    Example usage:
+      await init_terraform(...)
+      await ensure_terraform_workspace(...)
+      final_env = _set_tf_workspace(...)
+      await apply_terraform(..., env=final_env)
     """
     terraform_path = _validate_root_name(root_name, base_path)
-
-    final_env = env
-    if workspace:
-        await ensure_terraform_workspace(root_name, workspace, base_path, env, sensitive)
-        final_env = _set_tf_workspace(env, workspace)
 
     cmd = ["terraform", "init", "-no-color"]
     if reconfigure:
         cmd.append("-reconfigure")
 
-    await run_command(cmd, sensitive=sensitive, env=final_env, cwd=terraform_path)
+    await run_command(cmd, sensitive=sensitive, env=env, cwd=terraform_path)
 
 
 async def apply_terraform(
@@ -147,7 +153,9 @@ async def apply_terraform(
 
     final_env = env
     if workspace:
-        await ensure_terraform_workspace(root_name, workspace, base_path, env, sensitive)
+        await ensure_terraform_workspace(
+            root_name, workspace, base_path, env, sensitive
+        )
         final_env = _set_tf_workspace(env, workspace)
 
     cmd = ["terraform", "apply", "-no-color", "-auto-approve"]
@@ -169,7 +177,10 @@ async def apply_terraform(
                 await f.write(json.dumps(variables, indent=2))
 
             cmd.extend(["-var-file", tfvars_path])
-            await run_command(cmd, sensitive=sensitive, env=final_env, cwd=terraform_path)
+
+            await run_command(
+                cmd, sensitive=sensitive, env=final_env, cwd=terraform_path
+            )
         finally:
             if tfvars_path and os.path.exists(tfvars_path):
                 os.remove(tfvars_path)
@@ -225,7 +236,9 @@ async def destroy_terraform(
                 await f.write(json.dumps(variables, indent=2))
 
             cmd.extend(["-var-file", tfvars_path])
-            await run_command(cmd, sensitive=sensitive, env=final_env, cwd=terraform_path)
+            await run_command(
+                cmd, sensitive=sensitive, env=final_env, cwd=terraform_path
+            )
         finally:
             if tfvars_path and os.path.exists(tfvars_path):
                 os.remove(tfvars_path)
@@ -250,7 +263,9 @@ async def read_terraform_state(
 
     final_env = env
     if workspace:
-        await ensure_terraform_workspace(root_name, workspace, base_path, env, sensitive)
+        await ensure_terraform_workspace(
+            root_name, workspace, base_path, env, sensitive
+        )
         final_env = _set_tf_workspace(env, workspace)
 
     cmd = ["terraform", "show", "-json"]

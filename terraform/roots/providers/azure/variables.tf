@@ -44,8 +44,3 @@ variable "no_verify_ssl" {
   type        = bool
   description = "If true, skip SSL verification for Vault calls."
 }
-
-variable "resource_group_name" {
-  type        = string
-  description = "Name of the Azure resource group."
-}

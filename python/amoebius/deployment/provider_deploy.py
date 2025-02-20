@@ -96,7 +96,6 @@ async def deploy(
             env=env_vars,
             reconfigure=True,
             sensitive=False,
-            workspace=workspace,
         )
         await apply_terraform(
             root_name,

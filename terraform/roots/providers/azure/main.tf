@@ -14,6 +14,11 @@ provider "azurerm" {
   features {}
 }
 
+resource "azurerm_resource_group" "main" {
+  name     = "${terraform.workspace}-azure-rg"
+  location = var.region
+}
+
 module "network" {
   source             = "/amoebius/terraform/modules/providers/azure/network"
   region             = var.region
@@ -33,6 +38,6 @@ module "cluster" {
   vault_role_name     = var.vault_role_name
   no_verify_ssl       = var.no_verify_ssl
 
-  resource_group_name = module.network.resource_group_name
+  resource_group_name = azurerm_resource_group.main.name
   location            = var.region
 }
