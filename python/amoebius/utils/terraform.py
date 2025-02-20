@@ -3,7 +3,7 @@ import json
 import tempfile
 from typing import Any, Optional, Dict, Type, TypeVar
 
-import aiofiles  # <- ensure you have installed aiofiles
+import aiofiles  # Ensure you've installed aiofiles
 
 from pydantic import ValidationError
 
@@ -42,10 +42,17 @@ async def _list_workspaces(
     by running:
         terraform workspace list -no-color
     and stripping out leading '*' and whitespace from each line.
+
+    We explicitly suppress TF_WORKSPACE in the environment to avoid Terraform's
+    "workspace override" error when just listing.
     """
     list_cmd = ["terraform", "workspace", "list", "-no-color"]
     list_output = await run_command(
-        list_cmd, sensitive=sensitive, env=env, cwd=terraform_path
+        list_cmd,
+        sensitive=sensitive,
+        env=env,
+        cwd=terraform_path,
+        suppress_env_vars=["TF_WORKSPACE"]  # << Key addition
     )
 
     def strip_workspace_line(line: str) -> str:
@@ -64,18 +71,24 @@ async def ensure_terraform_workspace(
     """
     Idempotently ensures that 'workspace_name' exists in the specified Terraform
     root directory. If it doesn't exist, calls 'terraform workspace new <workspace_name>'.
+
+    We also suppress TF_WORKSPACE when creating so Terraform doesn't see it as an override.
     """
     terraform_path = _validate_root_name(root_name, base_path)
 
     existing_workspaces = await _list_workspaces(terraform_path, env, sensitive)
     if workspace_name not in existing_workspaces:
         new_cmd = ["terraform", "workspace", "new", workspace_name, "-no-color"]
-        await run_command(new_cmd, sensitive=sensitive, env=env, cwd=terraform_path)
+        await run_command(
+            new_cmd,
+            sensitive=sensitive,
+            env=env,
+            cwd=terraform_path,
+            suppress_env_vars=["TF_WORKSPACE"]  # << Key addition
+        )
 
 
-def _set_tf_workspace(
-    env: Optional[Dict[str, str]], workspace_name: str
-) -> Dict[str, str]:
+def _set_tf_workspace(env: Optional[Dict[str, str]], workspace_name: str) -> Dict[str, str]:
     """
     Returns a *copy* of the environment dict with TF_WORKSPACE set to
     'workspace_name'. Raises ValueError if env already contains TF_WORKSPACE.
@@ -104,12 +117,9 @@ async def init_terraform(
     """
     terraform_path = _validate_root_name(root_name, base_path)
 
-    # Ensure the workspace if specified
     final_env = env
     if workspace:
-        await ensure_terraform_workspace(
-            root_name, workspace, base_path, env, sensitive
-        )
+        await ensure_terraform_workspace(root_name, workspace, base_path, env, sensitive)
         final_env = _set_tf_workspace(env, workspace)
 
     cmd = ["terraform", "init", "-no-color"]
@@ -137,9 +147,7 @@ async def apply_terraform(
 
     final_env = env
     if workspace:
-        await ensure_terraform_workspace(
-            root_name, workspace, base_path, env, sensitive
-        )
+        await ensure_terraform_workspace(root_name, workspace, base_path, env, sensitive)
         final_env = _set_tf_workspace(env, workspace)
 
     cmd = ["terraform", "apply", "-no-color", "-auto-approve"]
@@ -148,27 +156,21 @@ async def apply_terraform(
 
     tfvars_path = None
 
-    # If we have variables, write them to a temporary JSON tfvars file in /dev/shm
     if variables:
+        # Create a temporary JSON tfvars
         temp_file = tempfile.NamedTemporaryFile(
             mode="w", dir="/dev/shm", delete=False, suffix=".auto.tfvars.json"
         )
         tfvars_path = temp_file.name
-        temp_file.close()  # We'll write to it with aiofiles below
+        temp_file.close()  # We'll write to it asynchronously below
 
         try:
-            # Write the JSON content asynchronously
             async with aiofiles.open(tfvars_path, "w") as f:
                 await f.write(json.dumps(variables, indent=2))
 
             cmd.extend(["-var-file", tfvars_path])
-
-            # Run terraform apply
-            await run_command(
-                cmd, sensitive=sensitive, env=final_env, cwd=terraform_path
-            )
+            await run_command(cmd, sensitive=sensitive, env=final_env, cwd=terraform_path)
         finally:
-            # Clean up the temp file
             if tfvars_path and os.path.exists(tfvars_path):
                 os.remove(tfvars_path)
     else:
@@ -194,6 +196,7 @@ async def destroy_terraform(
 
     final_env = env
     if workspace:
+        # Also suppress TF_WORKSPACE while listing existing workspaces
         existing_workspaces = await _list_workspaces(terraform_path, env, sensitive)
         if workspace not in existing_workspaces:
             print(
@@ -210,6 +213,7 @@ async def destroy_terraform(
     tfvars_path = None
 
     if variables:
+        # Create a temporary JSON tfvars
         temp_file = tempfile.NamedTemporaryFile(
             mode="w", dir="/dev/shm", delete=False, suffix=".auto.tfvars.json"
         )
@@ -221,9 +225,7 @@ async def destroy_terraform(
                 await f.write(json.dumps(variables, indent=2))
 
             cmd.extend(["-var-file", tfvars_path])
-            await run_command(
-                cmd, sensitive=sensitive, env=final_env, cwd=terraform_path
-            )
+            await run_command(cmd, sensitive=sensitive, env=final_env, cwd=terraform_path)
         finally:
             if tfvars_path and os.path.exists(tfvars_path):
                 os.remove(tfvars_path)
@@ -248,9 +250,7 @@ async def read_terraform_state(
 
     final_env = env
     if workspace:
-        await ensure_terraform_workspace(
-            root_name, workspace, base_path, env, sensitive
-        )
+        await ensure_terraform_workspace(root_name, workspace, base_path, env, sensitive)
         final_env = _set_tf_workspace(env, workspace)
 
     cmd = ["terraform", "show", "-json"]

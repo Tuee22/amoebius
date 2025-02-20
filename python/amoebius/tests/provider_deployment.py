@@ -57,7 +57,7 @@ async def run_deployment(
             vault_client=vc,
             vault_path=vault_path,
             cluster_deploy=cluster_deploy,
-            workspace=f"{provider}_test_workspace",
+            workspace=f"{provider.value}_test_workspace",
             destroy=destroy,
         )
 

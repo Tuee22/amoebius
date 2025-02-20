@@ -43,8 +43,6 @@ class AzureClusterDeploy(ClusterDeploy):
             vpc_cidr=vpc_cidr,
             availability_zones=availability_zones,
             instance_type_map=instance_type_map,
-            arm_default_image=arm_default_image,
-            x86_default_image=x86_default_image,
             instance_groups=instance_groups,
             ssh_user=ssh_user,
             vault_role_name=vault_role_name,
