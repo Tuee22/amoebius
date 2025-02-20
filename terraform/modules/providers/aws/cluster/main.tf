@@ -82,7 +82,7 @@ module "vm_secret" {
   no_verify_ssl   = var.no_verify_ssl
 
   # Hardcode 'aws' here
-  vault_prefix = "/amoebius/ssh/aws/${terraform.workspace}"
+  vault_prefix = "amoebius/ssh/aws/${terraform.workspace}"
 }
 
 locals {

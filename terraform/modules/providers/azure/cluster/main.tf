@@ -80,7 +80,7 @@ module "vm_secret" {
   vault_role_name = var.vault_role_name
   no_verify_ssl   = var.no_verify_ssl
 
-  vault_prefix = "/amoebius/ssh/azure/${terraform.workspace}"
+  vault_prefix = "amoebius/ssh/azure/${terraform.workspace}"
 }
 
 locals {

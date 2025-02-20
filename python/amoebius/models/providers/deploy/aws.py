@@ -24,8 +24,8 @@ class AWSClusterDeploy(ClusterDeploy):
             "nvidia_medium": "g5.2xlarge",
             "nvidia_large": "p4d.24xlarge",
         },
-        arm_default_image: str = "ami-04b70fa74e45c3917",  # Ubuntu 22.04 LTS ARM64
-        x86_default_image: str = "ami-053b0d53c279acc90",  # Ubuntu 22.04 LTS x86_64
+        arm_default_image: str = "ami-0d11a661ebb283897",  # Ubuntu 22.04 LTS ARM64
+        x86_default_image: str = "ami-0181d6b00c4160daf",  # Ubuntu 22.04 LTS x86_64
         instance_groups: List[InstanceGroup] = [],
         ssh_user: str = "ubuntu",
         vault_role_name: str = "amoebius-admin-role",

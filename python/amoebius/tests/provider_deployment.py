@@ -27,13 +27,13 @@ instance_groups: List[InstanceGroup] = [
     InstanceGroup(
         name="web-servers",
         category="x86_small",
-        count_per_zone=2,
+        count_per_zone=1,
         image=None,  # Use default x86 image
     ),
     InstanceGroup(
         name="app-servers",
-        category="arm_medium",
-        count_per_zone=2,
+        category="arm_small",
+        count_per_zone=1,
         image=None,  # Use default x86 image
     ),
 ]

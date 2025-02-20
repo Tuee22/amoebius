@@ -26,8 +26,6 @@ class ClusterDeploy(BaseModel):
     availability_zones: List[str]
     instance_type_map: Dict[str, str]
 
-    arm_default_image: str
-    x86_default_image: str
     instance_groups: List[InstanceGroup]
 
     ssh_user: str
