@@ -9,7 +9,7 @@ from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup
 class AzureClusterDeploy(ClusterDeploy):
     def __init__(
         self,
-        region: str = "eastus2",
+        region: str = "eastus",
         vpc_cidr: str = "10.0.0.0/16",
         availability_zones: List[str] = ["1", "2", "3"],
         instance_type_map: Dict[str, str] = {

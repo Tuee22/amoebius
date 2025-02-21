@@ -31,6 +31,7 @@ variable "vault_role_name" {
   default = "amoebius-admin-role"
 }
 
+# Whether or not to skip SSL certificate verification when talking to Vault
 variable "no_verify_ssl" {
   type    = bool
   default = false
@@ -66,7 +67,6 @@ provider "azurerm" {
 ###############################################################################
 # 3) Resource Groups
 ###############################################################################
-# Main resource group for your VMs, network, etc.
 resource "azurerm_resource_group" "main" {
   name     = var.resource_group_name
   location = var.location
@@ -135,7 +135,7 @@ resource "azurerm_public_ip" "main" {
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   
-  # Use 'Standard' so we can place IPs in zones
+  # Use 'Standard' so we can place IPs in specific Availability Zones
   sku               = "Standard"
   allocation_method = "Static"
   
@@ -182,8 +182,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
 
-  # Small and relatively inexpensive ARM64 instance
-  size = "Standard_D2ps_v5"
+  size = "Standard_D2ps_v5"  # Small and relatively inexpensive ARM64 instance
 
   admin_username = var.ssh_user
 
@@ -216,7 +215,30 @@ resource "azurerm_linux_virtual_machine" "vm" {
 }
 
 ###############################################################################
-# 10) Outputs
+# 10) Store Each Private Key in Vault (vault_secret module)
+###############################################################################
+module "ssh_vault_secret" {
+  source          = "/amoebius/terraform/modules/ssh/vault_secret"
+  count           = length(var.availability_zones)
+
+  vault_role_name = var.vault_role_name
+  user            = var.ssh_user
+  hostname        = azurerm_public_ip.main[count.index].ip_address
+  port            = 22
+  private_key     = tls_private_key.ssh_keys[count.index].private_key_pem
+  no_verify_ssl   = var.no_verify_ssl
+
+  # Adjust the Vault path as needed for your environment:
+  path = "amoebius/tests/azure-test-deploy/ssh/${terraform.workspace}-vm-${count.index}"
+
+  depends_on = [
+    azurerm_linux_virtual_machine.vm,
+    azurerm_network_security_group.ssh
+  ]
+}
+
+###############################################################################
+# 11) Outputs
 ###############################################################################
 output "vm_public_ips" {
   description = "Public IP addresses of the created Azure VMs."
@@ -226,4 +248,9 @@ output "vm_public_ips" {
 output "vm_names" {
   description = "List of VM names."
   value       = [for vm in azurerm_linux_virtual_machine.vm : vm.name]
+}
+
+output "vault_ssh_keys" {
+  description = "Vault paths where each SSH private key is stored."
+  value       = [for vault_secret in module.ssh_vault_secret : vault_secret.vault_path]
 }
