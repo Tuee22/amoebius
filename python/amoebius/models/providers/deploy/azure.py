@@ -17,14 +17,14 @@ class AzureClusterDeploy(ClusterDeploy):
             "arm_small": "Standard_D2ps_v5",  # 2 vCPUs, 8 GiB
             "arm_medium": "Standard_D4ps_v5",  # 4 vCPUs, 16 GiB
             "arm_large": "Standard_D8ps_v5",  # 8 vCPUs, 32 GiB
-            # x86-based
-            "x86_small": "Standard_D2s_v5",  # 2 vCPUs, 8 GiB
-            "x86_medium": "Standard_D4s_v5",  # 4 vCPUs, 16 GiB
-            "x86_large": "Standard_D8s_v5",  # 8 vCPUs, 32 GiB
+            # x86-based (updated to B-series)
+            "x86_small": "Standard_B2s",   # 2 vCPUs, 4 GiB
+            "x86_medium": "Standard_B4ms", # 4 vCPUs, 16 GiB
+            "x86_large": "Standard_B8ms",  # 8 vCPUs, 32 GiB
             # NVIDIA GPU
             "nvidia_small": "Standard_NC4as_T4_v3",  # 4 vCPUs, T4 GPU
-            "nvidia_medium": "Standard_NC6s_v3",  # 6 vCPUs, V100 GPU
-            "nvidia_large": "Standard_NC24s_v3",  # 24 vCPUs, V100 GPU
+            "nvidia_medium": "Standard_NC6s_v3",     # 6 vCPUs, V100 GPU
+            "nvidia_large": "Standard_NC24s_v3",     # 24 vCPUs, V100 GPU
         },
         arm_default_image: str = "Canonical:0001-com-ubuntu-server-jammy:22_04-lts-arm64:latest",
         x86_default_image: str = "Canonical:0001-com-ubuntu-server-jammy:22_04-lts:latest",
