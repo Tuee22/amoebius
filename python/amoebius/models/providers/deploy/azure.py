@@ -18,9 +18,9 @@ class AzureClusterDeploy(ClusterDeploy):
             "arm_medium": "Standard_D4ps_v5",  # 4 vCPUs, 16 GiB
             "arm_large": "Standard_D8ps_v5",  # 8 vCPUs, 32 GiB
             # x86-based (updated to B-series)
-            "x86_small": "Standard_B2s",   # 2 vCPUs, 4 GiB
-            "x86_medium": "Standard_B4ms", # 4 vCPUs, 16 GiB
-            "x86_large": "Standard_B8ms",  # 8 vCPUs, 32 GiB
+            "x86_small": "Standard_B2ats_v2",
+            "x86_medium": "Standard_B4als_v2",
+            "x86_large": "Standard_B8als_v2",
             # NVIDIA GPU
             "nvidia_small": "Standard_NC4as_T4_v3",  # 4 vCPUs, T4 GPU
             "nvidia_medium": "Standard_NC6s_v3",     # 6 vCPUs, V100 GPU
