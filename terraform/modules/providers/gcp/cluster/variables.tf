@@ -3,9 +3,10 @@ variable "availability_zones" {
   default = []
 }
 
-variable "subnet_ids" {
-  type        = list(string)
-  description = "One subnet per zone"
+variable "subnet_ids_by_zone" {
+  type        = map(string)
+  description = "Map of zone => subnet ID"
+  default     = {}
 }
 
 variable "security_group_id" {

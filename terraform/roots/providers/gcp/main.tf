@@ -23,9 +23,9 @@ module "network" {
 
 module "cluster" {
   source = "/amoebius/terraform/modules/providers/gcp/cluster"
+    subnet_ids_by_zone = { for idx, z in var.availability_zones : z => element(module.network.subnet_ids, idx) }
 
   availability_zones  = var.availability_zones
-  subnet_ids          = module.network.subnet_ids
   security_group_id   = module.network.security_group_id
   instance_groups     = var.instance_groups
   instance_type_map   = var.instance_type_map

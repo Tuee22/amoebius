@@ -7,98 +7,92 @@ terraform {
   }
 }
 
-# Flatten out instance groups (but no fallback for images)
 locals {
-  expanded = flatten([
+  # 1. Build a list of instances with stable 'key'
+  expanded_instances_list = flatten([
     for g in var.instance_groups : [
-      for z in var.availability_zones : {
-        group_name     = g.name
-        category       = g.category
-        zone           = z
-        count_per_zone = g.count_per_zone
-        custom_image   = g.image
-      }
+      for z in var.availability_zones : [
+        for i in range(g.count_per_zone) : {
+          key        = "${g.name}_z${z}_${i}"
+          group_name = g.name
+          zone       = z
+          image      = g.image
+          category   = g.category
+        }
+      ]
     ]
   ])
 
-  final_list = flatten([
-    for e in local.expanded : [
-      for i in range(e.count_per_zone) : {
-        group_name   = e.group_name
-        category     = e.category
-        zone         = e.zone
-        custom_image = e.custom_image
-      }
-    ]
-  ])
+  # 2. Convert list => map
+  expanded_instances_map = {
+    for inst in local.expanded_instances_list :
+    inst.key => {
+      group_name = inst.group_name
+      zone       = inst.zone
+      image      = inst.image
+      category   = inst.category
+    }
+  }
 }
 
 resource "tls_private_key" "all" {
-  count     = length(local.final_list)
+  for_each = local.expanded_instances_map
+
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
-locals {
-  all_specs = [
-    for idx, item in local.final_list : {
-      group_name    = item.group_name
-      zone          = item.zone
-      instance_type = lookup(var.instance_type_map, item.category, "UNDEFINED_TYPE")
-      image         = item.custom_image
-    }
-  ]
-}
-
 module "compute_single" {
-  count = length(local.all_specs)
+  for_each = local.expanded_instances_map
 
   source = "/amoebius/terraform/modules/providers/aws/compute"
 
-  vm_name            = "${terraform.workspace}-${local.all_specs[count.index].group_name}-${count.index}"
-  public_key_openssh = tls_private_key.all[count.index].public_key_openssh
+  vm_name            = "${terraform.workspace}-${each.value.group_name}-${each.key}"
+  public_key_openssh = tls_private_key.all[each.key].public_key_openssh
   ssh_user           = var.ssh_user
-  image              = local.all_specs[count.index].image
-  instance_type      = local.all_specs[count.index].instance_type
-  zone               = local.all_specs[count.index].zone
+  image              = each.value.image
+  instance_type      = lookup(var.instance_type_map, each.value.category, "UNDEFINED_TYPE")
+  zone               = each.value.zone
   workspace          = terraform.workspace
 
-  subnet_id         = element(var.subnet_ids, index(var.availability_zones, local.all_specs[count.index].zone))
-  security_group_id = var.security_group_id
+  # zone => subnet ID
+  subnet_id = var.subnet_ids_by_zone[each.value.zone]
 
+  security_group_id   = var.security_group_id
   resource_group_name = var.resource_group_name
   location            = var.location
 }
 
 module "vm_secret" {
-  count  = length(local.all_specs)
+  for_each = module.compute_single
+
   source = "/amoebius/terraform/modules/ssh/vm_secret"
 
-  vm_name         = module.compute_single[count.index].vm_name
-  public_ip       = module.compute_single[count.index].public_ip
-  private_key_pem = tls_private_key.all[count.index].private_key_pem
+  vm_name         = each.value.vm_name
+  public_ip       = each.value.public_ip
+  private_key_pem = tls_private_key.all[each.key].private_key_pem
   ssh_user        = var.ssh_user
   vault_role_name = var.vault_role_name
   no_verify_ssl   = var.no_verify_ssl
 
-  # Hardcode 'aws' here
   vault_prefix = "amoebius/ssh/aws/${terraform.workspace}"
 }
 
 locals {
-  results = [
-    for idx, s in local.all_specs : {
-      group_name = local.final_list[idx].group_name
-      name       = module.compute_single[idx].vm_name
-      private_ip = module.compute_single[idx].private_ip
-      public_ip  = module.compute_single[idx].public_ip
-      vault_path = module.vm_secret[idx].vault_path
+  compute_results = [
+    for k, comp in module.compute_single : {
+      key        = k
+      group_name = local.expanded_instances_map[k].group_name
+      name       = comp.vm_name
+      private_ip = comp.private_ip
+      public_ip  = comp.public_ip
+      vault_path = module.vm_secret[k].vault_path
     }
   ]
 
   instances_by_group = {
     for g in var.instance_groups : g.name => [
-      for r in local.results : r if r.group_name == g.name
+      for r in local.compute_results : r if r.group_name == g.name
     ]
   }
 }

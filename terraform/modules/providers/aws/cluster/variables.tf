@@ -3,9 +3,10 @@ variable "availability_zones" {
   default = []
 }
 
-variable "subnet_ids" {
-  type        = list(string)
-  description = "One subnet per zone"
+variable "subnet_ids_by_zone" {
+  type        = map(string)
+  description = "Map of zone => subnet ID"
+  default     = {}
 }
 
 variable "security_group_id" {
@@ -17,7 +18,6 @@ variable "instance_groups" {
     name           = string
     category       = string
     count_per_zone = number
-    # image is mandatory
     image          = string
   }))
   default = []
@@ -43,7 +43,6 @@ variable "no_verify_ssl" {
   default = true
 }
 
-# For AWS, we might not need resource_group_name / location, but let's keep them for consistency
 variable "resource_group_name" {
   type    = string
   default = ""
