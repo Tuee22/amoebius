@@ -3,13 +3,15 @@ variable "availability_zones" {
   default = []
 }
 
-variable "subnet_ids" {
-  type        = list(string)
-  description = "One subnet per zone"
+variable "subnet_ids_by_zone" {
+  type        = map(string)
+  description = "Map of zone => subnet ID"
+  default     = {}
 }
 
 variable "security_group_id" {
   type        = string
+  description = "Network security group ID"
 }
 
 variable "instance_groups" {
@@ -17,7 +19,6 @@ variable "instance_groups" {
     name           = string
     category       = string
     count_per_zone = number
-    # image required
     image          = string
   }))
   default = []

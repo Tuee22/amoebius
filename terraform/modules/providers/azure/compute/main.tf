@@ -46,6 +46,7 @@ resource "azurerm_network_interface_security_group_association" "sg_assoc" {
 # 🔹 Create Virtual Machine
 resource "azurerm_linux_virtual_machine" "this" {
   name                = "${var.workspace}-${var.vm_name}"
+  computer_name = substr(var.vm_name, 0, 15)
   resource_group_name = var.resource_group_name
   location            = var.location
   size                = var.instance_type
