@@ -24,12 +24,12 @@ from amoebius.models.provider_map import provider_model_map
 
 # Define a list of InstanceGroup objects
 instance_groups: List[InstanceGroup] = [
-    # InstanceGroup(
-    #     name="web-servers",
-    #     category="x86_small",
-    #     count_per_zone=1,
-    #     image=None,  # Use default x86 image
-    # ),
+    InstanceGroup(
+        name="web-servers",
+        category="x86_small",
+        count_per_zone=1,
+        image=None,  # Use default x86 image
+    ),
     InstanceGroup(
         name="app-servers",
         category="arm_small",
