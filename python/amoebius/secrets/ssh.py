@@ -51,6 +51,7 @@ from pydantic import ValidationError
 from amoebius.models.ssh import SSHConfig, SSHVaultData
 from amoebius.models.vault import VaultSettings
 from amoebius.utils.ssh_runner import ssh_get_server_key
+from amoebius.utils.async_retry import async_retry
 from amoebius.secrets.vault_client import AsyncVaultClient
 
 
@@ -201,6 +202,7 @@ async def store_ssh_config_with_tofu(
             ) from exc
 
 
+@async_retry(retries=30)
 async def tofu_populate_ssh_config(vault: AsyncVaultClient, path: str) -> None:
     """
     Perform a Trust On First Use (TOFU) workflow on an `SSHConfig` stored in Vault.

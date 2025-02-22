@@ -34,15 +34,20 @@ async def run_command(
     """
     Executes a local command in a subprocess, asynchronously, retrying if needed.
 
+    - If `input_data` is provided, it's passed to the command via stdin.
+    - If `input_data` is NOT provided, stdin is replaced with /dev/null.
+      This ensures that if the command attempts to prompt for input, it
+      will encounter EOF immediately and fail fast instead of hanging.
+
     :param command: The command and arguments to execute.
-    :param sensitive: If True, we won't print command details in exceptions.
+    :param sensitive: If True, command details won't be printed in exceptions.
     :param env: Environment variables to merge on top of the parent process env.
     :param cwd: Working directory for the subprocess.
     :param input_data: Optional string data to pass to stdin.
-    :param successful_return_codes: List of acceptable return codes that won't raise an exception.
+    :param successful_return_codes: Return codes that won't raise an exception.
     :param retries: How many times to retry failures.
     :param retry_delay: Delay (seconds) between retries.
-    :param suppress_env_vars: List of environment variable names to remove from
+    :param suppress_env_vars: List of environment vars to remove from
                               the final environment before running the command.
     :return: The captured stdout of the command on success.
     :raises CommandError: If the command fails more than `retries` times or returns
@@ -52,11 +57,10 @@ async def run_command(
     @async_retry(retries=retries, delay=retry_delay)
     async def _inner_run_command() -> str:
         # If no env modifications are requested, pass None to create_subprocess_exec
-        # to avoid copying the environment unnecessarily (for performance).
+        # to avoid copying the environment unnecessarily.
         if env is None and not suppress_env_vars:
             proc_env = None
         else:
-            # Otherwise, start with a copy of the parent process environment
             proc_env = os.environ.copy()
 
             # Remove (suppress) specific environment variables if needed
@@ -68,14 +72,19 @@ async def run_command(
             if env:
                 proc_env.update(env)
 
+        # If `input_data` is provided, we'll use a PIPE (so we can send data).
+        # Otherwise, replace stdin with /dev/null.
+        stdin = asyncio.subprocess.PIPE if input_data else asyncio.subprocess.DEVNULL
+
         proc = await asyncio.create_subprocess_exec(
             *command,
-            stdin=asyncio.subprocess.PIPE if input_data else None,
+            stdin=stdin,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
             env=proc_env,
             cwd=cwd,
         )
+
         stdout_bytes, stderr_bytes = await proc.communicate(
             input=input_data.encode() if input_data else None
         )
@@ -94,6 +103,7 @@ async def run_command(
                 f"Command failed with return code {proc.returncode}.{detail}",
                 proc.returncode,
             )
+
         return stdout_str
 
     return await _inner_run_command()
