@@ -3,6 +3,12 @@ variable "storage_class_name" {
   description = "Name of the storage class to create."
 }
 
+variable "pvc_name_prefix" {
+  type        = string
+  default     = "data-vault"
+  description = "Prefix for the PVC names referenced by claim_ref in each PV."
+}
+
 variable "volume_binding_mode" {
   type        = string
   default     = "WaitForFirstConsumer"
@@ -21,12 +27,6 @@ variable "volumes_count" {
   description = "Number of persistent volumes to create."
 }
 
-variable "pvc_name_prefix" {
-  type        = string
-  default     = "data-vault"
-  description = "Prefix for PVC names; matches the claimRef name in each PV."
-}
-
 variable "namespace" {
   type        = string
   default     = "vault"
@@ -39,10 +39,10 @@ variable "storage_size" {
   description = "Size of each persistent volume."
 }
 
-variable "path_base" {
+variable "base_host_path" {
   type        = string
-  default     = "/persistent-data/vault"
-  description = "Base host path on each node for local PVs."
+  default     = "/persistent-data"
+  description = "Base path on the host for local PVs."
 }
 
 variable "node_affinity_key" {

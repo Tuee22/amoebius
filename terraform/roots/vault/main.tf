@@ -32,64 +32,21 @@ module "vault_namespace" {
   namespace = var.vault_namespace
 }
 
-# Kubernetes storage class
-resource "kubernetes_storage_class" "hostpath_storage_class" {
-  metadata {
-    name = var.storage_class_name
-  }
-  storage_provisioner = "kubernetes.io/no-provisioner"
-  volume_binding_mode  = "WaitForFirstConsumer"
-  reclaim_policy       = "Retain"
+module "local_storage" {
+  source             = "../../modules/local_storage"
+  storage_class_name = var.storage_class_name
+  pvc_name_prefix    = var.pvc_name_prefix
+  volumes_count      = var.vault_replicas
+  namespace          = module.vault_namespace.namespace
+  storage_size       = var.vault_storage_size
+  base_host_path     = "/persistent-data"
+  node_affinity_key  = "kubernetes.io/hostname"
+  node_affinity_values = ["${var.cluster_name}-control-plane"]
 }
+
+# Kubernetes storage class
 
 # Persistent volumes for Vault
-resource "kubernetes_persistent_volume" "vault_storage" {
-  for_each = { for idx in range(var.vault_replicas) : idx => idx }
-
-  metadata {
-    name = "vault-pv-${each.key}"
-    labels = {
-      pvIndex = "${each.key}"
-    }
-  }
-
-  spec {
-    capacity = {
-      storage = var.vault_storage_size
-    }
-    access_modes       = ["ReadWriteOnce"]
-    storage_class_name = kubernetes_storage_class.hostpath_storage_class.metadata[0].name
-
-    # this ensures each PV can only bind with the PVC it was intended for
-    claim_ref {
-      name      = "${var.pvc_name_prefix}-${each.key}"  
-      namespace = module.vault_namespace.namespace
-    }
-
-    persistent_volume_source {
-      host_path {
-        path = "/persistent-data/vault/vault-${each.key}"
-        type = "DirectoryOrCreate"
-      }
-    }
-
-    node_affinity {
-      required {
-        node_selector_term {
-          match_expressions {
-            key      = "kubernetes.io/hostname"
-            operator = "In"
-            values   = ["${var.cluster_name}-control-plane"]
-          }
-        }
-      }
-    }
-  }
-
-  depends_on = [
-    kubernetes_storage_class.hostpath_storage_class
-  ]
-}
 
 resource "kubernetes_service_account_v1" "vault_service_account" {
   metadata {

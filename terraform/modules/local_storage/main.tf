@@ -8,9 +8,9 @@ terraform {
 }
 
 provider "kubernetes" {
-  # Typically inherits from root. If you have a separate provider block,
-  # you can omit or override. For most simple module usage, you rely
-  # on the parent's provider.
+  host                   = ""
+  cluster_ca_certificate = ""
+  token                  = ""
 }
 
 resource "kubernetes_storage_class" "this" {
@@ -23,12 +23,12 @@ resource "kubernetes_storage_class" "this" {
 }
 
 resource "kubernetes_persistent_volume" "this" {
-  # We will create N PVs, one for each item in range(var.volumes_count).
   for_each = toset([for i in range(var.volumes_count) : i])
 
   metadata {
-    # Example: "data-vault-0", "data-vault-1", ...
-    name = "${var.pvc_name_prefix}-${each.key}"
+    # e.g. "vault-local-0", "vault-local-1", ...
+    # Using storage_class_name in the PV name:
+    name = "${var.storage_class_name}-${each.key}"
   }
 
   spec {
@@ -36,17 +36,18 @@ resource "kubernetes_persistent_volume" "this" {
       storage = var.storage_size
     }
     access_modes       = ["ReadWriteOnce"]
-    storage_class_name = var.storage_class_name
+    storage_class_name = kubernetes_storage_class.this.metadata[0].name
 
-    # Ties each PV to the matching PVC
     claim_ref {
+      # ONLY uses the pvc_name_prefix for the claimRef
       name      = "${var.pvc_name_prefix}-${each.key}"
       namespace = var.namespace
     }
 
     persistent_volume_source {
       host_path {
-        path = "${var.path_base}/${each.key}"
+        # e.g. /persistent-data/storageClassName/storageClassName-0
+        path = "${var.base_host_path}/${var.storage_class_name}/${var.storage_class_name}-${each.key}"
         type = "DirectoryOrCreate"
       }
     }
@@ -63,8 +64,4 @@ resource "kubernetes_persistent_volume" "this" {
       }
     }
   }
-
-  depends_on = [
-    kubernetes_storage_class.this
-  ]
 }
