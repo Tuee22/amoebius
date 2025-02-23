@@ -16,16 +16,16 @@ resource "azurerm_resource_group" "main" {
   location = var.region
 }
 
-resource "azurerm_resource_group" "network_watcher" {
-  name     = "${terraform.workspace}-NetworkWatcherRG"
-  location = var.region
-}
+# resource "azurerm_resource_group" "network_watcher" {
+#   name     = "${terraform.workspace}-NetworkWatcherRG"
+#   location = var.region
+# }
 
-resource "azurerm_network_watcher" "main" {
-  name                = "NetworkWatcher_${var.region}"
-  location            = var.region
-  resource_group_name = azurerm_resource_group.network_watcher.name
-}
+# resource "azurerm_network_watcher" "main" {
+#   name                = "NetworkWatcher_${var.region}"
+#   location            = var.region
+#   resource_group_name = azurerm_resource_group.network_watcher.name
+# }
 
 resource "azurerm_virtual_network" "main" {
   name                = "${terraform.workspace}-vnet"
