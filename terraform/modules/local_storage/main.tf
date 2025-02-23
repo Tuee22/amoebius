@@ -39,14 +39,12 @@ resource "kubernetes_persistent_volume" "this" {
     storage_class_name = kubernetes_storage_class.this.metadata[0].name
 
     claim_ref {
-      # ONLY uses the pvc_name_prefix for the claimRef
       name      = "${var.pvc_name_prefix}-${each.key}"
       namespace = var.namespace
     }
 
     persistent_volume_source {
       host_path {
-        # e.g. /persistent-data/storageClassName/storageClassName-0
         path = "${var.base_host_path}/${var.storage_class_name}/${var.storage_class_name}-${each.key}"
         type = "DirectoryOrCreate"
       }

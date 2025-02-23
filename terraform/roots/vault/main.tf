@@ -33,6 +33,28 @@ module "vault_namespace" {
 }
 
 module "local_storage" {
+  source             = "/amoebius/terraform/modules/local_storage"
+
+  storage_class_name = var.storage_class_name
+
+  # volumes_count defaults to 3, so override if var.vault_replicas != 3:
+  volumes_count      = var.vault_replicas
+
+  # namespace defaults to "vault", override if your namespace differs:
+  namespace          = module.vault_namespace.namespace
+
+  # storage_size defaults to "1Gi", override if var.vault_storage_size != "1Gi":
+  storage_size       = var.vault_storage_size
+
+  # pvc_name_prefix defaults to "data-vault"; remove if that's exactly what you want
+  pvc_name_prefix    = var.pvc_name_prefix
+
+  # node_affinity_values defaults to ["kind-cluster-control-plane"]
+  # So if yours differs, pass it here:
+  node_affinity_values = ["${var.cluster_name}-control-plane"]
+}
+
+module "local_storage" {
   source             = "../../modules/local_storage"
   storage_class_name = var.storage_class_name
   pvc_name_prefix    = var.pvc_name_prefix
