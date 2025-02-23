@@ -1,45 +1,50 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Name of the output file
-OUTPUT_FILE="repo.txt"
+OUTPUT="repo.txt"
 
-# Check if the script is run inside a Git repository
-if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
-    echo "Error: This script must be run inside a Git repository."
-    exit 1
-fi
+# Remove the output file if it exists, so we start fresh
+rm -f "$OUTPUT"
 
-# Get the list of tracked files
-tracked_files=$(git ls-files)
+# Get the basename of this script (so we can exclude it)
+SCRIPT_NAME="$(basename "$0")"
 
-# Check if any tracked files exist
-if [ -z "$tracked_files" ]; then
-    echo "No tracked files found."
-    exit 0
-fi
+# A dashed separator line (adjust length to your preference)
+SEPARATOR="--------------------------------------------------------------------------------"
 
-# Create or overwrite the output file
-> "$OUTPUT_FILE"
+# Recursively find all files from the current directory,
+# then loop over them
+find . -type f | while read -r file; do
 
-# Loop through each tracked file and append its contents to the output file
-for file in $tracked_files; do
-    # Exclude .png, .dockerignore, .gitignore, LICENSE, and README.md files
-    if [[ $file == *.png || $file == ".dockerignore" || $file == ".gitignore" || $file == "LICENSE" || $file == "README.md" ]]; then
-        echo "Skipping: $file (excluded file)"
+    # Exclude this script itself
+    if [ "$(basename "$file")" = "$SCRIPT_NAME" ]; then
         continue
     fi
 
-    if [ -f "$file" ]; then
-        echo "Processing: $file"
-        # Add the filename as a header
-        echo "=== $file ===" >> "$OUTPUT_FILE"
-        # Append the file's content
-        cat "$file" >> "$OUTPUT_FILE"
-        # Add a newline for separation
-        echo -e "\n" >> "$OUTPUT_FILE"
-    else
-        echo "Skipping: $file (not a regular file)"
+    # Exclude the output file (repo.txt) if it exists
+    if [ "$(basename "$file")" = "$OUTPUT" ]; then
+        continue
     fi
+
+    # Keep the path as returned by 'find', which includes the leading './'
+    RELATIVE_PATH="$file"
+
+    # Mark the beginning of this file's section
+    echo "$SEPARATOR" >> "$OUTPUT"
+    echo "BEGIN FILE: $RELATIVE_PATH" >> "$OUTPUT"
+    echo "$SEPARATOR" >> "$OUTPUT"
+
+    # Append the file's content
+    cat "$file" >> "$OUTPUT"
+
+    # Mark the end of this file's section
+    echo "$SEPARATOR" >> "$OUTPUT"
+    echo "END FILE: $RELATIVE_PATH" >> "$OUTPUT"
+    echo "$SEPARATOR" >> "$OUTPUT"
+
+    # (Optional) Add a blank line separator
+    echo "" >> "$OUTPUT"
+
 done
 
-echo "All tracked files concatenated into $OUTPUT_FILE"
+echo "All files have been concatenated into $OUTPUT."
