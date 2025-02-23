@@ -32,44 +32,23 @@ module "vault_namespace" {
   namespace = var.vault_namespace
 }
 
-module "local_storage" {
-  source             = "/amoebius/terraform/modules/local_storage"
 
-  storage_class_name = var.storage_class_name
-
-  # volumes_count defaults to 3, so override if var.vault_replicas != 3:
-  volumes_count      = var.vault_replicas
-
-  # namespace defaults to "vault", override if your namespace differs:
-  namespace          = module.vault_namespace.namespace
-
-  # storage_size defaults to "1Gi", override if var.vault_storage_size != "1Gi":
-  storage_size       = var.vault_storage_size
-
-  # pvc_name_prefix defaults to "data-vault"; remove if that's exactly what you want
-  pvc_name_prefix    = var.pvc_name_prefix
-
-  # node_affinity_values defaults to ["kind-cluster-control-plane"]
-  # So if yours differs, pass it here:
-  node_affinity_values = ["${var.cluster_name}-control-plane"]
-}
-
-module "local_storage" {
-  source             = "../../modules/local_storage"
-  storage_class_name = var.storage_class_name
-  pvc_name_prefix    = var.pvc_name_prefix
-  volumes_count      = var.vault_replicas
-  namespace          = module.vault_namespace.namespace
-  storage_size       = var.vault_storage_size
-  base_host_path     = "/persistent-data"
-  node_affinity_key  = "kubernetes.io/hostname"
-  node_affinity_values = ["${var.cluster_name}-control-plane"]
-}
 
 # Kubernetes storage class
 
 # Persistent volumes for Vault
 
+module "local_storage" {
+  source = "/amoebius/terraform/modules/local_storage"
+
+  # Provide only what's necessary or that differs from defaults:
+  storage_class_name   = var.storage_class_name
+  volumes_count        = var.vault_replicas
+  namespace            = module.vault_namespace.namespace
+  storage_size         = var.vault_storage_size
+  pvc_name_prefix      = var.pvc_name_prefix
+  node_affinity_values = ["${var.cluster_name}-control-plane"]
+}
 resource "kubernetes_service_account_v1" "vault_service_account" {
   metadata {
     name      = "${var.vault_service_name}-service-account"
@@ -171,7 +150,7 @@ resource "helm_release" "vault" {
 
   set {
     name  = "server.dataStorage.storageClass"
-    value = kubernetes_storage_class.hostpath_storage_class.metadata[0].name
+    value = var.storage_class_name
   }
 
   set {
@@ -182,7 +161,6 @@ resource "helm_release" "vault" {
   wait = true
 
   depends_on = [
-    kubernetes_persistent_volume.vault_storage,
     module.vault_namespace
   ]
 }

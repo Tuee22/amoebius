@@ -26,8 +26,6 @@ resource "kubernetes_persistent_volume" "this" {
   for_each = toset([for i in range(var.volumes_count) : i])
 
   metadata {
-    # e.g. "vault-local-0", "vault-local-1", ...
-    # Using storage_class_name in the PV name:
     name = "${var.storage_class_name}-${each.key}"
   }
 

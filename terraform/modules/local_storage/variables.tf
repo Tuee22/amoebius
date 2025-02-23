@@ -6,7 +6,7 @@ variable "storage_class_name" {
 variable "pvc_name_prefix" {
   type        = string
   default     = "data-vault"
-  description = "Prefix for the PVC names referenced by claim_ref in each PV."
+  description = "Prefix for the PVC names (claimRef) in each PV."
 }
 
 variable "volume_binding_mode" {
