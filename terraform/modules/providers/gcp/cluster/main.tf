@@ -45,7 +45,7 @@ module "compute_single" {
 
   source = "/amoebius/terraform/modules/providers/gcp/compute"
 
-  vm_name            = "${terraform.workspace}-${each.value.group_name}-${each.key}"
+  vm_name = lower(replace("${terraform.workspace}-${each.value.group_name}-${each.key}", "_", "-"))
   public_key_openssh = tls_private_key.all[each.key].public_key_openssh
   ssh_user           = var.ssh_user
   image              = each.value.image
