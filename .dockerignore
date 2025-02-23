@@ -49,3 +49,4 @@ data/
 .gitignore
 .dockerignore
 **/.mypy_cache
+setup.sh
