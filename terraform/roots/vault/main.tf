@@ -5,6 +5,7 @@ terraform {
     namespace         = "amoebius"
     in_cluster_config = true
   }
+
   required_providers {
     helm = {
       source  = "hashicorp/helm"
@@ -14,10 +15,7 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "~> 2.25"
     }
-    vault = {
-      source  = "hashicorp/vault"
-      version = "~> 3.10"
-    }
+    # NOTE: We REMOVE the vault provider. Not needed for deploying Vault via Helm.
   }
 }
 
@@ -27,28 +25,31 @@ provider "kubernetes" {
   token                  = ""
 }
 
+################################################################################
+# 1) Linkerd-annotated namespace
+################################################################################
 module "vault_namespace" {
   source = "/amoebius/terraform/modules/linkerd_annotated_namespace"
   namespace = var.vault_namespace
 }
 
-
-
-# Kubernetes storage class
-
-# Persistent volumes for Vault
-
+################################################################################
+# 2) local_storage module
+################################################################################
 module "local_storage" {
   source = "/amoebius/terraform/modules/local_storage"
 
-  # Provide only what's necessary or that differs from defaults:
   storage_class_name   = var.storage_class_name
   volumes_count        = var.vault_replicas
+  pvc_name_prefix      = var.pvc_name_prefix
   namespace            = module.vault_namespace.namespace
   storage_size         = var.vault_storage_size
-  pvc_name_prefix      = var.pvc_name_prefix
   node_affinity_values = ["${var.cluster_name}-control-plane"]
 }
+
+################################################################################
+# 3) Vault ServiceAccount
+################################################################################
 resource "kubernetes_service_account_v1" "vault_service_account" {
   metadata {
     name      = "${var.vault_service_name}-service-account"
@@ -64,6 +65,9 @@ resource "kubernetes_service_account_v1" "vault_service_account" {
   automount_service_account_token = true
 }
 
+################################################################################
+# 4) Vault ClusterRole + Binding
+################################################################################
 resource "kubernetes_cluster_role" "vault_cluster_role" {
   metadata {
     name = "${var.vault_service_name}-cluster-role"
@@ -80,7 +84,6 @@ resource "kubernetes_cluster_role" "vault_cluster_role" {
     resources  = ["secrets"]
     verbs      = ["get"]
   }
-
 }
 
 resource "kubernetes_cluster_role_binding" "vault_cluster_role_binding" {
@@ -101,6 +104,9 @@ resource "kubernetes_cluster_role_binding" "vault_cluster_role_binding" {
   }
 }
 
+################################################################################
+# 5) Helm Release: Vault (no vault provider needed)
+################################################################################
 resource "helm_release" "vault" {
   name       = var.vault_service_name
   repository = "https://helm.releases.hashicorp.com"
@@ -116,11 +122,15 @@ resource "helm_release" "vault" {
     }
   }
 
+  # replicate your old sets
   set {
     name  = "server.dataStorage.size"
     value = var.vault_storage_size
   }
-
+  set {
+    name  = "server.dataStorage.storageClass"
+    value = var.storage_class_name
+  }
   set {
     name  = "server.ha.raft.config"
     value = <<-HCL
@@ -147,12 +157,6 @@ resource "helm_release" "vault" {
     name  = "server.ha.replicas"
     value = tostring(var.vault_replicas)
   }
-
-  set {
-    name  = "server.dataStorage.storageClass"
-    value = var.storage_class_name
-  }
-
   set {
     name  = "server.serviceAccount.name"
     value = kubernetes_service_account_v1.vault_service_account.metadata[0].name
@@ -161,6 +165,7 @@ resource "helm_release" "vault" {
   wait = true
 
   depends_on = [
+    module.local_storage,
     module.vault_namespace
   ]
 }

@@ -17,13 +17,15 @@ resource "kubernetes_storage_class" "this" {
   metadata {
     name = var.storage_class_name
   }
-  storage_provisioner = "kubernetes.io/no-provisioner"
-  volume_binding_mode  = var.volume_binding_mode
-  reclaim_policy       = var.reclaim_policy
+  storage_provisioner   = "kubernetes.io/no-provisioner"
+  volume_binding_mode    = var.volume_binding_mode
+  reclaim_policy         = var.reclaim_policy
+  allow_volume_expansion = true
 }
 
 resource "kubernetes_persistent_volume" "this" {
-  for_each = toset([for i in range(var.volumes_count) : i])
+  # Convert numeric indices to strings
+  for_each = toset([for i in range(var.volumes_count) : tostring(i)])
 
   metadata {
     name = "${var.storage_class_name}-${each.key}"

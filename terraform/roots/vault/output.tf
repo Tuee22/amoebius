@@ -29,5 +29,5 @@ output "vault_service_account_name" {
 
 output "vault_secret_path" {
   value       = "secret/${helm_release.vault.name}/config"
-  description = "Dynamic path for storing application secrets in Vault"
+  description = "Path for storing application secrets in Vault (if needed)."
 }

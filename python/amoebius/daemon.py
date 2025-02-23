@@ -14,8 +14,8 @@ async def run_amoebius() -> None:
     """
     await install_linkerd()
 
-    #await init_terraform(root_name="vault")
-    #await apply_terraform(root_name="vault")
+    await init_terraform(root_name="vault")
+    await apply_terraform(root_name="vault")
 
 
 async def main() -> None:
