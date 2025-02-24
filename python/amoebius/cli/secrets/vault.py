@@ -1,10 +1,15 @@
+#!/usr/bin/env python3
 """
 amoebius/cli/secrets/vault.py
 
-CLI for basic Vault secret operations (read, write-idempotent, list, delete),
-supporting either:
-  - K8s auth (--vault-role-name), or
-  - Direct token (--vault-token).
+CLI for basic Vault secret operations:
+  - read
+  - write-idempotent
+  - list
+  - delete
+  - unseal
+
+The unseal command calls `init_unseal_configure_vault()` from `amoebius.secrets.vault_unseal`.
 """
 
 from __future__ import annotations
@@ -14,24 +19,54 @@ import asyncio
 import importlib
 import json
 import sys
-from typing import Any, Dict, Optional, Type
+from typing import (
+    Any,
+    Callable,
+    Coroutine,
+    Dict,
+    List,
+    Optional,
+    Type,
+    TypedDict,
+)
 
 from pydantic import BaseModel
 
 from amoebius.models.vault import VaultSettings
 from amoebius.secrets.vault_client import AsyncVaultClient
+from amoebius.secrets.vault_unseal import init_unseal_configure_vault
+
+# Import your validator
+from amoebius.models.validator import validate_type
 
 
+#
+# Typed result from the write_secret_idempotent(...) call
+#
+class WriteIdempotentResult(TypedDict):
+    """
+    Represents the expected structure from vault.write_secret_idempotent().
+    Here we only require a 'changed' key that is a bool.
+
+    If your actual return structure has more fields, add them here.
+    """
+
+    changed: bool
+
+
+#
+# Subcommand handlers
+#
 async def run_read(args: argparse.Namespace) -> None:
     """
     Read a secret from Vault at a given path and print JSON.
 
     Raises SystemExit on error.
     """
-    vault_settings = _build_vault_settings(args)
+    vault_settings: VaultSettings = _build_vault_settings(args)
     async with AsyncVaultClient(vault_settings) as vault:
         try:
-            data = await vault.read_secret(args.path)
+            data: Dict[str, Any] = await vault.read_secret(args.path)
         except RuntimeError as exc:
             print(f"Error: cannot read secret at '{args.path}': {exc}", file=sys.stderr)
             sys.exit(1)
@@ -44,9 +79,9 @@ async def run_write_idempotent(args: argparse.Namespace) -> None:
 
     Raises SystemExit on error.
     """
-    vault_settings = _build_vault_settings(args)
+    vault_settings: VaultSettings = _build_vault_settings(args)
 
-    # Load JSON
+    # Load JSON (from --json-file or stdin)
     if args.json_file:
         try:
             with open(args.json_file, "r", encoding="utf-8") as f:
@@ -64,17 +99,16 @@ async def run_write_idempotent(args: argparse.Namespace) -> None:
             sys.exit(1)
 
     # Optional validation
-    data_for_vault: Dict[str, Any] = {}
+    data_for_vault: Dict[str, Any]
     if args.pydantic_model:
         try:
-            model_cls = _load_pydantic_model(args.pydantic_model)
+            model_cls: Type[BaseModel] = _load_pydantic_model(args.pydantic_model)
         except (ImportError, AttributeError, ValueError, TypeError) as exc:
             print(
                 f"Error loading pydantic model '{args.pydantic_model}': {exc}",
                 file=sys.stderr,
             )
             sys.exit(1)
-
         try:
             obj = model_cls(**raw_data)
             data_for_vault = obj.model_dump()
@@ -86,15 +120,27 @@ async def run_write_idempotent(args: argparse.Namespace) -> None:
 
     async with AsyncVaultClient(vault_settings) as vault:
         try:
-            result = await vault.write_secret_idempotent(args.path, data_for_vault)
+            raw_result: Dict[str, Any] = await vault.write_secret_idempotent(
+                args.path, data_for_vault
+            )
+            # Validate the raw_result dict to ensure it matches WriteIdempotentResult
+            write_result: WriteIdempotentResult = validate_type(
+                raw_result,
+                WriteIdempotentResult,
+            )
         except RuntimeError as exc:
             print(
                 f"Error: cannot write idempotently to '{args.path}': {exc}",
                 file=sys.stderr,
             )
             sys.exit(1)
+        except ValueError as exc:
+            # This handles a mismatch between raw_result and WriteIdempotentResult
+            print(f"Validation error for WriteIdempotentResult: {exc}", file=sys.stderr)
+            sys.exit(1)
 
-    if result:
+    # Check the 'changed' field rather than just using truthiness
+    if write_result["changed"]:
         print(f"Secret updated at path: {args.path}")
     else:
         print(f"No changes (identical data) at path: {args.path}")
@@ -106,10 +152,10 @@ async def run_list(args: argparse.Namespace) -> None:
 
     Raises SystemExit on error.
     """
-    vault_settings = _build_vault_settings(args)
+    vault_settings: VaultSettings = _build_vault_settings(args)
     async with AsyncVaultClient(vault_settings) as vault:
         try:
-            keys = await vault.list_secrets(args.path)
+            keys: List[str] = await vault.list_secrets(args.path)
         except RuntimeError as exc:
             print(
                 f"Error: cannot list secrets under '{args.path}': {exc}",
@@ -130,7 +176,7 @@ async def run_delete(args: argparse.Namespace) -> None:
 
     Raises SystemExit on error.
     """
-    vault_settings = _build_vault_settings(args)
+    vault_settings: VaultSettings = _build_vault_settings(args)
     async with AsyncVaultClient(vault_settings) as vault:
         try:
             await vault.delete_secret(args.path, hard=args.hard_delete)
@@ -144,6 +190,25 @@ async def run_delete(args: argparse.Namespace) -> None:
         print(f"Soft-deleted secret at '{args.path}'")
 
 
+async def run_unseal(args: argparse.Namespace) -> None:
+    """
+    Runs init_unseal_configure_vault() to initialize, unseal, and configure Vault.
+    """
+    try:
+        await init_unseal_configure_vault(
+            default_shamir_shares=args.default_shamir_shares,
+            default_shamir_threshold=args.default_shamir_threshold,
+            user_supplied_password=args.user_supplied_password,
+        )
+        print("Vault unseal and configuration complete.")
+    except Exception as exc:
+        print(f"Error unsealing Vault: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+
+#
+# Helpers
+#
 def _build_vault_settings(args: argparse.Namespace) -> VaultSettings:
     """
     Construct a VaultSettings object from CLI arguments.
@@ -157,7 +222,6 @@ def _build_vault_settings(args: argparse.Namespace) -> VaultSettings:
         )
         sys.exit(1)
 
-    # We rely on Pydantic + root_validator for final check, but we do a quick check here, too.
     return VaultSettings(
         vault_addr=args.vault_addr,
         vault_role_name=args.vault_role_name,
@@ -192,57 +256,72 @@ def _load_pydantic_model(dotted_path: str) -> Type[BaseModel]:
 
 def main() -> None:
     """
-    CLI entry point for basic Vault secret ops:
+    CLI entry point for Vault secret operations:
       - read
       - write-idempotent
       - list
       - delete
-
-    Subcommands are required; see --help for usage.
+      - unseal
     """
     parser = argparse.ArgumentParser(
         prog="amoebius.cli.secrets.vault",
-        description="CLI for basic Vault secret operations (read, write-idempotent, list, delete).",
+        description=(
+            "CLI for basic Vault secret operations (read, write-idempotent, list, delete), "
+            "plus a subcommand to unseal Vault."
+        ),
     )
-    subparsers = parser.add_subparsers(dest="command", required=True)
 
-    # Shared arguments for each subcommand
-    # read
-    read_parser = subparsers.add_parser(
-        "read", help="Read a secret from Vault and print JSON."
+    subparsers = parser.add_subparsers(
+        dest="command",
+        required=True,
+        help="Sub-command to run. Use -h/--help after a subcommand for more usage details.",
     )
+
+    #
+    # read
+    #
+    read_parser = subparsers.add_parser("read", help="Read a secret from Vault.")
     _add_vault_cli_args(read_parser)
     read_parser.add_argument("--path", required=True, help="Vault path to read.")
     read_parser.set_defaults(func=run_read)
 
+    #
     # write-idempotent
+    #
     write_parser = subparsers.add_parser(
         "write-idempotent",
-        help="Write JSON data to Vault if it differs from existing data. Optionally validate via pydantic.",
+        help=(
+            "Write JSON data to Vault if it differs from existing data. "
+            "Optionally validate via a Pydantic model."
+        ),
     )
     _add_vault_cli_args(write_parser)
     write_parser.add_argument("--path", required=True, help="Vault path to write to.")
     write_parser.add_argument("--json-file", help="JSON file to load instead of stdin.")
     write_parser.add_argument(
-        "--pydantic-model", help="Dotted path to a pydantic model."
+        "--pydantic-model",
+        help="Dotted path to a pydantic model (e.g. 'my_module.MyModel').",
     )
     write_parser.set_defaults(func=run_write_idempotent)
 
+    #
     # list
-    list_parser = subparsers.add_parser(
-        "list",
-        help="List child keys under a given Vault path prefix.",
-    )
+    #
+    list_parser = subparsers.add_parser("list", help="List child keys under a path.")
     _add_vault_cli_args(list_parser)
     list_parser.add_argument(
-        "--path", required=True, help="Vault prefix path (should end with slash)."
+        "--path",
+        required=True,
+        help="Vault prefix path (should end with a slash, e.g. 'secret/').",
     )
     list_parser.set_defaults(func=run_list)
 
+    #
     # delete
+    #
     delete_parser = subparsers.add_parser(
         "delete",
-        help="Delete a secret from Vault (soft by default, --hard-delete to remove all versions).",
+        help="Delete a secret from Vault (soft by default, use --hard-delete to remove all versions).",
     )
     _add_vault_cli_args(delete_parser)
     delete_parser.add_argument("--path", required=True, help="Vault path to delete.")
@@ -254,8 +333,48 @@ def main() -> None:
     )
     delete_parser.set_defaults(func=run_delete)
 
+    #
+    # unseal (NEW)
+    #
+    unseal_parser = subparsers.add_parser(
+        "unseal",
+        help=(
+            "Initialize, unseal, and configure Vault (does not require standard Vault args). "
+            "Calls init_unseal_configure_vault() internally."
+        ),
+    )
+    # No vault CLI args for unseal
+    unseal_parser.add_argument(
+        "--default-shamir-shares",
+        type=int,
+        default=5,
+        help="Number of unseal key shares if Vault needs initialization. (default: 5)",
+    )
+    unseal_parser.add_argument(
+        "--default-shamir-threshold",
+        type=int,
+        default=3,
+        help="Number of keys required to unseal if Vault needs initialization. (default: 3)",
+    )
+    unseal_parser.add_argument(
+        "--user-supplied-password",
+        type=str,
+        default=None,
+        help=(
+            "Optional password for encrypt/decrypt of Vault init data. "
+            "If omitted, the CLI will prompt."
+        ),
+    )
+    unseal_parser.set_defaults(func=run_unseal)
+
+    #
+    # Parse + run
+    #
     args = parser.parse_args()
-    asyncio.run(args.func(args))
+
+    # The `args.func` is an async function, so we run it via asyncio
+    func: Callable[[argparse.Namespace], Coroutine[Any, Any, None]] = args.func
+    asyncio.run(func(args))
 
 
 def _add_vault_cli_args(subparser: argparse.ArgumentParser) -> None:
@@ -271,7 +390,7 @@ def _add_vault_cli_args(subparser: argparse.ArgumentParser) -> None:
     )
     group.add_argument(
         "--vault-token",
-        help="A direct Vault token (mutually exclusive with --vault-role-name).",
+        help="Direct Vault token (mutually exclusive with --vault-role-name).",
     )
     subparser.add_argument(
         "--vault-addr",
@@ -281,13 +400,16 @@ def _add_vault_cli_args(subparser: argparse.ArgumentParser) -> None:
     subparser.add_argument(
         "--vault-token-path",
         default="/var/run/secrets/kubernetes.io/serviceaccount/token",
-        help="Path to JWT token for K8s auth (default: /var/run/secrets/kubernetes.io/serviceaccount/token).",
+        help=(
+            "Path to JWT token for K8s auth. "
+            "(default: /var/run/secrets/kubernetes.io/serviceaccount/token)."
+        ),
     )
     subparser.add_argument(
         "--no-verify-ssl",
         action="store_true",
         default=False,
-        help="Disable SSL certificate verification (default: verify).",
+        help="Disable SSL certificate verification (default: verify SSL).",
     )
 
 
