@@ -5,8 +5,14 @@ terraform {
       version = "~> 4.0"
     }
   }
-  backend "local" {
-    path = "terraform.tfstate"
+  backend "s3" {
+    endpoint                    = "minio.amoebius.svc.cluster.local"
+    bucket                      = "amoebius-terraform"
+    key                         = "gcp/terraform.tfstate"
+    region                      = "us-east-1"
+    skip_credentials_validation = true
+    skip_region_validation      = true
+    force_path_style            = true
   }
 }
 
@@ -23,7 +29,10 @@ module "network" {
 
 module "cluster" {
   source = "/amoebius/terraform/modules/providers/gcp/cluster"
-    subnet_ids_by_zone = { for idx, z in var.availability_zones : z => element(module.network.subnet_ids, idx) }
+  subnet_ids_by_zone = {
+    for idx, z in var.availability_zones :
+    z => element(module.network.subnet_ids, idx)
+  }
 
   availability_zones  = var.availability_zones
   security_group_id   = module.network.security_group_id
