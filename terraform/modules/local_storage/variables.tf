@@ -5,7 +5,6 @@ variable "storage_class_name" {
 
 variable "pvc_name_prefix" {
   type        = string
-  default     = "data-vault"
   description = "Prefix for the PVC names that each PV will bind to."
 }
 
@@ -29,7 +28,6 @@ variable "volumes_count" {
 
 variable "namespace" {
   type        = string
-  default     = "vault"
   description = "Namespace where the PVCs live (claimRef.namespace)."
 }
 
