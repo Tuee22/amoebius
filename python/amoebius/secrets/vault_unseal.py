@@ -423,10 +423,10 @@ async def init_unseal_configure_vault(
         RuntimeError: If reading the vault terraform state fails or other steps fail.
         CommandError: If the vault CLI commands fail.
     """
-    import pdb; pdb.set_trace()
     try:
         print("Attempting to retrieve vault terraform state...")
-        tfs = await read_terraform_state(root_name="vault", retries=30)
+
+        tfs = await async_retry(retries=30)(read_terraform_state)(root_name="vault")
     except Exception as ex:
         raise RuntimeError(
             "Failed to read vault terraform state. Has terraform deploy completed?"

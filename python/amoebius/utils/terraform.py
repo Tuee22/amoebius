@@ -467,7 +467,6 @@ async def destroy_terraform(
     )
 
 
-@async_retry(retries=30)
 async def read_terraform_state(
     root_name: str,
     workspace: Optional[str] = None,
