@@ -19,8 +19,8 @@ async def run_amoebius() -> None:
     await apply_terraform(root_name="vault")
 
     # New lines: deploy MinIO
-    #await init_terraform(root_name="minio")
-    #await apply_terraform(root_name="minio")
+    # await init_terraform(root_name="minio")
+    # await apply_terraform(root_name="minio")
 
 
 async def main() -> None:

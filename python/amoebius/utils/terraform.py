@@ -1,287 +1,541 @@
+"""
+amoebius/terraform/transit_terraform.py
+
+A revised version that keeps the _terraform_command(...) function smaller
+by moving helper functions (and context managers) to the top level, and
+avoiding in-place mutation of command lists.
+
+Key points:
+ - We define pure functions for base command creation, ephemeral usage, tfvars usage.
+ - We combine them in _terraform_command with minimal code, focusing on
+   building final commands in an immutable style.
+
+Usage:
+    storage=None => NoStorage => no ephemeral override
+    If transit_key_name + storage => ephemeral usage with partial encryption
+    The public wrappers remain standard (init/apply/destroy/read).
+"""
+
+from __future__ import annotations
+
 import os
+import io
 import json
+import aiofiles
 import tempfile
-from typing import Any, Optional, Dict, Type, TypeVar
+import asyncio
+from abc import ABC, abstractmethod
+from typing import Any, Dict, Optional, Type, TypeVar, List, AsyncGenerator
 
-import aiofiles  # Ensure you've installed aiofiles
+from contextlib import asynccontextmanager
 
-from pydantic import ValidationError
-
+from amoebius.utils.async_command_runner import run_command
+from amoebius.utils.async_retry import async_retry
 from amoebius.models.terraform_state import TerraformState
 from amoebius.models.validator import validate_type
-from amoebius.utils.async_command_runner import run_command, CommandError
-from amoebius.utils.async_retry import async_retry
+from amoebius.secrets.vault_client import AsyncVaultClient
+from minio import Minio
 
 T = TypeVar("T")
 
-DEFAULT_TERRAFORM_ROOTS = "/amoebius/terraform/roots"
 
-
-def _validate_root_name(root_name: str, base_path: str) -> str:
+# -----------------------------------------------------------------------------
+# State Storage Classes
+# -----------------------------------------------------------------------------
+class StateStorage(ABC):
     """
-    Validate the Terraform root name, returning the absolute path to the
-    corresponding directory.
+    Abstract base for reading/writing Terraform state ciphertext to (root_module, workspace).
     """
-    if not root_name.strip():
-        raise ValueError("Root name cannot be empty")
 
-    terraform_path = os.path.join(base_path, root_name)
-    if not os.path.isdir(terraform_path):
-        raise ValueError(f"Terraform root directory not found: {terraform_path}")
+    def __init__(self, root_module: str, workspace: Optional[str] = None) -> None:
+        self.root_module: str = root_module
+        self.workspace: str = workspace or "default"
 
-    return terraform_path
+    @abstractmethod
+    async def read_ciphertext(
+        self,
+        *,
+        vault_client: Optional[AsyncVaultClient] = None,
+        minio_client: Optional[Minio] = None,
+    ) -> Optional[str]:
+        raise NotImplementedError()
+
+    @abstractmethod
+    async def write_ciphertext(
+        self,
+        ciphertext: str,
+        *,
+        vault_client: Optional[AsyncVaultClient] = None,
+        minio_client: Optional[Minio] = None,
+    ) -> None:
+        raise NotImplementedError()
 
 
-async def _list_workspaces(
-    terraform_path: str,
-    env: Optional[Dict[str, str]],
-    sensitive: bool,
-) -> list[str]:
-    """
-    Returns a list of existing Terraform workspace names for the given path,
-    by running:
-        terraform workspace list -no-color
-    and stripping out leading '*' and whitespace from each line.
+class NoStorage(StateStorage):
+    def __init__(self, root_module: str, workspace: Optional[str] = None) -> None:
+        super().__init__(root_module, workspace)
 
-    We explicitly suppress TF_WORKSPACE in the environment to avoid Terraform's
-    "workspace override" error when just listing.
-    """
-    list_cmd = ["terraform", "workspace", "list", "-no-color"]
-    list_output = await run_command(
-        list_cmd,
-        sensitive=sensitive,
-        env=env,
-        cwd=terraform_path,
-        suppress_env_vars=["TF_WORKSPACE"],  # << Key addition
+    async def read_ciphertext(
+        self,
+        *,
+        vault_client: Optional[AsyncVaultClient] = None,
+        minio_client: Optional[Minio] = None,
+    ) -> Optional[str]:
+        return None
+
+    async def write_ciphertext(
+        self,
+        ciphertext: str,
+        *,
+        vault_client: Optional[AsyncVaultClient] = None,
+        minio_client: Optional[Minio] = None,
+    ) -> None:
+        pass
+
+
+class VaultKVStorage(StateStorage):
+    def __init__(self, root_module: str, workspace: Optional[str] = None) -> None:
+        super().__init__(root_module, workspace)
+
+    def _kv_path(self) -> str:
+        return f"amoebius/terraform-backends/{self.root_module}/{self.workspace}"
+
+    async def read_ciphertext(
+        self,
+        *,
+        vault_client: Optional[AsyncVaultClient] = None,
+        minio_client: Optional[Minio] = None,
+    ) -> Optional[str]:
+        if not vault_client:
+            raise RuntimeError("VaultKVStorage requires a vault_client.")
+        try:
+            raw = await vault_client.read_secret(self._kv_path())
+            return raw.get("ciphertext")
+        except RuntimeError as ex:
+            if "404" in str(ex):
+                return None
+            raise
+
+    async def write_ciphertext(
+        self,
+        ciphertext: str,
+        *,
+        vault_client: Optional[AsyncVaultClient] = None,
+        minio_client: Optional[Minio] = None,
+    ) -> None:
+        if not vault_client:
+            raise RuntimeError("VaultKVStorage requires a vault_client.")
+        await vault_client.write_secret(self._kv_path(), {"ciphertext": ciphertext})
+
+
+class MinioStorage(StateStorage):
+    def __init__(
+        self,
+        root_module: str,
+        workspace: Optional[str] = None,
+        bucket_name: str = "tf-states",
+    ) -> None:
+        super().__init__(root_module, workspace)
+        self.bucket_name: str = bucket_name
+
+    def _object_key(self) -> str:
+        return f"{self.root_module}/{self.workspace}.enc"
+
+    async def read_ciphertext(
+        self,
+        *,
+        vault_client: Optional[AsyncVaultClient] = None,
+        minio_client: Optional[Minio] = None,
+    ) -> Optional[str]:
+        if not minio_client:
+            raise RuntimeError("MinioStorage requires a minio_client.")
+
+        loop = asyncio.get_running_loop()
+        response = None
+        try:
+            response = await loop.run_in_executor(
+                None,
+                lambda: minio_client.get_object(self.bucket_name, self._object_key()),
+            )
+            data = response.read()
+            return data.decode("utf-8")
+        except Exception as ex:
+            if any(msg in str(ex) for msg in ("NoSuchKey", "NoSuchObject", "404")):
+                return None
+            raise
+        finally:
+            if response:
+                response.close()
+                response.release_conn()
+
+    async def write_ciphertext(
+        self,
+        ciphertext: str,
+        *,
+        vault_client: Optional[AsyncVaultClient] = None,
+        minio_client: Optional[Minio] = None,
+    ) -> None:
+        if not minio_client:
+            raise RuntimeError("MinioStorage.write_ciphertext requires a minio_client.")
+
+        loop = asyncio.get_running_loop()
+        data_bytes = ciphertext.encode("utf-8")
+        length = len(data_bytes)
+
+        def put_object() -> None:
+            stream = io.BytesIO(data_bytes)
+            minio_client.put_object(
+                self.bucket_name,
+                self._object_key(),
+                data=stream,
+                length=length,
+                content_type="text/plain",
+            )
+
+        await loop.run_in_executor(None, put_object)
+
+
+# -----------------------------------------------------------------------------
+# Encryption Helpers
+# -----------------------------------------------------------------------------
+@async_retry(retries=30)
+async def _encrypt_and_store(
+    storage: StateStorage,
+    ephemeral_path: str,
+    vault_client: AsyncVaultClient,
+    minio_client: Optional[Minio],
+    transit_key_name: str,
+) -> None:
+    async with aiofiles.open(ephemeral_path, "rb") as f:
+        plaintext = await f.read()
+    ciphertext = await vault_client.encrypt_transit_data(transit_key_name, plaintext)
+    await storage.write_ciphertext(
+        ciphertext, vault_client=vault_client, minio_client=minio_client
     )
 
-    def strip_workspace_line(line: str) -> str:
-        return line.lstrip("*").strip()
 
-    return [strip_workspace_line(line) for line in list_output.splitlines()]
+async def _decrypt_to_file(
+    storage: StateStorage,
+    ephemeral_path: str,
+    vault_client: Optional[AsyncVaultClient],
+    minio_client: Optional[Minio],
+    transit_key_name: Optional[str],
+) -> None:
+    if not transit_key_name or isinstance(storage, NoStorage) or not vault_client:
+        return
+    ciphertext = await storage.read_ciphertext(
+        vault_client=vault_client, minio_client=minio_client
+    )
+    if ciphertext:
+        plaintext = await vault_client.decrypt_transit_data(
+            transit_key_name, ciphertext
+        )
+        async with aiofiles.open(ephemeral_path, "wb") as f:
+            await f.write(plaintext)
 
 
-async def ensure_terraform_workspace(
+async def _encrypt_from_file(
+    storage: StateStorage,
+    ephemeral_path: str,
+    vault_client: Optional[AsyncVaultClient],
+    minio_client: Optional[Minio],
+    transit_key_name: Optional[str],
+) -> None:
+    try:
+        if not transit_key_name or isinstance(storage, NoStorage) or not vault_client:
+            return
+        await _encrypt_and_store(
+            storage, ephemeral_path, vault_client, minio_client, transit_key_name
+        )
+    finally:
+        if os.path.exists(ephemeral_path):
+            os.remove(ephemeral_path)
+
+
+# -----------------------------------------------------------------------------
+# Async context managers for ephemeral usage and tfvars
+# -----------------------------------------------------------------------------
+@asynccontextmanager
+async def ephemeral_tfstate_if_needed(
+    storage: StateStorage,
+    vault_client: Optional[AsyncVaultClient],
+    minio_client: Optional[Minio],
+    transit_key_name: Optional[str],
+) -> AsyncGenerator[Optional[str], None]:
+    """
+    Yields a string path if ephemeral usage is needed, else None.
+    Decrypts partial changes on enter, re-encrypts on exit.
+    """
+    ephemeral_needed = not (isinstance(storage, NoStorage) and not transit_key_name)
+    if not ephemeral_needed:
+        yield None
+        return
+
+    fd, ephemeral_path = tempfile.mkstemp(dir="/dev/shm", suffix=".tfstate")
+    os.close(fd)
+    await _decrypt_to_file(
+        storage, ephemeral_path, vault_client, minio_client, transit_key_name
+    )
+    try:
+        yield ephemeral_path
+    finally:
+        await _encrypt_from_file(
+            storage, ephemeral_path, vault_client, minio_client, transit_key_name
+        )
+
+
+@asynccontextmanager
+async def maybe_tfvars(
+    action: str,
+    variables: Optional[Dict[str, Any]],
+) -> AsyncGenerator[List[str], None]:
+    """
+    If action is 'apply' or 'destroy' and variables exist, create a tfvars file,
+    yield ['-var-file', that_file], then remove it. Otherwise yield [].
+    """
+    if action in ("apply", "destroy") and variables:
+        fd, tfvars_file = tempfile.mkstemp(dir="/dev/shm", suffix=".auto.tfvars.json")
+        os.close(fd)
+        try:
+            async with aiofiles.open(tfvars_file, "w") as f:
+                await f.write(json.dumps(variables, indent=2))
+            yield ["-var-file", tfvars_file]
+        finally:
+            if os.path.exists(tfvars_file):
+                os.remove(tfvars_file)
+    else:
+        yield []
+
+
+# -----------------------------------------------------------------------------
+# Pure Functions for Building Commands
+# -----------------------------------------------------------------------------
+def make_base_command(action: str, override_lock: bool, reconfigure: bool) -> List[str]:
+    """
+    Returns the initial Terraform command list (immutable).
+    """
+    cmd = ["terraform", action, "-no-color"]
+    if action in ("apply", "destroy"):
+        cmd.append("-auto-approve")
+        if override_lock:
+            cmd.append("-lock=false")
+    if action == "init" and reconfigure:
+        cmd.append("-reconfigure")
+    return cmd
+
+
+def build_final_command(
+    base_cmd: List[str],
+    ephemeral_path: Optional[str],
+    tfvars_args: List[str],
+) -> List[str]:
+    """
+    Returns a new list representing the final command.
+
+    If ephemeral_path is non-None => add ['-backend=false', '-state', ephemeral_path].
+    Also append tfvars_args if present.
+    """
+    new_cmd = list(base_cmd)  # Copy
+    new_cmd.extend(tfvars_args)
+    if ephemeral_path is not None:
+        new_cmd.extend(["-backend=false", "-state", ephemeral_path])
+    return new_cmd
+
+
+# -----------------------------------------------------------------------------
+# Single internal _terraform_command
+# -----------------------------------------------------------------------------
+async def _terraform_command(
+    action: str,
     root_name: str,
-    workspace_name: str,
+    workspace: Optional[str],
     base_path: str,
     env: Optional[Dict[str, str]],
+    storage: Optional[StateStorage],
+    vault_client: Optional[AsyncVaultClient],
+    minio_client: Optional[Minio],
+    transit_key_name: Optional[str],
+    override_lock: bool,
+    variables: Optional[Dict[str, Any]],
+    reconfigure: bool,
     sensitive: bool,
-) -> None:
+    capture_output: bool,
+) -> Optional[str]:
     """
-    Idempotently ensures that 'workspace_name' exists in the specified Terraform
-    root directory. If it doesn't exist, calls 'terraform workspace new <workspace_name>'.
+    Runs a Terraform command (init/apply/destroy/show) with ephemeral usage if needed.
+    The code is split among pure functions and context managers to minimize in-place mutations.
 
-    We also suppress TF_WORKSPACE when creating so Terraform doesn't see it as an override.
+    Returns the command's stdout if capture_output=True, else None.
     """
-    terraform_path = _validate_root_name(root_name, base_path)
+    ws = workspace or "default"
+    store = storage or NoStorage(root_name, ws)
+    terraform_dir = os.path.join(base_path, root_name)
 
-    existing_workspaces = await _list_workspaces(terraform_path, env, sensitive)
-    if workspace_name not in existing_workspaces:
-        new_cmd = ["terraform", "workspace", "new", workspace_name, "-no-color"]
-        await run_command(
-            new_cmd,
-            sensitive=sensitive,
-            env=env,
-            cwd=terraform_path,
-            suppress_env_vars=["TF_WORKSPACE"],  # << Key addition
+    if not os.path.isdir(terraform_dir):
+        raise ValueError(f"Terraform directory not found: {terraform_dir}")
+
+    base_cmd = make_base_command(action, override_lock, reconfigure)
+
+    async def run_tf(cmd_list: List[str]) -> str:
+        return await run_command(
+            cmd_list, sensitive=sensitive, env=env, cwd=terraform_dir
         )
 
-
-def _set_tf_workspace(
-    env: Optional[Dict[str, str]], workspace_name: str
-) -> Dict[str, str]:
-    """
-    Returns a *copy* of the environment dict with TF_WORKSPACE set to
-    'workspace_name'. Raises ValueError if env already contains TF_WORKSPACE.
-    """
-    new_env = dict(env) if env else {}
-    if "TF_WORKSPACE" in new_env:
-        raise ValueError(
-            f"Cannot override existing TF_WORKSPACE={new_env['TF_WORKSPACE']} "
-            f"with new workspace={workspace_name}"
-        )
-    new_env["TF_WORKSPACE"] = workspace_name
-    return new_env
+    async with ephemeral_tfstate_if_needed(
+        store, vault_client, minio_client, transit_key_name
+    ) as ephemeral_path:
+        async with maybe_tfvars(action, variables) as tfvars_args:
+            final_cmd = build_final_command(base_cmd, ephemeral_path, tfvars_args)
+            output = await run_tf(final_cmd)
+            return output if capture_output else None
 
 
+# -----------------------------------------------------------------------------
+# Public Wrappers
+# -----------------------------------------------------------------------------
 async def init_terraform(
     root_name: str,
-    base_path: str = DEFAULT_TERRAFORM_ROOTS,
+    workspace: Optional[str] = None,
+    env: Optional[Dict[str, str]] = None,
+    base_path: str = "/amoebius/terraform/roots",
+    storage: Optional[StateStorage] = None,
+    vault_client: Optional[AsyncVaultClient] = None,
+    minio_client: Optional[Minio] = None,
+    transit_key_name: Optional[str] = None,
     reconfigure: bool = False,
     sensitive: bool = True,
-    env: Optional[Dict[str, str]] = None,
 ) -> None:
     """
-    Runs 'terraform init' in the specified root directory.
-    Ensures Terraform does not get stuck due to TF_WORKSPACE remnants.
+    Runs 'terraform init' with optional ephemeral usage. No return value.
     """
-
-    terraform_path = _validate_root_name(root_name, base_path)
-
-    # 🔹 Step 1: Run Terraform init while suppressing TF_WORKSPACE
-    cmd = ["terraform", "init", "-no-color"]
-    if reconfigure:
-        cmd.append("-reconfigure")
-
-    await run_command(
-        cmd,
-        sensitive=sensitive,
+    await _terraform_command(
+        action="init",
+        root_name=root_name,
+        workspace=workspace,
+        base_path=base_path,
         env=env,
-        cwd=terraform_path,
-        suppress_env_vars=["TF_WORKSPACE"],
+        storage=storage,
+        vault_client=vault_client,
+        minio_client=minio_client,
+        transit_key_name=transit_key_name,
+        override_lock=False,
+        variables=None,
+        reconfigure=reconfigure,
+        sensitive=sensitive,
+        capture_output=False,
     )
 
 
 async def apply_terraform(
     root_name: str,
-    variables: Optional[Dict[str, Any]] = None,
-    base_path: str = DEFAULT_TERRAFORM_ROOTS,
-    override_lock: bool = False,
-    sensitive: bool = True,
-    env: Optional[Dict[str, str]] = None,
     workspace: Optional[str] = None,
+    env: Optional[Dict[str, str]] = None,
+    base_path: str = "/amoebius/terraform/roots",
+    storage: Optional[StateStorage] = None,
+    vault_client: Optional[AsyncVaultClient] = None,
+    minio_client: Optional[Minio] = None,
+    transit_key_name: Optional[str] = None,
+    override_lock: bool = False,
+    variables: Optional[Dict[str, Any]] = None,
+    sensitive: bool = True,
 ) -> None:
     """
-    Runs 'terraform apply' with -auto-approve, using a temporary .tfvars file
-    for variables if provided. If a 'workspace' is given, it is created if
-    missing, and TF_WORKSPACE is set in the environment.
+    Runs 'terraform apply -auto-approve' with ephemeral usage if needed. No return value.
     """
-    terraform_path = _validate_root_name(root_name, base_path)
-
-    final_env = env
-    if workspace:
-        await ensure_terraform_workspace(
-            root_name, workspace, base_path, env, sensitive
-        )
-        final_env = _set_tf_workspace(env, workspace)
-
-    cmd = ["terraform", "apply", "-no-color", "-auto-approve"]
-    if override_lock:
-        cmd.append("-lock=false")
-
-    tfvars_path = None
-
-    if variables:
-        # Create a temporary JSON tfvars
-        temp_file = tempfile.NamedTemporaryFile(
-            mode="w", dir="/dev/shm", delete=False, suffix=".auto.tfvars.json"
-        )
-        tfvars_path = temp_file.name
-        temp_file.close()  # We'll write to it asynchronously below
-
-        try:
-            async with aiofiles.open(tfvars_path, "w") as f:
-                await f.write(json.dumps(variables, indent=2))
-
-            cmd.extend(["-var-file", tfvars_path])
-
-            await run_command(
-                cmd, sensitive=sensitive, env=final_env, cwd=terraform_path
-            )
-        finally:
-            if tfvars_path and os.path.exists(tfvars_path):
-                os.remove(tfvars_path)
-    else:
-        # No variables => just run directly
-        await run_command(cmd, sensitive=sensitive, env=final_env, cwd=terraform_path)
+    await _terraform_command(
+        action="apply",
+        root_name=root_name,
+        workspace=workspace,
+        base_path=base_path,
+        env=env,
+        storage=storage,
+        vault_client=vault_client,
+        minio_client=minio_client,
+        transit_key_name=transit_key_name,
+        override_lock=override_lock,
+        variables=variables,
+        reconfigure=False,
+        sensitive=sensitive,
+        capture_output=False,
+    )
 
 
 async def destroy_terraform(
     root_name: str,
-    variables: Optional[Dict[str, Any]] = None,
-    base_path: str = DEFAULT_TERRAFORM_ROOTS,
-    override_lock: bool = False,
-    sensitive: bool = True,
-    env: Optional[Dict[str, str]] = None,
     workspace: Optional[str] = None,
+    env: Optional[Dict[str, str]] = None,
+    base_path: str = "/amoebius/terraform/roots",
+    storage: Optional[StateStorage] = None,
+    vault_client: Optional[AsyncVaultClient] = None,
+    minio_client: Optional[Minio] = None,
+    transit_key_name: Optional[str] = None,
+    override_lock: bool = False,
+    variables: Optional[Dict[str, Any]] = None,
+    sensitive: bool = True,
 ) -> None:
     """
-    Runs 'terraform destroy' with -auto-approve, using a temporary .tfvars file
-    if variables are provided. If a 'workspace' is given, we skip destroying
-    entirely if that workspace doesn't exist.
+    Runs 'terraform destroy -auto-approve' with ephemeral usage if needed. No return value.
     """
-    terraform_path = _validate_root_name(root_name, base_path)
-
-    final_env = env
-    if workspace:
-        # Also suppress TF_WORKSPACE while listing existing workspaces
-        existing_workspaces = await _list_workspaces(terraform_path, env, sensitive)
-        if workspace not in existing_workspaces:
-            print(
-                f"[destroy_terraform] Workspace '{workspace}' not found at '{root_name}' "
-                "=> skipping destroy."
-            )
-            return
-        final_env = _set_tf_workspace(env, workspace)
-
-    cmd = ["terraform", "destroy", "-no-color", "-auto-approve"]
-    if override_lock:
-        cmd.append("-lock=false")
-
-    tfvars_path = None
-
-    if variables:
-        # Create a temporary JSON tfvars
-        temp_file = tempfile.NamedTemporaryFile(
-            mode="w", dir="/dev/shm", delete=False, suffix=".auto.tfvars.json"
-        )
-        tfvars_path = temp_file.name
-        temp_file.close()
-
-        try:
-            async with aiofiles.open(tfvars_path, "w") as f:
-                await f.write(json.dumps(variables, indent=2))
-
-            cmd.extend(["-var-file", tfvars_path])
-            await run_command(
-                cmd, sensitive=sensitive, env=final_env, cwd=terraform_path
-            )
-        finally:
-            if tfvars_path and os.path.exists(tfvars_path):
-                os.remove(tfvars_path)
-    else:
-        await run_command(cmd, sensitive=sensitive, env=final_env, cwd=terraform_path)
+    await _terraform_command(
+        action="destroy",
+        root_name=root_name,
+        workspace=workspace,
+        base_path=base_path,
+        env=env,
+        storage=storage,
+        vault_client=vault_client,
+        minio_client=minio_client,
+        transit_key_name=transit_key_name,
+        override_lock=override_lock,
+        variables=variables,
+        reconfigure=False,
+        sensitive=sensitive,
+        capture_output=False,
+    )
 
 
-@async_retry(retries=30, delay=1.0)
 async def read_terraform_state(
     root_name: str,
-    base_path: str = DEFAULT_TERRAFORM_ROOTS,
-    sensitive: bool = True,
-    env: Optional[Dict[str, str]] = None,
     workspace: Optional[str] = None,
+    env: Optional[Dict[str, str]] = None,
+    base_path: str = "/amoebius/terraform/roots",
+    storage: Optional[StateStorage] = None,
+    vault_client: Optional[AsyncVaultClient] = None,
+    minio_client: Optional[Minio] = None,
+    transit_key_name: Optional[str] = None,
+    sensitive: bool = True,
 ) -> TerraformState:
     """
-    Reads and parses the current Terraform state as JSON by running
-    'terraform show -json'. If a 'workspace' is specified, it is created
-    if missing, and TF_WORKSPACE is set in the environment.
+    Runs 'terraform show -json' to retrieve the current state with ephemeral usage if needed.
+    Returns a TerraformState object.
     """
-    terraform_path = _validate_root_name(root_name, base_path)
-
-    final_env = env
-    if workspace:
-        await ensure_terraform_workspace(
-            root_name, workspace, base_path, env, sensitive
-        )
-        final_env = _set_tf_workspace(env, workspace)
-
-    cmd = ["terraform", "show", "-json"]
-    state_json = await run_command(
-        cmd, sensitive=sensitive, env=final_env, cwd=terraform_path
+    output = await _terraform_command(
+        action="show",
+        root_name=root_name,
+        workspace=workspace,
+        base_path=base_path,
+        env=env,
+        storage=storage,
+        vault_client=vault_client,
+        minio_client=minio_client,
+        transit_key_name=transit_key_name,
+        override_lock=False,
+        variables=None,
+        reconfigure=False,
+        sensitive=sensitive,
+        capture_output=True,
     )
-    return TerraformState.model_validate_json(state_json)
+    return TerraformState.model_validate_json(output or "")
 
 
 def get_output_from_state(
     state: TerraformState, output_name: str, output_type: Type[T]
 ) -> T:
     """
-    Retrieves and validates a specific output from a TerraformState object.
-    Raises KeyError if the output_name is not found, or ValueError if the
-    type conversion fails.
+    Retrieve a typed output from the TerraformState. Raises KeyError if absent,
+    ValueError if type conversion fails.
     """
-    output_value = state.values.outputs.get(output_name)
-    if output_value is None:
+    output_val = state.values.outputs.get(output_name)
+    if output_val is None:
         raise KeyError(f"Output '{output_name}' not found in Terraform state.")
-    return validate_type(output_value.value, output_type)
+    return validate_type(output_val.value, output_type)

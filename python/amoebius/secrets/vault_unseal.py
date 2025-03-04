@@ -269,16 +269,20 @@ async def configure_vault(
     # Write a policy named 'amoebius-policy'
     print("Creating policy 'amoebius-policy'...")
     policy_hcl = r"""
-    path "transit/*" {
-        capabilities = ["read", "create", "update", "delete", "list"]
-    }
-
     path "secret/data/amoebius/*" {
-        capabilities = ["read", "create", "update", "delete", "list"]
+        capabilities = ["create", "read", "update", "delete", "list"]
     }
 
     path "secret/metadata/amoebius/*" {
-        capabilities = ["read", "create", "update", "delete", "list"]
+        capabilities = ["create", "read", "update", "delete", "list"]
+    }
+
+    path "transit/keys/amoebius" {
+        capabilities = ["create", "read", "update", "delete", "list"]
+    }
+
+    path "transit/*/amoebius/*" {
+        capabilities = ["update"]
     }
     """
     await run_command(
