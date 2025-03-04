@@ -182,7 +182,7 @@ class MinioStorage(StateStorage):
 # -----------------------------------------------------------------------------
 # Encryption Helpers
 # -----------------------------------------------------------------------------
-@async_retry(retries=30)
+@async_retry(retries=30, noisy=True)
 async def _encrypt_and_store(
     storage: StateStorage,
     ephemeral_file: str,
@@ -360,7 +360,7 @@ async def _terraform_command(
 
     async def run_tf(cmd_list: List[str]) -> str:
         return await run_command(
-            cmd_list, sensitive=sensitive, env=env, cwd=terraform_dir
+            cmd_list, sensitive=sensitive, env=env, cwd=terraform_dir, retries=1
         )
 
     async with ephemeral_tfstate_if_needed(
@@ -467,6 +467,7 @@ async def destroy_terraform(
     )
 
 
+@async_retry(retries=30)
 async def read_terraform_state(
     root_name: str,
     workspace: Optional[str] = None,

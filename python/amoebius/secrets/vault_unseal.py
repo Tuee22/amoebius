@@ -146,7 +146,9 @@ async def unseal_vault_pods(
 
     async def run_unseal(pod: str, key: str) -> str:
         env = {"VAULT_ADDR": pod}
-        return await run_command(["vault", "operator", "unseal", key], env=env)
+        return await run_command(
+            ["vault", "operator", "unseal", key], env=env, retries=30
+        )
 
     # We attempt unsealing each pod with each of the randomly chosen keys
     tasks = [run_unseal(pod, key) for pod in pod_names for key in unseal_keys]
@@ -421,9 +423,10 @@ async def init_unseal_configure_vault(
         RuntimeError: If reading the vault terraform state fails or other steps fail.
         CommandError: If the vault CLI commands fail.
     """
+    import pdb; pdb.set_trace()
     try:
         print("Attempting to retrieve vault terraform state...")
-        tfs = await read_terraform_state(root_name="vault")
+        tfs = await read_terraform_state(root_name="vault", retries=30)
     except Exception as ex:
         raise RuntimeError(
             "Failed to read vault terraform state. Has terraform deploy completed?"
