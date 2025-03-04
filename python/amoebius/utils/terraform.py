@@ -1,19 +1,8 @@
 """
 amoebius/terraform/transit_terraform.py
 
-A revised version that keeps the _terraform_command(...) function smaller
-by moving helper functions (and context managers) to the top level, and
-avoiding in-place mutation of command lists.
-
-Key points:
- - We define pure functions for base command creation, ephemeral usage, tfvars usage.
- - We combine them in _terraform_command with minimal code, focusing on
-   building final commands in an immutable style.
-
-Usage:
-    storage=None => NoStorage => no ephemeral override
-    If transit_key_name + storage => ephemeral usage with partial encryption
-    The public wrappers remain standard (init/apply/destroy/read).
+Refactored to have a single `_terraform_command` with minimal mutation,
+plus an updated `make_base_command` that appends `-json` for `terraform show`.
 """
 
 from __future__ import annotations
@@ -40,13 +29,9 @@ T = TypeVar("T")
 
 
 # -----------------------------------------------------------------------------
-# State Storage Classes
+# Abstract State Storage
 # -----------------------------------------------------------------------------
 class StateStorage(ABC):
-    """
-    Abstract base for reading/writing Terraform state ciphertext to (root_module, workspace).
-    """
-
     def __init__(self, root_module: str, workspace: Optional[str] = None) -> None:
         self.root_module: str = root_module
         self.workspace: str = workspace or "default"
@@ -58,7 +43,7 @@ class StateStorage(ABC):
         vault_client: Optional[AsyncVaultClient] = None,
         minio_client: Optional[Minio] = None,
     ) -> Optional[str]:
-        raise NotImplementedError()
+        pass
 
     @abstractmethod
     async def write_ciphertext(
@@ -68,7 +53,7 @@ class StateStorage(ABC):
         vault_client: Optional[AsyncVaultClient] = None,
         minio_client: Optional[Minio] = None,
     ) -> None:
-        raise NotImplementedError()
+        pass
 
 
 class NoStorage(StateStorage):
@@ -107,7 +92,7 @@ class VaultKVStorage(StateStorage):
         minio_client: Optional[Minio] = None,
     ) -> Optional[str]:
         if not vault_client:
-            raise RuntimeError("VaultKVStorage requires a vault_client.")
+            raise RuntimeError("VaultKVStorage requires vault_client.")
         try:
             raw = await vault_client.read_secret(self._kv_path())
             return raw.get("ciphertext")
@@ -124,7 +109,7 @@ class VaultKVStorage(StateStorage):
         minio_client: Optional[Minio] = None,
     ) -> None:
         if not vault_client:
-            raise RuntimeError("VaultKVStorage requires a vault_client.")
+            raise RuntimeError("VaultKVStorage requires vault_client.")
         await vault_client.write_secret(self._kv_path(), {"ciphertext": ciphertext})
 
 
@@ -136,7 +121,7 @@ class MinioStorage(StateStorage):
         bucket_name: str = "tf-states",
     ) -> None:
         super().__init__(root_module, workspace)
-        self.bucket_name: str = bucket_name
+        self.bucket_name = bucket_name
 
     def _object_key(self) -> str:
         return f"{self.root_module}/{self.workspace}.enc"
@@ -148,8 +133,7 @@ class MinioStorage(StateStorage):
         minio_client: Optional[Minio] = None,
     ) -> Optional[str]:
         if not minio_client:
-            raise RuntimeError("MinioStorage requires a minio_client.")
-
+            raise RuntimeError("MinioStorage requires minio_client.")
         loop = asyncio.get_running_loop()
         response = None
         try:
@@ -176,7 +160,7 @@ class MinioStorage(StateStorage):
         minio_client: Optional[Minio] = None,
     ) -> None:
         if not minio_client:
-            raise RuntimeError("MinioStorage.write_ciphertext requires a minio_client.")
+            raise RuntimeError("MinioStorage requires minio_client.")
 
         loop = asyncio.get_running_loop()
         data_bytes = ciphertext.encode("utf-8")
@@ -201,12 +185,12 @@ class MinioStorage(StateStorage):
 @async_retry(retries=30)
 async def _encrypt_and_store(
     storage: StateStorage,
-    ephemeral_path: str,
+    ephemeral_file: str,
     vault_client: AsyncVaultClient,
     minio_client: Optional[Minio],
     transit_key_name: str,
 ) -> None:
-    async with aiofiles.open(ephemeral_path, "rb") as f:
+    async with aiofiles.open(ephemeral_file, "rb") as f:
         plaintext = await f.read()
     ciphertext = await vault_client.encrypt_transit_data(transit_key_name, plaintext)
     await storage.write_ciphertext(
@@ -253,7 +237,7 @@ async def _encrypt_from_file(
 
 
 # -----------------------------------------------------------------------------
-# Async context managers for ephemeral usage and tfvars
+# Async context managers
 # -----------------------------------------------------------------------------
 @asynccontextmanager
 async def ephemeral_tfstate_if_needed(
@@ -262,10 +246,6 @@ async def ephemeral_tfstate_if_needed(
     minio_client: Optional[Minio],
     transit_key_name: Optional[str],
 ) -> AsyncGenerator[Optional[str], None]:
-    """
-    Yields a string path if ephemeral usage is needed, else None.
-    Decrypts partial changes on enter, re-encrypts on exit.
-    """
     ephemeral_needed = not (isinstance(storage, NoStorage) and not transit_key_name)
     if not ephemeral_needed:
         yield None
@@ -290,8 +270,8 @@ async def maybe_tfvars(
     variables: Optional[Dict[str, Any]],
 ) -> AsyncGenerator[List[str], None]:
     """
-    If action is 'apply' or 'destroy' and variables exist, create a tfvars file,
-    yield ['-var-file', that_file], then remove it. Otherwise yield [].
+    If action is 'apply' or 'destroy' and variables is not None, yield ['-var-file', 'somefile'].
+    Else yield [].
     """
     if action in ("apply", "destroy") and variables:
         fd, tfvars_file = tempfile.mkstemp(dir="/dev/shm", suffix=".auto.tfvars.json")
@@ -308,19 +288,25 @@ async def maybe_tfvars(
 
 
 # -----------------------------------------------------------------------------
-# Pure Functions for Building Commands
+# Building the base command
 # -----------------------------------------------------------------------------
 def make_base_command(action: str, override_lock: bool, reconfigure: bool) -> List[str]:
     """
-    Returns the initial Terraform command list (immutable).
+    Creates the base command for Terraform. If action is show => add '-json',
+    if apply/destroy => add '-auto-approve', etc.
     """
-    cmd = ["terraform", action, "-no-color"]
-    if action in ("apply", "destroy"):
+    cmd: List[str] = ["terraform", action, "-no-color"]
+
+    if action == "show":
+        cmd.append("-json")
+    elif action in ("apply", "destroy"):
         cmd.append("-auto-approve")
         if override_lock:
             cmd.append("-lock=false")
+
     if action == "init" and reconfigure:
         cmd.append("-reconfigure")
+
     return cmd
 
 
@@ -330,20 +316,18 @@ def build_final_command(
     tfvars_args: List[str],
 ) -> List[str]:
     """
-    Returns a new list representing the final command.
-
-    If ephemeral_path is non-None => add ['-backend=false', '-state', ephemeral_path].
-    Also append tfvars_args if present.
+    Returns a new list representing the final command,
+    adding ephemeral usage or tfvars usage if needed.
     """
-    new_cmd = list(base_cmd)  # Copy
-    new_cmd.extend(tfvars_args)
-    if ephemeral_path is not None:
-        new_cmd.extend(["-backend=false", "-state", ephemeral_path])
-    return new_cmd
+    final = list(base_cmd)
+    final.extend(tfvars_args)
+    if ephemeral_path:
+        final.extend(["-backend=false", "-state", ephemeral_path])
+    return final
 
 
 # -----------------------------------------------------------------------------
-# Single internal _terraform_command
+# Single internal command
 # -----------------------------------------------------------------------------
 async def _terraform_command(
     action: str,
@@ -362,10 +346,8 @@ async def _terraform_command(
     capture_output: bool,
 ) -> Optional[str]:
     """
-    Runs a Terraform command (init/apply/destroy/show) with ephemeral usage if needed.
-    The code is split among pure functions and context managers to minimize in-place mutations.
-
-    Returns the command's stdout if capture_output=True, else None.
+    DRY internal function: runs 'terraform <action>' with ephemeral usage if needed,
+    plus optional tfvars usage. If capture_output=True, returns the stdout.
     """
     ws = workspace or "default"
     store = storage or NoStorage(root_name, ws)
@@ -405,9 +387,6 @@ async def init_terraform(
     reconfigure: bool = False,
     sensitive: bool = True,
 ) -> None:
-    """
-    Runs 'terraform init' with optional ephemeral usage. No return value.
-    """
     await _terraform_command(
         action="init",
         root_name=root_name,
@@ -439,9 +418,6 @@ async def apply_terraform(
     variables: Optional[Dict[str, Any]] = None,
     sensitive: bool = True,
 ) -> None:
-    """
-    Runs 'terraform apply -auto-approve' with ephemeral usage if needed. No return value.
-    """
     await _terraform_command(
         action="apply",
         root_name=root_name,
@@ -473,9 +449,6 @@ async def destroy_terraform(
     variables: Optional[Dict[str, Any]] = None,
     sensitive: bool = True,
 ) -> None:
-    """
-    Runs 'terraform destroy -auto-approve' with ephemeral usage if needed. No return value.
-    """
     await _terraform_command(
         action="destroy",
         root_name=root_name,
@@ -505,10 +478,6 @@ async def read_terraform_state(
     transit_key_name: Optional[str] = None,
     sensitive: bool = True,
 ) -> TerraformState:
-    """
-    Runs 'terraform show -json' to retrieve the current state with ephemeral usage if needed.
-    Returns a TerraformState object.
-    """
     output = await _terraform_command(
         action="show",
         root_name=root_name,
@@ -531,10 +500,6 @@ async def read_terraform_state(
 def get_output_from_state(
     state: TerraformState, output_name: str, output_type: Type[T]
 ) -> T:
-    """
-    Retrieve a typed output from the TerraformState. Raises KeyError if absent,
-    ValueError if type conversion fails.
-    """
     output_val = state.values.outputs.get(output_name)
     if output_val is None:
         raise KeyError(f"Output '{output_name}' not found in Terraform state.")
