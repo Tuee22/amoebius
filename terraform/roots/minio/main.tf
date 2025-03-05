@@ -1,119 +1,94 @@
+###############################################################################
+# /amoebius/terraform/roots/minio/main.tf
+###############################################################################
 terraform {
-  backend "kubernetes" {
-    secret_suffix     = "minio"
-    load_config_file  = false
-    namespace         = "amoebius"
-    in_cluster_config = true
-  }
+  required_version = ">= 1.0.0"
+
   required_providers {
     helm = {
       source  = "hashicorp/helm"
-      version = "~> 2.17"
+      version = ">= 2.0.0"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~> 2.25"
+      version = ">= 2.0.0"
     }
   }
 }
 
 provider "kubernetes" {
   host                   = ""
-  token                  = ""
   cluster_ca_certificate = ""
+  token                  = ""
 }
 
-module "minio_namespace" {
-  source = "/amoebius/terraform/modules/linkerd_annotated_namespace"
+provider "helm" {
+  kubernetes {
+    host                   = ""
+    cluster_ca_certificate = ""
+    token                  = ""
+  }
+}
 
-  namespace            = var.minio_namespace
-  create_namespace     = true
-  apply_linkerd_policy = false
+module "linkerd_namespace" {
+  source    = "/amoebius/terraform/modules/linkerd_annotated_namespace"
+  namespace = "minio"
 }
 
 module "local_storage" {
-  source = "/amoebius/terraform/modules/local_storage"
-
-  storage_class_name   = var.storage_class_name
-  volumes_count        = var.minio_replicas
-  pvc_name_prefix      = "data-minio"
-  namespace            = module.minio_namespace.namespace
-  storage_size         = var.minio_storage_size
-  node_affinity_values = ["${var.cluster_name}-control-plane"]
-}
-
-resource "kubernetes_secret" "minio_creds" {
-  metadata {
-    name      = "minio-kms-approle"
-    namespace = module.minio_namespace.namespace
-  }
-  type = "Opaque"
-
-  data = {
-    approle_id     = base64encode("YOUR_VAULT_APPROLE_ID")
-    approle_secret = base64encode("YOUR_VAULT_APPROLE_SECRET")
-  }
+  source             = "/amoebius/terraform/modules/local_storage"
+  storage_class_name = "minio-local-storage"
+  pvc_name_prefix    = "data-minio"
+  namespace          = "minio"
+  volumes_count      = 4
 }
 
 resource "helm_release" "minio" {
-  name       = var.minio_release_name
-  repository = "https://helm.min.io/"
-  chart      = "minio"
-  version    = var.minio_helm_chart_version
-  namespace  = module.minio_namespace.namespace
+  name             = "minio"
+  repository       = "oci://registry-1.docker.io/bitnamicharts"
+  chart            = "minio"
+  version          = "15.0.4"
+  namespace        = "minio"
+  create_namespace = false
 
   set {
     name  = "mode"
-    value = "standalone"
+    value = "distributed"
   }
+
   set {
     name  = "replicas"
-    value = tostring(var.minio_replicas)
+    value = "4"
   }
 
-  # Basic admin user/password for MinIO
-  set {
-    name  = "rootUser"
-    value = var.minio_root_user
-  }
-  set {
-    name  = "rootPassword"
-    value = var.minio_root_password
-  }
-
-  # Vault KMS ENV config
-  set {
-    name  = "env.MINIO_KMS_VAULT_ENDPOINT"
-    value = var.vault_addr
-  }
-  set {
-    name  = "env.MINIO_KMS_VAULT_AUTH_TYPE"
-    value = "approle"
-  }
-  set {
-    name  = "env.MINIO_KMS_VAULT_APPROLE_ID"
-    value = "${base64decode(kubernetes_secret.minio_creds.data["approle_id"])}"
-  }
-  set {
-    name  = "env.MINIO_KMS_VAULT_APPROLE_SECRET"
-    value = "${base64decode(kubernetes_secret.minio_creds.data["approle_secret"])}"
-  }
-  set {
-    name  = "env.MINIO_KMS_VAULT_KEY_NAME"
-    value = var.minio_vault_key
-  }
-
-  # Local PV config
   set {
     name  = "persistence.storageClass"
     value = module.local_storage.storage_class_name
   }
+
   set {
     name  = "persistence.size"
-    value = var.minio_storage_size
+    value = "1Gi"
+  }
+
+  set {
+    name  = "auth.rootUser"
+    value = var.root_user
+  }
+
+  set {
+    name  = "auth.rootPassword"
+    value = var.root_password
+  }
+
+  # Internal-only ClusterIP
+  set {
+    name  = "service.type"
+    value = "ClusterIP"
   }
 
   depends_on = [
+    module.linkerd_namespace,
     module.local_storage
   ]
 }

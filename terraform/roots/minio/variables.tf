@@ -1,56 +1,13 @@
-variable "cluster_name" {
-  type    = string
-  default = "kind-cluster"
-}
-
-variable "minio_namespace" {
-  type    = string
-  default = "minio"
-}
-
-variable "storage_class_name" {
-  type    = string
-  default = "minio"
-}
-
-variable "minio_storage_size" {
-  type    = string
-  default = "1Gi"
-}
-
-variable "minio_replicas" {
-  type    = number
-  default = 1
-}
-
-variable "minio_release_name" {
-  type    = string
-  default = "minio"
-}
-
-variable "minio_helm_chart_version" {
-  type    = string
-  default = "5.0.7"
-}
-
-variable "minio_root_user" {
-  type    = string
-  default = "minio"
-}
-
-variable "minio_root_password" {
-  type    = string
-  default = "minio123"
-}
-
-variable "vault_addr" {
+###############################################################################
+# /amoebius/terraform/roots/minio/variables.tf
+###############################################################################
+variable "root_user" {
   type        = string
-  description = "Vault address for KMS (http://vault...:8200)"
-  default     = "http://vault.amoebius.svc.cluster.local:8200"
+  description = "Minio root user"
 }
 
-variable "minio_vault_key" {
+variable "root_password" {
   type        = string
-  description = "Name of the transit key in Vault for MinIO encryption"
-  default     = "minio-key"
+  description = "Minio root password"
+  sensitive   = true
 }
