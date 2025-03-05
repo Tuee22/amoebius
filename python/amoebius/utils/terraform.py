@@ -1,8 +1,17 @@
 """
 amoebius/terraform/transit_terraform.py
 
-Refactored to have a single `_terraform_command` with minimal mutation,
-plus an updated `make_base_command` that appends `-json` for `terraform show`.
+This module runs Terraform commands with optional ephemeral state + Vault transit encryption.
+We also check if Vault is sealed/unavailable before ephemeral usage, ensuring we never run
+Terraform if Vault is not ready.
+
+Key Points:
+  - We rely on "AsyncVaultClient.is_vault_sealed()" to check Vault status.
+  - If sealed => we raise => no Terraform calls are made.
+  - We store ephemeral partial data in /dev/shm, handle partial encryption in a finally block.
+  - read_terraform_state uses 'terraform show -json'.
+
+Requires the updated vault_client with 'is_vault_sealed()'.
 """
 
 from __future__ import annotations
@@ -10,9 +19,9 @@ from __future__ import annotations
 import os
 import io
 import json
+import asyncio
 import aiofiles
 import tempfile
-import asyncio
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, Type, TypeVar, List, AsyncGenerator
 
@@ -29,19 +38,20 @@ T = TypeVar("T")
 
 
 # -----------------------------------------------------------------------------
-# Abstract State Storage
+# Abstract Storage
 # -----------------------------------------------------------------------------
 class StateStorage(ABC):
+    """
+    An abstract base class that reads/writes ciphertext for (root_module, workspace).
+    """
+
     def __init__(self, root_module: str, workspace: Optional[str] = None) -> None:
-        self.root_module: str = root_module
-        self.workspace: str = workspace or "default"
+        self.root_module = root_module
+        self.workspace = workspace or "default"
 
     @abstractmethod
     async def read_ciphertext(
-        self,
-        *,
-        vault_client: Optional[AsyncVaultClient] = None,
-        minio_client: Optional[Minio] = None,
+        self, *, vault_client: Optional[AsyncVaultClient], minio_client: Optional[Minio]
     ) -> Optional[str]:
         pass
 
@@ -50,21 +60,22 @@ class StateStorage(ABC):
         self,
         ciphertext: str,
         *,
-        vault_client: Optional[AsyncVaultClient] = None,
-        minio_client: Optional[Minio] = None,
+        vault_client: Optional[AsyncVaultClient],
+        minio_client: Optional[Minio],
     ) -> None:
         pass
 
 
 class NoStorage(StateStorage):
+    """
+    Indicates no ephemeral override (vanilla Terraform). read/write => do nothing.
+    """
+
     def __init__(self, root_module: str, workspace: Optional[str] = None) -> None:
         super().__init__(root_module, workspace)
 
     async def read_ciphertext(
-        self,
-        *,
-        vault_client: Optional[AsyncVaultClient] = None,
-        minio_client: Optional[Minio] = None,
+        self, *, vault_client: Optional[AsyncVaultClient], minio_client: Optional[Minio]
     ) -> Optional[str]:
         return None
 
@@ -72,13 +83,17 @@ class NoStorage(StateStorage):
         self,
         ciphertext: str,
         *,
-        vault_client: Optional[AsyncVaultClient] = None,
-        minio_client: Optional[Minio] = None,
+        vault_client: Optional[AsyncVaultClient],
+        minio_client: Optional[Minio],
     ) -> None:
         pass
 
 
 class VaultKVStorage(StateStorage):
+    """
+    Stores ciphertext in Vault's KV under "secret/data/amoebius/terraform-backends/<root>/<ws>"
+    """
+
     def __init__(self, root_module: str, workspace: Optional[str] = None) -> None:
         super().__init__(root_module, workspace)
 
@@ -86,16 +101,13 @@ class VaultKVStorage(StateStorage):
         return f"amoebius/terraform-backends/{self.root_module}/{self.workspace}"
 
     async def read_ciphertext(
-        self,
-        *,
-        vault_client: Optional[AsyncVaultClient] = None,
-        minio_client: Optional[Minio] = None,
+        self, *, vault_client: Optional[AsyncVaultClient], minio_client: Optional[Minio]
     ) -> Optional[str]:
         if not vault_client:
-            raise RuntimeError("VaultKVStorage requires vault_client.")
+            raise RuntimeError("VaultKVStorage requires a vault_client.")
         try:
-            raw = await vault_client.read_secret(self._kv_path())
-            return raw.get("ciphertext")
+            resp = await vault_client.read_secret(self._kv_path())
+            return resp.get("ciphertext")
         except RuntimeError as ex:
             if "404" in str(ex):
                 return None
@@ -105,15 +117,20 @@ class VaultKVStorage(StateStorage):
         self,
         ciphertext: str,
         *,
-        vault_client: Optional[AsyncVaultClient] = None,
-        minio_client: Optional[Minio] = None,
+        vault_client: Optional[AsyncVaultClient],
+        minio_client: Optional[Minio],
     ) -> None:
         if not vault_client:
-            raise RuntimeError("VaultKVStorage requires vault_client.")
+            raise RuntimeError("VaultKVStorage requires a vault_client.")
         await vault_client.write_secret(self._kv_path(), {"ciphertext": ciphertext})
 
 
 class MinioStorage(StateStorage):
+    """
+    Stores ciphertext in MinIO object bucket: <root>/<workspace>.enc
+    We do blocking calls in a threadpool, so we pass minio_client.
+    """
+
     def __init__(
         self,
         root_module: str,
@@ -127,13 +144,11 @@ class MinioStorage(StateStorage):
         return f"{self.root_module}/{self.workspace}.enc"
 
     async def read_ciphertext(
-        self,
-        *,
-        vault_client: Optional[AsyncVaultClient] = None,
-        minio_client: Optional[Minio] = None,
+        self, *, vault_client: Optional[AsyncVaultClient], minio_client: Optional[Minio]
     ) -> Optional[str]:
         if not minio_client:
-            raise RuntimeError("MinioStorage requires minio_client.")
+            raise RuntimeError("MinioStorage requires a minio_client.")
+
         loop = asyncio.get_running_loop()
         response = None
         try:
@@ -156,11 +171,11 @@ class MinioStorage(StateStorage):
         self,
         ciphertext: str,
         *,
-        vault_client: Optional[AsyncVaultClient] = None,
-        minio_client: Optional[Minio] = None,
+        vault_client: Optional[AsyncVaultClient],
+        minio_client: Optional[Minio],
     ) -> None:
         if not minio_client:
-            raise RuntimeError("MinioStorage requires minio_client.")
+            raise RuntimeError("MinioStorage requires a minio_client.")
 
         loop = asyncio.get_running_loop()
         data_bytes = ciphertext.encode("utf-8")
@@ -182,16 +197,20 @@ class MinioStorage(StateStorage):
 # -----------------------------------------------------------------------------
 # Encryption Helpers
 # -----------------------------------------------------------------------------
-@async_retry(retries=30, noisy=True)
+@async_retry(retries=30)
 async def _encrypt_and_store(
     storage: StateStorage,
-    ephemeral_file: str,
+    ephemeral_path: str,
     vault_client: AsyncVaultClient,
     minio_client: Optional[Minio],
     transit_key_name: str,
 ) -> None:
-    async with aiofiles.open(ephemeral_file, "rb") as f:
+    """
+    Read ephemeral_path -> encrypt => store in 'storage'. Retries on failures.
+    """
+    async with aiofiles.open(ephemeral_path, "rb") as f:
         plaintext = await f.read()
+
     ciphertext = await vault_client.encrypt_transit_data(transit_key_name, plaintext)
     await storage.write_ciphertext(
         ciphertext, vault_client=vault_client, minio_client=minio_client
@@ -205,6 +224,9 @@ async def _decrypt_to_file(
     minio_client: Optional[Minio],
     transit_key_name: Optional[str],
 ) -> None:
+    """
+    If we rely on Vault, read ciphertext from storage -> decrypt -> ephemeral_path.
+    """
     if not transit_key_name or isinstance(storage, NoStorage) or not vault_client:
         return
     ciphertext = await storage.read_ciphertext(
@@ -225,6 +247,9 @@ async def _encrypt_from_file(
     minio_client: Optional[Minio],
     transit_key_name: Optional[str],
 ) -> None:
+    """
+    If we rely on Vault, read ephemeral_path -> encrypt -> store => remove ephemeral file.
+    """
     try:
         if not transit_key_name or isinstance(storage, NoStorage) or not vault_client:
             return
@@ -237,7 +262,7 @@ async def _encrypt_from_file(
 
 
 # -----------------------------------------------------------------------------
-# Async context managers
+# Async context managers for ephemeral usage and optional tfvars
 # -----------------------------------------------------------------------------
 @asynccontextmanager
 async def ephemeral_tfstate_if_needed(
@@ -246,13 +271,28 @@ async def ephemeral_tfstate_if_needed(
     minio_client: Optional[Minio],
     transit_key_name: Optional[str],
 ) -> AsyncGenerator[Optional[str], None]:
+    """
+    If ephemeral usage is needed => create /dev/shm file, decrypt partial state,
+    then re-encrypt on exit. Also check if Vault is sealed => raise to avoid Terraform usage.
+    """
     ephemeral_needed = not (isinstance(storage, NoStorage) and not transit_key_name)
     if not ephemeral_needed:
         yield None
         return
 
+    # If ephemeral usage => we rely on Vault. Check if sealed:
+    if not vault_client:
+        raise RuntimeError("Vault usage required, but no vault_client is provided.")
+
+    sealed = await vault_client.is_vault_sealed()
+    if sealed:
+        raise RuntimeError(
+            "Vault is sealed/unavailable; cannot proceed with Terraform ephemeral usage."
+        )
+
     fd, ephemeral_path = tempfile.mkstemp(dir="/dev/shm", suffix=".tfstate")
     os.close(fd)
+
     await _decrypt_to_file(
         storage, ephemeral_path, vault_client, minio_client, transit_key_name
     )
@@ -266,12 +306,11 @@ async def ephemeral_tfstate_if_needed(
 
 @asynccontextmanager
 async def maybe_tfvars(
-    action: str,
-    variables: Optional[Dict[str, Any]],
+    action: str, variables: Optional[Dict[str, Any]]
 ) -> AsyncGenerator[List[str], None]:
     """
-    If action is 'apply' or 'destroy' and variables is not None, yield ['-var-file', 'somefile'].
-    Else yield [].
+    If action is 'apply' or 'destroy' & variables exist => yield ['-var-file', tmp_path].
+    Otherwise => yield [].
     """
     if action in ("apply", "destroy") and variables:
         fd, tfvars_file = tempfile.mkstemp(dir="/dev/shm", suffix=".auto.tfvars.json")
@@ -288,25 +327,22 @@ async def maybe_tfvars(
 
 
 # -----------------------------------------------------------------------------
-# Building the base command
+# Base Command Builders
 # -----------------------------------------------------------------------------
 def make_base_command(action: str, override_lock: bool, reconfigure: bool) -> List[str]:
     """
-    Creates the base command for Terraform. If action is show => add '-json',
-    if apply/destroy => add '-auto-approve', etc.
+    Construct a Terraform command list. If action=show => add -json,
+    if action in apply/destroy => add -auto-approve, etc.
     """
-    cmd: List[str] = ["terraform", action, "-no-color"]
-
+    cmd = ["terraform", action, "-no-color"]
     if action == "show":
         cmd.append("-json")
     elif action in ("apply", "destroy"):
         cmd.append("-auto-approve")
         if override_lock:
             cmd.append("-lock=false")
-
     if action == "init" and reconfigure:
         cmd.append("-reconfigure")
-
     return cmd
 
 
@@ -316,18 +352,17 @@ def build_final_command(
     tfvars_args: List[str],
 ) -> List[str]:
     """
-    Returns a new list representing the final command,
-    adding ephemeral usage or tfvars usage if needed.
+    Combine the base_cmd, ephemeral usage, and tfvars usage into a final List[str].
     """
-    final = list(base_cmd)
-    final.extend(tfvars_args)
+    final_cmd = list(base_cmd)
+    final_cmd.extend(tfvars_args)
     if ephemeral_path:
-        final.extend(["-backend=false", "-state", ephemeral_path])
-    return final
+        final_cmd.extend(["-backend=false", "-state", ephemeral_path])
+    return final_cmd
 
 
 # -----------------------------------------------------------------------------
-# Single internal command
+# The Single Internal Command
 # -----------------------------------------------------------------------------
 async def _terraform_command(
     action: str,
@@ -345,14 +380,9 @@ async def _terraform_command(
     sensitive: bool,
     capture_output: bool,
 ) -> Optional[str]:
-    """
-    DRY internal function: runs 'terraform <action>' with ephemeral usage if needed,
-    plus optional tfvars usage. If capture_output=True, returns the stdout.
-    """
     ws = workspace or "default"
     store = storage or NoStorage(root_name, ws)
     terraform_dir = os.path.join(base_path, root_name)
-
     if not os.path.isdir(terraform_dir):
         raise ValueError(f"Terraform directory not found: {terraform_dir}")
 
@@ -360,7 +390,7 @@ async def _terraform_command(
 
     async def run_tf(cmd_list: List[str]) -> str:
         return await run_command(
-            cmd_list, sensitive=sensitive, env=env, cwd=terraform_dir, retries=1
+            cmd_list, sensitive=sensitive, env=env, cwd=terraform_dir
         )
 
     async with ephemeral_tfstate_if_needed(
@@ -387,6 +417,9 @@ async def init_terraform(
     reconfigure: bool = False,
     sensitive: bool = True,
 ) -> None:
+    """
+    Runs 'terraform init'. If ephemeral usage is needed, checks Vault seal status first.
+    """
     await _terraform_command(
         action="init",
         root_name=root_name,
@@ -418,6 +451,9 @@ async def apply_terraform(
     variables: Optional[Dict[str, Any]] = None,
     sensitive: bool = True,
 ) -> None:
+    """
+    Runs 'terraform apply -auto-approve'. If ephemeral usage is needed, checks Vault seal status first.
+    """
     await _terraform_command(
         action="apply",
         root_name=root_name,
@@ -449,6 +485,9 @@ async def destroy_terraform(
     variables: Optional[Dict[str, Any]] = None,
     sensitive: bool = True,
 ) -> None:
+    """
+    Runs 'terraform destroy -auto-approve'. If ephemeral usage is needed, checks Vault seal status first.
+    """
     await _terraform_command(
         action="destroy",
         root_name=root_name,
@@ -478,6 +517,9 @@ async def read_terraform_state(
     transit_key_name: Optional[str] = None,
     sensitive: bool = True,
 ) -> TerraformState:
+    """
+    Runs 'terraform show -json', returning a TerraformState. If ephemeral usage is needed, checks vault seal status.
+    """
     output = await _terraform_command(
         action="show",
         root_name=root_name,
@@ -500,6 +542,10 @@ async def read_terraform_state(
 def get_output_from_state(
     state: TerraformState, output_name: str, output_type: Type[T]
 ) -> T:
+    """
+    Retrieves a typed output from a TerraformState object.
+    Raises KeyError if not found, ValueError if type mismatch.
+    """
     output_val = state.values.outputs.get(output_name)
     if output_val is None:
         raise KeyError(f"Output '{output_name}' not found in Terraform state.")
