@@ -2,13 +2,6 @@
 # main.tf
 ###############################################################################
 terraform {
-  backend "kubernetes" {
-    secret_suffix     = "minio-standalone"
-    load_config_file  = false
-    namespace         = "amoebius"
-    in_cluster_config = true
-  }
-
   required_version = ">= 1.0.0"
 
   required_providers {

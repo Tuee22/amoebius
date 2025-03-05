@@ -286,6 +286,10 @@ async def configure_vault(
     path "transit/*/amoebius/*" {
         capabilities = ["update"]
     }
+
+    path "sys/policies/acl/*" {
+        capabilities = ["create", "read", "update", "delete", "list"]
+    }
     """
     await run_command(
         ["vault", "policy", "write", "amoebius-policy", "-"],
