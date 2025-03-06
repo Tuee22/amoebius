@@ -2,8 +2,8 @@
 amoebius/utils/minio.py
 
 Provides a MinioAdminClient for performing MinIO administrative actions
-(create buckets, create/delete users, attach policies, etc.) with AWS
-Signature Version 4 authentication using aiohttp.
+(create buckets, create/delete users, attach policies, etc.) using AWS
+Signature Version 4 authentication with aiohttp.
 """
 
 from __future__ import annotations
@@ -13,17 +13,19 @@ import datetime
 import hashlib
 import hmac
 import json
-import logging
 import urllib.parse
 from types import TracebackType
 from typing import Dict, List, Optional, Tuple, Type, TypeVar
 
 import aiohttp
 
-from amoebius.models.minio import MinioSettings, MinioPolicySpec  # Example imports
-from amoebius.utils.async_retry import async_retry  # Decorator for retry logic
+from amoebius.utils.async_retry import async_retry
+from amoebius.models.minio import (
+    MinioSettings,
+    MinioPolicySpec,
+    MinioBucketPermission,
+)
 
-logger = logging.getLogger(__name__)
 
 T = TypeVar("T", bound=BaseException)
 
@@ -35,21 +37,13 @@ class MinioAdminClient:
     can optionally retry on transient errors via the @async_retry decorator.
 
     Attributes:
-        _REGION (str):
-            The AWS SigV4 region placeholder (hardcoded as 'us-east-1').
-        _SERVICE (str):
-            The AWS SigV4 service placeholder (hardcoded as 's3').
-        _settings (MinioSettings):
-            Holds information about the MinIO endpoint and root credentials.
-        _timeout (aiohttp.ClientTimeout):
-            The total request timeout for all operations (defaults to 10s).
-        _closed (bool):
-            Indicates whether the underlying HTTP session has been closed.
-        _session (Optional[aiohttp.ClientSession]):
-            The aiohttp session. Created in __aenter__ and closed in __aexit__.
-        _signing_key_cache (Dict[str, bytes]):
-            A cache of derived signing keys by date, used to avoid recomputing
-            the SigV4 HMAC chain on each request.
+        _REGION (str): Hardcoded SigV4 region placeholder (us-east-1).
+        _SERVICE (str): Hardcoded SigV4 service placeholder (s3).
+        _settings (MinioSettings): MinIO connection settings (URL, creds, etc.).
+        _timeout (aiohttp.ClientTimeout): Total request timeout for all ops.
+        _closed (bool): Tracks if the aiohttp session has been closed.
+        _session (Optional[aiohttp.ClientSession]): The active aiohttp session, or None if closed.
+        _signing_key_cache (Dict[str, bytes]): Cache of derived signing keys by date for SigV4.
     """
 
     _REGION = "us-east-1"
@@ -64,9 +58,9 @@ class MinioAdminClient:
 
         Args:
             settings (MinioSettings):
-                The MinIO configuration, including URL, access key, and secret key.
+                The MinIO connection details (URL, access key, secret key).
             total_timeout (float, optional):
-                The total request timeout (in seconds) for all operations.
+                Total request timeout in seconds for all operations.
                 Defaults to 10.0.
         """
         self._settings = settings
@@ -75,14 +69,14 @@ class MinioAdminClient:
         self._closed = False
         self._session: Optional[aiohttp.ClientSession] = None
 
-        # Caches signing keys per date for SigV4
+        # Cache for derived signing keys (one per date, region, service)
         self._signing_key_cache: Dict[str, bytes] = {}
 
     async def __aenter__(self) -> MinioAdminClient:
         """Creates and enters an async context with an aiohttp session.
 
         Returns:
-            MinioAdminClient: The current client instance, ready for requests.
+            MinioAdminClient: The current client instance, ready to make requests.
         """
         self._session = aiohttp.ClientSession(timeout=self._timeout)
         return self
@@ -93,7 +87,7 @@ class MinioAdminClient:
         exc_val: Optional[T],
         exc_tb: Optional[TracebackType],
     ) -> None:
-        """Closes the aiohttp session on context exit.
+        """Closes the aiohttp session when exiting the async context.
 
         Args:
             exc_type (Optional[Type[T]]): Exception type if raised in context.
@@ -113,8 +107,7 @@ class MinioAdminClient:
         """Creates a new bucket in MinIO.
 
         Args:
-            bucket_name (str):
-                The name of the bucket to create.
+            bucket_name (str): The name of the bucket to create.
 
         Raises:
             RuntimeError: If the operation fails with an unexpected status code.
@@ -132,8 +125,7 @@ class MinioAdminClient:
         """Deletes a bucket from MinIO.
 
         Args:
-            bucket_name (str):
-                The name of the bucket to delete.
+            bucket_name (str): The name of the bucket to delete.
 
         Raises:
             RuntimeError: If the operation fails with an unexpected status code.
@@ -151,10 +143,8 @@ class MinioAdminClient:
         """Creates a new user in MinIO.
 
         Args:
-            username (str):
-                The name (access key) of the new user.
-            password (str):
-                The user's secret key (password).
+            username (str): The name (access key) of the new user.
+            password (str): The user's secret key (password).
 
         Raises:
             RuntimeError: If the operation fails with an unexpected status code.
@@ -176,8 +166,7 @@ class MinioAdminClient:
         """Deletes a user from MinIO.
 
         Args:
-            username (str):
-                The user's name (access key).
+            username (str): The user's name (access key).
 
         Raises:
             RuntimeError: If the operation fails with an unexpected status code.
@@ -225,8 +214,7 @@ class MinioAdminClient:
         """Deletes a named policy from MinIO.
 
         Args:
-            policy_name (str):
-                The unique policy name to delete.
+            policy_name (str): The unique policy name to delete.
 
         Raises:
             RuntimeError: If the operation fails with an unexpected status code.
@@ -247,10 +235,8 @@ class MinioAdminClient:
         """Attaches an existing policy to a user in MinIO.
 
         Args:
-            username (str):
-                The user's name (access key).
-            policy_name (str):
-                The name of the policy to attach.
+            username (str): The user's name (access key).
+            policy_name (str): The name of the policy to attach.
 
         Raises:
             RuntimeError: If the operation fails with an unexpected status code.
@@ -283,11 +269,11 @@ class MinioAdminClient:
 
         Args:
             method (str):
-                The HTTP method to use (e.g. 'GET', 'POST', 'PUT', 'DELETE').
+                The HTTP method to use (e.g., 'GET', 'POST', 'PUT', 'DELETE').
             url (str):
                 The full request URL (including query parameters).
             body (Optional[str], optional):
-                The JSON string to send as the request body. Defaults to None.
+                A JSON string to send as the request body. Defaults to None.
 
         Returns:
             Tuple[str, int]:
@@ -333,7 +319,7 @@ class MinioAdminClient:
 
         Args:
             method (str):
-                The HTTP method (e.g. 'GET', 'POST').
+                The HTTP method (e.g., 'GET', 'POST').
             url (str):
                 The full request URL with query parameters.
             body (bytes):
@@ -425,32 +411,28 @@ class MinioAdminClient:
 
         Args:
             policy_items (List[MinioPolicySpec]):
-                A list of MinioPolicySpec objects, each specifying a bucket and permission.
+                A list of (bucket_name, permission) pairs.
 
         Returns:
             str:
                 A JSON string representing the policy, suitable for MinIO admin calls.
         """
-        statements = []
-        for item in policy_items:
-            if item.permission == "READ":
-                actions = ["s3:GetObject"]
-            elif item.permission == "WRITE":
-                actions = ["s3:PutObject"]
-            elif item.permission == "READ_WRITE":
-                actions = ["s3:GetObject", "s3:PutObject"]
-            else:
-                # If NONE or unknown, skip or handle differently
-                # e.g., skip entirely
-                continue
+        # Map each enum permission to the corresponding S3 actions
+        PERMISSION_ACTIONS = {
+            MinioBucketPermission.READ: ["s3:GetObject"],
+            MinioBucketPermission.WRITE: ["s3:PutObject"],
+            MinioBucketPermission.READWRITE: ["s3:GetObject", "s3:PutObject"],
+        }
 
-            statements.append(
-                {
-                    "Effect": "Allow",
-                    "Action": actions,
-                    "Resource": f"arn:aws:s3:::{item.bucket_name}/*",
-                }
-            )
+        statements = [
+            {
+                "Effect": "Allow",
+                "Action": PERMISSION_ACTIONS[item.permission],
+                "Resource": f"arn:aws:s3:::{item.bucket_name}/*",
+            }
+            for item in policy_items
+            if item.permission in PERMISSION_ACTIONS
+        ]
 
         doc = {
             "Version": "2012-10-17",
@@ -460,22 +442,22 @@ class MinioAdminClient:
 
 
 async def _demo() -> None:
-    """Demonstrates usage of the MinioAdminClient for testing or local dev."""
+    """Demonstrates usage of MinioAdminClient in a test scenario."""
     from amoebius.models.minio import MinioSettings
-
-    logging.basicConfig(level=logging.INFO)
 
     # Example credentials
     settings = MinioSettings(
         url="http://localhost:9000",
         access_key="admin",
-        secret_key="password123",
+        secret_key="admin123",
         secure=False,
     )
 
     async with MinioAdminClient(settings) as client:
-        await client.create_bucket("demo-bucket")
-        await client.delete_bucket("demo-bucket")
+        bucket_name = "demo-bucket"
+        await client.create_bucket(bucket_name)
+        # ... do more operations ...
+        await client.delete_bucket(bucket_name)
 
 
 if __name__ == "__main__":

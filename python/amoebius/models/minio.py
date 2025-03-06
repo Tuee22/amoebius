@@ -1,9 +1,9 @@
 """
 amoebius/models/minio.py
 
-Holds all pydantic models relevant to Minio usage:
+Holds all Pydantic models (and Enums) relevant to Minio usage:
   - MinioSettings
-  - MinioBucketPermission
+  - MinioBucketPermission (Enum)
   - MinioPolicySpec
   - MinioServiceAccountAccess
   - MinioDeployment
