@@ -1,31 +1,14 @@
 """
 amoebius/utils/minio.py
 
-This module provides:
-
-1. MinioSettings (pydantic model) containing just url, access_key, and secret_key.
-   - We omit "secure" or "region" from the model to minimize confusion.
-
-2. get_minio_client(...) which can:
-   - Read credentials from Vault (vault_client + vault_path), or
-   - Use a direct MinioSettings instance (direct_settings),
-   and also takes a "secure" bool to decide HTTPS vs. HTTP.
-
-3. create_minio_identity(...):
-   - Fetches root Minio credentials from Vault (amoebius/minio/root).
-   - Creates a root Minio client.
-   - Creates a new user/identity in Minio (placeholder) with the specified bucket permissions.
-   - Validates that user's credential with MinioSettings, then stores it in Vault at
-     amoebius/minio/id/<role_name>.
-   - Calls put_readonly_kv_policy(...) to create a narrower Vault policy
-     that grants read-only access to just that identity's secret path.
-
-4. put_readonly_kv_policy(...) that only grants read to
-   secret/data/amoebius/minio/id/<some_role> and ensures the policy name is safe.
-
-5. deploy_minio_cluster(...) and destroy_minio_cluster(...):
-   - Terraform-based placeholders for ephemeral usage via VaultKVStorage.
-   - Root credential is stored at amoebius/minio/root in Vault.
+Provides:
+  - MinioSettings (pydantic) with url, access_key, secret_key
+  - get_minio_client(...) that either loads from Vault or uses direct credentials
+  - create_minio_identity(...) to create a new identity in Minio (placeholder admin logic),
+    store it in Vault, and set a read-only policy for that path.
+  - put_readonly_kv_policy(...) that only grants 'read' to secret/data/amoebius/minio/id/<role_name>
+  - deploy_minio_cluster(...) / destroy_minio_cluster(...) that use ephemeral Terraform usage
+    plus a root credential stored in Vault at amoebius/minio/root
 """
 
 from __future__ import annotations
@@ -50,30 +33,29 @@ class MinioSettings(BaseModel):
     A pydantic model describing Minio connection settings.
 
     Attributes:
-        url (str): FQDN endpoint for the Minio server, e.g. "http://minio.minio.svc.cluster.local:9000".
-        access_key (str): The Minio user's access key (username).
-        secret_key (str): The Minio user's secret key (password).
+        url: The Minio server endpoint, e.g. "http://minio.minio.svc.cluster.local:9000".
+        access_key: Minio identity's access key (username).
+        secret_key: Minio identity's secret key (password).
     """
 
     url: str = Field(
         ...,
-        description="The Minio server endpoint, e.g. 'http://minio.minio.svc.cluster.local:9000'.",
+        description="Minio server endpoint, e.g. 'http://minio.minio.svc.cluster.local:9000'.",
     )
-    access_key: str = Field(..., description="Minio identity's access key (username).")
-    secret_key: str = Field(..., description="Minio identity's secret key (password).")
+    access_key: str = Field(..., description="Minio identity access key (username).")
+    secret_key: str = Field(..., description="Minio identity secret key (password).")
 
 
 def _get_minio_client_from_settings(settings: MinioSettings, secure: bool) -> Minio:
     """
-    Internal helper to create a Minio client from a MinioSettings instance plus
-    a secure flag for HTTPS.
+    Internal helper to create a Minio client from MinioSettings, plus a secure (bool).
 
     Args:
-        settings (MinioSettings): The Minio configuration (URL, keys).
-        secure (bool): If True => use HTTPS, else HTTP.
+        settings: The MinioSettings object with URL, access key, secret key.
+        secure: If True => use HTTPS, else HTTP.
 
     Returns:
-        Minio: A Minio client configured from the settings + secure mode.
+        A Minio client.
     """
     return Minio(
         endpoint=settings.url.replace("http://", "").replace("https://", ""),
@@ -90,44 +72,35 @@ async def get_minio_client(
     secure: bool = True,
 ) -> Minio:
     """
-    Retrieve a Minio client, either by:
-      - Reading credentials from Vault (vault_client + vault_path), or
-      - Using a direct MinioSettings instance (direct_settings).
+    Retrieve a Minio client via either:
+      1) Vault-sourced credentials at 'secret/data/<vault_path>'
+      2) Direct MinioSettings
     Exactly one approach must be used.
 
     Args:
-        vault_client (Optional[AsyncVaultClient]):
-            If retrieving credentials from Vault, supply this client.
-        vault_path (Optional[str]):
-            The path under 'secret/data/<vault_path>' to retrieve credentials.
-            Must contain "url", "access_key", "secret_key".
-        direct_settings (Optional[MinioSettings]):
-            If providing credentials directly, pass them here.
-        secure (bool, optional):
-            If True => use HTTPS, else HTTP. Defaults to True if retrieving from Vault.
+        vault_client: If loading from Vault, supply the AsyncVaultClient.
+        vault_path: The vault KV path storing {url, access_key, secret_key}.
+        direct_settings: If using direct credentials, supply MinioSettings.
+        secure: If True => use HTTPS, else HTTP.
 
     Returns:
-        Minio: A configured Minio client instance.
+        A Minio client.
 
     Raises:
-        RuntimeError: If neither or both of (vault_path, direct_settings) are provided,
-                      or if Vault credentials are malformed,
-                      or if vault_client is missing when vault_path is used.
+        RuntimeError if neither or both approaches are provided, or if
+        Vault credentials are invalid, or if vault_client is missing.
     """
-    # Validate approach
     if (vault_path is None) == (direct_settings is None):
         raise RuntimeError(
             "Exactly one of (vault_path, direct_settings) must be provided."
         )
 
-    # If direct settings are provided, just use them
     if direct_settings is not None:
         return _get_minio_client_from_settings(direct_settings, secure=secure)
 
-    # Otherwise, fetch from Vault
     if vault_client is None or vault_path is None:
         raise RuntimeError(
-            "Must provide vault_client and vault_path to load from Vault."
+            "Must provide vault_client and vault_path for Vault-based credentials."
         )
 
     secret_data: Dict[str, Any] = await vault_client.read_secret(vault_path)
@@ -139,7 +112,7 @@ async def get_minio_client(
         )
     except ValidationError as exc:
         raise RuntimeError(
-            f"Invalid Minio credentials in Vault path '{vault_path}': {exc}"
+            f"Invalid Minio credentials at '{vault_path}': {exc}"
         ) from exc
 
     return _get_minio_client_from_settings(settings, secure=secure)
@@ -151,33 +124,25 @@ async def put_readonly_kv_policy(
     role_name: str,
 ) -> None:
     """
-    Create or update a narrow Vault policy that only grants 'read'
-    to secret/data/amoebius/minio/id/<role_name>.
-
-    This ensures the policy is confined to the path "amoebius/minio/id/<role_name>",
-    and we prevent forward slash usage in the role_name to keep the path consistent.
+    Create/update a read-only policy for secret/data/amoebius/minio/id/<role_name>.
 
     Args:
-        vault_client (AsyncVaultClient): The Vault client to put the policy.
-        policy_name (str): The name of the policy, e.g. "minio-id-someuser".
-        role_name (str): The portion for 'amoebius/minio/id/<role_name>'.
+        vault_client: The AsyncVaultClient to call put_policy(...).
+        policy_name: The name of the policy, e.g. "minio-id-devuser".
+        role_name: The portion used in the path amoebius/minio/id/<role_name>.
 
     Raises:
-        RuntimeError: If policy creation fails or if role_name is invalid.
+        RuntimeError: If role_name or policy_name contain forward slashes, or if policy write fails.
     """
-    # Validate the role_name for safety
     if "/" in role_name:
         raise RuntimeError(f"role_name '{role_name}' must not contain forward slashes.")
 
-    # Build the narrower policy text
     kv_full_path = f"amoebius/minio/id/{role_name}"
     policy_text = f"""
 path "secret/data/{kv_full_path}" {{
   capabilities = ["read"]
 }}
 """
-
-    # Also validate the policy_name
     if "/" in policy_name:
         raise RuntimeError(
             f"policy_name '{policy_name}' must not contain forward slashes."
@@ -194,54 +159,50 @@ async def create_minio_identity(
     secure: bool = False,
 ) -> None:
     """
-    Creates a new Minio identity (user) with the specified bucket permissions, by:
-      1) Retrieving the Minio root credential from 'amoebius/minio/root' in Vault.
-      2) Creating a root Minio client via get_minio_client(...).
-      3) Creating a new user in Minio (placeholder logic, as minio-py isn't an admin library).
-      4) Validate the new credential with MinioSettings, store in Vault at 'amoebius/minio/id/{role_name}'.
-      5) Call put_readonly_kv_policy(...) to create a narrow policy granting read-only to that path.
+    Creates a Minio identity with given bucket perms (placeholder), storing credentials in Vault.
+
+    Steps:
+      1) Retrieve root Minio credential from 'amoebius/minio/root'.
+      2) Create root Minio client.
+      3) Create user in Minio (placeholder).
+      4) Validate new user's credentials with MinioSettings, store in vault at 'amoebius/minio/id/<role_name>'.
+      5) Create a read-only policy for that path.
 
     Args:
-        vault_client (AsyncVaultClient): For reading root credentials & creating the new identity's policy.
-        role_name (str): The identity name (and user access key).
-        buckets_permissions (Dict[str, str]): Mapping of {bucket_name -> permission} placeholders.
-        fqdn_service (str): The FQDN for Minio, e.g. "minio.minio.svc.cluster.local:9000".
-        secure (bool): Whether to connect to the root client via HTTPS. Defaults to False.
+        vault_client: The Vault client for reading/writing secrets + policy.
+        role_name: The identity name (also used as the new user's access_key).
+        buckets_permissions: A dict of bucket => perms (placeholder logic).
+        fqdn_service: The FQDN for Minio, e.g. "minio.minio.svc.cluster.local:9000".
+        secure: If True => use HTTPS for the Minio client.
 
     Raises:
-        RuntimeError: If reading/writing Vault secrets fails or user creation fails.
+        RuntimeError if reading/writing secrets or policy fails.
     """
-    # 1) Read the root credential from Vault
     root_cred_path = "amoebius/minio/root"
     root_secret = await vault_client.read_secret(root_cred_path)
 
-    # 2) Create a root Minio client
     root_client = await get_minio_client(
         direct_settings=MinioSettings(
-            url=f"http://{fqdn_service}" if not secure else f"https://{fqdn_service}",
+            url=f"https://{fqdn_service}" if secure else f"http://{fqdn_service}",
             access_key=root_secret["root_user"],
             secret_key=root_secret["root_password"],
         ),
         secure=secure,
     )
 
-    # 3) Create the new user in Minio (placeholder logic)
-    # In reality, you'd use an admin approach to attach a minio policy that
-    # grants {bucket => permission} e.g. "read", "readwrite".
     new_access_key = role_name
     new_secret_key = secrets.token_urlsafe(16)
-    # e.g.: root_client.admin_add_user(new_access_key, new_secret_key)
-    # for bucket, perm in buckets_permissions.items():
-    #    # create a minio policy with perm for that bucket, attach to user
-    #    pass
 
-    # 4) Validate new credential with MinioSettings, store in Vault
+    # e.g. root_client.admin_add_user(new_access_key, new_secret_key)
+    # for bucket, perm in buckets_permissions.items():
+    #     # e.g. set policy
+    #     pass
+
     new_settings = MinioSettings(
-        url=f"http://{fqdn_service}" if not secure else f"https://{fqdn_service}",
+        url=f"https://{fqdn_service}" if secure else f"http://{fqdn_service}",
         access_key=new_access_key,
         secret_key=new_secret_key,
     )
-    # If this raises ValidationError => something is wrong with the new user.
 
     new_identity_path = f"amoebius/minio/id/{role_name}"
     new_secret: Dict[str, Any] = {
@@ -251,7 +212,6 @@ async def create_minio_identity(
     }
     await vault_client.write_secret(new_identity_path, new_secret)
 
-    # 5) Create a narrower read-only Vault policy for that path
     policy_name = f"minio-id-{role_name}"
     await put_readonly_kv_policy(vault_client, policy_name, role_name)
 
@@ -265,23 +225,24 @@ async def deploy_minio_cluster(
     transit_key_name: Optional[str] = "amoebius/terraform-backends",
 ) -> None:
     """
-    Deploy a Minio cluster via Terraform, storing ephemeral TF state in Vault via VaultKVStorage.
-    The root credential is found or created at 'amoebius/minio/root'.
+    Deploy a Minio cluster via Terraform, storing ephemeral TF state in Vault.
 
     Args:
-        vault_client: For reading/writing the root credential in Vault.
-        base_path: The Terraform root path (/amoebius/terraform/roots/minio).
-        workspace: Terraform workspace name ("default").
-        env: Env vars for Terraform.
-        sensitive: If True, mask Terraform logs.
-        transit_key_name: Vault transit key name for ephemeral encryption.
+        vault_client: For reading/writing the minio root credentials.
+        base_path: Path to the Minio terraform root.
+        workspace: The Terraform workspace.
+        env: Optional environment variables.
+        sensitive: If True, mask logs.
+        transit_key_name: Optional Vault transit key for ephemeral encryption.
+
+    Raises:
+        RuntimeError if reading or writing secrets fails.
     """
     root_cred_path = "amoebius/minio/root"
     try:
         root_secret = await vault_client.read_secret(root_cred_path)
     except RuntimeError as ex:
         if "404" in str(ex):
-            # Generate new root credential
             root_user = "admin"
             root_pass = secrets.token_urlsafe(16)
             root_secret = {"root_user": root_user, "root_password": root_pass}
@@ -289,7 +250,6 @@ async def deploy_minio_cluster(
         else:
             raise
 
-    # ephemeral TF variables
     variables = {
         "root_user": root_secret["root_user"],
         "root_password": root_secret["root_password"],
@@ -334,15 +294,15 @@ async def destroy_minio_cluster(
     transit_key_name: Optional[str] = "amoebius/terraform-backends",
 ) -> None:
     """
-    Destroy the Minio cluster using Terraform, ephemeral TF state stored in Vault.
+    Destroy a Minio cluster via Terraform, ephemeral TF state in Vault.
 
     Args:
-        vault_client: For ephemeral usage + reading root credentials if needed.
-        base_path: The Terraform root path (/amoebius/terraform/roots/minio).
-        workspace: Terraform workspace name ("default").
-        env: Environment variables for Terraform.
-        sensitive: If True, mask Terraform logs.
-        transit_key_name: Vault transit key name for ephemeral encryption.
+        vault_client: The Vault client for ephemeral usage and root cred reading.
+        base_path: The Terraform root path for Minio.
+        workspace: The Terraform workspace name.
+        env: Optional environment variables for Terraform.
+        sensitive: If True, mask logs.
+        transit_key_name: Optional Vault transit key name.
     """
     storage = VaultKVStorage(root_module="minio", workspace=workspace)
 

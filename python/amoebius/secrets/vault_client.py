@@ -4,9 +4,15 @@ amoebius/secrets/vault_client.py
 An asynchronous Vault client (AsyncVaultClient) that supports:
  - KV v2 (read, write, delete, list, history)
  - Transit encryption/decryption
- - Token management (K8s or direct token usage)
+ - Token management (Kubernetes or direct token usage)
  - Checking Vault seal status
  - Creating/deleting Vault ACL policies
+
+Usage:
+    from amoebius.secrets.vault_client import AsyncVaultClient
+    ...
+
+All functions are typed to pass mypy --strict, assuming a compatible environment.
 """
 
 from __future__ import annotations
@@ -21,17 +27,22 @@ from typing import Any, Dict, List, Optional, Type
 from amoebius.models.validator import validate_type
 from amoebius.models.vault import VaultSettings
 
-__all__ = ["AsyncVaultClient"]  # EXPLICIT EXPORT for mypy
+__all__ = ["AsyncVaultClient"]
 
 
 class AsyncVaultClient:
     """
     An asynchronous Vault client that manages:
       - KV v2 read/write/delete/list
-      - Transit encryption/decryption
+      - Transit encrypt/decrypt
       - Token acquisition & renewal
       - Checking Vault seal status
       - Creating/deleting Vault ACL policies
+
+    Typical usage:
+        settings = VaultSettings(...)
+        async with AsyncVaultClient(settings) as client:
+            secret = await client.read_secret("some/path")
     """
 
     _session: Optional[aiohttp.ClientSession]
@@ -60,6 +71,10 @@ class AsyncVaultClient:
         self._last_token_check = 0.0
 
     async def __aenter__(self) -> AsyncVaultClient:
+        """
+        Async context manager entry:
+        Creates an aiohttp session for usage within the client.
+        """
         self._session = aiohttp.ClientSession()
         return self
 
@@ -69,13 +84,20 @@ class AsyncVaultClient:
         exc_val: Optional[BaseException],
         exc_tb: Optional[Any],
     ) -> None:
+        """
+        Async context manager exit:
+        Closes the aiohttp session if open.
+        """
         if self._session:
             await self._session.close()
         self._session = None
 
     async def ensure_session(self) -> aiohttp.ClientSession:
         """
-        Ensure an aiohttp session is available.
+        Ensure an aiohttp session is available, creating one if not present.
+
+        Returns:
+            The active aiohttp.ClientSession.
         """
         if self._session is None:
             self._session = aiohttp.ClientSession()
@@ -83,10 +105,10 @@ class AsyncVaultClient:
 
     async def ensure_valid_token(self) -> None:
         """
-        Ensure we have a valid token, either direct or from K8s-based login or renewal.
+        Ensure we have a valid Vault token, performing login or renewal if needed.
 
         Raises:
-            RuntimeError if token acquisition or renewal fails.
+            RuntimeError: If token acquisition/renewal fails.
         """
         if self._direct_token is not None:
             if self._client_token is None:
@@ -125,10 +147,13 @@ class AsyncVaultClient:
 
     async def is_vault_sealed(self) -> bool:
         """
-        Check if Vault is sealed/unavailable by calling /v1/sys/seal-status.
+        Check if Vault is sealed or unavailable by calling /v1/sys/seal-status.
 
         Returns:
-            bool: True if sealed/unavailable, False if unsealed.
+            True if sealed/unavailable, False if unsealed.
+
+        Raises:
+            RuntimeError: If the request fails or status is non-200.
         """
         session = await self.ensure_session()
         url = f"{self._vault_addr}/v1/sys/seal-status"
@@ -140,10 +165,13 @@ class AsyncVaultClient:
 
     async def get_active_token(self) -> str:
         """
-        Obtain a valid token, returning it if successful.
+        Return the current valid Vault token, ensuring it's renewed or acquired first.
 
         Raises:
-            RuntimeError: If no valid token can be acquired.
+            RuntimeError: If no token can be acquired.
+
+        Returns:
+            The active Vault token string.
         """
         await self.ensure_valid_token()
         if not self._client_token:
@@ -155,7 +183,7 @@ class AsyncVaultClient:
         Internal method for K8s-based login or direct token usage.
 
         Raises:
-            RuntimeError on login failure or invalid token response.
+            RuntimeError: if login fails or the token is invalid.
         """
         if self._direct_token is not None:
             self._client_token = self._direct_token
@@ -209,6 +237,9 @@ class AsyncVaultClient:
     async def _get_token_info(self) -> Dict[str, Any]:
         """
         Internal method: retrieve token info from /v1/auth/token/lookup-self.
+
+        Returns:
+            A dict containing token details (ttl, etc.).
         """
         if not self._client_token:
             raise RuntimeError("Vault token is not set.")
@@ -226,8 +257,22 @@ class AsyncVaultClient:
             raise RuntimeError("lookup-self did not return 'data'")
         return data_obj
 
-    # KV V2
+    # ------------------------------
+    # KV V2 Methods
+    # ------------------------------
     async def read_secret(self, path: str) -> Dict[str, Any]:
+        """
+        Read a secret at path='secret/data/{path}' from the KV v2 engine.
+
+        Args:
+            path: The path under KV v2, e.g. "some/secret".
+
+        Returns:
+            A dict of the secret data.
+
+        Raises:
+            RuntimeError: If read fails or returns non-200.
+        """
         await self.ensure_valid_token()
         session = await self.ensure_session()
         if not self._client_token:
@@ -246,6 +291,19 @@ class AsyncVaultClient:
         return js
 
     async def write_secret(self, path: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Write a secret to KV v2 at path='secret/data/{path}'.
+
+        Args:
+            path: The KV path, e.g. "some/secret".
+            data: A dict of data to store.
+
+        Returns:
+            The Vault response JSON if 200, or empty if 204.
+
+        Raises:
+            RuntimeError: If write fails or status not in [200, 204].
+        """
         await self.ensure_valid_token()
         session = await self.ensure_session()
         if not self._client_token:
@@ -270,6 +328,19 @@ class AsyncVaultClient:
     async def write_secret_idempotent(
         self, path: str, data: Dict[str, Any]
     ) -> Dict[str, Any]:
+        """
+        Write a secret only if existing data differs or doesn't exist.
+
+        Args:
+            path: The KV path.
+            data: The data to store if new or changed.
+
+        Returns:
+            The Vault response if a write is performed, else {}.
+
+        Raises:
+            RuntimeError: If read/write fails or returns an error.
+        """
         existing_data: Optional[Dict[str, Any]] = None
         try:
             existing_data = await self.read_secret(path)
@@ -283,6 +354,16 @@ class AsyncVaultClient:
         return await self.write_secret(path, data)
 
     async def delete_secret(self, path: str, hard: bool = False) -> None:
+        """
+        Delete a secret from KV v2 (soft or hard).
+
+        Args:
+            path: The KV path.
+            hard: If True, delete metadata => all versions. Otherwise just the data.
+
+        Raises:
+            RuntimeError: If deletion fails with status not in [200, 204, 404].
+        """
         await self.ensure_valid_token()
         session = await self.ensure_session()
         if not self._client_token:
@@ -300,6 +381,18 @@ class AsyncVaultClient:
                 raise RuntimeError(f"{label} delete failed: {resp.status}, {raw_js}")
 
     async def list_secrets(self, path: str) -> List[str]:
+        """
+        List secrets under a path in KV v2 metadata.
+
+        Args:
+            path: The KV path to list (folder-like).
+
+        Returns:
+            A list of child keys if the path is found, else [].
+
+        Raises:
+            RuntimeError: If listing fails with status not in [200, 404].
+        """
         await self.ensure_valid_token()
         session = await self.ensure_session()
         if not path.endswith("/"):
@@ -322,6 +415,18 @@ class AsyncVaultClient:
         return keys
 
     async def secret_history(self, path: str) -> Dict[str, Any]:
+        """
+        Retrieve metadata about all versions for a KV v2 secret.
+
+        Args:
+            path: The KV path (no 'secret/data/' prefix needed).
+
+        Returns:
+            The metadata dict if found, else {} if 404.
+
+        Raises:
+            RuntimeError: If the request fails or status not in [200, 404].
+        """
         await self.ensure_valid_token()
         session = await self.ensure_session()
         if not self._client_token:
@@ -337,6 +442,11 @@ class AsyncVaultClient:
         return validate_type(raw_js, Dict[str, Any])
 
     async def revoke_self_token(self) -> None:
+        """
+        Revoke the current client token (token/self-revoke).
+
+        After this, the client token is cleared. Future operations require re-login.
+        """
         await self.ensure_valid_token()
         session = await self.ensure_session()
         if not self._client_token:
@@ -349,13 +459,29 @@ class AsyncVaultClient:
                 raise RuntimeError(f"Failed to revoke token: {resp.status}, {detail}")
         self._client_token = None
 
-    # Transit
+    # ------------------------------
+    # Transit Methods
+    # ------------------------------
     async def write_transit_key(
         self,
         key_name: str,
         idempotent: bool = False,
         params: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
+        """
+        Create or update a Vault transit key at path='transit/keys/{key_name}'.
+
+        Args:
+            key_name: The name of the transit key in Vault.
+            idempotent: If True, skip creation if already exists.
+            params: Additional JSON for key creation (e.g., type, exportable).
+
+        Returns:
+            The Vault response if newly created or updated, {} if skipped.
+
+        Raises:
+            RuntimeError: If the request fails or status is unexpected.
+        """
         await self.ensure_valid_token()
         session = await self.ensure_session()
         if not self._client_token:
@@ -372,7 +498,7 @@ class AsyncVaultClient:
                 elif r.status not in (404, 200):
                     c_js = await r.json()
                     raise RuntimeError(
-                        f"Error checking key existence: {r.status}, {c_js}"
+                        f"Error checking transit key existence: {r.status}, {c_js}"
                     )
         url = f"{self._vault_addr}/v1/transit/keys/{key_name}"
         payload = params or {}
@@ -392,6 +518,19 @@ class AsyncVaultClient:
         return {}
 
     async def encrypt_transit_data(self, key_name: str, plaintext: bytes) -> str:
+        """
+        Encrypt data using Vault's transit engine under 'transit/encrypt/{key_name}'.
+
+        Args:
+            key_name: The transit key name.
+            plaintext: Raw bytes to encrypt.
+
+        Returns:
+            The vault-format ciphertext string.
+
+        Raises:
+            RuntimeError: If encryption fails or status != 200.
+        """
         await self.ensure_valid_token()
         session = await self.ensure_session()
         if not self._client_token:
@@ -414,6 +553,19 @@ class AsyncVaultClient:
         return ct
 
     async def decrypt_transit_data(self, key_name: str, ciphertext: str) -> bytes:
+        """
+        Decrypt data using Vault's transit engine under 'transit/decrypt/{key_name}'.
+
+        Args:
+            key_name: The transit key name.
+            ciphertext: The vault-format ciphertext string.
+
+        Returns:
+            The raw decrypted bytes.
+
+        Raises:
+            RuntimeError: If decryption fails or status != 200.
+        """
         await self.ensure_valid_token()
         session = await self.ensure_session()
         if not self._client_token:
@@ -437,6 +589,19 @@ class AsyncVaultClient:
     async def encrypt_transit_dict(
         self, key_name: str, data_dict: Dict[str, Any]
     ) -> str:
+        """
+        Serialize a dict to JSON, then encrypt it using the named transit key.
+
+        Args:
+            key_name: The name of the transit key.
+            data_dict: The dictionary to be serialized and encrypted.
+
+        Returns:
+            The vault-format ciphertext string.
+
+        Raises:
+            RuntimeError if encryption fails or the response is invalid.
+        """
         import json
 
         raw = json.dumps(data_dict).encode("utf-8")
@@ -445,12 +610,35 @@ class AsyncVaultClient:
     async def decrypt_transit_dict(
         self, key_name: str, ciphertext: str
     ) -> Dict[str, Any]:
+        """
+        Decrypt a vault-format ciphertext, parse it as JSON, and return the dict.
+
+        Args:
+            key_name: The name of the transit key.
+            ciphertext: The vault-format ciphertext.
+
+        Returns:
+            The decrypted dictionary.
+
+        Raises:
+            RuntimeError if decryption or JSON parse fails.
+        """
         import json
 
         raw_bytes = await self.decrypt_transit_data(key_name, ciphertext)
         return validate_type(json.loads(raw_bytes.decode()), Dict[str, Any])
 
     async def put_policy(self, policy_name: str, policy_text: str) -> None:
+        """
+        Create or update a Vault ACL policy at path=sys/policies/acl/{policy_name}.
+
+        Args:
+            policy_name: The name of the ACL policy.
+            policy_text: The HCL policy text.
+
+        Raises:
+            RuntimeError: If creation/updating fails or status not in [200, 204].
+        """
         await self.ensure_valid_token()
         session = await self.ensure_session()
         if not self._client_token:
@@ -473,6 +661,15 @@ class AsyncVaultClient:
                 )
 
     async def delete_policy(self, policy_name: str) -> None:
+        """
+        Delete a Vault ACL policy by name.
+
+        Args:
+            policy_name: The name of the policy to delete.
+
+        Raises:
+            RuntimeError: If deletion fails or status not in [200, 204, 404].
+        """
         await self.ensure_valid_token()
         session = await self.ensure_session()
         if not self._client_token:

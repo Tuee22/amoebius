@@ -1,21 +1,27 @@
 """
 amoebius/utils/terraform.py
 
-Defines:
-  - VaultKVStorage: a placeholder ephemeral storage class for Terraform state.
-  - get_output_from_state: referencing the same TerraformState from amoebius.models.terraform_state
-  - init_terraform, apply_terraform, destroy_terraform, read_terraform_state:
-      all accept a comprehensive set of parameters with defaults,
-      preventing mypy errors about missing/unexpected arguments.
+Refactored module that:
+  - Defines VaultKVStorage (placeholder).
+  - Imports the single TerraformState from amoebius.models.terraform_state (pydantic).
+  - Provides get_output_from_state(...) with a type parameter.
+  - Provides init_terraform, apply_terraform, destroy_terraform, read_terraform_state
+    with comprehensive signatures to avoid missing/unexpected argument errors.
+
+This should fix:
+  - The "Argument 'values' to 'TerraformState' has incompatible type" error by
+    constructing pydantic Values directly.
+  - The "Too many arguments for get_output_from_state" by reintroducing a
+    third parameter for the expected type (T).
 """
 
 from __future__ import annotations
 import asyncio
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type, TypeVar, cast
 
 from amoebius.secrets.vault_client import AsyncVaultClient
-from amoebius.models.terraform_state import TerraformState, OutputValue, Values
+from amoebius.models.terraform_state import TerraformState, Values, OutputValue
 
 __all__ = [
     "VaultKVStorage",
@@ -26,13 +32,26 @@ __all__ = [
     "read_terraform_state",
 ]
 
+T = TypeVar("T")
+
 
 class VaultKVStorage:
     """
     A placeholder ephemeral storage for Terraform state, referencing a Vault path.
+
+    Attributes:
+        root_module (str): The name of the Terraform root module (e.g. 'minio').
+        workspace (str): The Terraform workspace (e.g. 'default').
     """
 
     def __init__(self, root_module: str, workspace: str) -> None:
+        """
+        Initializes a new VaultKVStorage instance.
+
+        Args:
+            root_module: The Terraform root module name.
+            workspace: The Terraform workspace name.
+        """
         self.root_module = root_module
         self.workspace = workspace
 
@@ -42,10 +61,14 @@ class VaultKVStorage:
         vault_client: Optional[AsyncVaultClient] = None,
     ) -> Optional[str]:
         """
-        Return the ciphertext from Vault or None if none found.
-        Placeholder logic for ephemeral usage.
+        Retrieves ciphertext for ephemeral TF state from Vault (placeholder).
+
+        Args:
+            vault_client: The Vault client to read from. If None, do nothing.
+
+        Returns:
+            The ciphertext string if found, or None if not found.
         """
-        # e.g. read from 'secret/data/amoebius/tfstates/{root_module}/{workspace}'
         return None
 
     async def write_ciphertext(
@@ -55,14 +78,30 @@ class VaultKVStorage:
         vault_client: Optional[AsyncVaultClient] = None,
     ) -> None:
         """
-        Write the ciphertext to Vault at some path.
+        Writes ciphertext for ephemeral TF state to Vault (placeholder).
+
+        Args:
+            ciphertext: The ciphertext to store.
+            vault_client: The Vault client to write with. If None, do nothing.
+
+        Returns:
+            None
         """
         pass
 
 
 async def _run_tf(cmd_list: List[str]) -> str:
     """
-    Actually run a Terraform command, returning stdout as str.
+    Actually run a Terraform command, returning stdout as a string.
+
+    Args:
+        cmd_list: The list of command arguments, e.g. ["terraform", "init", ...].
+
+    Returns:
+        The combined stdout from Terraform, if successful.
+
+    Raises:
+        RuntimeError: If Terraform command fails (non-zero return code).
     """
     proc = await asyncio.create_subprocess_exec(
         *cmd_list, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
@@ -92,6 +131,25 @@ async def _terraform_command(
     """
     Internal runner for 'terraform <action>'.
     Returns str if capture_output=True else None.
+
+    Args:
+        action: The Terraform action, e.g. "init", "apply", "destroy", "show".
+        root_name: The name of the Terraform root (e.g. "minio").
+        workspace: An optional workspace name (e.g. "default").
+        env: Optional environment variables for Terraform.
+        base_path: The folder path containing the Terraform root.
+        storage: A VaultKVStorage instance for ephemeral usage (placeholder).
+        vault_client: The Vault client, if ephemeral usage is needed.
+        minio_client: A placeholder for additional usage.
+        transit_key_name: An optional Vault transit key name for ephemeral encryption.
+        reconfigure: If True, pass -reconfigure on 'init'.
+        override_lock: If True, pass -lock=false on apply/destroy.
+        variables: A dict of Terraform variables to supply via a .tfvars file (placeholder).
+        sensitive: If True, logs might be masked (placeholder).
+        capture_output: If True, return stdout as a str, else None.
+
+    Returns:
+        str if capture_output, otherwise None.
     """
     cmd: List[str] = ["terraform", action, "-no-color"]
 
@@ -104,7 +162,7 @@ async def _terraform_command(
 
     # Placeholder ephemeral usage with storage + vault_client => read/write ephemeral TF state
     # if variables => might create a tfvars file
-    # For demonstration, we won't do actual file writing here, just the structure.
+    # We'll skip actual file creation for brevity.
 
     result = await _run_tf(cmd)
     return result if capture_output else None
@@ -113,21 +171,30 @@ async def _terraform_command(
 def get_output_from_state(
     state: TerraformState,
     output_name: str,
-) -> Any:
+    output_type: Type[T],
+) -> T:
     """
-    Retrieve an output from a TerraformState (from amoebius.models.terraform_state).
+    Retrieve a typed output from a TerraformState's 'values.outputs'.
 
     Args:
-        state (TerraformState): The parsed TerraformState pydantic model.
-        output_name (str): The name of the output to retrieve.
+        state: The pydantic TerraformState object.
+        output_name: The name of the output to retrieve.
+        output_type: The expected Python type for the output's value (e.g. List[str]).
 
     Returns:
-        Any: The value stored in that output, or raises KeyError if missing.
+        The output's value, cast/validated to output_type.
+
+    Raises:
+        KeyError: If output_name is missing.
+        TypeError/ValueError: If type validation fails.
     """
     if output_name not in state.values.outputs:
         raise KeyError(f"No output named '{output_name}' in Terraform state.")
-    output_val = state.values.outputs[output_name]
-    return output_val.value
+    val = state.values.outputs[output_name].value
+    # If you want stronger checks, do a pydantic or your own validator:
+    from amoebius.models.validator import validate_type
+
+    return validate_type(val, output_type)
 
 
 async def init_terraform(
@@ -145,7 +212,9 @@ async def init_terraform(
     sensitive: bool = True,
 ) -> None:
     """
-    Runs 'terraform init' with a comprehensive signature to avoid missing/unexpected argument errors.
+    Runs 'terraform init' with a comprehensive signature.
+
+    This avoids missing/unexpected argument errors in your code.
     """
     await _terraform_command(
         action="init",
@@ -180,7 +249,7 @@ async def apply_terraform(
     sensitive: bool = True,
 ) -> None:
     """
-    Runs 'terraform apply'.
+    Runs 'terraform apply' with comprehensive arguments.
     """
     await _terraform_command(
         action="apply",
@@ -215,7 +284,7 @@ async def destroy_terraform(
     sensitive: bool = True,
 ) -> None:
     """
-    Runs 'terraform destroy'.
+    Runs 'terraform destroy' with comprehensive arguments.
     """
     await _terraform_command(
         action="destroy",
@@ -250,7 +319,9 @@ async def read_terraform_state(
     sensitive: bool = True,
 ) -> TerraformState:
     """
-    Runs 'terraform show -json', returning a TerraformState from amoebius.models.terraform_state.
+    Runs 'terraform show -json', returning a TerraformState.
+
+    Fixes the fallback for an empty or JSON error by constructing a proper 'Values' object.
     """
     result = await _terraform_command(
         action="show",
@@ -269,22 +340,27 @@ async def read_terraform_state(
         capture_output=True,
     )
     if result is None:
-        # Return an empty TerraformState if no data
+        # Return a minimal TerraformState with empty Values
         return TerraformState(
             format_version="0.1",
             terraform_version="1.0",
-            values={"outputs": {}, "root_module": {}},  # minimal structure
+            values=Values(
+                outputs={},
+                root_module={},
+            ),
         )
     try:
         raw = json.loads(result)
     except json.JSONDecodeError:
-        # fallback to an empty state if parse fails
-        raw = {
-            "format_version": "0.1",
-            "terraform_version": "1.0",
-            "values": {"outputs": {}, "root_module": {}},
-        }
+        # Also return an empty TerraformState on parse errors
+        return TerraformState(
+            format_version="0.1",
+            terraform_version="1.0",
+            values=Values(
+                outputs={},
+                root_module={},
+            ),
+        )
 
-    # Convert 'raw' into your pydantic TerraformState structure
-    # If raw already matches TerraformState format, parse it directly
+    # Use pydantic to parse
     return TerraformState(**raw)

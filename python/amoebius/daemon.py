@@ -13,10 +13,10 @@ async def run_amoebius() -> None:
     Runs Terraform initialization and apply steps for the 'vault' configuration,
     then deploys MinIO.
     """
-    await install_linkerd()
+    # await install_linkerd()
 
-    await init_terraform(root_name="vault")
-    await apply_terraform(root_name="vault")
+    # await init_terraform(root_name="vault")
+    # await apply_terraform(root_name="vault")
 
     # New lines: deploy MinIO
     # await init_terraform(root_name="minio")
