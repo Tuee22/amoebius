@@ -1,306 +1,482 @@
 """
 amoebius/utils/minio.py
 
-Contains:
-  - A placeholder S3 v4 signing approach for Minio admin REST calls.
-  - Raw admin-like calls (create/delete bucket/user/policy, etc.) referencing _signed_request.
+Provides a MinioAdminClient for performing MinIO administrative actions
+(create buckets, create/delete users, attach policies, etc.) with AWS
+Signature Version 4 authentication using aiohttp.
 """
 
-import aiohttp
-import hmac
-import hashlib
+from __future__ import annotations
+
+import asyncio
 import datetime
-import urllib.parse
-from typing import Dict, Any, List
-from amoebius.models.minio import (
-    MinioSettings,
-    MinioPolicySpec,
-    MinioBucketPermission,
-)
-from amoebius.models.validator import validate_type
+import hashlib
+import hmac
 import json
+import logging
+import urllib.parse
+from types import TracebackType
+from typing import Dict, List, Optional, Tuple, Type, TypeVar
 
-# -----------------------------------------------------------------------------
-# Minimal S3 V4 Signer (placeholder)
-# -----------------------------------------------------------------------------
+import aiohttp
+
+from amoebius.models.minio import MinioSettings, MinioPolicySpec  # Example imports
+from amoebius.utils.async_retry import async_retry  # Decorator for retry logic
+
+logger = logging.getLogger(__name__)
+
+T = TypeVar("T", bound=BaseException)
 
 
-def _sign_request_v4(
-    method: str,
-    url: str,
-    region: str,
-    service: str,
-    access_key: str,
-    secret_key: str,
-    body: bytes = b"",
-) -> Dict[str, str]:
+class MinioAdminClient:
+    """An asynchronous client for MinIO Admin REST API calls using AWS SigV4 signing.
+
+    The client reuses a single aiohttp session for performance, and
+    can optionally retry on transient errors via the @async_retry decorator.
+
+    Attributes:
+        _REGION (str):
+            The AWS SigV4 region placeholder (hardcoded as 'us-east-1').
+        _SERVICE (str):
+            The AWS SigV4 service placeholder (hardcoded as 's3').
+        _settings (MinioSettings):
+            Holds information about the MinIO endpoint and root credentials.
+        _timeout (aiohttp.ClientTimeout):
+            The total request timeout for all operations (defaults to 10s).
+        _closed (bool):
+            Indicates whether the underlying HTTP session has been closed.
+        _session (Optional[aiohttp.ClientSession]):
+            The aiohttp session. Created in __aenter__ and closed in __aexit__.
+        _signing_key_cache (Dict[str, bytes]):
+            A cache of derived signing keys by date, used to avoid recomputing
+            the SigV4 HMAC chain on each request.
     """
-    Produce HTTP headers for an AWS S3 v4 style signature. A placeholder approach
-    suitable for Minio's admin endpoints if they accept standard S3 signature.
 
-    Args:
-        method (str): HTTP method (e.g. "GET", "POST").
-        url (str): Full endpoint URL (with query).
-        region (str): AWS region. With Minio, might often be "us-east-1" placeholder.
-        service (str): Usually "s3".
-        access_key (str): The root or user access key.
-        secret_key (str): The root or user secret key.
-        body (bytes, optional): The request body bytes.
+    _REGION = "us-east-1"
+    _SERVICE = "s3"
 
-    Returns:
-        Dict[str, str]: A dict of headers, including "Authorization" and "x-amz-date".
+    def __init__(
+        self,
+        settings: MinioSettings,
+        total_timeout: float = 10.0,
+    ) -> None:
+        """Initializes the MinioAdminClient with the given settings.
 
-    Note:
-        Real usage with Minio admin might differ. Adjust as needed.
-    """
-    # This is an intentionally minimal approach that might work if Minio
-    # admin endpoints accept standard s3 v4 signatures for admin calls.
+        Args:
+            settings (MinioSettings):
+                The MinIO configuration, including URL, access key, and secret key.
+            total_timeout (float, optional):
+                The total request timeout (in seconds) for all operations.
+                Defaults to 10.0.
+        """
+        self._settings = settings
+        self._timeout = aiohttp.ClientTimeout(total=total_timeout)
 
-    # 1) parse host, path, queries
-    parsed = urllib.parse.urlparse(url)
-    host = parsed.netloc
-    canonical_uri = parsed.path or "/"
-    canonical_query = parsed.query  # we won't re-sort, keep as is
+        self._closed = False
+        self._session: Optional[aiohttp.ClientSession] = None
 
-    # 2) times
-    now_utc = datetime.datetime.utcnow()
-    amz_date = now_utc.strftime("%Y%m%dT%H%M%SZ")
-    date_stamp = now_utc.strftime("%Y%m%d")
+        # Caches signing keys per date for SigV4
+        self._signing_key_cache: Dict[str, bytes] = {}
 
-    # 3) payload hash
-    payload_hash = hashlib.sha256(body).hexdigest()
+    async def __aenter__(self) -> MinioAdminClient:
+        """Creates and enters an async context with an aiohttp session.
 
-    # 4) build canonical headers
-    canonical_headers = (
-        f"host:{host}\n"
-        f"x-amz-content-sha256:{payload_hash}\n"
-        f"x-amz-date:{amz_date}\n"
-    )
-    signed_headers = "host;x-amz-content-sha256;x-amz-date"
+        Returns:
+            MinioAdminClient: The current client instance, ready for requests.
+        """
+        self._session = aiohttp.ClientSession(timeout=self._timeout)
+        return self
 
-    # 5) canonical request
-    canonical_request = (
-        f"{method}\n"
-        f"{canonical_uri}\n"
-        f"{canonical_query}\n"
-        f"{canonical_headers}\n"
-        f"{signed_headers}\n"
-        f"{payload_hash}"
-    )
-    cr_hash = hashlib.sha256(canonical_request.encode("utf-8")).hexdigest()
+    async def __aexit__(
+        self,
+        exc_type: Optional[Type[T]],
+        exc_val: Optional[T],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        """Closes the aiohttp session on context exit.
 
-    # 6) string to sign
-    algorithm = "AWS4-HMAC-SHA256"
-    credential_scope = f"{date_stamp}/{region}/{service}/aws4_request"
-    string_to_sign = (
-        f"{algorithm}\n" f"{amz_date}\n" f"{credential_scope}\n" f"{cr_hash}"
-    )
+        Args:
+            exc_type (Optional[Type[T]]): Exception type if raised in context.
+            exc_val (Optional[T]): The exception instance if raised.
+            exc_tb (Optional[TracebackType]): Traceback if an exception was raised.
+        """
+        await self.close()
 
-    # 7) sign
-    def _sign(key: bytes, msg: str) -> bytes:
-        return hmac.new(key, msg.encode("utf-8"), hashlib.sha256).digest()
+    async def close(self) -> None:
+        """Closes the underlying aiohttp session if it isn't already closed."""
+        if not self._closed and self._session is not None:
+            await self._session.close()
+            self._closed = True
 
-    k_date = _sign(("AWS4" + secret_key).encode("utf-8"), date_stamp)
-    k_region = _sign(k_date, region)
-    k_service = _sign(k_region, service)
-    k_signing = _sign(k_service, "aws4_request")
-    signature = hmac.new(
-        k_signing, string_to_sign.encode("utf-8"), hashlib.sha256
-    ).hexdigest()
+    @async_retry(retries=3, delay=1.0, noisy=True)
+    async def create_bucket(self, bucket_name: str) -> None:
+        """Creates a new bucket in MinIO.
 
-    authorization_header = (
-        f"{algorithm} Credential={access_key}/{credential_scope}, "
-        f"SignedHeaders={signed_headers}, "
-        f"Signature={signature}"
-    )
+        Args:
+            bucket_name (str):
+                The name of the bucket to create.
 
-    return {
-        "Host": host,
-        "X-Amz-Date": amz_date,
-        "X-Amz-Content-Sha256": payload_hash,
-        "Authorization": authorization_header,
-    }
+        Raises:
+            RuntimeError: If the operation fails with an unexpected status code.
+        """
+        url = f"{self._settings.url}/{bucket_name}"
+        resp_text, status = await self._make_request("PUT", url)
+        if status not in (200, 204):
+            raise RuntimeError(
+                f"Failed to create bucket '{bucket_name}'. "
+                f"Status={status}, Response={resp_text}"
+            )
 
+    @async_retry(retries=3, delay=1.0, noisy=True)
+    async def delete_bucket(self, bucket_name: str) -> None:
+        """Deletes a bucket from MinIO.
 
-async def _signed_request(
-    method: str,
-    url: str,
-    settings: MinioSettings,
-    data: bytes = b"",
-) -> aiohttp.ClientResponse:
-    """
-    Perform an HTTP request with minimal S3 V4 signing headers for Minio admin usage.
+        Args:
+            bucket_name (str):
+                The name of the bucket to delete.
 
-    Args:
-        method (str): e.g. "GET", "PUT", ...
-        url (str): The full URL with query.
-        settings (MinioSettings): Contains access_key, secret_key, url, secure usage.
-        data (bytes, optional): Request body bytes.
+        Raises:
+            RuntimeError: If the operation fails with an unexpected status code.
+        """
+        url = f"{self._settings.url}/{bucket_name}"
+        resp_text, status = await self._make_request("DELETE", url)
+        if status not in (200, 204, 404):
+            raise RuntimeError(
+                f"Failed to delete bucket '{bucket_name}'. "
+                f"Status={status}, Response={resp_text}"
+            )
 
-    Returns:
-        ClientResponse: The aiohttp response object.
-    """
-    # region=us-east-1, service=s3 => placeholders for Minio usage
-    # Real usage might require different region or service name.
-    region = "us-east-1"
-    service = "s3"
+    @async_retry(retries=3, delay=1.0, noisy=True)
+    async def create_user(self, username: str, password: str) -> None:
+        """Creates a new user in MinIO.
 
-    headers = _sign_request_v4(
-        method=method,
-        url=url,
-        region=region,
-        service=service,
-        access_key=settings.access_key,
-        secret_key=settings.secret_key,
-        body=data,
-    )
+        Args:
+            username (str):
+                The name (access key) of the new user.
+            password (str):
+                The user's secret key (password).
 
-    # Prepare the session request
-    async with aiohttp.ClientSession() as session:
-        req_func = {
-            "GET": session.get,
-            "POST": session.post,
-            "PUT": session.put,
-            "DELETE": session.delete,
-        }.get(method.upper())
+        Raises:
+            RuntimeError: If the operation fails with an unexpected status code.
+        """
+        url = (
+            f"{self._settings.url}/minio/admin/v3/add-user"
+            f"?accessKey={urllib.parse.quote_plus(username)}"
+            f"&secretKey={urllib.parse.quote_plus(password)}"
+        )
+        resp_text, status = await self._make_request("POST", url)
+        if status not in (200, 204):
+            raise RuntimeError(
+                f"Failed to create user '{username}'. "
+                f"Status={status}, Response={resp_text}"
+            )
 
-        if not req_func:
-            raise ValueError(f"Unsupported method {method}")
+    @async_retry(retries=3, delay=1.0, noisy=True)
+    async def delete_user(self, username: str) -> None:
+        """Deletes a user from MinIO.
 
-        resp = await req_func(url, headers=headers, data=data)
-        return resp
+        Args:
+            username (str):
+                The user's name (access key).
 
+        Raises:
+            RuntimeError: If the operation fails with an unexpected status code.
+        """
+        url = (
+            f"{self._settings.url}/minio/admin/v3/remove-user"
+            f"?accessKey={urllib.parse.quote_plus(username)}"
+        )
+        resp_text, status = await self._make_request("DELETE", url)
+        if status not in (200, 204, 404):
+            raise RuntimeError(
+                f"Failed to delete user '{username}'. "
+                f"Status={status}, Response={resp_text}"
+            )
 
-def build_policy_json(policy_items: List[MinioPolicySpec]) -> str:
-    """
-    Same as before: build a minimal JSON doc for the S3-style policy.
-    """
-    statements = []
-    for item in policy_items:
-        if item.permission == MinioBucketPermission.NONE:
-            continue
-        elif item.permission == MinioBucketPermission.READ:
-            actions = ["s3:GetObject"]
-        elif item.permission == MinioBucketPermission.WRITE:
-            actions = ["s3:PutObject"]
-        else:
-            actions = ["s3:GetObject", "s3:PutObject"]
+    @async_retry(retries=3, delay=1.0, noisy=True)
+    async def create_policy(
+        self, policy_name: str, policy_items: List[MinioPolicySpec]
+    ) -> None:
+        """Creates or updates a named policy in MinIO.
 
-        statements.append(
-            {
-                "Effect": "Allow",
-                "Action": actions,
-                "Resource": f"arn:aws:s3:::{item.bucket_name}/*",
-            }
+        Args:
+            policy_name (str):
+                The unique policy name to create or update.
+            policy_items (List[MinioPolicySpec]):
+                A list of bucket permissions defining the policy.
+
+        Raises:
+            RuntimeError: If the operation fails with an unexpected status code.
+        """
+        policy_doc = self._build_policy_json(policy_items)
+        url = (
+            f"{self._settings.url}/minio/admin/v3/add-canned-policy"
+            f"?name={urllib.parse.quote_plus(policy_name)}"
+        )
+        resp_text, status = await self._make_request("POST", url, body=policy_doc)
+        if status not in (200, 204):
+            raise RuntimeError(
+                f"Failed to create or update policy '{policy_name}'. "
+                f"Status={status}, Response={resp_text}"
+            )
+
+    @async_retry(retries=3, delay=1.0, noisy=True)
+    async def delete_policy(self, policy_name: str) -> None:
+        """Deletes a named policy from MinIO.
+
+        Args:
+            policy_name (str):
+                The unique policy name to delete.
+
+        Raises:
+            RuntimeError: If the operation fails with an unexpected status code.
+        """
+        url = (
+            f"{self._settings.url}/minio/admin/v3/remove-canned-policy"
+            f"?name={urllib.parse.quote_plus(policy_name)}"
+        )
+        resp_text, status = await self._make_request("DELETE", url)
+        if status not in (200, 204, 404):
+            raise RuntimeError(
+                f"Failed to delete policy '{policy_name}'. "
+                f"Status={status}, Response={resp_text}"
+            )
+
+    @async_retry(retries=3, delay=1.0, noisy=True)
+    async def attach_policy_to_user(self, username: str, policy_name: str) -> None:
+        """Attaches an existing policy to a user in MinIO.
+
+        Args:
+            username (str):
+                The user's name (access key).
+            policy_name (str):
+                The name of the policy to attach.
+
+        Raises:
+            RuntimeError: If the operation fails with an unexpected status code.
+        """
+        url = (
+            f"{self._settings.url}/minio/admin/v3/set-user-policy"
+            f"?accessKey={urllib.parse.quote_plus(username)}"
+            f"&name={urllib.parse.quote_plus(policy_name)}"
+        )
+        resp_text, status = await self._make_request("POST", url)
+        if status not in (200, 204):
+            raise RuntimeError(
+                f"Failed to attach policy '{policy_name}' "
+                f"to user '{username}'. Status={status}, Response={resp_text}"
+            )
+
+    # ------------------------------------------------------------------------
+    # Internal Logic
+    # ------------------------------------------------------------------------
+    async def _make_request(
+        self,
+        method: str,
+        url: str,
+        *,
+        body: Optional[str] = None,
+    ) -> Tuple[str, int]:
+        """Makes an HTTP request with SigV4 signing and custom timeouts.
+
+        The retry logic is handled externally by the @async_retry decorator.
+
+        Args:
+            method (str):
+                The HTTP method to use (e.g. 'GET', 'POST', 'PUT', 'DELETE').
+            url (str):
+                The full request URL (including query parameters).
+            body (Optional[str], optional):
+                The JSON string to send as the request body. Defaults to None.
+
+        Returns:
+            Tuple[str, int]:
+                A tuple containing the response text and the HTTP status code.
+
+        Raises:
+            RuntimeError: If a 5xx status is encountered, triggering a retry.
+            RuntimeError: If the client session is closed or unavailable.
+        """
+        if self._session is None or self._closed:
+            raise RuntimeError("Client session is not available or already closed.")
+
+        data_bytes = body.encode("utf-8") if body else b""
+        sigv4_headers = self._sign_request_v4(method, url, data_bytes)
+        headers = {
+            **sigv4_headers,
+            "Content-Type": "application/json",
+        }
+
+        async with self._session.request(
+            method,
+            url,
+            headers=headers,
+            data=data_bytes,
+        ) as response:
+            resp_text = await response.text()
+            status = response.status
+
+            if 500 <= status < 600:
+                raise RuntimeError(
+                    f"Server error {status} from {method} {url}: {resp_text}"
+                )
+
+            return resp_text, status
+
+    def _sign_request_v4(
+        self,
+        method: str,
+        url: str,
+        body: bytes,
+    ) -> Dict[str, str]:
+        """Signs a request using AWS Signature Version 4 (S3-compatible).
+
+        Args:
+            method (str):
+                The HTTP method (e.g. 'GET', 'POST').
+            url (str):
+                The full request URL with query parameters.
+            body (bytes):
+                The request body bytes (for hashing).
+
+        Returns:
+            Dict[str, str]:
+                A dictionary of headers, including Authorization, X-Amz-Date,
+                and X-Amz-Content-Sha256.
+        """
+        parsed = urllib.parse.urlparse(url)
+        host = parsed.netloc
+        canonical_uri = parsed.path or "/"
+        canonical_query = parsed.query
+
+        now_utc = datetime.datetime.utcnow()
+        amz_date = now_utc.strftime("%Y%m%dT%H%M%SZ")
+        date_stamp = now_utc.strftime("%Y%m%d")
+
+        payload_hash = hashlib.sha256(body).hexdigest()
+        canonical_headers = (
+            f"host:{host}\n"
+            f"x-amz-content-sha256:{payload_hash}\n"
+            f"x-amz-date:{amz_date}\n"
+        )
+        signed_headers = "host;x-amz-content-sha256;x-amz-date"
+
+        canonical_request = (
+            f"{method}\n"
+            f"{canonical_uri}\n"
+            f"{canonical_query}\n"
+            f"{canonical_headers}\n"
+            f"{signed_headers}\n"
+            f"{payload_hash}"
+        )
+        cr_hash = hashlib.sha256(canonical_request.encode("utf-8")).hexdigest()
+
+        algorithm = "AWS4-HMAC-SHA256"
+        credential_scope = f"{date_stamp}/{self._REGION}/{self._SERVICE}/aws4_request"
+        string_to_sign = f"{algorithm}\n{amz_date}\n{credential_scope}\n{cr_hash}"
+
+        signing_key = self._get_signing_key(date_stamp)
+        signature = hmac.new(
+            signing_key, string_to_sign.encode("utf-8"), hashlib.sha256
+        ).hexdigest()
+
+        authorization_header = (
+            f"{algorithm} Credential={self._settings.access_key}/{credential_scope}, "
+            f"SignedHeaders={signed_headers}, "
+            f"Signature={signature}"
         )
 
-    doc = {
-        "Version": "2012-10-17",
-        "Statement": statements,
-    }
-    return json.dumps(doc, indent=2)
+        return {
+            "Host": host,
+            "X-Amz-Date": amz_date,
+            "X-Amz-Content-Sha256": payload_hash,
+            "Authorization": authorization_header,
+        }
 
+    def _get_signing_key(self, date_stamp: str) -> bytes:
+        """Retrieves or derives the SigV4 signing key for the given date.
 
-async def create_bucket(settings: MinioSettings, bucket_name: str) -> None:
-    """
-    Create a bucket in Minio with S3 v4-signed PUT.
-    """
-    put_url = f"{settings.url}/{bucket_name}"
-    resp = await _signed_request("PUT", put_url, settings)
-    async with resp:
-        if resp.status not in (200, 204):
-            text = await resp.text()
-            raise RuntimeError(
-                f"Failed to create bucket '{bucket_name}': {resp.status}, {text}"
+        Args:
+            date_stamp (str):
+                The date in 'YYYYMMDD' format, e.g. '20230925'.
+
+        Returns:
+            bytes:
+                The derived signing key used to sign the string-to-sign.
+        """
+        cache_key = f"{date_stamp}-{self._REGION}-{self._SERVICE}"
+        if cache_key in self._signing_key_cache:
+            return self._signing_key_cache[cache_key]
+
+        def _sign(key: bytes, msg: str) -> bytes:
+            return hmac.new(key, msg.encode("utf-8"), hashlib.sha256).digest()
+
+        secret_bytes = self._settings.secret_key.encode("utf-8")
+        k_date = _sign(b"AWS4" + secret_bytes, date_stamp)
+        k_region = _sign(k_date, self._REGION)
+        k_service = _sign(k_region, self._SERVICE)
+        k_signing = _sign(k_service, "aws4_request")
+
+        self._signing_key_cache[cache_key] = k_signing
+        return k_signing
+
+    def _build_policy_json(self, policy_items: List[MinioPolicySpec]) -> str:
+        """Builds an S3-style JSON policy document from a list of bucket permissions.
+
+        Args:
+            policy_items (List[MinioPolicySpec]):
+                A list of MinioPolicySpec objects, each specifying a bucket and permission.
+
+        Returns:
+            str:
+                A JSON string representing the policy, suitable for MinIO admin calls.
+        """
+        statements = []
+        for item in policy_items:
+            if item.permission == "READ":
+                actions = ["s3:GetObject"]
+            elif item.permission == "WRITE":
+                actions = ["s3:PutObject"]
+            elif item.permission == "READ_WRITE":
+                actions = ["s3:GetObject", "s3:PutObject"]
+            else:
+                # If NONE or unknown, skip or handle differently
+                # e.g., skip entirely
+                continue
+
+            statements.append(
+                {
+                    "Effect": "Allow",
+                    "Action": actions,
+                    "Resource": f"arn:aws:s3:::{item.bucket_name}/*",
+                }
             )
 
-
-async def delete_bucket(settings: MinioSettings, bucket_name: str) -> None:
-    """
-    Delete a bucket in Minio with S3 v4-signed DELETE.
-    """
-    del_url = f"{settings.url}/{bucket_name}"
-    resp = await _signed_request("DELETE", del_url, settings)
-    async with resp:
-        if resp.status not in (200, 204, 404):
-            text = await resp.text()
-            raise RuntimeError(
-                f"Failed to delete bucket '{bucket_name}': {resp.status}, {text}"
-            )
+        doc = {
+            "Version": "2012-10-17",
+            "Statement": statements,
+        }
+        return json.dumps(doc, indent=2)
 
 
-async def create_policy(
-    settings: MinioSettings, policy_name: str, policy_items: List[MinioPolicySpec]
-) -> None:
-    """
-    Create or update a named policy in Minio. Using S3 v4-signed POST to /minio/admin/v3/add-canned-policy.
-    """
-    policy_json = build_policy_json(policy_items)
-    admin_url = f"{settings.url}/minio/admin/v3/add-canned-policy?name={policy_name}"
-    resp = await _signed_request(
-        "POST", admin_url, settings, data=policy_json.encode("utf-8")
+async def _demo() -> None:
+    """Demonstrates usage of the MinioAdminClient for testing or local dev."""
+    from amoebius.models.minio import MinioSettings
+
+    logging.basicConfig(level=logging.INFO)
+
+    # Example credentials
+    settings = MinioSettings(
+        url="http://localhost:9000",
+        access_key="admin",
+        secret_key="password123",
+        secure=False,
     )
-    async with resp:
-        if resp.status not in (200, 204):
-            text = await resp.text()
-            raise RuntimeError(
-                f"Failed to create policy '{policy_name}': {resp.status}, {text}"
-            )
+
+    async with MinioAdminClient(settings) as client:
+        await client.create_bucket("demo-bucket")
+        await client.delete_bucket("demo-bucket")
 
 
-async def delete_policy(settings: MinioSettings, policy_name: str) -> None:
-    """
-    Delete a named policy in Minio with S3 v4-signed DELETE.
-    """
-    admin_url = f"{settings.url}/minio/admin/v3/remove-canned-policy?name={policy_name}"
-    resp = await _signed_request("DELETE", admin_url, settings)
-    async with resp:
-        if resp.status not in (200, 204, 404):
-            text = await resp.text()
-            raise RuntimeError(
-                f"Failed to delete policy '{policy_name}': {resp.status}, {text}"
-            )
-
-
-async def create_user(settings: MinioSettings, username: str, password: str) -> None:
-    """
-    Create a user in Minio. S3 v4-signed POST to /minio/admin/v3/add-user?accessKey=...&secretKey=...
-    """
-    admin_url = f"{settings.url}/minio/admin/v3/add-user?accessKey={username}&secretKey={password}"
-    resp = await _signed_request("POST", admin_url, settings)
-    async with resp:
-        if resp.status not in (200, 204):
-            text = await resp.text()
-            raise RuntimeError(
-                f"Failed to create user '{username}': {resp.status}, {text}"
-            )
-
-
-async def delete_user(settings: MinioSettings, username: str) -> None:
-    """
-    Delete a user in Minio.
-    """
-    admin_url = f"{settings.url}/minio/admin/v3/remove-user?accessKey={username}"
-    resp = await _signed_request("DELETE", admin_url, settings)
-    async with resp:
-        if resp.status not in (200, 204, 404):
-            text = await resp.text()
-            raise RuntimeError(
-                f"Failed to delete user '{username}': {resp.status}, {text}"
-            )
-
-
-async def attach_policy_to_user(
-    settings: MinioSettings, username: str, policy_name: str
-) -> None:
-    """
-    Attach a named policy to a user in Minio.
-    """
-    admin_url = f"{settings.url}/minio/admin/v3/set-user-policy?accessKey={username}&name={policy_name}"
-    resp = await _signed_request("POST", admin_url, settings)
-    async with resp:
-        if resp.status not in (200, 204):
-            text = await resp.text()
-            raise RuntimeError(
-                f"Failed to attach policy '{policy_name}' to user '{username}': {resp.status}, {text}"
-            )
+if __name__ == "__main__":
+    asyncio.run(_demo())
