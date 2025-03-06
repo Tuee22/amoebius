@@ -1,13 +1,25 @@
 """
 amoebius/utils/async_command_runner.py
+
+Provides a reusable asynchronous command runner with retry logic.
+
+Usage example:
+    from amoebius.utils.async_command_runner import run_command, CommandError
+
+    try:
+        output = await run_command(["ls", "-l"], env={"EXAMPLE": "1"}, retries=3)
+        print(output)
+    except CommandError as err:
+        print(f"Command failed: {err}")
 """
 
 import os
 import asyncio
 from typing import Dict, List, Optional
+
 from typing_extensions import ParamSpec, TypeVar
 
-from .async_retry import async_retry
+from amoebius.utils.async_retry import async_retry
 
 P = ParamSpec("P")
 R = TypeVar("R")
@@ -16,9 +28,20 @@ R = TypeVar("R")
 class CommandError(Exception):
     """
     Represents a failure when executing a shell command.
+
+    Attributes:
+        message (str): The error message describing the command failure.
+        return_code (Optional[int]): The return code if available.
     """
 
     def __init__(self, message: str, return_code: Optional[int] = None) -> None:
+        """
+        Initialize a CommandError.
+
+        Args:
+            message (str): The error message describing the command failure.
+            return_code (Optional[int]): The exit code if known.
+        """
         super().__init__(message)
         self.return_code = return_code
 
@@ -36,48 +59,44 @@ async def run_command(
     suppress_env_vars: Optional[List[str]] = None,
 ) -> str:
     """
-    Executes a local command in a subprocess, asynchronously, retrying if needed.
+    Executes a local command in a subprocess, asynchronously, with optional retries.
 
-    - If `input_data` is provided, it's passed to the command via stdin.
-    - If `input_data` is NOT provided, stdin is replaced with /dev/null.
-      This ensures that if the command attempts to prompt for input, it
-      will encounter EOF immediately and fail fast instead of hanging.
+    This function supports input data via stdin, environment variable overrides,
+    and ignoring certain return codes as successful.
 
-    :param command: The command and arguments to execute.
-    :param sensitive: If True, command details won't be printed in exceptions.
-    :param env: Environment variables to merge on top of the parent process env.
-    :param cwd: Working directory for the subprocess.
-    :param input_data: Optional string data to pass to stdin.
-    :param successful_return_codes: Return codes that won't raise an exception.
-    :param retries: How many times to retry failures.
-    :param retry_delay: Delay (seconds) between retries.
-    :param suppress_env_vars: List of environment vars to remove from
-                              the final environment before running the command.
-    :return: The captured stdout of the command on success.
-    :raises CommandError: If the command fails more than `retries` times or returns
-                         a code not in `successful_return_codes`.
+    Args:
+        command (List[str]): The command and arguments to execute.
+        sensitive (bool, optional): If True, command details won't appear in the exception message.
+        env (Optional[Dict[str, str]], optional): Extra environment variables to add or override.
+        cwd (Optional[str], optional): Working directory for the command.
+        input_data (Optional[str], optional): If provided, this string is passed to stdin.
+        successful_return_codes (List[int], optional): Which return codes won't be treated as errors. Defaults to [0].
+        retries (int, optional): How many times to retry on failure. Defaults to 3.
+        retry_delay (float, optional): Delay in seconds between retries. Defaults to 1.0.
+        suppress_env_vars (Optional[List[str]], optional):
+            A list of environment variables to remove from the environment before execution.
+
+    Returns:
+        str: The captured stdout of the command on success.
+
+    Raises:
+        CommandError: If the command fails after retries or returns a code not in `successful_return_codes`.
     """
 
     @async_retry(retries=retries, delay=retry_delay)
     async def _inner_run_command() -> str:
-        # If no env modifications are requested, pass None to create_subprocess_exec
-        # to avoid copying the environment unnecessarily.
+        # Prepare environment if necessary
         if env is None and not suppress_env_vars:
             proc_env = None
         else:
             proc_env = os.environ.copy()
-
-            # Remove (suppress) specific environment variables if needed
             if suppress_env_vars:
                 for var in suppress_env_vars:
                     proc_env.pop(var, None)
-
-            # Merge in any environment variables the caller wants to set/override
             if env:
                 proc_env.update(env)
 
-        # If `input_data` is provided, we'll use a PIPE (so we can send data).
-        # Otherwise, replace stdin with /dev/null.
+        # If input_data is provided, we'll pass a PIPE for stdin; otherwise /dev/null.
         stdin = asyncio.subprocess.PIPE if input_data else asyncio.subprocess.DEVNULL
 
         proc = await asyncio.create_subprocess_exec(
