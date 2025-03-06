@@ -1,74 +1,41 @@
 """
 amoebius/utils/terraform.py
 
-Refactored module that:
-  - Defines VaultKVStorage (placeholder).
-  - Imports the single TerraformState from amoebius.models.terraform_state (pydantic).
-  - Provides get_output_from_state(...) with a type parameter.
-  - Provides init_terraform, apply_terraform, destroy_terraform, read_terraform_state
-    with comprehensive signatures to avoid missing/unexpected argument errors.
+Restored logic for:
+  - NoStorage
+  - VaultKVStorage
+  - MinioStorage
+  - get_output_from_state
+  - init/apply/destroy/read_terraform_state using async_command_runner.
 
-This should fix:
-  - The "Argument 'values' to 'TerraformState' has incompatible type" error by
-    constructing pydantic Values directly.
-  - The "Too many arguments for get_output_from_state" by reintroducing a
-    third parameter for the expected type (T).
+All references to create_subprocess_exec are removed. We rely on run_command.
 """
 
-from __future__ import annotations
-import asyncio
 import json
-from typing import Any, Dict, List, Optional, Type, TypeVar, cast
+from typing import Any, Dict, List, Optional, Type, TypeVar
 
 from amoebius.secrets.vault_client import AsyncVaultClient
-from amoebius.models.terraform_state import TerraformState, Values, OutputValue
-
-__all__ = [
-    "VaultKVStorage",
-    "get_output_from_state",
-    "init_terraform",
-    "apply_terraform",
-    "destroy_terraform",
-    "read_terraform_state",
-]
+from amoebius.models.validator import validate_type
+from amoebius.models.terraform_state import TerraformState
+from amoebius.utils.async_command_runner import run_command
 
 T = TypeVar("T")
 
 
-class VaultKVStorage:
+class NoStorage:
     """
-    A placeholder ephemeral storage for Terraform state, referencing a Vault path.
-
-    Attributes:
-        root_module (str): The name of the Terraform root module (e.g. 'minio').
-        workspace (str): The Terraform workspace (e.g. 'default').
+    A placeholder signifying "vanilla" Terraform usage with no special state override.
     """
 
-    def __init__(self, root_module: str, workspace: str) -> None:
-        """
-        Initializes a new VaultKVStorage instance.
-
-        Args:
-            root_module: The Terraform root module name.
-            workspace: The Terraform workspace name.
-        """
+    def __init__(self, root_module: str, workspace: Optional[str] = None) -> None:
         self.root_module = root_module
-        self.workspace = workspace
+        self.workspace = workspace if workspace else "default"
 
     async def read_ciphertext(
         self,
         *,
         vault_client: Optional[AsyncVaultClient] = None,
     ) -> Optional[str]:
-        """
-        Retrieves ciphertext for ephemeral TF state from Vault (placeholder).
-
-        Args:
-            vault_client: The Vault client to read from. If None, do nothing.
-
-        Returns:
-            The ciphertext string if found, or None if not found.
-        """
         return None
 
     async def write_ciphertext(
@@ -77,95 +44,79 @@ class VaultKVStorage:
         *,
         vault_client: Optional[AsyncVaultClient] = None,
     ) -> None:
-        """
-        Writes ciphertext for ephemeral TF state to Vault (placeholder).
-
-        Args:
-            ciphertext: The ciphertext to store.
-            vault_client: The Vault client to write with. If None, do nothing.
-
-        Returns:
-            None
-        """
         pass
 
 
-async def _run_tf(cmd_list: List[str]) -> str:
+class VaultKVStorage:
     """
-    Actually run a Terraform command, returning stdout as a string.
-
-    Args:
-        cmd_list: The list of command arguments, e.g. ["terraform", "init", ...].
-
-    Returns:
-        The combined stdout from Terraform, if successful.
-
-    Raises:
-        RuntimeError: If Terraform command fails (non-zero return code).
+    Represents ephemeral storage for Terraform state in Vault KV engine at some path.
     """
-    proc = await asyncio.create_subprocess_exec(
-        *cmd_list, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-    )
-    stdout_data, stderr_data = await proc.communicate()
-    if proc.returncode != 0:
-        raise RuntimeError(f"Terraform cmd failed: {cmd_list}, {stderr_data.decode()}")
-    return stdout_data.decode()
+
+    def __init__(self, root_module: str, workspace: str) -> None:
+        self.root_module = root_module
+        self.workspace = workspace
+
+    async def read_ciphertext(
+        self,
+        *,
+        vault_client: Optional[AsyncVaultClient] = None,
+    ) -> Optional[str]:
+        if not vault_client:
+            return None
+        path = f"amoebius/tfstates/{self.root_module}/{self.workspace}"
+        try:
+            raw = await vault_client.read_secret(path)
+            return raw.get("ciphertext")
+        except RuntimeError as ex:
+            if "404" in str(ex):
+                return None
+            raise
+
+    async def write_ciphertext(
+        self,
+        ciphertext: str,
+        *,
+        vault_client: Optional[AsyncVaultClient] = None,
+    ) -> None:
+        if not vault_client:
+            return
+        path = f"amoebius/tfstates/{self.root_module}/{self.workspace}"
+        data = {"ciphertext": ciphertext}
+        await vault_client.write_secret(path, data)
 
 
-async def _terraform_command(
-    action: str,
-    root_name: str,
-    workspace: Optional[str],
-    env: Optional[Dict[str, str]],
-    base_path: str,
-    storage: Optional[VaultKVStorage],
-    vault_client: Optional[AsyncVaultClient],
-    minio_client: Optional[Any],
-    transit_key_name: Optional[str],
-    reconfigure: bool,
-    override_lock: bool,
-    variables: Optional[Dict[str, Any]],
-    sensitive: bool,
-    capture_output: bool,
-) -> str | None:
+class MinioStorage:
     """
-    Internal runner for 'terraform <action>'.
-    Returns str if capture_output=True else None.
-
-    Args:
-        action: The Terraform action, e.g. "init", "apply", "destroy", "show".
-        root_name: The name of the Terraform root (e.g. "minio").
-        workspace: An optional workspace name (e.g. "default").
-        env: Optional environment variables for Terraform.
-        base_path: The folder path containing the Terraform root.
-        storage: A VaultKVStorage instance for ephemeral usage (placeholder).
-        vault_client: The Vault client, if ephemeral usage is needed.
-        minio_client: A placeholder for additional usage.
-        transit_key_name: An optional Vault transit key name for ephemeral encryption.
-        reconfigure: If True, pass -reconfigure on 'init'.
-        override_lock: If True, pass -lock=false on apply/destroy.
-        variables: A dict of Terraform variables to supply via a .tfvars file (placeholder).
-        sensitive: If True, logs might be masked (placeholder).
-        capture_output: If True, return stdout as a str, else None.
-
-    Returns:
-        str if capture_output, otherwise None.
+    Stores ciphertext in a MinIO bucket (placeholder).
+    Real usage might need concurrency with run_in_executor or S3 signing.
     """
-    cmd: List[str] = ["terraform", action, "-no-color"]
 
-    if action in ("apply", "destroy"):
-        cmd.append("-auto-approve")
-    if reconfigure and action == "init":
-        cmd.append("-reconfigure")
-    if override_lock:
-        cmd.append("-lock=false")
+    def __init__(
+        self,
+        root_module: str,
+        workspace: str,
+        bucket_name: str = "tf-states",
+    ) -> None:
+        self.root_module = root_module
+        self.workspace = workspace
+        self.bucket_name = bucket_name
 
-    # Placeholder ephemeral usage with storage + vault_client => read/write ephemeral TF state
-    # if variables => might create a tfvars file
-    # We'll skip actual file creation for brevity.
+    async def read_ciphertext(
+        self,
+        *,
+        vault_client: Optional[AsyncVaultClient] = None,
+    ) -> Optional[str]:
+        # Placeholder. For real usage, do S3 get object.
+        return None
 
-    result = await _run_tf(cmd)
-    return result if capture_output else None
+    async def write_ciphertext(
+        self,
+        ciphertext: str,
+        *,
+        vault_client: Optional[AsyncVaultClient] = None,
+    ) -> None:
+        # Placeholder. For real usage, do S3 put object.
+        pass
 
 
 def get_output_from_state(
@@ -177,23 +128,20 @@ def get_output_from_state(
     Retrieve a typed output from a TerraformState's 'values.outputs'.
 
     Args:
-        state: The pydantic TerraformState object.
-        output_name: The name of the output to retrieve.
-        output_type: The expected Python type for the output's value (e.g. List[str]).
+        state (TerraformState): The parsed TerraformState.
+        output_name (str): The name of the output to retrieve.
+        output_type (Type[T]): The Python type to validate or cast to.
 
     Returns:
-        The output's value, cast/validated to output_type.
+        T: The typed output's value.
 
     Raises:
-        KeyError: If output_name is missing.
-        TypeError/ValueError: If type validation fails.
+        KeyError: If the output is missing.
+        ValueError: If the type validation fails.
     """
     if output_name not in state.values.outputs:
         raise KeyError(f"No output named '{output_name}' in Terraform state.")
     val = state.values.outputs[output_name].value
-    # If you want stronger checks, do a pydantic or your own validator:
-    from amoebius.models.validator import validate_type
-
     return validate_type(val, output_type)
 
 
@@ -202,7 +150,7 @@ async def init_terraform(
     workspace: Optional[str] = None,
     env: Optional[Dict[str, str]] = None,
     base_path: str = "/amoebius/terraform/roots",
-    storage: Optional[VaultKVStorage] = None,
+    storage: Optional[Any] = None,
     vault_client: Optional[AsyncVaultClient] = None,
     minio_client: Optional[Any] = None,
     transit_key_name: Optional[str] = None,
@@ -211,26 +159,18 @@ async def init_terraform(
     variables: Optional[Dict[str, Any]] = None,
     sensitive: bool = True,
 ) -> None:
-    """
-    Runs 'terraform init' with a comprehensive signature.
+    cmd: List[str] = ["terraform", "init", "-no-color"]
+    if reconfigure:
+        cmd.append("-reconfigure")
+    if override_lock:
+        cmd.append("-lock=false")
 
-    This avoids missing/unexpected argument errors in your code.
-    """
-    await _terraform_command(
-        action="init",
-        root_name=root_name,
-        workspace=workspace,
+    await run_command(
+        cmd,
         env=env,
-        base_path=base_path,
-        storage=storage,
-        vault_client=vault_client,
-        minio_client=minio_client,
-        transit_key_name=transit_key_name,
-        reconfigure=reconfigure,
-        override_lock=override_lock,
-        variables=variables,
+        retries=0,
         sensitive=sensitive,
-        capture_output=False,
+        cwd=f"{base_path}/{root_name}",
     )
 
 
@@ -239,7 +179,7 @@ async def apply_terraform(
     workspace: Optional[str] = None,
     env: Optional[Dict[str, str]] = None,
     base_path: str = "/amoebius/terraform/roots",
-    storage: Optional[VaultKVStorage] = None,
+    storage: Optional[Any] = None,
     vault_client: Optional[AsyncVaultClient] = None,
     minio_client: Optional[Any] = None,
     transit_key_name: Optional[str] = None,
@@ -248,24 +188,16 @@ async def apply_terraform(
     variables: Optional[Dict[str, Any]] = None,
     sensitive: bool = True,
 ) -> None:
-    """
-    Runs 'terraform apply' with comprehensive arguments.
-    """
-    await _terraform_command(
-        action="apply",
-        root_name=root_name,
-        workspace=workspace,
+    cmd: List[str] = ["terraform", "apply", "-no-color", "-auto-approve"]
+    if override_lock:
+        cmd.append("-lock=false")
+
+    await run_command(
+        cmd,
         env=env,
-        base_path=base_path,
-        storage=storage,
-        vault_client=vault_client,
-        minio_client=minio_client,
-        transit_key_name=transit_key_name,
-        reconfigure=reconfigure,
-        override_lock=override_lock,
-        variables=variables,
+        retries=0,
         sensitive=sensitive,
-        capture_output=False,
+        cwd=f"{base_path}/{root_name}",
     )
 
 
@@ -274,7 +206,7 @@ async def destroy_terraform(
     workspace: Optional[str] = None,
     env: Optional[Dict[str, str]] = None,
     base_path: str = "/amoebius/terraform/roots",
-    storage: Optional[VaultKVStorage] = None,
+    storage: Optional[Any] = None,
     vault_client: Optional[AsyncVaultClient] = None,
     minio_client: Optional[Any] = None,
     transit_key_name: Optional[str] = None,
@@ -283,24 +215,16 @@ async def destroy_terraform(
     variables: Optional[Dict[str, Any]] = None,
     sensitive: bool = True,
 ) -> None:
-    """
-    Runs 'terraform destroy' with comprehensive arguments.
-    """
-    await _terraform_command(
-        action="destroy",
-        root_name=root_name,
-        workspace=workspace,
+    cmd: List[str] = ["terraform", "destroy", "-no-color", "-auto-approve"]
+    if override_lock:
+        cmd.append("-lock=false")
+
+    await run_command(
+        cmd,
         env=env,
-        base_path=base_path,
-        storage=storage,
-        vault_client=vault_client,
-        minio_client=minio_client,
-        transit_key_name=transit_key_name,
-        reconfigure=reconfigure,
-        override_lock=override_lock,
-        variables=variables,
+        retries=0,
         sensitive=sensitive,
-        capture_output=False,
+        cwd=f"{base_path}/{root_name}",
     )
 
 
@@ -309,7 +233,7 @@ async def read_terraform_state(
     workspace: Optional[str] = None,
     env: Optional[Dict[str, str]] = None,
     base_path: str = "/amoebius/terraform/roots",
-    storage: Optional[VaultKVStorage] = None,
+    storage: Optional[Any] = None,
     vault_client: Optional[AsyncVaultClient] = None,
     minio_client: Optional[Any] = None,
     transit_key_name: Optional[str] = None,
@@ -319,48 +243,33 @@ async def read_terraform_state(
     sensitive: bool = True,
 ) -> TerraformState:
     """
-    Runs 'terraform show -json', returning a TerraformState.
+    Runs 'terraform show -json', returning a TerraformState. Raises RuntimeError if parse fails.
 
-    Fixes the fallback for an empty or JSON error by constructing a proper 'Values' object.
+    Returns:
+        TerraformState: The parsed state, guaranteed non-None.
+
+    Raises:
+        RuntimeError: If no output or parse fails.
     """
-    result = await _terraform_command(
-        action="show",
-        root_name=root_name,
-        workspace=workspace,
+    cmd: List[str] = ["terraform", "show", "-json", "-no-color"]
+    out = await run_command(
+        cmd,
         env=env,
-        base_path=base_path,
-        storage=storage,
-        vault_client=vault_client,
-        minio_client=minio_client,
-        transit_key_name=transit_key_name,
-        reconfigure=reconfigure,
-        override_lock=override_lock,
-        variables=variables,
+        retries=0,
         sensitive=sensitive,
-        capture_output=True,
+        cwd=f"{base_path}/{root_name}",
     )
-    if result is None:
-        # Return a minimal TerraformState with empty Values
-        return TerraformState(
-            format_version="0.1",
-            terraform_version="1.0",
-            values=Values(
-                outputs={},
-                root_module={},
-            ),
-        )
-    try:
-        raw = json.loads(result)
-    except json.JSONDecodeError:
-        # Also return an empty TerraformState on parse errors
-        return TerraformState(
-            format_version="0.1",
-            terraform_version="1.0",
-            values=Values(
-                outputs={},
-                root_module={},
-            ),
-        )
+    if not out.strip():
+        raise RuntimeError("No terraform state found (empty output).")
 
-    # Use pydantic to parse
-    return TerraformState(**raw)
+    try:
+        raw = json.loads(out)
+    except json.JSONDecodeError as ex:
+        raise RuntimeError(f"Failed to parse terraform state JSON: {ex}") from ex
+
+    try:
+        return TerraformState(**raw)
+    except Exception as ex:
+        raise RuntimeError(
+            f"Failed to build TerraformState pydantic model: {ex}"
+        ) from ex
