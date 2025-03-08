@@ -1,17 +1,18 @@
 """
 amoebius/models/minio.py
 
-Holds all Pydantic models (and Enums) relevant to Minio usage:
+Pydantic models for Minio usage, including:
   - MinioSettings
   - MinioBucketPermission (Enum)
   - MinioPolicySpec
   - MinioServiceAccountAccess
-  - MinioDeployment
+  - MinioDeployment (with a validator ensuring each SA is unique).
 """
 
+from __future__ import annotations
 from enum import Enum
 from typing import List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from amoebius.models.k8s import KubernetesServiceAccount
 
@@ -82,3 +83,18 @@ class MinioDeployment(BaseModel):
 
     minio_root_bucket: str = "amoebius"
     service_accounts: List[MinioServiceAccountAccess] = []
+
+    @field_validator("service_accounts")
+    @classmethod
+    def ensure_unique_sa(
+        cls, value: List[MinioServiceAccountAccess]
+    ) -> List[MinioServiceAccountAccess]:
+        """Ensure no duplicate SAs appear in the list, using a comprehension check."""
+        # Build a list of "namespace:name" for each SA
+        sa_keys = [
+            f"{item.service_account.namespace}:{item.service_account.name}"
+            for item in value
+        ]
+        if len(sa_keys) != len(set(sa_keys)):
+            raise ValueError("Duplicate SAs detected in MinioDeployment.")
+        return value

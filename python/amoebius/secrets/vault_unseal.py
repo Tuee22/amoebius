@@ -267,6 +267,10 @@ async def configure_vault(
     path "sys/policies/acl/*" {
         capabilities = ["create", "read", "update", "delete", "list"]
     }
+
+    path "auth/kubernetes/role/*" {
+        capabilities = ["create", "read", "update", "delete", "list"]
+    }
     """
     await run_command(
         ["vault", "policy", "write", "amoebius-policy", "-"],
