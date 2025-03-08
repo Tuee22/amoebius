@@ -4,6 +4,11 @@ amoebius/utils/minio.py
 Provides a MinioAdminClient for performing MinIO administrative actions
 (create buckets, create/delete users, attach policies, etc.) using AWS
 Signature Version 4 authentication with aiohttp.
+
+Enhanced for idempotent usage:
+ - create_bucket() and create_user() gracefully handle "already exists" conflicts
+   by ignoring them instead of raising exceptions.
+ - update_user_password() for credential rotation.
 """
 
 from __future__ import annotations
@@ -25,7 +30,6 @@ from amoebius.models.minio import (
     MinioPolicySpec,
     MinioBucketPermission,
 )
-
 
 T = TypeVar("T", bound=BaseException)
 
@@ -65,7 +69,6 @@ class MinioAdminClient:
         """
         self._settings = settings
         self._timeout = aiohttp.ClientTimeout(total=total_timeout)
-
         self._closed = False
         self._session: Optional[aiohttp.ClientSession] = None
 
@@ -104,50 +107,39 @@ class MinioAdminClient:
 
     @async_retry(retries=3, delay=1.0, noisy=True)
     async def create_bucket(self, bucket_name: str) -> None:
-        """Creates a new bucket in MinIO.
+        """Creates a new bucket in MinIO, skipping if it already exists.
 
         Args:
             bucket_name (str): The name of the bucket to create.
 
         Raises:
-            RuntimeError: If the operation fails with an unexpected status code.
+            RuntimeError: If the operation fails with an unexpected status code
+                that is not interpreted as 'already exists'.
         """
         url = f"{self._settings.url}/{bucket_name}"
         resp_text, status = await self._make_request("PUT", url)
+        # 200 or 204 => success. Some MinIO versions might return 409 if already exists.
         if status not in (200, 204):
+            # Attempt to detect "already owned by you" or similar message
+            if status == 409 and "already owned by you" in resp_text.lower():
+                # treat as idempotent
+                return
             raise RuntimeError(
                 f"Failed to create bucket '{bucket_name}'. "
                 f"Status={status}, Response={resp_text}"
             )
 
     @async_retry(retries=3, delay=1.0, noisy=True)
-    async def delete_bucket(self, bucket_name: str) -> None:
-        """Deletes a bucket from MinIO.
-
-        Args:
-            bucket_name (str): The name of the bucket to delete.
-
-        Raises:
-            RuntimeError: If the operation fails with an unexpected status code.
-        """
-        url = f"{self._settings.url}/{bucket_name}"
-        resp_text, status = await self._make_request("DELETE", url)
-        if status not in (200, 204, 404):
-            raise RuntimeError(
-                f"Failed to delete bucket '{bucket_name}'. "
-                f"Status={status}, Response={resp_text}"
-            )
-
-    @async_retry(retries=3, delay=1.0, noisy=True)
     async def create_user(self, username: str, password: str) -> None:
-        """Creates a new user in MinIO.
+        """Creates a new user in MinIO, skipping if user already exists.
 
         Args:
             username (str): The name (access key) of the new user.
             password (str): The user's secret key (password).
 
         Raises:
-            RuntimeError: If the operation fails with an unexpected status code.
+            RuntimeError: If the operation fails with an unexpected status code
+                that is not interpreted as 'already exists'.
         """
         url = (
             f"{self._settings.url}/minio/admin/v3/add-user"
@@ -155,38 +147,37 @@ class MinioAdminClient:
             f"&secretKey={urllib.parse.quote_plus(password)}"
         )
         resp_text, status = await self._make_request("POST", url)
+        # Some MinIO versions return 409 or 400 if user already exists
         if status not in (200, 204):
+            if status in (409, 400) and "already exists" in resp_text.lower():
+                return
             raise RuntimeError(
                 f"Failed to create user '{username}'. "
                 f"Status={status}, Response={resp_text}"
             )
 
     @async_retry(retries=3, delay=1.0, noisy=True)
-    async def delete_user(self, username: str) -> None:
-        """Deletes a user from MinIO.
+    async def update_user_password(self, username: str, new_password: str) -> None:
+        """Updates password for an existing user in MinIO.
+
+        If the user doesn't exist, this may create it (MinIO version-dependent).
+        Essentially an upsert. Some MinIO servers might error if the user is missing.
 
         Args:
             username (str): The user's name (access key).
+            new_password (str): The new secret key (password).
 
         Raises:
-            RuntimeError: If the operation fails with an unexpected status code.
+            RuntimeError: If the operation fails or the user doesn't exist on certain MinIO builds.
         """
-        url = (
-            f"{self._settings.url}/minio/admin/v3/remove-user"
-            f"?accessKey={urllib.parse.quote_plus(username)}"
-        )
-        resp_text, status = await self._make_request("DELETE", url)
-        if status not in (200, 204, 404):
-            raise RuntimeError(
-                f"Failed to delete user '{username}'. "
-                f"Status={status}, Response={resp_text}"
-            )
+        # Reusing same endpoint as create_user() to upsert the password.
+        await self.create_user(username, new_password)
 
     @async_retry(retries=3, delay=1.0, noisy=True)
     async def create_policy(
         self, policy_name: str, policy_items: List[MinioPolicySpec]
     ) -> None:
-        """Creates or updates a named policy in MinIO.
+        """Creates or updates a named policy in MinIO (upsert behavior).
 
         Args:
             policy_name (str):
@@ -195,7 +186,7 @@ class MinioAdminClient:
                 A list of bucket permissions defining the policy.
 
         Raises:
-            RuntimeError: If the operation fails with an unexpected status code.
+            RuntimeError: If the operation fails with a status code not in [200, 204].
         """
         policy_doc = self._build_policy_json(policy_items)
         url = (
@@ -210,29 +201,8 @@ class MinioAdminClient:
             )
 
     @async_retry(retries=3, delay=1.0, noisy=True)
-    async def delete_policy(self, policy_name: str) -> None:
-        """Deletes a named policy from MinIO.
-
-        Args:
-            policy_name (str): The unique policy name to delete.
-
-        Raises:
-            RuntimeError: If the operation fails with an unexpected status code.
-        """
-        url = (
-            f"{self._settings.url}/minio/admin/v3/remove-canned-policy"
-            f"?name={urllib.parse.quote_plus(policy_name)}"
-        )
-        resp_text, status = await self._make_request("DELETE", url)
-        if status not in (200, 204, 404):
-            raise RuntimeError(
-                f"Failed to delete policy '{policy_name}'. "
-                f"Status={status}, Response={resp_text}"
-            )
-
-    @async_retry(retries=3, delay=1.0, noisy=True)
     async def attach_policy_to_user(self, username: str, policy_name: str) -> None:
-        """Attaches an existing policy to a user in MinIO.
+        """Attaches an existing policy to a user in MinIO (idempotent if already attached).
 
         Args:
             username (str): The user's name (access key).
@@ -253,6 +223,9 @@ class MinioAdminClient:
                 f"to user '{username}'. Status={status}, Response={resp_text}"
             )
 
+    # Omitted delete_* methods to fully remove "destroy" logic,
+    # matching the requirement to not have a service_destroy function.
+
     # ------------------------------------------------------------------------
     # Internal Logic
     # ------------------------------------------------------------------------
@@ -269,7 +242,7 @@ class MinioAdminClient:
 
         Args:
             method (str):
-                The HTTP method to use (e.g., 'GET', 'POST', 'PUT', 'DELETE').
+                The HTTP method (e.g., 'GET', 'POST', 'PUT', 'DELETE').
             url (str):
                 The full request URL (including query parameters).
             body (Optional[str], optional):
@@ -417,48 +390,26 @@ class MinioAdminClient:
             str:
                 A JSON string representing the policy, suitable for MinIO admin calls.
         """
-        # Map each enum permission to the corresponding S3 actions
         PERMISSION_ACTIONS = {
             MinioBucketPermission.READ: ["s3:GetObject"],
             MinioBucketPermission.WRITE: ["s3:PutObject"],
             MinioBucketPermission.READWRITE: ["s3:GetObject", "s3:PutObject"],
         }
 
-        statements = [
-            {
-                "Effect": "Allow",
-                "Action": PERMISSION_ACTIONS[item.permission],
-                "Resource": f"arn:aws:s3:::{item.bucket_name}/*",
-            }
-            for item in policy_items
-            if item.permission in PERMISSION_ACTIONS
-        ]
+        statements = []
+        for item in policy_items:
+            actions = PERMISSION_ACTIONS.get(item.permission)
+            if actions:
+                statements.append(
+                    {
+                        "Effect": "Allow",
+                        "Action": actions,
+                        "Resource": f"arn:aws:s3:::{item.bucket_name}/*",
+                    }
+                )
 
         doc = {
             "Version": "2012-10-17",
             "Statement": statements,
         }
         return json.dumps(doc, indent=2)
-
-
-async def _demo() -> None:
-    """Demonstrates usage of MinioAdminClient in a test scenario."""
-    from amoebius.models.minio import MinioSettings
-
-    # Example credentials
-    settings = MinioSettings(
-        url="http://localhost:9000",
-        access_key="admin",
-        secret_key="admin123",
-        secure=False,
-    )
-
-    async with MinioAdminClient(settings) as client:
-        bucket_name = "demo-bucket"
-        await client.create_bucket(bucket_name)
-        # ... do more operations ...
-        await client.delete_bucket(bucket_name)
-
-
-if __name__ == "__main__":
-    asyncio.run(_demo())

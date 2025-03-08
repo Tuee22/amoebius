@@ -1,17 +1,18 @@
 """
 amoebius/services/minio.py
 
-Defines high-level, idempotent "deploy" and "destroy" functions for Minio,
-tying together:
- - Terraform (init/apply/destroy)
- - Vault storage for root cred (amoebius/minio/root)
- - K8s SA listing via kubectl
- - "Root" usage to create users/policies in Minio
- - concurrency with gather(*)
+Defines two functions:
+
+1) minio_deploy(...) -> None
+   - Idempotently deploy Minio based on a MinioDeployment,
+     creating or reusing a root credential in Vault if missing.
+
+2) rotate_minio_secrets(...) -> None
+   - Rotates both root and user credentials by listing all from Vault
+     and updating them in Minio.
 """
 
 import asyncio
-import json
 import secrets
 from typing import Optional
 
@@ -20,15 +21,18 @@ from amoebius.models.minio import (
     MinioSettings,
     MinioServiceAccountAccess,
 )
+from amoebius.secrets.minio import (
+    get_minio_settings_from_vault,
+    store_user_credentials_in_vault,
+)
 from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.utils.terraform import (
     init_terraform,
     apply_terraform,
-    destroy_terraform,
     VaultKVStorage,
 )
-from amoebius.utils.minio import MinioAdminClient  # <-- Correct import here
-from amoebius.utils.async_command_runner import run_command, CommandError
+from amoebius.utils.minio import MinioAdminClient
+from amoebius.utils.k8s import get_service_accounts
 
 
 async def minio_deploy(
@@ -41,59 +45,40 @@ async def minio_deploy(
 ) -> None:
     """Idempotently deploy a Minio cluster and configure buckets/policies.
 
-    This function:
-      1. Retrieves or generates a root credential from Vault (path=amoebius/minio/root).
-      2. Performs a Terraform init/apply for the Minio cluster.
-      3. Creates the 'root bucket' specified in the deployment.
-      4. Retrieves K8s service accounts from the cluster.
-      5. For each SA in the deployment config:
-         - (Optionally) skips if not found in the cluster,
-         - Creates a Minio user, policy, attaches policy,
-         - Stores user creds in Vault at 'amoebius/minio/id/<sa_name>'.
+    Steps:
+      1) Retrieve or create root credential from Vault at amoebius/minio/root.
+      2) Perform Terraform init/apply.
+      3) Create the 'root bucket' if missing.
+      4) Retrieve K8s service accounts from the cluster.
+      5) For each SA => create user/policy if missing, store in vault if newly created.
 
     Args:
         deployment (MinioDeployment):
-            The desired Minio deployment specification, including root bucket name,
-            service account settings, etc.
+            Describes the root bucket name and which K8s SAs need access.
         vault_client (AsyncVaultClient):
-            Vault client used to read/write root credentials and user credentials.
+            The Vault client for reading/writing credentials.
         base_path (str, optional):
-            Filesystem path to the Terraform directory. Defaults to
-            "/amoebius/terraform/roots/minio".
+            Path to Terraform. Defaults to "/amoebius/terraform/roots/minio".
         workspace (str, optional):
-            Name of the Terraform workspace. Defaults to "default".
+            Terraform workspace name. Defaults to "default".
         skip_missing_sas (bool, optional):
-            Whether to skip creating Minio accounts if the specified K8s SA
-            cannot be found in the cluster. Defaults to True.
-
-    Raises:
-        RuntimeError: Propagates any errors from Vault, Terraform, or Minio operations.
+            If True, skip SAs not found. Defaults to True.
     """
-    # 1) Generate or retrieve "root" credentials from Vault
     root_cred_path = "amoebius/minio/root"
-    try:
-        stored_root_secret = await vault_client.read_secret(root_cred_path)
-    except RuntimeError as ex:
-        if "404" in str(ex):
-            stored_root_secret = {}
-        else:
-            raise
 
-    if not stored_root_secret:
-        # Create random root credential
-        root_access_key = "admin"
-        root_secret_key = secrets.token_urlsafe(16)
-        new_root_settings = {
-            "url": "http://minio.minio.svc.cluster.local:9000",
-            "access_key": root_access_key,
-            "secret_key": root_secret_key,
-            "secure": False,
-        }
-        await vault_client.write_secret(root_cred_path, new_root_settings)
-        stored_root_secret = new_root_settings
-
-    # Build root minio settings
-    root_settings_model = MinioSettings(**stored_root_secret)
+    # 1) Retrieve existing root or create a new one if missing
+    existing_root = await get_minio_settings_from_vault(vault_client, root_cred_path)
+    if existing_root is None:
+        # Create new root
+        existing_root = MinioSettings(
+            url="http://minio.minio.svc.cluster.local:9000",
+            access_key="admin",
+            secret_key=secrets.token_urlsafe(16),
+            secure=False,
+        )
+        await store_user_credentials_in_vault(
+            vault_client, root_cred_path, existing_root
+        )
 
     # 2) Terraform init + apply
     storage = VaultKVStorage(root_module="minio", workspace=workspace)
@@ -112,134 +97,127 @@ async def minio_deploy(
         base_path=base_path,
     )
 
-    # 3) Use MinioAdminClient to create the root bucket and configure SAs
-    async with MinioAdminClient(root_settings_model) as client:
+    # 3) Create root bucket if missing
+    async with MinioAdminClient(existing_root) as client:
         await client.create_bucket(deployment.minio_root_bucket)
 
-        # 4) Retrieve actual K8s SAs
-        cmd_sa = ["kubectl", "get", "serviceaccounts", "-A", "-o", "json"]
-        raw_sa_json = await run_command(cmd_sa, retries=0)
-        parsed = json.loads(raw_sa_json)
-        found_sas = set()
-        for item in parsed.get("items", []):
-            ns = item.get("metadata", {}).get("namespace", "")
-            nm = item.get("metadata", {}).get("name", "")
-            if ns and nm:
-                found_sas.add(f"{ns}:{nm}")
+        # 4) Retrieve K8s SAs
+        cluster_sas = await get_service_accounts()
 
-        # 5) For each SA, create a user/policy if relevant
+        # 5) For each SA => create user + policy if missing
         async def configure_sa(sa_obj: MinioServiceAccountAccess) -> None:
-            user_name = sa_obj.service_account_name
-            if skip_missing_sas:
-                # If not found in the cluster, skip
-                # We interpret "any namespace" => must be anyNs:user_name in found_sas
-                if not any(user_name == s.split(":", 1)[1] for s in found_sas):
-                    return
+            ksa = sa_obj.service_account
+            if skip_missing_sas and (ksa not in cluster_sas):
+                return
 
-            # Random password for user
-            user_password = secrets.token_urlsafe(16)
+            user_name = f"{ksa.namespace}:{ksa.name}"
+            user_vault_path = f"amoebius/minio/id/{user_name}"
 
-            # Create user
-            await client.create_user(user_name, user_password)
-            # Create policy
+            # Check if credentials exist
+            user_settings = await get_minio_settings_from_vault(
+                vault_client, user_vault_path
+            )
+            if user_settings is None:
+                # Generate new
+                user_settings = MinioSettings(
+                    url=existing_root.url,
+                    access_key=user_name,
+                    secret_key=secrets.token_urlsafe(16),
+                    secure=existing_root.secure,
+                )
+                await store_user_credentials_in_vault(
+                    vault_client, user_vault_path, user_settings
+                )
+
+            # Create user if missing
+            await client.create_user(
+                user_settings.access_key,
+                user_settings.secret_key,
+            )
+            # Upsert policy
             policy_name = f"policy-{user_name}"
             await client.create_policy(policy_name, sa_obj.bucket_permissions)
-            # Attach policy
             await client.attach_policy_to_user(user_name, policy_name)
-
-            # Store in vault => "amoebius/minio/id/<sa_name>"
-            user_creds = MinioSettings(
-                url=root_settings_model.url,
-                access_key=user_name,
-                secret_key=user_password,
-                secure=root_settings_model.secure,
-            )
-            path_in_vault = f"amoebius/minio/id/{user_name}"
-            await vault_client.write_secret(path_in_vault, user_creds.dict())
 
         tasks = [configure_sa(sa) for sa in deployment.service_accounts]
         await asyncio.gather(*tasks)
 
 
-async def minio_destroy(
-    deployment: MinioDeployment,
+async def rotate_minio_secrets(
     vault_client: AsyncVaultClient,
     *,
     base_path: str = "/amoebius/terraform/roots/minio",
     workspace: str = "default",
 ) -> None:
-    """Idempotently remove an entire Minio cluster, buckets, policies, and users.
-
-    This function:
-      1. Retrieves the root Minio credential from Vault (or uses a fallback).
-      2. Removes each configured user and policy from Minio.
-      3. Removes the root bucket.
-      4. Performs a Terraform destroy to remove the Minio infrastructure.
-
-    Args:
-        deployment (MinioDeployment):
-            The Minio deployment specification, including root bucket and service accounts.
-        vault_client (AsyncVaultClient):
-            Vault client used for reading/writing secrets.
-        base_path (str, optional):
-            The Terraform directory path for the Minio module. Defaults to
-            "/amoebius/terraform/roots/minio".
-        workspace (str, optional):
-            The Terraform workspace name. Defaults to "default".
+    """Rotates both root and user secrets:
+       1) Regenerate root creds, re-apply Terraform
+       2) List user secrets in 'amoebius/minio/id/', update them concurrently
 
     Raises:
-        RuntimeError: Propagates any errors from Vault, Terraform, or Minio operations.
+        RuntimeError: If no existing root secret is found in Vault, or if operations fail.
     """
     root_cred_path = "amoebius/minio/root"
-    try:
-        stored_root_secret = await vault_client.read_secret(root_cred_path)
-    except RuntimeError as ex:
-        if "404" in str(ex):
-            stored_root_secret = {}
-        else:
-            raise
+    user_secrets_prefix = "amoebius/minio/id/"
 
-    if not stored_root_secret:
-        # fallback if none found
-        stored_root_secret = {
-            "url": "http://minio.minio.svc.cluster.local:9000",
-            "access_key": "admin",
-            "secret_key": "admin123",
-            "secure": False,
-        }
+    # 1) Read existing root or fail
+    old_root = await get_minio_settings_from_vault(vault_client, root_cred_path)
+    if old_root is None:
+        raise RuntimeError(
+            "No existing root credential found in Vault, cannot rotate secrets."
+        )
 
-    root_settings_model = MinioSettings(**stored_root_secret)
+    new_root_settings = MinioSettings(
+        url=old_root.url,
+        access_key="admin",
+        secret_key=secrets.token_urlsafe(16),
+        secure=old_root.secure,
+    )
+    await store_user_credentials_in_vault(
+        vault_client, root_cred_path, new_root_settings
+    )
 
-    async with MinioAdminClient(root_settings_model) as client:
-        # Remove each service account user and policy, plus vault creds
-        async def remove_sa(sa_obj: MinioServiceAccountAccess) -> None:
-            user_name = sa_obj.service_account_name
-            policy_name = f"policy-{user_name}"
-
-            await client.delete_user(user_name)
-            await client.delete_policy(policy_name)
-
-            path_in_vault = f"amoebius/minio/id/{user_name}"
-            try:
-                await vault_client.delete_secret(path_in_vault, hard=False)
-            except RuntimeError as ex:
-                if "404" in str(ex):
-                    pass
-                else:
-                    raise
-
-        tasks = [remove_sa(sa) for sa in deployment.service_accounts]
-        await asyncio.gather(*tasks)
-
-        # Remove the root bucket
-        await client.delete_bucket(deployment.minio_root_bucket)
-
-    # Finally destroy the Terraform-managed Minio infra
+    # Re-apply Terraform
     storage = VaultKVStorage(root_module="minio", workspace=workspace)
-    await destroy_terraform(
+    await init_terraform(
         root_name="minio",
         workspace=workspace,
         storage=storage,
         vault_client=vault_client,
         base_path=base_path,
     )
+    await apply_terraform(
+        root_name="minio",
+        workspace=workspace,
+        storage=storage,
+        vault_client=vault_client,
+        base_path=base_path,
+    )
+
+    # 2) Rotate user creds
+    async with MinioAdminClient(new_root_settings) as client:
+        user_paths = await vault_client.list_secrets(user_secrets_prefix)
+
+        async def rotate_user(path_frag: str) -> None:
+            user_vault_path = f"{user_secrets_prefix}{path_frag}"
+            user_settings = await get_minio_settings_from_vault(
+                vault_client, user_vault_path
+            )
+            if user_settings is None:
+                # user doesn't exist => skip
+                return
+
+            new_pass = secrets.token_urlsafe(16)
+            await client.update_user_password(user_settings.access_key, new_pass)
+
+            updated_user_settings = MinioSettings(
+                url=new_root_settings.url,
+                access_key=user_settings.access_key,
+                secret_key=new_pass,
+                secure=new_root_settings.secure,
+            )
+            await store_user_credentials_in_vault(
+                vault_client, user_vault_path, updated_user_settings
+            )
+
+        tasks = [rotate_user(path_frag) for path_frag in user_paths]
+        await asyncio.gather(*tasks)

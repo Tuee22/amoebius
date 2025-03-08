@@ -13,6 +13,8 @@ from enum import Enum
 from typing import List
 from pydantic import BaseModel, Field
 
+from amoebius.models.k8s import KubernetesServiceAccount
+
 
 class MinioSettings(BaseModel):
     """
@@ -60,11 +62,11 @@ class MinioServiceAccountAccess(BaseModel):
     Represents a single Kubernetes SA's intended Minio bucket permissions.
 
     Attributes:
-        service_account_name (str): The K8s service account name.
+        service_account (KubernetesServiceAccount): The K8s service account reference.
         bucket_permissions (List[MinioPolicySpec]): The bucket+permission list for this SA.
     """
 
-    service_account_name: str
+    service_account: KubernetesServiceAccount
     bucket_permissions: List[MinioPolicySpec]
 
 
