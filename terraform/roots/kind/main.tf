@@ -46,7 +46,7 @@ provider "kubernetes" {
 }
 
 module "amoebius_namespace" {
-  source = "../../modules/linkerd_annotated_namespace"
+  source = "amoebius/terraform/modules/linkerd_annotated_namespace"
   host                   = kind_cluster.default.endpoint
   cluster_ca_certificate = kind_cluster.default.cluster_ca_certificate
   client_certificate     = kind_cluster.default.client_certificate
