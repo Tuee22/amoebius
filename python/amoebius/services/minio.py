@@ -64,7 +64,7 @@ async def minio_deploy(
         skip_missing_sas (bool, optional):
             If True, skip SAs not found. Defaults to True.
     """
-    root_cred_path = "amoebius/minio/root"
+    root_cred_path = "amoebius/services/minio/root"
 
     # 1) Retrieve existing root or create a new one if missing
     existing_root = await get_minio_settings_from_vault(vault_client, root_cred_path)
@@ -111,7 +111,7 @@ async def minio_deploy(
                 return
 
             user_name = f"{ksa.namespace}:{ksa.name}"
-            user_vault_path = f"amoebius/minio/id/{user_name}"
+            user_vault_path = f"amoebius/services/minio/id/{user_name}"
 
             # Check if credentials exist
             user_settings = await get_minio_settings_from_vault(
