@@ -8,12 +8,10 @@ from pydantic import BaseModel, Field
 
 
 class KubernetesServiceAccount(BaseModel):
-    """Represents a Kubernetes ServiceAccount with namespace and name.
-
-    Attributes:
-        namespace (str): The Kubernetes namespace in which the SA resides.
-        name (str): The name of the service account within that namespace.
-    """
+    """Represents a Kubernetes ServiceAccount with namespace and name."""
 
     namespace: str = Field(..., description="Kubernetes namespace.")
     name: str = Field(..., description="Kubernetes service account name.")
+
+    class Config:
+        frozen = True

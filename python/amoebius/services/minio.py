@@ -79,6 +79,7 @@ async def minio_deploy(
         workspace=workspace,
         storage=storage,
         vault_client=vault_client,  # needed if ephemeral encryption is in use
+        sensitive=False,  # test code
     )
     await apply_terraform(
         root_name="minio",
@@ -89,6 +90,7 @@ async def minio_deploy(
             "root_user": root.access_key,
             "root_password": root.secret_key,
         },
+        sensitive=False,  # test code
     )
 
     # 3) Create the 'root bucket' if missing

@@ -10,5 +10,4 @@ variable "root_password" {
   type        = string
   description = "Minio root password"
   sensitive   = true
-  ephemeral   = true
 }

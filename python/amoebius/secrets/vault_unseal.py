@@ -1,16 +1,16 @@
 """
-amoebius/secrets/vault_unseal.py
-
 Handles Vault initialization, unseal, and configuration, including storing/loading
 Vault init data in encrypted form.
+
+We also set a K8s secret "vault-config-status" in namespace "amoebius"
+with a single field "configured". We set it to "false" immediately before unsealing,
+and update it to "true" once the Vault configuration is done.
 
 Uses:
   - "VaultInitData" from amoebius.models.vault
   - "TerraformState" from amoebius.models.terraform_state
   - "read_terraform_state", "get_output_from_state" from amoebius.utils.terraform
   - "encrypt_dict_to_file", "decrypt_dict_from_file" from amoebius.secrets.encrypted_dict
-
-All functions typed to pass mypy --strict, assuming a compatible environment.
 """
 
 from __future__ import annotations
@@ -22,9 +22,6 @@ import random
 from getpass import getpass
 from typing import Any, Dict, List, Optional
 
-import yaml
-import aiohttp
-
 from amoebius.models.vault import VaultInitData
 from amoebius.models.terraform_state import TerraformState
 from amoebius.models.validator import validate_type
@@ -32,6 +29,7 @@ from amoebius.utils.async_command_runner import run_command, CommandError
 from amoebius.utils.terraform import read_terraform_state, get_output_from_state
 from amoebius.utils.async_retry import async_retry
 from amoebius.secrets.encrypted_dict import encrypt_dict_to_file, decrypt_dict_from_file
+from amoebius.utils.k8s import put_k8s_secret_data
 
 DEFAULT_SECRETS_FILE_PATH = "/amoebius/data/vault_secrets.bin"
 DEFAULT_KUBERNETES_HOST = "https://kubernetes.default.svc.cluster.local/"
@@ -39,14 +37,13 @@ DEFAULT_KUBERNETES_HOST = "https://kubernetes.default.svc.cluster.local/"
 
 @async_retry(retries=30)
 async def is_vault_initialized(vault_addr: str) -> bool:
-    """
-    Check if Vault is initialized by running `vault status -format=json`, with up to 30 retries.
+    """Check if Vault is initialized by running `vault status -format=json`, retrying up to 30 times.
 
     Args:
-        vault_addr: The Vault server address (e.g. http://vault:8200).
+        vault_addr (str): The Vault server address (e.g. http://vault:8200).
 
     Returns:
-        True if Vault is initialized, False otherwise.
+        bool: True if Vault is initialized, False otherwise.
 
     Raises:
         ValueError: If the 'initialized' field is missing or invalid in the JSON.
@@ -75,16 +72,15 @@ async def initialize_vault(
     num_shares: int,
     threshold: int,
 ) -> VaultInitData:
-    """
-    Initialize Vault with Shamir's secret sharing using 'vault operator init'.
+    """Initialize Vault with Shamir's secret sharing using `vault operator init`.
 
     Args:
-        vault_addr: The Vault server address (e.g. http://vault:8200).
-        num_shares: Number of unseal keys to generate (e.g., 5).
-        threshold: Minimum number of keys required to unseal Vault (e.g., 3).
+        vault_addr (str): The Vault server address, e.g. "http://vault:8200".
+        num_shares (int): Number of unseal keys to generate.
+        threshold (int): Minimum number of keys required to unseal Vault.
 
     Returns:
-        A VaultInitData object with unseal keys and root token.
+        VaultInitData: Object with unseal keys and root token.
 
     Raises:
         CommandError: If the init command fails.
@@ -102,7 +98,6 @@ async def initialize_vault(
         ],
         env=env,
     )
-    # Convert JSON to VaultInitData
     return VaultInitData.model_validate_json(out)
 
 
@@ -110,12 +105,11 @@ async def unseal_vault_pods(
     pod_names: List[str],
     vault_init_data: VaultInitData,
 ) -> None:
-    """
-    Unseal each Vault pod using 'vault operator unseal' and a subset of Shamir keys.
+    """Unseal each Vault pod using 'vault operator unseal' and a subset of Shamir keys.
 
     Args:
-        pod_names: DNS names or addresses for each Vault pod.
-        vault_init_data: The Vault initialization data (unseal keys, threshold).
+        pod_names (List[str]): DNS names or addresses for each Vault pod.
+        vault_init_data (VaultInitData): Vault initialization data (keys, threshold).
 
     Raises:
         CommandError: If any unseal command fails.
@@ -142,19 +136,18 @@ async def configure_vault(
     tfs: TerraformState,
     kubernetes_host: str = DEFAULT_KUBERNETES_HOST,
 ) -> None:
-    """
-    Configure Vault for Kubernetes auth, KV v2, Transit, and an 'amoebius-policy'.
+    """Configure Vault for Kubernetes auth, KV v2, Transit, and an 'amoebius-policy'.
+
+    Once complete, sets a K8s secret "vault-config-status" with "configured" = "true".
 
     Args:
-        vault_init_data: Contains root_token and unseal keys.
-        tfs: A TerraformState with outputs for e.g. vault SA name/namespace.
-        kubernetes_host: The cluster API host (defaults to standard K8s internal URL).
+        vault_init_data (VaultInitData): Contains root_token/unseal keys.
+        tfs (TerraformState): A TerraformState with Vault outputs (e.g. SA name).
+        kubernetes_host (str): The cluster API host. Defaults to K8s internal URL.
 
     Raises:
-        CommandError: If any vault CLI commands fail.
+        CommandError: If any Vault CLI command fails.
     """
-    # We now provide the third argument "output_type" to get_output_from_state
-    # plus type annotations for the local variables.
     vault_sa_name: str = get_output_from_state(tfs, "vault_service_account_name", str)
     vault_service_name: str = get_output_from_state(tfs, "vault_service_name", str)
     vault_sa_namespace: str = get_output_from_state(tfs, "vault_namespace", str)
@@ -166,20 +159,16 @@ async def configure_vault(
         "VAULT_TOKEN": vault_init_data.root_token,
     }
 
-    # Check if Kubernetes auth is enabled
-    print("Checking if Kubernetes authentication is enabled in Vault...")
     auth_methods_output = await run_command(
         ["vault", "auth", "list", "-format=json"], env=env, retries=30
     )
     auth_methods: Dict[str, Any] = json.loads(auth_methods_output)
     if "kubernetes/" not in auth_methods:
-        print("Enabling Kubernetes auth in Vault...")
         await run_command(["vault", "auth", "enable", "kubernetes"], env=env)
     else:
         print("Kubernetes auth is already enabled, skipping.")
 
-    # Create a 10-year token for the SA
-    print("Creating a long-lived token via kubectl for the vault SA...")
+    # Create a 10-year token via kubectl for the vault SA
     sa_token = await run_command(
         [
             "kubectl",
@@ -193,7 +182,6 @@ async def configure_vault(
     )
 
     # Grab CA cert from configmap
-    print("Retrieving cluster CA cert from 'kube-root-ca.crt' configmap...")
     ca_cert = await run_command(
         [
             "kubectl",
@@ -207,7 +195,7 @@ async def configure_vault(
         ]
     )
 
-    print("Writing k8s auth config to Vault...")
+    # Write k8s auth config to Vault
     await run_command(
         [
             "vault",
@@ -220,7 +208,6 @@ async def configure_vault(
         env=env,
     )
 
-    # Check for secret/ and transit/ engines
     secrets_list_output = await run_command(
         ["vault", "secrets", "list", "-format=json"],
         env=env,
@@ -229,47 +216,39 @@ async def configure_vault(
 
     # KV v2
     if "secret/" not in secrets_list:
-        print("Enabling KV v2 at 'secret/' path.")
         await run_command(
             ["vault", "secrets", "enable", "-path=secret", "-version=2", "kv"], env=env
         )
-    else:
-        print("KV v2 at path=secret/ is already enabled. Skipping.")
 
     # Transit
     if "transit/" not in secrets_list:
-        print("Enabling Transit engine at 'transit/' path.")
         await run_command(
             ["vault", "secrets", "enable", "-path=transit", "transit"], env=env
         )
-    else:
-        print("Transit engine already enabled. Skipping.")
 
-    # Create a policy
-    print("Creating 'amoebius-policy' policy in Vault...")
     policy_hcl = r"""
     path "secret/data/amoebius/*" {
-        capabilities = ["create", "read", "update", "delete", "list"]
+      capabilities = ["create", "read", "update", "delete", "list"]
     }
 
     path "secret/metadata/amoebius/*" {
-        capabilities = ["create", "read", "update", "delete", "list"]
+      capabilities = ["create", "read", "update", "delete", "list"]
     }
 
     path "transit/keys/amoebius" {
-        capabilities = ["create", "read", "update", "delete", "list"]
+      capabilities = ["create", "read", "update", "delete", "list"]
     }
 
     path "transit/*/amoebius/*" {
-        capabilities = ["update"]
+      capabilities = ["update"]
     }
 
     path "sys/policies/acl/*" {
-        capabilities = ["create", "read", "update", "delete", "list"]
+      capabilities = ["create", "read", "update", "delete", "list"]
     }
 
     path "auth/kubernetes/role/*" {
-        capabilities = ["create", "read", "update", "delete", "list"]
+      capabilities = ["create", "read", "update", "delete", "list"]
     }
     """
     await run_command(
@@ -278,7 +257,7 @@ async def configure_vault(
         env=env,
     )
 
-    print("Creating 'amoebius-admin-role' for 'amoebius-admin' SA...")
+    # Create a Vault k8s role for the "amoebius-admin" SA
     await run_command(
         [
             "vault",
@@ -292,7 +271,13 @@ async def configure_vault(
         env=env,
     )
 
-    print("Vault configuration completed.")
+    print("Vault configuration completed. Setting 'vault-config-status' to 'true'...")
+    # Mark "configured" = "true"
+    await put_k8s_secret_data(
+        secret_name="vault-config-status",
+        namespace="amoebius",
+        data={"configured": "true"},
+    )
 
 
 def save_vault_init_data_to_file(
@@ -300,16 +285,13 @@ def save_vault_init_data_to_file(
     file_path: str,
     password: str,
 ) -> None:
-    """
-    Save Vault initialization data to an encrypted file on disk.
+    """Save Vault initialization data to an encrypted file on disk.
 
     Args:
-        vault_init_data: The Vault initialization data (root token, unseal keys, etc.).
-        file_path: The path where encrypted data is written.
-        password: The password used to encrypt.
+        vault_init_data (VaultInitData): The Vault initialization data.
+        file_path (str): The path where encrypted data is written.
+        password (str): The password used to encrypt.
     """
-    from amoebius.secrets.encrypted_dict import encrypt_dict_to_file
-
     encrypt_dict_to_file(
         data=vault_init_data.model_dump(),
         password=password,
@@ -321,18 +303,15 @@ def load_vault_init_data_from_file(
     password: str,
     file_path: str = DEFAULT_SECRETS_FILE_PATH,
 ) -> VaultInitData:
-    """
-    Load Vault initialization data from an encrypted file on disk.
+    """Load Vault initialization data from an encrypted file on disk.
 
     Args:
-        password: The password used to decrypt.
-        file_path: The path of the encrypted data file.
+        password (str): The password used to decrypt.
+        file_path (str): The path of the encrypted data file.
 
     Returns:
-        VaultInitData object.
+        VaultInitData: Parsed unseal data.
     """
-    from amoebius.secrets.encrypted_dict import decrypt_dict_from_file
-
     decrypted_data = decrypt_dict_from_file(password=password, file_path=file_path)
     return VaultInitData.model_validate(decrypted_data)
 
@@ -344,21 +323,18 @@ async def retrieve_vault_init_data(
     threshold: int,
     secrets_file_path: str,
 ) -> VaultInitData:
-    """
-    Retrieve (or create) Vault initialization data from an encrypted file, or initialize Vault if not present.
+    """Retrieve (or create) Vault initialization data from an encrypted file, or initialize Vault if absent.
 
     Args:
-        password: The encryption password for the file.
-        vault_addr: The Vault server address.
-        num_shares: The number of Shamir unseal keys to create if init is needed.
-        threshold: The threshold to unseal.
-        secrets_file_path: The encrypted file path.
+        password (str): The encryption password for the file.
+        vault_addr (str): The Vault server address.
+        num_shares (int): Number of Shamir unseal keys to create if init is needed.
+        threshold (int): The threshold to unseal.
+        secrets_file_path (str): The encrypted file path.
 
     Returns:
-        VaultInitData object containing unseal keys, root token, etc.
+        VaultInitData: Contains unseal keys, root token, etc.
     """
-    import os
-
     if os.path.exists(secrets_file_path):
         return load_vault_init_data_from_file(
             password=password, file_path=secrets_file_path
@@ -379,9 +355,7 @@ async def retrieve_vault_init_data(
 
 @async_retry(retries=30)
 async def is_vault_initialized_wrapper(vault_addr: str) -> bool:
-    """
-    A wrapper for is_vault_initialized, to demonstrate usage with async_retry.
-    """
+    """Wrapper for is_vault_initialized, using async_retry."""
     return await is_vault_initialized(vault_addr)
 
 
@@ -391,35 +365,23 @@ async def init_unseal_configure_vault(
     secrets_file_path: str = DEFAULT_SECRETS_FILE_PATH,
     user_supplied_password: Optional[str] = None,
 ) -> None:
-    """
-    High-level workflow to:
-      1) Read Terraform state for Vault (root_name="vault").
-      2) Determine if Vault is initialized, prompt for password if needed.
+    """High-level workflow to:
+      1) Read Terraform state for root_name="vault".
+      2) Determine if Vault is initialized; prompt or confirm password if needed.
       3) Retrieve or create VaultInitData (initializes Vault if needed).
-      4) Unseal all pods.
-      5) Configure Vault for K8s auth, secrets, policies.
+      4) Set "vault-config-status" = "false" immediately before unseal.
+      5) Unseal all pods.
+      6) Configure Vault for K8s auth, secrets, policies => sets "vault-config-status"="true".
 
     Args:
-        default_shamir_shares: The default number of unseal key shares.
-        default_shamir_threshold: The default threshold for unseal.
-        secrets_file_path: Path to store/read the encrypted VaultInitData.
-        user_supplied_password: If provided, use it directly.
-
-    Raises:
-        RuntimeError: If reading Terraform fails or other steps fail.
-        CommandError: If vault CLI calls fail.
+        default_shamir_shares (int, optional): Number of unseal key shares. Defaults to 5.
+        default_shamir_threshold (int, optional): Threshold to unseal. Defaults to 3.
+        secrets_file_path (str, optional): Path to store/read VaultInitData. Defaults to /amoebius/data/vault_secrets.bin.
+        user_supplied_password (Optional[str], optional): If provided, use it directly. Otherwise prompt.
     """
-    from amoebius.utils.terraform import read_terraform_state, get_output_from_state
-
     print("Reading vault terraform state with up to 30 retries...")
-    try:
-        tfs = await read_terraform_state(root_name="vault")
-    except Exception as ex:
-        raise RuntimeError(
-            "Failed to read vault terraform state. Has terraform deploy completed?"
-        ) from ex
+    tfs = await read_terraform_state(root_name="vault")
 
-    # Provide type annotation and third argument for get_output_from_state:
     vault_raft_pod_dns_names: List[str] = get_output_from_state(
         tfs, "vault_raft_pod_dns_names", List[str]
     )
@@ -428,12 +390,11 @@ async def init_unseal_configure_vault(
 
     vault_init_addr = vault_raft_pod_dns_names[0]
 
-    # Determine password (prompt or user-supplied)
+    # Acquire password (prompt or user-supplied)
+    vault_is_init = await is_vault_initialized_wrapper(vault_addr=vault_init_addr)
     if user_supplied_password is not None:
         password = user_supplied_password
     else:
-        # Check if Vault is initialized => single vs double prompt
-        vault_is_init = await is_vault_initialized_wrapper(vault_addr=vault_init_addr)
 
         def get_password_once() -> str:
             return getpass("Enter password to decrypt existing Vault secrets: ")
@@ -447,7 +408,6 @@ async def init_unseal_configure_vault(
 
         password = get_password_once() if vault_is_init else get_password_twice()
 
-    # Retrieve or create the Vault init data
     vault_init_data = await retrieve_vault_init_data(
         password=password,
         vault_addr=vault_init_addr,
@@ -456,22 +416,29 @@ async def init_unseal_configure_vault(
         secrets_file_path=secrets_file_path,
     )
 
-    # Unseal
+    # 4) Immediately before unseal => set "vault-config-status" = "false"
+    print("Setting 'vault-config-status' to 'false' just before unseal...")
+    await put_k8s_secret_data(
+        secret_name="vault-config-status",
+        namespace="amoebius",
+        data={"configured": "false"},
+    )
+
+    # 5) Unseal
     await unseal_vault_pods(
         pod_names=vault_raft_pod_dns_names,
         vault_init_data=vault_init_data,
     )
 
-    # Configure
-    from amoebius.secrets.vault_unseal import configure_vault
-
-    await configure_vault(vault_init_data=vault_init_data, tfs=tfs)
+    # 6) Configure => sets "vault-config-status"="true"
+    await configure_vault(
+        vault_init_data=vault_init_data,
+        tfs=tfs,
+    )
 
 
 def main() -> None:
-    """
-    Command-line entry point to init/unseal/configure Vault in one go.
-    """
+    """Command-line entry point to init/unseal/configure Vault in one go."""
     asyncio.run(init_unseal_configure_vault())
 
 

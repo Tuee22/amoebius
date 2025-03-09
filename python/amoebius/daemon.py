@@ -1,16 +1,14 @@
 """
-amoebius/daemon.py
-
 A daemon that:
-1) Ensures Docker is running or fails => K8s restarts.
-2) Deploys Linkerd + Vault once, or fails => K8s restarts.
-3) Reads Terraform state for 'vault_addr' once, or fails => K8s restarts.
+1) Ensures Docker is running or fails => K8s restarts container.
+2) Deploys Linkerd + Vault once, or fails => K8s restarts container.
+3) Reads TF state for 'vault_addr' once, or fails => K8s restarts container.
 4) Creates a single AsyncVaultClient outside the loop.
 5) Each loop iteration:
-   - Redeploy Linkerd+Vault (idempotent),
-   - Check if vault is sealed => if sealed, skip; if unsealed, run minio,
-   - Sleep 5s,
-   - Repeats forever or until canceled => K8s can also restart it on crash.
+   - Redeploy Linkerd+Vault (idempotent).
+   - Checks if vault is sealed => if sealed, skip.
+   - Checks if vault is configured => if not, skip.
+   - Otherwise, run minio_deploy(...) => Sleep => repeat.
 """
 
 import asyncio
@@ -25,8 +23,6 @@ from amoebius.utils.terraform import (
     read_terraform_state,
     get_output_from_state,
 )
-
-# We import AsyncVaultClient from vault_client, but import VaultSettings from amoebius.models.vault
 from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.models.vault import VaultSettings
 from amoebius.services.minio import minio_deploy
@@ -40,13 +36,12 @@ from amoebius.models.k8s import KubernetesServiceAccount
 
 
 async def deploy_infra() -> None:
-    """
-    Deploy Linkerd + Vault (idempotent).
+    """Deploy Linkerd + Vault in an idempotent way.
 
-    If it fails, let the exception propagate => k8s restarts.
+    If it fails, let the exception propagate => K8s restarts container.
     """
     print("Deploying Linkerd...")
-    await install_linkerd()
+    await install_linkerd() test code
 
     print("Deploying Vault via Terraform...")
     await init_terraform(root_name="vault", sensitive=False)
@@ -56,14 +51,11 @@ async def deploy_infra() -> None:
 
 
 async def run_amoebius(vclient: AsyncVaultClient) -> None:
-    """
-    Runs the MinIO deployment logic with a guaranteed Vault client.
+    """Runs MinIO deployment logic with a guaranteed Vault client.
 
     Args:
-        vclient: The already-initialized and unsealed Vault client.
+        vclient (AsyncVaultClient): The already-initialized Vault client.
     """
-    # Provide read/write perms on the 'amoebius' bucket for the 'amoebius' user
-    # in the 'amoebius-admin' namespace
     service_account_access = MinioServiceAccountAccess(
         service_account=KubernetesServiceAccount(
             namespace="amoebius-admin",
@@ -85,16 +77,16 @@ async def run_amoebius(vclient: AsyncVaultClient) -> None:
 
 
 async def main() -> None:
-    """
-    Main daemon:
-      1) Ensures docker is running or crash => k8s restarts.
-      2) Deploys Linkerd + Vault once, or crash => k8s restarts.
-      3) Reads TF for vault_addr => if missing => crash => k8s restarts.
-      4) Creates one VaultClient outside the loop.
-      5) In the loop:
-         - Redeploy infra each iteration (idempotent),
-         - is_vault_sealed() => if sealed => skip, else run_amoebius,
-         - Sleep 5s, repeat.
+    """Main daemon flow:
+    1) Ensure Docker is running or fail => K8s restarts.
+    2) Deploy Linkerd + Vault once or fail => K8s restarts.
+    3) Read TF for vault_addr => if missing => fail => K8s restarts.
+    4) Create one VaultClient outside the loop.
+    5) In a loop:
+       - Redeploy infra (idempotent).
+       - Check `is_vault_sealed()` => if sealed => skip.
+       - Check `is_vault_configured()` => if false => skip.
+       - Else run minio, sleep 5s, repeat.
     """
     print("Daemon starting...")
     docker_process: Optional[asyncio.subprocess.Process] = None
@@ -110,10 +102,10 @@ async def main() -> None:
     else:
         print("Docker daemon already running.")
 
-    # 2) Deploy Linkerd + Vault once or fail => k8s restarts
+    # 2) Deploy Linkerd + Vault once or fail => K8s restarts
     await deploy_infra()
 
-    # 3) Read Terraform state => get vault_addr => or fail => k8s restarts
+    # 3) Read Terraform state => get vault_addr => or fail => K8s restarts
     tfs = await read_terraform_state(root_name="vault")
     vault_addr = get_output_from_state(tfs, "vault_addr", str)
     print(f"Got vault_addr from TF: {vault_addr}")
@@ -129,18 +121,18 @@ async def main() -> None:
 
         try:
             while True:
-                print(
-                    "Daemon iteration: redeploy infra, check sealed, run minio if unsealed."
-                )
-                # Redeploy infra each iteration
+                print("Daemon iteration: re-deploy infra, then check Vault status.")
                 await deploy_infra()
 
-                # If is_vault_sealed fails => crash => k8s restarts
                 sealed = await vclient.is_vault_sealed()
                 if sealed:
                     print("Vault is sealed => skipping MinIO logic.")
                 else:
-                    await run_amoebius(vclient)
+                    configured = await vclient.is_vault_configured()
+                    if not configured:
+                        print("Vault is unsealed but not yet configured => skipping.")
+                    else:
+                        await run_amoebius(vclient)
 
                 print("Iteration done. Sleeping 5s...")
                 await asyncio.sleep(5)
@@ -148,7 +140,6 @@ async def main() -> None:
         except asyncio.CancelledError:
             print("Daemon shutting down (cancelled).")
         finally:
-            # Clean up if needed
             if docker_process:
                 print("Terminating dockerd...")
                 docker_process.terminate()
