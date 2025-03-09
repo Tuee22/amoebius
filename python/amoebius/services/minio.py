@@ -120,10 +120,10 @@ async def minio_deploy(
         sas_to_configure = [
             sa_obj
             for sa_obj in deployment.service_accounts
-            if not (
-                skip_missing_sas
-                and f"{sa_obj.service_account.namespace}:{sa_obj.service_account.name}"
-                not in cluster_sa_keys
+            if (
+                not skip_missing_sas
+                or f"{sa_obj.service_account.namespace}:{sa_obj.service_account.name}"
+                in cluster_sa_keys
             )
         ]
 
