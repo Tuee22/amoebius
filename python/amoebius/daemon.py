@@ -49,8 +49,8 @@ async def deploy_infra() -> None:
     await install_linkerd()
 
     print("Deploying Vault via Terraform...")
-    await init_terraform(root_name="vault")
-    await apply_terraform(root_name="vault")
+    await init_terraform(root_name="vault", sensitive=False)
+    await apply_terraform(root_name="vault", sensitive=False)
 
     print("Deployment (Linkerd + Vault) completed.")
 

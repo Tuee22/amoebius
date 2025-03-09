@@ -158,11 +158,11 @@ async def configure_vault(
     vault_sa_name: str = get_output_from_state(tfs, "vault_service_account_name", str)
     vault_service_name: str = get_output_from_state(tfs, "vault_service_name", str)
     vault_sa_namespace: str = get_output_from_state(tfs, "vault_namespace", str)
-    vault_common_name: str = get_output_from_state(tfs, "vault_common_name", str)
+    vault_addr: str = get_output_from_state(tfs, "vault_addr", str)
     vault_secret_path: str = get_output_from_state(tfs, "vault_secret_path", str)
 
     env = {
-        "VAULT_ADDR": vault_common_name,
+        "VAULT_ADDR": vault_addr,
         "VAULT_TOKEN": vault_init_data.root_token,
     }
 

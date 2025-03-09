@@ -46,7 +46,7 @@ provider "kubernetes" {
 }
 
 module "amoebius_namespace" {
-  source = "amoebius/terraform/modules/linkerd_annotated_namespace"
+  source = "../../modules/linkerd_annotated_namespace"
   host                   = kind_cluster.default.endpoint
   cluster_ca_certificate = kind_cluster.default.cluster_ca_certificate
   client_certificate     = kind_cluster.default.client_certificate
@@ -107,6 +107,9 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
         container {
           name  = "amoebius"
           image = var.amoebius_image
+
+          # Override the default entrypoint/command with infinite sleep:
+          command = ["/bin/sh", "-c", "sleep infinity"]
           
           port {
             container_port = 8080

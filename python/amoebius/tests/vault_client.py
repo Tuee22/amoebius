@@ -108,7 +108,7 @@ async def main() -> None:
 
     # Read the base Terraform state for the Vault server (to get its address)
     tfs = await read_terraform_state(root_name="vault")
-    vault_addr = get_output_from_state(tfs, "vault_common_name", str)
+    vault_addr = get_output_from_state(tfs, "vault_addr", str)
 
     # Print root token if requested
     if args.print_root_token:

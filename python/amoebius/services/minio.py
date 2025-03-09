@@ -42,7 +42,6 @@ async def minio_deploy(
     deployment: MinioDeployment,
     vault_client: AsyncVaultClient,
     *,
-    base_path: str = "/amoebius/terraform/roots/minio",
     workspace: str = "default",
     skip_missing_sas: bool = True,
 ) -> None:
@@ -71,6 +70,8 @@ async def minio_deploy(
     """
     # 1) Retrieve or create the Minio 'root' credential in Vault
     root_cred_path = "amoebius/services/minio/root"
+    import pdb
+
     root = await get_minio_settings_from_vault(vault_client, root_cred_path)
     if root is None:
         root = MinioSettings(
@@ -88,18 +89,18 @@ async def minio_deploy(
         workspace=workspace,
         storage=storage,
         vault_client=vault_client,
-        base_path=base_path,
+        sensitive=False,  # test code
     )
     await apply_terraform(
         root_name="minio",
         workspace=workspace,
         storage=storage,
         vault_client=vault_client,
-        base_path=base_path,
         variables={
             "root_user": root.access_key,
             "root_password": root.secret_key,
         },
+        sensitive=False,  # test code
     )
 
     # 3) Create the 'root bucket' if missing
@@ -203,7 +204,6 @@ async def minio_deploy(
 async def rotate_minio_secrets(
     vault_client: AsyncVaultClient,
     *,
-    base_path: str = "/amoebius/terraform/roots/minio",
     workspace: str = "default",
 ) -> None:
     """Rotate both root and user secrets, reapplying Terraform, ignoring user-specific Vault policy/roles.
@@ -248,7 +248,7 @@ async def rotate_minio_secrets(
         workspace=workspace,
         storage=storage,
         vault_client=vault_client,
-        base_path=base_path,
+        sensitive=False,  # test code
     )
     # Pass new root creds as Terraform variables
     await apply_terraform(
@@ -256,7 +256,6 @@ async def rotate_minio_secrets(
         workspace=workspace,
         storage=storage,
         vault_client=vault_client,
-        base_path=base_path,
         variables={
             "root_user": new_root_settings.access_key,
             "root_password": new_root_settings.secret_key,
