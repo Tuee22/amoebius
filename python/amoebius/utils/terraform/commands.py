@@ -1,9 +1,13 @@
 """
 amoebius/utils/terraform/commands.py
 
-Implements the Terraform commands (init, apply, destroy, read, etc.),
-plus helper functions for building commands.
-Uses ephemeral usage from ephemeral.py to ensure no secrets on local disk.
+Implements Terraform commands (init, apply, destroy, show, etc.),
+plus helpers for building command arrays.
+Uses ephemeral usage from ephemeral.py so no secrets remain on disk.
+
+We do NOT pass transit_key_name here; ephemeral usage reads from storage.transit_key_name.
+
+No local imports, no for loops for side-effect removal, passes mypy --strict.
 """
 
 from __future__ import annotations
@@ -18,10 +22,7 @@ from amoebius.secrets.vault_client import AsyncVaultClient
 from minio import Minio
 
 from amoebius.utils.terraform.storage import StateStorage, NoStorage
-from amoebius.utils.terraform.ephemeral import (
-    ephemeral_tfstate_if_needed,
-    maybe_tfvars,
-)
+from amoebius.utils.terraform.ephemeral import ephemeral_tfstate_if_needed, maybe_tfvars
 
 T = TypeVar("T")
 
@@ -29,6 +30,14 @@ T = TypeVar("T")
 def make_base_command(action: str, override_lock: bool, reconfigure: bool) -> List[str]:
     """
     Build the base Terraform command in a purely functional style (no list mutation).
+
+    Args:
+        action: One of "init","apply","destroy","show".
+        override_lock: If True => '-lock=false' for apply/destroy.
+        reconfigure: If True => '-reconfigure' for init.
+
+    Returns:
+        List of command tokens, e.g. ["terraform","apply","-auto-approve"].
     """
     base = ["terraform", action, "-no-color"]
 
@@ -44,7 +53,9 @@ def make_base_command(action: str, override_lock: bool, reconfigure: bool) -> Li
 
 
 def build_final_command(base_cmd: List[str], tfvars_args: List[str]) -> List[str]:
-    """Combine base_cmd with optional var-file flags, no ephemeral flags used in TF 1.10."""
+    """
+    Combine base_cmd with optional var-file flags, no ephemeral flags used in TF 1.10.
+    """
     return base_cmd + tfvars_args
 
 
@@ -57,7 +68,6 @@ async def _terraform_command(
     storage: Optional[StateStorage],
     vault_client: Optional[AsyncVaultClient],
     minio_client: Optional[Minio],
-    transit_key_name: Optional[str],
     override_lock: bool,
     variables: Optional[Dict[str, Any]],
     reconfigure: bool,
@@ -65,7 +75,8 @@ async def _terraform_command(
     capture_output: bool,
 ) -> Optional[str]:
     """
-    Internal runner for 'terraform <action>' with ephemeral usage => store .tfstate & .tfstate.backup in memory only.
+    Internal runner for 'terraform <action>' with ephemeral usage => .tfstate in memory only.
+    ephemeral_tfstate_if_needed sees if storage.transit_key_name is set to do encryption.
     """
     ws = workspace or "default"
     store = storage or NoStorage(root_name, ws)
@@ -82,7 +93,7 @@ async def _terraform_command(
         )
 
     async with ephemeral_tfstate_if_needed(
-        store, vault_client, minio_client, transit_key_name, terraform_dir
+        store, vault_client, minio_client, terraform_dir
     ):
         async with maybe_tfvars(action, variables) as tfvars_args:
             final_cmd = build_final_command(base_cmd, tfvars_args)
@@ -98,11 +109,23 @@ async def init_terraform(
     storage: Optional[StateStorage] = None,
     vault_client: Optional[AsyncVaultClient] = None,
     minio_client: Optional[Minio] = None,
-    transit_key_name: Optional[str] = None,
     reconfigure: bool = False,
     sensitive: bool = True,
 ) -> None:
-    """Run 'terraform init' with ephemeral usage if needed, covering .tfstate & .tfstate.backup."""
+    """
+    Run 'terraform init' with ephemeral usage if needed, storing .tfstate in memory or remote.
+
+    Args:
+        root_name: Terraform root module name.
+        workspace: The workspace name, defaults to 'default'.
+        env: Additional env vars for Terraform.
+        base_path: Path to Terraform modules, defaults to '/amoebius/terraform/roots'.
+        storage: The chosen storage class for ciphertext, or NoStorage.
+        vault_client: If ephemeral usage w/ Vault encryption is desired.
+        minio_client: If ephemeral usage storing ciphertext in Minio.
+        reconfigure: If True => '-reconfigure' for 'terraform init'.
+        sensitive: If True => omit command details from error logs.
+    """
     await _terraform_command(
         action="init",
         root_name=root_name,
@@ -112,7 +135,6 @@ async def init_terraform(
         storage=storage,
         vault_client=vault_client,
         minio_client=minio_client,
-        transit_key_name=transit_key_name,
         override_lock=False,
         variables=None,
         reconfigure=reconfigure,
@@ -129,12 +151,15 @@ async def apply_terraform(
     storage: Optional[StateStorage] = None,
     vault_client: Optional[AsyncVaultClient] = None,
     minio_client: Optional[Minio] = None,
-    transit_key_name: Optional[str] = None,
     override_lock: bool = False,
     variables: Optional[Dict[str, Any]] = None,
     sensitive: bool = True,
 ) -> None:
-    """Run 'terraform apply' with ephemeral usage for .tfstate & .tfstate.backup."""
+    """
+    Run 'terraform apply' with ephemeral usage for .tfstate & .tfstate.backup.
+
+    ephemeral_tfstate_if_needed references storage.transit_key_name if encryption is needed.
+    """
     await _terraform_command(
         action="apply",
         root_name=root_name,
@@ -144,7 +169,6 @@ async def apply_terraform(
         storage=storage,
         vault_client=vault_client,
         minio_client=minio_client,
-        transit_key_name=transit_key_name,
         override_lock=override_lock,
         variables=variables,
         reconfigure=False,
@@ -161,12 +185,13 @@ async def destroy_terraform(
     storage: Optional[StateStorage] = None,
     vault_client: Optional[AsyncVaultClient] = None,
     minio_client: Optional[Minio] = None,
-    transit_key_name: Optional[str] = None,
     override_lock: bool = False,
     variables: Optional[Dict[str, Any]] = None,
     sensitive: bool = True,
 ) -> None:
-    """Run 'terraform destroy' with ephemeral usage for .tfstate & .tfstate.backup."""
+    """
+    Run 'terraform destroy' with ephemeral usage, referencing storage.transit_key_name if set.
+    """
     await _terraform_command(
         action="destroy",
         root_name=root_name,
@@ -176,7 +201,6 @@ async def destroy_terraform(
         storage=storage,
         vault_client=vault_client,
         minio_client=minio_client,
-        transit_key_name=transit_key_name,
         override_lock=override_lock,
         variables=variables,
         reconfigure=False,
@@ -193,12 +217,12 @@ async def read_terraform_state(
     storage: Optional[StateStorage] = None,
     vault_client: Optional[AsyncVaultClient] = None,
     minio_client: Optional[Minio] = None,
-    transit_key_name: Optional[str] = None,
     sensitive: bool = True,
 ) -> TerraformState:
     """
-    Run 'terraform show -json' with ephemeral usage for .tfstate & .tfstate.backup,
-    returning the parsed TerraformState object.
+    Run 'terraform show -json' with ephemeral usage, returning the parsed TerraformState.
+
+    ephemeral_tfstate_if_needed references storage.transit_key_name if encryption is needed.
     """
     output = await _terraform_command(
         action="show",
@@ -209,7 +233,6 @@ async def read_terraform_state(
         storage=storage,
         vault_client=vault_client,
         minio_client=minio_client,
-        transit_key_name=transit_key_name,
         override_lock=False,
         variables=None,
         reconfigure=False,
@@ -228,16 +251,16 @@ def get_output_from_state(
     Retrieve a typed output from a TerraformState object.
 
     Args:
-        state: The parsed TerraformState from read_terraform_state.
+        state: The parsed TerraformState.
         output_name: The name of the output to retrieve.
         output_type: The Python type to cast/validate to.
 
     Returns:
-        T: The typed output value.
+        The typed output if present.
 
     Raises:
-        KeyError: If the output is not found.
-        ValueError: If type validation fails.
+        KeyError: If the output is missing.
+        ValueError: If validation fails.
     """
     output_val = state.values.outputs.get(output_name)
     if output_val is None:

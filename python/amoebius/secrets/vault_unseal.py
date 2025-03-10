@@ -239,7 +239,7 @@ async def configure_vault(
       capabilities = ["create", "read", "update", "delete", "list"]
     }
 
-    path "transit/*/amoebius/*" {
+    path "transit/+/amoebius" {
       capabilities = ["update"]
     }
 
@@ -379,7 +379,7 @@ async def init_unseal_configure_vault(
         secrets_file_path (str, optional): Path to store/read VaultInitData. Defaults to /amoebius/data/vault_secrets.bin.
         user_supplied_password (Optional[str], optional): If provided, use it directly. Otherwise prompt.
     """
-    print("Reading vault terraform state with up to 30 retries...")
+    print("Reading vault terraform state ...")
     tfs = await read_terraform_state(root_name="vault")
 
     vault_raft_pod_dns_names: List[str] = get_output_from_state(

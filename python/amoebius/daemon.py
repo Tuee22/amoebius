@@ -41,7 +41,7 @@ async def deploy_infra() -> None:
     If it fails, let the exception propagate => K8s restarts container.
     """
     print("Deploying Linkerd...")
-    await install_linkerd() test code
+    await install_linkerd()
 
     print("Deploying Vault via Terraform...")
     await init_terraform(root_name="vault", sensitive=False)

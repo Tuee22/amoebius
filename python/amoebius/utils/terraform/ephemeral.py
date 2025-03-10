@@ -3,10 +3,10 @@ amoebius/utils/terraform/ephemeral.py
 
 Handles ephemeral file usage for Terraform state:
  - .tfstate & .tfstate.backup in /dev/shm
- - Encryption/decryption via Vault transit or other storage
+ - Encryption/decryption via Vault transit if storage.transit_key_name is set
  - A helper function returning bool for side-effect file removal, satisfying mypy.
 
-No local imports, no for loops for removal, no ignoring or casting types.
+No local imports, no for loops, passes mypy --strict.
 """
 
 from __future__ import annotations
@@ -45,11 +45,19 @@ async def _encrypt_and_store(
     ephemeral_path: str,
     vault_client: AsyncVaultClient,
     minio_client: Optional[Minio],
-    transit_key_name: str,
 ) -> None:
+    """
+    Read ephemeral_path -> encrypt (with storage.transit_key_name) -> write ciphertext to storage.
+    """
     async with aiofiles.open(ephemeral_path, "rb") as f:
         plaintext = await f.read()
-    ciphertext = await vault_client.encrypt_transit_data(transit_key_name, plaintext)
+
+    if not storage.transit_key_name:
+        raise RuntimeError("Storage indicates encryption but has no transit_key_name.")
+
+    ciphertext = await vault_client.encrypt_transit_data(
+        storage.transit_key_name, plaintext
+    )
     await storage.write_ciphertext(
         ciphertext, vault_client=vault_client, minio_client=minio_client
     )
@@ -60,9 +68,16 @@ async def _decrypt_to_file(
     ephemeral_path: str,
     vault_client: Optional[AsyncVaultClient],
     minio_client: Optional[Minio],
-    transit_key_name: Optional[str],
 ) -> None:
-    if not transit_key_name or isinstance(storage, NoStorage) or not vault_client:
+    """
+    If storage.transit_key_name is set => read ciphertext => decrypt => ephemeral_path.
+    Otherwise skip encryption entirely.
+    """
+    if (
+        not storage.transit_key_name
+        or isinstance(storage, NoStorage)
+        or not vault_client
+    ):
         return
 
     ciphertext = await storage.read_ciphertext(
@@ -70,7 +85,7 @@ async def _decrypt_to_file(
     )
     if ciphertext:
         plaintext = await vault_client.decrypt_transit_data(
-            transit_key_name, ciphertext
+            storage.transit_key_name, ciphertext
         )
         async with aiofiles.open(ephemeral_path, "wb") as f:
             await f.write(plaintext)
@@ -81,14 +96,18 @@ async def _encrypt_from_file(
     ephemeral_path: str,
     vault_client: Optional[AsyncVaultClient],
     minio_client: Optional[Minio],
-    transit_key_name: Optional[str],
 ) -> None:
+    """
+    Encrypt ephemeral_path => store => remove ephemeral file, if transit_key_name is set.
+    """
     try:
-        if not transit_key_name or isinstance(storage, NoStorage) or not vault_client:
+        if (
+            not storage.transit_key_name
+            or isinstance(storage, NoStorage)
+            or not vault_client
+        ):
             return
-        await _encrypt_and_store(
-            storage, ephemeral_path, vault_client, minio_client, transit_key_name
-        )
+        await _encrypt_and_store(storage, ephemeral_path, vault_client, minio_client)
     finally:
         if os.path.exists(ephemeral_path):
             os.remove(ephemeral_path)
@@ -99,25 +118,14 @@ async def ephemeral_tfstate_if_needed(
     storage: StateStorage,
     vault_client: Optional[AsyncVaultClient],
     minio_client: Optional[Minio],
-    transit_key_name: Optional[str],
     terraform_dir: str,
 ) -> AsyncGenerator[None, None]:
     """
     If ephemeral usage => store .tfstate & .tfstate.backup in memory (random dir in /dev/shm),
-    symlink them from terraform_dir.
+    symlink them from terraform_dir. Then decrypt/encrypt if storage.transit_key_name is set.
     """
-    ephemeral_needed = not (
-        isinstance(storage, NoStorage) and (not vault_client or not transit_key_name)
-    )
-    if not ephemeral_needed:
-        yield
-        return
-
-    if not vault_client:
-        raise RuntimeError("Vault usage required, but no vault_client is provided.")
-    if await vault_client.is_vault_sealed():
-        raise RuntimeError("Vault is sealed => cannot proceed with ephemeral usage.")
-
+    # We assume ephemeral is always desired for safety,
+    # but if you only want ephemeral for certain storages, you can add logic.
     ephemeral_dir = tempfile.mkdtemp(dir="/dev/shm", prefix="tfstate-")
     ephemeral_file = os.path.join(ephemeral_dir, "terraform.tfstate")
     ephemeral_backup = os.path.join(ephemeral_dir, "terraform.tfstate.backup")
@@ -125,7 +133,6 @@ async def ephemeral_tfstate_if_needed(
     local_tfstate = os.path.join(terraform_dir, "terraform.tfstate")
     local_backup = os.path.join(terraform_dir, "terraform.tfstate.backup")
 
-    # Remove existing symlinks/files with comprehension
     _ = [
         await _delete_file(p)
         for p in (local_tfstate, local_backup)
@@ -135,30 +142,25 @@ async def ephemeral_tfstate_if_needed(
     os.symlink(ephemeral_file, local_tfstate)
     os.symlink(ephemeral_backup, local_backup)
 
-    # Create ephemeral_file => decrypt
     async with aiofiles.open(ephemeral_file, "wb") as f:
         await f.write(b"")
-
-    await _decrypt_to_file(
-        storage, ephemeral_file, vault_client, minio_client, transit_key_name
-    )
+    if vault_client:
+        await _decrypt_to_file(storage, ephemeral_file, vault_client, minio_client)
 
     try:
         yield
     finally:
-        # re-encrypt ephemeral => remove ephemeral file
-        await _encrypt_from_file(
-            storage, ephemeral_file, vault_client, minio_client, transit_key_name
-        )
+        if vault_client:
+            await _encrypt_from_file(
+                storage, ephemeral_file, vault_client, minio_client
+            )
 
-        # Remove symlinks
         _ = [
             await _delete_file(p)
             for p in (local_tfstate, local_backup)
             if os.path.lexists(p)
         ]
 
-        # Remove ephemeral_dir
         items = os.listdir(ephemeral_dir)
         _ = [
             await _delete_file(os.path.join(ephemeral_dir, i))
@@ -173,7 +175,7 @@ async def maybe_tfvars(
     action: str, variables: Optional[Dict[str, Any]]
 ) -> AsyncGenerator[List[str], None]:
     """
-    If action in ('apply','destroy') & variables => ephemeral .auto.tfvars in /dev/shm => yield flags, else []
+    If action in ('apply','destroy') and variables => ephemeral .auto.tfvars in /dev/shm => yield flags, else [].
     """
     if action in ("apply", "destroy") and variables:
         fd, tfvars_file = tempfile.mkstemp(dir="/dev/shm", suffix=".auto.tfvars.json")

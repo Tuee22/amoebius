@@ -2,12 +2,15 @@
 amoebius/utils/terraform/storage.py
 
 Defines storage classes for reading/writing ciphertext of Terraform state:
-  - NoStorage (always skip)
+  - NoStorage (no encryption)
   - VaultKVStorage
   - MinioStorage
   - K8sSecretStorage
 
-All imports are at the top, no local imports, no for loops for side-effect removal.
+We define 'transit_key_name: Optional[str] = None' at the base class level, so ephemeral usage
+can always reference 'storage.transit_key_name' safely.
+
+No local imports, passes mypy --strict, no for loops used for side effects.
 """
 
 from __future__ import annotations
@@ -19,21 +22,29 @@ from typing import Optional
 
 from minio import Minio
 from amoebius.secrets.vault_client import AsyncVaultClient
+from amoebius.utils.k8s import get_k8s_secret_data, put_k8s_secret_data
 
 
 class StateStorage(ABC):
     """Abstract base class for reading/writing Terraform state ciphertext."""
 
-    def __init__(self, root_module: str, workspace: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        root_module: str,
+        workspace: Optional[str] = None,
+        transit_key_name: Optional[str] = None,
+    ) -> None:
         """
         Initialize a StateStorage.
 
         Args:
-            root_module: The Terraform root module name.
-            workspace: The workspace name, defaults to 'default'.
+            root_module (str): The Terraform root module name.
+            workspace (Optional[str]): The workspace name, defaults to 'default'.
+            transit_key_name (Optional[str]): The Vault transit key name for ephemeral usage, if any.
         """
         self.root_module = root_module
         self.workspace = workspace or "default"
+        self.transit_key_name: Optional[str] = transit_key_name
 
     @abstractmethod
     async def read_ciphertext(
@@ -63,7 +74,7 @@ class StateStorage(ABC):
         minio_client: Optional[Minio],
     ) -> None:
         """
-        Write/overwrite the ciphertext for this (root_module, workspace).
+        Write or overwrite the ciphertext for this (root_module, workspace).
 
         Args:
             ciphertext: The ciphertext to store.
@@ -74,10 +85,10 @@ class StateStorage(ABC):
 
 
 class NoStorage(StateStorage):
-    """Indicates 'vanilla' Terraform usage where read/write => no-op."""
+    """Indicates 'vanilla' Terraform usage where read/write => no-op, no encryption needed."""
 
     def __init__(self, root_module: str, workspace: Optional[str] = None) -> None:
-        super().__init__(root_module, workspace)
+        super().__init__(root_module, workspace, transit_key_name=None)
 
     async def read_ciphertext(
         self,
@@ -98,12 +109,19 @@ class NoStorage(StateStorage):
 
 
 class VaultKVStorage(StateStorage):
-    """Stores ciphertext in Vault's KV under
-    'secret/data/amoebius/terraform-backends/<root>/<workspace>'.
+    """
+    Stores ciphertext in Vault's KV under:
+    'secret/data/amoebius/terraform-backends/<root_module>/<workspace>'.
+    If transit_key_name is set, ephemeral usage can do encryption.
     """
 
-    def __init__(self, root_module: str, workspace: Optional[str] = None) -> None:
-        super().__init__(root_module, workspace)
+    def __init__(
+        self,
+        root_module: str,
+        workspace: Optional[str] = None,
+        transit_key_name: Optional[str] = None,
+    ) -> None:
+        super().__init__(root_module, workspace, transit_key_name)
 
     def _kv_path(self) -> str:
         return f"amoebius/terraform-backends/{self.root_module}/{self.workspace}"
@@ -137,15 +155,19 @@ class VaultKVStorage(StateStorage):
 
 
 class MinioStorage(StateStorage):
-    """Stores ciphertext in a MinIO bucket => '<root_module>/<workspace>.enc'."""
+    """
+    Stores ciphertext in a MinIO bucket => '<root_module>/<workspace>.enc'.
+    If transit_key_name is set, ephemeral usage can do encryption with Vault.
+    """
 
     def __init__(
         self,
         root_module: str,
         workspace: Optional[str] = None,
         bucket_name: str = "tf-states",
+        transit_key_name: Optional[str] = None,
     ) -> None:
-        super().__init__(root_module, workspace)
+        super().__init__(root_module, workspace, transit_key_name)
         self.bucket_name = bucket_name
 
     def _object_key(self) -> str:
@@ -207,7 +229,8 @@ class MinioStorage(StateStorage):
 
 class K8sSecretStorage(StateStorage):
     """
-    Stores ciphertext in a K8s Secret => 'tf-backend-<root>-<workspace>' => data['ciphertext'].
+    Stores ciphertext in a K8s Secret => 'tf-backend-<root_module>-<workspace>',
+    under data['ciphertext']. If transit_key_name is set, ephemeral usage is encrypted.
     """
 
     def __init__(
@@ -215,8 +238,9 @@ class K8sSecretStorage(StateStorage):
         root_module: str,
         workspace: Optional[str] = None,
         namespace: str = "amoebius",
+        transit_key_name: Optional[str] = None,
     ) -> None:
-        super().__init__(root_module, workspace)
+        super().__init__(root_module, workspace, transit_key_name)
         self.namespace = namespace
 
     def _secret_name(self) -> str:
@@ -228,8 +252,6 @@ class K8sSecretStorage(StateStorage):
         vault_client: Optional[AsyncVaultClient],
         minio_client: Optional[Minio],
     ) -> Optional[str]:
-        from amoebius.utils.k8s import get_k8s_secret_data
-
         secret_data = await get_k8s_secret_data(self._secret_name(), self.namespace)
         if not secret_data:
             return None
@@ -242,7 +264,5 @@ class K8sSecretStorage(StateStorage):
         vault_client: Optional[AsyncVaultClient],
         minio_client: Optional[Minio],
     ) -> None:
-        from amoebius.utils.k8s import put_k8s_secret_data
-
         data_dict = {"ciphertext": ciphertext}
         await put_k8s_secret_data(self._secret_name(), self.namespace, data_dict)

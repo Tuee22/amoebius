@@ -41,7 +41,8 @@ RETRIES = 3
 
 
 class MinioAdminClient:
-    """An asynchronous client for MinIO Admin REST API calls (S3-compatible SigV4).
+    """
+    An asynchronous client for MinIO Admin REST API calls (S3-compatible SigV4).
 
     This client manages:
       - Bucket creation
@@ -51,15 +52,6 @@ class MinioAdminClient:
 
     The client reuses a single aiohttp session for performance and can optionally retry on
     transient errors via the @async_retry decorator.
-
-    Attributes:
-        _REGION (str): Hardcoded SigV4 region placeholder (e.g. "us-east-1").
-        _SERVICE (str): Hardcoded SigV4 service placeholder (e.g. "s3").
-        _settings (MinioSettings): Connection settings (endpoint, creds, etc.).
-        _timeout (aiohttp.ClientTimeout): Request timeout.
-        _closed (bool): Whether the aiohttp session is closed.
-        _session (Optional[aiohttp.ClientSession]): The active session, or None if closed.
-        _signing_key_cache (Dict[str, bytes]): Cache of derived signing keys by date for SigV4.
     """
 
     _REGION = "us-east-1"
@@ -70,28 +62,27 @@ class MinioAdminClient:
         settings: MinioSettings,
         total_timeout: float = 10.0,
     ) -> None:
-        """Initialize the MinioAdminClient.
+        """
+        Initialize the MinioAdminClient.
 
         Args:
             settings (MinioSettings):
-                The MinIO connection details (URL, access key, secret key).
+                Connection details (endpoint, access_key, secret_key, etc.).
             total_timeout (float, optional):
-                The total request timeout (in seconds) for all operations.
-                Defaults to 10.0.
+                Total request timeout in seconds. Defaults to 10.0.
         """
         self._settings = settings
         self._timeout = aiohttp.ClientTimeout(total=total_timeout)
         self._closed = False
         self._session: Optional[aiohttp.ClientSession] = None
-
-        # Cache for derived signing keys (one per date, region, service)
         self._signing_key_cache: Dict[str, bytes] = {}
 
     async def __aenter__(self) -> MinioAdminClient:
-        """Enter the async context, creating an aiohttp session.
+        """
+        Enter the async context, creating an aiohttp session.
 
         Returns:
-            MinioAdminClient: The current client with an open session.
+            MinioAdminClient: self
         """
         self._session = aiohttp.ClientSession(timeout=self._timeout)
         return self
@@ -113,34 +104,44 @@ class MinioAdminClient:
 
     @async_retry(retries=RETRIES)
     async def create_bucket(self, bucket_name: str) -> None:
-        """Create a new bucket in MinIO, skipping if it already exists.
+        """
+        Create a new bucket in MinIO, skipping if it already exists.
 
         Args:
             bucket_name (str): The bucket name.
 
         Raises:
-            RuntimeError: If operation fails with an unexpected status code
-                          or we can't interpret a 409 as 'bucket exists'.
+            RuntimeError: If operation fails with an unexpected status code,
+                          or if we can't interpret 409 as 'BucketAlreadyOwnedByYou'.
         """
         url = f"{self._settings.url}/{bucket_name}"
         resp_text, status = await self._make_request("PUT", url)
         if status not in (200, 204):
-            if status == 409 and "already owned by you" in resp_text.lower():
-                return  # treat as idempotent
+            if status == 409:
+                # Check the error text to see if it's "already owned by you"
+                # or "BucketAlreadyOwnedByYou"
+                lower_text = resp_text.lower()
+                if (
+                    "already owned by you" in lower_text
+                    or "bucketalreadyownedbyyou" in lower_text
+                ):
+                    # treat as idempotent
+                    return
             raise RuntimeError(
                 f"Failed to create bucket '{bucket_name}': status={status}, response={resp_text}"
             )
 
     @async_retry(retries=RETRIES)
     async def create_user(self, username: str, password: str) -> None:
-        """Create a user in MinIO, ignoring if 'already exists'.
+        """
+        Create a user in MinIO, ignoring if 'already exists'.
 
         Args:
-            username: MinIO access key (username).
-            password: MinIO secret key (password).
+            username (str): MinIO access key (username).
+            password (str): MinIO secret key (password).
 
         Raises:
-            RuntimeError: If creation fails or we can't handle 'already exists' properly.
+            RuntimeError: If creation fails or 'already exists' can't be handled.
         """
         url = (
             f"{self._settings.url}/minio/admin/v3/add-user"
@@ -157,15 +158,14 @@ class MinioAdminClient:
 
     @async_retry(retries=RETRIES)
     async def update_user_password(self, username: str, new_password: str) -> None:
-        """Update a user's password in MinIO (or upsert in some versions).
+        """
+        Update a user's password in MinIO (or upsert in some versions).
 
         Args:
             username (str): The user's MinIO access key.
             new_password (str): The new secret key (password).
-
-        Raises:
-            RuntimeError: If operation fails or user is missing on certain MinIO servers.
         """
+        # Many MinIO versions treat "add-user" as an upsert for password changes.
         await self.create_user(username, new_password)
 
     @async_retry(retries=RETRIES)
@@ -174,11 +174,12 @@ class MinioAdminClient:
         policy_name: str,
         policy_items: List[MinioPolicySpec],
     ) -> None:
-        """Create or update a named policy in MinIO.
+        """
+        Create or update a named policy in MinIO.
 
         Args:
-            policy_name: The policy name.
-            policy_items: A list of bucket permission specs.
+            policy_name (str): The policy name.
+            policy_items (List[MinioPolicySpec]): A list of bucket permission specs.
 
         Raises:
             RuntimeError: If creation fails or returns an unexpected status.
@@ -197,14 +198,12 @@ class MinioAdminClient:
 
     @async_retry(retries=RETRIES)
     async def attach_policy_to_user(self, username: str, policy_name: str) -> None:
-        """Attach an existing policy to a user in MinIO.
+        """
+        Attach an existing policy to a user in MinIO.
 
         Args:
             username (str): The user's name (access key).
             policy_name (str): The MinIO policy name to attach.
-
-        Raises:
-            RuntimeError: If operation fails or returns an unexpected status code.
         """
         url = (
             f"{self._settings.url}/minio/admin/v3/set-user-policy"
@@ -220,10 +219,11 @@ class MinioAdminClient:
 
     @async_retry(retries=RETRIES)
     async def delete_user(self, username: str) -> None:
-        """Delete a user from MinIO, raises if user doesn't exist.
+        """
+        Delete a user from MinIO, raises if user doesn't exist.
 
         Args:
-            username: MinIO access key.
+            username (str): MinIO access key.
 
         Raises:
             RuntimeError: If 404 => user missing, or any unexpected status not in [200, 204].
@@ -235,13 +235,13 @@ class MinioAdminClient:
         resp_text, status = await self._make_request("DELETE", url)
         if status not in (200, 204):
             raise RuntimeError(
-                f"Failed to delete user '{username}': "
-                f"status={status}, response={resp_text}"
+                f"Failed to delete user '{username}': status={status}, response={resp_text}"
             )
 
     @async_retry(retries=RETRIES)
     async def delete_policy(self, policy_name: str) -> None:
-        """Delete a named policy from MinIO, raises if not found.
+        """
+        Delete a named policy from MinIO, raises if not found.
 
         Args:
             policy_name (str): The MinIO policy name to remove.
@@ -256,8 +256,7 @@ class MinioAdminClient:
         resp_text, status = await self._make_request("DELETE", url)
         if status not in (200, 204):
             raise RuntimeError(
-                f"Failed to delete policy '{policy_name}': "
-                f"status={status}, response={resp_text}"
+                f"Failed to delete policy '{policy_name}': status={status}, response={resp_text}"
             )
 
     # -------------------------------------------------------------------------
@@ -270,7 +269,8 @@ class MinioAdminClient:
         *,
         body: Optional[str] = None,
     ) -> Tuple[str, int]:
-        """Make an HTTP request with SigV4 signing and optional request body.
+        """
+        Make an HTTP request with SigV4 signing and optional request body.
 
         The @async_retry decorator handles transient failures.
 
@@ -283,7 +283,7 @@ class MinioAdminClient:
             A tuple of (response_text, status_code).
 
         Raises:
-            RuntimeError: If the session is closed or if we get a 5xx error => triggering a retry.
+            RuntimeError: If the session is closed or if we get a 5xx error => triggers a retry.
         """
         if self._session is None or self._closed:
             raise RuntimeError("Client session is not available or already closed.")
@@ -317,15 +317,8 @@ class MinioAdminClient:
         url: str,
         body: bytes,
     ) -> Dict[str, str]:
-        """Sign a request using AWS Signature Version 4 for S3-compatibility.
-
-        Args:
-            method: The HTTP method, e.g. "GET", "POST".
-            url: The full request URL (including query).
-            body: The raw request body bytes for hashing.
-
-        Returns:
-            A dict of headers including Authorization, X-Amz-Date, X-Amz-Content-Sha256, etc.
+        """
+        Sign a request using AWS Signature Version 4 for S3-compatibility.
         """
         parsed = urllib.parse.urlparse(url)
         host = parsed.netloc
@@ -377,13 +370,8 @@ class MinioAdminClient:
         }
 
     def _get_signing_key(self, date_stamp: str) -> bytes:
-        """Retrieve or derive the SigV4 signing key for the given date.
-
-        Args:
-            date_stamp: The date as YYYYMMDD (e.g. '20230925').
-
-        Returns:
-            The derived signing key bytes for that date, region, and service.
+        """
+        Retrieve or derive the SigV4 signing key for the given date.
         """
         cache_key = f"{date_stamp}-{self._REGION}-{self._SERVICE}"
         if cache_key in self._signing_key_cache:
@@ -402,15 +390,8 @@ class MinioAdminClient:
         return k_signing
 
     def _build_policy_json(self, policy_items: List[MinioPolicySpec]) -> str:
-        """Build an S3-style JSON policy from a list of bucket permission specs.
-
-        Uses a comprehension for statements. Only read/write perms are included.
-
-        Args:
-            policy_items: A list of MinioPolicySpec, each specifying bucket_name and permission.
-
-        Returns:
-            A JSON string representing the policy for MinIO admin calls.
+        """
+        Build an S3-style JSON policy from a list of bucket permission specs.
         """
         permission_map = {
             MinioBucketPermission.READ: ["s3:GetObject"],
