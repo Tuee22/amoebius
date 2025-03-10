@@ -34,13 +34,10 @@ from amoebius.utils.terraform.commands import (
 )
 
 __all__ = [
-    "StateStorage",
     "NoStorage",
     "VaultKVStorage",
     "MinioStorage",
     "K8sSecretStorage",
-    "ephemeral_tfstate_if_needed",
-    "maybe_tfvars",
     "init_terraform",
     "apply_terraform",
     "destroy_terraform",

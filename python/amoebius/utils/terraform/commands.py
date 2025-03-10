@@ -73,6 +73,7 @@ async def _terraform_command(
     reconfigure: bool,
     sensitive: bool,
     capture_output: bool,
+    retries: int,
 ) -> Optional[str]:
     """
     Internal runner for 'terraform <action>' with ephemeral usage => .tfstate in memory only.
@@ -89,7 +90,7 @@ async def _terraform_command(
 
     async def run_tf(cmd_list: List[str]) -> str:
         return await run_command(
-            cmd_list, sensitive=sensitive, env=env, cwd=terraform_dir
+            cmd_list, sensitive=sensitive, env=env, cwd=terraform_dir, retries=retries
         )
 
     async with ephemeral_tfstate_if_needed(
@@ -111,6 +112,7 @@ async def init_terraform(
     minio_client: Optional[Minio] = None,
     reconfigure: bool = False,
     sensitive: bool = True,
+    retries: int = 3,
 ) -> None:
     """
     Run 'terraform init' with ephemeral usage if needed, storing .tfstate in memory or remote.
@@ -140,6 +142,7 @@ async def init_terraform(
         reconfigure=reconfigure,
         sensitive=sensitive,
         capture_output=False,
+        retries=retries,
     )
 
 
@@ -154,6 +157,7 @@ async def apply_terraform(
     override_lock: bool = False,
     variables: Optional[Dict[str, Any]] = None,
     sensitive: bool = True,
+    retries: int = 3,
 ) -> None:
     """
     Run 'terraform apply' with ephemeral usage for .tfstate & .tfstate.backup.
@@ -174,6 +178,7 @@ async def apply_terraform(
         reconfigure=False,
         sensitive=sensitive,
         capture_output=False,
+        retries=retries,
     )
 
 
@@ -188,6 +193,7 @@ async def destroy_terraform(
     override_lock: bool = False,
     variables: Optional[Dict[str, Any]] = None,
     sensitive: bool = True,
+    retries: int = 3,
 ) -> None:
     """
     Run 'terraform destroy' with ephemeral usage, referencing storage.transit_key_name if set.
@@ -206,6 +212,7 @@ async def destroy_terraform(
         reconfigure=False,
         sensitive=sensitive,
         capture_output=False,
+        retries=retries,
     )
 
 
@@ -218,6 +225,7 @@ async def read_terraform_state(
     vault_client: Optional[AsyncVaultClient] = None,
     minio_client: Optional[Minio] = None,
     sensitive: bool = True,
+    retries: int = 3,
 ) -> TerraformState:
     """
     Run 'terraform show -json' with ephemeral usage, returning the parsed TerraformState.
@@ -238,6 +246,7 @@ async def read_terraform_state(
         reconfigure=False,
         sensitive=sensitive,
         capture_output=True,
+        retries=retries,
     )
     if not output:
         raise RuntimeError("Failed to retrieve terraform state (empty output).")

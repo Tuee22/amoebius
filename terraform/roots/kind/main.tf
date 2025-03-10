@@ -109,7 +109,7 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
           image = var.amoebius_image
 
           # Override the default entrypoint/command with infinite sleep:
-          command = ["/bin/sh", "-c", "sleep infinity"]
+          # command = ["/bin/sh", "-c", "sleep infinity"]
           
           port {
             container_port = 8080
