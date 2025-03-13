@@ -1,5 +1,5 @@
 # Outputs
-output "vault_common_name" {
+output "vault_addr" {
   value       = "http://${var.vault_service_name}.${var.vault_namespace}.svc.cluster.local:8200"
   description = "FQDN for vault service"
 }

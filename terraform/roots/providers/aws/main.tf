@@ -5,8 +5,14 @@ terraform {
       version = "~> 4.0"
     }
   }
-  backend "local" {
-    path = "terraform.tfstate"
+  backend "s3" {
+    endpoint                    = "minio.amoebius.svc.cluster.local"
+    bucket                      = "amoebius-terraform"
+    key                         = "aws/terraform.tfstate"
+    region                      = "us-east-1"
+    skip_credentials_validation = true
+    skip_region_validation      = true
+    force_path_style            = true
   }
 }
 
@@ -23,7 +29,10 @@ module "network" {
 
 module "cluster" {
   source = "/amoebius/terraform/modules/providers/aws/cluster"
-    subnet_ids_by_zone = { for idx, z in var.availability_zones : z => element(module.network.subnet_ids, idx) }
+  subnet_ids_by_zone = {
+    for idx, z in var.availability_zones :
+    z => element(module.network.subnet_ids, idx)
+  }
 
   availability_zones  = var.availability_zones
   security_group_id   = module.network.security_group_id
@@ -33,7 +42,6 @@ module "cluster" {
   vault_role_name     = var.vault_role_name
   no_verify_ssl       = var.no_verify_ssl
 
-  # For AWS, resource_group_name is typically unused, but we keep them for consistency
   resource_group_name = ""
   location            = var.region
 }

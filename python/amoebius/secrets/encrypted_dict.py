@@ -6,7 +6,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import InvalidTag
-from ..models.validator import validate_type
+from amoebius.models.validator import validate_type
 
 
 def encrypt_dict(data: Dict[str, Any], password: str) -> bytes:
