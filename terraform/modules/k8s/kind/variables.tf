@@ -11,13 +11,7 @@ variable "data_dir" {
 }
 
 variable "amoebius_dir" {
-  description = "Amoebius directory path"
+  description = "Amoebius directory path to mount into the container"
   type        = string
   default     = "~/amoebius"
-}
-
-variable "amoebius_image" {
-  description = "Docker image for the script runner"
-  type        = string
-  default     = "tuee22/amoebius:latest"
 }

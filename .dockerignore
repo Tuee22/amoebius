@@ -50,3 +50,4 @@ data/
 .dockerignore
 **/.mypy_cache
 setup.sh
+kubeconfig
