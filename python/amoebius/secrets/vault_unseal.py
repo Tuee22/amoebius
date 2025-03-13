@@ -380,7 +380,7 @@ async def init_unseal_configure_vault(
         user_supplied_password (Optional[str], optional): If provided, use it directly. Otherwise prompt.
     """
     print("Reading vault terraform state ...")
-    tfs = await read_terraform_state(root_name="vault", retries=30)
+    tfs = await read_terraform_state(root_name="services/vault", retries=30)
 
     vault_raft_pod_dns_names: List[str] = get_output_from_state(
         tfs, "vault_raft_pod_dns_names", List[str]

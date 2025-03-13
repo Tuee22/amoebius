@@ -42,7 +42,9 @@ class StateStorage(ABC):
             workspace (Optional[str]): The workspace name, defaults to 'default'.
             transit_key_name (Optional[str]): The Vault transit key name for ephemeral usage, if any.
         """
-        self.root_module = root_module
+        self.root_module = root_module.replace(
+            "/", "."
+        )  # since k8s doesn't allow / in secret names
         self.workspace = workspace or "default"
         self.transit_key_name: Optional[str] = transit_key_name
 

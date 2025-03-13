@@ -168,8 +168,8 @@ async def install_linkerd() -> None:
     print("Linkerd is ready and healthy.")
 
     print("Adding linkerd annotation to amoebius...")
-    await init_terraform("annotate_amoebius_linkerd")
-    await apply_terraform("annotate_amoebius_linkerd")
+    await init_terraform("utils/annotate_amoebius_linkerd")
+    await apply_terraform("utils/annotate_amoebius_linkerd")
 
     # 3) Delete 'amoebius-0' if sidecar is missing
     print("Checking if 'amoebius-0' has a 'linkerd-proxy' container...")

@@ -34,7 +34,7 @@ async def main() -> None:
     password = getpass("Enter the password to decrypt Vault secrets: ")
     vault_init_data = load_vault_init_data_from_file(password=password)
 
-    tfs = await read_terraform_state(root_name="vault")
+    tfs = await read_terraform_state(root_name="services/vault")
     vault_addr = get_output_from_state(tfs, "vault_addr", str)
 
     # Check if the --print-root-token flag is set

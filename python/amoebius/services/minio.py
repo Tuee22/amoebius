@@ -36,8 +36,10 @@ from amoebius.utils.k8s import get_service_accounts
 from amoebius.utils.terraform.storage import K8sSecretStorage
 from amoebius.utils.terraform.commands import init_terraform, apply_terraform
 
-
 TRANSIT_KEY_NAME = "amoebius"
+
+# Use an uppercase constant for the Terraform root module name:
+SERVICE_NAME = "services/minio"
 
 
 async def minio_deploy(
@@ -87,19 +89,19 @@ async def minio_deploy(
     # 3) Terraform init+apply for Minio, storing ephemeral .tfstate in K8s secrets,
     #    referencing TRANSIT_KEY_NAME if ephemeral encryption is used
     storage = K8sSecretStorage(
-        root_module="minio",
+        root_module=SERVICE_NAME,
         workspace=workspace,
         namespace="amoebius",
         transit_key_name=TRANSIT_KEY_NAME,
     )
     await init_terraform(
-        root_name="minio",
+        root_name=SERVICE_NAME,
         workspace=workspace,
         storage=storage,
         vault_client=vault_client,
     )
     await apply_terraform(
-        root_name="minio",
+        root_name=SERVICE_NAME,
         workspace=workspace,
         storage=storage,
         vault_client=vault_client,
@@ -253,19 +255,19 @@ async def rotate_minio_secrets(
 
     # Use K8sSecretStorage for Terraform ephemeral usage
     storage = K8sSecretStorage(
-        root_module="minio",
+        root_module=SERVICE_NAME,
         workspace=workspace,
         namespace="amoebius",
         transit_key_name=TRANSIT_KEY_NAME,
     )
     await init_terraform(
-        root_name="minio",
+        root_name=SERVICE_NAME,
         workspace=workspace,
         storage=storage,
         vault_client=vault_client,
     )
     await apply_terraform(
-        root_name="minio",
+        root_name=SERVICE_NAME,
         workspace=workspace,
         storage=storage,
         vault_client=vault_client,

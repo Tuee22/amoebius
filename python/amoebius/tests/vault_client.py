@@ -107,7 +107,7 @@ async def main() -> None:
     vault_init_data = load_vault_init_data_from_file(password=password)
 
     # Read the base Terraform state for the Vault server (to get its address)
-    tfs = await read_terraform_state(root_name="vault")
+    tfs = await read_terraform_state(root_name="services/vault")
     vault_addr = get_output_from_state(tfs, "vault_addr", str)
 
     # Print root token if requested

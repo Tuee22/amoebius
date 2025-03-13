@@ -44,8 +44,8 @@ async def deploy_infra() -> None:
     await install_linkerd()
 
     print("Deploying Vault via Terraform...")
-    await init_terraform(root_name="vault", sensitive=False)
-    await apply_terraform(root_name="vault", sensitive=False)
+    await init_terraform(root_name="services/vault", sensitive=False)
+    await apply_terraform(root_name="services/vault", sensitive=False)
 
     print("Deployment (Linkerd + Vault) completed.")
 
@@ -106,7 +106,7 @@ async def main() -> None:
     await deploy_infra()
 
     # 3) Read Terraform state => get vault_addr => or fail => K8s restarts
-    tfs = await read_terraform_state(root_name="vault")
+    tfs = await read_terraform_state(root_name="services/vault")
     vault_addr = get_output_from_state(tfs, "vault_addr", str)
     print(f"Got vault_addr from TF: {vault_addr}")
 
