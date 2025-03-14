@@ -46,7 +46,6 @@ async def run_gcp_deploy_test(destroy_only: bool = False) -> None:
                 root_name=TERRAFORM_ROOT_NAME,
                 env=env_vars,
                 variables=tf_vars,
-                sensitive=False,
             )
         else:
             print("Terraform init+apply for GCP.")
@@ -54,13 +53,11 @@ async def run_gcp_deploy_test(destroy_only: bool = False) -> None:
                 root_name=TERRAFORM_ROOT_NAME,
                 env=env_vars,
                 reconfigure=True,
-                sensitive=False,
             )
             await apply_terraform(
                 root_name=TERRAFORM_ROOT_NAME,
                 env=env_vars,
                 variables=tf_vars,
-                sensitive=False,
             )
 
 

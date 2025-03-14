@@ -40,7 +40,7 @@ async def run_aws_deploy_test(destroy_only: bool = False) -> None:
         if destroy_only:
             print("Terraform destroy only for AWS.")
             await destroy_terraform(
-                root_name=TERRAFORM_ROOT_NAME, env=env_vars, sensitive=False
+                root_name=TERRAFORM_ROOT_NAME, env=env_vars
             )
         else:
             print("Terraform init+apply for AWS.")
@@ -48,10 +48,9 @@ async def run_aws_deploy_test(destroy_only: bool = False) -> None:
                 root_name=TERRAFORM_ROOT_NAME,
                 env=env_vars,
                 reconfigure=True,
-                sensitive=False,
             )
             await apply_terraform(
-                root_name=TERRAFORM_ROOT_NAME, env=env_vars, sensitive=False
+                root_name=TERRAFORM_ROOT_NAME, env=env_vars
             )
 
 

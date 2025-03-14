@@ -131,4 +131,4 @@ async def put_k8s_secret_data(
     cmd_apply = ["kubectl", "apply", "-f", "-"]
 
     # Use input_data (NOT stdin_data) for run_command
-    await run_command(cmd_apply, retries=0, sensitive=False, input_data=manifest_json)
+    await run_command(cmd_apply, retries=0, input_data=manifest_json)

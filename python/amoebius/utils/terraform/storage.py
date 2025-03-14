@@ -2,21 +2,19 @@
 amoebius/utils/terraform/storage.py
 
 Defines storage classes for reading/writing ciphertext of Terraform state:
-  - NoStorage (no encryption)
+  - NoStorage
   - VaultKVStorage
   - MinioStorage
   - K8sSecretStorage
 
 We define 'transit_key_name: Optional[str] = None' at the base class level, so ephemeral usage
 can always reference 'storage.transit_key_name' safely.
-
-No local imports, passes mypy --strict, no for loops used for side effects.
 """
 
 from __future__ import annotations
 
-import asyncio
 import io
+import asyncio
 from abc import ABC, abstractmethod
 from typing import Optional
 
@@ -42,9 +40,8 @@ class StateStorage(ABC):
             workspace (Optional[str]): The workspace name, defaults to 'default'.
             transit_key_name (Optional[str]): The Vault transit key name for ephemeral usage, if any.
         """
-        self.root_module = root_module.replace(
-            "/", "."
-        )  # since k8s doesn't allow / in secret names
+        # Because k8s secrets don't allow "/", replace it with "."
+        self.root_module = root_module.replace("/", ".")
         self.workspace = workspace or "default"
         self.transit_key_name: Optional[str] = transit_key_name
 
@@ -63,7 +60,7 @@ class StateStorage(ABC):
             minio_client: For Minio usage if any.
 
         Returns:
-            The ciphertext, or None if not found.
+            Optional[str]: The ciphertext, or None if not found.
         """
         pass
 
@@ -79,7 +76,7 @@ class StateStorage(ABC):
         Write or overwrite the ciphertext for this (root_module, workspace).
 
         Args:
-            ciphertext: The ciphertext to store.
+            ciphertext (str): The ciphertext to store.
             vault_client: For Vault usage if any.
             minio_client: For Minio usage if any.
         """
@@ -114,7 +111,7 @@ class VaultKVStorage(StateStorage):
     """
     Stores ciphertext in Vault's KV under:
     'secret/data/amoebius/terraform-backends/<root_module>/<workspace>'.
-    If transit_key_name is set, ephemeral usage can do encryption.
+    If transit_key_name is set, ephemeral usage can do encryption externally.
     """
 
     def __init__(
@@ -158,8 +155,9 @@ class VaultKVStorage(StateStorage):
 
 class MinioStorage(StateStorage):
     """
-    Stores ciphertext in a MinIO bucket => '<root_module>/<workspace>.enc'.
+    Stores ciphertext in a MinIO bucket => 'terraform-backends/<root_module>/<workspace>.enc'.
     If transit_key_name is set, ephemeral usage can do encryption with Vault.
+    Optionally, a minio_client can be provided directly so we skip re-creating it each time.
     """
 
     def __init__(
@@ -168,12 +166,15 @@ class MinioStorage(StateStorage):
         workspace: Optional[str] = None,
         bucket_name: str = "tf-states",
         transit_key_name: Optional[str] = None,
+        minio_client: Optional[Minio] = None,
     ) -> None:
         super().__init__(root_module, workspace, transit_key_name)
         self.bucket_name = bucket_name
+        # If _minio_client is None, the code will rely on the method call param
+        self._minio_client = minio_client
 
     def _object_key(self) -> str:
-        return f"{self.root_module}/{self.workspace}.enc"
+        return f"terraform-backends/{self.root_module}/{self.workspace}.enc"
 
     async def read_ciphertext(
         self,
@@ -181,15 +182,16 @@ class MinioStorage(StateStorage):
         vault_client: Optional[AsyncVaultClient],
         minio_client: Optional[Minio],
     ) -> Optional[str]:
-        if not minio_client:
+        """Reads ciphertext from Minio, returning None if the object doesn't exist."""
+        client = self._minio_client or minio_client
+        if not client:
             raise RuntimeError("MinioStorage requires a minio_client.")
 
         loop = asyncio.get_running_loop()
         response = None
         try:
             response = await loop.run_in_executor(
-                None,
-                lambda: minio_client.get_object(self.bucket_name, self._object_key()),
+                None, lambda: client.get_object(self.bucket_name, self._object_key())
             )
             data = response.read()
             return data.decode("utf-8")
@@ -198,7 +200,7 @@ class MinioStorage(StateStorage):
                 return None
             raise
         finally:
-            if response:
+            if response is not None:
                 response.close()
                 response.release_conn()
 
@@ -209,7 +211,9 @@ class MinioStorage(StateStorage):
         vault_client: Optional[AsyncVaultClient],
         minio_client: Optional[Minio],
     ) -> None:
-        if not minio_client:
+        """Writes ciphertext to Minio, overwriting if the object already exists."""
+        client = self._minio_client or minio_client
+        if not client:
             raise RuntimeError("MinioStorage requires a minio_client.")
 
         loop = asyncio.get_running_loop()
@@ -218,9 +222,9 @@ class MinioStorage(StateStorage):
 
         def put_object() -> None:
             stream = io.BytesIO(data_bytes)
-            minio_client.put_object(
-                self.bucket_name,
-                self._object_key(),
+            client.put_object(
+                bucket_name=self.bucket_name,
+                object_name=self._object_key(),
                 data=stream,
                 length=length,
                 content_type="text/plain",
@@ -246,7 +250,7 @@ class K8sSecretStorage(StateStorage):
         self.namespace = namespace
 
     def _secret_name(self) -> str:
-        return f"tf-backend-{self.root_module}-{self.workspace}"
+        return f"terraform-backend-{self.root_module}-{self.workspace}"
 
     async def read_ciphertext(
         self,

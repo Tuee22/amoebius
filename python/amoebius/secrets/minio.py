@@ -95,7 +95,7 @@ async def get_minio_client(vault_client: AsyncVaultClient, vault_path: str) -> M
     if not settings:
         raise RuntimeError(f"Vault credential not found at {vault_path}")
     return Minio(
-        endpoint=settings.url,
+        endpoint=settings.url.replace("http://", "").replace("https://", ""),
         access_key=settings.access_key,
         secret_key=settings.secret_key,
         secure=settings.secure,

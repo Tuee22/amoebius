@@ -1,13 +1,20 @@
-from typing import List, Dict, Optional
-import json
+"""
+filename: amoebius/models/providers/deploy/aws.py
+
+Provides cluster deployment logic for the 'aws' provider (e.g. AWSClusterDeploy).
+"""
+
+from typing import List, Dict
 from pydantic import BaseModel
 from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup
 
+# Import the credential model from new location
+from amoebius.models.providers.api_keys.aws import AWSApiKey
 
-# ----------------------------------------
-# AWSClusterDeploy
-# ----------------------------------------
+
 class AWSClusterDeploy(ClusterDeploy):
+    """Cluster deployment parameters for AWS."""
+
     def __init__(
         self,
         region: str = "us-west-2",
@@ -51,19 +58,4 @@ class AWSClusterDeploy(ClusterDeploy):
         )
 
 
-# ----------------------------------------
-# AWSApiKey
-# ----------------------------------------
-class AWSApiKey(BaseModel):
-    access_key_id: str
-    secret_access_key: str
-    session_token: Optional[str] = None
-
-    def to_env_dict(self) -> Dict[str, str]:
-        env = {
-            "AWS_ACCESS_KEY_ID": self.access_key_id,
-            "AWS_SECRET_ACCESS_KEY": self.secret_access_key,
-        }
-        if self.session_token:
-            env["AWS_SESSION_TOKEN"] = self.session_token
-        return env
+__all__ = ["AWSClusterDeploy", "AWSApiKey"]

@@ -7,28 +7,28 @@
 #   up      : Deploy or upgrade the cluster (terraform apply)
 #   down    : Destroy the cluster (terraform destroy)
 #   unseal  : Wait for "amoebius-0" to have 2 containers, then unseal Vault
-#   exec    : Open a bash shell in the "amoebius-0" pod (amoebius container)
+#   shell   : Open a bash shell in the "amoebius-0" pod (amoebius container)
 #   status  : Check cluster, Linkerd readiness, Vault sealed/unsealed
 #
 # Usage:
 #   ./ac.sh [command]
 #
 # This script expects:
-#   - Terraform configuration in "terraform/roots/deploy/local".
-#   - A "kubeconfig" file in the current directory (if you want `kubectl` to point
-#     to the correct cluster automatically).
+#   - Terraform config in "terraform/roots/deploy/local"
+#   - If a "kubeconfig" file is in the current directory, we’ll export it for
+#     the duration of this script so kubectl points to your Kind cluster.
 
-set -eu  # Exit on error (-e) or when referencing uninitialized variables (-u).
+set -eu  # Exit on error (-e) or uninitialized var usage (-u).
 
 ##############################################################################
-# MINIMAL VERSIONS -- Adjust as needed
+# MINIMAL VERSIONS
 ##############################################################################
 MIN_DOCKER_VERSION="27.5"
 MIN_TERRAFORM_VERSION="1.10.0"
 MIN_KUBECTL_VERSION="1.32"
 
 ##############################################################################
-# Print usage/help
+# Help message
 ##############################################################################
 print_help() {
   cat <<EOF
@@ -39,30 +39,27 @@ Commands:
     Show this help message.
 
   check
-    Confirms Docker, Terraform, and kubectl meet minimum versions
-    and that the Docker daemon is running.
+    Checks Docker, Terraform, and kubectl minimum versions and Docker daemon.
 
   up
-    Runs 'terraform apply' in "terraform/roots/deploy/local" to provision
-    or update the Kind cluster and associated resources.
+    Runs 'terraform apply' in "terraform/roots/deploy/local" to bring up
+    the Kind cluster and resources.
 
   down
     Runs 'terraform destroy' in "terraform/roots/deploy/local" to tear down
-    the Kind cluster and all resources.
+    the Kind cluster.
 
   unseal
-    Waits for the "amoebius-0" pod to have 2 containers (Vault + Linkerd),
-    then interactively unseals Vault with "amoebctl secrets.vault unseal".
+    Waits for "amoebius-0" to have 2 containers (Vault + Linkerd), then uses
+    "amoebctl secrets.vault unseal" inside that pod.
 
-  exec
-    Opens a bash shell inside the "amoebius-0" pod (amoebius container),
-    useful for debugging or maintenance within the container.
+  shell
+    Opens a bash shell inside "amoebius-0" (amoebius container), useful for
+    debugging or maintenance.
 
   status
-    1) Checks if the Kind cluster is running (kubectl get nodes).
-    2) Ensures Linkerd is deployed and pods are ready.
-    3) Checks the vault namespace for pods, and if any, determines
-       whether Vault is sealed or unsealed.
+    Checks if the Kind cluster is running, verifies Linkerd readiness, and
+    detects whether Vault is sealed/unsealed based on pods in the "vault" ns.
 
 Examples:
   $0 up
@@ -73,8 +70,7 @@ EOF
 }
 
 ##############################################################################
-# Compare two semantic versions (e.g. 1.23.4 vs 1.20.0).
-# Return 0 if ver1 >= ver2, else 1.
+# version_ge: Return 0 if ver1 >= ver2, else 1
 ##############################################################################
 version_ge() {
   ver1="$1"
@@ -110,13 +106,11 @@ version_ge() {
     return 1
   fi
 
-  # Equal
-  return 0
+  return 0  # equal
 }
 
 ##############################################################################
-# Check Docker, Terraform, and kubectl, ensure Docker daemon is up
-#   $1 (optional) "silent" => only print errors, not success messages.
+# check_requirements: Docker, Terraform, kubectl
 ##############################################################################
 check_requirements() {
   mode="${1:-}"
@@ -179,13 +173,13 @@ check_requirements() {
 }
 
 ##############################################################################
-# Wait for "amoebius-0" to have 2 containers, then confirm it's Ready.
+# Wait for "amoebius-0" to have Vault + Linkerd containers, then be Ready.
 ##############################################################################
 wait_for_amoebius_pod() {
   pod="amoebius-0"
   ns="amoebius"
 
-  echo "Ensuring Linkerd injection is complete in pod/$pod (expecting 2 containers)..."
+  echo "Ensuring Linkerd injection in pod/$pod (expecting 2 containers)..."
   while true
   do
     container_count=$(kubectl get pod "$pod" -n "$ns" -o jsonpath='{.spec.containers[*].name}' 2>/dev/null \
@@ -203,39 +197,35 @@ wait_for_amoebius_pod() {
 }
 
 ##############################################################################
-# Temporarily set KUBECONFIG to "./kubeconfig" if it exists,
-# so kubectl commands reference the correct cluster for this script session.
+# If there's a "kubeconfig" file in the current directory, export it so
+# subsequent kubectl commands target the correct cluster.
 ##############################################################################
 export_if_kubeconfig_exists() {
-  kube_file="${PWD}/kubeconfig"
+  local kube_file="${PWD}/kubeconfig"
   if [ -f "$kube_file" ]; then
     export KUBECONFIG="$kube_file"
   fi
 }
 
 ##############################################################################
-# status: checks cluster, Linkerd, Vault sealed/unsealed.
-#
-# Implementation detail: we do a short (1s) readiness wait for Linkerd/Vault
-# in code. We don't mention "1s" to the user; we only show final results.
+# status: cluster, Linkerd, Vault sealed/unsealed
 ##############################################################################
 print_status() {
   echo "=== Status Report ==="
 
-  # 1) Is cluster up?
+  # 1) cluster
   if ! kubectl get nodes >/dev/null 2>&1; then
     echo "Kind cluster: NOT RUNNING or unreachable"
     return 0
   fi
   echo "Kind cluster: RUNNING"
 
-  # 2) Linkerd
+  # 2) linkerd
   echo ""
   echo "=== Checking Linkerd ==="
   if ! kubectl get ns linkerd >/dev/null 2>&1; then
     echo "Linkerd: NOT DEPLOYED"
   else
-    # We do a short readiness wait in code; if it fails, we say "Not fully ready"
     if kubectl wait --for=condition=Ready pods -n linkerd --all --timeout=1s >/dev/null 2>&1; then
       echo "Linkerd: READY"
     else
@@ -243,14 +233,13 @@ print_status() {
     fi
   fi
 
-  # 3) Vault
+  # 3) vault
   echo ""
   echo "=== Checking Vault ==="
   vault_pods=$(kubectl -n vault get pods --no-headers 2>/dev/null || true)
   if [ -z "$vault_pods" ]; then
     echo "Vault: NOT DEPLOYED (no pods in 'vault' namespace)"
   else
-    # We do a short readiness wait in code; if it fails, we say "sealed or partial"
     if kubectl wait --for=condition=Ready pods -n vault --all --timeout=1s >/dev/null 2>&1; then
       echo "Vault: UNSEALED"
     else
@@ -290,13 +279,11 @@ case "$cmd" in
   unseal)
     check_requirements "silent"
     export_if_kubeconfig_exists
-
     wait_for_amoebius_pod
-
     echo "Unsealing Vault in pod 'amoebius-0'..."
     kubectl exec -n amoebius -c amoebius -it amoebius-0 -- amoebctl secrets.vault unseal
     ;;
-  exec)
+  shell)
     check_requirements "silent"
     export_if_kubeconfig_exists
     echo "Opening a bash shell in pod 'amoebius-0' (amoebius container)..."

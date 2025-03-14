@@ -5,15 +5,6 @@ terraform {
       version = "~> 3.0"
     }
   }
-  backend "s3" {
-    endpoint                    = "minio.amoebius.svc.cluster.local"
-    bucket                      = "amoebius-terraform"
-    key                         = "azure/terraform.tfstate"
-    region                      = "us-east-1"
-    skip_credentials_validation = true
-    skip_region_validation      = true
-    force_path_style            = true
-  }
 }
 
 provider "azurerm" {

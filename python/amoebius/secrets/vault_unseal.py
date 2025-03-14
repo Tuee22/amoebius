@@ -53,7 +53,6 @@ async def is_vault_initialized(vault_addr: str) -> bool:
     env = {"VAULT_ADDR": vault_addr}
     out = await run_command(
         ["vault", "status", "-format=json"],
-        sensitive=False,
         env=env,
         successful_return_codes=[0, 1, 2],
         retries=0,

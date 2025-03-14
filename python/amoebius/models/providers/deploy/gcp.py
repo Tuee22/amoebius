@@ -1,15 +1,21 @@
+"""
+filename: amoebius/models/providers/deploy/gcp.py
+
+Provides cluster deployment logic for the 'gcp' provider (e.g. GCPClusterDeploy).
+"""
+
 from typing import List, Dict
 import json
-from pydantic import BaseModel, Field, ValidationError
-from typing import Literal
-
+from pydantic import BaseModel, Field
 from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup
 
+# Import the credential model from new location
+from amoebius.models.providers.api_keys.gcp import GCPServiceAccountKey
 
-# ----------------------------------------
-# GCPClusterDeploy
-# ----------------------------------------
+
 class GCPClusterDeploy(ClusterDeploy):
+    """Cluster deployment parameters for GCP."""
+
     def __init__(
         self,
         region: str = "us-central1",
@@ -20,15 +26,15 @@ class GCPClusterDeploy(ClusterDeploy):
             "us-central1-f",
         ],
         instance_type_map: Dict[str, str] = {
-            "arm_small": "t2a-standard-1",  # T2A supported in a, b, f
-            "arm_medium": "t2a-standard-4",  # T2A supported in a, b, f
-            "arm_large": "t2a-standard-8",  # T2A supported in a, b, f
-            "x86_small": "e2-small",  # E2 supported in a, b, f
-            "x86_medium": "e2-standard-4",  # E2 supported in a, b, f
-            "x86_large": "n2-standard-8",  # N2 supported in a, b, f
-            "nvidia_small": "a2-highgpu-1g",  # A2 supported in a, b, f
-            "nvidia_medium": "a2-highgpu-2g",  # A2 supported in a, b, f
-            "nvidia_large": "a2-highgpu-4g",  # A2 supported in a, b, f
+            "arm_small": "t2a-standard-1",
+            "arm_medium": "t2a-standard-4",
+            "arm_large": "t2a-standard-8",
+            "x86_small": "e2-small",
+            "x86_medium": "e2-standard-4",
+            "x86_large": "n2-standard-8",
+            "nvidia_small": "a2-highgpu-1g",
+            "nvidia_medium": "a2-highgpu-2g",
+            "nvidia_large": "a2-highgpu-4g",
         },
         arm_default_image: str = "projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts-arm64",
         x86_default_image: str = "projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts",
@@ -57,24 +63,4 @@ class GCPClusterDeploy(ClusterDeploy):
         )
 
 
-# ----------------------------------------
-# GCPServiceAccountKey
-# ----------------------------------------
-class GCPServiceAccountKey(BaseModel):
-    type: Literal["service_account"]
-    project_id: str
-    private_key_id: str
-    private_key: str
-    client_email: str
-    client_id: str
-    auth_uri: str
-    token_uri: str
-    auth_provider_x509_cert_url: str
-    client_x509_cert_url: str
-    universe_domain: str = Field(..., description="Typically 'googleapis.com'")
-
-    def to_env_dict(self) -> Dict[str, str]:
-        return {
-            "GOOGLE_CREDENTIALS": json.dumps(self.model_dump()),
-            "GOOGLE_PROJECT": self.project_id,
-        }
+__all__ = ["GCPClusterDeploy", "GCPServiceAccountKey"]

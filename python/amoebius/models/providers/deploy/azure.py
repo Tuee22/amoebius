@@ -1,12 +1,20 @@
+"""
+filename: amoebius/models/providers/deploy/azure.py
+
+Provides cluster deployment logic for the 'azure' provider (e.g. AzureClusterDeploy).
+"""
+
 from typing import List, Dict
 from pydantic import BaseModel, Field
 from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup
 
+# Import the credential model from new location
+from amoebius.models.providers.api_keys.azure import AzureCredentials
 
-# ----------------------------------------
-# AzureClusterDeploy
-# ----------------------------------------
+
 class AzureClusterDeploy(ClusterDeploy):
+    """Cluster deployment parameters for Azure."""
+
     def __init__(
         self,
         region: str = "eastus",
@@ -53,19 +61,4 @@ class AzureClusterDeploy(ClusterDeploy):
         )
 
 
-# ----------------------------------------
-# AzureCredentials
-# ----------------------------------------
-class AzureCredentials(BaseModel):
-    client_id: str = Field(..., description="Azure Client ID")
-    client_secret: str = Field(..., description="Azure Client Secret")
-    tenant_id: str = Field(..., description="Azure Tenant ID")
-    subscription_id: str = Field(..., description="Azure Subscription ID")
-
-    def to_env_dict(self) -> Dict[str, str]:
-        return {
-            "ARM_CLIENT_ID": self.client_id,
-            "ARM_CLIENT_SECRET": self.client_secret,
-            "ARM_TENANT_ID": self.tenant_id,
-            "ARM_SUBSCRIPTION_ID": self.subscription_id,
-        }
+__all__ = ["AzureClusterDeploy", "AzureCredentials"]
