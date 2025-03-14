@@ -11,7 +11,7 @@ terraform {
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = ">= 2.0.0"
+      version = "~> 2.25.1"
     }
   }
 }
@@ -37,7 +37,7 @@ module "linkerd_namespace" {
 
 module "local_storage" {
   source             = "/amoebius/terraform/modules/local_storage"
-  storage_class_name = "minio-local-storage"
+  storage_class_name = "minio"
   pvc_name_prefix    = "data-minio"
   namespace          = "minio"
   volumes_count      = 4

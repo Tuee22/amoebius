@@ -1,27 +1,27 @@
 #!/bin/sh
 #
-# ac.sh - Manage a Terraform-provisioned Kind cluster with these commands:
+# amoebloctl.sh - Manage a Terraform-provisioned Kind cluster with these commands:
 #
 #   help    : Show this help
 #   check   : Validate Docker, Terraform, and kubectl
 #   up      : Deploy or upgrade the cluster (terraform apply)
+#             Optional flag: --local-build (build local Docker image)
 #   down    : Destroy the cluster (terraform destroy)
 #   unseal  : Wait for "amoebius-0" to have 2 containers, then unseal Vault
 #   shell   : Open a bash shell in the "amoebius-0" pod (amoebius container)
 #   status  : Check cluster, Linkerd readiness, Vault sealed/unsealed
 #
 # Usage:
-#   ./ac.sh [command]
+#   ./amoebloctl.sh [command] [options]
 #
-# This script expects:
-#   - Terraform config in "terraform/roots/deploy/local"
-#   - If a "kubeconfig" file is in the current directory, we’ll export it for
-#     the duration of this script so kubectl points to your Kind cluster.
+# With 'up --local-build', we build the Docker image "amoebius:local". Terraform
+# will then load it into Kind via null_resource (kind load docker-image).
+#
 
 set -eu  # Exit on error (-e) or uninitialized var usage (-u).
 
 ##############################################################################
-# MINIMAL VERSIONS
+# MINIMAL VERSIONS (adjust to your environment)
 ##############################################################################
 MIN_DOCKER_VERSION="27.5"
 MIN_TERRAFORM_VERSION="1.10.0"
@@ -32,7 +32,7 @@ MIN_KUBECTL_VERSION="1.32"
 ##############################################################################
 print_help() {
   cat <<EOF
-Usage: $0 [command]
+Usage: $0 [command] [options]
 
 Commands:
   help
@@ -41,9 +41,11 @@ Commands:
   check
     Checks Docker, Terraform, and kubectl minimum versions and Docker daemon.
 
-  up
+  up [--local-build]
     Runs 'terraform apply' in "terraform/roots/deploy/local" to bring up
-    the Kind cluster and resources.
+    the Kind cluster and resources. If '--local-build' is specified,
+    we build 'amoebius:local' first, and Terraform will load it into Kind
+    (via null_resource).
 
   down
     Runs 'terraform destroy' in "terraform/roots/deploy/local" to tear down
@@ -54,15 +56,15 @@ Commands:
     "amoebctl secrets.vault unseal" inside that pod.
 
   shell
-    Opens a bash shell inside "amoebius-0" (amoebius container), useful for
-    debugging or maintenance.
+    Opens a bash shell inside "amoebius-0" (amoebius container).
 
   status
-    Checks if the Kind cluster is running, verifies Linkerd readiness, and
-    detects whether Vault is sealed/unsealed based on pods in the "vault" ns.
+    Checks if the Kind cluster is running, verifies Linkerd readiness,
+    and checks Vault sealed/unsealed status.
 
 Examples:
   $0 up
+  $0 up --local-build
   $0 status
   $0 unseal
   $0 down
@@ -110,7 +112,7 @@ version_ge() {
 }
 
 ##############################################################################
-# check_requirements: Docker, Terraform, kubectl
+# check_requirements
 ##############################################################################
 check_requirements() {
   mode="${1:-}"
@@ -173,32 +175,28 @@ check_requirements() {
 }
 
 ##############################################################################
-# Wait for "amoebius-0" to have Vault + Linkerd containers, then be Ready.
+# wait_for_amoebius_pod
 ##############################################################################
 wait_for_amoebius_pod() {
   pod="amoebius-0"
   ns="amoebius"
 
   echo "Ensuring Linkerd injection in pod/$pod (expecting 2 containers)..."
-  while true
-  do
-    container_count=$(kubectl get pod "$pod" -n "$ns" -o jsonpath='{.spec.containers[*].name}' 2>/dev/null \
-      | wc -w | tr -d '[:space:]')
-    if [ "$container_count" -ge 2 ] 2>/dev/null; then
-      break
-    fi
-    echo "  Current container count in $pod: $container_count. Retrying in 5s..."
-    sleep 5
-  done
+  container_count=$(kubectl get pod "$pod" -n "$ns" -o jsonpath='{.spec.containers[*].name}' 2>/dev/null | wc -w | tr -d '[:space:]')
+
+  # If container count < 2, Linkerd is not injected
+  if [ "$container_count" -lt 2 ] 2>/dev/null; then
+    echo "linkerd not deployed yet"
+    exit 1
+  fi
 
   echo "Waiting for pod/$pod to become Ready..."
   kubectl wait --for=condition=Ready pod/"$pod" -n "$ns" --timeout=300s
-  echo "Pod/$pod is Ready with 2 containers."
+  echo "Pod/$pod is Ready with $container_count containers."
 }
 
 ##############################################################################
-# If there's a "kubeconfig" file in the current directory, export it so
-# subsequent kubectl commands target the correct cluster.
+# export_if_kubeconfig_exists
 ##############################################################################
 export_if_kubeconfig_exists() {
   local kube_file="${PWD}/kubeconfig"
@@ -208,11 +206,10 @@ export_if_kubeconfig_exists() {
 }
 
 ##############################################################################
-# status: cluster, Linkerd, Vault sealed/unsealed
+# print_status
 ##############################################################################
 print_status() {
   echo "=== Status Report ==="
-
   # 1) cluster
   if ! kubectl get nodes >/dev/null 2>&1; then
     echo "Kind cluster: NOT RUNNING or unreachable"
@@ -220,7 +217,6 @@ print_status() {
   fi
   echo "Kind cluster: RUNNING"
 
-  # 2) linkerd
   echo ""
   echo "=== Checking Linkerd ==="
   if ! kubectl get ns linkerd >/dev/null 2>&1; then
@@ -233,7 +229,6 @@ print_status() {
     fi
   fi
 
-  # 3) vault
   echo ""
   echo "=== Checking Vault ==="
   vault_pods=$(kubectl -n vault get pods --no-headers 2>/dev/null || true)
@@ -268,9 +263,32 @@ case "$cmd" in
     check_requirements
     ;;
   up)
+    shift
+    local_build=false
+    if [ "${1:-}" = "--local-build" ]; then
+      local_build=true
+    fi
+
     check_requirements "silent"
     terraform -chdir=terraform/roots/deploy/local init
-    terraform -chdir=terraform/roots/deploy/local apply -auto-approve
+
+    if [ "$local_build" = "true" ]; then
+      echo "Building local Docker image 'amoebius:local'..."
+      # Adjust path to match your actual directory structure
+      (cd docker && \
+        docker build \
+          -t amoebius:local \
+          -f ./amoebius/Dockerfile \
+          ..)
+
+      echo "Running 'terraform apply' with local_build_enabled=true..."
+      terraform -chdir=terraform/roots/deploy/local apply \
+        -auto-approve \
+        -var "local_build_enabled=true"
+    else
+      echo "Running 'terraform apply' (no local build)..."
+      terraform -chdir=terraform/roots/deploy/local apply -auto-approve
+    fi
     ;;
   down)
     check_requirements "silent"

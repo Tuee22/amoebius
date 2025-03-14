@@ -13,7 +13,7 @@ terraform {
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~> 2.25"
+      version = "~> 2.25.1"
     }
     # NOTE: We REMOVE the vault provider. Not needed for deploying Vault via Helm.
   }
