@@ -44,9 +44,8 @@ variable "apply_linkerd_policy" {
 
 variable "local_build_enabled" {
   description = <<EOT
-If true, use 'amoebius:local' as the image and run 'kind load docker-image'
-via a null_resource. The assumption is that you've already built the image
-locally (e.g. via docker build -t amoebius:local ...).
+If true, we assume a tarball of 'amoebius:local' has been created at
+data/images/amoebius.tar, and we'll use 'kind load image-archive' to load it.
 EOT
   type    = bool
   default = false
@@ -56,4 +55,13 @@ variable "local_docker_image_tag" {
   description = "Local Docker image tag to use if local_build_enabled is true"
   type        = string
   default     = "amoebius:local"
+}
+
+#######################################
+# DOCKER SOCKET MOUNT
+#######################################
+variable "mount_docker_socket" {
+  description = "Whether to mount /var/run/docker.sock in the container that runs Kind."
+  type        = bool
+  default     = true
 }

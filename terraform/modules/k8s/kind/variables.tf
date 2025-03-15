@@ -15,3 +15,9 @@ variable "amoebius_dir" {
   type        = string
   default     = "~/amoebius"
 }
+
+variable "mount_docker_socket" {
+  description = "Whether to mount /var/run/docker.sock into the Kind node container"
+  type        = bool
+  default     = true
+}

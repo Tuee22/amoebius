@@ -5,17 +5,22 @@
 #   help    : Show this help
 #   check   : Validate Docker, Terraform, and kubectl
 #   up      : Deploy or upgrade the cluster (terraform apply)
-#             Optional flag: --local-build (build local Docker image)
+#             Optional flag: --local-build (build local Docker image -> .tar)
 #   down    : Destroy the cluster (terraform destroy)
 #   unseal  : Wait for "amoebius-0" to have 2 containers, then unseal Vault
 #   shell   : Open a bash shell in the "amoebius-0" pod (amoebius container)
 #   status  : Check cluster, Linkerd readiness, Vault sealed/unsealed
 #
+# Note:
+#   A new Terraform variable "mount_docker_socket" (default: true) is available
+#   if you want to conditionally mount /var/run/docker.sock for the Kind container.
+#
 # Usage:
 #   ./amoebloctl.sh [command] [options]
 #
-# With 'up --local-build', we build the Docker image "amoebius:local". Terraform
-# will then load it into Kind via null_resource (kind load docker-image).
+# With 'up --local-build', we build the Docker image "amoebius:local" into a tarball
+# (data/images/amoebius.tar). Terraform will then load it into Kind by referencing
+# the tarball.
 #
 
 set -eu  # Exit on error (-e) or uninitialized var usage (-u).
@@ -42,13 +47,13 @@ Commands:
     Checks Docker, Terraform, and kubectl minimum versions and Docker daemon.
 
   up [--local-build]
-    Runs 'terraform apply' in "terraform/roots/deploy/local" to bring up
+    Runs 'terraform apply' in "terraform/roots/deploy/local_bootstrap" to bring up
     the Kind cluster and resources. If '--local-build' is specified,
-    we build 'amoebius:local' first, and Terraform will load it into Kind
-    (via null_resource).
+    we build/save 'amoebius:local' as data/images/amoebius.tar first,
+    and Terraform will load that tarball into Kind.
 
   down
-    Runs 'terraform destroy' in "terraform/roots/deploy/local" to tear down
+    Runs 'terraform destroy' in "terraform/roots/deploy/local_bootstrap" to tear down
     the Kind cluster.
 
   unseal
@@ -270,29 +275,42 @@ case "$cmd" in
     fi
 
     check_requirements "silent"
-    terraform -chdir=terraform/roots/deploy/local init
+    terraform -chdir=terraform/roots/deploy/local_bootstrap init
 
     if [ "$local_build" = "true" ]; then
-      echo "Building local Docker image 'amoebius:local'..."
-      # Adjust path to match your actual directory structure
-      (cd docker && \
-        docker build \
-          -t amoebius:local \
-          -f ./amoebius/Dockerfile \
-          ..)
+      echo "[up] --local-build specified. Preparing data/images/amoebius.tar..."
 
-      echo "Running 'terraform apply' with local_build_enabled=true..."
-      terraform -chdir=terraform/roots/deploy/local apply \
+      # 1) Ensure the data/images directory exists (idempotent)
+      mkdir -p data/images
+
+      # 2) Build+save the tar if it doesn't already exist
+      if [ ! -f data/images/amoebius.tar ]; then
+        echo "[up] data/images/amoebius.tar not found. Building Docker image 'amoebius:local'..."
+        (
+          cd docker
+          docker build \
+            -t amoebius:local \
+            -f ./amoebius/Dockerfile \
+            ..
+        )
+        echo "[up] Saving image to data/images/amoebius.tar..."
+        docker save -o data/images/amoebius.tar amoebius:local
+      else
+        echo "[up] data/images/amoebius.tar already exists. Skipping docker build."
+      fi
+
+      echo "[up] Running 'terraform apply' with local_build_enabled=true..."
+      terraform -chdir=terraform/roots/deploy/local_bootstrap apply \
         -auto-approve \
         -var "local_build_enabled=true"
     else
-      echo "Running 'terraform apply' (no local build)..."
-      terraform -chdir=terraform/roots/deploy/local apply -auto-approve
+      echo "[up] Running 'terraform apply' (no local build)..."
+      terraform -chdir=terraform/roots/deploy/local_bootstrap apply -auto-approve
     fi
     ;;
   down)
     check_requirements "silent"
-    terraform -chdir=terraform/roots/deploy/local destroy -auto-approve
+    terraform -chdir=terraform/roots/deploy/local_bootstrap destroy -auto-approve
     ;;
   unseal)
     check_requirements "silent"

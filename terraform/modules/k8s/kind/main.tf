@@ -1,8 +1,3 @@
-# This module deploys a Kind cluster using the 'kind_cluster' resource
-# from the 'tehcyx/kind' provider. Typically, you would define the
-# provider block in the *root* module or pass it in via the "providers" argument.
-# For self-containment, it is shown here; adapt to your usage as needed.
-
 terraform {
   required_providers {
     kind = {
@@ -12,7 +7,29 @@ terraform {
   }
 }
 
-resource "kind_cluster" "default" {
+locals {
+  default_mounts = [
+    {
+      host_path      = pathexpand(var.data_dir)
+      container_path = "/persistent-data"
+    },
+    {
+      host_path      = pathexpand(var.amoebius_dir)
+      container_path = "/amoebius"
+    }
+  ]
+
+  docker_socket_mount = [
+    {
+      host_path      = "/var/run/docker.sock"
+      container_path = "/var/run/docker.sock"
+    }
+  ]
+
+  combined_mounts = var.mount_docker_socket ? concat(local.default_mounts, local.docker_socket_mount) : local.default_mounts
+}
+
+resource kind_cluster default {
   name           = var.cluster_name
   wait_for_ready = true
 
@@ -21,15 +38,8 @@ resource "kind_cluster" "default" {
     api_version = "kind.x-k8s.io/v1alpha4"
 
     node {
-      role = "control-plane"
-      extra_mounts {
-        host_path      = pathexpand(var.data_dir)
-        container_path = "/persistent-data"
-      }
-      extra_mounts {
-        host_path      = pathexpand(var.amoebius_dir)
-        container_path = "/amoebius"
-      }
+      role         = "control-plane"
+      extra_mounts = local.combined_mounts
     }
   }
 }

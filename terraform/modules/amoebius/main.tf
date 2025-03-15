@@ -24,8 +24,8 @@ module "amoebius_namespace" {
   client_certificate      = var.client_certificate
   client_key              = var.client_key
 
-  namespace              = var.namespace
-  apply_linkerd_policy   = var.apply_linkerd_policy
+  namespace             = var.namespace
+  apply_linkerd_policy  = var.apply_linkerd_policy
 }
 
 # Service Account for Amoebius
@@ -88,9 +88,6 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
           name  = "amoebius"
           image = var.amoebius_image
 
-          # Example: override entrypoint to do an infinite sleep
-          # command = ["/bin/sh", "-c", "sleep infinity"]
-
           port {
             container_port = 8080
           }
@@ -103,6 +100,16 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
             name       = "amoebius-volume"
             mount_path = "/amoebius"
           }
+
+          # Conditionally mount /var/run/docker.sock if requested
+          dynamic "volume_mount" {
+            for_each = var.mount_docker_socket ? [1] : []
+            content {
+              name       = "docker-sock"
+              mount_path = "/var/run/docker.sock"
+              read_only  = false
+            }
+          }
         }
 
         volume {
@@ -110,6 +117,20 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
           host_path {
             path = "/amoebius"
             type = "Directory"
+          }
+        }
+
+        # Conditionally create a HostPath volume for docker.sock
+        dynamic "volume" {
+          for_each = var.mount_docker_socket ? [1] : []
+          content {
+            name = "docker-sock"
+            host_path {
+              path = "/var/run/docker.sock"
+              # K8s recognizes "Socket" type in newer versions; if it doesn't
+              # accept "Socket", you can leave it as an empty string or "File".
+              type = "Socket"
+            }
           }
         }
       }

@@ -38,3 +38,9 @@ variable "apply_linkerd_policy" {
   type        = bool
   default     = false
 }
+
+variable "mount_docker_socket" {
+  description = "Whether to mount /var/run/docker.sock into the Amoebius container"
+  type        = bool
+  default     = true
+}
