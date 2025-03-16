@@ -1,3 +1,8 @@
+#####################################################################
+# No provider block: we rely on the root-level configuration.
+# This module just declares its required providers (optionally).
+#####################################################################
+
 terraform {
   required_providers {
     kind = {

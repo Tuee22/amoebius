@@ -358,6 +358,7 @@ async def is_vault_initialized_wrapper(vault_addr: str) -> bool:
     return await is_vault_initialized(vault_addr)
 
 
+@async_retry(retries=30)
 async def init_unseal_configure_vault(
     default_shamir_shares: int = 5,
     default_shamir_threshold: int = 3,
@@ -378,7 +379,6 @@ async def init_unseal_configure_vault(
         secrets_file_path (str, optional): Path to store/read VaultInitData. Defaults to /amoebius/data/vault_secrets.bin.
         user_supplied_password (Optional[str], optional): If provided, use it directly. Otherwise prompt.
     """
-    print("Reading vault terraform state ...")
     tfs = await read_terraform_state(root_name="services/vault", retries=30)
 
     vault_raft_pod_dns_names: List[str] = get_output_from_state(

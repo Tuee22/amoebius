@@ -11,13 +11,13 @@ variable "cluster_name" {
 variable "data_dir" {
   description = "Data directory for Kind"
   type        = string
-  default     = "~/amoebius/data/kind-data"
+  default     = "../../../../data/kind-data"
 }
 
 variable "amoebius_dir" {
   description = "Amoebius directory path"
   type        = string
-  default     = "~/amoebius"
+  default     = "../../../../"
 }
 
 variable "amoebius_image" {

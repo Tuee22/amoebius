@@ -1,17 +1,16 @@
+#####################################################################
+# No provider block: we rely on the root-level configuration.
+# This module just declares its required providers (optionally).
+#####################################################################
+
 terraform {
+  # Optional: declare required providers (versions), but no configs.
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = "~> 2.25.1"
     }
   }
-}
-
-provider "kubernetes" {
-  host                   = var.host
-  cluster_ca_certificate = var.cluster_ca_certificate
-  client_certificate     = var.client_certificate
-  client_key             = var.client_key
 }
 
 resource "kubernetes_namespace" "this" {

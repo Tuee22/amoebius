@@ -225,7 +225,7 @@ async def read_terraform_state(
     vault_client: Optional[AsyncVaultClient] = None,
     minio_client: Optional[Minio] = None,
     sensitive: bool = True,
-    retries: int = 3,
+    retries: int = 0,
 ) -> TerraformState:
     """
     Run 'terraform show -json' with ephemeral usage, returning the parsed TerraformState.

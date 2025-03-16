@@ -1,5 +1,6 @@
 #####################################################################
-# No local provider block: we rely on parent-level "kubernetes" provider
+# No local provider block: we rely on the root-level "kubernetes" provider
+# This module only declares its required providers (optionally).
 #####################################################################
 
 terraform {
