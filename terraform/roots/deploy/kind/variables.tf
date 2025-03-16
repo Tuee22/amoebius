@@ -11,13 +11,13 @@ variable "cluster_name" {
 variable "data_dir" {
   description = "Data directory for Kind"
   type        = string
-  default     = "../../../../data/kind-data"
+  default     = "/amoebius/data/kind-in-amoebius-data"
 }
 
 variable "amoebius_dir" {
   description = "Amoebius directory path"
   type        = string
-  default     = "../../../../"
+  default     = "/amoebius"
 }
 
 variable "amoebius_image" {
@@ -51,7 +51,7 @@ If you prefer to load a tarball from `data/images/amoebius.tar` instead,
 you can tweak the approach in main.tf accordingly.
 EOT
   type    = bool
-  default = false
+  default = true
 }
 
 variable "local_docker_image_tag" {
@@ -66,5 +66,5 @@ variable "local_docker_image_tag" {
 variable "mount_docker_socket" {
   description = "Whether to mount /var/run/docker.sock in the container that runs Kind."
   type        = bool
-  default     = false
+  default     = true
 }

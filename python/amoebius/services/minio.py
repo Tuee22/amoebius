@@ -38,7 +38,6 @@ from amoebius.utils.terraform.commands import init_terraform, apply_terraform
 
 TRANSIT_KEY_NAME = "amoebius"
 
-# Use an uppercase constant for the Terraform root module name:
 SERVICE_NAME = "services/minio"
 
 
