@@ -26,10 +26,14 @@ locals {
     }
   ]
 
-  combined_mounts = var.mount_docker_socket ? concat(local.default_mounts, local.docker_socket_mount) : local.default_mounts
+  combined_mounts = (
+    var.mount_docker_socket
+      ? concat(local.default_mounts, local.docker_socket_mount)
+      : local.default_mounts
+  )
 }
 
-resource kind_cluster default {
+resource "kind_cluster" "default" {
   name           = var.cluster_name
   wait_for_ready = true
 
@@ -38,8 +42,15 @@ resource kind_cluster default {
     api_version = "kind.x-k8s.io/v1alpha4"
 
     node {
-      role         = "control-plane"
-      extra_mounts = local.combined_mounts
+      role = "control-plane"
+
+      dynamic "extra_mounts" {
+        for_each = local.combined_mounts
+        content {
+          host_path      = extra_mounts.value.host_path
+          container_path = extra_mounts.value.container_path
+        }
+      }
     }
   }
 }

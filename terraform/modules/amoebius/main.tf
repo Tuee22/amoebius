@@ -1,3 +1,7 @@
+#####################################################################
+# No local provider block: we rely on parent-level "kubernetes" provider
+#####################################################################
+
 terraform {
   required_providers {
     kubernetes = {
@@ -7,28 +11,18 @@ terraform {
   }
 }
 
-# Kubernetes provider using the 4 connection parameters
-provider "kubernetes" {
+module "amoebius_namespace" {
+  source = "../../modules/linkerd_annotated_namespace"
+
   host                   = var.host
   cluster_ca_certificate = var.cluster_ca_certificate
   client_certificate     = var.client_certificate
   client_key             = var.client_key
+
+  namespace            = var.namespace
+  apply_linkerd_policy = var.apply_linkerd_policy
 }
 
-# If you use a module for Linkerd-annotated namespaces, call it here.
-# Otherwise, you can replace this with a simple kubernetes_namespace resource.
-module "amoebius_namespace" {
-  source                  = "../../modules/linkerd_annotated_namespace"
-  host                    = var.host
-  cluster_ca_certificate  = var.cluster_ca_certificate
-  client_certificate      = var.client_certificate
-  client_key              = var.client_key
-
-  namespace             = var.namespace
-  apply_linkerd_policy  = var.apply_linkerd_policy
-}
-
-# Service Account for Amoebius
 resource "kubernetes_service_account_v1" "amoebius_admin" {
   metadata {
     name      = "amoebius-admin"
@@ -36,7 +30,6 @@ resource "kubernetes_service_account_v1" "amoebius_admin" {
   }
 }
 
-# ClusterRoleBinding granting cluster-admin to the above Service Account
 resource "kubernetes_cluster_role_binding_v1" "amoebius_admin_binding" {
   metadata {
     name = "amoebius-admin-binding"
@@ -55,7 +48,6 @@ resource "kubernetes_cluster_role_binding_v1" "amoebius_admin_binding" {
   }
 }
 
-# Amoebius StatefulSet
 resource "kubernetes_stateful_set_v1" "amoebius" {
   metadata {
     name      = "amoebius"
@@ -128,7 +120,7 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
             host_path {
               path = "/var/run/docker.sock"
               # K8s recognizes "Socket" type in newer versions; if it doesn't
-              # accept "Socket", you can leave it as an empty string or "File".
+              # accept "Socket", you can leave it as "File".
               type = "Socket"
             }
           }
@@ -138,7 +130,6 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
   }
 }
 
-# ClusterIP Service for Amoebius
 resource "kubernetes_service_v1" "amoebius" {
   metadata {
     name      = "amoebius"

@@ -1,3 +1,7 @@
+#########################################
+# Variables for the Kind cluster module
+#########################################
+
 variable "cluster_name" {
   description = "Name of the Kind cluster"
   type        = string
@@ -5,19 +9,19 @@ variable "cluster_name" {
 }
 
 variable "data_dir" {
-  description = "Data directory for Kind"
+  description = "Data directory for Kind's persistent data"
   type        = string
   default     = "~/amoebius/data/kind-data"
 }
 
 variable "amoebius_dir" {
-  description = "Amoebius directory path to mount into the container"
+  description = "Path to mount the Amoebius project dir into the Kind node"
   type        = string
   default     = "~/amoebius"
 }
 
 variable "mount_docker_socket" {
-  description = "Whether to mount /var/run/docker.sock into the Kind node container"
+  description = "If true, mount /var/run/docker.sock into the Kind container"
   type        = bool
   default     = true
 }
