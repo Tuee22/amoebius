@@ -7,12 +7,6 @@ terraform {
   }
 }
 
-provider "kubernetes" {
-  host                   = ""
-  cluster_ca_certificate = ""
-  token                  = ""
-}
-
 resource "kubernetes_storage_class" "this" {
   metadata {
     name = var.storage_class_name

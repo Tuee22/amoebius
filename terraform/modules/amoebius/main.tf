@@ -74,6 +74,9 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
             container_port = 8080
           }
 
+          # for testing
+          # command = ["/bin/sh", "-c", "sleep infinity"]
+
           security_context {
             privileged = true
           }
