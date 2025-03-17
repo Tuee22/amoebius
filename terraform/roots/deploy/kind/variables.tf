@@ -41,14 +41,10 @@ variable "apply_linkerd_policy" {
 #######################################
 # LOCAL BUILD LOGIC
 #######################################
-
 variable "local_build_enabled" {
   description = <<EOT
-If true, we assume a local Docker image tag 'amoebius:local' has been built
-(e.g. via `docker build -t amoebius:local .`).
+If true, we assume a local Docker image tag 'amoebius:local' has been built.
 We will load that image into Kind using `kind load docker-image`.
-If you prefer to load a tarball from `data/images/amoebius.tar` instead,
-you can tweak the approach in main.tf accordingly.
 EOT
   type    = bool
   default = true

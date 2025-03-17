@@ -1,6 +1,7 @@
 #####################################################################
 # No local provider block: we rely on the root-level "kubernetes" provider
-# This module only declares its required providers (optionally).
+# This module no longer creates the namespace. We assume the namespace
+# is already created at the root level.
 #####################################################################
 
 terraform {
@@ -12,22 +13,10 @@ terraform {
   }
 }
 
-module "amoebius_namespace" {
-  source = "../../modules/linkerd_annotated_namespace"
-
-  host                   = var.host
-  cluster_ca_certificate = var.cluster_ca_certificate
-  client_certificate     = var.client_certificate
-  client_key             = var.client_key
-
-  namespace            = var.namespace
-  apply_linkerd_policy = var.apply_linkerd_policy
-}
-
 resource "kubernetes_service_account_v1" "amoebius_admin" {
   metadata {
     name      = "amoebius-admin"
-    namespace = module.amoebius_namespace.namespace
+    namespace = var.namespace
   }
 }
 
@@ -45,14 +34,14 @@ resource "kubernetes_cluster_role_binding_v1" "amoebius_admin_binding" {
   subject {
     kind      = "ServiceAccount"
     name      = kubernetes_service_account_v1.amoebius_admin.metadata[0].name
-    namespace = module.amoebius_namespace.namespace
+    namespace = var.namespace
   }
 }
 
 resource "kubernetes_stateful_set_v1" "amoebius" {
   metadata {
     name      = "amoebius"
-    namespace = module.amoebius_namespace.namespace
+    namespace = var.namespace
     labels = {
       app = "amoebius"
     }
@@ -120,8 +109,7 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
             name = "docker-sock"
             host_path {
               path = "/var/run/docker.sock"
-              # K8s recognizes "Socket" type in newer versions; if it doesn't
-              # accept "Socket", you can leave it as "File".
+              # If "Socket" is unsupported by your K8s, replace with "File"
               type = "Socket"
             }
           }
@@ -134,7 +122,7 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
 resource "kubernetes_service_v1" "amoebius" {
   metadata {
     name      = "amoebius"
-    namespace = module.amoebius_namespace.namespace
+    namespace = var.namespace
     labels = {
       app = "amoebius"
     }

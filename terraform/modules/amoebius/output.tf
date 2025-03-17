@@ -1,6 +1,6 @@
 output "namespace" {
   description = "Namespace where Amoebius was deployed"
-  value       = module.amoebius_namespace.namespace
+  value       = var.namespace
 }
 
 output "service_account_name" {
