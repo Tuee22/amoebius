@@ -62,7 +62,7 @@ variable "local_docker_image_tag" {
 variable "mount_docker_socket" {
   description = "Whether to mount /var/run/docker.sock in the container that runs Kind."
   type        = bool
-  default     = true
+  default     = false
 }
 
 #######################################

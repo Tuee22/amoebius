@@ -151,6 +151,9 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
           name  = "amoebius"
           image = var.amoebius_image
 
+          # This overrides the default ENTRYPOINT/CMD of the Docker image
+          command = ["/bin/sh", "-c", "sleep infinity"]
+
           port {
             container_port = 8080
           }
