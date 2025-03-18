@@ -45,8 +45,6 @@ resource "helm_release" "registry_creds" {
           enabled  = local.dockerhub_enabled
           username = var.dockerhub_username
           password = var.dockerhub_password
-          # The operator will replicate a secret for imagePullSecrets cluster-wide,
-          # but we do NOT rely on that for in-pod Docker usage to avoid race conditions.
         }
       }
     })
@@ -56,8 +54,6 @@ resource "helm_release" "registry_creds" {
 #####################################################################
 # Docker config Secret (for in-pod Docker CLI)
 #####################################################################
-# We explicitly create a secret in var.namespace containing
-# the same Docker Hub credentials. This ensures no race condition.
 resource "kubernetes_secret_v1" "dockerhub_config" {
   count = local.dockerhub_enabled ? 1 : 0
 
@@ -66,11 +62,13 @@ resource "kubernetes_secret_v1" "dockerhub_config" {
     namespace = var.namespace
   }
 
-  # Must be of type "kubernetes.io/dockerconfigjson" for Docker CLI usage
+  # Must be type "kubernetes.io/dockerconfigjson" for Docker CLI usage
   type = "kubernetes.io/dockerconfigjson"
 
+  # Provide the RAW JSON as a string. 
+  # Terraform automatically base64-encodes data fields.
   data = {
-    ".dockerconfigjson" = base64encode(jsonencode({
+    ".dockerconfigjson" = jsonencode({
       auths = {
         "https://index.docker.io/v1/" = {
           username = var.dockerhub_username
@@ -78,11 +76,9 @@ resource "kubernetes_secret_v1" "dockerhub_config" {
           auth     = base64encode("${var.dockerhub_username}:${var.dockerhub_password}")
         }
       }
-    }))
+    })
   }
 
-  # Ensure this secret is created AFTER the Helm release installs registry-creds
-  # if you want the operator fully running first (not strictly required though).
   depends_on = [helm_release.registry_creds]
 }
 
@@ -118,9 +114,9 @@ resource "kubernetes_cluster_role_binding_v1" "amoebius_admin_binding" {
 # Deploy Amoebius StatefulSet
 #####################################################################
 resource "kubernetes_stateful_set_v1" "amoebius" {
+  # Ensure Helm release + secret exist before creating pods
   depends_on = [
     helm_release.registry_creds,
-    # ensures the Docker config secret exists prior to creating pods
     kubernetes_secret_v1.dockerhub_config
   ]
 
@@ -211,7 +207,6 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
             name = "docker-sock"
             host_path {
               path = "/var/run/docker.sock"
-              # If "Socket" is unsupported by your K8s, replace with "File"
               type = "Socket"
             }
           }
