@@ -8,6 +8,10 @@ terraform {
       source  = "hashicorp/null"
       version = "3.2.1"
     }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.9.0"
+    }
   }
 }
 
@@ -34,6 +38,19 @@ provider "kubernetes" {
 
   # Optionally set insecure = true if using self-signed cert:
   # insecure = true
+}
+
+###########################################
+# CONFIGURE HELM PROVIDER
+###########################################
+provider "helm" {
+  kubernetes {
+    host                   = module.kind.host
+    cluster_ca_certificate = module.kind.cluster_ca_certificate
+    client_certificate     = module.kind.client_certificate
+    client_key             = module.kind.client_key
+    # insecure = true  # If self-signed
+  }
 }
 
 ###########################################
@@ -71,7 +88,6 @@ module "amoebius_namespace" {
   namespace            = var.namespace
   apply_linkerd_policy = var.apply_linkerd_policy
 
-  # Use the same cluster credentials as the root provider
   host                   = module.kind.host
   cluster_ca_certificate = module.kind.cluster_ca_certificate
   client_certificate     = module.kind.client_certificate
@@ -79,7 +95,7 @@ module "amoebius_namespace" {
 }
 
 ###########################################
-# DEPLOY AMOEBIUS
+# DEPLOY AMOEBIUS (ALSO INSTALLS REGISTRY-CREDS HELM CHART)
 ###########################################
 module "amoebius" {
   source = "/amoebius/terraform/modules/amoebius"
@@ -88,6 +104,11 @@ module "amoebius" {
   amoebius_image      = local.effective_image
   namespace           = var.namespace
   mount_docker_socket = var.mount_docker_socket
+
+  # Pass DockerHub creds down to the module
+  dockerhub_username  = var.dockerhub_username
+  dockerhub_password  = var.dockerhub_password
+  registry_creds_chart_version = var.registry_creds_chart_version
 
   depends_on = [
     null_resource.load_local_image_tar,

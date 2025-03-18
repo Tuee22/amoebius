@@ -64,3 +64,26 @@ variable "mount_docker_socket" {
   type        = bool
   default     = false
 }
+
+#######################################
+# REGISTRY CREDS
+#######################################
+variable "dockerhub_username" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "DockerHub username (leave blank for unauthenticated pulls)."
+}
+
+variable "dockerhub_password" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "DockerHub password/token (leave blank for unauthenticated pulls)."
+}
+
+variable "registry_creds_chart_version" {
+  type        = string
+  default     = "1.3.0"
+  description = "Which version of the registry-creds Helm chart to install."
+}
