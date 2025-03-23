@@ -6,8 +6,10 @@ ephemeral_manager from amoebius/utils/ephemeral_file.py to manage ephemeral
 known_hosts and private keys in /dev/shm. No manual tempfile or cleanup is needed.
 
 We use `validate_type` from amoebius.models.validator to enforce that
-ephemeral_manager yields a plain str (single-file mode), rather than performing
-`assert isinstance(...)`.
+ephemeral_manager yields a plain str (single-file mode).
+
+Additionally, file I/O has been converted to asynchronous operations via aiofiles,
+except for os.chmod() calls, which remain synchronous to avoid mypy errors.
 """
 
 import argparse
@@ -17,6 +19,9 @@ import shlex
 import sys
 from pathlib import Path
 from typing import Dict, List, Optional
+
+import aiofiles
+import aiofiles.ospath
 
 from amoebius.utils.async_command_runner import run_command, CommandError
 from amoebius.models.ssh import SSHConfig, KubectlCommand
@@ -52,22 +57,21 @@ async def ssh_get_server_key(
     Raises:
         CommandError: If handshake fails or if no keys are discovered.
     """
-    # Single-file ephemeral known_hosts
     async with ephemeral_manager(
         single_file_name="ssh_known_hosts", prefix="sshkh-"
     ) as kh_path_union:
-        # Convert union -> str using validate_type
         kh_path = validate_type(kh_path_union, str)
 
-        # Another single-file ephemeral context for the private key
         async with ephemeral_manager(
             single_file_name="ssh_idkey", prefix="sshpk-"
         ) as pk_path_union:
             pk_path = validate_type(pk_path_union, str)
 
-            # Write private key
-            with open(pk_path, "wb") as fpk:
-                fpk.write(cfg.private_key.encode("utf-8"))
+            # Write private key (async)
+            async with aiofiles.open(pk_path, "wb") as fpk:
+                await fpk.write(cfg.private_key.encode("utf-8"))
+
+            # Protect private key (sync call to avoid mypy errors)
             os.chmod(pk_path, 0o600)
 
             ssh_cmd = [
@@ -95,10 +99,12 @@ async def ssh_get_server_key(
                 retry_delay=retry_delay,
             )
 
-            lines: List[str] = []
-            if os.path.exists(kh_path):
-                with open(kh_path, "r", encoding="utf-8") as fkh:
-                    lines = [ln.strip() for ln in fkh if ln.strip()]
+            # Read known_hosts (async)
+            lines = []
+            if await aiofiles.ospath.exists(kh_path):
+                async with aiofiles.open(kh_path, "r", encoding="utf-8") as fkh:
+                    all_lines = await fkh.readlines()
+                    lines = [ln.strip() for ln in all_lines if ln.strip()]
 
             if not lines:
                 raise CommandError(
@@ -151,14 +157,16 @@ async def run_ssh_command(
         ) as pk_path_union:
             pk_path = validate_type(pk_path_union, str)
 
-            # Write known_hosts lines
-            with open(kh_path, "w", encoding="utf-8") as fkh:
+            # Write known_hosts lines (async)
+            async with aiofiles.open(kh_path, "w", encoding="utf-8") as fkh:
                 for line in ssh_config.host_keys:
-                    fkh.write(line + "\n")
+                    await fkh.write(line + "\n")
 
-            # Write private key
-            with open(pk_path, "wb") as fpk:
-                fpk.write(ssh_config.private_key.encode("utf-8"))
+            # Write private key (async)
+            async with aiofiles.open(pk_path, "wb") as fpk:
+                await fpk.write(ssh_config.private_key.encode("utf-8"))
+
+            # Protect private key (sync call to avoid mypy errors)
             os.chmod(pk_path, 0o600)
 
             ssh_cmd = [
