@@ -1,21 +1,35 @@
 """
 amoebius/utils/async_command_runner.py
 
-Provides a reusable asynchronous command runner with retry logic.
+Provides a reusable asynchronous command runner with retry logic. Optionally,
+allows passing a custom error_parser callback that can parse stderr for known
+errors (e.g., Docker Hub rate limits) and return a short user-friendly message.
 
 Usage example:
     from amoebius.utils.async_command_runner import run_command, CommandError
 
+    def dockerhub_parser(stderr_str: str) -> Optional[str]:
+        lower = stderr_str.lower()
+        if "429 too many requests" in lower or "toomanyrequests" in lower:
+            return "Docker Hub rate limit encountered. Consider authenticating or upgrading."
+        return None
+
     try:
-        output = await run_command(["ls", "-l"], env={"EXAMPLE": "1"}, retries=3)
+        output = await run_command(
+            ["helm", "install", "..."],
+            retries=3,
+            error_parser=dockerhub_parser,
+        )
         print(output)
     except CommandError as err:
         print(f"Command failed: {err}")
 """
 
+from __future__ import annotations
+
 import os
 import asyncio
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 
 from typing_extensions import ParamSpec, TypeVar
 
@@ -26,12 +40,11 @@ R = TypeVar("R")
 
 
 class CommandError(Exception):
-    """
-    Represents a failure when executing a shell command.
+    """Represents a failure when executing a shell command.
 
     Attributes:
         message (str): The error message describing the command failure.
-        return_code (Optional[int]): The return code if available.
+        return_code (Optional[int]): The exit code if available.
     """
 
     def __init__(self, message: str, return_code: Optional[int] = None) -> None:
@@ -46,6 +59,7 @@ class CommandError(Exception):
         self.return_code = return_code
 
 
+@async_retry()
 async def run_command(
     command: List[str],
     *,
@@ -57,35 +71,55 @@ async def run_command(
     retries: int = 3,
     retry_delay: float = 1.0,
     suppress_env_vars: Optional[List[str]] = None,
+    error_parser: Optional[Callable[[str], Optional[str]]] = None,
 ) -> str:
     """
-    Executes a local command in a subprocess, asynchronously, with optional retries.
+    Executes a local command in a subprocess, asynchronously, with optional retries
+    and an optional error parser callback.
 
-    This function supports input data via stdin, environment variable overrides,
-    and ignoring certain return codes as successful.
+    If the command fails (return code not in successful_return_codes), we raise
+    CommandError. If `error_parser` is given, we pass stderr to it, and if it returns
+    a non-None string, we raise that as a short user-friendly message. Otherwise, we
+    raise the usual "Command failed" message.
+
+    When `sensitive=True`, we omit the command, stdout, and stderr from the final error
+    message.
 
     Args:
-        command (List[str]): The command and arguments to execute.
-        sensitive (bool, optional): If True, command details won't appear in the exception message.
-        env (Optional[Dict[str, str]], optional): Extra environment variables to add or override.
-        cwd (Optional[str], optional): Working directory for the command.
-        input_data (Optional[str], optional): If provided, this string is passed to stdin.
-        successful_return_codes (List[int], optional): Which return codes won't be treated as errors. Defaults to [0].
-        retries (int, optional): How many times to retry on failure. Defaults to 3.
-        retry_delay (float, optional): Delay in seconds between retries. Defaults to 1.0.
-        suppress_env_vars (Optional[List[str]], optional):
-            A list of environment variables to remove from the environment before execution.
+        command (List[str]):
+            The command and arguments to execute.
+        sensitive (bool):
+            If True, hides command details in the raised error.
+        env (Optional[Dict[str, str]]):
+            Additional environment variables to add or override.
+        cwd (Optional[str]):
+            Working directory for the command.
+        input_data (Optional[str]):
+            If provided, passed to stdin.
+        successful_return_codes (List[int]):
+            Which return codes won't be treated as errors. Defaults to [0].
+        retries (int):
+            How many times to retry on failure. Defaults to 3.
+        retry_delay (float):
+            Delay in seconds between retries. Defaults to 1.0.
+        suppress_env_vars (Optional[List[str]]):
+            A list of environment variables to remove from the environment.
+        error_parser (Optional[Callable[[str], Optional[str]]]):
+            A callback that receives stderr (as a string). If it returns a non-None
+            value, we raise a short CommandError with that message. This can detect
+            known errors like Docker Hub rate limits.
 
     Returns:
         str: The captured stdout of the command on success.
 
     Raises:
-        CommandError: If the command fails after retries or returns a code not in `successful_return_codes`.
+        CommandError: If the command fails after all retries or returns a code not in
+            `successful_return_codes`. Also if `error_parser` returns a message.
     """
 
     @async_retry(retries=retries, delay=retry_delay)
     async def _inner_run_command() -> str:
-        # Prepare environment if necessary
+        # Build environment
         if env is None and not suppress_env_vars:
             proc_env = None
         else:
@@ -96,7 +130,7 @@ async def run_command(
             if env:
                 proc_env.update(env)
 
-        # If input_data is provided, we'll pass a PIPE for stdin; otherwise /dev/null.
+        # Decide how we pass stdin
         stdin = asyncio.subprocess.PIPE if input_data else asyncio.subprocess.DEVNULL
 
         proc = await asyncio.create_subprocess_exec(
@@ -114,7 +148,17 @@ async def run_command(
         stdout_str = stdout_bytes.decode(errors="replace").strip()
         stderr_str = stderr_bytes.decode(errors="replace").strip()
 
+        # Check return code
         if proc.returncode not in successful_return_codes:
+            # If user provided an error_parser, see if it returns a custom message
+            short_message = None
+            if error_parser:
+                short_message = error_parser(stderr_str)
+
+            if short_message is not None:
+                # Raise short, custom message from the error parser
+                raise CommandError(short_message, proc.returncode)
+
             detail = ""
             if not sensitive:
                 detail = (
@@ -122,6 +166,7 @@ async def run_command(
                     f"\nStdout: {stdout_str}"
                     f"\nStderr: {stderr_str}"
                 )
+
             raise CommandError(
                 f"Command failed with return code {proc.returncode}.{detail}",
                 proc.returncode,
