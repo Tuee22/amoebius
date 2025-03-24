@@ -1,15 +1,19 @@
 """
+amoebius/daemon.py
+
 A daemon that:
-1) Ensures Docker is running or fails => K8s restarts container.
-2) Deploys Linkerd + Vault once, or fails => K8s restarts container.
-3) Reads TF state for 'vault_addr' once, or fails => K8s restarts container.
-4) Creates a single AsyncVaultClient outside the loop.
-5) Each loop iteration:
-   - Redeploy Linkerd+Vault (idempotent).
-   - Checks if vault is sealed => if sealed, skip.
-   - Checks if vault is configured => if not, skip.
-   - Otherwise, run minio_deploy(...) => Sleep => repeat.
+  1) Ensures Docker is running or fails => K8s restarts container.
+  2) Deploys Linkerd + Vault once, or fails => K8s restarts container.
+  3) Reads TF state for 'vault_addr' once, or fails => K8s restarts container.
+  4) Creates a single AsyncVaultClient outside the loop.
+  5) Each loop iteration:
+       - Redeploy Linkerd+Vault (idempotent).
+       - Checks if vault is sealed => if sealed, skip.
+       - Checks if vault is configured => if not, skip.
+       - Otherwise, run minio_deploy(...) => Sleep => repeat.
 """
+
+from __future__ import annotations
 
 import asyncio
 import sys
@@ -23,6 +27,7 @@ from amoebius.utils.terraform import (
     read_terraform_state,
     get_output_from_state,
 )
+from amoebius.models.terraform import TerraformBackendRef
 from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.models.vault import VaultSettings
 from amoebius.services.minio import minio_deploy
@@ -36,25 +41,23 @@ from amoebius.models.k8s import KubernetesServiceAccount
 
 
 async def deploy_infra() -> None:
-    """Deploy Linkerd + Vault in an idempotent way.
-
-    If it fails, let the exception propagate => K8s restarts container.
-    """
+    """Deploy Linkerd + Vault in an idempotent way, or raise on failure."""
     print("Deploying Linkerd...")
     await install_linkerd()
 
     print("Deploying Vault via Terraform...")
-    await init_terraform(root_name="services/vault")
-    await apply_terraform(root_name="services/vault")
+    ref_vault = TerraformBackendRef(root="services/vault")
+    await init_terraform(ref=ref_vault)
+    await apply_terraform(ref=ref_vault)
 
     print("Deployment (Linkerd + Vault) completed.")
 
 
 async def run_amoebius(vclient: AsyncVaultClient) -> None:
-    """Runs MinIO deployment logic with a guaranteed Vault client.
+    """Run MinIO deployment logic with a guaranteed Vault client.
 
     Args:
-        vclient (AsyncVaultClient): The already-initialized Vault client.
+        vclient (AsyncVaultClient): Pre-initialized Vault client.
     """
     service_account_access = MinioServiceAccountAccess(
         service_account=KubernetesServiceAccount(
@@ -77,16 +80,13 @@ async def run_amoebius(vclient: AsyncVaultClient) -> None:
 
 
 async def main() -> None:
-    """Main daemon flow:
+    """Main daemon logic.
+
     1) Ensure Docker is running or fail => K8s restarts.
     2) Deploy Linkerd + Vault once or fail => K8s restarts.
     3) Read TF for vault_addr => if missing => fail => K8s restarts.
-    4) Create one VaultClient outside the loop.
-    5) In a loop:
-       - Redeploy infra (idempotent).
-       - Check `is_vault_sealed()` => if sealed => skip.
-       - Check `is_vault_configured()` => if false => skip.
-       - Else run minio, sleep 5s, repeat.
+    4) Create one VaultClient.
+    5) In a loop => re-deploy infra, check vault sealed/config => run minio => sleep => repeat.
     """
     print("Daemon starting...")
     docker_process: Optional[asyncio.subprocess.Process] = None
@@ -102,15 +102,16 @@ async def main() -> None:
     else:
         print("Docker daemon already running.")
 
-    # 2) Deploy Linkerd + Vault once or fail => K8s restarts
+    # 2) Deploy Linkerd + Vault
     await deploy_infra()
 
-    # 3) Read Terraform state => get vault_addr => or fail => K8s restarts
-    tfs = await read_terraform_state(root_name="services/vault")
+    # 3) Read Terraform for vault_addr => or fail
+    ref_vault = TerraformBackendRef(root="services/vault")
+    tfs = await read_terraform_state(ref=ref_vault)
     vault_addr = get_output_from_state(tfs, "vault_addr", str)
     print(f"Got vault_addr from TF: {vault_addr}")
 
-    # Create a single Vault client outside the loop
+    # Build a VaultSettings
     vault_settings = VaultSettings(
         vault_addr=vault_addr,
         vault_role_name="amoebius-admin-role",
