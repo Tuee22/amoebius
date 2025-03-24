@@ -1,20 +1,8 @@
 """
 amoebius/utils/terraform/commands.py
 
-Provides user-callable Terraform command functions with ephemeral usage:
-    - init_terraform
-    - apply_terraform
-    - destroy_terraform
-    - read_terraform_state
-    - get_output_from_state
-    - list_minio_backends
-    - delete_empty_minio_backends
-
-All state is handled via ephemeral usage if a 'transit_key_name' is set on the
-provided storage. We do NOT manually pass the transit key name to these functions.
-
-We rely on TerraformBackendRef for the root + workspace references, with
-workspace defaulting to "default" if not specified.
+Provides user-callable Terraform command functions with ephemeral usage, plus
+logic to detect Docker Hub "too many requests" errors when installing Helm charts.
 """
 
 from __future__ import annotations
@@ -23,13 +11,13 @@ import os
 import asyncio
 from typing import Any, Dict, Optional, Type, TypeVar, List
 
-from amoebius.utils.async_command_runner import run_command
+from amoebius.utils.async_command_runner import run_command, CommandError
 from amoebius.models.validator import validate_type
 from amoebius.models.terraform import TerraformState, TerraformBackendRef
 from amoebius.secrets.vault_client import AsyncVaultClient
 from minio import Minio
 
-from amoebius.utils.terraform.storage import StateStorage, NoStorage, MinioStorage
+from amoebius.utils.terraform.storage import StateStorage, NoStorage
 from amoebius.utils.terraform.ephemeral import ephemeral_tfstate_if_needed, maybe_tfvars
 
 T = TypeVar("T")
@@ -38,16 +26,7 @@ T = TypeVar("T")
 def _make_base_command(
     action: str, override_lock: bool, reconfigure: bool
 ) -> List[str]:
-    """Build the base Terraform command, optionally adding flags.
-
-    Args:
-        action (str): Terraform action, e.g. "init", "apply", "destroy", "show".
-        override_lock (bool): If True, add '-lock=false' for apply/destroy.
-        reconfigure (bool): If True, add '-reconfigure' for init.
-
-    Returns:
-        List[str]: The initial command list, e.g. ["terraform","apply","-auto-approve"].
-    """
+    """Internal: Build the base Terraform command with optional flags."""
     base = ["terraform", action, "-no-color"]
 
     show_flags = ["-json"] if action == "show" else []
@@ -62,7 +41,7 @@ def _make_base_command(
 
 
 def _build_final_command(base_cmd: List[str], tfvars_args: List[str]) -> List[str]:
-    """Combine base command with optional var-file flags."""
+    """Internal: Combine base_cmd with optional var-file flags."""
     return base_cmd + tfvars_args
 
 
@@ -82,10 +61,10 @@ async def _terraform_command(
     retries: int,
 ) -> Optional[str]:
     """
-    Internal runner for 'terraform <action>' using ephemeral state storage if needed.
+    Internal runner for 'terraform <action>' with ephemeral usage => .tfstate in memory only.
 
-    ephemeral_tfstate_if_needed checks if 'transit_key_name' is set on storage.
-    The working directory is base_path / ref.root.
+    ephemeral_tfstate_if_needed checks if `storage.transit_key_name` is set to do encryption.
+    The working directory is `os.path.join(base_path, ref.root)`.
 
     Returns:
         Optional[str]: Terraform stdout if capture_output=True, else None.
@@ -98,9 +77,23 @@ async def _terraform_command(
     base_cmd = _make_base_command(action, override_lock, reconfigure)
 
     async def run_tf(cmd_list: List[str]) -> str:
-        return await run_command(
-            cmd_list, sensitive=sensitive, env=env, cwd=terraform_dir, retries=retries
-        )
+        try:
+            return await run_command(
+                cmd_list, sensitive=sensitive, env=env, cwd=terraform_dir, retries=retries
+            )
+        except CommandError as exc:
+            # Detect Docker Hub rate-limit in the error message
+            lower_msg = str(exc).lower()
+            if ("429 too many requests" in lower_msg or 
+                "you have reached your pull rate limit" in lower_msg or
+                "toomanyrequests" in lower_msg):
+                raise CommandError(
+                    "Terraform failed due to a Docker Hub rate limit error. "
+                    "Please consider authenticating or upgrading your Docker Hub plan."
+                ) from exc
+
+            # Otherwise, re-raise the original error
+            raise
 
     async with ephemeral_tfstate_if_needed(
         store, vault_client, minio_client, terraform_dir
@@ -125,15 +118,15 @@ async def init_terraform(
     """Initialize Terraform for the specified backend ref.
 
     Args:
-        ref (TerraformBackendRef): Identifies the root + workspace.
-        base_path (str): Folder containing Terraform directories, default /amoebius/terraform/roots.
-        env (Dict[str, str], optional): Additional environment variables for Terraform.
-        storage (StateStorage, optional): The ephemeral or persistent storage for state.
-        vault_client (AsyncVaultClient, optional): If ephemeral with Vault encryption.
-        minio_client (Minio, optional): If ephemeral with Minio-based storage.
-        reconfigure (bool): If True, passes -reconfigure to 'terraform init'.
-        sensitive (bool): If True, hides command details on error.
-        retries (int): Number of retries for run_command.
+        ref: Identifies the root + workspace.
+        base_path: Path to Terraform modules. Default /amoebius/terraform/roots.
+        env: Optional environment vars for Terraform.
+        storage: Optional ephemeral/persistent storage for state.
+        vault_client: If ephemeral usage with Vault encryption is desired.
+        minio_client: If ephemeral usage storing ciphertext in Minio.
+        reconfigure: If True => '-reconfigure' for init.
+        sensitive: If True => does not print full logs on error.
+        retries: Number of command retries.
     """
     await _terraform_command(
         action="init",
@@ -164,20 +157,7 @@ async def apply_terraform(
     sensitive: bool = True,
     retries: int = 3,
 ) -> None:
-    """Apply a Terraform plan for the specified backend ref.
-
-    Args:
-        ref (TerraformBackendRef): Identifies the root + workspace.
-        base_path (str): Folder containing Terraform directories, default /amoebius/terraform/roots.
-        env (Dict[str, str], optional): Additional environment variables for Terraform.
-        storage (StateStorage, optional): The ephemeral or persistent storage for state.
-        vault_client (AsyncVaultClient, optional): If ephemeral with Vault encryption.
-        minio_client (Minio, optional): If ephemeral with Minio-based storage.
-        override_lock (bool): If True, passes -lock=false for apply.
-        variables (Dict[str, Any], optional): Key-value data for terraform variables.
-        sensitive (bool): If True, hides command details on error.
-        retries (int): Number of retries for run_command.
-    """
+    """Apply a Terraform plan for the specified backend ref."""
     await _terraform_command(
         action="apply",
         ref=ref,
@@ -207,20 +187,7 @@ async def destroy_terraform(
     sensitive: bool = True,
     retries: int = 3,
 ) -> None:
-    """Destroy Terraform-managed resources for the specified backend ref.
-
-    Args:
-        ref (TerraformBackendRef): Identifies the root + workspace.
-        base_path (str): Folder containing Terraform directories, default /amoebius/terraform/roots.
-        env (Dict[str, str], optional): Additional environment variables for Terraform.
-        storage (StateStorage, optional): The ephemeral or persistent storage for state.
-        vault_client (AsyncVaultClient, optional): If ephemeral with Vault encryption.
-        minio_client (Minio, optional): If ephemeral with Minio-based storage.
-        override_lock (bool): If True, passes -lock=false for destroy.
-        variables (Dict[str, Any], optional): Key-value data for terraform variables.
-        sensitive (bool): If True, hides command details on error.
-        retries (int): Number of retries for run_command.
-    """
+    """Destroy Terraform-managed resources for the specified backend ref."""
     await _terraform_command(
         action="destroy",
         ref=ref,
@@ -248,24 +215,7 @@ async def read_terraform_state(
     sensitive: bool = True,
     retries: int = 0,
 ) -> TerraformState:
-    """Read and parse Terraform state (JSON) for the specified backend ref.
-
-    Args:
-        ref (TerraformBackendRef): Identifies the root + workspace.
-        base_path (str): Folder containing Terraform directories, default /amoebius/terraform/roots.
-        env (Dict[str, str], optional): Additional environment variables for Terraform.
-        storage (StateStorage, optional): The ephemeral or persistent storage for state.
-        vault_client (AsyncVaultClient, optional): If ephemeral with Vault encryption.
-        minio_client (Minio, optional): If ephemeral with Minio-based storage.
-        sensitive (bool): If True, hides command details on error.
-        retries (int): Number of retries for run_command.
-
-    Returns:
-        TerraformState: The parsed state object.
-
-    Raises:
-        RuntimeError: If state retrieval fails or is empty.
-    """
+    """Read and parse Terraform state (JSON) for the specified backend ref."""
     output = await _terraform_command(
         action="show",
         ref=ref,
@@ -289,44 +239,22 @@ async def read_terraform_state(
 def get_output_from_state(
     state: TerraformState, output_name: str, output_type: Type[T]
 ) -> T:
-    """Retrieve a typed output value from a TerraformState.
-
-    Args:
-        state (TerraformState): Parsed state object.
-        output_name (str): Which output name to retrieve.
-        output_type (Type[T]): The Python type to validate against.
-
-    Returns:
-        T: The typed value from that output.
-
-    Raises:
-        KeyError: If the output is missing.
-        ValueError: If validation fails.
-    """
+    """Retrieve a typed output value from a TerraformState object."""
     output_val = state.values.outputs.get(output_name)
     if output_val is None:
         raise KeyError(f"Output '{output_name}' not found in Terraform state.")
     return validate_type(output_val.value, output_type)
 
 
+# Helm/destroy related internal code for listing Minio-based backends
 def _build_object_name(root: str, workspace: str) -> str:
-    """Construct a Minio object key for storing state.
-
-    E.g. "terraform-backends/providers.aws/my-workspace.enc"
-    Slash in root => replaced with dot, then appended with "/{workspace}.enc"
-    """
+    """Construct a Minio object key for storing Terraform state, e.g. 'terraform-backends/<dotted_root>/<workspace>.enc'."""
     dotted_root = root.replace("/", ".")
     return f"terraform-backends/{dotted_root}/{workspace}.enc"
 
 
 def _parse_object_name(obj_name: str) -> Optional[TerraformBackendRef]:
-    """Parse a Minio object name => TerraformBackendRef if it matches the known pattern.
-
-    Pattern: "terraform-backends/<dotted_root>/<workspace>.enc"
-
-    Returns:
-        TerraformBackendRef if parseable, else None.
-    """
+    """Parse a Minio object name => TerraformBackendRef if it matches the known pattern."""
     if not obj_name.startswith("terraform-backends/"):
         return None
     if not obj_name.endswith(".enc"):
@@ -355,21 +283,10 @@ async def list_minio_backends(
     minio_client: Minio,
     delete_empty_backends: bool = True,
 ) -> List[TerraformBackendRef]:
-    """List all recognized Minio-based Terraform backends from the 'amoebius' bucket.
-
-    Args:
-        vault_client (AsyncVaultClient): For reading secrets if needed.
-        minio_client (Minio): Minio client for listing objects.
-        delete_empty_backends (bool): If True, calls `delete_empty_minio_backends` first.
-
-    Returns:
-        List[TerraformBackendRef]: A list of recognized backend references.
-    """
+    """List all recognized Minio-based Terraform backends from the 'amoebius' bucket."""
     if delete_empty_backends:
         await delete_empty_minio_backends(vault_client, minio_client)
-        return await list_minio_backends(
-            vault_client, minio_client, delete_empty_backends=False
-        )
+        return await list_minio_backends(vault_client, minio_client, delete_empty_backends=False)
 
     try:
         objects = minio_client.list_objects(
@@ -390,17 +307,7 @@ async def delete_empty_minio_backends(
     vault_client: AsyncVaultClient,
     minio_client: Minio,
 ) -> None:
-    """Remove any Minio-based Terraform backend objects that are effectively empty or fail retrieval.
-
-    Steps:
-      1) List recognized backends (with delete_empty_backends=False).
-      2) For each => read_terraform_state. If is_empty or fails => remove object.
-      3) The removal is done in parallel threads for concurrency.
-
-    Args:
-        vault_client (AsyncVaultClient): For ephemeral usage if needed.
-        minio_client (Minio): Minio client to remove objects from.
-    """
+    """Remove Minio-based Terraform backend objects that are empty or fail retrieval."""
     backends = await list_minio_backends(
         vault_client, minio_client, delete_empty_backends=False
     )
@@ -408,7 +315,6 @@ async def delete_empty_minio_backends(
         return
 
     async def check_backend(ref: TerraformBackendRef) -> bool:
-        """Return True if the backend is empty or we fail reading the state."""
         store = MinioStorage(
             ref=ref,
             bucket_name="amoebius",
@@ -427,9 +333,10 @@ async def delete_empty_minio_backends(
         except Exception:
             return True
 
-    tasks = [asyncio.create_task(check_backend(ref)) for ref in backends]
+    tasks = [asyncio.create_task(check_backend(r)) for r in backends]
     results = await asyncio.gather(*tasks)
-    empties = [ref for ref, empty in zip(backends, results) if empty]
+
+    empties = [r for r, empty in zip(backends, results) if empty]
 
     def remove_object_ignore_errors(client: Minio, bucket: str, key: str) -> None:
         try:
@@ -437,15 +344,14 @@ async def delete_empty_minio_backends(
         except Exception:
             pass
 
-    # Parallel removal
     await asyncio.gather(
         *[
             asyncio.to_thread(
                 remove_object_ignore_errors,
                 minio_client,
                 "amoebius",
-                _build_object_name(ref.root, ref.workspace),
+                _build_object_name(r.root, r.workspace),
             )
-            for ref in empties
+            for r in empties
         ]
     )
