@@ -154,7 +154,7 @@ def main() -> None:
     g_show = show_parser.add_mutually_exclusive_group()
     g_show.add_argument(
         "--vault-role-name",
-        default=None,
+        default="amoebius-admin-role",
         help="Name of a Vault K8s auth role (mutually exclusive with --vault-token).",
     )
     g_show.add_argument(
@@ -199,7 +199,7 @@ def main() -> None:
     g_list = list_parser.add_mutually_exclusive_group()
     g_list.add_argument(
         "--vault-role-name",
-        default=None,
+        default="amoebius-admin-role",
         help="Name of a Vault K8s auth role (mutually exclusive with --vault-token).",
     )
     g_list.add_argument(
