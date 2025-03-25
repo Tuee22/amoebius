@@ -21,19 +21,19 @@ variable "amoebius_dir" {
 }
 
 variable "amoebius_image" {
-  description = "Docker image for Amoebius (DockerHub path if not local build)"
+  description = "Docker image for Amoebius"
   type        = string
   default     = "tuee22/amoebius:latest"
 }
 
 variable "namespace" {
-  description = "Kubernetes namespace to deploy Amoebius into"
+  description = "Kubernetes namespace to deploy Amoebius"
   type        = string
   default     = "amoebius"
 }
 
 variable "apply_linkerd_policy" {
-  description = "Whether to apply Linkerd policy annotation in the namespace"
+  description = "Whether to apply Linkerd policy in the namespace"
   type        = bool
   default     = false
 }
@@ -42,27 +42,24 @@ variable "apply_linkerd_policy" {
 # LOCAL BUILD LOGIC
 #######################################
 variable "local_build_enabled" {
-  description = <<EOT
-If true, we assume a local Docker image tag 'amoebius:local' has been built,
-and we will load that image into Kind using `kind load docker-image`.
-EOT
-  type    = bool
-  default = false
+  type        = bool
+  default     = false
+  description = "If true, load a local Docker image into Kind"
 }
 
 variable "local_docker_image_tag" {
-  description = "Local Docker image tag to use if local_build_enabled is true"
   type        = string
   default     = "amoebius:local"
+  description = "Local Docker image tag if local_build_enabled is true"
 }
 
 #######################################
 # DOCKER SOCKET MOUNT
 #######################################
 variable "mount_docker_socket" {
-  description = "Whether to mount /var/run/docker.sock in the container that runs Kind."
   type        = bool
   default     = false
+  description = "Whether to mount /var/run/docker.sock in the container that runs Kind."
 }
 
 #######################################
@@ -72,14 +69,14 @@ variable "dockerhub_username" {
   type        = string
   sensitive   = true
   default     = ""
-  description = "DockerHub username (leave blank for unauthenticated pulls)."
+  description = "DockerHub username (leave blank for anonymous)."
 }
 
 variable "dockerhub_password" {
   type        = string
   sensitive   = true
   default     = ""
-  description = "DockerHub password/token (leave blank for unauthenticated pulls)."
+  description = "DockerHub password/token (leave blank for anonymous)."
 }
 
 variable "registry_creds_chart_version" {

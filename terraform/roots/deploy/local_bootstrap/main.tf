@@ -1,3 +1,6 @@
+#####################################################################
+# main.tf (Root Module)
+#####################################################################
 terraform {
   required_providers {
     kubernetes = {
@@ -16,7 +19,7 @@ terraform {
 }
 
 ###########################################
-# KIND CLUSTER MODULE
+# 1) KIND CLUSTER MODULE
 ###########################################
 module "kind" {
   source = "../../../modules/k8s/kind"
@@ -25,22 +28,24 @@ module "kind" {
   data_dir            = var.data_dir
   amoebius_dir        = var.amoebius_dir
   mount_docker_socket = var.mount_docker_socket
+
+  dockerhub_username  = var.dockerhub_username
+  dockerhub_password  = var.dockerhub_password
 }
 
 ###########################################
-# CONFIGURE KUBERNETES PROVIDER
+# 2) (Optional) KUBERNETES PROVIDER in Root
 ###########################################
+# (Used for other resources if needed, not relevant to child modules that define their own.)
 provider "kubernetes" {
   host                   = module.kind.host
   cluster_ca_certificate = module.kind.cluster_ca_certificate
   client_certificate     = module.kind.client_certificate
   client_key             = module.kind.client_key
-
-  # insecure = true  # If using self-signed cert
 }
 
 ###########################################
-# CONFIGURE HELM PROVIDER
+# 3) CONFIGURE HELM PROVIDER
 ###########################################
 provider "helm" {
   kubernetes {
@@ -48,19 +53,18 @@ provider "helm" {
     cluster_ca_certificate = module.kind.cluster_ca_certificate
     client_certificate     = module.kind.client_certificate
     client_key             = module.kind.client_key
-    # insecure = true  # If self-signed
   }
 }
 
 ###########################################
-# DETERMINE WHICH IMAGE TO USE
+# 4) DETERMINE WHICH IMAGE TO USE
 ###########################################
 locals {
-  effective_image   = var.local_build_enabled ? var.local_docker_image_tag : var.amoebius_image
+  effective_image = var.local_build_enabled ? var.local_docker_image_tag : var.amoebius_image
 }
 
 ###########################################
-# (Optional) LOAD LOCAL IMAGE TAR INTO KIND
+# 5) (Optional) LOAD LOCAL IMAGE TAR INTO KIND
 ###########################################
 resource "null_resource" "load_local_image_tar" {
   count = var.local_build_enabled ? 1 : 0
@@ -75,22 +79,24 @@ EOT
 }
 
 ###########################################
-# CREATE NAMESPACE (LINKERD OPTIONAL)
+# 6) CREATE NAMESPACE (LINKERD OPTIONAL) 
 ###########################################
+# We pass the cluster credentials for local provider usage in child
 module "amoebius_namespace" {
   source = "../../../modules/linkerd_annotated_namespace"
-
-  namespace            = var.namespace
-  apply_linkerd_policy = var.apply_linkerd_policy
 
   host                   = module.kind.host
   cluster_ca_certificate = module.kind.cluster_ca_certificate
   client_certificate     = module.kind.client_certificate
   client_key             = module.kind.client_key
+
+  namespace            = var.namespace
+  apply_linkerd_policy = var.apply_linkerd_policy
+  # (If the child has defaults for create_namespace, linkerd_inject, etc. you can omit them)
 }
 
 ###########################################
-# DEPLOY AMOEBIUS (ALSO INSTALLS REGISTRY-CREDS)
+# 7) DEPLOY AMOEBIUS (ALSO INSTALLS REGISTRY-CREDS)
 ###########################################
 module "amoebius" {
   source = "../../../modules/amoebius"

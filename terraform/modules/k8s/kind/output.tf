@@ -1,3 +1,6 @@
+#####################################################################
+# outputs.tf
+#####################################################################
 output "host" {
   description = "API endpoint for the Kind cluster"
   value       = kind_cluster.default.endpoint

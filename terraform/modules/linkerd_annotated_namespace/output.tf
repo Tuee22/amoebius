@@ -1,9 +1,12 @@
+#####################################################################
+# outputs.tf
+#####################################################################
 output "namespace" {
-  description = "The created (or referenced) Namespace name."
+  description = "The namespace name used by this module."
   value       = var.namespace
 }
 
 output "server_name" {
-  description = "The created Server name."
+  description = "Name of the Linkerd Server resource."
   value       = var.server_name
 }

@@ -107,6 +107,12 @@ resource "helm_release" "harbor" {
     data.template_file.harbor_values.rendered
   ]
 
+  # Explicitly set container pullPolicy
+  set {
+    name  = "image.pullPolicy"
+    value = "IfNotPresent"
+  }
+
   # Ensure secrets (if we are creating them) are created before the Helm install
   depends_on = [
     kubernetes_secret.harbor_admin_pwd,

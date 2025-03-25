@@ -1,10 +1,7 @@
 #####################################################################
-# No provider block: we rely on the root-level configuration.
-# This module just declares its required providers (optionally).
+# main.tf
 #####################################################################
-
 terraform {
-  # Optional: declare required providers (versions), but no configs.
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -13,6 +10,20 @@ terraform {
   }
 }
 
+# Local K8s provider (no load_config_file argument)
+# provider "kubernetes" {
+#   host                   = var.host
+#   cluster_ca_certificate = var.cluster_ca_certificate
+#   client_certificate     = var.client_certificate
+#   client_key             = var.client_key
+
+#   # If using self-signed cert, optionally:
+#   # insecure = true
+# }
+
+#####################################################################
+# 1) Possibly create the namespace
+#####################################################################
 resource "kubernetes_namespace" "this" {
   count = var.create_namespace ? 1 : 0
 
@@ -27,6 +38,9 @@ resource "kubernetes_namespace" "this" {
   }
 }
 
+#####################################################################
+# 2) Linkerd Server resource
+#####################################################################
 resource "kubernetes_manifest" "linkerd_server" {
   count = var.apply_linkerd_policy ? 1 : 0
 
@@ -39,7 +53,7 @@ resource "kubernetes_manifest" "linkerd_server" {
     }
     spec = {
       podSelector   = {}
-      port = var.server_port_range
+      port          = var.server_port_range
       proxyProtocol = var.proxy_protocol
     }
   }
@@ -49,6 +63,9 @@ resource "kubernetes_manifest" "linkerd_server" {
   ]
 }
 
+#####################################################################
+# 3) Linkerd ServerAuthorization
+#####################################################################
 resource "kubernetes_manifest" "linkerd_server_auth" {
   count = var.apply_linkerd_policy ? 1 : 0
 

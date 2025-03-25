@@ -1,11 +1,6 @@
 #####################################################################
-# This module:
-# 1) Creates the amoebius-admin ServiceAccount and cluster role binding
-# 2) Deploys a StatefulSet + Service for amoebius
-# 3) Installs/updates the registry-creds operator via Helm
-# 4) Creates our own Docker config Secret for in-pod Docker CLI usage
+# modules/amoebius/main.tf
 #####################################################################
-
 terraform {
   required_providers {
     kubernetes = {
@@ -19,15 +14,16 @@ terraform {
   }
 }
 
-#####################################################################
-# Locals
-#####################################################################
 locals {
+  # Hardcode the name of the Docker config secret
+  dockerhub_secret_name = "amoebius-dockerhub-cred"
+
+  # True if both username + password are provided
   dockerhub_enabled = var.dockerhub_username != "" && var.dockerhub_password != ""
 }
 
 #####################################################################
-# registry-creds Operator via Helm (for cluster-wide pulls)
+# 1) Deploy registry-creds operator via Helm (for cluster-wide pulls)
 #####################################################################
 resource "helm_release" "registry_creds" {
   name             = "registry-creds"
@@ -37,7 +33,6 @@ resource "helm_release" "registry_creds" {
   namespace        = "kube-system"
   create_namespace = false
 
-  # If username/password are both blank, do unauthenticated pulls
   values = [
     yamlencode({
       registryList = {
@@ -47,26 +42,30 @@ resource "helm_release" "registry_creds" {
           password = var.dockerhub_password
         }
       }
+      # ensure all SAs are patched for node-level pulls
+      patchAllServiceAccounts = true
+
+      # Explicitly set the container pull policy
+      image = {
+        pullPolicy = "IfNotPresent"
+      }
     })
   ]
 }
 
 #####################################################################
-# Docker config Secret (for in-pod Docker CLI)
+# 2) Docker config Secret (for in-pod Docker CLI usage)
 #####################################################################
 resource "kubernetes_secret_v1" "dockerhub_config" {
   count = local.dockerhub_enabled ? 1 : 0
 
   metadata {
-    name      = var.dockerhub_secret_name
+    name      = local.dockerhub_secret_name
     namespace = var.namespace
   }
 
-  # Must be type "kubernetes.io/dockerconfigjson" for Docker CLI usage
   type = "kubernetes.io/dockerconfigjson"
 
-  # Provide the RAW JSON as a string. 
-  # Terraform automatically base64-encodes data fields.
   data = {
     ".dockerconfigjson" = jsonencode({
       auths = {
@@ -83,7 +82,7 @@ resource "kubernetes_secret_v1" "dockerhub_config" {
 }
 
 #####################################################################
-# Create ServiceAccount + Binding
+# 3) 'amoebius-admin' ServiceAccount + cluster role binding
 #####################################################################
 resource "kubernetes_service_account_v1" "amoebius_admin" {
   metadata {
@@ -111,10 +110,9 @@ resource "kubernetes_cluster_role_binding_v1" "amoebius_admin_binding" {
 }
 
 #####################################################################
-# Deploy Amoebius StatefulSet
+# 4) Deploy Amoebius (StatefulSet)
 #####################################################################
 resource "kubernetes_stateful_set_v1" "amoebius" {
-  # Ensure Helm release + secret exist before creating pods
   depends_on = [
     helm_release.registry_creds,
     kubernetes_secret_v1.dockerhub_config
@@ -147,12 +145,26 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
       spec {
         service_account_name = kubernetes_service_account_v1.amoebius_admin.metadata[0].name
 
+        #####################################################################
+        # If DockerHub creds are enabled, attach the known secret
+        # for node-level pulls
+        #####################################################################
+        dynamic "image_pull_secrets" {
+          for_each = local.dockerhub_enabled ? [1] : []
+          content {
+            name = local.dockerhub_secret_name
+          }
+        }
+
         container {
           name  = "amoebius"
           image = var.amoebius_image
 
           # This overrides the default ENTRYPOINT/CMD of the Docker image for testing
           # command = ["/bin/sh", "-c", "sleep infinity"]
+
+
+          image_pull_policy = "IfNotPresent"  # avoids re-pulling if tag == :latest
 
           port {
             container_port = 8080
@@ -167,7 +179,9 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
             mount_path = "/amoebius"
           }
 
-          # Conditionally mount /var/run/docker.sock if requested
+          ###################################################################
+          # If user wants to mount /var/run/docker.sock
+          ###################################################################
           dynamic "volume_mount" {
             for_each = var.mount_docker_socket ? [1] : []
             content {
@@ -177,7 +191,9 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
             }
           }
 
-          # If DockerHub creds are enabled, mount the secret as ~/.docker/config.json
+          ###################################################################
+          # If DockerHub creds are enabled, mount the secret for in-container CLI
+          ###################################################################
           dynamic "volume_mount" {
             for_each = local.dockerhub_enabled ? [1] : []
             content {
@@ -187,8 +203,7 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
             }
           }
 
-          # The Docker CLI will look for config in /root/.docker/config.json
-          # If you run as a different user, adjust DOCKER_CONFIG and mount path.
+          # Docker CLI inside the container will look in /root/.docker/config.json
           env {
             name  = "DOCKER_CONFIG"
             value = "/root/.docker"
@@ -208,6 +223,7 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
           for_each = var.mount_docker_socket ? [1] : []
           content {
             name = "docker-sock"
+
             host_path {
               path = "/var/run/docker.sock"
               type = "Socket"
@@ -215,14 +231,16 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
           }
         }
 
-        # If DockerHub creds are set, mount the Terraform-managed secret
+        #####################################################################
+        # If DockerHub creds are set, mount the user-managed secret
+        #####################################################################
         dynamic "volume" {
           for_each = local.dockerhub_enabled ? [1] : []
           content {
             name = "docker-config-vol"
 
             secret {
-              secret_name = var.dockerhub_secret_name
+              secret_name = local.dockerhub_secret_name
 
               items {
                 key  = ".dockerconfigjson"
@@ -237,7 +255,7 @@ resource "kubernetes_stateful_set_v1" "amoebius" {
 }
 
 #####################################################################
-# Expose Amoebius Service
+# 5) Expose Amoebius Service (ClusterIP)
 #####################################################################
 resource "kubernetes_service_v1" "amoebius" {
   metadata {

@@ -8,8 +8,8 @@ Defines storage classes for reading/writing Terraform state ciphertext:
   - K8sSecretStorage
 
 All classes accept a `TerraformBackendRef` referencing (root, workspace).
-If a backend is absent, a user-friendly RuntimeError is raised rather than
-returning partial data that could lead to validation errors.
+For a non-existent state, each backend returns None, so the caller can detect
+"No existing Terraform state" and proceed accordingly.
 """
 
 from __future__ import annotations
@@ -23,7 +23,6 @@ from minio import Minio
 from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.utils.k8s import get_k8s_secret_data, put_k8s_secret_data
 from amoebius.models.terraform import TerraformBackendRef
-from amoebius.models.validator import validate_type
 
 
 class StateStorage(ABC):
@@ -52,15 +51,12 @@ class StateStorage(ABC):
         *,
         vault_client: Optional[AsyncVaultClient],
         minio_client: Optional[Minio],
-    ) -> str:
+    ) -> Optional[str]:
         """
         Read the stored ciphertext for this validated (root, workspace).
 
-        Raises:
-            RuntimeError: If no ciphertext was found for the given backend.
-
         Returns:
-            str: The ciphertext read from storage.
+            str or None: The ciphertext if it exists, or None if no state is found.
         """
         pass
 
@@ -94,8 +90,9 @@ class NoStorage(StateStorage):
         *,
         vault_client: Optional[AsyncVaultClient],
         minio_client: Optional[Minio],
-    ) -> str:
-        return ""
+    ) -> Optional[str]:
+        # No storage => always no existing state
+        return None
 
     async def write_ciphertext(
         self,
@@ -112,8 +109,7 @@ class VaultKVStorage(StateStorage):
     Stores ciphertext in Vault's KV under:
     'secret/data/amoebius/terraform-backends/<mapped_root>/<mapped_workspace>'.
 
-    We map slash-based `ref.root` and `ref.workspace` to dot-based only for the path.
-    If transit_key_name is set, ephemeral usage can do encryption externally.
+    If no secret is found, returns None to indicate no existing state.
     """
 
     def __init__(
@@ -133,25 +129,17 @@ class VaultKVStorage(StateStorage):
         *,
         vault_client: Optional[AsyncVaultClient],
         minio_client: Optional[Minio],
-    ) -> str:
+    ) -> Optional[str]:
         if not vault_client:
             raise RuntimeError("VaultKVStorage requires a vault_client.")
 
         try:
             data = await vault_client.read_secret(self._kv_path())
             ciphertext = data.get("ciphertext") if data else None
-            if ciphertext is None:
-                raise RuntimeError(
-                    f"No Terraform state found in VaultKVStorage for "
-                    f"{self.ref.root}/{self.ref.workspace}."
-                )
-            return validate_type(ciphertext, str)
+            return ciphertext  # None if not found
         except RuntimeError as ex:
             if "404" in str(ex):
-                raise RuntimeError(
-                    f"No Terraform state found in VaultKVStorage for "
-                    f"{self.ref.root}/{self.ref.workspace}."
-                ) from ex
+                return None
             raise
 
     async def write_ciphertext(
@@ -169,10 +157,7 @@ class VaultKVStorage(StateStorage):
 class MinioStorage(StateStorage):
     """
     Stores ciphertext in a MinIO bucket => 'terraform-backends/<mapped_root>/<mapped_workspace>.enc'.
-    If transit_key_name is set, ephemeral usage can do encryption with Vault.
-
-    The user must provide bucket_name. If the user never stored anything for
-    a given root/workspace, read_ciphertext raises an error if not found.
+    If no object is found, returns None to indicate no existing state.
     """
 
     def __init__(
@@ -196,24 +181,20 @@ class MinioStorage(StateStorage):
         *,
         vault_client: Optional[AsyncVaultClient],
         minio_client: Optional[Minio],
-    ) -> str:
+    ) -> Optional[str]:
         client = self._minio_client or minio_client
         if not client:
             raise RuntimeError("MinioStorage requires a minio_client.")
 
-        def do_get_and_read() -> str:
+        def do_get_and_read() -> Optional[str]:
             response = None
             try:
                 response = client.get_object(self.bucket_name, self._object_key())
-                data_b: bytes = response.read()  # explicitly typed
+                data_b = response.read()  # type: bytes
                 return data_b.decode("utf-8")
             except Exception as ex:
-                # Check if it means "object doesn't exist"
                 if any(msg in str(ex) for msg in ("NoSuchKey", "NoSuchObject", "404")):
-                    raise RuntimeError(
-                        f"No Terraform state found in MinioStorage for "
-                        f"{self.ref.root}/{self.ref.workspace}."
-                    ) from ex
+                    return None
                 raise
             finally:
                 if response is not None:
@@ -252,8 +233,7 @@ class MinioStorage(StateStorage):
 class K8sSecretStorage(StateStorage):
     """
     Stores ciphertext in a K8s Secret => 'tf-backend-<mapped_root>-<mapped_workspace>',
-    under data['ciphertext']. If transit_key_name is set, ephemeral usage is encrypted.
-    Raises an error if the secret doesn't exist or 'ciphertext' is missing.
+    under data['ciphertext']. If it doesn't exist or lacks "ciphertext", returns None.
     """
 
     def __init__(
@@ -275,12 +255,10 @@ class K8sSecretStorage(StateStorage):
         *,
         vault_client: Optional[AsyncVaultClient],
         minio_client: Optional[Minio],
-    ) -> str:
+    ) -> Optional[str]:
         secret_data = await get_k8s_secret_data(self._secret_name(), self.namespace)
         if not secret_data or "ciphertext" not in secret_data:
-            raise RuntimeError(
-                f"No Terraform state found in K8s Secret for {self.ref.root}/{self.ref.workspace}."
-            )
+            return None
         return secret_data["ciphertext"]
 
     async def write_ciphertext(

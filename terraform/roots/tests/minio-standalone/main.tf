@@ -88,6 +88,12 @@ resource "helm_release" "minio" {
     value = "ClusterIP"
   }
 
+  # Explicitly set container pullPolicy
+  set {
+    name  = "image.pullPolicy"
+    value = "IfNotPresent"
+  }
+
   depends_on = [
     module.linkerd_namespace,
     module.local_storage

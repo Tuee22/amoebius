@@ -162,6 +162,12 @@ resource "helm_release" "vault" {
     value = kubernetes_service_account_v1.vault_service_account.metadata[0].name
   }
 
+  # Explicitly set container pullPolicy
+  set {
+    name  = "image.pullPolicy"
+    value = "IfNotPresent"
+  }
+
   wait = true
 
   depends_on = [
