@@ -23,7 +23,7 @@ variable "amoebius_dir" {
 variable "amoebius_image" {
   description = "Docker image for Amoebius"
   type        = string
-  default     = "tuee22/amoebius:latest"
+  default     = "tuee22/amoebius:0.0.1"
 }
 
 variable "namespace" {
