@@ -11,7 +11,7 @@ variable "namespace" {
 variable "amoebius_image" {
   description = "Docker image for the Amoebius container"
   type        = string
-  default     = "tuee22/amoebius:latest"
+  default     = "tuee22/amoebius:0.0.1"
 }
 
 variable "mount_docker_socket" {

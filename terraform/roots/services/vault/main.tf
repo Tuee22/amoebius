@@ -62,6 +62,21 @@ resource "kubernetes_service_account_v1" "vault_service_account" {
       "meta.helm.sh/release-namespace" = "vault"
     }
   }
+
+  // Insert your secrets here as well
+  image_pull_secret {
+    name = "gcr-secret"
+  }
+  image_pull_secret {
+    name = "awsecr-cred"
+  }
+  image_pull_secret {
+    name = "dpr-secret"
+  }
+  image_pull_secret {
+    name = "acr-secret"
+  }
+  
   automount_service_account_token = true
 }
 

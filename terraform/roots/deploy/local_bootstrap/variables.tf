@@ -78,9 +78,3 @@ variable "dockerhub_password" {
   default     = ""
   description = "DockerHub password/token (leave blank for anonymous)."
 }
-
-variable "registry_creds_chart_version" {
-  type        = string
-  default     = "1.3.0"
-  description = "Which version of the registry-creds Helm chart to install."
-}

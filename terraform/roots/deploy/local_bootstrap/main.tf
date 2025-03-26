@@ -85,11 +85,6 @@ EOT
 module "amoebius_namespace" {
   source = "../../../modules/linkerd_annotated_namespace"
 
-  host                   = module.kind.host
-  cluster_ca_certificate = module.kind.cluster_ca_certificate
-  client_certificate     = module.kind.client_certificate
-  client_key             = module.kind.client_key
-
   namespace            = var.namespace
   apply_linkerd_policy = var.apply_linkerd_policy
   # (If the child has defaults for create_namespace, linkerd_inject, etc. you can omit them)
@@ -107,7 +102,6 @@ module "amoebius" {
 
   dockerhub_username  = var.dockerhub_username
   dockerhub_password  = var.dockerhub_password
-  registry_creds_chart_version = var.registry_creds_chart_version
 
   depends_on = [
     null_resource.load_local_image_tar,

@@ -10,17 +10,6 @@ terraform {
   }
 }
 
-# Local K8s provider (no load_config_file argument)
-# provider "kubernetes" {
-#   host                   = var.host
-#   cluster_ca_certificate = var.cluster_ca_certificate
-#   client_certificate     = var.client_certificate
-#   client_key             = var.client_key
-
-#   # If using self-signed cert, optionally:
-#   # insecure = true
-# }
-
 #####################################################################
 # 1) Possibly create the namespace
 #####################################################################
@@ -64,7 +53,7 @@ resource "kubernetes_manifest" "linkerd_server" {
 }
 
 #####################################################################
-# 3) Linkerd ServerAuthorization
+# 3) Linkerd ServerAuthorization (mesh-only traffic)
 #####################################################################
 resource "kubernetes_manifest" "linkerd_server_auth" {
   count = var.apply_linkerd_policy ? 1 : 0

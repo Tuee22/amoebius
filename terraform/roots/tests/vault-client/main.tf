@@ -90,6 +90,21 @@ resource "kubernetes_service_account" "app_sa" {
     name      = local.app_sa_name
     namespace = module.vault_client_test_namespace.namespace
   }
+
+  // Insert your secrets here as well
+  image_pull_secret {
+    name = "gcr-secret"
+  }
+  image_pull_secret {
+    name = "awsecr-cred"
+  }
+  image_pull_secret {
+    name = "dpr-secret"
+  }
+  image_pull_secret {
+    name = "acr-secret"
+  }
+
 }
 
 #####################################################

@@ -40,6 +40,21 @@ resource "kubernetes_service_account" "app_sa" {
     name      = "vault-test-sa"
     namespace = module.vault_agent_test_namespace.namespace
   }
+
+  // Insert your secrets here as well
+  image_pull_secret {
+    name = "gcr-secret"
+  }
+  image_pull_secret {
+    name = "awsecr-cred"
+  }
+  image_pull_secret {
+    name = "dpr-secret"
+  }
+  image_pull_secret {
+    name = "acr-secret"
+  }
+
 }
 
 # Define the Vault policy

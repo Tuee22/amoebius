@@ -89,6 +89,20 @@ resource "kubernetes_service_account_v1" "amoebius_admin" {
     name      = "amoebius-admin"
     namespace = var.namespace
   }
+
+  // Insert your secrets here as well
+  image_pull_secret {
+    name = "gcr-secret"
+  }
+  image_pull_secret {
+    name = "awsecr-cred"
+  }
+  image_pull_secret {
+    name = "dpr-secret"
+  }
+  image_pull_secret {
+    name = "acr-secret"
+  }
 }
 
 resource "kubernetes_cluster_role_binding_v1" "amoebius_admin_binding" {
