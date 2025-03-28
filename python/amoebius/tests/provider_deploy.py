@@ -7,8 +7,8 @@ All fields are strictly typed; each provider subclass defines __init__ with defa
 so no defaults are needed in the .tf roots.
 
 Usage:
-  ./provider_deployment.py --provider aws --vault-path amoebius/tests/api_keys/aws
-  ./provider_deployment.py --provider azure --vault-path amoebius/tests/api_keys/azure --destroy
+  python -m amoebius.tests.provider_deploy --provider aws --vault-path amoebius/tests/api_keys/aws
+  python -m amoebius.tests.provider_deploy --provider azure --vault-path amoebius/tests/api_keys/azure --destroy
 """
 
 import sys
@@ -24,8 +24,8 @@ from amoebius.models.provider_map import provider_model_map
 
 
 # Define an example Deployment (keys are group names, values are InstanceGroup configs)
-deployment: Deployment = Deployment(
-    __root__={
+example_deployment = Deployment(
+    {
         "control-plane": InstanceGroup(
             category="x86_small",
             count_per_zone=1,
@@ -48,17 +48,17 @@ async def run_deployment(
     Args:
         provider: The cloud provider to use (aws, azure, gcp).
         vault_path: The Vault path containing provider credentials.
-        destroy: Whether to run `terraform destroy`.
+        destroy: Whether to run 'terraform destroy'.
     """
     vs = VaultSettings(vault_role_name="amoebius-admin-role", verify_ssl=False)
 
-    # Get the provider-specific model from the dictionary
+    # Get the provider-specific deploy model from a dict (provider_model_map)
     model_cls = provider_model_map.get(provider)
     if not model_cls:
         raise ValueError(f"Unknown provider: {provider}")
 
-    # Instantiate the provider-specific deploy model
-    cluster_deploy = model_cls(deployment=deployment)
+    # Instantiate the provider-specific deploy model with our example deployment
+    cluster_deploy = model_cls(deployment=example_deployment)
 
     async with AsyncVaultClient(vs) as vc:
         await deploy(

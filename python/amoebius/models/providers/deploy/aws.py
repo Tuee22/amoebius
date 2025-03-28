@@ -7,9 +7,7 @@ Provides cluster deployment logic for the 'aws' provider (e.g. AWSClusterDeploy)
 from typing import List, Dict
 from pydantic import BaseModel
 from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup, Deployment
-
-# Import the credential model from new location
-from amoebius.models.providers.api_keys.aws import AWSApiKey
+from amoebius.models.providers.api_keys.aws import AWSApiKey  # credentials
 
 
 class AWSClusterDeploy(ClusterDeploy):
@@ -52,7 +50,8 @@ class AWSClusterDeploy(ClusterDeploy):
             vault_role_name: The Vault role name to use.
             no_verify_ssl: Whether to disable SSL verification.
         """
-        for ig in deployment.__root__.values():
+        # Fill in default images
+        for ig in deployment.root.values():
             if ig.image is None:
                 if ig.category.startswith("arm_"):
                     ig.image = arm_default_image

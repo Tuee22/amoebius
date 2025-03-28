@@ -8,9 +8,7 @@ from typing import List, Dict
 import json
 from pydantic import BaseModel, Field
 from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup, Deployment
-
-# Import the credential model from new location
-from amoebius.models.providers.api_keys.gcp import GCPServiceAccountKey
+from amoebius.models.providers.api_keys.gcp import GCPServiceAccountKey  # credentials
 
 
 class GCPClusterDeploy(ClusterDeploy):
@@ -49,7 +47,7 @@ class GCPClusterDeploy(ClusterDeploy):
             region: GCP region (e.g. 'us-central1').
             vpc_cidr: The CIDR block for the VPC.
             availability_zones: A list of availability zones in the region.
-            instance_type_map: A mapping from categories (e.g. 'arm_small') to GCP machine types.
+            instance_type_map: A mapping from categories to GCP machine types.
             arm_default_image: Default ARM image for GCP if none is provided.
             x86_default_image: Default x86 image for GCP if none is provided.
             deployment: A Deployment keyed by group name.
@@ -58,7 +56,7 @@ class GCPClusterDeploy(ClusterDeploy):
             no_verify_ssl: Whether to disable SSL verification.
         """
         # Assign default images based on architecture
-        for ig in deployment.__root__.values():
+        for ig in deployment.root.values():
             if ig.image is None:
                 if ig.category.startswith("arm_"):
                     ig.image = arm_default_image

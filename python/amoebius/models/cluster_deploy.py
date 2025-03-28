@@ -7,7 +7,7 @@ field in InstanceGroup, which can be None or a string.
 """
 
 from typing import List, Dict, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel
 
 
 class InstanceGroup(BaseModel):
@@ -24,13 +24,16 @@ class InstanceGroup(BaseModel):
     image: Optional[str] = None
 
 
-class Deployment(BaseModel):
+class Deployment(RootModel[Dict[str, InstanceGroup]]):
     """A mapping from group name to its corresponding InstanceGroup configuration.
 
     The dictionary keys represent logical group names (e.g. 'control-plane', 'workers').
     """
 
-    __root__: Dict[str, InstanceGroup] = Field(default_factory=dict)
+    def __init__(self, __root__: Optional[Dict[str, InstanceGroup]] = None) -> None:
+        if __root__ is None:
+            __root__ = {}
+        super().__init__(__root__)
 
 
 class ClusterDeploy(BaseModel):
@@ -65,6 +68,7 @@ class ClusterDeploy(BaseModel):
             "nvidia_large": "p4d.24xlarge",
         }
     )
+    # Provide a default empty Deployment
     deployment: Deployment = Field(default_factory=Deployment)
     ssh_user: str = "ubuntu"
     vault_role_name: str = "amoebius-admin-role"
