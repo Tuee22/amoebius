@@ -8,22 +8,22 @@ terraform {
 }
 
 locals {
-  # 1. Build a list of instances with stable 'key'
+  # 1) Flatten each group_name => groupDef into multiple instance definitions.
   expanded_instances_list = flatten([
-    for g in var.instance_groups : [
+    for group_name, groupDef in var.deployment : [
       for z in var.availability_zones : [
-        for i in range(g.count_per_zone) : {
-          key        = "${g.name}_z${z}_${i}"
-          group_name = g.name
+        for i in range(groupDef.count_per_zone) : {
+          key        = "${group_name}_z${z}_${i}"
+          group_name = group_name
           zone       = z
-          image      = g.image
-          category   = g.category
+          image      = groupDef.image
+          category   = groupDef.category
         }
       ]
     ]
   ])
 
-  # 2. Convert list => map
+  # 2) Convert the list => map for for_each usage
   expanded_instances_map = {
     for inst in local.expanded_instances_list :
     inst.key => {
@@ -35,6 +35,7 @@ locals {
   }
 }
 
+# 3) One TLS key per instance
 resource "tls_private_key" "all" {
   for_each = local.expanded_instances_map
 
@@ -42,6 +43,7 @@ resource "tls_private_key" "all" {
   rsa_bits  = 4096
 }
 
+# 4) Launch each EC2 instance
 module "compute_single" {
   for_each = local.expanded_instances_map
 
@@ -55,14 +57,14 @@ module "compute_single" {
   zone               = each.value.zone
   workspace          = terraform.workspace
 
-  # zone => subnet ID
-  subnet_id = var.subnet_ids_by_zone[each.value.zone]
+  subnet_id         = var.subnet_ids_by_zone[each.value.zone]
+  security_group_id = var.security_group_id
 
-  security_group_id   = var.security_group_id
   resource_group_name = var.resource_group_name
   location            = var.location
 }
 
+# 5) Secrets for each VM
 module "vm_secret" {
   for_each = module.compute_single
 
@@ -78,6 +80,7 @@ module "vm_secret" {
   vault_prefix = "amoebius/ssh/aws/${terraform.workspace}"
 }
 
+# 6) Collect outputs
 locals {
   compute_results = [
     for k, comp in module.compute_single : {
@@ -90,9 +93,18 @@ locals {
     }
   ]
 
-  instances_by_group = {
-    for g in var.instance_groups : g.name => [
-      for r in local.compute_results : r if r.group_name == g.name
-    ]
+  # 7) Nested map => group_name => instance_key => details
+  instances = {
+    for group_name, _unused in var.deployment :
+    group_name => {
+      for r in local.compute_results :
+      r.key => {
+        name       = r.name
+        private_ip = r.private_ip
+        public_ip  = r.public_ip
+        vault_path = r.vault_path
+      }
+      if r.group_name == group_name
+    }
   }
 }

@@ -1,4 +1,5 @@
-output "instances_by_group" {
-  description = "Map of group_name => list of VM objects (name, private_ip, public_ip, vault_path)."
-  value       = local.instances_by_group
+# 8) Output the final map
+output "instances" {
+  description = "Nested map: group_name => (instance_key => { name, private_ip, public_ip, vault_path })"
+  value       = local.instances
 }

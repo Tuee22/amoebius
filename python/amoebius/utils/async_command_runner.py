@@ -59,7 +59,6 @@ class CommandError(Exception):
         self.return_code = return_code
 
 
-@async_retry()
 async def run_command(
     command: List[str],
     *,

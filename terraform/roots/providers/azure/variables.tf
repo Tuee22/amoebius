@@ -18,15 +18,13 @@ variable "instance_type_map" {
   description = "Map of category => instance type."
 }
 
-# 'image' is mandatory now
-variable "instance_groups" {
-  type = list(object({
-    name           = string
+variable "deployment" {
+  type = map(object({
     category       = string
     count_per_zone = number
     image          = string
   }))
-  description = "All instance group definitions (image is now required)."
+  description = "Map of group_name => instance definitions (image is mandatory)."
 }
 
 variable "ssh_user" {

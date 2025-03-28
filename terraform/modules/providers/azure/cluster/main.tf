@@ -8,35 +8,26 @@ terraform {
 }
 
 locals {
-  ###############################
-  # 1. Build a list of instances
-  ###############################
+  #################################################
+  # 1) Expand each group_name => groupDef into a list
+  #################################################
   expanded_instances_list = flatten([
-    for g in var.instance_groups : [
+    for group_name, groupDef in var.deployment : [
       for z in var.availability_zones : [
-        for i in range(g.count_per_zone) : {
-          key        = "${g.name}_z${z}_${i}"
-          group_name = g.name
+        for i in range(groupDef.count_per_zone) : {
+          key        = "${group_name}_z${z}_${i}"
+          group_name = group_name
           zone       = z
-          image      = g.image
-          category   = g.category
+          image      = groupDef.image
+          category   = groupDef.category
         }
       ]
     ]
   ])
 
-  ###########################################
-  # 2. Convert that list to a map keyed by `key`
-  ###########################################
-  # e.g. {
-  #   "app-servers_z1_0" = {
-  #       group_name = "app-servers"
-  #       zone       = "1"
-  #       image      = "Canonical:..."
-  #       category   = "arm_small"
-  #   },
-  #   ...
-  # }
+  ###################################################
+  # 2) Convert to a map for for_each usage
+  ###################################################
   expanded_instances_map = {
     for inst in local.expanded_instances_list :
     inst.key => {
@@ -48,9 +39,6 @@ locals {
   }
 }
 
-##########################################
-# 3. Create one SSH key per instance
-##########################################
 resource "tls_private_key" "all" {
   for_each = local.expanded_instances_map
 
@@ -58,15 +46,11 @@ resource "tls_private_key" "all" {
   rsa_bits  = 4096
 }
 
-#####################################
-# 4. Create VM modules using for_each
-#####################################
 module "compute_single" {
   for_each = local.expanded_instances_map
 
   source = "/amoebius/terraform/modules/providers/azure/compute"
 
-  # Use each.key in the VM name, plus we store group_name in each.value
   vm_name            = "${terraform.workspace}-${each.value.group_name}-${each.key}"
   public_key_openssh = tls_private_key.all[each.key].public_key_openssh
   ssh_user           = var.ssh_user
@@ -75,18 +59,13 @@ module "compute_single" {
   zone               = each.value.zone
   workspace          = terraform.workspace
 
-  # Simple example: relies on matching index() in availability_zones vs. subnet_ids
-  # (If you want a more robust approach, see notes about maps: var.subnet_ids_by_zone)
-  subnet_id = var.subnet_ids_by_zone[each.value.zone]
+  subnet_id         = var.subnet_ids_by_zone[each.value.zone]
+  security_group_id = var.security_group_id
 
-  security_group_id   = var.security_group_id
   resource_group_name = var.resource_group_name
   location            = var.location
 }
 
-#################################################
-# 5. Create SSH secrets for each VM (Vault, etc.)
-#################################################
 module "vm_secret" {
   for_each = module.compute_single
 
@@ -102,11 +81,7 @@ module "vm_secret" {
   vault_prefix = "amoebius/ssh/azure/${terraform.workspace}"
 }
 
-####################################
-# 6. Gather results for outputs
-####################################
 locals {
-  # Grab data from each compute module and get group_name from local.expanded_instances_map
   compute_results = [
     for k, comp_mod in module.compute_single : {
       key        = k
@@ -118,10 +93,19 @@ locals {
     }
   ]
 
-  # Summarize in a map: group_name => list of instance info
-  instances_by_group = {
-    for g in var.instance_groups : g.name => [
-      for r in local.compute_results : r if r.group_name == g.name
-    ]
+  # 3) Build a nested map: group_name => instance_key => instance data
+  instances = {
+    for group_name, _ in var.deployment :
+    group_name => {
+      for r in local.compute_results :
+      r.key => {
+        name       = r.name
+        private_ip = r.private_ip
+        public_ip  = r.public_ip
+        vault_path = r.vault_path
+      }
+      if r.group_name == group_name
+    }
   }
 }
+

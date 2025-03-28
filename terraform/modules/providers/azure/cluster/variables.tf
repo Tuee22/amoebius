@@ -14,14 +14,20 @@ variable "security_group_id" {
   description = "Network security group ID"
 }
 
-variable "instance_groups" {
-  type = list(object({
-    name           = string
+variable "deployment" {
+  type = map(object({
     category       = string
     count_per_zone = number
     image          = string
   }))
-  default = []
+  default = {}
+  description = <<EOT
+Map of group_name => object({
+  category       = string
+  count_per_zone = number
+  image          = string
+})
+EOT
 }
 
 variable "instance_type_map" {

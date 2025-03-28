@@ -27,7 +27,7 @@ module "cluster" {
 
   availability_zones  = var.availability_zones
   security_group_id   = module.network.security_group_id
-  instance_groups     = var.instance_groups
+  deployment          = var.deployment
   instance_type_map   = var.instance_type_map
   ssh_user            = var.ssh_user
   vault_role_name     = var.vault_role_name

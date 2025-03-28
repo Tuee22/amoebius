@@ -8,20 +8,22 @@ terraform {
 }
 
 locals {
+  # 1) Flatten each group_name => groupDef into multiple instances
   expanded_instances_list = flatten([
-    for g in var.instance_groups : [
+    for group_name, def in var.deployment : [
       for z in var.availability_zones : [
-        for i in range(g.count_per_zone) : {
-          key        = "${g.name}_z${z}_${i}"
-          group_name = g.name
+        for i in range(def.count_per_zone) : {
+          key        = "${group_name}_z${z}_${i}"
+          group_name = group_name
           zone       = z
-          image      = g.image
-          category   = g.category
+          image      = def.image
+          category   = def.category
         }
       ]
     ]
   ])
 
+  # 2) Convert to a map for for_each usage
   expanded_instances_map = {
     for inst in local.expanded_instances_list :
     inst.key => {
@@ -45,7 +47,7 @@ module "compute_single" {
 
   source = "/amoebius/terraform/modules/providers/gcp/compute"
 
-  vm_name = lower(replace("${terraform.workspace}-${each.value.group_name}-${each.key}", "_", "-"))
+  vm_name            = lower(replace("${terraform.workspace}-${each.value.group_name}-${each.key}", "_", "-"))
   public_key_openssh = tls_private_key.all[each.key].public_key_openssh
   ssh_user           = var.ssh_user
   image              = each.value.image
@@ -53,7 +55,6 @@ module "compute_single" {
   zone               = each.value.zone
   workspace          = terraform.workspace
 
-  # robust approach: zone => subnet ID
   subnet_id         = var.subnet_ids_by_zone[each.value.zone]
   security_group_id = var.security_group_id
 
@@ -88,9 +89,18 @@ locals {
     }
   ]
 
-  instances_by_group = {
-    for g in var.instance_groups : g.name => [
-      for r in local.compute_results : r if r.group_name == g.name
-    ]
+  # 3) Nested map: group_name => instance_key => details
+  instances = {
+    for group_name, _unused in var.deployment :
+    group_name => {
+      for r in local.compute_results :
+      r.key => {
+        name       = r.name
+        private_ip = r.private_ip
+        public_ip  = r.public_ip
+        vault_path = r.vault_path
+      }
+      if r.group_name == group_name
+    }
   }
 }

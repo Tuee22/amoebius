@@ -18,20 +18,23 @@ variable "instance_type_map" {
   description = "Map of category => instance type."
 }
 
-# 'image' is now mandatory
-variable "instance_groups" {
-  type = list(object({
-    name           = string
+/*
+  'deployment' is now a map, where the key is the group name (e.g. "control-plane"),
+  and the value is an object with {category, count_per_zone, image}.
+*/
+variable "deployment" {
+  type = map(object({
     category       = string
     count_per_zone = number
     image          = string
   }))
-  description = "All instance group definitions (image is now required)."
+  description = "Map of group_name => instance definitions. (image is now required)."
 }
 
 variable "ssh_user" {
   type        = string
   description = "SSH username."
+  default     = "ubuntu"
 }
 
 variable "vault_role_name" {

@@ -504,7 +504,7 @@ async def list_minio_backends(
                 result.append(parsed)
         return result
     except Exception:
-        return []
+        raise
 
 
 async def delete_empty_minio_backends(

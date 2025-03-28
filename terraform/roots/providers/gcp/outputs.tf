@@ -1,5 +1,4 @@
-output "instances_by_group" {
-  description = "Map of group_name => list of VM objects (name, private_ip, public_ip, vault_path)."
-  value       = module.cluster.instances_by_group
+output "instances" {
+  description = "Nested map: group_name => (instance_key => VM info)."
+  value       = module.cluster.instances
 }
-
