@@ -14,34 +14,42 @@ Usage:
 import sys
 import argparse
 import asyncio
-from typing import List
+from typing import Dict
 
 from amoebius.deployment.provider_deploy import deploy, ProviderName
 from amoebius.models.vault import VaultSettings
 from amoebius.secrets.vault_client import AsyncVaultClient
-from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup
+from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup, Deployment
 from amoebius.models.provider_map import provider_model_map
 
-# Define a list of InstanceGroup objects
-instance_groups: List[InstanceGroup] = [
-    InstanceGroup(
-        name="web-servers",
-        category="x86_small",
-        count_per_zone=1,
-        image=None,  # Use default x86 image
-    ),
-    InstanceGroup(
-        name="app-servers",
-        category="arm_small",
-        count_per_zone=1,
-        image=None,  # Use default arm image
-    ),
-]
+
+# Define an example Deployment (keys are group names, values are InstanceGroup configs)
+deployment: Deployment = Deployment(
+    __root__={
+        "control-plane": InstanceGroup(
+            category="x86_small",
+            count_per_zone=1,
+            image=None,  # Use default x86 image
+        ),
+        "workers": InstanceGroup(
+            category="arm_small",
+            count_per_zone=1,
+            image=None,  # Use default ARM image
+        ),
+    }
+)
 
 
 async def run_deployment(
     provider: ProviderName, vault_path: str, destroy: bool
 ) -> None:
+    """Run the deployment (or destruction) for the specified provider.
+
+    Args:
+        provider: The cloud provider to use (aws, azure, gcp).
+        vault_path: The Vault path containing provider credentials.
+        destroy: Whether to run `terraform destroy`.
+    """
     vs = VaultSettings(vault_role_name="amoebius-admin-role", verify_ssl=False)
 
     # Get the provider-specific model from the dictionary
@@ -49,7 +57,8 @@ async def run_deployment(
     if not model_cls:
         raise ValueError(f"Unknown provider: {provider}")
 
-    cluster_deploy = model_cls(instance_groups=instance_groups)
+    # Instantiate the provider-specific deploy model
+    cluster_deploy = model_cls(deployment=deployment)
 
     async with AsyncVaultClient(vs) as vc:
         await deploy(
@@ -63,6 +72,7 @@ async def run_deployment(
 
 
 def main() -> int:
+    """Entry point for the simple test script."""
     parser = argparse.ArgumentParser(
         description="Simple test script for cluster deploy with Mypy-friendly code."
     )

@@ -60,7 +60,7 @@ async def deploy(
         provider: The cloud provider (aws, azure, gcp).
         vault_client: Vault client for retrieving secrets / Minio credentials.
         vault_path: Path in Vault where provider credentials are stored.
-        cluster_deploy: Model with region, instance_groups, etc.
+        cluster_deploy: Model with region, deployment, etc.
         workspace: Terraform workspace name.
         destroy: If True => runs 'destroy_terraform'; else init+apply.
 

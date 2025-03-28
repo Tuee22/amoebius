@@ -7,7 +7,7 @@ Provides cluster deployment logic for the 'gcp' provider (e.g. GCPClusterDeploy)
 from typing import List, Dict
 import json
 from pydantic import BaseModel, Field
-from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup
+from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup, Deployment
 
 # Import the credential model from new location
 from amoebius.models.providers.api_keys.gcp import GCPServiceAccountKey
@@ -38,13 +38,27 @@ class GCPClusterDeploy(ClusterDeploy):
         },
         arm_default_image: str = "projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts-arm64",
         x86_default_image: str = "projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts",
-        instance_groups: List[InstanceGroup] = [],
+        deployment: Deployment = Deployment(),
         ssh_user: str = "ubuntu",
         vault_role_name: str = "amoebius-admin-role",
         no_verify_ssl: bool = True,
     ):
+        """Initialize GCP-specific deployment parameters.
+
+        Args:
+            region: GCP region (e.g. 'us-central1').
+            vpc_cidr: The CIDR block for the VPC.
+            availability_zones: A list of availability zones in the region.
+            instance_type_map: A mapping from categories (e.g. 'arm_small') to GCP machine types.
+            arm_default_image: Default ARM image for GCP if none is provided.
+            x86_default_image: Default x86 image for GCP if none is provided.
+            deployment: A Deployment keyed by group name.
+            ssh_user: SSH username on GCP VMs.
+            vault_role_name: Vault role name.
+            no_verify_ssl: Whether to disable SSL verification.
+        """
         # Assign default images based on architecture
-        for ig in instance_groups:
+        for ig in deployment.__root__.values():
             if ig.image is None:
                 if ig.category.startswith("arm_"):
                     ig.image = arm_default_image
@@ -56,7 +70,7 @@ class GCPClusterDeploy(ClusterDeploy):
             vpc_cidr=vpc_cidr,
             availability_zones=availability_zones,
             instance_type_map=instance_type_map,
-            instance_groups=instance_groups,
+            deployment=deployment,
             ssh_user=ssh_user,
             vault_role_name=vault_role_name,
             no_verify_ssl=no_verify_ssl,

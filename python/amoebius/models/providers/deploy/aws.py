@@ -6,7 +6,7 @@ Provides cluster deployment logic for the 'aws' provider (e.g. AWSClusterDeploy)
 
 from typing import List, Dict
 from pydantic import BaseModel
-from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup
+from amoebius.models.cluster_deploy import ClusterDeploy, InstanceGroup, Deployment
 
 # Import the credential model from new location
 from amoebius.models.providers.api_keys.aws import AWSApiKey
@@ -33,13 +33,26 @@ class AWSClusterDeploy(ClusterDeploy):
         },
         arm_default_image: str = "ami-0d11a661ebb283897",  # Ubuntu 22.04 LTS ARM64
         x86_default_image: str = "ami-0181d6b00c4160daf",  # Ubuntu 22.04 LTS x86_64
-        instance_groups: List[InstanceGroup] = [],
+        deployment: Deployment = Deployment(),
         ssh_user: str = "ubuntu",
         vault_role_name: str = "amoebius-admin-role",
         no_verify_ssl: bool = True,
     ):
-        # If an InstanceGroup has image=None, fill with either ARM or x86 default:
-        for ig in instance_groups:
+        """Initialize AWS-specific deployment parameters.
+
+        Args:
+            region: AWS region.
+            vpc_cidr: CIDR block for the VPC.
+            availability_zones: Availability zones in the given region.
+            instance_type_map: Maps categories (e.g. 'arm_small') to AWS instance types.
+            arm_default_image: Default ARM image if an instance group's image is None.
+            x86_default_image: Default x86 image if an instance group's image is None.
+            deployment: A Deployment keyed by group name.
+            ssh_user: The SSH user for AWS instances.
+            vault_role_name: The Vault role name to use.
+            no_verify_ssl: Whether to disable SSL verification.
+        """
+        for ig in deployment.__root__.values():
             if ig.image is None:
                 if ig.category.startswith("arm_"):
                     ig.image = arm_default_image
@@ -51,7 +64,7 @@ class AWSClusterDeploy(ClusterDeploy):
             vpc_cidr=vpc_cidr,
             availability_zones=availability_zones,
             instance_type_map=instance_type_map,
-            instance_groups=instance_groups,
+            deployment=deployment,
             ssh_user=ssh_user,
             vault_role_name=vault_role_name,
             no_verify_ssl=no_verify_ssl,
