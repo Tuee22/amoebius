@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.0"
+      version = "~> 4.25.0"
     }
   }
 }
@@ -40,4 +40,7 @@ module "cluster" {
 
   resource_group_name = azurerm_resource_group.main.name
   location            = var.region
+
+  # Missing required child module param:
+  workspace = terraform.workspace
 }

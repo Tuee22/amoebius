@@ -1,29 +1,29 @@
 terraform {
   required_providers {
     tls = {
-      source  = "hashicorp/tls"
+      source = "hashicorp/tls"
       version = "~> 4.0"
     }
   }
 }
 
 locals {
-  # 1) Flatten each group_name => groupDef into multiple instance definitions.
+  # 1) Flatten
   expanded_instances_list = flatten([
     for group_name, groupDef in var.deployment : [
       for z in var.availability_zones : [
         for i in range(groupDef.count_per_zone) : {
-          key        = "${group_name}_z${z}_${i}"
-          group_name = group_name
-          zone       = z
-          image      = groupDef.image
+          key        = "${group_name}_${z}_${i}",
+          group_name = group_name,
+          zone       = z,
+          image      = groupDef.image,
           category   = groupDef.category
         }
       ]
     ]
   ])
 
-  # 2) Convert the list => map for for_each usage
+  # 2) Map from key => { group_name, zone, ... }
   expanded_instances_map = {
     for inst in local.expanded_instances_list :
     inst.key => {
@@ -33,9 +33,41 @@ locals {
       category   = inst.category
     }
   }
+
+  # Step A: Convert underscores to hyphens + lowercase
+  pre_names = {
+    for k, v in local.expanded_instances_map :
+    k => lower(replace("${v.group_name}-${k}", "_", "-"))
+  }
+
+  # Step B: Keep only [a-z0-9-]
+  only_valid_chars = {
+    for k, nm in local.pre_names :
+    k => join("", regexall("[a-z0-9-]", nm))
+  }
+
+  # Step C: Ensure starts with letter
+  ensure_letter_prefix = {
+    for k, nm in local.only_valid_chars :
+    k => length(regexall("^[a-z]", nm)) > 0 ? nm : "x${nm}"
+  }
+
+  # Step D: Truncate to 63 chars
+  truncated = {
+    for k, nm in local.ensure_letter_prefix :
+    k => substr(nm, 0, 63)
+  }
+
+  # Step E: Remove single trailing hyphen if present
+  no_trailing_hyphen = {
+    for k, nm in local.truncated :
+    k => length(regexall("-$", nm)) == 0 ? nm : substr(nm, 0, length(nm) - 1)
+  }
+
+  # Final map => validated names
+  validated_names = local.no_trailing_hyphen
 }
 
-# 3) One TLS key per instance
 resource "tls_private_key" "all" {
   for_each = local.expanded_instances_map
 
@@ -43,19 +75,18 @@ resource "tls_private_key" "all" {
   rsa_bits  = 4096
 }
 
-# 4) Launch each EC2 instance
 module "compute_single" {
   for_each = local.expanded_instances_map
 
   source = "/amoebius/terraform/modules/providers/aws/compute"
 
-  vm_name            = "${terraform.workspace}-${each.value.group_name}-${each.key}"
+  vm_name            = local.validated_names[each.key]
   public_key_openssh = tls_private_key.all[each.key].public_key_openssh
   ssh_user           = var.ssh_user
   image              = each.value.image
   instance_type      = lookup(var.instance_type_map, each.value.category, "UNDEFINED_TYPE")
   zone               = each.value.zone
-  workspace          = terraform.workspace
+  workspace          = var.workspace
 
   subnet_id         = var.subnet_ids_by_zone[each.value.zone]
   security_group_id = var.security_group_id
@@ -64,7 +95,6 @@ module "compute_single" {
   location            = var.location
 }
 
-# 5) Secrets for each VM
 module "vm_secret" {
   for_each = module.compute_single
 
@@ -77,10 +107,9 @@ module "vm_secret" {
   vault_role_name = var.vault_role_name
   no_verify_ssl   = var.no_verify_ssl
 
-  vault_prefix = "amoebius/ssh/aws/${terraform.workspace}"
+  vault_prefix = "amoebius/ssh/aws/${var.workspace}"
 }
 
-# 6) Collect outputs
 locals {
   compute_results = [
     for k, comp in module.compute_single : {
@@ -93,7 +122,6 @@ locals {
     }
   ]
 
-  # 7) Nested map => group_name => instance_key => details
   instances = {
     for group_name, _unused in var.deployment :
     group_name => {

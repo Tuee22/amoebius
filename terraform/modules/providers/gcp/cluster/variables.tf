@@ -59,3 +59,8 @@ variable "location" {
   type    = string
   default = ""
 }
+
+variable "workspace" {
+  type        = string
+  description = "Terraform workspace name, passed from root."
+}

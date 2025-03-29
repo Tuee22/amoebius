@@ -35,4 +35,7 @@ module "cluster" {
 
   resource_group_name = ""
   location            = var.region
+
+  # Missing required child module param:
+  workspace = terraform.workspace
 }

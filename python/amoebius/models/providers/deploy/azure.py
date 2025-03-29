@@ -23,10 +23,10 @@ class AzureClusterDeploy(ClusterDeploy):
             "arm_small": "Standard_D2ps_v5",
             "arm_medium": "Standard_D4ps_v5",
             "arm_large": "Standard_D8ps_v5",
-            # x86-based
-            "x86_small": "Standard_D2ads_v6",
-            "x86_medium": "Standard_D4ads_v6",
-            "x86_large": "Standard_D8ads_v6",
+            # x86-based (currently using ARM since it's hard to get a x86 small instance)
+            "x86_small": "Standard_D2ps_v5",
+            "x86_medium": "Standard_D4ps_v5",
+            "x86_large": "Standard_D8ps_v5",
             # NVIDIA GPU
             "nvidia_small": "Standard_NC4as_T4_v3",
             "nvidia_medium": "Standard_NC6s_v3",

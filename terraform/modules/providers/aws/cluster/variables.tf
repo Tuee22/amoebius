@@ -21,7 +21,7 @@ variable "deployment" {
   }))
   default = {}
   description = <<EOT
-Dictionary of group_name => object({
+Map of group_name => object({
   category       = string
   count_per_zone = number
   image          = string
@@ -57,4 +57,9 @@ variable "resource_group_name" {
 variable "location" {
   type    = string
   default = ""
+}
+
+variable "workspace" {
+  type        = string
+  description = "Terraform workspace name, passed from root."
 }
