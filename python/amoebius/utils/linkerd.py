@@ -142,7 +142,7 @@ async def install_linkerd() -> None:
     """
 
     # 1) Make sure Gateway API CRDs are installed. If you'd rather have Linkerd manage them,
-    #    remove or comment out this function call. 
+    #    remove or comment out this function call.
     await install_gateway_api_crds()
 
     # 2) Check if 'linkerd-config' exists
@@ -155,7 +155,9 @@ async def install_linkerd() -> None:
             print("Linkerd CRDs installed successfully.")
 
             control_plane_yaml = await run_command(["linkerd", "install"])
-            await run_command(["kubectl", "apply", "-f", "-"], input_data=control_plane_yaml)
+            await run_command(
+                ["kubectl", "apply", "-f", "-"], input_data=control_plane_yaml
+            )
             print("Linkerd control plane installed successfully.")
         except CommandError as e:
             print(
@@ -176,7 +178,9 @@ async def install_linkerd() -> None:
                 await run_command(["kubectl", "apply", "-f", "-"], input_data=crds_yaml)
 
                 control_plane_yaml = await run_command(["linkerd", "install"])
-                await run_command(["kubectl", "apply", "-f", "-"], input_data=control_plane_yaml)
+                await run_command(
+                    ["kubectl", "apply", "-f", "-"], input_data=control_plane_yaml
+                )
                 print("Linkerd control plane re-installed successfully.")
             except CommandError as e:
                 print(f"Error during re-install: {e}")
@@ -202,7 +206,9 @@ async def install_linkerd() -> None:
     if not sidecar_present:
         print("Sidecar missing. Deleting 'amoebius-0' to force injection restart.")
         try:
-            await run_command(["kubectl", "delete", "pod", "amoebius-0", "-n", "amoebius"])
+            await run_command(
+                ["kubectl", "delete", "pod", "amoebius-0", "-n", "amoebius"]
+            )
             print("'amoebius-0' deleted; new pod will appear with the sidecar.")
             print("Waiting forever to keep container alive...")
             while True:
