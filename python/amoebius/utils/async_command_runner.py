@@ -72,8 +72,6 @@ async def run_command(
     suppress_env_vars: Optional[List[str]] = None,
     error_parser: Optional[Callable[[str], Optional[str]]] = None,
 ) -> str:
-    # test code
-    sensitive = False
     """
     Executes a local command in a subprocess, asynchronously, with optional retries
     and an optional error parser callback.

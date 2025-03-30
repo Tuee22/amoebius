@@ -36,7 +36,6 @@ module "kind" {
 ###########################################
 # 2) (Optional) KUBERNETES PROVIDER in Root
 ###########################################
-# (Used for other resources if needed, not relevant to child modules that define their own.)
 provider "kubernetes" {
   host                   = module.kind.host
   cluster_ca_certificate = module.kind.cluster_ca_certificate
@@ -81,13 +80,11 @@ EOT
 ###########################################
 # 6) CREATE NAMESPACE (LINKERD OPTIONAL) 
 ###########################################
-# We pass the cluster credentials for local provider usage in child
 module "amoebius_namespace" {
   source = "../../../modules/linkerd_annotated_namespace"
 
   namespace            = var.namespace
   apply_linkerd_policy = var.apply_linkerd_policy
-  # (If the child has defaults for create_namespace, linkerd_inject, etc. you can omit them)
 }
 
 ###########################################

@@ -12,3 +12,8 @@ variable "availability_zones" {
   type        = list(string)
   default     = []
 }
+
+variable "resource_group_name" {
+  type        = string
+  description = "Existing RG name to place the VNet and subnets in."
+}
