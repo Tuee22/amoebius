@@ -4,6 +4,8 @@ amoebius/utils/linkerd.py
 Provides helper functions for installing/uninstalling Linkerd in a Kubernetes cluster,
 verifying its health, and ensuring that a sidecar is present on certain pods. Also
 runs minimal Terraform steps to annotate the 'amoebius' deployment for injection.
+
+Updated to handle Gateway API CRDs explicitly before installing Linkerd.
 """
 
 from __future__ import annotations
@@ -15,6 +17,11 @@ from typing import Any
 from amoebius.utils.async_command_runner import run_command, CommandError
 from amoebius.utils.terraform.commands import init_terraform, apply_terraform
 from amoebius.models.terraform import TerraformBackendRef
+
+
+# Official Gateway API CRD manifest for reference; choose the version that Linkerd expects
+# (This URL may change; keep it updated with the recommended Gateway API CRD release.)
+GATEWAY_API_CRD_URL = "https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.0/standard-install.yaml"
 
 
 async def configmap_exists(name: str, namespace: str) -> bool:
@@ -41,7 +48,7 @@ async def linkerd_check_ok() -> bool:
         bool: True if Linkerd is confirmed healthy, otherwise False.
     """
     try:
-        # Wait for the control plane's deployments to become Available/Ready
+        # Wait for the control plane deployments to become Available/Ready
         await run_command(
             [
                 "kubectl",
@@ -111,16 +118,34 @@ async def uninstall_linkerd() -> None:
         )
 
 
+async def install_gateway_api_crds() -> None:
+    """Install Gateway API CRDs, if they are not already present."""
+    print("Applying Gateway API CRDs from official source...")
+    try:
+        await run_command(["kubectl", "apply", "-f", GATEWAY_API_CRD_URL])
+        print("Gateway API CRDs applied successfully.")
+    except CommandError as e:
+        print(f"Error applying Gateway API CRDs: {e}")
+        raise
+
+
 async def install_linkerd() -> None:
     """Install or re-install Linkerd in an idempotent manner, verifying readiness.
 
     Steps:
-      1) Check if 'linkerd-config' exists. If not, do a fresh install.
-      2) If it does exist, run 'linkerd check'. If fail => uninstall + reinstall.
-      3) Wait for readiness via linkerd_check_ok().
-      4) Annotate 'amoebius' with linkerd injection if needed.
-      5) Possibly remove the 'amoebius-0' pod to force injection if sidecar is absent.
+      1) Install Gateway API CRDs (if not present) or skip if Linkerd manages them entirely.
+      2) Check if 'linkerd-config' exists. If not, do a fresh install.
+      3) If it does exist, run 'linkerd check'. If fail => uninstall + reinstall.
+      4) Wait for readiness via linkerd_check_ok().
+      5) Annotate 'amoebius' with linkerd injection if needed.
+      6) Possibly remove the 'amoebius-0' pod to force injection if sidecar is absent.
     """
+
+    # 1) Make sure Gateway API CRDs are installed. If you'd rather have Linkerd manage them,
+    #    remove or comment out this function call. 
+    await install_gateway_api_crds()
+
+    # 2) Check if 'linkerd-config' exists
     cm_exists = await configmap_exists("linkerd-config", "linkerd")
     if not cm_exists:
         print("No 'linkerd-config' found. Doing a fresh Linkerd install...")
@@ -130,9 +155,7 @@ async def install_linkerd() -> None:
             print("Linkerd CRDs installed successfully.")
 
             control_plane_yaml = await run_command(["linkerd", "install"])
-            await run_command(
-                ["kubectl", "apply", "-f", "-"], input_data=control_plane_yaml
-            )
+            await run_command(["kubectl", "apply", "-f", "-"], input_data=control_plane_yaml)
             print("Linkerd control plane installed successfully.")
         except CommandError as e:
             print(
@@ -153,9 +176,7 @@ async def install_linkerd() -> None:
                 await run_command(["kubectl", "apply", "-f", "-"], input_data=crds_yaml)
 
                 control_plane_yaml = await run_command(["linkerd", "install"])
-                await run_command(
-                    ["kubectl", "apply", "-f", "-"], input_data=control_plane_yaml
-                )
+                await run_command(["kubectl", "apply", "-f", "-"], input_data=control_plane_yaml)
                 print("Linkerd control plane re-installed successfully.")
             except CommandError as e:
                 print(f"Error during re-install: {e}")
@@ -163,26 +184,25 @@ async def install_linkerd() -> None:
         else:
             print("Linkerd is healthy, skipping re-install.")
 
+    # 4) Wait for readiness
     print("Waiting for Linkerd to become ready...")
     is_ok = await linkerd_check_ok()
-    assert is_ok, "Error: linkerd health check failed"
+    assert is_ok, "Error: Linkerd health check failed"
     print("Linkerd is ready and healthy.")
 
+    # 5) Annotate 'amoebius' for auto-injection
     print("Adding linkerd annotation to amoebius...")
-
-    # We annotate 'amoebius' with linkerd injection using a Terraform reference
     ref = TerraformBackendRef(root="utils/annotate_amoebius_linkerd")
     await init_terraform(ref=ref)
     await apply_terraform(ref=ref)
 
+    # 6) Check if the sidecar is attached; if not, delete the pod to force injection
     print("Checking if 'amoebius-0' has a 'linkerd-proxy' container...")
     sidecar_present = await linkerd_sidecar_attached("amoebius", "amoebius-0")
     if not sidecar_present:
         print("Sidecar missing. Deleting 'amoebius-0' to force injection restart.")
         try:
-            await run_command(
-                ["kubectl", "delete", "pod", "amoebius-0", "-n", "amoebius"]
-            )
+            await run_command(["kubectl", "delete", "pod", "amoebius-0", "-n", "amoebius"])
             print("'amoebius-0' deleted; new pod will appear with the sidecar.")
             print("Waiting forever to keep container alive...")
             while True:
