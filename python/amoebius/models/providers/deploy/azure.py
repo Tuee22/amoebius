@@ -34,7 +34,7 @@ class AzureClusterDeploy(ClusterDeploy):
         },
         arm_default_image: str = "Canonical:0001-com-ubuntu-server-jammy:22_04-lts-arm64:latest",
         x86_default_image: str = "Canonical:0001-com-ubuntu-server-jammy:22_04-lts-arm64:latest",
-        #x86_default_image: str = "Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest",
+        # x86_default_image: str = "Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest",
         deployment: Deployment = Deployment(),
         ssh_user: str = "azureuser",
         vault_role_name: str = "amoebius-admin-role",
