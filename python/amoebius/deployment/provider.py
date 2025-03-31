@@ -1,5 +1,5 @@
 """
-filename: amoebius/deployment/provider_deploy.py
+filename: amoebius/deployment/provider.py
 
 Defines the logic for deploying/destroying infrastructure for each cloud provider.
 Refactored to use MinioStorage for Terraform state, now requiring a Minio client
