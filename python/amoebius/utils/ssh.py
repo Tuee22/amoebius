@@ -1,5 +1,5 @@
 """
-amoebius/utils/ssh_runner.py
+amoebius/utils/ssh.py
 
 Provides high-level functions for SSH-related operations, leveraging
 ephemeral_manager from amoebius/utils/ephemeral_file.py to manage ephemeral

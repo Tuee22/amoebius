@@ -50,7 +50,7 @@ from pydantic import ValidationError
 
 from amoebius.models.ssh import SSHConfig, SSHVaultData
 from amoebius.models.vault import VaultSettings
-from amoebius.utils.ssh_runner import ssh_get_server_key
+from amoebius.utils.ssh import ssh_get_server_key
 from amoebius.utils.async_retry import async_retry
 from amoebius.secrets.vault_client import AsyncVaultClient
 
