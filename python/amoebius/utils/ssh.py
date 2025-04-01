@@ -1,12 +1,16 @@
 """
 amoebius/utils/ssh.py
 
-Provides high-level ephemeral SSH-related operations, with no direct Vault usage.
-We keep:
-  - ssh_get_server_key(...) for TOFU accept-new
-  - run_ssh_command(...) for strict SSH
-  - run_kubectl(...) for local kubectl commands
-  - run_ssh_kubectl_command(...) for remote kubectl via SSH
+Provides high-level functions for SSH-related operations, leveraging
+ephemeral_manager from amoebius/utils/ephemeral_file.py to manage ephemeral
+known_hosts and private keys in /dev/shm. No manual tempfile or cleanup is needed,
+and no direct Vault usage occurs here.
+
+We use validate_type from amoebius.models.validator to enforce that
+ephemeral_manager yields a plain str (single-file mode).
+
+Additionally, file I/O has been converted to asynchronous operations via aiofiles,
+except for os.chmod() calls, which remain synchronous to avoid mypy errors.
 """
 
 from __future__ import annotations
@@ -35,8 +39,26 @@ async def ssh_get_server_key(
     retry_delay: float = 1.0,
 ) -> List[str]:
     """
-    Minimal SSH handshake with StrictHostKeyChecking=accept-new to retrieve
-    the server's host key lines (TOFU). Ephemeral known_hosts + ephemeral private key.
+    Perform a minimal SSH handshake with StrictHostKeyChecking=accept-new to retrieve
+    the server's host key lines (TOFU).
+
+    Creates two ephemeral single-file contexts in /dev/shm:
+      1) known_hosts (initially empty)
+      2) private key
+
+    After writing the private key and performing the handshake, we read the ephemeral
+    known_hosts file to extract the server key lines.
+
+    Args:
+        cfg: SSHConfig with user, hostname, port, private_key. host_keys is not needed here.
+        retries: Number of times to retry on failure. Defaults to 3.
+        retry_delay: Delay (seconds) between retries. Defaults to 1.0.
+
+    Returns:
+        A list of lines from the ephemeral known_hosts file (the server's key lines).
+
+    Raises:
+        CommandError: If handshake fails or if no keys are discovered.
     """
     async with ephemeral_manager(
         single_file_name="ssh_known_hosts", prefix="sshkh-"
@@ -52,7 +74,7 @@ async def ssh_get_server_key(
             async with aiofiles.open(pk_path, "wb") as fpk:
                 await fpk.write(cfg.private_key.encode("utf-8"))
 
-            # Protect private key (sync call to avoid mypy issues)
+            # Protect private key (sync call to avoid mypy errors)
             os.chmod(pk_path, 0o600)
 
             ssh_cmd = [
@@ -80,8 +102,8 @@ async def ssh_get_server_key(
                 retry_delay=retry_delay,
             )
 
-            # read ephemeral known_hosts
-            lines = []
+            # Read known_hosts (async)
+            lines: List[str] = []
             if await aiofiles.ospath.exists(kh_path):
                 async with aiofiles.open(kh_path, "r", encoding="utf-8") as fkh:
                     all_lines = await fkh.readlines()
@@ -106,7 +128,24 @@ async def run_ssh_command(
 ) -> str:
     """
     Run an SSH command in strict host-key-checking mode, requiring host_keys in ssh_config.
-    Uses ephemeral known_hosts + ephemeral private key.
+
+    Creates two ephemeral single-file contexts for:
+      1) known_hosts (populated from ssh_config.host_keys)
+      2) private key
+
+    Args:
+        ssh_config: Must have user, hostname, port, private_key, and non-empty host_keys.
+        remote_command: The command to run on the remote host.
+        sensitive: If True, command details won't be shown in logs on failure.
+        env: Optional dict of env vars to prefix onto the remote command as "env VAR=VAL".
+        retries: Number of times to retry on failure.
+        retry_delay: Delay between retries.
+
+    Returns:
+        The captured stdout from the SSH command.
+
+    Raises:
+        CommandError: If host_keys is empty, or if the command fails repeatedly.
     """
     if not ssh_config.host_keys:
         raise CommandError("run_ssh_command requires ssh_config.host_keys (strict).")
@@ -121,16 +160,15 @@ async def run_ssh_command(
         ) as pk_path_union:
             pk_path = validate_type(pk_path_union, str)
 
-            # Write known_hosts lines (async)
+            # Write known_hosts lines
             async with aiofiles.open(kh_path, "w", encoding="utf-8") as fkh:
                 for line in ssh_config.host_keys:
                     await fkh.write(line + "\n")
 
-            # Write private key (async)
+            # Write private key
             async with aiofiles.open(pk_path, "wb") as fpk:
                 await fpk.write(ssh_config.private_key.encode("utf-8"))
 
-            # Protect private key
             os.chmod(pk_path, 0o600)
 
             ssh_cmd = [
@@ -174,6 +212,8 @@ async def run_kubectl(
 ) -> str:
     """
     Execute a local 'kubectl exec' command.
+
+    This does not involve SSH. It's a local invocation of kubectl.
     """
     args = kube_cmd.build_kubectl_args()
     return await run_command(
@@ -194,6 +234,8 @@ async def run_ssh_kubectl_command(
 ) -> str:
     """
     Run a 'kubectl exec' command on a remote host via SSH in strict mode.
+
+    We first build the normal 'kubectl exec' arguments, then pass them to run_ssh_command.
     """
     if not ssh_config.host_keys:
         raise CommandError("Cannot do run_ssh_kubectl_command: missing host_keys")
@@ -210,13 +252,10 @@ async def run_ssh_kubectl_command(
 
 def main() -> None:
     """
-    Demonstration for ephemeral SSH usage:
+    Demonstration:
       1) TOFU => retrieve server key lines
       2) Strict => run 'whoami'
     """
-    import argparse, asyncio, sys
-    from pathlib import Path
-
     parser = argparse.ArgumentParser(
         description="Demonstrate ephemeral SSH usage: TOFU -> Strict"
     )
@@ -229,7 +268,7 @@ def main() -> None:
     async def _demo() -> None:
         key_txt = Path(args.key_file).read_text()
 
-        # Step 1: No known keys => get them via accept-new
+        # Step 1: No known keys => TOFU
         tofu_cfg = SSHConfig(
             user=args.user,
             hostname=args.hostname,

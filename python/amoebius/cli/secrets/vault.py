@@ -228,8 +228,6 @@ def _build_vault_settings(args: argparse.Namespace) -> VaultSettings:
         direct_vault_token=args.vault_token,
         token_path=args.vault_token_path,
         verify_ssl=not args.no_verify_ssl,
-        renew_threshold_seconds=60.0,
-        check_interval_seconds=30.0,
     )
 
 
