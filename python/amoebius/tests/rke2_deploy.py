@@ -3,9 +3,11 @@
 amoebius/tests/rke2_deploy.py
 
 Simple test script that reads 'instances' from Terraform output, flattens them,
-and calls deploy_rke2_cluster. We do not print final RKE2 creds because 
-the function now stores them in Vault instead of returning them.
+and calls deploy_rke2_cluster. We do not print final RKE2Credentials because 
+the function now stores them in Vault, not returning them.
 """
+
+from __future__ import annotations
 
 import sys
 import argparse
@@ -82,8 +84,8 @@ async def run_rke2_deploy_test(
     Main async test function:
       1) read TF state
       2) flatten 'instances'
-      3) call deploy_rke2_cluster with a multi-CP approach
-      4) no direct printing of final creds, as they're stored in Vault
+      3) call deploy_rke2_cluster with multi-CP
+      4) final RKE2Credentials are stored in Vault at credentials_vault_path
     """
     ref = TerraformBackendRef(root=root, workspace=workspace)
     tfstate = await read_terraform_state(ref=ref)
@@ -110,6 +112,8 @@ async def run_rke2_deploy_test(
         vault_role_name=vault_role_name,
         direct_vault_token=vault_token,
         verify_ssl=not no_verify_ssl,
+        renew_threshold_seconds=60,
+        check_interval_seconds=30,
     )
 
     async with AsyncVaultClient(vs) as vc:

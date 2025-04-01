@@ -4,8 +4,6 @@ amoebius/secrets/ssh.py
 Vault-based SSH management (store_ssh_config, store_ssh_config_with_tofu,
 delete_ssh_config, tofu_populate_ssh_config, get_ssh_config). Any ephemeral usage
 for missing host_keys references amoebius.utils.ssh, but no ephemeral logic is duplicated here.
-
-Demo-lifecycle logic has been removed per request; see original code for references if needed.
 """
 
 from __future__ import annotations
@@ -23,11 +21,10 @@ from amoebius.utils.async_retry import async_retry
 
 def _is_expired(expiry: Optional[float]) -> bool:
     """
-    Determine if the expiry epoch is in the past.
+    Determine if the given epoch time is in the past.
 
     Args:
-        expiry: epoch seconds or None
-
+        expiry: optional float epoch
     Returns:
         True if expired, else False
     """
@@ -121,8 +118,9 @@ async def delete_ssh_config(
 
     Hard => remove all versions (metadata). Soft => remove only the latest version.
     """
+    from pydantic import ValidationError
+
     if hard_delete:
-        # read+validate if possible, ignoring 404
         try:
             raw = await vault_client.read_secret(path)
             SSHVaultData(**raw)
@@ -139,7 +137,7 @@ async def delete_ssh_config(
         await vault_client.delete_secret(path, hard=True)
         return
 
-    # Soft-delete => read+validate => delete
+    # soft-delete => read+validate => delete
     try:
         raw = await vault_client.read_secret(path)
         SSHVaultData(**raw)

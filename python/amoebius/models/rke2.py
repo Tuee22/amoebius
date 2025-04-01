@@ -18,11 +18,11 @@ class RKE2Instance(BaseModel):
     Represents a single VM's essential data for RKE2 deployment.
 
     Attributes:
-        name:      VM name or unique ID for reference
+        name: VM name or unique ID for reference
         private_ip: VM's private IP address
-        public_ip:  VM's optional public IP address
+        public_ip: VM's optional public IP address
         vault_path: Vault path referencing this VM's SSH credentials
-        has_gpu:    True if the instance includes an NVIDIA GPU
+        has_gpu: True if the instance includes an NVIDIA GPU
     """
 
     name: str
