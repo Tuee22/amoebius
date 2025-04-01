@@ -10,8 +10,8 @@ class VaultSettings(BaseModel):
     vault_role_name: Optional[str] = None
     token_path: str = "/var/run/secrets/kubernetes.io/serviceaccount/token"
     verify_ssl: bool = True
-    renew_threshold_seconds: float = 1800.0
-    check_interval_seconds: float = 1800.0
+    renew_threshold_seconds: float = 60.0
+    check_interval_seconds: float = 30.0
     direct_vault_token: Optional[str] = None
 
     @model_validator(mode="after")
