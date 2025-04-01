@@ -91,32 +91,31 @@ async def run_rke2_deploy_test(
     tfstate = await read_terraform_state(ref=ref)
 
     raw_instances = get_output_from_state(tfstate, "instances", dict)
-    flattened: Dict[str, List[RKE2Instance]] = {}
-    for grp_name, grp_map in raw_instances.items():
-        inst_list: List[RKE2Instance] = []
-        for info in grp_map.values():
-            rke_inst = RKE2Instance(
+    flattened: Dict[str, List[RKE2Instance]] = {
+        grp_name: [
+            RKE2Instance(
                 name=info["name"],
                 private_ip=info["private_ip"],
                 public_ip=info.get("public_ip"),
                 vault_path=info["vault_path"],
                 has_gpu=bool(info.get("is_nvidia_instance", False)),
             )
-            inst_list.append(rke_inst)
-        flattened[grp_name] = inst_list
+            for info in grp_map.values()
+        ]
+        for grp_name, grp_map in raw_instances.items()
+    }
 
     rke2_data = RKE2InstancesOutput(instances=flattened)
 
-    vs = VaultSettings(
+    vsettings = VaultSettings(
         vault_addr=vault_addr,
         vault_role_name=vault_role_name,
         direct_vault_token=vault_token,
         verify_ssl=not no_verify_ssl,
-        renew_threshold_seconds=60,
-        check_interval_seconds=30,
+        # no mention of renew_threshold_seconds or check_interval_seconds
     )
 
-    async with AsyncVaultClient(vs) as vc:
+    async with AsyncVaultClient(vsettings) as vc:
         await deploy_rke2_cluster(
             rke2_output=rke2_data,
             control_plane_group=control_plane_group,

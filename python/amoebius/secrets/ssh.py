@@ -10,13 +10,11 @@ from __future__ import annotations
 
 import time
 from typing import Optional
-
 from pydantic import ValidationError
 
 from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.models.ssh import SSHConfig, SSHVaultData
 from amoebius.utils.ssh import ssh_get_server_key
-from amoebius.utils.async_retry import async_retry
 
 
 def _is_expired(expiry: Optional[float]) -> bool:
@@ -33,7 +31,6 @@ def _is_expired(expiry: Optional[float]) -> bool:
     return expiry < time.time()
 
 
-@async_retry(retries=3)
 async def get_ssh_config(
     vault_client: AsyncVaultClient, path: str, tofu_if_missing_host_keys: bool = True
 ) -> SSHConfig:
@@ -93,7 +90,6 @@ async def store_ssh_config_with_tofu(
             ) from e
 
 
-@async_retry(retries=30)
 async def tofu_populate_ssh_config(vault_client: AsyncVaultClient, path: str) -> None:
     """
     If host_keys is empty => ephemeral handshake => store them => clear expiry.
@@ -118,8 +114,6 @@ async def delete_ssh_config(
 
     Hard => remove all versions (metadata). Soft => remove only the latest version.
     """
-    from pydantic import ValidationError
-
     if hard_delete:
         try:
             raw = await vault_client.read_secret(path)

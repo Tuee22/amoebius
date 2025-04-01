@@ -44,12 +44,12 @@ class RKE2InstancesOutput(BaseModel):
 class RKE2Credentials(BaseModel):
     """
     Captures essential cluster credentials post-deployment:
-      - kubeconfig:  The admin kubeconfig YAML for the cluster
-      - join_token:  The RKE2 node token used by new servers/agents to join
-      - control_plane_ssh: A list of Vault paths for SSH credentials
-        of all control-plane nodes, ensuring multi-CP is possible.
+      - kubeconfig: The admin kubeconfig YAML for the cluster
+      - join_token: The RKE2 node token used by new servers/agents to join
+      - control_plane_ssh_vault_path: A list of Vault paths for SSH credentials
+        of all control-plane nodes, enabling multi-CP approach
     """
 
     kubeconfig: str
     join_token: str
-    control_plane_ssh: List[str] = Field(default_factory=list)
+    control_plane_ssh_vault_path: List[str] = Field(default_factory=list)
