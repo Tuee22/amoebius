@@ -1,16 +1,12 @@
 """
 amoebius/deployment/rke2.py
 
-Implements an idempotent RKE2 cluster deployment on Ubuntu 22.04 using apt-based commands.
-All ephemeral SSH usage is in amoebius.utils.ssh, and Vault-based SSH config retrieval 
-is from amoebius.secrets.ssh. We support multiple control-plane nodes for HA.
+Provides an idempotent RKE2 cluster deployment on Ubuntu 22.04 (APT-based).
+Ephemeral SSH usage is in amoebius.utils.ssh, Vault-based SSH config retrieval 
+is from amoebius.secrets.ssh. We support multi-control-plane (HA) if multiple 
+nodes exist in the "control_plane_group."
 
-We do not return RKE2Credentials from deploy_rke2_cluster; instead we store them in Vault
-using secrets/rke2.py.
-
-No uses of SELinux steps. We keep concurrency with async gather. We only use async_retry
-where we wait for the node token.
-No silent fails, no for loops that can be replaced by comprehensions, etc.
+We store final RKE2Credentials in Vault (via secrets/rke2.py), not returning them.
 """
 
 from __future__ import annotations
@@ -25,8 +21,6 @@ from amoebius.secrets.rke2 import save_rke2_credentials
 from amoebius.models.rke2 import RKE2InstancesOutput, RKE2Instance, RKE2Credentials
 from amoebius.models.ssh import SSHConfig
 from amoebius.utils.ssh import run_ssh_command
-
-# We only use async_retry for node-token retrieval
 from amoebius.utils.async_retry import async_retry
 
 
@@ -38,91 +32,88 @@ async def deploy_rke2_cluster(
     install_channel: str = "stable",
 ) -> None:
     """
-    Deploy an RKE2 cluster across all groups, with a multi-CP approach for the group
-    'control_plane_group' under Ubuntu 22.04 (APT-based logic).
+    Deploy an RKE2 cluster across all groups on Ubuntu 22.04. Multi-CP approach for
+    any nodes in 'control_plane_group'. The final RKE2Credentials are stored in Vault.
 
     Steps:
-      1) prepare all VMs concurrently
-      2) first CP node => bootstrap server
-      3) additional CP nodes => also servers referencing the bootstrap's IP/token
-      4) all other nodes => agents referencing bootstrap
-      5) gather final credentials => store in Vault
+      1) Prepare all VMs concurrently: disable swap, load modules, configure sysctl, etc.
+      2) Use the first node in 'control_plane_group' as the bootstrap server.
+      3) Additional CP nodes also install as 'server' referencing the bootstrap's IP + token.
+      4) All other nodes become 'agents' referencing the bootstrap IP + token.
+      5) We fetch the kubeconfig from the bootstrap, store {kubeconfig, token, CP vault paths}
+         in Vault via secrets/rke2.save_rke2_credentials.
 
     Args:
-      rke2_output: Flattened instance data from Terraform
-      control_plane_group: The name of the group containing CP nodes
-      vault_client: For retrieving SSH config & storing final credentials
-      credentials_vault_path: Vault path where we store final RKE2Credentials
-      install_channel: e.g. 'stable'
-
+      rke2_output: Flattened instance data (group => list of RKE2Instance).
+      control_plane_group: The group name containing control-plane nodes.
+      vault_client: For retrieving SSH credentials from Vault + storing RKE2 creds.
+      credentials_vault_path: Where to store final RKE2Credentials in Vault.
+      install_channel: RKE2 channel (default: stable).
     Returns:
-      None (the credentials are stored in Vault, not returned)
+      None. Credentials stored in Vault, not returned.
     """
 
-    # 1) prepare all VMs
-    # let's define a local function to build coros for concurrency
-    async def prep_single(inst: RKE2Instance):
-        cfg = await get_ssh_config(
+    # 1) Prepare all VMs concurrently
+    async def _prepare_instance(inst: RKE2Instance) -> None:
+        ssh_cfg = await get_ssh_config(
             vault_client, inst.vault_path, tofu_if_missing_host_keys=True
         )
-        await disable_swap(cfg)
-        await load_kernel_modules(cfg)
-        await _set_sysctl(cfg)
+        await disable_swap(ssh_cfg)
+        await load_kernel_modules(ssh_cfg)
+        await configure_sysctl(ssh_cfg)
         if inst.has_gpu:
-            await _install_nvidia_drivers(cfg)
+            await install_nvidia_drivers(ssh_cfg)
 
-    all_instances = [i for grp_list in rke2_output.instances.values() for i in grp_list]
-    prep_coros = [prep_single(inst) for inst in all_instances]
-    await asyncio.gather(*prep_coros)
+    all_instances = [
+        i for grp_insts in rke2_output.instances.values() for i in grp_insts
+    ]
+    await asyncio.gather(*(_prepare_instance(inst) for inst in all_instances))
 
-    # 2) multi-CP => first node is bootstrap
+    # 2) Multi-CP => first node is bootstrap
     cp_list = rke2_output.instances.get(control_plane_group, [])
     if not cp_list:
-        raise ValueError(
-            f"No instances found in control_plane_group '{control_plane_group}'"
-        )
+        raise ValueError(f"No instances found in group '{control_plane_group}'")
 
     bootstrap_cp = cp_list[0]
     bootstrap_ssh = await get_ssh_config(vault_client, bootstrap_cp.vault_path, True)
-    await _install_server(bootstrap_ssh, install_channel)
-    token = await _get_node_token(bootstrap_ssh)
+    await install_server(bootstrap_ssh, install_channel)
+    token = await get_node_token(bootstrap_ssh)
 
-    # concurrency for additional CP nodes
+    # additional CP nodes beyond the first
     if len(cp_list) > 1:
-        # define a local function that returns a coro
-        async def join_cp_server(cp_node: RKE2Instance):
-            ssh_cp = await get_ssh_config(vault_client, cp_node.vault_path, True)
-            await _install_server(
-                ssh_cp,
+
+        async def _join_cp_server(cp_inst: RKE2Instance) -> None:
+            cp_ssh = await get_ssh_config(vault_client, cp_inst.vault_path, True)
+            await install_server(
+                cp_ssh,
                 install_channel,
                 existing_server_ip=bootstrap_cp.private_ip,
                 node_token=token,
             )
 
-        coros = [join_cp_server(cp_node) for cp_node in cp_list[1:]]
-        await asyncio.gather(*coros)
+        await asyncio.gather(*(_join_cp_server(n) for n in cp_list[1:]))
 
-    # 3) agents
-    # all non-cp instances
-    agent_instances = [
-        i
-        for grp_name, insts in rke2_output.instances.items()
-        for i in insts
-        if grp_name != control_plane_group
+    # 3) Agents => all non-CP
+    agent_insts = [
+        inst
+        for group_name, group_insts in rke2_output.instances.items()
+        for inst in group_insts
+        if group_name != control_plane_group
     ]
 
-    async def join_agent(agent_inst: RKE2Instance):
-        ssh_a = await get_ssh_config(vault_client, agent_inst.vault_path, True)
-        await _install_agent(ssh_a, install_channel, bootstrap_cp.private_ip, token)
+    async def _join_agent(a_inst: RKE2Instance) -> None:
+        agent_ssh = await get_ssh_config(vault_client, a_inst.vault_path, True)
+        await install_agent(agent_ssh, install_channel, bootstrap_cp.private_ip, token)
 
-    agent_coros = [join_agent(ai) for ai in agent_instances]
-    await asyncio.gather(*agent_coros)
+    await asyncio.gather(*(_join_agent(a) for a in agent_insts))
 
     # 4) gather final credentials => store in vault
-    kubeconfig = await _fetch_kubeconfig(bootstrap_ssh)
-    cp_paths = [cp.vault_path for cp in cp_list]
+    kubeconfig = await fetch_kubeconfig(bootstrap_ssh)
+    cp_vault_paths = [cp.vault_path for cp in cp_list]
     creds = RKE2Credentials(
-        kubeconfig=kubeconfig, join_token=token, control_plane_ssh_vault_path=cp_paths
+        kubeconfig=kubeconfig,
+        join_token=token,
+        control_plane_ssh_vault_path=cp_vault_paths,
     )
     await save_rke2_credentials(vault_client, credentials_vault_path, creds)
 
@@ -130,8 +121,8 @@ async def deploy_rke2_cluster(
 async def disable_swap(ssh_cfg: SSHConfig) -> None:
     """
     Disables swap permanently on Ubuntu 22.04:
-      - swapoff -a
-      - sed out any swap lines from /etc/fstab
+      - 'swapoff -a'
+      - comments out swap lines in /etc/fstab
     """
     await run_ssh_command(ssh_cfg, ["sudo", "swapoff", "-a"], sensitive=True)
     sed_cmd = r"sudo sed -i.bak '/\sswap\s/s/^/#/g' /etc/fstab"
@@ -140,8 +131,8 @@ async def disable_swap(ssh_cfg: SSHConfig) -> None:
 
 async def load_kernel_modules(ssh_cfg: SSHConfig) -> None:
     """
-    Loads modules (overlay, br_netfilter) for bridging,
-    ensures they load on reboot by writing /etc/modules-load.d/rke2.conf
+    Loads required kernel modules (e.g. br_netfilter, overlay) for K8s bridging
+    and ensures they load on reboot by writing /etc/modules-load.d/rke2.conf
     """
     for mod in ["overlay", "br_netfilter"]:
         await run_ssh_command(ssh_cfg, ["sudo", "modprobe", mod], sensitive=True)
@@ -154,10 +145,10 @@ async def load_kernel_modules(ssh_cfg: SSHConfig) -> None:
     await run_ssh_command(ssh_cfg, ["bash", "-c", cmd_upload], sensitive=True)
 
 
-async def _set_sysctl(ssh_cfg: SSHConfig) -> None:
+async def configure_sysctl(ssh_cfg: SSHConfig) -> None:
     """
-    Writes bridging & ip_forward settings in /etc/sysctl.d/99-rke2.conf,
-    then sysctl --system, no need for retry
+    Configures bridging and IP forwarding in /etc/sysctl.d/99-rke2.conf,
+    then applies via 'sysctl --system'. Ensures container networking bridging.
     """
     content = textwrap.dedent(
         """\
@@ -174,10 +165,10 @@ async def _set_sysctl(ssh_cfg: SSHConfig) -> None:
     await run_ssh_command(ssh_cfg, ["sudo", "sysctl", "--system"], sensitive=True)
 
 
-async def _install_nvidia_drivers(ssh_cfg: SSHConfig) -> None:
+async def install_nvidia_drivers(ssh_cfg: SSHConfig) -> None:
     """
-    If the node has a GPU => we install official Ubuntu drivers + nvidia-container-toolkit
-    using apt on Ubuntu 22.04
+    Installs official Ubuntu GPU drivers and nvidia-container-toolkit on Ubuntu 22.04
+    so that GPU-based workloads can run properly.
     """
     # check nvidia-smi
     try:
@@ -236,17 +227,17 @@ async def _install_nvidia_drivers(ssh_cfg: SSHConfig) -> None:
     )
 
 
-async def _install_server(
+async def install_server(
     ssh_cfg: SSHConfig,
     channel: str,
     existing_server_ip: Optional[str] = None,
     node_token: Optional[str] = None,
 ) -> None:
     """
-    Install RKE2 as 'server'. If existing_server_ip/node_token => join existing cluster,
-    else we become the first CP node (bootstrap).
+    Install RKE2 as 'server'. If existing_server_ip and node_token are provided,
+    we join an existing cluster; otherwise we become the first control-plane node.
     """
-    # see if rke2 is installed
+    # see if rke2 installed
     try:
         await run_ssh_command(ssh_cfg, ["which", "rke2"], sensitive=True)
     except Exception:
@@ -287,11 +278,11 @@ async def _install_server(
         )
 
 
-async def _install_agent(
+async def install_agent(
     ssh_cfg: SSHConfig, channel: str, server_ip: str, node_token: str
 ) -> None:
     """
-    Install RKE2 agent on Ubuntu, referencing main server IP + token.
+    Install RKE2 as 'agent', referencing the main server (server_ip + node_token).
     """
     try:
         await run_ssh_command(ssh_cfg, ["which", "rke2"], sensitive=True)
@@ -335,36 +326,36 @@ async def _install_agent(
 
 
 @async_retry(retries=30, delay=2.0)
-async def _get_node_token(ssh_cfg: SSHConfig) -> str:
+async def get_node_token(ssh_cfg: SSHConfig) -> str:
     """
-    Retrieve the node token from the "primary" server node. We do use a retry here
-    because the server might not be fully up when we attempt to read the token.
+    Retrieve the node token from the bootstrap server node. We use async_retry here
+    because the server may not be fully started when we attempt to read the token file.
     """
     out = await run_ssh_command(
         ssh_cfg,
         ["sudo", "cat", "/var/lib/rancher/rke2/server/node-token"],
         sensitive=True,
     )
-    stripped = out.strip()
-    if not stripped:
-        raise RuntimeError("Empty node-token from server.")
-    return stripped
+    token_val = out.strip()
+    if not token_val:
+        raise RuntimeError("Empty node-token from server node.")
+    return token_val
 
 
-async def _fetch_kubeconfig(ssh_cfg: SSHConfig) -> str:
+async def fetch_kubeconfig(ssh_cfg: SSHConfig) -> str:
     """
     Retrieve the admin kubeconfig from /etc/rancher/rke2/rke2.yaml,
-    raising on empty or missing file.
+    raising if empty.
     """
-    out = await run_ssh_command(
+    result = await run_ssh_command(
         ssh_cfg, ["sudo", "cat", "/etc/rancher/rke2/rke2.yaml"], sensitive=True
     )
-    return out
+    return result
 
 
-########################################################################
+####################################################################
 # Lifecycle / Maintenance
-########################################################################
+####################################################################
 
 
 async def destroy_cluster(
@@ -372,8 +363,7 @@ async def destroy_cluster(
     remove_infra_callback: Optional[Callable[[], None]] = None,
 ) -> None:
     """
-    Uninstall RKE2 on each node, optionally call remove_infra_callback
-    for infrastructure teardown. No silent fails.
+    Uninstall RKE2 from each node in ssh_cfgs, optionally call remove_infra_callback.
     """
     tasks = [_uninstall_rke2_node(cfg) for cfg in ssh_cfgs]
     await asyncio.gather(*tasks)
@@ -387,9 +377,9 @@ async def upgrade_cluster(
     channel: str = "stable",
 ) -> None:
     """
-    Minimal approach to upgrading the cluster:
-      - sequentially upgrade each server
-      - parallel upgrade of all agents
+    Minimal cluster upgrade approach:
+      - sequentially upgrade servers
+      - parallel upgrade of agents
     """
     for s_cfg in server_ssh_cfgs:
         await _upgrade_node(s_cfg, channel)
@@ -400,9 +390,7 @@ async def upgrade_cluster(
 
 async def _upgrade_node(ssh_cfg: SSHConfig, channel: str) -> None:
     """
-    Minimal approach to "upgrade" a node by stopping RKE2,
-    re-running the get.rke2.io script with a new channel,
-    and then starting services again.
+    Stop RKE2, re-run get.rke2.io with the new channel, start services again.
     """
     await run_ssh_command(
         ssh_cfg,
@@ -430,7 +418,7 @@ async def _upgrade_node(ssh_cfg: SSHConfig, channel: str) -> None:
 
 async def rotate_certs(server_ssh_cfgs: List[SSHConfig]) -> None:
     """
-    Rotates cluster certs on each server node, restarting afterwards.
+    Rotate cluster certs on each server node, then restart that server.
     """
     for s_cfg in server_ssh_cfgs:
         await run_ssh_command(
@@ -447,20 +435,21 @@ async def backup_cluster_state(
     local_download_path: Optional[str] = None,
 ) -> None:
     """
-    Creates an etcd snapshot on the primary server node.
-    If local_download_path is set, you might scp from /var/lib/rancher/rke2/server/db/snapshots/.
+    Creates an etcd snapshot on the control-plane server.
+    local_download_path is optional if we want to scp it somewhere else.
     """
     await run_ssh_command(
-        ssh_cfg,
+        server_ssh_cfg,
         ["sudo", "rke2", "etcd-snapshot", "save", "--name", snapshot_name],
         sensitive=True,
     )
+    # If local_download_path is set, scp from /var/lib/rancher/rke2/server/db/snapshots/ ?
 
 
 async def reset_node(ssh_cfg: SSHConfig, is_control_plane: bool) -> None:
     """
-    Remove a node from the cluster, uninstall RKE2.
-    For CP node => stop rke2-server; for agent => stop rke2-agent.
+    Remove a node from the cluster by stopping the relevant service
+    (rke2-server if is_control_plane, else rke2-agent), then uninstall RKE2.
     """
     svc = "rke2-server" if is_control_plane else "rke2-agent"
     await run_ssh_command(ssh_cfg, ["sudo", "systemctl", "stop", svc], sensitive=True)
@@ -469,7 +458,7 @@ async def reset_node(ssh_cfg: SSHConfig, is_control_plane: bool) -> None:
 
 async def _uninstall_rke2_node(ssh_cfg: SSHConfig) -> None:
     """
-    Calls rke2-uninstall.sh or rke2-agent-uninstall.sh if they exist, forcibly removing RKE2 from that node.
+    Runs rke2-uninstall.sh or rke2-agent-uninstall.sh if they exist, forcibly removing RKE2.
     """
     for script in ["rke2-uninstall.sh", "rke2-agent-uninstall.sh"]:
         cmd = f"sudo bash -c '[[ -f /usr/local/bin/{script} ]] && /usr/local/bin/{script}'"
