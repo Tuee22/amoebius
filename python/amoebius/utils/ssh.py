@@ -1,16 +1,15 @@
 """
 amoebius/utils/ssh.py
 
-Provides high-level functions for SSH-related operations, leveraging
-ephemeral_manager from amoebius/utils/ephemeral_file.py to manage ephemeral
-known_hosts and private keys in /dev/shm. No manual tempfile or cleanup is needed.
-
-We use `validate_type` from amoebius.models.validator to enforce that
-ephemeral_manager yields a plain str (single-file mode).
-
-Additionally, file I/O has been converted to asynchronous operations via aiofiles,
-except for os.chmod() calls, which remain synchronous to avoid mypy errors.
+Provides high-level ephemeral SSH-related operations, with no direct Vault usage.
+We keep:
+  - ssh_get_server_key(...) for TOFU accept-new
+  - run_ssh_command(...) for strict SSH
+  - run_kubectl(...) for local kubectl commands
+  - run_ssh_kubectl_command(...) for remote kubectl via SSH
 """
+
+from __future__ import annotations
 
 import argparse
 import asyncio
@@ -36,26 +35,8 @@ async def ssh_get_server_key(
     retry_delay: float = 1.0,
 ) -> List[str]:
     """
-    Perform a minimal SSH handshake with StrictHostKeyChecking=accept-new to retrieve
-    the server's host key lines (TOFU).
-
-    Creates two ephemeral single-file contexts in /dev/shm:
-      1) known_hosts (initially empty),
-      2) private key.
-
-    After writing the private key and performing the handshake, reads the ephemeral
-    known_hosts file to extract the server key lines.
-
-    Args:
-        cfg: An SSHConfig with user, hostname, port, private_key. host_keys is not needed here.
-        retries: Number of times to retry on failure. Defaults to 3.
-        retry_delay: Delay (seconds) between retries. Defaults to 1.0.
-
-    Returns:
-        A list of lines from the ephemeral known_hosts file (the server's key lines).
-
-    Raises:
-        CommandError: If handshake fails or if no keys are discovered.
+    Minimal SSH handshake with StrictHostKeyChecking=accept-new to retrieve
+    the server's host key lines (TOFU). Ephemeral known_hosts + ephemeral private key.
     """
     async with ephemeral_manager(
         single_file_name="ssh_known_hosts", prefix="sshkh-"
@@ -71,7 +52,7 @@ async def ssh_get_server_key(
             async with aiofiles.open(pk_path, "wb") as fpk:
                 await fpk.write(cfg.private_key.encode("utf-8"))
 
-            # Protect private key (sync call to avoid mypy errors)
+            # Protect private key (sync call to avoid mypy issues)
             os.chmod(pk_path, 0o600)
 
             ssh_cmd = [
@@ -99,7 +80,7 @@ async def ssh_get_server_key(
                 retry_delay=retry_delay,
             )
 
-            # Read known_hosts (async)
+            # read ephemeral known_hosts
             lines = []
             if await aiofiles.ospath.exists(kh_path):
                 async with aiofiles.open(kh_path, "r", encoding="utf-8") as fkh:
@@ -125,24 +106,7 @@ async def run_ssh_command(
 ) -> str:
     """
     Run an SSH command in strict host-key-checking mode, requiring host_keys in ssh_config.
-
-    Creates two ephemeral single-file contexts for:
-      1) known_hosts (populated from ssh_config.host_keys),
-      2) private key.
-
-    Args:
-        ssh_config: Must have user, hostname, port, private_key, and non-empty host_keys.
-        remote_command: The command to run on the remote host.
-        sensitive: If True, command details won't be shown in logs on failure.
-        env: Optional dict of env vars to prefix onto the remote command as "env VAR=VAL".
-        retries: Number of times to retry on failure. Default 3.
-        retry_delay: Delay (seconds) between retries. Default 1.0.
-
-    Returns:
-        The captured stdout from the SSH command.
-
-    Raises:
-        CommandError: If host_keys is empty, or if the command fails repeatedly.
+    Uses ephemeral known_hosts + ephemeral private key.
     """
     if not ssh_config.host_keys:
         raise CommandError("run_ssh_command requires ssh_config.host_keys (strict).")
@@ -166,7 +130,7 @@ async def run_ssh_command(
             async with aiofiles.open(pk_path, "wb") as fpk:
                 await fpk.write(ssh_config.private_key.encode("utf-8"))
 
-            # Protect private key (sync call to avoid mypy errors)
+            # Protect private key
             os.chmod(pk_path, 0o600)
 
             ssh_cmd = [
@@ -186,7 +150,6 @@ async def run_ssh_command(
                 f"{ssh_config.user}@{ssh_config.hostname}",
             ]
 
-            # Possibly prefix environment variables
             if env:
                 env_tokens = ["env"] + [f"{k}={v}" for k, v in env.items()]
                 remote_command = env_tokens + remote_command
@@ -211,18 +174,6 @@ async def run_kubectl(
 ) -> str:
     """
     Execute a local 'kubectl exec' command.
-
-    Args:
-        kube_cmd: A KubectlCommand describing the namespace, pod, container, and command.
-        sensitive: If True, hides command details in logs on error.
-        retries: Number of times to retry on failure.
-        retry_delay: Delay in seconds between retries.
-
-    Returns:
-        The captured stdout from the 'kubectl exec' command.
-
-    Raises:
-        CommandError: If the command fails repeatedly.
     """
     args = kube_cmd.build_kubectl_args()
     return await run_command(
@@ -243,19 +194,6 @@ async def run_ssh_kubectl_command(
 ) -> str:
     """
     Run a 'kubectl exec' command on a remote host via SSH in strict mode.
-
-    Args:
-        ssh_config: Must have user, hostname, port, private_key, and host_keys for strict mode.
-        kube_cmd: The KubectlCommand describing the exec operation.
-        sensitive: If True, hides command details in logs if it fails.
-        retries: Number of times to retry on failure.
-        retry_delay: Delay in seconds between retries.
-
-    Returns:
-        The captured stdout from the remote kubectl command.
-
-    Raises:
-        CommandError: If host_keys is empty or the SSH command fails repeatedly.
     """
     if not ssh_config.host_keys:
         raise CommandError("Cannot do run_ssh_kubectl_command: missing host_keys")
@@ -272,10 +210,13 @@ async def run_ssh_kubectl_command(
 
 def main() -> None:
     """
-    Demonstration:
+    Demonstration for ephemeral SSH usage:
       1) TOFU => retrieve server key lines
       2) Strict => run 'whoami'
     """
+    import argparse, asyncio, sys
+    from pathlib import Path
+
     parser = argparse.ArgumentParser(
         description="Demonstrate ephemeral SSH usage: TOFU -> Strict"
     )
