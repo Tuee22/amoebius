@@ -2,9 +2,9 @@
 """
 amoebius/tests/rke2_deploy.py
 
-Simple test script that reads 'instances' from Terraform output, flattens them,
-and calls deploy_rke2_cluster. We do not print final RKE2Credentials because 
-the function now stores them in Vault, not returning them.
+Simple test script that calls get_rke2_instances_output from amoebius/utils/rke2.py
+and then calls deploy_rke2_cluster on the resulting data.
+We do not print final RKE2Credentials because the function now stores them in Vault.
 """
 
 from __future__ import annotations
@@ -12,17 +12,18 @@ from __future__ import annotations
 import sys
 import argparse
 import asyncio
-from typing import Optional, List, Dict
+from typing import Optional
 
-from amoebius.utils.terraform import read_terraform_state, get_output_from_state
+from amoebius.utils.terraform import read_terraform_state
 from amoebius.models.terraform import TerraformBackendRef
 from amoebius.secrets.vault_client import AsyncVaultClient
 from amoebius.models.vault import VaultSettings
-from amoebius.models.rke2 import RKE2Instance, RKE2InstancesOutput
+from amoebius.utils.rke2 import get_rke2_instances_output
 from amoebius.deployment.rke2 import deploy_rke2_cluster
 
 
 def main() -> int:
+    """CLI entrypoint for testing RKE2 cluster deployment."""
     parser = argparse.ArgumentParser(
         description="Test script for multi-CP RKE2 cluster deployment on Ubuntu 22.04."
     )
@@ -82,37 +83,18 @@ async def run_rke2_deploy_test(
 ) -> None:
     """
     Main async test function:
-      1) read TF state
-      2) flatten 'instances'
-      3) call deploy_rke2_cluster with multi-CP
-      4) final RKE2Credentials are stored in Vault at credentials_vault_path
+      1) read RKE2InstancesOutput from terraform
+      2) call deploy_rke2_cluster
+      3) final RKE2Credentials are stored in Vault at credentials_vault_path
     """
     ref = TerraformBackendRef(root=root, workspace=workspace)
-    tfstate = await read_terraform_state(ref=ref)
-
-    raw_instances = get_output_from_state(tfstate, "instances", dict)
-    flattened: Dict[str, List[RKE2Instance]] = {
-        grp_name: [
-            RKE2Instance(
-                name=info["name"],
-                private_ip=info["private_ip"],
-                public_ip=info.get("public_ip"),
-                vault_path=info["vault_path"],
-                has_gpu=bool(info.get("is_nvidia_instance", False)),
-            )
-            for info in grp_map.values()
-        ]
-        for grp_name, grp_map in raw_instances.items()
-    }
-
-    rke2_data = RKE2InstancesOutput(instances=flattened)
+    rke2_data = await get_rke2_instances_output(ref)
 
     vsettings = VaultSettings(
         vault_addr=vault_addr,
         vault_role_name=vault_role_name,
         direct_vault_token=vault_token,
         verify_ssl=not no_verify_ssl,
-        # no mention of renew_threshold_seconds or check_interval_seconds
     )
 
     async with AsyncVaultClient(vsettings) as vc:

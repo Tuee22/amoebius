@@ -1,16 +1,9 @@
 """
 amoebius/utils/ssh.py
 
-Provides high-level functions for SSH-related operations, leveraging
-ephemeral_manager from amoebius/utils/ephemeral_file.py to manage ephemeral
-known_hosts and private keys in /dev/shm. No manual tempfile or cleanup is needed,
-and no direct Vault usage occurs here.
-
-We use validate_type from amoebius.models.validator to ensure ephemeral_manager
-yields a plain str (single-file mode).
-
-Additionally, file I/O has been converted to asynchronous operations via aiofiles,
-except for os.chmod() calls, which remain synchronous to avoid mypy errors.
+Provides high-level functions for SSH-related operations, including ephemeral known_hosts
+and private key usage. Also includes optional run_ssh_kubectl_command referencing 
+the KubectlCommand from amoebius.models.k8s.
 """
 
 from __future__ import annotations
@@ -27,9 +20,12 @@ import aiofiles
 import aiofiles.ospath
 
 from amoebius.utils.async_command_runner import run_command, CommandError
-from amoebius.models.ssh import SSHConfig, KubectlCommand
+from amoebius.models.ssh import SSHConfig
 from amoebius.models.validator import validate_type
 from amoebius.utils.ephemeral_file import ephemeral_manager
+
+# The KubectlCommand is now in models.k8s
+from amoebius.models.k8s import KubectlCommand
 
 
 async def ssh_get_server_key(
@@ -39,26 +35,19 @@ async def ssh_get_server_key(
     retry_delay: float = 1.0,
 ) -> List[str]:
     """
-    Perform a minimal SSH handshake with StrictHostKeyChecking=accept-new to retrieve
-    the server's host key lines (TOFU).
-
-    Creates two ephemeral single-file contexts in /dev/shm:
-      1) known_hosts (initially empty)
-      2) private key
-
-    After writing the private key and performing the handshake, we read the ephemeral
-    known_hosts file to extract the server key lines.
+    Perform a minimal SSH handshake with StrictHostKeyChecking=accept-new
+    to retrieve the server's host key lines (TOFU).
 
     Args:
-        cfg: SSHConfig with user, hostname, port, private_key. host_keys not needed here.
-        retries: Number of times to retry on failure.
-        retry_delay: Delay in seconds between retries.
+      cfg: SSHConfig with user, hostname, port, private_key.
+      retries: times to retry if error
+      retry_delay: seconds between retries
 
     Returns:
-        A list of lines from ephemeral known_hosts (the server's key lines).
+      A list of lines from ephemeral known_hosts (the server's keys).
 
     Raises:
-        CommandError: If handshake fails or if no keys are discovered.
+      CommandError: if handshake fails or no host keys found
     """
     async with ephemeral_manager(
         single_file_name="ssh_known_hosts", prefix="sshkh-"
@@ -70,10 +59,9 @@ async def ssh_get_server_key(
         ) as pk_path_union:
             pk_path = validate_type(pk_path_union, str)
 
-            # Write private key
+            # write private key
             async with aiofiles.open(pk_path, "wb") as fpk:
                 await fpk.write(cfg.private_key.encode("utf-8"))
-
             os.chmod(pk_path, 0o600)
 
             ssh_cmd = [
@@ -124,25 +112,24 @@ async def run_ssh_command(
     retry_delay: float = 1.0,
 ) -> str:
     """
-    Run an SSH command in strict host-key-checking mode, requiring host_keys in ssh_config.
-    We create ephemeral known_hosts + ephemeral private key.
+    Run an SSH command in strict mode, requiring host_keys in ssh_config.
 
     Args:
-        ssh_config: Must have user, hostname, port, private_key, host_keys.
-        remote_command: The command to run on the remote.
-        sensitive: If True, omit details from error logs on failure.
-        env: If provided, prefix remote_command with "env VAR=VAL".
-        retries: Number of times to retry on error.
-        retry_delay: Delay in seconds between retries.
+      ssh_config: Must have user, hostname, port, private_key, host_keys
+      remote_command: The actual remote command tokens
+      sensitive: If True, hides details on error
+      env: optional environment variables
+      retries: how many times to retry
+      retry_delay: seconds between retries
 
     Returns:
-        Captured stdout from the SSH command on success.
+      captured stdout
 
     Raises:
-        CommandError: If host_keys is empty or the command fails repeatedly.
+      CommandError: if host_keys empty or command fails
     """
     if not ssh_config.host_keys:
-        raise CommandError("run_ssh_command requires non-empty host_keys (strict).")
+        raise CommandError("run_ssh_command requires non-empty host_keys.")
 
     async with ephemeral_manager(
         single_file_name="ssh_known_hosts", prefix="sshkh-"
@@ -154,15 +141,14 @@ async def run_ssh_command(
         ) as pk_path_union:
             pk_path = validate_type(pk_path_union, str)
 
-            # Write known_hosts
+            # write known_hosts
             async with aiofiles.open(kh_path, "w", encoding="utf-8") as fkh:
                 for line in ssh_config.host_keys:
                     await fkh.write(line + "\n")
 
-            # Write private key
+            # write private key
             async with aiofiles.open(pk_path, "wb") as fpk:
                 await fpk.write(ssh_config.private_key.encode("utf-8"))
-
             os.chmod(pk_path, 0o600)
 
             ssh_cmd = [
@@ -189,10 +175,7 @@ async def run_ssh_command(
             ssh_cmd.append(cmd_str)
 
             return await run_command(
-                ssh_cmd,
-                sensitive=sensitive,
-                retries=retries,
-                retry_delay=retry_delay,
+                ssh_cmd, sensitive=sensitive, retries=retries, retry_delay=retry_delay
             )
 
 
@@ -204,7 +187,7 @@ async def run_kubectl(
     retry_delay: float = 1.0,
 ) -> str:
     """
-    Execute a local "kubectl exec" command. This does not do SSH; it's purely local.
+    Execute a local "kubectl exec" command (no SSH).
     """
     args = kube_cmd.build_kubectl_args()
     return await run_command(
@@ -224,16 +207,16 @@ async def run_ssh_kubectl_command(
     Run a 'kubectl exec' command on a remote host via SSH in strict mode.
 
     Args:
-        ssh_config: Must have host_keys
-        kube_cmd:   The KubectlCommand describing the action
+      ssh_config: Must have user, host_keys
+      kube_cmd: The KubectlCommand from amoebius.models.k8s
     """
     if not ssh_config.host_keys:
         raise CommandError("run_ssh_kubectl_command requires non-empty host_keys.")
 
     remote_args = kube_cmd.build_kubectl_args()
     return await run_ssh_command(
-        ssh_config,
-        remote_args,
+        ssh_config=ssh_config,
+        remote_command=remote_args,
         sensitive=sensitive,
         retries=retries,
         retry_delay=retry_delay,
@@ -242,7 +225,7 @@ async def run_ssh_kubectl_command(
 
 def main() -> None:
     """
-    CLI demonstration:
+    CLI demonstration of ephemeral usage:
       1) TOFU => retrieve server key lines
       2) Strict => run 'whoami'
     """
@@ -277,7 +260,7 @@ def main() -> None:
             host_keys=lines,
         )
         print("\n=== Step 2: Strict => run 'whoami' ===")
-        who = await run_ssh_command(strict_cfg, ["whoami"])
+        who = await run_ssh_command(ssh_config=strict_cfg, remote_command=["whoami"])
         print("whoami =>", who)
 
     try:

@@ -5,6 +5,9 @@ Provides a reusable asynchronous command runner with retry logic. Optionally,
 allows passing a custom error_parser callback that can parse stderr for known
 errors (e.g., Docker Hub rate limits) and return a short user-friendly message.
 
+We also keep an optional argument for `successful_return_codes`, which indicates
+which return codes won't be treated as errors (defaults to [0]).
+
 Usage example:
     from amoebius.utils.async_command_runner import run_command, CommandError
 
@@ -30,7 +33,6 @@ from __future__ import annotations
 import os
 import asyncio
 from typing import Callable, Dict, List, Optional
-
 from typing_extensions import ParamSpec, TypeVar
 
 from amoebius.utils.async_retry import async_retry
@@ -174,3 +176,25 @@ async def run_command(
         return stdout_str
 
     return await _inner_run_command()
+
+
+async def run_command_interactive(command: List[str]) -> int:
+    """
+    Launches the given command in an interactive manner, attaching local stdin/out.
+    Returns the exit code on completion.
+
+    This function does not do ephemeral approach or TTY bridging automatically.
+    It's a minimal approach: we spawn a child process that inherits local FDs
+    so the user can interact directly. The user must be on a real TTY for it to work well.
+
+    Args:
+        command: The command and arguments to run in interactive mode.
+
+    Returns:
+        The exit code of the child process.
+    """
+    proc = await asyncio.create_subprocess_exec(
+        *command, stdin=None, stdout=None, stderr=None
+    )
+    return_code = await proc.wait()
+    return return_code

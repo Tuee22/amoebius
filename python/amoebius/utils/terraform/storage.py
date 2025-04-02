@@ -7,7 +7,7 @@ Defines storage classes for reading/writing Terraform state ciphertext:
   - MinioStorage
   - K8sSecretStorage
 
-All classes accept a `TerraformBackendRef` referencing (root, workspace).
+All classes accept a TerraformBackendRef referencing (root, workspace).
 For a non-existent state, each backend returns None, so the caller can detect
 "No existing Terraform state" and proceed accordingly.
 """
@@ -56,7 +56,7 @@ class StateStorage(ABC):
         Read the stored ciphertext for this validated (root, workspace).
 
         Returns:
-            str or None: The ciphertext if it exists, or None if no state is found.
+            Optional[str]: The ciphertext if it exists, or None if no state is found.
         """
         pass
 
@@ -80,7 +80,9 @@ class StateStorage(ABC):
 
 
 class NoStorage(StateStorage):
-    """Indicates 'vanilla' Terraform usage where read/write => no-op, no encryption needed."""
+    """
+    Indicates 'vanilla' Terraform usage where read/write => no-op, no encryption needed.
+    """
 
     def __init__(self, ref: TerraformBackendRef) -> None:
         super().__init__(ref, transit_key_name=None)
@@ -91,7 +93,6 @@ class NoStorage(StateStorage):
         vault_client: Optional[AsyncVaultClient],
         minio_client: Optional[Minio],
     ) -> Optional[str]:
-        # No storage => always no existing state
         return None
 
     async def write_ciphertext(
@@ -107,7 +108,7 @@ class NoStorage(StateStorage):
 class VaultKVStorage(StateStorage):
     """
     Stores ciphertext in Vault's KV under:
-    'secret/data/amoebius/terraform-backends/<mapped_root>/<mapped_workspace>'.
+      'secret/data/amoebius/terraform-backends/<mapped_root>/<mapped_workspace>'.
 
     If no secret is found, returns None to indicate no existing state.
     """
@@ -120,6 +121,9 @@ class VaultKVStorage(StateStorage):
         super().__init__(ref, transit_key_name)
 
     def _kv_path(self) -> str:
+        """
+        Build the path under 'secret/data/...' for storing the ciphertext.
+        """
         mapped_root = self.ref.root.replace("/", ".")
         mapped_ws = self.ref.workspace.replace("/", ".")
         return f"amoebius/terraform-backends/{mapped_root}/{mapped_ws}"
@@ -132,11 +136,9 @@ class VaultKVStorage(StateStorage):
     ) -> Optional[str]:
         if not vault_client:
             raise RuntimeError("VaultKVStorage requires a vault_client.")
-
         try:
             data = await vault_client.read_secret(self._kv_path())
-            ciphertext = data.get("ciphertext") if data else None
-            return ciphertext  # None if not found
+            return data.get("ciphertext") if data else None
         except RuntimeError as ex:
             if "404" in str(ex):
                 return None
@@ -156,7 +158,7 @@ class VaultKVStorage(StateStorage):
 
 class MinioStorage(StateStorage):
     """
-    Stores ciphertext in a MinIO bucket => 'terraform-backends/<mapped_root>/<mapped_workspace>.enc'.
+    Stores ciphertext in a Minio bucket => 'terraform-backends/<mapped_root>/<mapped_workspace>.enc'.
     If no object is found, returns None to indicate no existing state.
     """
 
@@ -190,9 +192,10 @@ class MinioStorage(StateStorage):
             response = None
             try:
                 response = client.get_object(self.bucket_name, self._object_key())
-                data_b = response.read()  # type: bytes
+                data_b = response.read()
                 return data_b.decode("utf-8")
             except Exception as ex:
+                # If object not found => return None
                 if any(msg in str(ex) for msg in ("NoSuchKey", "NoSuchObject", "404")):
                     return None
                 raise
@@ -233,7 +236,7 @@ class MinioStorage(StateStorage):
 class K8sSecretStorage(StateStorage):
     """
     Stores ciphertext in a K8s Secret => 'tf-backend-<mapped_root>-<mapped_workspace>',
-    under data['ciphertext']. If it doesn't exist or lacks "ciphertext", returns None.
+    under data['ciphertext']. If no such secret or if 'ciphertext' not present, returns None.
     """
 
     def __init__(
@@ -256,7 +259,10 @@ class K8sSecretStorage(StateStorage):
         vault_client: Optional[AsyncVaultClient],
         minio_client: Optional[Minio],
     ) -> Optional[str]:
-        secret_data = await get_k8s_secret_data(self._secret_name(), self.namespace)
+        secret_data = await get_k8s_secret_data(
+            secret_name=self._secret_name(),
+            namespace=self.namespace,
+        )
         if not secret_data or "ciphertext" not in secret_data:
             return None
         return secret_data["ciphertext"]
@@ -269,4 +275,8 @@ class K8sSecretStorage(StateStorage):
         minio_client: Optional[Minio],
     ) -> None:
         data_dict = {"ciphertext": ciphertext}
-        await put_k8s_secret_data(self._secret_name(), self.namespace, data_dict)
+        await put_k8s_secret_data(
+            secret_name=self._secret_name(),
+            namespace=self.namespace,
+            data=data_dict,
+        )

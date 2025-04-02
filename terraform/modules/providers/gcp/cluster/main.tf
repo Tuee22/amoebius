@@ -77,7 +77,7 @@ module "compute_single" {
 
   source = "/amoebius/terraform/modules/providers/gcp/compute"
 
-  vm_name = local.validated_names[each.key]
+  vm_name            = local.validated_names[each.key]
   public_key_openssh = tls_private_key.all[each.key].public_key_openssh
   ssh_user           = var.ssh_user
   image              = each.value.image
@@ -110,12 +110,13 @@ module "vm_secret" {
 locals {
   compute_results = [
     for k, comp_mod in module.compute_single : {
-      key        = k
-      group_name = local.expanded_instances_map[k].group_name
-      name       = comp_mod.vm_name
-      private_ip = comp_mod.private_ip
-      public_ip  = comp_mod.public_ip
-      vault_path = module.vm_secret[k].vault_path
+      key                = k
+      group_name         = local.expanded_instances_map[k].group_name
+      name               = comp_mod.vm_name
+      private_ip         = comp_mod.private_ip
+      public_ip          = comp_mod.public_ip
+      vault_path         = module.vm_secret[k].vault_path
+      is_nvidia_instance = length(regexall("^nvidia_", local.expanded_instances_map[k].category)) > 0 ? true : false
     }
   ]
 
@@ -124,10 +125,11 @@ locals {
     group_name => {
       for r in local.compute_results :
       r.key => {
-        name       = r.name
-        private_ip = r.private_ip
-        public_ip  = r.public_ip
-        vault_path = r.vault_path
+        name               = r.name
+        private_ip         = r.private_ip
+        public_ip          = r.public_ip
+        vault_path         = r.vault_path
+        is_nvidia_instance = r.is_nvidia_instance
       }
       if r.group_name == group_name
     }
