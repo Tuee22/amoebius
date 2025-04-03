@@ -33,9 +33,9 @@ async def get_rke2_instances_output(ref: TerraformBackendRef) -> RKE2InstancesOu
             RKE2Instance(
                 name=info["name"],
                 private_ip=info["private_ip"],
-                public_ip=info.get("public_ip"),
+                public_ip=info["public_ip"],
                 vault_path=info["vault_path"],
-                has_gpu=bool(info.get("is_nvidia_instance", False)),
+                has_gpu=bool(info.get["is_nvidia_instance"]),
             )
             for info in grp_map.values()
         ]
