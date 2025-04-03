@@ -175,7 +175,6 @@ async def _terraform_command(
 
 async def init_terraform(
     ref: TerraformBackendRef,
-    workspace: Optional[str] = None,  # ignored if user passes ref
     env: Optional[Dict[str, str]] = None,
     base_path: str = "/amoebius/terraform/roots",
     storage: Optional[StateStorage] = None,
@@ -228,7 +227,6 @@ async def init_terraform(
 
 async def apply_terraform(
     ref: TerraformBackendRef,
-    workspace: Optional[str] = None,
     env: Optional[Dict[str, str]] = None,
     base_path: str = "/amoebius/terraform/roots",
     storage: Optional[StateStorage] = None,
@@ -287,7 +285,6 @@ async def apply_terraform(
 
 async def destroy_terraform(
     ref: TerraformBackendRef,
-    workspace: Optional[str] = None,
     env: Optional[Dict[str, str]] = None,
     base_path: str = "/amoebius/terraform/roots",
     storage: Optional[StateStorage] = None,
@@ -345,7 +342,6 @@ async def destroy_terraform(
 
 async def read_terraform_state(
     ref: TerraformBackendRef,
-    workspace: Optional[str] = None,
     env: Optional[Dict[str, str]] = None,
     base_path: str = "/amoebius/terraform/roots",
     storage: Optional[StateStorage] = None,
