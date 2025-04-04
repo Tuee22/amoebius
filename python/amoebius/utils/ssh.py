@@ -1,9 +1,15 @@
 """
 amoebius/utils/ssh.py
 
-Provides high-level functions for SSH-related operations, including ephemeral known_hosts
-and private key usage. Also includes optional run_ssh_kubectl_command referencing 
-the KubectlCommand from amoebius.models.k8s.
+Provides high-level functions for SSH-related operations, leveraging ephemeral
+known_hosts and private keys stored in /dev/shm. This includes:
+  - ssh_get_server_key: minimal handshake to retrieve server host key (TOFU).
+  - run_ssh_command: strict host-key-checking SSH (expects host_keys in SSHConfig).
+  - run_kubectl: local 'kubectl exec' command.
+  - run_ssh_kubectl_command: remote 'kubectl exec' via SSH.
+
+We now allow specifying 'successful_return_codes' where needed—for example,
+to tolerate exit code 255 if the host forcibly terminates the session (e.g. reboot).
 """
 
 from __future__ import annotations
@@ -23,8 +29,6 @@ from amoebius.utils.async_command_runner import run_command, CommandError
 from amoebius.models.ssh import SSHConfig
 from amoebius.models.validator import validate_type
 from amoebius.utils.ephemeral_file import ephemeral_manager
-
-# The KubectlCommand is now in models.k8s
 from amoebius.models.k8s import KubectlCommand
 
 
@@ -59,7 +63,7 @@ async def ssh_get_server_key(
         ) as pk_path_union:
             pk_path = validate_type(pk_path_union, str)
 
-            # write private key
+            # Write private key
             async with aiofiles.open(pk_path, "wb") as fpk:
                 await fpk.write(cfg.private_key.encode("utf-8"))
             os.chmod(pk_path, 0o600)
@@ -82,6 +86,7 @@ async def ssh_get_server_key(
                 "exit",
                 "0",
             ]
+            # Use run_command with default success code=0
             await run_command(
                 ssh_cmd,
                 retries=retries,
@@ -110,9 +115,10 @@ async def run_ssh_command(
     env: Optional[Dict[str, str]] = None,
     retries: int = 3,
     retry_delay: float = 1.0,
+    successful_return_codes: Optional[List[int]] = None,
 ) -> str:
     """
-    Run an SSH command in strict mode, requiring host_keys in ssh_config.
+    Run an SSH command in strict host-key-checking mode, requiring host_keys in ssh_config.
 
     Args:
       ssh_config: Must have user, hostname, port, private_key, host_keys
@@ -121,12 +127,14 @@ async def run_ssh_command(
       env: optional environment variables
       retries: how many times to retry
       retry_delay: seconds between retries
+      successful_return_codes: Additional exit codes considered "non-error."
 
     Returns:
       captured stdout
 
     Raises:
-      CommandError: if host_keys empty or command fails
+      CommandError: if host_keys empty or the command fails (unless the code
+                    is in `successful_return_codes`).
     """
     if not ssh_config.host_keys:
         raise CommandError("run_ssh_command requires non-empty host_keys.")
@@ -141,16 +149,17 @@ async def run_ssh_command(
         ) as pk_path_union:
             pk_path = validate_type(pk_path_union, str)
 
-            # write known_hosts
+            # Write known_hosts
             async with aiofiles.open(kh_path, "w", encoding="utf-8") as fkh:
                 for line in ssh_config.host_keys:
                     await fkh.write(line + "\n")
 
-            # write private key
+            # Write private key
             async with aiofiles.open(pk_path, "wb") as fpk:
                 await fpk.write(ssh_config.private_key.encode("utf-8"))
             os.chmod(pk_path, 0o600)
 
+            # Build the ssh command
             ssh_cmd = [
                 "ssh",
                 "-p",
@@ -174,8 +183,16 @@ async def run_ssh_command(
             cmd_str = " ".join(shlex.quote(x) for x in remote_command)
             ssh_cmd.append(cmd_str)
 
+            # If user didn't specify, default to [0]
+            if successful_return_codes is None:
+                successful_return_codes = [0]
+
             return await run_command(
-                ssh_cmd, sensitive=sensitive, retries=retries, retry_delay=retry_delay
+                ssh_cmd,
+                sensitive=sensitive,
+                retries=retries,
+                retry_delay=retry_delay,
+                successful_return_codes=successful_return_codes,
             )
 
 
@@ -187,7 +204,7 @@ async def run_kubectl(
     retry_delay: float = 1.0,
 ) -> str:
     """
-    Execute a local "kubectl exec" command (no SSH).
+    Execute a local "kubectl exec" command. This is purely local, with no SSH.
     """
     args = kube_cmd.build_kubectl_args()
     return await run_command(
@@ -225,7 +242,7 @@ async def run_ssh_kubectl_command(
 
 def main() -> None:
     """
-    CLI demonstration of ephemeral usage:
+    CLI demonstration of ephemeral SSH usage:
       1) TOFU => retrieve server key lines
       2) Strict => run 'whoami'
     """
@@ -260,7 +277,11 @@ def main() -> None:
             host_keys=lines,
         )
         print("\n=== Step 2: Strict => run 'whoami' ===")
-        who = await run_ssh_command(ssh_config=strict_cfg, remote_command=["whoami"])
+        who = await run_ssh_command(
+            ssh_config=strict_cfg,
+            remote_command=["whoami"],
+            sensitive=True,
+        )
         print("whoami =>", who)
 
     try:
