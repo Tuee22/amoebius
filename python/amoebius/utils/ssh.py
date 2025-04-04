@@ -6,30 +6,32 @@ known_hosts and private keys stored in /dev/shm. This includes:
   - ssh_get_server_key: minimal handshake to retrieve server host key (TOFU).
   - run_ssh_command: strict host-key-checking SSH (expects host_keys in SSHConfig).
   - run_kubectl: local 'kubectl exec' command.
-  - run_ssh_kubectl_command: remote 'kubectl exec' via SSH.
+  - run_ssh_kubectl_command: remote 'kubectl exec' via SSH in strict mode.
+  - ssh_interactive_shell: an interactive shell session with strict host-key-checking.
 
-We now allow specifying 'successful_return_codes' where needed—for example,
-to tolerate exit code 255 if the host forcibly terminates the session (e.g. reboot).
+We allow specifying 'successful_return_codes' for run_ssh_command in case you need
+to accept non-zero codes as successes (e.g., disconnection codes on reboot).
 """
 
 from __future__ import annotations
 
-import argparse
 import asyncio
 import os
 import shlex
-import sys
+import aiofiles
+import aiofiles.ospath
 from pathlib import Path
 from typing import Dict, List, Optional
 
-import aiofiles
-import aiofiles.ospath
-
-from amoebius.utils.async_command_runner import run_command, CommandError
+from amoebius.models.k8s import KubectlCommand
 from amoebius.models.ssh import SSHConfig
 from amoebius.models.validator import validate_type
+from amoebius.utils.async_command_runner import (
+    run_command,
+    run_command_interactive,
+    CommandError,
+)
 from amoebius.utils.ephemeral_file import ephemeral_manager
-from amoebius.models.k8s import KubectlCommand
 
 
 async def ssh_get_server_key(
@@ -86,7 +88,6 @@ async def ssh_get_server_key(
                 "exit",
                 "0",
             ]
-            # Use run_command with default success code=0
             await run_command(
                 ssh_cmd,
                 retries=retries,
@@ -130,7 +131,7 @@ async def run_ssh_command(
       successful_return_codes: Additional exit codes considered "non-error."
 
     Returns:
-      captured stdout
+      captured stdout from the remote command
 
     Raises:
       CommandError: if host_keys empty or the command fails (unless the code
@@ -208,7 +209,10 @@ async def run_kubectl(
     """
     args = kube_cmd.build_kubectl_args()
     return await run_command(
-        args, sensitive=sensitive, retries=retries, retry_delay=retry_delay
+        args,
+        sensitive=sensitive,
+        retries=retries,
+        retry_delay=retry_delay,
     )
 
 
@@ -240,56 +244,75 @@ async def run_ssh_kubectl_command(
     )
 
 
-def main() -> None:
+async def ssh_interactive_shell(
+    ssh_config: SSHConfig,
+) -> int:
     """
-    CLI demonstration of ephemeral SSH usage:
-      1) TOFU => retrieve server key lines
-      2) Strict => run 'whoami'
+    Open an interactive SSH shell session with the remote host, using strict host key checking.
+
+    This function uses ephemeral known_hosts and the ephemeral private key in /dev/shm,
+    then invokes an interactive subprocess with 'ssh -t'.
+
+    Args:
+        ssh_config: Must have user, hostname, port, private_key, host_keys.
+
+    Returns:
+        The numeric exit code from the SSH session (e.g. 0 if clean exit).
+
+    Raises:
+        CommandError: If host_keys is empty or if we fail to launch the SSH session at all.
+                      (Once the interactive session starts, the user is interacting directly,
+                      so any remote command errors won't be thrown as CommandError.)
     """
-    parser = argparse.ArgumentParser(
-        description="Demonstrate ephemeral SSH usage: TOFU -> Strict"
-    )
-    parser.add_argument("--hostname", required=True)
-    parser.add_argument("--port", type=int, default=22)
-    parser.add_argument("--user", required=True)
-    parser.add_argument("--key-file", required=True)
-    args = parser.parse_args()
+    if not ssh_config.host_keys:
+        raise CommandError("ssh_interactive_shell requires non-empty host_keys.")
 
-    async def _demo() -> None:
-        key_txt = Path(args.key_file).read_text()
+    async with ephemeral_manager(
+        single_file_name="ssh_known_hosts", prefix="sshkh-"
+    ) as kh_path_union:
+        kh_path = validate_type(kh_path_union, str)
 
-        tofu_cfg = SSHConfig(
-            user=args.user,
-            hostname=args.hostname,
-            port=args.port,
-            private_key=key_txt,
-        )
-        print("=== Step 1: TOFU => retrieving server key ===")
-        lines = await ssh_get_server_key(tofu_cfg)
-        for ln in lines:
-            print("   ", ln)
+        async with ephemeral_manager(
+            single_file_name="ssh_idkey", prefix="sshpk-"
+        ) as pk_path_union:
+            pk_path = validate_type(pk_path_union, str)
 
-        strict_cfg = SSHConfig(
-            user=args.user,
-            hostname=args.hostname,
-            port=args.port,
-            private_key=key_txt,
-            host_keys=lines,
-        )
-        print("\n=== Step 2: Strict => run 'whoami' ===")
-        who = await run_ssh_command(
-            ssh_config=strict_cfg,
-            remote_command=["whoami"],
-            sensitive=True,
-        )
-        print("whoami =>", who)
+            # Write known_hosts lines
+            async with aiofiles.open(kh_path, "w", encoding="utf-8") as fkh:
+                for line in ssh_config.host_keys:
+                    await fkh.write(line + "\n")
 
-    try:
-        asyncio.run(_demo())
-    except Exception as ex:
-        print(f"Error: {ex}", file=sys.stderr)
-        sys.exit(1)
+            # Write private key
+            async with aiofiles.open(pk_path, "wb") as fpk:
+                await fpk.write(ssh_config.private_key.encode("utf-8"))
+            os.chmod(pk_path, 0o600)
 
+            # Build an SSH command that allocates a TTY (-t)
+            ssh_cmd = [
+                "ssh",
+                "-t",  # force pseudo-tty allocation
+                "-p",
+                str(ssh_config.port),
+                "-i",
+                pk_path,
+                "-o",
+                "BatchMode=yes",
+                "-o",
+                "StrictHostKeyChecking=yes",
+                "-o",
+                f"UserKnownHostsFile={kh_path}",
+                "-o",
+                "GlobalKnownHostsFile=/dev/null",
+                f"{ssh_config.user}@{ssh_config.hostname}",
+            ]
 
-if __name__ == "__main__":
-    main()
+            # Now run interactively. If we fail to start, we raise CommandError.
+            # Once the user is in the shell, the session is direct.
+            try:
+                rc = await run_command_interactive(ssh_cmd)
+            except Exception as exc:
+                raise CommandError(
+                    f"Failed to start interactive SSH session: {exc}"
+                ) from exc
+
+            return rc
