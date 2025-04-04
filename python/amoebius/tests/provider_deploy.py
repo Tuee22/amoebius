@@ -31,11 +31,11 @@ example_deployment = Deployment(
             count_per_zone=1,
             image=None,  # Use default x86 image
         ),
-        "workers": InstanceGroup(
-            category="arm_small",
-            count_per_zone=1,
-            image=None,  # Use default ARM image
-        ),
+        # "workers": InstanceGroup(
+        #     category="arm_small",
+        #     count_per_zone=1,
+        #     image=None,  # Use default ARM image
+        # ),
     }
 )
 
