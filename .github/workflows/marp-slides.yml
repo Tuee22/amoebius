@@ -31,7 +31,7 @@ jobs:
       - name: Build presentation
         run: |
           mkdir -p docs
-          marp presentation/slides.md --html --output docs/index.html
+          marp presentation/slides.md --html --output docs/index.html --no-stdin
           cp -r presentation/assets docs/
           
       - name: Commit built files
