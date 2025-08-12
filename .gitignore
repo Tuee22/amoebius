@@ -126,7 +126,6 @@ presentation/*.pptx
 
 # GitHub Pages (auto-generated)
 docs/assets/
-docs/index.html
 
 # Claude Code workspace
 .claude/
