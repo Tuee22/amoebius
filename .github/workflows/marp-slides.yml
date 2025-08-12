@@ -1,4 +1,4 @@
-name: Build Marp Slides
+name: Build and Deploy Marp Slides
 
 on:
   push:
@@ -9,7 +9,13 @@ on:
   workflow_dispatch: # Allow manual triggering
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -17,8 +23,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
         
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -30,14 +34,25 @@ jobs:
         
       - name: Build presentation
         run: |
-          mkdir -p docs
-          marp presentation/slides.md --html --output docs/index.html --no-stdin
-          cp -r presentation/assets docs/
+          mkdir -p _site
+          marp presentation/slides.md --html --output _site/index.html --no-stdin
+          cp -r presentation/assets _site/
           
-      - name: Commit built files
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add docs/
-          git diff --staged --quiet || git commit -m "Build presentation [skip ci]"
-          git push
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
