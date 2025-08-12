@@ -234,7 +234,7 @@ You need **microsecond execution** for competitive advantage, but your private k
 - 🏢 Physical security as primary defense
 
 ### **Amoebius Distributed Approach:**
-- 🔐 **Vault Key Sharding**: Private keys split across multiple regions
+- 🔐 **Shamir Secret Sharing**: Master keys split into shares; configurable quorum required for unsealing
 - 🎭 **Ceremony-Based Access**: Multi-party computation for key operations
 - ☁️ **Cloud-Native HSMs**: AWS CloudHSM, Azure Dedicated HSM integration
 - 📋 **Zero-Knowledge Proofs**: Prove key security without revealing keys
