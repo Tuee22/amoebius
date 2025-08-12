@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "amoebius"
 version = "0.0.1"
-description = "A brief description of your project."
-authors = ["tuee22"]
+description = "Multi-cloud resilient computing platform for autonomous failover and recovery"
+authors = ["Matt Nowak <matt@resolvefintech.com>"]
 
 packages = [
   { include = "amoebius" , from="python"}

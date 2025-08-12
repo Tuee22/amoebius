@@ -1,53 +1,65 @@
-# Local .terraform directories
-**/.terraform/*
-
-# .tfstate files
-**/*.tfstate
-**/*.tfstate.*
-
-# Crash log files
-**/crash.log
-
-# Terraform variable override files
-**/*.tfvars
-**/*.tfvars.json
-
-# Packer specific files
-packer_cache/
-**/*.pkr.hcl.lock
-
-# data folder
-data/
-
-# Provider-related lock files
-**/.terraform.lock.hcl
-
-# Sensitive files
-**/*.auto.tfvars
-**/*.tfvars
-
-# Ignore any secret or private key files
-**/*.pem
-**/*.key
-
-# Ignore .DS_Store (macOS specific)
-**/.DS_Store
-
-# other extensions to ignore
-**/*.zip
-**/*.log
-**/*.txt
-**/*.bin
-**/*.pid
-**/kind-cluster-config
-**/*.tfstate
-**/*.tfstate.backup
-
-**/__pycache__
-
-.git
+# Version Control
+.git/
 .gitignore
-.dockerignore
-**/.mypy_cache
-setup.sh
+.gitattributes
+
+# Documentation (keep CLAUDE.md for container context)
+README.md
+docs/
+presentation/
+
+# Generated presentation files  
+*.html
+*.pdf
+*.pptx
+
+# Python cache and artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Virtual environments and dependencies
+.venv/
+venv/
+.env
+.env.*
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Terraform (not needed in container)
+*.tfstate
+*.tfstate.*
+.terraform/
+*.tfvars
+*.tfvars.json
+.terraform.lock.hcl
+
+# Development and testing (exclude from production image)
+.pytest_cache/
+.coverage
+*.log
+
+# Local data and configs
+data/
+kind-cluster-config
 kubeconfig
+setup.sh
+
+# Claude Code workspace
+.claude/
+
+# CI/CD
+.github/

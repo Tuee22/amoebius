@@ -1,36 +1,36 @@
 Zen of Amoebius
 
-We all have an HSM called mom. Except for Eve. Eve is her own mom. But she still follows the rules for children.
+Clusters spawn other clusters in a hierarchy. Parent clusters act as authorities for their children, while simultaneously being children to their parents. The root cluster operates as both ultimate parent and child within this hierarchy.
 
-Here are the rules for children:
+Here are the foundational security principles:
 
-You can trust her completely.
+Parent clusters are completely trusted by their children.
 
-If you can’t reach mom don’t panic, you still have permission to use your secrets
+If a parent cluster is unreachable, children retain permission to use existing secrets.
 
-Some of your secrets might expire before mom gets home, that’s ok
+Secret expiration may occur before parent reconnection - this is acceptable.
 
-Mom is responsible for giving you the secrets you need in time, don’t worry about it
+Parent clusters are responsible for timely secret provisioning to their children.
 
-Mom only gives you secrets you absolutely need
+Parent clusters provide only necessary secrets with minimal required permissions to children.
 
-Mom prefers to give you less permissive secrets whenever possible
+Parent clusters prefer limited-scope secrets over broad permissions when delegating to children.
 
-Mom prefers to give you expiring secrets over permanent secrets– but she still has to give her children permanent secrets sometimes (especially to herself)
+Parent clusters prefer expiring secrets over permanent secrets, though permanent secrets are sometimes necessary (especially for spawning new children).
 
-When mom gives you a permanent secret, avoid storing it durably. But if you must, it has to be ciphertext
+When permanent secrets are issued, avoid durable storage. If durable storage is required, secrets must be stored as ciphertext.
 
-Storing expiring secrets durably in cleartext is generally discouraged, but allowed if it expires soon. And only when absolutely necessary
+Durable cleartext storage of expiring secrets is discouraged but permitted for short-lived secrets when absolutely necessary.
 
-Storing expiring secrets durably in cleartext is only necessary for bootstrap reasons, namely to avoid chicken-and-egg problem when initializing vault 
+Durable cleartext storage is only justified for bootstrap scenarios to prevent circular dependencies during vault initialization.
 
-This means cluster rebootstraps are always safe, even if storage is being read and/or tampered with– we only have to rely on cleartext memory being safe
+This ensures cluster rebootstraps remain secure even with compromised storage, relying only on secure memory operations.
 
-Mom knows her children remember everything they see. Both in durable and ephemeral storage. Either in cleartext or ciphertext– it exists in that form, in that geolocation, forever.
+All clusters permanently retain any observed secrets in both durable and ephemeral storage, whether in cleartext or ciphertext form, within their geolocation.
 
-Secrets can never be unseen, they can only be expired
+Secrets cannot be unseen, only expired.
 
-There’s probably never an ok time to manually expire a secret (it’s unreliable and error prone, and a suitably short-expiring secret is preferable-- but only for vault bootstrap reasons)
+Manual secret expiration should be avoided as it is unreliable and error-prone. Short-expiring secrets are preferable, with exceptions only for vault bootstrap scenarios.
 
 The amoebius config is global. Parts of it are obfuscated because you don't need them.
 
