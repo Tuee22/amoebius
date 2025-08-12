@@ -105,7 +105,7 @@ style: |
 
 ### **Kubernetes delivers this... but with limitations**
 
-*What happens when your NYC colo needs to failover to AWS at 2 AM?*
+*What happens when your NYC colo needs to failover to AWS at 2:00 AM?*
 
 ---
 
