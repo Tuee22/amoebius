@@ -1,4 +1,4 @@
-name: Build and Deploy Marp Slides
+name: Build Marp Slides
 
 on:
   push:
@@ -10,32 +10,34 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
-      - name: Create docs directory
-        run: mkdir -p docs
-        
-      - name: Build slides with Marp
-        uses: docker://marpteam/marp-cli:latest
         with:
-          args: presentation/slides.md --html --output docs/index.html --theme default
+          token: ${{ secrets.GITHUB_TOKEN }}
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
           
-      - name: Copy assets
+      - name: Install Marp CLI
+        run: npm install -g @marp-team/marp-cli
+        
+      - name: Build presentation
         run: |
+          mkdir -p docs
+          marp presentation/slides.md --html --output docs/index.html
           cp -r presentation/assets docs/
           
-      - name: Commit and push to gh-pages branch
+      - name: Commit built files
         run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
           git add docs/
-          git commit -m "Deploy presentation" || echo "No changes to commit"
-          git push origin main
+          git diff --staged --quiet || git commit -m "Build presentation [skip ci]"
+          git push
