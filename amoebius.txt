@@ -87,3 +87,4 @@ in general we need semantics around cluster manifest changes, and proofs of corr
 
 do we want first class support for wireguard vpn / linkerd service mesh? we would need semantics like : root node deploys HA cluster, cluster configures wireguard gateway, all clusters (including root) get a VPN ip from that gateway, linkerd service mesh is now active. this may be redundant with envoy though : if clusters already have their own secure gateways, arbitrary access to internal services can already be granted. 
 
+one sidenote about .dhall and GHC 9.14.1 : due to version limitations in hackage, it is necessary to use the allow-newer feature. 
