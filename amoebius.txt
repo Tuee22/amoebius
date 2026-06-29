@@ -88,3 +88,26 @@ in general we need semantics around cluster manifest changes, and proofs of corr
 do we want first class support for wireguard vpn / linkerd service mesh? we would need semantics like : root node deploys HA cluster, cluster configures wireguard gateway, all clusters (including root) get a VPN ip from that gateway, linkerd service mesh is now active. this may be redundant with envoy though : if clusters already have their own secure gateways, arbitrary access to internal services can already be granted. 
 
 one sidenote about .dhall and GHC 9.14.1 : due to version limitations in hackage, it is necessary to use the allow-newer feature. 
+
+
+because of the ephemeral nature of amoebius k8s clusters, individual clusters should be able to be torn down anytime without affecting global coherence. cluster teardowns can happen in conjunction with syncrhonization events (pulsar, MinIO). that's different from chaos style failovers : if a cluster is to be torn down, it gets to properly clean things up before going away. the global .dhall applies even when a cluster gets torn down. when tearing down a cluster would stop the global .dhall from being satisfied (eg it has the only nodes running a particular hardware substrate which can't be independently failed over) it pushes back with a warning : something is going to stop working, and we're going to fallback to the .dhall failback. there needs to be an override command to go ahead under these circumstances. factors like compute and storage capacity are .dhall configurable, and affect whether pushback occurs.
+
+open question : while teardown should be a safe way to "turn off" a cluster anytime, freeing its compute resources, it's critical that it's durable storage remains or spin-up will fail. we need a way to also control the lifecycle of that durable storage, otherwise the default behaviour is "all durable storage must exist forever". we need to ensure amoebius doesn't accidentally delete durable storage, which could mean outright forbidding it under normal circumstances. on the other hand, we will need test harnesses to be able to delete storage in order to run leak free test cycles.
+
+this points to special test sematics in the dhall based DSL
+
+this requires more thought for things like elastic storage requirements (how can we ever shrink them ?). we need to enable storage shrinking while still making it impossible to represent destruction of data.
+
+does this mean eg EBS drives are not in pulumi ? or that the AWS keys only have authority to create, not delete, EBS resources ? (and test cleanup should only be done with elevated permissions?) one possibility is all test generated resources have a test flag for the harness to see, and these get deleted by the elevated test credentials. but i'm not sure how that works with pulumi, ie does it make sense for pulumi to create with one set of credentails then destroy with another ? or is the harness manually deleting these resources then destroying the pulumi backend (after a final resource sweep) ?
+
+something else requiring thought is how amoebius builds containers and uploads them to harbor. presumably we should always use buildx to build multi-arch containers. should we fail on both if only one upload fails ? should we implement a versioned system or just use :latest ? at some point does the amoebius pod itself take over responsibility for container builds or does that continue to be a host daemon requirement ? (strongest argument for host is that it's guaranteed to keep all builds in the same place, eg apple silicon on tart)
+
+how should the general amoebius boostrap look ? eg give it a bootstrap.dhall that gets deleted ? can the amoebius manifest be embedded into this, or should the first manifest ?
+
+should the localhost gateway go through envoy / gateway api, or just vanilla nodeport ? not sure which is safer. but we need to be absolutely certain only localhost traffic can get direct access to any k8s services without going through the public envoy/keycloak gateway. 
+
+i'm tempted to have one big ameobius container with everything in it including 3rd party services (harbor, pulsar, postgres, etc). somehow that feels more security conscious than pulling a mixed array of public containers. i could even put all that stuff into basecontainer and amoebius would just be a light wrapper around that. maybe even eventually have amoebius be the only base container for everything. should infernix, jitml etc just be haskell libraries ? it would be lightweight enough to have them there and just build them. or perhaps amoebius has modules which are haskell sourcecode (checked with a custom AST checker?).
+
+that could be the winning secret : orchestration DSL lives in .dhall, extension DSL is Haskell that is a) validated by a custom AST checker, and b) has access to all amoebius libraries + jit features. (this would turn jitML into an extension of amoebius's native jit features.) jit stuff is probably amoebius v2. v1 can be an orchestrator for arbitrary containers, + specify (when it's ready).
+
+in general we do not want to use env vars or bash logic, we want everything to be dhall
