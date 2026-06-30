@@ -31,7 +31,7 @@ app spec joins with *a* deployment-rules layer to produce *a* deployment; swap t
 and you get a different deployment from byte-identical app logic. The grammar of these two surfaces — the
 Dhall record/union types, total composability, and the illegal-state-unrepresentable contract — is owned by
 [dsl_doctrine.md](./dsl_doctrine.md). This document owns only the **dividing line**: which concerns live on
-which surface, and why the line must never be crossed (`amoebius.txt` lines 43–47, 62–64; DEVELOPMENT_PLAN
+which surface, and why the line must never be crossed (DEVELOPMENT_PLAN
 cross-cutting invariant "Application logic and deployment rules are separate DSL surfaces").
 
 > **Honesty.** This split is *specified* doctrine for Phase 3 (the DSL type families) and *demonstrated* by
@@ -47,11 +47,10 @@ cross-cutting invariant "Application logic and deployment rules are separate DSL
 Lead with the intuition: **everything on this surface survives a move.** If you tore the app off its cluster
 and stood it up somewhere else, on a different substrate, at a different scale, these are the things that
 would have to come *with* it because they *are* the app. An amoebius app is exactly two artifacts: one or
-more container images that build for both `amd64` and `arm64`, and an **app-spec `.dhall`** (`amoebius.txt`
-lines 43, 64). The image-build pipeline is owned by [image_build_doctrine.md](./image_build_doctrine.md);
+more container images that build for both `amd64` and `arm64`, and an **app-spec `.dhall`**. The image-build pipeline is owned by [image_build_doctrine.md](./image_build_doctrine.md);
 this surface owns the spec.
 
-The app-spec surface declares (`amoebius.txt` lines 43, 47):
+The app-spec surface declares:
 
 - **UI and user lifecycles** — what surfaces the app exposes and what a user can do with them.
 - **LB services** — *which* of the app's services are reachable from the edge. (Whether they are reachable
@@ -71,7 +70,7 @@ The app-spec surface declares (`amoebius.txt` lines 43, 47):
 - **Use of shared libraries** — that the app builds on infernix, jitML, or (later) a Haskell extension
   module is part of what the app *is* (see §8).
 
-Two structural facts pin app identity to the cluster (`amoebius.txt` line 47): an app's **name is unique per
+Two structural facts pin app identity to the cluster: an app's **name is unique per
 cluster**, and the app gets **its own namespace with that same name**. Secrets appear here **by name only** —
 the app references a secret; it never contains one. The secret-by-name `SecretRef` contract and
 parent-injects-into-child model are owned by [vault_pki_doctrine.md](./vault_pki_doctrine.md) and must not
@@ -96,12 +95,11 @@ The deployment-rules surface declares:
   replica value is a pure deployment dial that rides an unchanged chart. Where the replica value physically
   lives in the DSL (a cluster-scoped `cluster.dhall` value seeded at `bootstrap` vs a per-app deployment
   block) is a [dsl_doctrine.md](./dsl_doctrine.md) concern; this doc owns only the rule that it is **never**
-  app logic (`amoebius.txt` line 62).
+  app logic.
 - **Geo-replication topology.** Whether the app runs on one cluster or N geographically-replicated clusters,
   and how their durable state is kept in step (via the Pulsar / MinIO / Postgres idioms — see §9). The
   cross-cluster mechanics are owned by [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md).
-- **Failover policy.** When and how the lead cluster's gateway fails over and DNS is repointed
-  (`amoebius.txt` line 68). The async cross-cluster correctness boundary — the one place a per-system proof
+- **Failover policy.** When and how the lead cluster's gateway fails over and DNS is repointed. The async cross-cluster correctness boundary — the one place a per-system proof
   obligation concentrates — is owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md).
 - **Chaos-test injection.** The app **does not know it is being chaos-tested.** A chaos schedule is attached
   here, never in the app spec; the Extract→Model→Inject methodology and the proven/tested/assumed ledger are
@@ -110,7 +108,7 @@ The deployment-rules surface declares:
 - **Inference substrate.** Whether an ML workload runs on Apple Metal on the host, CUDA on the cluster, or
   linux-cpu is a deployment decision, not app logic — see §7.
 - **Dynamic node provisioning policy.** Scaling nodes by arbitrary logic — load, spot-instance cost, or
-  workflow completion (`amoebius.txt` line 70) — is a deployment rule, owned operationally by
+  workflow completion — is a deployment rule, owned operationally by
   [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md).
 
 This surface is **keyed by app**: a deployment-rules layer references an app by name and says *how to run
@@ -164,7 +162,7 @@ Three concrete payoffs, each a direct consequence of keeping the line clean:
   opening the app's source — and app authors ship features without ever reasoning about topology. The two
   teams change different files.
 - **Composability.** Because the surfaces are separable inputs, the *same* app composes with *any* valid
-  deployment-rules layer (`amoebius.txt` line 72, "total composability"). The proof case is §6 and the
+  deployment-rules layer (total composability). The proof case is §6 and the
   extreme case is §9.
 
 The deepest payoff is that the split makes a whole category of mistakes **unrepresentable**: the app surface
@@ -179,7 +177,7 @@ the *reason* it is worth enforcing.
 ## 6. The proof case: mattandjames boiled to application-logic-only
 
 mattandjames is the canonical demonstration of this doctrine, because it currently violates it and the plan
-is to fix it (`amoebius.txt` line 62).
+is to fix it.
 
 **Today**, mattandjames bakes deployment decisions into the app: it ships a naive **CPU-only inference
 engine**, it deploys itself **exclusively on kind** in a **mock 3-replica mode**, and it simulates HA by
@@ -187,7 +185,7 @@ standing up *multiple kind clusters*. Scale, substrate, and HA strategy are all 
 — so the "3" is unchangeable without editing the app, and the inference engine cannot move off CPU without a
 rewrite.
 
-**Target** (`amoebius.txt` line 62): mattandjames is **boiled down to application logic only** — the UI,
+**Target**: mattandjames is **boiled down to application logic only** — the UI,
 the user lifecycles, the durable data, the auth rules. Then a *single* amoebius `.dhall` deployment-rules
 layer configures, **with zero extra effort from the application itself**:
 
@@ -216,13 +214,11 @@ This is the subtlest application of the litmus test, so make the distinction exp
 - **"Inference runs on Apple Metal vs CUDA vs linux-cpu"** is a **deployment rule.** *Where* the inference
   workload is placed — a host compute daemon using Apple Silicon's unified memory, a CUDA pod on the
   cluster, or a CPU pod — is a substrate/placement choice, configured in the deployment-rules layer with no
-  change to the app (`amoebius.txt` line 62).
+  change to the app.
 
 infernix is "an amoebius extension: a single Haskell binary that can be deployed as a distributed system
-either at node-system level (in an Apple cluster) or cluster level (as a stateless deployment)"
-(`amoebius.txt` line 62). That *dual* placement is precisely a deployment decision — the same infernix logic,
-two placements. Consequently **the infernix `.dhall` nests inside the amoebius `.dhall`** (`amoebius.txt`
-line 62): infernix's own configuration is composed into the larger deployment spec rather than living as a
+either at node-system level (in an Apple cluster) or cluster level (as a stateless deployment)". That *dual* placement is precisely a deployment decision — the same infernix logic,
+two placements. Consequently **the infernix `.dhall` nests inside the amoebius `.dhall`**: infernix's own configuration is composed into the larger deployment spec rather than living as a
 parallel system. The host-vs-cluster placement mechanics (host compute daemons as Pulsar/MinIO peers over
 host-only NodePorts, no mTLS) are owned by [platform_services_doctrine.md §9](./platform_services_doctrine.md)
 and the host↔cluster comms doctrine; the determinism and content-addressing that make an infernix run
@@ -234,7 +230,7 @@ dependency is app logic, the placement is a deployment rule.
 ## 8. Shared-library use is application logic
 
 Which libraries an app builds on — infernix, jitML, and (a later phase) Haskell extension modules validated
-by a custom AST checker (`amoebius.txt` lines 109–111) — is part of what the app *is*, and therefore lives
+by a custom AST checker — is part of what the app *is*, and therefore lives
 on the application-logic surface. The clean way to hold this with §7:
 
 - The library **call graph** — *that* the app invokes infernix, *which* workflows it composes — is
@@ -268,9 +264,8 @@ Cashing out "zero app change":
 
 - The app already declares its durable state — MinIO buckets, Pulsar topics, a Postgres DB (§2). The
   deployment-rules layer says *replicate them across clusters*; the **platform idioms carry the state**:
-  Pulsar geo-replication, MinIO replication, and Patroni/Postgres replication
-  (`amoebius.txt` lines 68, 80). The app's data model is unchanged; only its replication topology is.
-- Gateway failover and route53 repointing (`amoebius.txt` line 68) are deployment-rules + cluster-lifecycle
+  Pulsar geo-replication, MinIO replication, and Patroni/Postgres replication. The app's data model is unchanged; only its replication topology is.
+- Gateway failover and route53 repointing are deployment-rules + cluster-lifecycle
   concerns — the app never repoints its own DNS.
 - The app spec is **byte-identical** across the single-cluster and N-cluster deployments; the diff is
   entirely in the deployment-rules layer.
@@ -329,4 +324,3 @@ ledger; it states the target shape and links back for status.
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
-- [Amoebius vision](../../amoebius.txt)

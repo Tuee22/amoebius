@@ -17,8 +17,7 @@ ad-hoc, env-var-driven, secret-on-disk shape amoebius exists to abolish. So amoe
 *cluster capability*, not a host tool: **"via pulumi, amoebius may spawn other k8s clusters … in all cases
 these deployments are to be tracked using pulumi, using minio backend, locally encrypted via vault
 transport engine"** and **"aks clusters, along with all pulumi deploys of all assets, only happens within
-an existing amoebius cluster, using MinIO as the backend and vault envelope encryption for that backend"**
-(`amoebius.txt` lines 54, 60).
+an existing amoebius cluster, using MinIO as the backend and vault envelope encryption for that backend"**.
 
 Concretely:
 
@@ -35,7 +34,7 @@ Concretely:
 - **No environment variables, no `PATH`, ever.** The `pulumi` binary, the cloud-provider plugin, and any
   CLI a deploy shells out to are discovered lazily through the substrate's package manager and invoked by
   full path; credentials and backend coordinates come from the `.dhall` and Vault, never from process
-  environment (`amoebius.txt` lines 20, 58; the no-env contract is owned by
+  environment (the no-env contract is owned by
   [substrate_doctrine.md](./substrate_doctrine.md)). amoebius does not export `PULUMI_*`,
   `AWS_*`, or `PULUMI_CONFIG_PASSPHRASE` into a child process's environment as a side channel.
 
@@ -57,9 +56,8 @@ opaque ciphertext.
   [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md)). The checkpoint is one **opaque object**,
   not a vendor-managed state service and not a host file.
 - **Encryption = a Vault-Transit envelope.** The checkpoint is sealed with a data key that Vault's Transit
-  engine wraps and unwraps; the plaintext key never lands on disk, and MinIO sees only ciphertext
-  (`amoebius.txt` lines 54, 60: "vault envelope encryption for that backend" / "locally encrypted via vault
-  transport engine"). **This doctrine does not own the envelope mechanism** — the Transit mount, the
+  engine wraps and unwraps; the plaintext key never lands on disk, and MinIO sees only ciphertext.
+  **This doctrine does not own the envelope mechanism** — the Transit mount, the
   wrap/unwrap policy, the seal/unseal posture, and the parent/child trust tree are owned by
   [vault_pki_doctrine.md](./vault_pki_doctrine.md). This doc owns only the *requirement* that Pulumi state
   be a Transit-enveloped MinIO object and never anything weaker.
@@ -143,12 +141,12 @@ duplicates it.
 
 | Resource | What Pulumi does here | Owned by |
 |---|---|---|
-| **Provider-managed clusters** (EKS now — prodbox's reality; AKS later) | Provision the managed cluster via cloud keys over the API, from inside a parent (`amoebius.txt` lines 54, 60); land the stateless in-cluster singleton daemon | Lifecycle meaning: [cluster_lifecycle_doctrine.md §1, §3](./cluster_lifecycle_doctrine.md) |
+| **Provider-managed clusters** (EKS now — prodbox's reality; AKS later) | Provision the managed cluster via cloud keys over the API, from inside a parent; land the stateless in-cluster singleton daemon | Lifecycle meaning: [cluster_lifecycle_doctrine.md §1, §3](./cluster_lifecycle_doctrine.md) |
 | **Spawned self-managed children** (`kind` / `rke2`) | Provision nodes via one or more SSH keys, then bring up the standard service set | Spawn lifecycle: [cluster_lifecycle_doctrine.md §3](./cluster_lifecycle_doctrine.md) |
-| **Dynamic node provisioning** | Add/drain EC2 or managed nodes driven by load / spot cost / workflow completion (`amoebius.txt` line 70) | Elastic-shape policy: [cluster_lifecycle_doctrine.md §8](./cluster_lifecycle_doctrine.md) |
-| **Per-PV EBS volumes** | One EBS per PV, sized 1:1 to its PVC, decoupled from the EC2/node lifecycle (`amoebius.txt` line 29) | Sizing/rebind invariant: [storage_lifecycle_doctrine.md §5, §5.1](./storage_lifecycle_doctrine.md); credential model: §6 here |
-| **DNS — route53** | Provision/maintain hosted zones and records (`amoebius.txt` line 56) | This doctrine, §5 |
-| **TLS — zerossl** | ACME (DNS-01) certificate issuance and retention (`amoebius.txt` line 56) | This doctrine, §5 |
+| **Dynamic node provisioning** | Add/drain EC2 or managed nodes driven by load / spot cost / workflow completion | Elastic-shape policy: [cluster_lifecycle_doctrine.md §8](./cluster_lifecycle_doctrine.md) |
+| **Per-PV EBS volumes** | One EBS per PV, sized 1:1 to its PVC, decoupled from the EC2/node lifecycle | Sizing/rebind invariant: [storage_lifecycle_doctrine.md §5, §5.1](./storage_lifecycle_doctrine.md); credential model: §6 here |
+| **DNS — route53** | Provision/maintain hosted zones and records | This doctrine, §5 |
+| **TLS — zerossl** | ACME (DNS-01) certificate issuance and retention | This doctrine, §5 |
 
 Two boundaries worth stating loudly, because they are easy to blur:
 
@@ -171,8 +169,7 @@ Two boundaries worth stating loudly, because they are easy to blur:
 The intuition: a cluster that terminates public TLS and answers on a public name needs two external facts
 to be *true in the world* — a DNS record that points at its load balancer, and a certificate a browser will
 trust. Both are external mutations, so both are Pulumi/IaC concerns, and **amoebius models them so the wrong
-binding is unrepresentable** (`amoebius.txt` line 56: "amoebius is also responsible for DNS (eg route53) and
-TLS certs (eg zerossl). look at ~/prodbox in particular for examples of this").
+binding is unrepresentable**.
 
 ### 5.1 DNS — route53
 
@@ -182,7 +179,7 @@ TLS certs (eg zerossl). look at ~/prodbox in particular for examples of this").
   per-run/durable; a shared apex/parent zone is long-lived.
 - **"DNS that binds to the wrong IP address" is unrepresentable.** The DSL ties a record to the cluster's
   *actual* LB endpoint rather than a free-text address, so the illegal binding the vision names
-  (`amoebius.txt` line 5) cannot be written. The typing technique that enforces this lives in
+  cannot be written. The typing technique that enforces this lives in
   [dsl_doctrine.md](./dsl_doctrine.md) / [illegal_state_catalog.md](./illegal_state_catalog.md); this doc
   owns the route53 *realization* of the bound record.
 - **Failover repoint is a different owner.** Geo-replicated siblings repointing DNS when the lead's gateway
@@ -203,8 +200,7 @@ TLS certs (eg zerossl). look at ~/prodbox in particular for examples of this").
   [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md)).
 - **Secrets are names, injected — not in Dhall.** The ZeroSSL EAB credential and any route53 API credential
   appear in the `.dhall` only as a `SecretRef`-style *name*; the bytes are injected into the cluster's Vault
-  by its parent and resolved at use ([vault_pki_doctrine.md](./vault_pki_doctrine.md); `amoebius.txt`
-  line 72).
+  by its parent and resolved at use ([vault_pki_doctrine.md](./vault_pki_doctrine.md)).
 
 > **Honesty.** The single-issuer ZeroSSL-DNS-01 model and the retain-and-restore certificate flow are
 > **proven in prodbox**, not in amoebius. Treat them as the design amoebius adopts, not a tested amoebius
@@ -215,15 +211,15 @@ TLS certs (eg zerossl). look at ~/prodbox in particular for examples of this").
 ## 6. The EBS create-vs-delete credential model
 
 This is the section the storage doctrine defers to
-([storage_lifecycle_doctrine.md §5, §7](./storage_lifecycle_doctrine.md)) and the one `amoebius.txt`
-flags as genuinely open (line 101): *"does this mean eg EBS drives are not in pulumi? or that the AWS keys
+([storage_lifecycle_doctrine.md §5, §7](./storage_lifecycle_doctrine.md)) and the one the original vision
+flags as genuinely open: *"does this mean eg EBS drives are not in pulumi? or that the AWS keys
 only have authority to create, not delete, EBS resources? (and test cleanup should only be done with
 elevated permissions?) … does it make sense for pulumi to create with one set of credentials then destroy
 with another? or is the harness manually deleting these resources then destroying the pulumi backend
 (after a final resource sweep)?"* This doctrine takes a **design position** and resolves it.
 
 **The danger, stated plainly.** Durable storage must survive every ordinary teardown, or "ephemeral cluster,
-durable data" collapses (`amoebius.txt` lines 29, 95). But a Pulumi stack that *creates* a volume can, by
+durable data" collapses. But a Pulumi stack that *creates* a volume can, by
 default, *destroy* it on `pulumi destroy`. If the ephemeral cluster stack owned its EBS volumes, tearing
 the cluster down would delete the data. So the EBS volumes must be **structurally** outside the ephemeral
 destroy set, and the authority to delete them must be **structurally** withheld from normal operation.
@@ -241,13 +237,13 @@ destroy set, and the authority to delete them must be **structurally** withheld 
    credential — the one a running cluster uses for ordinary deploys — is granted `ec2:CreateVolume` (and
    the cluster-stack create/delete it needs) but **denied `ec2:DeleteVolume`** on durable, retained
    volumes. "Accidentally delete durable storage" is therefore *unauthorized at the cloud API*, not merely
-   discouraged by policy (`amoebius.txt` line 101; the requirement is set by
+   discouraged by policy (the requirement is set by
    [storage_lifecycle_doctrine.md §7](./storage_lifecycle_doctrine.md), the credential mechanics are owned
    here).
 3. **Only the elevated test harness may delete durable EBS, and only test-flagged volumes.** Leak-free test
-   cycles *must* reclaim what they create (`amoebius.txt` line 95). The elevated test credential — held in
+   cycles *must* reclaim what they create. The elevated test credential — held in
    memory for the run, never stored — carries the delete authority the normal credential lacks, and uses it
-   **only on volumes carrying the harness's test flag** (`amoebius.txt` line 101). The flag-and-sweep
+   **only on volumes carrying the harness's test flag**. The flag-and-sweep
    mechanism, the per-run leak ledger, and the always-tear-down test `.dhall` are owned by
    [testing_doctrine.md](./testing_doctrine.md); this doc owns the credential split and the
    create/delete authority boundary.
@@ -272,7 +268,7 @@ flowchart TD
   durable -->|survives cluster teardown, re-attaches next bring-up| rebind[Same bytes on the next spin-up]
 ```
 
-> **Honesty.** This is a **design resolution of an explicitly open question** (`amoebius.txt` line 101), not
+> **Honesty.** This is a **design resolution of an explicitly open question**, not
 > a built or tested amoebius capability. The credential split, the `protect`/`Retain` separation, and the
 > elevated test-flagged sweep are specification to be validated — the credential-class split is *proven in
 > prodbox* (operational vs ephemeral-elevated credentials per resource class), but EBS-in-prodbox is
@@ -288,7 +284,7 @@ The intuition: if a parent must spin up three unrelated child clusters, running 
 another is slow for no reason — they share no data, so their *independence is a fact about the program* that
 the type structure should make visible and the runtime should exploit. amoebius does exactly that:
 **"we want to use sound FP principles, including applicatives wherever possible to parallelize work (eg
-multiple independent pulumi deploys)"** (`amoebius.txt` line 58).
+multiple independent pulumi deploys)"**.
 
 - **Independence = `Applicative`; dependency = `Monad`.** Independent deploys compose under the applicative
   combinator (`<*>` / `traverse`-style), which *cannot* express a data dependency between its operands — so
@@ -398,4 +394,3 @@ credential model is an explicit *resolution of an open question*, not a tested c
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
-- [Amoebius vision](../../amoebius.txt)

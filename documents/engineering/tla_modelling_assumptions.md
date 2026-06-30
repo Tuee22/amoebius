@@ -99,8 +99,7 @@ accepted some replicated state but not all — and at that instant it goes down,
 fail the gateway over *to that very cluster*. What happens? The honest answer today is *we have
 not proven one*, and that is exactly why the model is scheduled.
 
-This is the motivating problem stated in the project vision
-([amoebius.txt](../../amoebius.txt), line 80): *"what exactly happens if a cluster goes down
+This is the motivating problem stated in the project vision: *"what exactly happens if a cluster goes down
 mid geo-sync and we try to failover the gateway to that cluster? We need to prove we always have
 well-defined behaviour (somehow, and even define what that means)."*
 
@@ -174,5 +173,4 @@ state the layer it actually reaches — proof, test evidence, or assumption — 
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — geo-replication, gateway failover, and teardown-with-cleanup vs chaos-failover mechanics.
 - [Platform Services Doctrine](./platform_services_doctrine.md) — which delegated subsystem (MinIO/Pulsar/Patroni) owns which intra-cluster consensus guarantee.
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — the DNS-failover repoint owner.
-- [Amoebius vision](../../amoebius.txt) — line 80, the motivating mid-geo-sync failover question.
 - [Documentation Standards](../documentation_standards.md) — header, SSoT, and honesty requirements.

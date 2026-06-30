@@ -86,8 +86,8 @@ and a warm cluster is air-gapped by construction.
 
 amoebius runs on both x86 substrates (linux-cpu / linux-cuda, typically `amd64`) and Apple-Silicon hosts
 (`arm64`). A single-arch image would mean "this image only runs where it was built" — fatal for a
-fungible, spawn-anywhere cluster. So **every amoebius-built image is multi-arch** (`amoebius.txt` line 103:
-"presumably we should always use buildx to build multi-arch containers").
+fungible, spawn-anywhere cluster. So **every amoebius-built image is multi-arch** — the resolved answer to
+an open design question of whether amoebius should always use buildx to build multi-arch containers.
 
 Concretely:
 
@@ -119,8 +119,8 @@ flowchart LR
 
 ## 4. Atomic publication — a partial multi-arch upload is a failed upload
 
-The vision asks the operational question directly (`amoebius.txt` line 103: "should we fail on both if only
-one upload fails?"). amoebius's doctrine answer is **yes — fail closed, atomically.**
+An open design question asks directly whether a multi-arch publish should fail on both arches if only one
+upload fails. amoebius's doctrine answer is **yes — fail closed, atomically.**
 
 The intuition: a multi-arch tag that resolves on `amd64` but 404s on `arm64` is *worse* than no tag at all,
 because the cluster looks healthy until an `arm64` node tries to schedule the pod. A half-published tag is a
@@ -153,8 +153,8 @@ landmine. So amoebius treats a multi-arch image as one indivisible artifact:
 
 ## 5. Versioning vs `:latest` — DEVELOPMENT_PLAN decision (recommended default: immutable, never `:latest`)
 
-This is one of the explicitly open questions (`amoebius.txt` line 103: "should we implement a versioned
-system or just use `:latest`?"). It is flagged here as a
+This is an explicitly open design question: whether to implement a versioned tagging system or just use
+`:latest`. It is flagged here as a
 [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) decision (Phase 2); this section records the **trade and
 the recommended default**, not a frozen mechanism.
 
@@ -190,15 +190,14 @@ vs a release calendar) and whether amoebius keeps a floating pointer tag at all.
 
 ## 6. Host build vs in-pod build — DEVELOPMENT_PLAN decision (recommended default: host builder for v1)
 
-The second open question (`amoebius.txt` line 103: "at some point does the amoebius pod itself take over
-responsibility for container builds or does that continue to be a host daemon requirement?"). Flagged as a
+The second open design question: whether the amoebius pod itself eventually takes over container builds, or
+that continues to be a host-daemon responsibility. Flagged as a
 [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) decision; recommended default below.
 
 The intuition: a builder needs a Docker/buildx engine *somewhere*. Two homes are possible — the host's
 build daemon (the prodbox model: `docker build` on the host, `local_registry_pipeline.md` §6) or an in-pod
 builder running inside the cluster. The vision states the strongest argument for host directly: a host
-builder is "guaranteed to keep all builds in the same place, eg apple silicon on Tart" (`amoebius.txt` line
-103).
+builder is "guaranteed to keep all builds in the same place, eg apple silicon on Tart".
 
 **Recommended default: the host builder for v1.**
 
@@ -222,7 +221,7 @@ in-pod builder reproduces the host's multi-arch coverage (especially Apple-Silic
 
 ## 7. What amoebius bakes vs builds — the base container is the supply chain
 
-`amoebius.txt` line 109 asked whether to put *"one big amoebius container with everything in it including
+An open design question asked whether to put *"one big amoebius container with everything in it including
 3rd party services … into basecontainer."* The operator has now **adopted** exactly that: amoebius's images
 fall into two classes, and the third-party services are **baked**, not mirrored.
 
@@ -348,4 +347,3 @@ the build-and-registry pipeline and links back for status; it never maintains a 
 - [Engineering Doctrine Index](./README.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
-- [Amoebius vision](../../amoebius.txt)

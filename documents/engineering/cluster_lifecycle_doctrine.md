@@ -13,13 +13,13 @@
 
 There are exactly **two** kinds of cluster amoebius drives, and the whole point of this doctrine is that
 they share **one** lifecycle vocabulary — *bring-up → init → reconcile → teardown* — even though the
-bring-up mechanics differ underneath (`amoebius.txt` lines 7, 18, 60).
+bring-up mechanics differ underneath.
 
 | | **Self-managed** (`kind` / `rke2`) | **Provider-managed** (AKS; EKS is prodbox's reality) |
 |---|---|---|
-| Host binary present? | **Yes** — the binary lives on the host and owns bring-up | **No** — there is no direct host access (`amoebius.txt` line 18) |
-| How it comes up | `bootstrap.sh` on the host → `bootstrap --distro={kind,rke2}` (§2) | Provisioned **via cloud keys over the API, from inside an existing amoebius cluster** (Pulumi) (`amoebius.txt` line 60) |
-| Host-level worker daemons | Supported (e.g. Apple-Metal inference) | **Not** supported — no host, no Apple substrate; only the in-cluster singleton daemon (`amoebius.txt` line 60) |
+| Host binary present? | **Yes** — the binary lives on the host and owns bring-up | **No** — there is no direct host access |
+| How it comes up | `bootstrap.sh` on the host → `bootstrap --distro={kind,rke2}` (§2) | Provisioned **via cloud keys over the API, from inside an existing amoebius cluster** (Pulumi) |
+| Host-level worker daemons | Supported (e.g. Apple-Metal inference) | **Not** supported — no host, no Apple substrate; only the in-cluster singleton daemon |
 | Typical role | Any tier, including the **root** (an admin's laptop kind, or a single-node rke2) | A **child** spawned by a parent; never the root |
 
 The shared shape is what lets the rest of this document treat "a cluster" uniformly: a child you spawn on
@@ -42,23 +42,24 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
 
 - **`bootstrap.sh` is a thin igniter, not the orchestrator.** Its only job is to ensure the package
   manager, ensure `ghcup`, install the pinned toolchain (GHC **9.12.4**, Cabal 3.16.1.0 — the
-  [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) toolchain pin, not `amoebius.txt`'s deferred 9.14.1),
+  [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) toolchain pin, not the originally-specified, now-deferred 9.14.1),
   build the binary, and call `bootstrap`. From that call onward the **binary** owns everything. The script
   itself and substrate detection are owned by [substrate_doctrine.md](./substrate_doctrine.md);
-  this doc owns the lifecycle ordering the binary then drives.
+  this doc owns the lifecycle ordering the binary then drives. Bootstrap also establishes the
+  binary-sibling `.dhall` configuration the rest of bring-up consumes — selecting the cluster distro and
+  **naming** (never embedding) every credential the cluster needs to provision nodes: SSH keys for
+  self-managed kind/rke2 nodes, cloud API keys for provider clusters.
 - **`bootstrap --distro={kind,rke2}`**, with `kind` accepting `--replicas=n` (default `1`). The replica
   count is a deployment-rules knob; the HA charts are identical across values of `n`
   ([platform_services_doctrine.md §2](./platform_services_doctrine.md)).
 - **The root cluster is single-node, on purpose.** A multi-node bring-up would need secrets — SSH keys or
-  cloud credentials for the additional nodes — and that would violate the secrets-never-in-Dhall rule
-  (`amoebius.txt` lines 82–84). Constraining the root to a single node lets it be bootstrapped with **zero
-  secrets**, after which a small set of *root init commands* take over. (Whether the root may ever be
-  multi-node is an open question recorded in `amoebius.txt`; this doctrine specifies the single-node answer
-  the plan adopts.) The root's single-node init-to-password-encrypted-Vault-and-failover behaviour is the
+  cloud credentials for the additional nodes — and that would violate the secrets-never-in-Dhall rule. Constraining the root to a single node lets it be bootstrapped with **zero
+  secrets**, after which a small set of *root init commands* take over. (Whether the root may ever be multi-node is an open design question; this doctrine specifies
+  the single-node answer the plan adopts.) The root's single-node init-to-password-encrypted-Vault-and-failover behaviour is the
   **prodbox** constituent behaviour ([DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md): *prodbox = the
   root single-node control-plane behaviour*).
 - **Init follows readiness, never precedes it.** Once the standard services are up and reachable, the
-  cluster is *initialized*: init Vault, then hand it its `.dhall` (`amoebius.txt` line 33). The
+  cluster is *initialized*: init Vault, then hand it its `.dhall`. The
   fail-closed Vault init, the root password-encrypted unseal that requires a human on first bring-up, and
   the PKI trust anchor are all owned by [vault_pki_doctrine.md](./vault_pki_doctrine.md). The
   platform-service bring-up ordering edges (LB before edge, the registry before later pulls, Vault before
@@ -68,12 +69,17 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
   the world toward the `.dhall`. Re-running it is a no-op when already converged — that is the Phase 1
   acceptance shape.
 
+> **Open question.** The shape of the bootstrap config and first-manifest delivery: one candidate is a
+> transient `bootstrap.dhall` the binary consumes and then deletes once bring-up completes; and whether the
+> initial amoebius manifest is embedded directly in that bootstrap config or supplied separately after the
+> kernel is up remains undecided.
+
 ---
 
 ## 3. Amoebic spawning — the recursive forest
 
 This is the feature that **names the project**. A cluster can spawn one or more child clusters; those
-children can in turn spawn children of their own; and so on, recursively (`amoebius.txt` line 14). The
+children can in turn spawn children of their own; and so on, recursively. The
 result is a *forest*: a root at the top, an arbitrary tree of descendants below.
 
 ```mermaid
@@ -87,7 +93,7 @@ flowchart TD
 
 **Spawning is a Pulumi deploy from inside an existing cluster.** A parent provisions a child — `kind` or
 `rke2` via one or more SSH keys, or a provider cluster via cloud keys — tracking the deploy in Pulumi with
-a **MinIO backend, locally encrypted via the Vault transport engine** (`amoebius.txt` lines 54, 60). The
+a **MinIO backend, locally encrypted via the Vault transport engine**. The
 spawn mechanism, the backend encryption, and the create-vs-delete credential model are owned by
 [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md); this doc owns only the *lifecycle* meaning of a spawn.
 
@@ -103,12 +109,11 @@ Two encapsulation rules make the forest safe to reason about:
   child's subtree under its **own per-child Vault Transit key**, so a child cannot decrypt a sibling's
   subtree even under an unsealed parent
   ([vault_pki_doctrine.md §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes)). It knows
-  nothing about its siblings or any wider part of the forest (`amoebius.txt` line 66): a child you have
+  nothing about its siblings or any wider part of the forest: a child you have
   never inspected is the same machine as any other cluster, and it cannot reach into state it was never
   given.
 - **Trust flows down from the root, never sideways.** The root cluster — typically a kind cluster on the
-  admin's laptop — owns the **self-signed PKI trust anchor** for everything below it (`amoebius.txt`
-  line 66). Children derive trust from above; they do not mint independent anchors. The trust tree, the
+  admin's laptop — owns the **self-signed PKI trust anchor** for everything below it. Children derive trust from above; they do not mint independent anchors. The trust tree, the
   parent/child Vault unseal modes (a child either self-unseals via a k8s secret, **or** the parent owns
   the unseal secret and the child requests an unlock), and the **parent-injects-secrets-into-the-child's-Vault**
   contract are all owned by [vault_pki_doctrine.md](./vault_pki_doctrine.md). Dhall carries only *names*
@@ -126,11 +131,10 @@ Two encapsulation rules make the forest safe to reason about:
 
 There is **one** desired-state spec — the global `.dhall` — and it **outlives any individual cluster**.
 This is the load-bearing invariant for everything below: tearing a cluster down does **not** edit the
-global `.dhall`; the spec still applies, and the remaining forest reconciles toward it (`amoebius.txt`
-lines 66, 93).
+global `.dhall`; the spec still applies, and the remaining forest reconciles toward it.
 
 - **Always rolled out from the root.** A new global `.dhall` is rolled out from the root cluster (the
-  laptop kind), never from a leaf (`amoebius.txt` line 66). The root is the single point from which the
+  laptop kind), never from a leaf. The root is the single point from which the
   forest's desired state changes.
 - **Teardown is a capacity event, not a spec change.** When a cluster goes away (§5), the global `.dhall`
   is untouched. The forest's *desired* shape is the same; only its *available* capacity dropped. The
@@ -149,7 +153,7 @@ surface, never inside an app's logic ([app_vs_deployment_doctrine.md](./app_vs_d
 ## 5. Teardown-with-cleanup vs chaos-failover (the central distinction)
 
 There are two completely different ways a cluster can stop being the lead — one **polite**, one **violent**
-— and conflating them is the exact bug this section exists to prevent (`amoebius.txt` line 93). The
+— and conflating them is the exact bug this section exists to prevent. The
 one-line rule:
 
 > **Graceful teardown cleans up first; chaos-failover does not.**
@@ -167,8 +171,7 @@ released, the cluster (driven by its control-plane singleton, §9):
 
 1. **Drains workloads** and quiesces in-flight work.
 2. **Flushes / checkpoints synchronization** — lets Pulsar topics drain and acknowledge and MinIO / Postgres
-   replication catch up — so the teardown can be timed to a synchronization event and lose nothing
-   (`amoebius.txt` line 93). The Pulsar side rides the **native binary protocol — no WebSockets**
+   replication catch up — so the teardown can be timed to a synchronization event and lose nothing. The Pulsar side rides the **native binary protocol — no WebSockets**
    ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)).
 3. **Deregisters from geo-replication and hands off the gateway** cleanly, so siblings take over the wild
    ingress (which Keycloak owns, [platform_services_doctrine.md §9](./platform_services_doctrine.md)) and
@@ -178,7 +181,7 @@ released, the cluster (driven by its control-plane singleton, §9):
 
 **Chaos-failover, concretely.** A chaos-failover is what happens when the lead simply *vanishes* — no
 drain, no flush, no handoff. Surviving siblings with the same parent **detect the dead gateway and fail
-over on their own, repointing DNS (e.g. route53 migrations)** (`amoebius.txt` line 68). Because there was
+over on their own, repointing DNS (e.g. route53 migrations)**. Because there was
 no synchronization event, the outcome is **not** lossless-by-construction: it is bounded by the declared
 data-loss budget, and proving that the behaviour is always well-defined — especially *"what happens if a
 cluster goes down mid geo-sync and we try to fail the gateway over to it?"* — is the one place a
@@ -200,7 +203,7 @@ lossless guarantee — exactly the kind of "tested/assumed reported as proven" c
 Teardown is meant to be a safe way to turn a cluster off **any time** — but some clusters are
 load-bearing. A cluster might hold the *only* nodes of a particular hardware substrate (say, the only
 Apple-Metal inference nodes), which cannot be independently failed over. Tearing that cluster down would
-make the global `.dhall` **unsatisfiable**. amoebius refuses to do that silently (`amoebius.txt` line 93).
+make the global `.dhall` **unsatisfiable**. amoebius refuses to do that silently.
 
 ```mermaid
 flowchart TD
@@ -214,11 +217,11 @@ flowchart TD
 
 - **Push-back, not a hard wall.** When a teardown would stop the global `.dhall` from being satisfied, the
   command **pushes back with a warning**: it names what is going to stop working and the `.dhall`
-  *failback* it will fall to (`amoebius.txt` line 93). It does not just succeed-and-break.
+  *failback* it will fall to. It does not just succeed-and-break.
 - **An explicit override exists.** There is an override command to proceed anyway, accepting the named
-  degradation (`amoebius.txt` line 93). The override is deliberate and explicit — never the default.
+  degradation. The override is deliberate and explicit — never the default.
 - **The thresholds are declarative.** Factors like **compute and storage capacity** are `.dhall`-
-  configurable and govern *whether* push-back fires (`amoebius.txt` line 93). Because every container
+  configurable and govern *whether* push-back fires. Because every container
   declares explicit CPU and RAM ([platform_services_doctrine.md §10](./platform_services_doctrine.md)),
   the capacity arithmetic — "does the surviving forest have room for what C was running?" — is sound rather
   than guesswork.
@@ -232,14 +235,14 @@ flowchart TD
 
 The slogan is **clusters are cattle; their storage is not.** A cluster can be torn down and spun back up
 *ephemerally with zero data loss*, because the only durable state lives on retained PVs that rebind
-identically (`amoebius.txt` lines 70, 93).
+identically.
 
 - **Deterministic rebind is owned elsewhere — referenced, not restated.** The mechanism that guarantees a
   rebuilt cluster reattaches the *same* data is the `no-provisioner` retained-PV policy
   (`<namespace>/<statefulset>/pv_<integer>`, sized, host/EBS-bound), owned in full by
   [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md). This doc owns only the *lifecycle
   consequence*: spin-down then spin-up converges to the identical shape **and** the identical bytes.
-- **Teardown frees compute, never storage.** This is the critical caveat (`amoebius.txt` line 95): the
+- **Teardown frees compute, never storage.** This is the critical caveat: the
   durable storage **must remain** or a later spin-up fails. So a graceful teardown (§5) releases compute
   and **leaves the PVs intact**. The default posture is *"durable storage exists forever"*; deleting it is
   forbidden under normal credentials and performed only by the elevated test harness for leak-free test
@@ -255,8 +258,7 @@ identically (`amoebius.txt` lines 70, 93).
 
 ## 8. Dynamic node provisioning
 
-A cluster's **node set is itself declarative and reactive** — it grows and shrinks by *logic*, not by hand
-(`amoebius.txt` line 70). The global `.dhall` can express dynamic node provisioning driven by arbitrary
+A cluster's **node set is itself declarative and reactive** — it grows and shrinks by *logic*, not by hand. The global `.dhall` can express dynamic node provisioning driven by arbitrary
 conditions:
 
 - **Load** — provision nodes when demand rises, release them when it falls.
@@ -345,4 +347,3 @@ node provisioning in **Phase 10**; and the storage-lifecycle safety that makes t
 - [Testing Doctrine](./testing_doctrine.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
-- [Amoebius vision](../../amoebius.txt)

@@ -62,4 +62,3 @@ authoring of this doc is itself complete; 📝 = a Phase 0 deliverable still to 
 ## Cross-references
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
-- [Amoebius vision](../../amoebius.txt)

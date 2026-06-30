@@ -19,11 +19,11 @@ amoebius deployment.** Everything amoebius already knows how to do — stand up 
 Helm from Dhall, place workloads, inject secrets, fail a leader over — is exactly the machinery a test
 needs. So a test is not written in some second language with its own runner; it is written in the *same*
 Dhall DSL, and it inherits the *same* illegal-state-unrepresentable guarantee. There is no "test mode" of
-the type system that lets a test express a broken cluster the production DSL would reject.
+the type system that lets a test express a broken cluster the production DSL would reject. The test suite may itself be driven by an amoebius root cluster — the root stands up the test topology, runs the workflow, and tears it down, exactly as it rolls out any child manifest.
 
-Concretely (`amoebius.txt` lines 76–78): "the amoebius tests should be an amoebius.dhall that spins up
-resources, runs workflow, and tears down resources… we don't need an explicit list of tests; we need a
-general test `.dhall` topology (which, by definition, always tears down the resources it creates)." The
+Concretely, the amoebius tests are an amoebius.dhall that spins up
+resources, runs the workflow, and tears down resources — there is no need for an explicit list of tests; what
+is needed is a general test `.dhall` topology (which, by definition, always tears down the resources it creates). The
 vision is emphatic that there is **no enumerated catalog of tests** to maintain — there is a *topology*, and
 specific tests are values of it.
 
@@ -33,7 +33,7 @@ Three consequences fall straight out of "a test is a spec":
   deployment-rules layer that adds two things the production layer omits: a **chaos/failover schedule** and
   a **mandatory teardown**. That chaos injection lives in deployment rules, never in application logic — the
   app under test does not know it is being tested — per
-  [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md) (`amoebius.txt` lines 43–47, 62).
+  [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md).
 - **A test cannot represent an illegal cluster.** Because the test reuses the production DSL, a test
   `.dhall` that tried to mis-bind a PVC to no PV, open a backdoor ingress, or place a CUDA workload on a
   GPU-less substrate would fail to type-check before it ever ran — the same contract owned by
@@ -103,8 +103,8 @@ isolated ephemeral stacks, unique names per run, aggressive tagging, *always* te
    is the prodbox fixture-ownership rule lifted to the `.dhall` surface: the code that creates owns the
    destroy.
 2. **Teardown runs on every exit — success, failure, and Ctrl-C.** Teardown is wrapped in structured
-   cleanup so an aborted or crashed run still reclaims what it built. "Always tears down" (`amoebius.txt`
-   line 78) means *by construction of the topology type*, not by operator diligence.
+   cleanup so an aborted or crashed run still reclaims what it built. "Always tears down" means *by
+   construction of the topology type*, not by operator diligence.
 3. **Destroy is idempotent.** Re-running a teardown (after a crash, or because the first attempt half-ran)
    converges to "nothing left," never errors on already-gone resources. The safe recovery from an
    interrupted run is to re-run the same topology, not to clean up by hand.
@@ -125,7 +125,7 @@ flowchart LR
   down -->|sweep non-empty| fail["hard failure: leak list in the record"]
 ```
 
-The "no explicit list of tests" principle (`amoebius.txt` line 78) is what makes this a *contract* rather
+The "no explicit list of tests" principle is what makes this a *contract* rather
 than a checklist: amoebius does not maintain an enumerated test catalog that each could forget the teardown
 clause. The teardown is a property of the topology *type*, so every value of it inherits the guarantee.
 
@@ -142,7 +142,7 @@ machine-visible by emitting a ledger.
   prerequisite validation, not in a silent skip. If a topology needs a substrate, a credential, or a tool
   that is absent, the run *fails with a message naming what is missing* — it does not pass-with-a-skip.
 - **Every run emits a proven/tested/assumed ledger artifact.** The development plan's phase discipline rule
-  is absolute (`amoebius.txt` lines 76–78; [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md),
+  is absolute ([../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md),
   "Honest ledger"): *every validation emits a proven/tested/assumed ledger artifact*. This doc owns the
   *artifact* — that a topology run produces, as a first-class output beside its pass/fail, a record of which
   correctness layers it actually reached and at what strength. The artifact is the deliverable, not a
@@ -169,7 +169,7 @@ The intuition: an operator should not have to hand-write a representative test f
 amoebius can simply *look at*. amoebius already detects what a host is and what credentials can do — so
 `suggest-test` turns that introspection into a starting-point test topology the operator then reviews.
 
-Per `amoebius.txt` line 78, `suggest-test`:
+Per the original vision, `suggest-test`:
 
 1. **Detects the current substrate** — including compute, memory, and storage available — using the same
    pure substrate classification owned by [substrate_doctrine.md](./substrate_doctrine.md) (detection is a
@@ -214,8 +214,8 @@ Three boundaries keep `suggest-test` honest and within doctrine:
 
 ## 6. Flagged test credentials
 
-The intuition straight from the vision (`amoebius.txt` line 76): "the credentials used for testing eg AWS
-deployments need to be specifically flagged (as we do in `~/prodbox`)." A test must be able to do things
+The intuition straight from the vision: the credentials used for testing (e.g. AWS deployments) need to be
+specifically flagged, as is done in `~/prodbox`. A test must be able to do things
 production must not — most sharply, *delete durable storage* (§7) — so the authority to do them must be a
 **separate, marked** credential, never the everyday one wearing a different hat.
 
@@ -225,8 +225,8 @@ amoebius adopts the prodbox `aws_admin_for_test_simulation` pattern, generalized
   under a credential explicitly flagged as test-simulation, separate from the normal-operation credentials a
   running cluster uses. Normal operation never holds the elevated authority; the test harness never runs
   workloads under the everyday credential. The boundary is an *identity* boundary, not a convention.
-- **Test-generated resources carry a test flag** (`amoebius.txt` line 101: "all test generated resources
-  have a test flag for the harness to see, and these get deleted by the elevated test credentials"). Every
+- **Test-generated resources carry a test flag.** All test-generated resources carry a flag for the harness
+  to see, and these get deleted by the elevated test credentials. Every
   resource a topology allocates is tagged test-owned at creation, so the harness can later find *exactly*
   what it created and reclaim it without guessing — the basis of the leak-free sweep in §7.
 - **The flagged credential is still a secret-by-name.** The credential's *material* lives in Vault and is
@@ -235,8 +235,8 @@ amoebius adopts the prodbox `aws_admin_for_test_simulation` pattern, generalized
   [vault_pki_doctrine.md](./vault_pki_doctrine.md).
 
 The **create-vs-delete credential model** — whether normal-operation credentials are scoped to *create* but
-not *delete* cloud storage, and how the elevated test credential is scoped to delete — is the open design
-question of `amoebius.txt` line 101 and is **owned by** [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md).
+not *delete* cloud storage, and how the elevated test credential is scoped to delete — is an open design
+question and is **owned by** [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md).
 This doc records only the testing-side requirement: the *destroy* authority over durable storage is withheld
 from normal operation and granted only to the flagged elevated harness.
 
@@ -246,9 +246,8 @@ from normal operation and granted only to the flagged elevated harness.
 
 The intuition is the resolution of a real tension. On one side, amoebius **forbids deleting durable data
 under normal operation** — clusters are ephemeral, their storage is not, and an accidental delete loses
-data the next bring-up needs (`amoebius.txt` line 95). On the other side, **leak-free test cycles must
-delete the storage they create**, or every run silts up the substrate forever (`amoebius.txt` line 95: "we
-will need test harnesses to be able to delete storage in order to run leak free test cycles"). amoebius
+data the next bring-up needs. On the other side, **leak-free test cycles must
+delete the storage they create**, or every run silts up the substrate forever. amoebius
 reconciles the two by making harness deletion the **one** sanctioned exception.
 
 The cardinal "no normal-operation deletion of durable data" rule, the retained `no-provisioner` PV model,
@@ -273,13 +272,13 @@ exception to this doc). This doc owns the **exception mechanism**:
   remnant of a test is.
 - **Pulumi mechanics are owned elsewhere.** Whether Pulumi *itself* destroys under the elevated credential,
   or the harness manually deletes the flagged resources and then destroys the Pulumi backend after a final
-  sweep, is the open question of `amoebius.txt` line 101 and is **owned by**
+  sweep, is an open question and is **owned by**
   [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). This doc fixes only the invariant both must satisfy:
   the durable-data destroy capability is exercised solely by the flagged elevated harness, solely on
   test-flagged resources, and the cycle ends with an empty sweep.
 
 > **Honesty.** The flag-and-elevated-sweep mechanism above is a *design resolution* of an explicitly open
-> question in the vision (`amoebius.txt` lines 95, 101), not a built or tested amoebius capability. Treat
+> question in the vision, not a built or tested amoebius capability. Treat
 > the leak-free guarantee as a specification to be validated, never as a proven result. Delivery (Phase 11)
 > is tracked in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
@@ -361,4 +360,3 @@ amoebius design intent.
 - [Illegal State Catalog](./illegal_state_catalog.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
-- [Amoebius vision](../../amoebius.txt)

@@ -30,7 +30,7 @@ runs, and is therefore a deployment-rules concern. The capability survives a mov
 not have to.
 
 amoebius's own vision already names products at the app surface — an app "may create one or more MinIO buckets
-named `<app_name>/<bucket_name>` … may request a postgres DB" (`amoebius.txt` lines 43, 47). This doctrine
+named `<app_name>/<bucket_name>` … may request a postgres DB". This doctrine
 reads those as the *resources of a capability*: a `<app>/<bucket>` is an **ObjectStore** resource, a requested
 database is a **Sql** resource, a declared topic lifecycle is a **MessageBus** resource. The app declares
 resources *against a capability*; the capability is the abstract interface that keeps the provider swappable.
@@ -343,7 +343,6 @@ status.
 - [Illegal State Catalog](./illegal_state_catalog.md) — best-practice-by-construction and which capability invariants are type-enforced
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
-- [Amoebius vision](../../amoebius.txt)
 
 > **Honesty.** Everything in this doctrine is Phase 0 design intent, specified before implementation:
 > manifest generation and the typed reconciler are Phase 2, and the capability abstraction is Phase 3. It is

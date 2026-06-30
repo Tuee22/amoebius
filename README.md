@@ -16,7 +16,6 @@ separate products: **prodbox** (root control-plane behaviour), **infernix** + **
 
 ## Where to start
 
-- **The vision:** [`amoebius.txt`](./amoebius.txt) — the grand, narrative high-level idea (non-binding).
 - **The plan:** [`DEVELOPMENT_PLAN/README.md`](./DEVELOPMENT_PLAN/README.md) — the single, authoritative,
   numerically-ordered phased plan that delivers the vision. Phase 0 is the complete documentation suite.
 - **The doctrine:** [`documents/engineering/README.md`](./documents/engineering/README.md) — the index of

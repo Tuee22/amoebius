@@ -12,7 +12,7 @@
 ## 1. One binary, three contexts
 
 **Everything amoebius does is the same executable.** There is no "CLI package" and a separate "daemon
-package"; there is one Haskell binary that *runs* in three different ways (`amoebius.txt` line 3):
+package"; there is one Haskell binary that *runs* in three different ways:
 
 | Context | How it runs | What it is for |
 |---------|-------------|----------------|
@@ -69,8 +69,7 @@ Two facts fall out of the grid:
   first singleton into being (this is the prodbox root single-node story), then defers to it — the host
   daemon is the *midwife*, not the brain.
 - **Worker daemons run in both daemon contexts.** Most workers are in-cluster pods; a few must be
-  host-level subprocesses because their hardware cannot be containerized (Apple-Metal GPU work —
-  `amoebius.txt` lines 10, 27, 50). A host-level worker is the **same binary in the worker role under the
+  host-level subprocesses because their hardware cannot be containerized (Apple-Metal GPU work). A host-level worker is the **same binary in the worker role under the
   host-daemon context**, supervised as a subprocess.
 
 Which roles run, how many replicas each gets, and which workers are host-level versus in-cluster are all
@@ -89,7 +88,7 @@ cluster" ([README](../../README.md): *prodbox = the root single-node control-pla
 
 ### 3.1 "Exactly one pod" reconciled with HA-always
 
-`amoebius.txt` line 3 calls the in-cluster daemon "a singleton service daemon (**exactly one pod**)", yet
+The in-cluster daemon is a singleton service daemon (**exactly one pod**), yet
 the platform invariant is **HA always — including `replicas=1`**
 ([platform_services_doctrine.md §2](./platform_services_doctrine.md)). These are not in tension once you
 read "exactly one pod" as **exactly one *active* (elected) singleton**, not "the chart only ever schedules
@@ -133,7 +132,7 @@ there.
 
 **If the singleton is the brain, the workers are the muscle.** A worker daemon does bounded, horizontally
 scalable work; it is **not** elected, holds **no** cluster-wide authority, and there can be **many** of
-each kind. The canonical worker kinds (`amoebius.txt` lines 27, 43, 50, 62):
+each kind. The canonical worker kinds:
 
 | Worker kind | What it does | Constituent library |
 |-------------|--------------|---------------------|
@@ -331,4 +330,3 @@ shape and links back for status.
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
-- [Amoebius vision](../../amoebius.txt)

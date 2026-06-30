@@ -30,7 +30,7 @@ cluster you destroyed last night rebinds to the same shape this morning. Fungibi
 is the precondition for every cross-cluster move in [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md)
 and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md).
 
-The standard service set (`amoebius.txt` line 27; DEVELOPMENT_PLAN "Standard platform services"):
+The standard service set (DEVELOPMENT_PLAN "Standard platform services"):
 
 | Service | Role on every cluster | Deeper mechanics owned by |
 |---------|-----------------------|---------------------------|
@@ -60,7 +60,7 @@ byte-identical HA charts a production cluster runs — only the replica count ch
 class of *works-in-dev, breaks-in-prod-because-the-topology-differs* bugs: the chart you debugged at one
 replica is the chart that runs at five.
 
-Concretely (`amoebius.txt` line 62; DEVELOPMENT_PLAN cross-cutting invariants):
+Concretely (DEVELOPMENT_PLAN cross-cutting invariants):
 
 - **Replica count is a deployment-rules knob, not a chart fork.** `bootstrap.sh` requires
   `--distro={kind,rke2}`; `kind` accepts `--replicas=n` (default `1`). The HA charts are identical across
@@ -170,7 +170,7 @@ configured against a SQL backend, that database follows the per-service Patroni 
 
 amoebius **never** runs a "just one Postgres Pod." Every relational database is a Patroni cluster managed
 by the Percona operator, and — crucially — **each consuming service gets its own cluster**, never a shared
-mega-database, each paired with **its own pgAdmin** (`amoebius.txt` line 27).
+mega-database, each paired with **its own pgAdmin**.
 
 Why separate-per-service: blast-radius isolation (one service's DB incident can't take down another's),
 independent version and lifecycle, and clean per-namespace teardown.
@@ -212,7 +212,7 @@ guideline — it is the only sanctioned ingress shape, and the DSL makes the alt
 ### The sole exception: host-origin, localhost-only traffic
 
 There is exactly one carve-out from "Keycloak owns all wild ingress," and it is **not** wild — it is
-host-origin and strictly localhost (`amoebius.txt` line 27):
+host-origin and strictly localhost:
 
 1. The **host amoebius binary** talks to `kube-apiserver` directly over the distro's default mTLS.
 2. **Host compute daemons** (e.g. an Apple-Metal inference engine that needs unified memory and cannot run
@@ -248,7 +248,7 @@ compile-time impossibility.
 ## 10. Every container declares CPU and RAM
 
 No pod is a freeloader: **every container — platform service and app alike — declares explicit CPU and RAM**
-(`amoebius.txt` line 31; DEVELOPMENT_PLAN cross-cutting invariants). Cashing that out:
+(DEVELOPMENT_PLAN cross-cutting invariants). Cashing that out:
 
 - The scheduler can place HA replicas across nodes deterministically.
 - Dynamic node provisioning can reason about real capacity (load / spot cost / workflow completion) — see
@@ -354,4 +354,3 @@ This doc never maintains a competing status ledger; it states the target shape a
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
-- [Amoebius vision](../../amoebius.txt)

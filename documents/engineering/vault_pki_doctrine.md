@@ -11,8 +11,8 @@
 
 ## 1. Why this doctrine exists
 
-The DSL holds no secrets — only *names* for them (`amoebius.txt` line 72;
-[dsl_doctrine.md §6](./dsl_doctrine.md#6-secrets-are-names-never-values)). That single rule forces a
+The DSL holds no secrets — only *names* for them
+([dsl_doctrine.md §6](./dsl_doctrine.md#6-secrets-are-names-never-values)). That single rule forces a
 question this document answers: if the `.dhall` that is composed, diffed, rolled out across an entire
 forest of clusters, and stored in an object store carries no secret bytes, then **where do the bytes
 live, who puts them there, and what happens when they cannot be reached?** The answer is one subsystem:
@@ -25,15 +25,15 @@ This document owns six things:
    sealed means *bricked*, never *degraded* (§2).
 2. **The SecretRef contract** — the typed *reference* the DSL carries, and the validator that rejects a
    literal secret in a production `.dhall` (§3).
-3. **Fail-closed Vault init that follows readiness** — *init Vault, then give it its `.dhall`*
-   (`amoebius.txt` line 33), init-once / unseal-on-rebuild (§4).
+3. **Fail-closed Vault init that follows readiness** — *init Vault, then give it its `.dhall`*,
+   init-once / unseal-on-rebuild (§4).
 4. **The root cluster's single-node, password-encrypted unseal** — *root single-node "prodbox"
-   behaviour, init to password-encrypted Vault keys* (`amoebius.txt` line 37), human-on-init (§5).
+   behaviour, init to password-encrypted Vault keys*, human-on-init (§5).
 5. **The two parent/child unseal modes and parent secret injection** — self-unseal via a k8s secret
    **or** parent-owns-the-secret-and-the-child-requests-an-unlock, and *parents directly inject the
-   secrets into the child's Vault* (`amoebius.txt` lines 66, 72) (§6, §7).
+   secrets into the child's Vault* (§6, §7).
 6. **The root-owned PKI trust anchor** — the root cluster owns the self-signed anchor *for everything
-   else* (`amoebius.txt` line 66); trust flows down the tree, never sideways (§8).
+   else*; trust flows down the tree, never sideways (§8).
 
 It does **not** own: the DSL-surface rule that secrets are names not values
 ([dsl_doctrine.md §6](./dsl_doctrine.md#6-secrets-are-names-never-values)); the fact that Vault is one
@@ -123,7 +123,7 @@ in  SecretRef
 |---|---|---|
 | `Vault` / `TransitKey` | Allowed | The target for every in-cluster-consumed secret and every envelope key. |
 | `Prompt` | Allowed (CLI only) | One-off elevated operator material (e.g. the cloud-admin credential that mints a least-privilege identity); supplied at the prompt, used, and discarded — never written to disk. |
-| `TestPlaintext` | **Rejected** | Accepted only by the test harness, only from a flagged test-secrets file (`amoebius.txt` line 76). |
+| `TestPlaintext` | **Rejected** | Accepted only by the test harness, only from a flagged test-secrets file. |
 
 The contract is enforced by the same **two typed gates** that guard every amoebius `.dhall`
 ([dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)): Gate 1 (the
@@ -133,8 +133,8 @@ in production mode**. A plaintext secret in a production config is therefore not
 fails to decode, and an undecoded config is never reconciled. *If it decodes, it carries no secret.*
 
 The corollary — *flagged* test credentials — is a locked amoebius rule: credentials used for test
-deployments are specifically flagged so the harness can recognize and clean them up
-(`amoebius.txt` line 76). `TestPlaintext` is that flag in the type system; its lifecycle (spin-up →
+deployments are specifically flagged so the harness can recognize and clean them up.
+`TestPlaintext` is that flag in the type system; its lifecycle (spin-up →
 run → always tear down, elevated-only storage deletion) is owned by
 [testing_doctrine.md](./testing_doctrine.md).
 
@@ -143,7 +143,7 @@ run → always tear down, elevated-only storage deletion) is owned by
 ## 4. Init follows readiness: fail-closed Vault init
 
 **Init never precedes readiness.** Only after the cluster is bootstrapped and all the core services are
-up and reachable is it *initialized*: init Vault, then hand it its `.dhall` (`amoebius.txt` line 33).
+up and reachable is it *initialized*: init Vault, then hand it its `.dhall`.
 The bring-up sequence that arrives at "core services reachable" is owned by
 [cluster_lifecycle_doctrine.md §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap); the
 platform-service ordering edge — **Vault initialized and unsealed before any secret-dependent startup**
@@ -180,12 +180,12 @@ This section owns the Vault-init contract those two point at.
 ## 5. The root cluster: single-node, password-encrypted unseal
 
 The root is the one cluster a human ever unseals, and the reason it can be is its single-node shape.
-*Root single-node "prodbox" behaviour … init to password-encrypted Vault keys* (`amoebius.txt` line 37)
+*Root single-node "prodbox" behaviour … init to password-encrypted Vault keys*
 is the constituent capability amoebius inherits from prodbox.
 
 **Why single-node makes this work.** A multi-node root bring-up would need secrets — SSH keys or cloud
 credentials for the extra nodes — and that would violate secrets-never-in-Dhall before Vault even
-exists to hold them (`amoebius.txt` lines 82–84). Constraining the root to a single node lets it
+exists to hold them. Constraining the root to a single node lets it
 bootstrap with **zero secrets**, so the *only* secret involved in standing up the root Vault is the one
 a human types. The single-node-root *bootstrap* decision is owned by
 [cluster_lifecycle_doctrine.md §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap); the
@@ -197,8 +197,8 @@ The model:
   the initial root token. amoebius captures that material exactly once and immediately seals it under
   the operator's password into **password-encrypted unlock material** — then never prints raw keys.
 - **The password is the sole ephemeral secret.** It is *memorized*, *persisted nowhere*, and supplied
-  by a human at the unseal prompt on root init and on every subsequent unseal (`amoebius.txt` line 66:
-  *the human provides this password on root cluster init*). It is the single ephemeral root of trust
+  by a human at the unseal prompt on root init and on every subsequent unseal
+  (*the human provides this password on root cluster init*). It is the single ephemeral root of trust
   for the whole forest.
 - **A password is not a hash.** The unlock material is sealed with a real password-based KDF
   (Argon2id) feeding an AEAD (e.g. ChaCha20-Poly1305 / AES-256-GCM) — **never raw SHA-256**, which is a
@@ -232,8 +232,7 @@ sealed and never plaintext at rest**, not which vault holds the ciphertext.
 ## 6. Parent/child unseal: two sanctioned modes
 
 Below the root, no human is in the loop — a child must come up on its own. amoebius sanctions **exactly
-two** ways a child Vault may unseal, and the choice is a typed field of the child's `.dhall`
-(`amoebius.txt` line 66):
+two** ways a child Vault may unseal, and the choice is a typed field of the child's `.dhall`:
 
 | Mode | How the child unseals | Where the unseal authority lives |
 |---|---|---|
@@ -269,7 +268,7 @@ here only because they are *unseal-trust* facts:
 
 - **Children know nothing about siblings.** A child receives only its own subtree's `.dhall`
   (including its own children's) and nothing about siblings or any wider part of the forest
-  (`amoebius.txt` line 66; [cluster_lifecycle_doctrine.md §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)).
+  ([cluster_lifecycle_doctrine.md §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)).
   A child's unseal request reaches *up* to its parent and never *sideways*. A sealed cluster therefore
   cannot be made to reveal whether it even *has* children, how many, or where (§2 metadata invariant).
 - **The brick cascades down, by design.** In mode (b), if any parent is sealed or unreachable, its
@@ -297,7 +296,7 @@ here only because they are *unseal-trust* facts:
 
 Section 3 says the DSL holds only a *name*. This section closes the loop: the bytes get into the
 child's Vault because **the parent puts them there**. *Parents directly inject the secrets into the
-child's Vault* (`amoebius.txt` line 72) — the DSL names *where* a secret will be, and the parent
+child's Vault* — the DSL names *where* a secret will be, and the parent
 materializes *what* it is into the child during spawn/reconcile.
 
 The end-to-end path, in order:
@@ -330,8 +329,7 @@ a child's `.dhall` names only its own.
 ## 8. The root cluster owns the PKI trust anchor
 
 There is exactly **one** self-signed root of trust in the forest, and it sits at the root cluster: *that
-root cluster's kind owns the (self-signed) PKI trust anchor for everything else* (`amoebius.txt`
-line 66). Internal trust flows **down** the tree from that anchor; it is never minted independently at a
+root cluster's kind owns the (self-signed) PKI trust anchor for everything else*. Internal trust flows **down** the tree from that anchor; it is never minted independently at a
 leaf and never shared sideways between siblings — the same direction as unseal authority (§6).
 
 - **Vault PKI is the anchor.** The root cluster's Vault `pki/` engine holds the self-signed **root
@@ -468,4 +466,3 @@ states the target shape and links back for status.
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md) — the proven/tested/assumed ledger and the sealed-Vault red-team surface
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
-- [Amoebius vision](../../amoebius.txt)

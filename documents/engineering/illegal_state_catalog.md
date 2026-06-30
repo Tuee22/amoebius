@@ -22,7 +22,7 @@ amoebius lifts that whole class of failure from *runtime surprise* to *does not 
 Dhall — a **total** configuration language (no general recursion, no arbitrary I/O, every expression fully
 evaluates), so a spec the type-checker accepts is a finite value amoebius has already inspected end to end.
 The contract, stated by [`dsl_doctrine.md`](./dsl_doctrine.md), is blunt: **a valid `amoebius.dhall`
-cannot represent illegal state** (`amoebius.txt` lines 66 and 72). This document is the companion to that
+cannot represent illegal state**. This document is the companion to that
 contract — the *enumerated* list of what "illegal state" means, and the *typing techniques* that make each
 entry uninhabitable.
 
@@ -88,7 +88,7 @@ flowchart LR
 
 ## 3. The catalog — states a valid spec cannot represent
 
-The entries below enumerate `amoebius.txt` line 66's list (§3.1–§3.8), plus the isolation invariants
+The entries below enumerate the original illegal-state list (§3.1–§3.8), plus the isolation invariants
 (§3.9–§3.10) and the best-practice-by-construction states (§3.11–§3.12) the techniques in §4 demand. Each
 entry: the **intuition** (how it goes wrong in raw k8s), the **owning doctrine** (the SSoT for the rule),
 and the **technique** (§4) that forecloses it.
@@ -97,7 +97,7 @@ and the **technique** (§4) that forecloses it.
 
 Raw k8s lets you mix arbitrary storage classes, dynamic provisioners, and unsized claims, so "durable"
 data can quietly live on an ephemeral, auto-provisioned volume that vanishes with the node. amoebius admits
-**only** `no-provisioner`, explicitly-sized, retained PVs (`amoebius.txt` line 29) — the dynamic-provisioner
+**only** `no-provisioner`, explicitly-sized, retained PVs — the dynamic-provisioner
 path, the unsized claim, and the "default storage class we didn't choose" are simply not constructible.
 **Owner:** [`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md). **Technique:** §4.1
 (PVC↔PV binding by construction) + refined non-zero sizes.
@@ -157,7 +157,7 @@ does).
 
 The nightmare entry: a chart that opens its own NodePort to the wild, or an Ingress that skips Keycloak, so
 an unauthenticated path exists that nobody meant to ship. amoebius enforces **Keycloak owns all wild
-ingress** (`amoebius.txt` line 27) structurally: an app cannot publish its own wild ingress, because the
+ingress** structurally: an app cannot publish its own wild ingress, because the
 only constructor that yields a wild-reachable endpoint routes through the Keycloak-owned edge. The sole
 carve-out — host-origin, localhost-only NodePorts with no mTLS — is a *different type* of endpoint
 (`HostLocalPeer`, not `WildIngress`), reachable only from the host and never from WAN/LAN, owned by
@@ -171,8 +171,8 @@ indices that do not interconvert).
 
 Two locked invariants ride together here. **(a) Secrets are names only** — a literal secret value in Dhall
 is unrepresentable; the spec carries a `SecretRef` (a name), and the parent injects the actual material
-into the child's Vault (`amoebius.txt` lines 66, 72). **(b) Tenant isolation** — a child cluster knows
-*nothing* about its siblings (`amoebius.txt` line 66), so a spec for child *X* must not be able to name
+into the child's Vault. **(b) Tenant isolation** — a child cluster knows
+*nothing* about its siblings, so a spec for child *X* must not be able to name
 child *Y*'s resources or secrets. Both are foreclosed the same way: references are **tenant-tagged**, and
 there is no function that re-tags a reference from one tenant to another (§4.2). A `SecretRef` is a name
 under *this* tenant's tag; a cross-tenant reference has no inhabitant. **Owner:**
@@ -342,8 +342,8 @@ are three grades, and a conformant claim names which one it is reaching:
    spec at all. These are **not** in this catalog's promise; their verification is owned by
    [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) and the testing doctrine (§2).
 
-Worked example of the discipline: **every container declares cpu/ram** (`amoebius.txt` line 31;
-[`platform_services_doctrine.md` §10](./platform_services_doctrine.md)). As specified, a workload value
+Worked example of the discipline: **every container declares cpu/ram**
+([`platform_services_doctrine.md` §10](./platform_services_doctrine.md)). As specified, a workload value
 *requires* a `Resources` field whose cpu and ram are refined non-zero quantities — grade (1)/(2): a
 container with no resources is unrepresentable / rejected at decode. What the catalog does **not** claim is
 that the *running* pod's cgroup limits are honored by the kernel — that is grade (3), and it is not ours to
@@ -382,4 +382,3 @@ phases. This doc never maintains a competing status ledger.
 - [Engineering Doctrine Index](./README.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
-- [Amoebius vision](../../amoebius.txt)

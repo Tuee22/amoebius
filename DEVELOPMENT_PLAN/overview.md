@@ -13,8 +13,8 @@ remaining work — that is [README.md](README.md)'s job, and per
 [development_plan_standards.md §K](development_plan_standards.md) status lives **only** in the plan tracker.
 The doctrine under [`../documents/engineering/`](../documents/engineering/README.md) owns the normative
 detail of each subsystem; this overview summarizes and links, and **never restates** doctrine content
-(documentation_standards §5). The grand, non-binding narrative is [`../amoebius.txt`](../amoebius.txt); this
-plan is its binding, executable decomposition.
+(documentation_standards §5). This document is the target-architecture companion to that grand, non-binding
+vision; the plan is its binding, executable decomposition.
 
 > **Greenfield, read this first.** Nothing is implemented. Only the Phase 0 documentation suite exists; there
 > is no `src/` yet. Every phase and sprint is 📋 Planned and **every prescriptive sentence below is design
@@ -133,7 +133,7 @@ self-tearing-down test topology of [`testing_doctrine.md`](../documents/engineer
   never marked Done on "it compiles," and a gate is passed only when its acceptance test actually ran on its
   substrate.
 - **Toolchain pin:** GHC **9.12.4**, Cabal 3.16.1.0, one shared pin across all packages.
-  (`../amoebius.txt`'s 9.14.1 is a deferred later-phase bump.)
+  (GHC 9.14.1 is a deferred later-phase bump.)
 - **Evidence vs. proof:** the sibling `prodbox` project is cited throughout the doctrine as a working
   precedent for the root control-plane behaviour, the AWS/Pulumi reality, the ZeroSSL/route53 path, and the
   chaos-hardening ledger. Those are *evidence the shape works*, never amoebius results — amoebius has run
@@ -148,6 +148,5 @@ self-tearing-down test topology of [`testing_doctrine.md`](../documents/engineer
 - [substrates.md](substrates.md) — the substrate registry and per-phase substrate map
 - [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) — the migration-removal ledger as prodbox/infernix/jitML/mattandjames converge
 - [later_phases.md](later_phases.md) — the in-scope, high-numbered phases not yet given their own document
-- [../amoebius.txt](../amoebius.txt) — the grand, non-binding vision narrative
 - [Engineering Doctrine Index](../documents/engineering/README.md) — the doctrine SSoTs this overview summarizes and links
 - [Documentation Standards](../documents/documentation_standards.md) — the header/link mechanics this inherits

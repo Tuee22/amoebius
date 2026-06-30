@@ -1,0 +1,14 @@
+- vpn and linkerd service mesh story (certs ? )
+- pulsar payload ? protobuf ? something more functional like CBOR ? does dhall make sense ? (probably not a dense binary format)
+- semantics for full pulsar topic lifecycle management, including teired storage (bound topic sizes, movement to s3 mandatory after some amount of time, user sets retention policy; no way to represent keeping more storage than you have room for. unbounded minio only possible if there are autoscaling)
+- resource scaling semantics. autoscaling, compute price shopping
+- can a host binary's dhall ever get changed ? i think only the parent should do that
+- test dhall generating topology
+- should infernix/jitML be extensions ? what about spectralmc ?
+- do infernix inference engines download / build their engines at startup from dhall ?
+- no tart !
+- do we actually need pulumi ? can our state be the dhall just as it was with helm ?
+- specifics for how rke2 clusters are rolled out, including control plane and worker nodes 
+- amoebius extensions, eg spectralMC ?
+- story for migrations / CICD
+

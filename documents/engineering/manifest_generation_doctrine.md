@@ -12,7 +12,7 @@
 ## 1. Why this doctrine exists: types render manifests, Helm does not
 
 The vision text frames the target as interpreting the DSL *"into opinionated helm deployments and cluster
-configs"* (`amoebius.txt` line 3), with *"a generic & reusable helm chart for amoebius apps"* (line 45).
+configs"*, with *"a generic & reusable helm chart for amoebius apps"*.
 **This doctrine records the operator's locked decision to drop that framing.** amoebius does not template
 YAML and does not ship or consume a Helm chart — its own or anyone else's. It **generates the complete
 per-service Kubernetes object set from pure typed Haskell**, serializes it with Aeson, and applies it with
@@ -36,8 +36,8 @@ Two indictments motivate the decision, and they are different:
   construction over manifests you did not generate. amoebius therefore renders **every** object it applies,
   including the install manifests of the operators it runs (§4).
 
-`amoebius.txt` line 86 asks for exactly the guarantee this buys: *"we need semantics around cluster manifest
-changes, and proofs of correctness / that there won't be a degenerate or broken state."* A pure
+amoebius needs semantics around cluster manifest changes, and proofs of correctness / that there won't be a
+degenerate or broken state — exactly the guarantee this buys. A pure
 `render(spec)` over typed ADTs is where those semantics live — the manifest set is a *value* amoebius can
 inspect end to end before any object reaches the cluster.
 
@@ -370,7 +370,6 @@ phase. This doc states the target shape and links back for status.
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — replica counts and topology are deployment rules, not app logic
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
-- [Amoebius vision](../../amoebius.txt)
 
 > **Honesty.** Everything in this doctrine is Phase 0 **design intent**: the typed manifest renderer and the
 > server-side-apply reconciler are Phase 2, and the capability abstraction is Phase 3 — neither is built or

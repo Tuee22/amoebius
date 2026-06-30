@@ -24,7 +24,7 @@ machine with no GPU, because the substrate that would carry it is not a thing th
 
 The canonical amoebius substrate catalog — the "at most one substrate per validation" set the plan keys
 its phase gates to (see [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)) — is four
-members (`amoebius.txt` line 16):
+members:
 
 | Substrate | Host OS | Native arch | GPU axis | Canonical role |
 |-----------|---------|-------------|----------|----------------|
@@ -82,17 +82,18 @@ Two classification rules are load-bearing and stated as hard failures, not warni
 ## 3. The no-environment / no-`PATH` lazy tool-ensure contract
 
 **amoebius never reads an environment variable — including `PATH` — directly or indirectly, ever**
-(`amoebius.txt` line 20; DEVELOPMENT_PLAN cross-cutting invariants). This is one of the project's locked
+(DEVELOPMENT_PLAN cross-cutting invariants). This is one of the project's locked
 invariants, and it has a precise positive form: when a host tool is needed, amoebius **lazily ensures and
 resolves it through the substrate's package manager, then invokes it by absolute path.** No bare command
-name is ever handed to the OS to resolve against a search path.
+name is ever handed to the OS to resolve against a search path. This lazy package-manager scheme is proven
+prior art — the sibling ML projects already run a two-tiered version of it in which, on Apple silicon, a
+host-level Haskell binary manages the toolchain by lazily installing the brew packages it needs on demand.
 
-Cashing out "lazily ensures" — the four-step contract (`amoebius.txt` line 20):
+Cashing out "lazily ensures" — the four-step contract:
 
 1. **Probe.** Ask the substrate's package manager whether the tool is installed.
 2. **Install if absent.** Use the package manager to install it.
-3. **Resolve the absolute path** from the package manager itself (e.g. `brew --prefix` on Apple,
-   `amoebius.txt` line 50).
+3. **Resolve the absolute path** from the package manager itself (e.g. `brew --prefix` on Apple).
 4. **Invoke by full path** in a subprocess — never a `PATH`-resolved bare name.
 
 ### Why this is structurally enforced, not merely a guideline
@@ -145,8 +146,7 @@ own `PATH`, which is legitimate because it is that guest's environment, not the 
 
 > **Honesty.** The structural enforcement above (`AbsExe`, the closed enum, full-path exec) exists in the
 > `hostbootstrap` seed. Its *discovery* step today resolves an absolute path via `findExecutable` +
-> `mkAbsExe`; the amoebius target is package-manager-canonical discovery (`brew --prefix` and equivalents,
-> `amoebius.txt` line 50). The end-state invariant — invocation is always by absolute path — is the part
+> `mkAbsExe`; the amoebius target is package-manager-canonical discovery (`brew --prefix` and equivalents). The end-state invariant — invocation is always by absolute path — is the part
 > that is type-enforced now; package-manager-canonical *discovery* is the part still to land. Do not read
 > the current discovery seam as the finished contract.
 
@@ -156,8 +156,8 @@ own `PATH`, which is legitimate because it is that guest's environment, not the 
 
 amoebius is Kubernetes-centric and does not support Windows containers; the unit of compute it actually
 wants is a **Linux host**. On a substrate that is not natively Linux, amoebius synthesizes one in a VM and
-then treats it as an ordinary Linux substrate — the same charts, the same services, the same DSL
-(`amoebius.txt` line 10). The VM is plumbing; the substrate the cluster sees is Linux.
+then treats it as an ordinary Linux substrate — the same charts, the same services, the same DSL.
+The VM is plumbing; the substrate the cluster sees is Linux.
 
 | Host substrate | VM provider | What it synthesizes | Seed module |
 |----------------|-------------|---------------------|-------------|
@@ -196,9 +196,10 @@ PowerShell so the absolute-path discipline holds at the host boundary.
 ### 4.3 Tart for Swift builds on Apple
 
 Some Apple toolchains — Swift/Xcode builds for the ML extension libraries — want a clean, reproducible
-macOS environment rather than the developer's live host. amoebius's design (`amoebius.txt` lines 50, 52;
-the plan's Phase 7 gate) provisions a **Tart** macOS VM for those Swift builds, managed by the host binary
-just like Lima and WSL2, so build artifacts land in one place under the host's control. This keeps Apple
+macOS environment rather than the developer's live host. amoebius's design (the plan's Phase 7 gate)
+provisions a **Tart** macOS VM for those Swift builds, managed by the host binary
+just like Lima and WSL2, so build artifacts land in one place under the host's control — the approach the
+sibling jitML build already uses today. This keeps Apple
 build provenance off the developer's hand-configured machine.
 
 > **Honesty.** Lima, WSL2, and Incus are implemented VM providers in the `hostbootstrap` seed; **Tart is
@@ -213,7 +214,7 @@ build provenance off the developer's hand-configured machine.
 
 Containers and VMs are the default, but two classes of hardware **cannot be reached performantly through
 them**, and for those amoebius builds and manages a non-containerized **host worker node** — a long-running
-host subprocess of the host binary (`amoebius.txt` lines 10, 27, 50):
+host subprocess of the host binary:
 
 | Hardware | Substrate | Why not a container / VM | What runs on the host |
 |----------|-----------|--------------------------|-----------------------|
@@ -256,9 +257,9 @@ flowchart LR
 `bootstrap.sh` is the **only shell script amoebius owns**, and it does as little as possible. Its entire
 job is to get a built amoebius binary onto the host and then get out of the way — because the no-`PATH` /
 no-env, lazy-tool-ensure discipline (§3) cannot start until there is a Haskell binary to enforce it.
-Everything after the binary exists is the binary's responsibility, in Haskell, under this doctrine
-(`amoebius.txt` line 52: "they don't install brew packages, they just ensure brew is installed … build the
-project haskell binary, than call `bootstrap`; it takes over from there").
+Everything after the binary exists is the binary's responsibility, in Haskell, under this doctrine: the
+script does not install brew packages, it just ensures brew is installed, builds the project Haskell binary,
+then calls `bootstrap`, which takes over from there.
 
 The contract, on the canonical Apple lane:
 
@@ -268,9 +269,8 @@ The contract, on the canonical Apple lane:
    fail-fast with the install instruction otherwise). So the script installs `brew` **pre-binary**.
 2. **Ensure `ghcup` via the package manager** (`brew install ghcup`).
 3. **Install the pinned toolchain: GHC 9.12.4 and Cabal 3.16.1.0** via `ghcup`, and ensure they are
-   available on the host. (`amoebius.txt` names 9.14.1; per the plan that is a deferred later-phase bump —
-   the committed pin is 9.12.4 / 3.16.1.0; see
-   [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).)
+   available on the host. (GHC 9.14.1 is a deferred later-phase bump; the committed pin is 9.12.4 /
+   3.16.1.0; see [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).)
 4. **Build the project Haskell binary** (`cabal build`).
 5. **Hand off to the binary.** The script's final act is to invoke the freshly built binary's `bootstrap`
    subcommand with its mandatory distro flag — `amoebius bootstrap --distro={kind,rke2} [--replicas=n]`
@@ -298,7 +298,7 @@ cluster bring-up, the `--distro` / `--replicas` orchestration — is owned by
 **pre-binary** contract and the hand-off point.
 
 > **Provider clusters have no `bootstrap.sh` and no host binary.** A fully managed cluster (e.g. AKS/EKS) is
-> provisioned over an API from within an existing amoebius cluster (`amoebius.txt` line 18); there is no
+> provisioned over an API from within an existing amoebius cluster; there is no
 > host access, so there is no host worker node and no on-host bootstrap. That path is owned by
 > [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). The highest-level parent is therefore generally a
 > single-node kind or rke2 cluster on an admin's machine, which *does* go through this contract.
@@ -347,4 +347,3 @@ and links back for status, per [documentation_standards.md §6](../documentation
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
-- [Amoebius vision](../../amoebius.txt)

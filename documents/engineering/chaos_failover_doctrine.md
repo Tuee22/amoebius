@@ -232,8 +232,8 @@ semantics; Percona/Patroni Postgres runs synchronous replication with its own le
 synchronous-HA correctness obligation to these systems rather than re-deriving it. A Pulsar
 topic-lifecycle coordinator that needs single-consumer semantics gets it from Pulsar's subscription model
 and the at-least-once + dedup discipline, not from a bespoke amoebius election
-([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)). `amoebius.txt` states the rule directly: *we
-want TLA+ for all distributed consensus problems that aren't already handled by systems that do their own
+([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)). The governing rule is stated directly: *amoebius
+wants TLA+ for all distributed consensus problems that aren't already handled by systems that do their own
 distributed consensus and georeplication (minio, pulsar, postgres, etc).*
 
 **Fact two: chaos, HA, geo-replication, and failover are deployment-rules, never application logic.** An
@@ -261,8 +261,8 @@ flowchart TD
   no system off the shelf provides, so it earns the full Extract → Model → Inject treatment (Appendix A).
 - **Second Axis — the async cross-cluster boundary.** Across clusters, geo-replication is asynchronous and
   the gateway can fail over from one cluster to another. *This* is where the genuinely new, hard amoebius
-  obligation lives — the boundary no single system proves end-to-end, the one `amoebius.txt` flags as
-  "tricky": *asynchronous georeplication gets tricky. what exactly happens if a cluster goes down mid
+  obligation lives — the boundary no single system proves end-to-end, the one this doctrine flags as genuinely
+  "tricky": *asynchronous geo-replication is hard. what exactly happens if a cluster goes down mid
   geo-sync and we try to failover the gateway to that cluster? we need to prove we always have well-defined
   behaviour.* The whole of §16–§19 and Appendix B exist to answer that question.
 
@@ -682,7 +682,7 @@ move proves it.
 And the defect itself recurs, with **replication lag** now playing the role of the gap between `t0` and
 `t1`. A read from a cluster that lags the authoritative history is a premise true at that cluster's
 last-applied instant but trusted after the history has moved on — the stale-premise decision of §3 lifted to
-the storage layer. This is the precise shape of the `amoebius.txt` question: *what happens if a cluster
+the storage layer. This is the precise shape of the open cross-cluster failover question: *what happens if a cluster
 goes down mid geo-sync and we try to failover the gateway to that cluster?* A surviving sibling that reads
 its lagging replica at offset `X` and treats `X` as the complete history is committing
 *timeout-coerces-unknown* at topology scale; one that reads "partitioned-from-peer" as "peer-cluster-dead"
@@ -810,7 +810,7 @@ Each first-axis rule (§13) gains a cross-boundary extension, and one new rule �
   watermark, or holding a fence — trading recovery time (R9's RTO) for zero divergence beyond the suffix
   already lost at the instant of failover. This is the only form in which the R8 lag bound is *enforceable*:
   not by un-losing the suffix, but by refusing to promote a too-stale cluster into service. This is the
-  direct, well-defined answer to the `amoebius.txt` question — see Appendix B.
+  direct, well-defined answer to the open cross-cluster failover question — see Appendix B.
 - **R8, cross-boundary.** The **replication lag** the asynchronous substrate runs at is itself a synchrony
   premise: name it, bound it, monitor it (export the observed maximum lag / replica-offset gap). Its
   enforcement differs from clock skew in *what* the bound gates: the un-replicated suffix that exists *at
@@ -988,7 +988,7 @@ analogues are evidence, not amoebius proof.
 
 ---
 
-## Appendix B — Worked example (fenced): cross-cluster geo-replication failover (the `amoebius.txt` question)
+## Appendix B — Worked example (fenced): cross-cluster geo-replication failover (the open cross-cluster failover question)
 
 > The Second-Axis example, and the one the whole async-replication concern exists for: **what happens if a
 > cluster goes down mid geo-sync and we fail the gateway over to it?** It crosses the cluster boundary
@@ -1009,7 +1009,7 @@ converge; acknowledged-but-un-replicated work is bounded by the R9 data-loss bud
 the content-addressed blobs and the Pulsar log are confluent and cross safely; the CAS pointer and the
 gateway authority are non-confluent singletons that cross only in R7's conditional form with reconciliation.
 
-**The defect (§3 made concrete), and the literal `amoebius.txt` question.** On chaos-failover (the lead
+**The defect (§3 made concrete), and the literal open cross-cluster failover question.** On chaos-failover (the lead
 cluster *vanishes* mid geo-sync — no drain, no flush; contrast the **graceful, lossless-by-construction**
 teardown owned by [cluster_lifecycle_doctrine.md §5](./cluster_lifecycle_doctrine.md)):
 
@@ -1250,4 +1250,3 @@ exists so the invariant-confluence machinery is in place before any future schem
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — the content-addressed MinIO store that lands cross-cluster artifacts in confluence bucket (i).
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — native-protocol (no-WebSockets) at-least-once + dedup, the R3 substrate.
 - [Testing Doctrine](./testing_doctrine.md) — the test-as-`.dhall` fault harness that the Inject move extends, and the per-run ledger artifact.
-- [Amoebius vision](../../amoebius.txt) — the async-georeplication proof requirement (line 80) this doctrine answers.

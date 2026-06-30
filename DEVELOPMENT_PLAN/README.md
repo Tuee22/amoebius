@@ -10,8 +10,8 @@
 
 Amoebius is an **everything-orchestrator**: one Haskell binary running as a CLI, a sudo-capable host
 daemon, and an in-cluster singleton service, whose **Dhall DSL makes illegal cluster state
-unrepresentable**. The grand vision lives in [`amoebius.txt`](../amoebius.txt) (non-binding narrative);
-this plan is the binding, executable decomposition of it.
+unrepresentable**. This plan is the binding, executable decomposition of amoebius's grand,
+non-binding vision.
 
 The constituent projects are **not separate products** — they are libraries and behaviours unified under
 the DSL: **prodbox** = the root single-node control-plane behaviour; **infernix** + **jitML** =
@@ -69,7 +69,7 @@ manifest-generation doctrines).
 
 ## Toolchain
 
-GHC **9.12.4**, Cabal 3.16.1.0, one shared pin across all packages. (`amoebius.txt`'s 9.14.1 is a
+GHC **9.12.4**, Cabal 3.16.1.0, one shared pin across all packages. (GHC 9.14.1 is a
 deferred, later-phase bump.)
 
 ---
@@ -129,6 +129,5 @@ constraints behind them are in [overview.md](overview.md).
 ---
 
 ## Cross-references
-- [Amoebius vision](../amoebius.txt)
 - [Documentation Standards](../documents/documentation_standards.md)
 - [Engineering Doctrine Index](../documents/engineering/README.md)

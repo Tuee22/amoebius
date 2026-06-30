@@ -47,7 +47,7 @@ re-derive the `allow-newer` set the `dhall` library's transitive deps require on
 **Provisional gate**: the whole workspace builds clean on GHC 9.14.1 under the new pin, and every prior
 phase's acceptance gate still passes unchanged on the bumped toolchain (no behavioural regression).
 
-The current plan deliberately ships on GHC **9.12.4**, with `amoebius.txt`'s 9.14.1 marked a *deferred,
+The current plan deliberately ships on GHC **9.12.4**, with GHC 9.14.1 marked a *deferred,
 later-phase bump* — this is stated as doctrine in the DSL toolchain note,
 [`dsl_doctrine.md` §9 — Toolchain note](../documents/engineering/dsl_doctrine.md#9-toolchain-note), and in the
 README "Toolchain" line. The bump is its own phase precisely because the binding cost is not the language
@@ -91,7 +91,7 @@ determinism contract requires.
 This is the explicitly **v2** language. The grand vision draws the line — *"orchestration DSL lives in
 .dhall, extension DSL is Haskell that is (a) validated by a custom AST checker, and (b) has access to all
 amoebius libraries + jit features"*, and *"jit stuff is probably amoebius v2; v1 can be an orchestrator for
-arbitrary containers"* ([`../amoebius.txt`](../amoebius.txt) lines 109–111). The DSL doctrine is the SSoT for
+arbitrary containers"*. The DSL doctrine is the SSoT for
 the *orchestration* Dhall surface and forwards the extension language to this later phase by name:
 [`dsl_doctrine.md` §8 — The Haskell extension DSL (forward pointer only)](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl-forward-pointer-only).
 This candidate is where that forward pointer is redeemed — the custom AST checker, the library-access surface,
@@ -121,6 +121,12 @@ LoadBalancer + Gateway API
 so any WireGuard/Linkerd adoption must justify itself *against* that path rather than alongside it — and the
 honest default outcome of the evaluation may well be "redundant, do not adopt." Stating the gate as a *verdict*
 rather than a feature keeps that outcome admissible.
+
+Cross-cluster failover is especially valuable for a VPN host that flattens the node-network topology: when the
+cluster carrying that role fails over, the flattened mesh moves with it, so peers keep a single, stable view of
+the network. If first-class VPN/mesh is adopted, the proposed semantics are: the root node deploys an HA
+cluster; that cluster configures a WireGuard gateway; every cluster (root included) receives a VPN IP from that
+gateway; and a Linkerd service mesh then becomes active across the VPN.
 
 ---
 
@@ -160,4 +166,3 @@ re-open it as a candidate phase.
   niche-substrate candidate probes
 - [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — §9 the single
   wild-ingress path the WireGuard/Linkerd evaluation measures against
-- [Amoebius vision](../amoebius.txt) — lines 109–111, the extension-DSL + JIT v2 framing

@@ -246,7 +246,7 @@ discouraged.
    from the ephemeral cluster stack's checkpoint.
 
 > **Honesty.** The create-vs-delete credential split is a **design resolution of an explicitly open
-> question** (`amoebius.txt` line 101); the operational-vs-elevated *credential class* is proven in prodbox,
+> question**; the operational-vs-elevated *credential class* is proven in prodbox,
 > but EBS-in-prodbox is CSI-driver-created, **not** Pulumi-tracked — so amoebius's Pulumi-tracked durable-EBS
 > model is *new design, not inherited proof*. The leak-free *reclamation* of durable test-flagged EBS by
 > the elevated harness is Phase 11; this sprint builds only the create-only guard and the `protect`/`Retain`

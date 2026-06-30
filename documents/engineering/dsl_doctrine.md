@@ -17,7 +17,7 @@ Kubernetes lets you represent nonsense. You can write a PVC that binds to no PV,
 the wrong address, a NetworkPolicy that quietly severs two services that must talk, a backdoor NodePort
 that exposes an admin surface to the wild — and the YAML is *valid*. The cluster discovers the mistake at
 runtime, in production, at 3am. Amoebius's central bet is the inversion of that: a **typed orchestration
-surface where the nonsense is unspellable** (`amoebius.txt` lines 3–5, 64, 72).
+surface where the nonsense is unspellable**.
 
 This document owns four things about that surface:
 
@@ -43,7 +43,7 @@ The single most important thing to understand about the amoebius DSL is what it 
 scripting language, and it does not contain the deployment logic. The instinct from a decade of bash and
 Helm templating is to put the *how* in the config — loops, conditionals, string-built commands. Amoebius
 refuses that outright: *"in general we do not want to use env vars or bash logic, we want everything to be
-dhall"* (`amoebius.txt` line 113). The way it gets there is a hard split between two languages:
+dhall"*. The way it gets there is a hard split between two languages:
 
 - **Dhall is the data.** A `.dhall` file is typed, total, side-effect-free *data* — a description of the
   desired world. It carries no control flow that the binary executes, no subprocess strings, no
@@ -115,7 +115,7 @@ the binary is actually standing where the context claims. All three are typed Dh
 
 ## 4. Total composability
 
-The phrase to cash out is `amoebius.txt` line 72: *"the key to making amoebius really work well is a great
+The phrase to cash out is from the original vision: *"the key to making amoebius really work well is a great
 .dhall DSL that ties everything together. total composability."* An amoebius `.dhall` is never one
 monolith — it is a composition built from smaller typed pieces via Dhall's native import system. Because
 every piece is typed, total, side-effect-free data (§2), the pieces nest *without limit and without
@@ -123,30 +123,30 @@ leakage*: importing a fragment can never smuggle in an effect or a partial value
 
 Total composability runs along four concrete axes, each owned in detail by a sibling doc:
 
-- **App-in-cluster.** An app is *"a container … and a `.dhall` for that app"* (`amoebius.txt` lines 43, 64).
+- **App-in-cluster.** An app is *"a container … and a `.dhall` for that app"*.
   The app spec — its LB services, Keycloak-backed auth rules, durable storage (MinIO buckets, block
   storage, Postgres), and Pulsar topic lifecycles — is a typed fragment that nests inside the cluster
   spec. The generic reusable app chart is populated *from* that fragment, so an operator never writes Helm
   values by hand.
 - **Two surfaces per app: logic vs rules.** A locked invariant: **application logic and deployment rules
-  are separate DSL surfaces** (`amoebius.txt` line 62; DEVELOPMENT_PLAN cross-cutting invariants). The app
+  are separate DSL surfaces** (DEVELOPMENT_PLAN cross-cutting invariants). The app
   is written once; HA replica count, chaos testing, geo-replication, and failover are an *orthogonal*
   deployment-rules surface that composes over it. That split is owned by
   [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md); this doc owns only the fact that the
   DSL *has* two composable surfaces.
 - **Extension-lib-in-app.** ML extension libraries nest the same way: *"the infernix .dhall can be
-  contained inside an amoebius.dhall"* (`amoebius.txt` line 62). infernix and jitML are libraries unified
+  contained inside an amoebius.dhall"*. infernix and jitML are libraries unified
   under the DSL, not separate products (DEVELOPMENT_PLAN), so an inference workload is a nested typed
   fragment, not a bolt-on.
 - **Child-cluster-in-parent.** The name *amoebius* is the recursion: a cluster spawns children, which
-  spawn their own (`amoebius.txt` lines 14, 66). A child receives *only its own* `.dhall` — *"including
+  spawn their own. A child receives *only its own* `.dhall` — *"including
   their childrens'"* but nothing about siblings — and the whole tree is rolled out from the root. The
   parent/child trust, secret-injection, and spawning lifecycle are owned by
   [vault_pki_doctrine.md](./vault_pki_doctrine.md) and the cluster-lifecycle doctrine; here the point is
   that an entire child cluster spec is itself a composable fragment of the parent's.
 
 A fifth axis is the **test topology**: a test is *"an amoebius.dhall that spins up resources, runs [a]
-workflow, and tears down resources"* (`amoebius.txt` line 76) — the same composition, with a teardown
+workflow, and tears down resources"* — the same composition, with a teardown
 obligation. The testing surface is owned by the testing doctrine; it is named here only as proof that even
 *testing* is expressed in the one composable DSL rather than a parallel harness language.
 
@@ -164,7 +164,7 @@ flowchart LR
 ## 5. The illegal-state-unrepresentable contract
 
 This is the heart of the doctrine, and the claim is exact: **a valid amoebius `.dhall` cannot represent
-illegal, non-working, or insecure cluster state** (`amoebius.txt` lines 5, 64, 72). Not "is rejected by a
+illegal, non-working, or insecure cluster state**. Not "is rejected by a
 linter," not "is caught in CI" — *cannot be written down in the first place*. The contract has a one-line
 form an operator can hold onto:
 
@@ -209,7 +209,7 @@ description — which is exactly *"if it decodes, it is deployable."*
 
 ### Recursion: a child's spec is a typed subtree projection
 
-The contract extends through the recursive forest (`amoebius.txt` line 14). When a cluster spawns a child,
+The contract extends through the recursive forest. When a cluster spawns a child,
 the value the child receives is a **`ChildSpec`** — by construction the projection of *exactly that child's
 subtree* (its own config including its children's). The type has no field in which a sibling or
 ancestor-only branch can appear, so over-sharing the tree is as unrepresentable as a cross-tenant secret:
@@ -232,7 +232,7 @@ owns only the `ChildSpec` type and its projection.
 
 ## 6. Secrets are names, never values
 
-A locked invariant: **secrets never live in Dhall — only names** (`amoebius.txt` line 72; DEVELOPMENT_PLAN
+A locked invariant: **secrets never live in Dhall — only names** (DEVELOPMENT_PLAN
 cross-cutting invariants). The intuition is a direct consequence of §4 and §5: a `.dhall` is composed,
 diffed, rolled out from the root across an entire tree of clusters, and stored — so it must be **safe to
 read**. A surface you can safely hand to a child cluster, paste into a review, or keep in an object store
@@ -241,7 +241,7 @@ is a surface that holds no secret bytes.
 So the DSL carries a typed **reference** to each secret — a *name/coordinate*, not the value:
 
 - **Parents inject; children resolve.** The actual value is materialized into the child's Vault by its
-  parent (`amoebius.txt` line 66, 72). The DSL names *where* a secret will be; Vault holds *what* it is.
+  parent. The DSL names *where* a secret will be; Vault holds *what* it is.
 - **The typechecker never sees a literal secret**, because there is no literal secret in the tree to see —
   only a reference. This is what lets Gate 1 and Gate 2 (§5) run over the full config tree without ever
   touching sensitive material.
@@ -258,7 +258,7 @@ rule: *a name, never a value.*
 ## 7. The DSL compiles to one opinionated platform
 
 The DSL is deliberately **not** a blank canvas. The vision framed the target as *"opinionated helm
-deployments and cluster configs"* (`amoebius.txt` line 3); amoebius keeps the *opinionated* part and drops
+deployments and cluster configs"*; amoebius keeps the *opinionated* part and drops
 the *helm* part — the DSL compiles to **typed Kubernetes manifests**, rendered and applied by amoebius's own
 typed reconciler with no Helm and no third-party charts
 ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)). An operator does not get to choose
@@ -282,7 +282,7 @@ decision viewed from two sides.
 
 There is a second, later language in the vision: *"orchestration DSL lives in .dhall, extension DSL is
 Haskell that is (a) validated by a custom AST checker, and (b) has access to all amoebius libraries + jit
-features"* (`amoebius.txt` lines 109–111). It is explicitly **v2** — *"jit stuff is probably amoebius v2;
+features"*. It is explicitly **v2** — *"jit stuff is probably amoebius v2;
 v1 can be an orchestrator for arbitrary containers."*
 
 This doc is the SSoT for the **orchestration** DSL (the Dhall surface). The **extension** DSL — the
@@ -296,8 +296,7 @@ not the future Haskell extension language.
 
 ## 9. Toolchain note
 
-Amoebius decodes Dhall in-process under **GHC 9.12.4** (DEVELOPMENT_PLAN "Toolchain"; `amoebius.txt`'s
-9.14.1 is a deferred later-phase bump). Because of Hackage version skew, the `dhall` library's transitive
+Amoebius decodes Dhall in-process under **GHC 9.12.4** (DEVELOPMENT_PLAN "Toolchain"; the deferred 9.14.1 is a later-phase bump). Because of Hackage version skew, the `dhall` library's transitive
 dependencies require `allow-newer` to build on the pinned GHC — the precise toolchain pins and `allow-newer`
 set are owned by the dependency-management surface tracked in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), not restated here. There is **no**
@@ -332,4 +331,3 @@ states the target shape and links back for status.
 - [Substrate Doctrine](./substrate_doctrine.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
-- [Amoebius vision](../../amoebius.txt)
