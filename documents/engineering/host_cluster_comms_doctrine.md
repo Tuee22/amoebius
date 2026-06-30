@@ -1,0 +1,256 @@
+# Host ↔ Cluster Communication
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: documents/engineering/README.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Generated sections**: none
+
+> **Purpose**: Define exactly how the host amoebius binary and any host-level worker daemons talk to the
+> cluster — the two localhost-only channels, and the resolved decision that a host compute daemon is a
+> plain Pulsar + MinIO peer over host-only NodePorts with no mTLS.
+
+---
+
+## 1. The whole surface: two channels, both localhost-only
+
+Start from the picture. Everything that reaches an amoebius cluster from the *wild* — WAN, LAN, even a
+browser on the same machine — goes through one door, and Keycloak is the bouncer
+([platform_services_doctrine.md §9](./platform_services_doctrine.md)). This document owns the **one
+carve-out** from that rule: the traffic that originates *on the host itself* and never touches a network
+anyone else can see.
+
+There are exactly two host-origin channels, and **both are strictly localhost** (`amoebius.txt` line 27,
+"these access points are strictly available from the localhost, there is to be no WAN or LAN access"):
+
+| # | Who | Reaches | Transport | Why this transport |
+|---|-----|---------|-----------|--------------------|
+| 1 | The **host binary** (CLI / sudo host-daemon context) | `kube-apiserver` | The k8s distro's **default mTLS** (kind/rke2 client cert) | It is the cluster's control path; the distro already issues a trusted client identity, so amoebius reuses it rather than inventing one |
+| 2 | **Host compute daemons** (e.g. Apple-Metal inference) — and the host binary when it coordinates rather than controls | In-cluster **MinIO + Pulsar** | **Host-only NodePort, no mTLS** | Bulk artifact / event I/O needs raw socket bandwidth; security is the network restriction, not transport crypto (§3–§5) |
+
+Anything that is neither of these is *wild*, and wild traffic has no host-special path: it goes through the
+LoadBalancer → Envoy → Keycloak like everyone else. The carve-out is acceptable **precisely because** it is
+unreachable off the host; the moment such an access point were exposed to LAN or WAN it would become a
+backdoor around Keycloak, which the DSL makes unrepresentable (§7).
+
+```mermaid
+flowchart LR
+  wild[Wild traffic: WAN / LAN / localhost browser] -->|TLS| lb[LoadBalancer: MetalLB or cloud LB]
+  lb -->|Gateway API listener| envoy[Envoy Gateway data plane]
+  envoy -->|OIDC and JWT enforcement| kc[Keycloak: owns all wild ingress]
+  kc -->|authenticated route| workloads[App and platform admin surfaces]
+  binary[Host amoebius binary] -->|Channel 1: distro default mTLS, localhost| api[kube-apiserver]
+  binary -->|Channel 2: coordination as a peer| peers[In-cluster MinIO and Pulsar]
+  daemon[Host compute daemon: Apple-Metal inference] -->|Channel 2: host-only NodePort, no mTLS, localhost| peers
+```
+
+---
+
+## 2. The decision that was open, and is now resolved
+
+The amoebius vision posed host↔cluster comms as an **open question**, twice:
+
+- `amoebius.txt` line 27 sketches the carve-out (host binary → kubeapi via distro mTLS; host services →
+  cluster services via NodePort, localhost only).
+- `amoebius.txt` line 74 lays out the choice explicitly and *does not pick*: how should the host daemon and
+  its subprocesses talk to the in-cluster daemon? It names three options and the trade no one had resolved.
+
+This document **resolves it.** The three options as posed, and the verdict:
+
+| Option (`amoebius.txt` line 74) | What it buys | Why rejected |
+|---------------------------------|--------------|--------------|
+| **(a)** Same Keycloak / Envoy / Gateway-API path as wild traffic | One uniform ingress story | Defeats the point: host daemons exist for *performance* (e.g. Apple unified memory), and forcing bulk model/blob/event I/O through OIDC + L7 routing + edge TLS adds auth and proxy overhead to the one path that most needs to be cheap. A host daemon is also not "wild" — treating it as such conflates trust boundaries. |
+| **(b)** Separate NodePort with **mTLS issued by root** | Network-level confidentiality + authenticity | The mTLS handshake and per-record encryption are real overhead on high-bandwidth bulk transfer (model weights, content-addressed blobs, Pulsar streams). You pay a tax on every channel-2 byte to defend against an attacker who, by the network restriction (§5), cannot reach the socket in the first place. |
+| **(c)** A **Unix domain socket** | A *hard* guarantee of no network traffic — attractive | One socket becomes the single pipe through which **all** MinIO and Pulsar I/O is funnelled and bottlenecked (`amoebius.txt` line 74 names exactly this). It is also not cross-substrate-uniform: the loopback-NodePort shape generalizes cleanly across kind/rke2/Lima/WSL2, a single named socket does not. |
+
+**Resolution — chosen design: a host compute daemon is a plain Pulsar + MinIO *client/peer* over
+host-only NodePorts, with no mTLS, and the NodePorts are network-restricted to host-origin traffic only.**
+This takes option (c)'s security goal — *no malicious network traffic can use this as a backdoor* — and
+achieves it by **network restriction** instead of by crypto or by a single bottlenecking socket, while
+keeping option (b)'s bandwidth headroom (a real socket per stream) without paying (b)'s mTLS tax.
+
+> **Honesty.** This is a *resolved design decision* for Phase 7, argued from the threat model and bandwidth
+> economics below — **not** a tested or proven amoebius result. The loopback-NodePort pattern has a sibling
+> precedent in prodbox (§6), which is evidence from another system, not proof here. Status and gates live
+> only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
+> [documentation_standards.md §6](../documentation_standards.md)).
+
+---
+
+## 3. There is no bespoke control channel — coordination *is* Pulsar + MinIO
+
+The cleanest part of the resolution is what it **removes**: there is no custom RPC, no side-channel
+protocol, and no "amoebius proxy" that a host daemon dials into. **All coordination flows through Pulsar
+and MinIO** — the same nervous system every in-cluster worker already uses.
+
+Concretely:
+
+- **Commands arrive as Pulsar messages; results and artifacts land in MinIO.** A host compute daemon
+  subscribes to its work topic, does the work (Metal/CUDA), and writes outputs to the content-addressed
+  MinIO store. That is the entire interaction shape. The native-protocol client, topic algebra, and
+  at-least-once + dedup semantics are owned by [pulsar_client_doctrine.md](./pulsar_client_doctrine.md);
+  the artifact store is owned by the content-addressing doctrine
+  (see [platform_services_doctrine.md §4 and §6](./platform_services_doctrine.md)).
+- **The host daemon and an in-cluster worker are the same kind of thing.** A daemon is a worker role that
+  happens to run on the host for hardware reasons; its *coordination* is identical to a worker Pod's. The
+  daemon roles, the elected control-plane singleton's authority, and leadership election are owned by
+  [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) — this doc does not restate them; it only
+  fixes *the wire they ride on*.
+- **The line-74 sub-question is answered the same way.** "Should host↔service access pass back through
+  amoebius for safety, or should there be ingress rules there?" — **neither.** The daemon does not proxy
+  through the binary, and it gets no bespoke *wild* ingress rule. It is a direct peer of MinIO/Pulsar over
+  the host-only NodePort, authenticating as an ordinary client. The NodePort plus the network restriction
+  (§5) *is* the access grant.
+- **The host binary uses the same path for coordination.** When the binary needs to *control* cluster
+  state it uses channel 1 (kubeapi, §4); when it needs to *coordinate* with the in-cluster daemon
+  (`amoebius.txt` line 27, "as well as the cluster amoebius daemon") it is itself a Pulsar/MinIO client on
+  channel 2 — no separate binary↔daemon RPC exists.
+
+No WebSockets anywhere: the daemon speaks the native Pulsar TCP binary protocol via the shared
+`amoebius-pulsar` client, which is a locked invariant of
+[pulsar_client_doctrine.md](./pulsar_client_doctrine.md).
+
+---
+
+## 4. Channel 1 — the host binary ↔ kube-apiserver via distro mTLS
+
+The host binary's privileged path is the kube-apiserver, reached over the **k8s distro's own default
+mTLS** — the client certificate kind or rke2 already mints during bring-up. amoebius does not reinvent this
+identity; it consumes the distro's kubeconfig and talks to the apiserver like any trusted admin client.
+
+- **Localhost only.** Like channel 2, this endpoint is host-origin and not exposed to LAN/WAN. On a
+  single-node kind/rke2 control plane the apiserver is reachable on loopback; nothing publishes it wild.
+- **This is the *control* path, not a data path.** It applies manifests, reads cluster state, and drives
+  reconciliation. Bulk artifact/event traffic never rides the apiserver — that is channel 2's job.
+- **It is the binary's distinguishing privilege.** The host binary (in its sudo host-daemon context) is the
+  bootstrap and total-authority root; the in-cluster control-plane singleton's elected authority is owned
+  by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md). This doc only records that channel 1's
+  transport is "whatever mTLS the distro already created," not an amoebius-bespoke scheme.
+- **Provider-managed clusters have no channel 1.** On AKS/EKS there is no host and no host binary
+  (`amoebius.txt` line 18); the in-cluster stateless singleton reaches its own control plane instead. The
+  per-distro split is owned by [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md); this doc's
+  host-channel rules apply only where a host binary exists.
+
+---
+
+## 5. Why no mTLS is safe here: the network restriction *is* the security boundary
+
+The intuition: **you do not need to encrypt a wire that no attacker can reach.** Channel 2's security comes
+from *who can open the socket*, not from what flows over it.
+
+The threat model, made explicit:
+
+- **The NodePorts are bound to host-origin traffic only — no WAN, no LAN** (`amoebius.txt` lines 27 and
+  107). They are not advertised through the LoadBalancer, not routed by Envoy, not exposed by any Service
+  of type LoadBalancer, and not reachable from another machine on the LAN. The only thing that can connect
+  is a process already running on this host.
+- **A process that can already run on the host as the daemon is *inside* the trust boundary anyway.** The
+  host binary runs with sudo and owns the kubeconfig; a host compute daemon is a subprocess the binary
+  itself launched and manages. Anything with enough access to dial channel 2 already has enough access to
+  read the binary's credentials and drive channel 1. Transport mTLS on channel 2 would defend a boundary
+  that the host's own process model has already drawn — adding cost without moving the line.
+- **"Absolutely certain only localhost can reach these"** (`amoebius.txt` line 107) is the load-bearing
+  property, and it is enforced by the network restriction, *not* by going through Envoy/Keycloak. The
+  whole reason channel 2 exists is to be the path that does **not** pass through the wild gateway; routing
+  it back through Envoy would re-introduce exactly the overhead §2 rejected.
+
+The bandwidth half of the argument (why we don't add crypto "just in case"):
+
+- **Host compute daemons exist for performance.** Apple-Metal inference wants the host's unified memory;
+  the daemon is on the host precisely to avoid a containerization/VM tax. Bulk traffic — model weights,
+  content-addressed blobs, Pulsar event streams — is the dominant load on channel 2.
+- **mTLS would tax every channel-2 byte** (handshake setup, per-record encrypt/decrypt) on the one path
+  most sensitive to throughput, to defend against an attacker the network restriction already excludes.
+- **A single Unix socket would bottleneck it differently** — all MinIO and Pulsar I/O funnelled through one
+  pipe (`amoebius.txt` line 74). Host-only NodePorts keep a real socket per stream (full TCP parallelism)
+  while preserving the no-network-backdoor guarantee.
+
+Net: **security from network restriction, bandwidth from plain sockets.** That is the trade the resolution
+buys.
+
+---
+
+## 6. The host-only restriction in practice (and its sibling precedent)
+
+How the "host-origin only" property is realized is substrate-shaped, and the *substrate catalog* —
+apple / linux-cpu / linux-cuda / windows, and the virtualized substrates (Lima on Apple, WSL2 on Windows,
+Tart for Swift builds) — is owned by [substrate_doctrine.md](./substrate_doctrine.md). This doc owns only
+the comms-relevant requirement each substrate must satisfy:
+
+- **The NodePort must be reachable from the host and from nowhere else.** The canonical shape is a NodePort
+  bound to loopback (the daemon connects to `127.0.0.1:<nodeport>`), with no path from LAN/WAN. Where the
+  node network does not bind NodePorts to loopback by default (Docker-backed kind, the Lima/WSL2 VMs), the
+  substrate layer is responsible for the loopback binding / host-only firewalling that makes the same shape
+  hold — never by relaxing the restriction.
+- **This generalizes a pattern proven in the sibling prodbox project**, where in-cluster Harbor is reached
+  by host-origin clients at `127.0.0.1:30080` over a NodePort bound to loopback (prodbox CLAUDE.md,
+  "Substrate Equivalence"). That is **evidence from another system, not proof in amoebius** — amoebius has
+  not yet built Phase 7. Read it as precedent for *feasibility*, not as a tested amoebius guarantee.
+- **The DSL never lets a substrate "fix" a missing piece by widening exposure.** If a substrate's node
+  networking makes the loopback binding awkward, the resolution is to extend that substrate's installer to
+  honor the host-only contract — not to publish the port wider. Substrate equivalence is structural
+  ([platform_services_doctrine.md §12](./platform_services_doctrine.md)).
+
+---
+
+## 7. What the DSL makes unrepresentable here
+
+The carve-out is safe only if its boundaries cannot be drawn wrong, so the relevant illegal states are
+type-excluded rather than merely linted. The catalog of illegal states and the typing techniques that make
+each unrepresentable is owned by [illegal_state_catalog.md](./illegal_state_catalog.md), and the
+orchestration surface by [dsl_doctrine.md](./dsl_doctrine.md); this section names only the host-comms
+invariants those docs must uphold:
+
+- A host-origin NodePort **cannot** be expressed as WAN/LAN-exposed (no `LoadBalancer`-typed Service, no
+  Envoy route, no wild listener for it).
+- A host compute daemon **cannot** publish its own wild ingress — its only inbound coordination is via
+  Pulsar/MinIO peering, and its only privileged control path is the binary's channel 1.
+- "Insecure ingress / accidental backdoor around Keycloak" is one of the named illegal states the DSL
+  forbids (`amoebius.txt` lines 5 and 72); the host-only NodePort is the *sanctioned* localhost path and is
+  structurally distinct from a wild ingress.
+
+The credentials a host daemon presents to MinIO/Pulsar are **secrets-by-name**: Dhall holds only the name,
+and Vault holds the value (parents inject into a child's Vault). That model is owned in full by
+[vault_pki_doctrine.md](./vault_pki_doctrine.md) and is not restated here — this doc only notes that
+channel-2 client auth resolves through it, not through any host environment variable or `PATH` lookup
+(the no-env/no-`PATH` lazy-tool-ensure contract is owned by [substrate_doctrine.md](./substrate_doctrine.md)).
+
+---
+
+## 8. Boundaries this doc does and does not own
+
+| Owned here (SSoT) | Owned elsewhere (referenced) |
+|-------------------|------------------------------|
+| The two host-origin channels and that both are localhost-only | — |
+| The resolution of the line-27 / line-74 open question (host-only NodePort, no mTLS) and its rationale | — |
+| Why no mTLS is safe (network-restriction threat model) and why no crypto/socket (bandwidth) | — |
+| "No bespoke control channel; coordination is Pulsar/MinIO" as the host-comms wire rule | Daemon roles, control-plane singleton, election → [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
+| The host-only network-restriction requirement each substrate must meet | The substrate catalog, virtualized substrates, no-env/PATH contract → [substrate_doctrine.md](./substrate_doctrine.md) |
+| That channel-2 transport is plain Pulsar/MinIO peering | The native-protocol client, no-WebSockets, topology algebra → [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) |
+| Naming the one carve-out from Keycloak-owns-all-ingress | The wild-ingress rule itself → [platform_services_doctrine.md §9](./platform_services_doctrine.md) |
+| That channel-2 auth is secrets-by-name | The Vault secret/inject model → [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
+
+---
+
+## 9. Planning ownership
+
+This document is normative host↔cluster comms doctrine only. Delivery sequencing, completion status, and
+validation gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) — host
+compute daemons (the Apple-Metal / Windows-CUDA Pulsar+MinIO peers) land in **Phase 7**. This doc never
+maintains a competing status ledger; it states the target shape and links back for status.
+
+---
+
+## Cross-references
+
+- [Engineering Doctrine Index](./README.md)
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md)
+- [Substrate Doctrine](./substrate_doctrine.md)
+- [Platform Services Doctrine](./platform_services_doctrine.md)
+- [Pulsar Client Doctrine](./pulsar_client_doctrine.md)
+- [Vault / PKI Doctrine](./vault_pki_doctrine.md)
+- [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md)
+- [Illegal State Catalog](./illegal_state_catalog.md)
+- [DSL Doctrine](./dsl_doctrine.md)
+- [Development Plan](../../DEVELOPMENT_PLAN/README.md)
+- [Documentation Standards](../documentation_standards.md)
+- [Amoebius vision](../../amoebius.txt)
