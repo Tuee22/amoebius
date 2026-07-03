@@ -74,7 +74,9 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
 > **Open question.** The shape of the bootstrap config and first-manifest delivery: one candidate is a
 > transient `bootstrap.dhall` the binary consumes and then deletes once bring-up completes; and whether the
 > initial amoebius manifest is embedded directly in that bootstrap config or supplied separately after the
-> kernel is up remains undecided.
+> kernel is up remains undecided. This is now scoped to the **root** bootstrap config only: every deeper
+> **child-frame** config is delivered by in-place `stdin` streaming rather than a persistent file, per
+> [dsl_doctrine.md §3](./dsl_doctrine.md).
 
 ---
 
@@ -98,6 +100,10 @@ flowchart TD
 a **MinIO backend, locally encrypted via the Vault transport engine**. The
 spawn mechanism, the backend encryption, and the create-vs-delete credential model are owned by
 [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md); this doc owns only the *lifecycle* meaning of a spawn.
+This cross-cluster spawn is a distinct **transport** from the intra-host **frame descent** that streams a
+child-frame `.dhall` on the lift's `stdin` ([dsl_doctrine.md §3](./dsl_doctrine.md)): both hand a child only
+its own projection and both mint strictly from the parent, but the spawn crosses a cluster boundary under a
+per-child Vault Transit envelope where the frame descent crosses a process boundary on `stdin`.
 
 Two encapsulation rules make the forest safe to reason about:
 

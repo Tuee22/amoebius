@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/service_capability_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/service_capability_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for how amoebius turns a typed cluster spec into running Kubernetes objects — a pure `render(spec)` that emits the full per-service object set from Haskell ADTs, and amoebius's own idempotent server-side-apply reconciler that applies, prunes, and waits — with **no Helm, no templating layer, and no third-party charts**.
@@ -88,6 +88,11 @@ set of typed Kubernetes objects** that service requires — `Deployment` / `Stat
 instance / `ClusterIssuer` / `Certificate` — each as a typed Haskell record serialized to JSON via Aeson,
 exactly as prodbox already serializes its supporting objects (§1). There is no intermediate text template
 and no `values.yaml`; the *record* is the manifest.
+
+Among those objects, the rendered **`ConfigMap`** is how an **in-cluster pod** frame receives its own
+`.dhall` — the one config-delivery path that stays a ConfigMap mount rather than the in-place `stdin`
+streaming used for the VM/container bootstrap-lift frames. [dsl_doctrine.md §3](./dsl_doctrine.md) owns that
+frame-descent delivery contract; this doc owns only the ConfigMap render.
 
 Three properties make this the right shape:
 

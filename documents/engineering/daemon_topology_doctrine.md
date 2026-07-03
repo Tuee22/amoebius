@@ -272,7 +272,13 @@ Lifecycle"); this doc records only the contract amoebius daemons share:
 - **Boot vs live config:** configuration is a single Dhall file; live fields hot-reload via atomic STM swap
   on a file-watch, boot fields trigger a drain-and-restart so the supervisor relaunches against the new
   file. No `PATH`, no `PRODBOX_*`-style environment-variable precedence on supported paths
-  ([substrate_doctrine.md](./substrate_doctrine.md) for the no-env/no-`PATH` contract).
+  ([substrate_doctrine.md](./substrate_doctrine.md) for the no-env/no-`PATH` contract). **That single file
+  arrives differently per context (§1):** a **CLI / host** binary reads the sibling `.dhall` written by
+  `init`; a binary **descending a bootstrap-lift frame** (VM/container) has it **streamed on `stdin` and
+  written once before `exec`** — the parent's `context-init` mint
+  ([dsl_doctrine.md §3](./dsl_doctrine.md)); an **in-cluster pod** receives it as a rendered `ConfigMap`
+  mount ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)). In every case a frame
+  receives its config from its parent and never rewrites its own.
 
 > **Honesty.** This spine is **proven in prodbox**; for amoebius it is design intent inherited from a
 > sibling, not a tested amoebius result.
@@ -329,5 +335,7 @@ shape and links back for status.
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md)
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the control-plane singleton runs the capacity fold at decode
+- [DSL Doctrine](./dsl_doctrine.md) — §3 how each context's `.dhall` is delivered (sibling / stdin / ConfigMap)
+- [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — the rendered `ConfigMap` that delivers an in-cluster pod's config
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

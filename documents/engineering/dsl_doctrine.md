@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for what the amoebius Dhall DSL is — a typed orchestration surface
@@ -119,6 +119,30 @@ acts**: parameters say what to build, context says who is allowed to build it he
 the binary is actually standing where the context claims. All three are typed Dhall, none is a secret
 (§6), and none is logic (§2).
 
+**How the minted context reaches each frame.** The child `.dhall` of the Context bullet is not written to a
+host file and bind-mounted in; it is **delivered in place, on the lift's `stdin` channel**. At each frame
+handoff the parent streams the *narrowed child projection* into the descending self-invocation, whose
+entrypoint writes it to that frame's own sibling `.dhall` and then `exec`s the binary — hostbootstrap's
+`ConfigDelivery` (`{ cdWritePath, cdExecPath, cdPayload }`) carried by `liftStdin` through the recursive
+`runChainFromFrame`
+(`/home/matthewnowak/hostbootstrap/core/hostbootstrap-core/src/HostBootstrap/Lift.hs`,
+`.../Chain.hs`); the container handoff keeps stdin open and overrides the entrypoint to
+`sh -c "cat > <sibling>.dhall && exec <binary>"`. Two invariants fall out, and §5 leans on both:
+
+- **Only the projection crosses.** The narrowed child config travels on `stdin` alone — never in `argv`,
+  never as a bind-mount, and never as a host-side file at rest. The parent's *full* config never crosses the
+  boundary, only the child's own subtree.
+- **The parent mints; the child never rewrites.** A frame receives its `.dhall` read-only at entry and has
+  no verb that edits its own config — minting is exclusively a parent act (the `context-init` step, one frame
+  up). This is the doctrine answer to the standing question *"can a host binary's `.dhall` ever change? only
+  the parent should do that"*: a frame cannot rewrite its own config; only its parent mints it.
+
+The one exception is the terminal **in-cluster pod** frame, whose config is delivered as a rendered
+`ConfigMap` mount ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)) rather than on
+`stdin`; the `stdin` mechanism covers the VM/container bootstrap-lift frames. Like the rest of §2–§3, this
+delivery is **proven in hostbootstrap and inherited as evidence** — not an amoebius-built result
+([documentation_standards.md §6](../documentation_standards.md)).
+
 ---
 
 ## 4. Total composability
@@ -223,9 +247,12 @@ The contract extends through the recursive forest. When a cluster spawns a child
 the value the child receives is a **`ChildSpec`** — by construction the projection of *exactly that child's
 subtree* (its own config including its children's). The type has no field in which a sibling or
 ancestor-only branch can appear, so over-sharing the tree is as unrepresentable as a cross-tenant secret:
-`project : ForestSpec → ChildId → ChildSpec` can only ever yield a node's own subtree. The handoff itself
-(a Pulumi spawn) is owned by
-[cluster_lifecycle_doctrine.md §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest);
+`project : ForestSpec → ChildId → ChildSpec` can only ever yield a node's own subtree. That subtree is handed
+to the child by the **spawn** handoff (a Pulumi deploy) owned by
+[cluster_lifecycle_doctrine.md §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest),
+which shares its *projection-only, parent-mints* discipline with the intra-host **frame descent** of §3 — the
+same rule one level down, delivering each frame's minted context on the lift's `stdin` — the two differing
+only in **transport**;
 the at-rest encryption under a per-child Transit key (so a child cannot even decrypt a sibling's subtree) is
 owned by [vault_pki_doctrine.md §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes); the
 unrepresentability is catalogued at [illegal_state_catalog.md](./illegal_state_catalog.md) §3.10. This doc
