@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define amoebius's durable-storage contract — the single `no-provisioner` retained PV model,
@@ -162,6 +162,31 @@ moment a node is replaced. amoebius requires the two backings to deliver that in
 Either way, the rule is the same: **node lifecycle and storage lifecycle are decoupled**, which is the
 node-level precondition for the cluster-level guarantee in §6.
 
+### 5.2 The storage backing is bounded — the closed `StorageBacking` union
+
+§5 caps each *volume*; this subsection caps the *backing* a set of volumes draws from, so "unbounded storage"
+([illegal_state_catalog.md §3.18](./illegal_state_catalog.md)) has no syntax. There is no such thing as
+unbounded storage in amoebius: durable storage is **either** host-level (bounded by a physical disk) **or**
+cloud (bounded by a quota), encoded as a **closed union with no unbounded arm**:
+
+```
+StorageBacking = HostDisk Capacity | Ebs Capacity | CloudQuota Quota
+```
+
+- **No unbounded constructor** (a grade-1 union shape, [illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-grades-of-foreclosure-and-the-honesty-they-force)):
+  a value cannot denote unbounded storage. A `HostDisk`/`Ebs` backing is bounded by a physical/EBS size; a
+  `CloudQuota` backing is bounded by a quota owned by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md); the
+  content-addressed MinIO store is a `HostDisk`/`CloudQuota` backing owned by
+  [content_addressing_doctrine.md](./content_addressing_doctrine.md). Each arm names exactly one owner of its
+  ceiling number, so "available storage" has one definition.
+- **The aggregate fold lives elsewhere.** This doc owns the *union shape* and the per-volume sizing (§5);
+  the **aggregate arithmetic** — `Σ(PV caps) ≤ backing`, and the Pulsar two-ceiling fold — is owned by
+  [resource_capacity_doctrine.md §5, §7](./resource_capacity_doctrine.md) (the §4.6 capacity-accounting
+  technique). An app that would consume more storage than its backing
+  ([illegal_state_catalog.md §3.19](./illegal_state_catalog.md)) is rejected by that fold at decode; "unbounded"
+  is representable **only** through a `Growable` scaling policy whose ceiling is itself a quota
+  ([resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md)).
+
 ---
 
 ## 6. The lossless-teardown guarantee: deterministic rebind
@@ -290,6 +315,7 @@ To keep the SSoT boundaries crisp:
 | Making "a PVC that can't bind" / "durable storage without a StatefulSet" unrepresentable | [dsl_doctrine.md](./dsl_doctrine.md), [illegal_state_catalog.md](./illegal_state_catalog.md) |
 | Substrate catalog and the host-path vs cloud-LB/EBS substrate split | [substrate_doctrine.md](./substrate_doctrine.md) |
 | App-level durable-storage requests vs deployment-rules replica counts | [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md) |
+| The aggregate capacity fold over the `StorageBacking` (`Σ` sizes `≤` backing); the `Growable` escape valve | [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) |
 
 ---
 
@@ -315,6 +341,7 @@ result: the model generalizes behaviour proven in prodbox into amoebius design i
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [DSL Doctrine](./dsl_doctrine.md)
 - [Illegal State Catalog](./illegal_state_catalog.md)
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the aggregate `StorageBacking` fold and the `Growable` escape valve
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

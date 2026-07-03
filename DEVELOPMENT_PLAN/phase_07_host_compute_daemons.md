@@ -2,13 +2,14 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, system_components.md
+**Referenced by**: README.md, overview.md, system_components.md, ../documents/engineering/apple_metal_headless_builds.md
 **Generated sections**: none
 
 > **Purpose**: Stand up a long-running host compute daemon — the non-containerizable Apple-Metal (and
 > Windows-CUDA) ML worker — as a plain Pulsar + MinIO peer over host-only loopback NodePorts with no mTLS,
-> managed as a subprocess of the host binary on the apple substrate via Lima, Tart, and brew-rooted lazy
-> tool-ensure.
+> managed as a subprocess of the host binary on the apple substrate via Lima and brew-rooted lazy
+> tool-ensure, with the native Apple-Metal worker built **headless, directly on the host — no VM (no Tart)**
+> via the fixed Metal bridge ([apple_metal_headless_builds.md](../documents/engineering/apple_metal_headless_builds.md)).
 
 ---
 
@@ -18,10 +19,12 @@
 statement is a target shape, not a tested amoebius result. The Lima/WSL2 VM providers, the brew lazy-tool
 ensure, and the loopback-NodePort peering pattern are inherited as *evidence* from the sibling `hostbootstrap`
 seed and the sibling prodbox project (where in-cluster Harbor is reached at `127.0.0.1:30080` over a
-loopback-bound NodePort) — evidence of feasibility from other systems, never an amoebius proof. Tart is
-design intent only; the sibling `infernix` library has *removed* its own legacy Tart path, so no Tart code is
-to be treated as existing-and-proven. Status transitions are recorded reverse-chronologically here once work
-begins.
+loopback-bound NodePort) — evidence of feasibility from other systems, never an amoebius proof. The Apple
+worker is built **headless on the host with no VM (no Tart)** via a fixed Metal bridge — a shape **proven in
+the sibling jitML project** and adopted after the sibling `infernix` library *removed* its own legacy Tart
+path; that is sibling evidence, not an amoebius result, and there is no amoebius Tart code, now or planned
+([apple_metal_headless_builds.md](../documents/engineering/apple_metal_headless_builds.md)). Status
+transitions are recorded reverse-chronologically here once work begins.
 
 ## Phase Summary
 
@@ -40,14 +43,26 @@ The phase does four things, in order:
 2. **Exposes channel 2 host-only.** It binds the in-cluster MinIO and Pulsar services to a **loopback
    NodePort** reachable only from the host (`127.0.0.1:<nodeport>`), with no LoadBalancer, no Envoy route,
    and no path from LAN/WAN — the sanctioned localhost carve-out from Keycloak-owns-all-wild-ingress.
-3. **Builds and runs the native host worker.** It provisions a **Tart** macOS VM to build the native
-   Swift/Metal worker off the developer's live machine, then runs that worker as a managed subprocess of the
-   host binary with a defined Load → Prereq → Acquire → Ready → Serve → Drain → Exit lifecycle and a
-   guaranteed drain.
+3. **Builds and runs the native host worker.** It builds the native Apple-Metal worker **headless, directly
+   on the host — no VM (no Tart)** — via a fixed Objective-C/C Metal bridge source-built with `/usr/bin/clang`
+   by absolute path (with generated MSL compiled at runtime through the OS Metal framework), then runs that
+   worker as a managed subprocess of the host binary with a defined Load → Prereq → Acquire → Ready → Serve →
+   Drain → Exit lifecycle and a guaranteed drain.
 4. **Wires the daemon as a peer.** The worker joins the cluster as an **ordinary Pulsar + MinIO peer over the
    host-only NodePort, with no mTLS**: commands arrive as Pulsar messages, results and artifacts land in the
    content-addressed MinIO store, and there is **no bespoke binary↔daemon RPC** — coordination *is*
    Pulsar/MinIO. Security comes from the network restriction, not from transport crypto.
+
+This phase is where the **`LinuxHost` witness** of the topology type discipline (Phase 3, Sprint 3.6) meets
+reality: the Lima Ubuntu VM *is* the only `LinuxHost` an apple host can produce, so "an rke2/kind cluster on a
+bare Apple host" — unrepresentable at decode ([`illegal_state_catalog.md`](../documents/engineering/illegal_state_catalog.md)
+§3.14, [`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md) §3) — is
+realized by *actually interposing* the VM here (the grade-(3) "the VM boots" residue). The Lima VM's carved
+capacity budget is likewise the runtime cross-check for the host/VM capacity fold
+([`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) §8,
+[`illegal_state_catalog.md`](../documents/engineering/illegal_state_catalog.md) §3.17): a spec whose VM/guest
+`Demand` exceeds the host is decode-rejected in Phase 3, and this phase refuses if the real Apple host is
+smaller than its declared `Capacity`.
 
 This phase consumes earlier phases rather than re-implementing them: Phase 1's substrate detection, the
 `bootstrap` contract, and the lazy-tool-ensure kernel; Phase 2's MinIO and Pulsar standard services; and
@@ -60,8 +75,8 @@ flowchart LR
   apple[Apple Silicon host: detected substrate] --> lima[Lima Ubuntu VM: kind or rke2 cluster]
   lima --> svc[In-cluster MinIO and Pulsar standard services]
   svc --> np[Host-only NodePort bound to 127.0.0.1, no mTLS]
-  apple --> tart[Tart macOS VM: native Swift Metal worker build]
-  tart --> daemon[Host compute daemon: subprocess of the host binary]
+  apple --> bridge[Headless on-host fixed Metal bridge build: clang, no VM]
+  bridge --> daemon[Host compute daemon: subprocess of the host binary]
   np --> daemon
   daemon --> metal[Metal ML workload on Apple unified memory]
   daemon --> peer[Channel 2 peer: Pulsar consume plus MinIO put and get]
@@ -75,7 +90,7 @@ target shape, but it is **not** part of this phase's single-substrate acceptance
 
 **Gate:** an Apple-Silicon host daemon runs a Metal ML workload as a cluster Pulsar/MinIO peer — driven by a
 single `amoebius.dhall` that brings up the apple-substrate cluster, exposes MinIO and Pulsar on a host-only
-loopback NodePort, builds the native worker via Tart, starts the daemon as a managed subprocess, dispatches a
+loopback NodePort, builds the native worker **headless on-host via the fixed Metal bridge (no VM)**, starts the daemon as a managed subprocess, dispatches a
 Metal inference job over Pulsar, lands its output in the content-addressed MinIO store, and tears the worker
 and cluster down. The run emits a proven/tested/assumed ledger artifact recording that host-only reachability
 was *tested* (the NodePort is reachable from `127.0.0.1` and unreachable from the LAN) and that no mTLS or
@@ -83,7 +98,7 @@ bespoke RPC was introduced on channel 2.
 
 ## Doctrine adopted
 
-This phase is the first implementation of two doctrines. Each bullet names the sections this phase realizes;
+This phase is the first implementation of three doctrines. Each bullet names the sections this phase realizes;
 individual sprints cite the same sections where they adopt them.
 
 - [`host_cluster_comms_doctrine.md` §2 — The decision that was open, and is now resolved](../documents/engineering/host_cluster_comms_doctrine.md#2-the-decision-that-was-open-and-is-now-resolved):
@@ -103,14 +118,21 @@ individual sprints cite the same sections where they adopt them.
 - [`substrate_doctrine.md` §5 — Host worker nodes: substrate-specific hardware that refuses to be contained](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained):
   Phase 7 implements the apple host worker (Apple-Metal on unified memory) — and names the windows-CUDA case
   — as a managed subprocess of the host binary with the Load → Prereq → Acquire → Ready → Serve → Drain →
-  Exit role lifecycle, built via the virtualized-substrate providers of
+  Exit role lifecycle, built via the virtualized-substrate provider of
   [§4 — Virtualized substrates](../documents/engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)
-  ([§4.1 — Lima on Apple](../documents/engineering/substrate_doctrine.md#41-lima-on-apple) for the Linux VM,
-  [§4.3 — Tart for Swift builds on Apple](../documents/engineering/substrate_doctrine.md#43-tart-for-swift-builds-on-apple)
-  for the native Swift/Metal build), all under the
+  ([§4.1 — Lima on Apple](../documents/engineering/substrate_doctrine.md#41-lima-on-apple) for the Linux VM),
+  all under the
   [§3 — no-environment / no-`PATH` lazy tool-ensure contract](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract)
   rooted in brew by the
   [§6 — `bootstrap.sh` contract](../documents/engineering/substrate_doctrine.md#6-the-bootstrapsh-contract-ensure-a-toolchain-build-the-binary-hand-off).
+- [`apple_metal_headless_builds.md` §1 — The commitment: headless, on-host, no VM](../documents/engineering/apple_metal_headless_builds.md#1-the-commitment-headless-on-host-no-vm),
+  with [§3 — Architecture (the fixed host Metal bridge)](../documents/engineering/apple_metal_headless_builds.md#3-architecture),
+  [§4 — Build and prerequisite model](../documents/engineering/apple_metal_headless_builds.md#4-build-and-prerequisite-model),
+  and [§6 — Why Tart is not viable (the no-VM rationale)](../documents/engineering/apple_metal_headless_builds.md#6-why-tart-is-not-viable-the-no-vm-rationale):
+  Phase 7 builds the Apple-Metal worker **headless on the host — no Tart, no macOS VM** — source-building the
+  fixed Objective-C/C Metal bridge with `/usr/bin/clang` by absolute path and compiling generated MSL at
+  runtime through the OS Metal framework, so a cache miss never starts a VM, invokes SwiftPM, or depends on a
+  login keychain.
 
 ## Sprints
 
@@ -191,38 +213,47 @@ precedent (evidence, not amoebius proof) onto the Lima-backed apple substrate.
 
 The whole sprint.
 
-## Sprint 7.3: Tart macOS VM + native Swift/Metal worker build 📋
+## Sprint 7.3: Headless host-native Metal bridge + native worker build (no Tart) 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Substrate/Tart.hs`, `src/Amoebius/HostWorker/AppleMetalBuild.hs` (target paths; not yet built)
-**Blocked by**: Sprint 7.1 (the apple substrate manager + brew lazy tool-ensure that provisions Tart and drives the build by absolute path)
-**Independent Validation**: a Tart macOS VM is provisioned and managed by the host binary just like Lima/WSL2; the native Swift/Metal worker binary is built **inside** that VM (not on the developer's live host), and its build provenance is captured in one host-controlled location; the build is reproducible from the same inputs.
-**Docs to update**: `documents/engineering/substrate_doctrine.md`
+**Implementation**: `src/Amoebius/HostWorker/MetalBridge.hs` (fixed ObjC/C bridge install + probe + runtime MSL dispatch), `src/Amoebius/HostWorker/AppleMetalBuild.hs` (target paths; not yet built)
+**Blocked by**: Sprint 7.1 (the apple substrate manager + brew lazy tool-ensure that resolves `/usr/bin/clang` and the OS Metal runtime by absolute path)
+**Independent Validation**: the fixed Objective-C/C Metal bridge dylib is source-built on the host with `/usr/bin/clang` (absolute path, no env/`PATH`), `dlopen`'d, and verified by its probe symbol; generated MSL compiles at runtime via `MTLDevice.makeLibrary(source:options:)` and dispatches on the host GPU; **no VM is ever started, no SwiftPM/`swift build` runs on a cache miss, and no login-keychain unlock is required**; the source-metadata cache artifact is content-addressed and reproducible from the same inputs.
+**Docs to update**: `documents/engineering/apple_metal_headless_builds.md`, `documents/engineering/substrate_doctrine.md`
 
 ### Objective
 
-Adopt [`substrate_doctrine.md` §4.3 — Tart for Swift builds on Apple](../documents/engineering/substrate_doctrine.md#43-tart-for-swift-builds-on-apple)
-and the host-worker build rule of [§5 — host worker nodes](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained):
-provision a clean, reproducible Tart macOS VM for the Swift/Xcode parts of the Apple-Metal worker, so build
-artifacts land under the host's control rather than on a hand-configured developer machine. Tart is **design
-intent** here — the sibling infernix library removed its legacy Tart path — so this sprint provisions Tart
-fresh under doctrine, not from existing code.
+Adopt [`apple_metal_headless_builds.md` §1 — The commitment: headless, on-host, no VM](../documents/engineering/apple_metal_headless_builds.md#1-the-commitment-headless-on-host-no-vm),
+[§3 — Architecture](../documents/engineering/apple_metal_headless_builds.md#3-architecture),
+[§4 — Build and prerequisite model](../documents/engineering/apple_metal_headless_builds.md#4-build-and-prerequisite-model),
+and [§6 — Why Tart is not viable](../documents/engineering/apple_metal_headless_builds.md#6-why-tart-is-not-viable-the-no-vm-rationale),
+with the host-worker build rule of [`substrate_doctrine.md` §5 — host worker nodes](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained):
+build the Apple-Metal worker **headless, directly on the host — with no macOS VM (no Tart)** — so build
+provenance is host-controlled without inheriting VM lifecycle, keychain, or SwiftPM surfaces. The headless
+fixed-bridge shape is **proven in the sibling jitML project** (sibling evidence, not amoebius proof); this
+sprint realizes it in amoebius for the first time.
 
 ### Deliverables
 
-- A Tart provider managed by the host binary (provision → build → collect → dispose) parallel to the Lima
-  and WSL2 providers, with `tart` ensured and invoked by absolute path via brew (no env/`PATH`).
-- The native Apple-Metal worker built inside the Tart macOS VM — Swift/Metal compiled against Apple Silicon
-  unified memory — producing a host worker binary, **not** a container image.
-- Captured build provenance (inputs → output) in one host-controlled location, so the worker is rebuilt
-  reproducibly rather than from the developer's live environment.
+- A fixed Objective-C/C Metal bridge, source-built once on the host by invoking `/usr/bin/clang` **by
+  absolute path** (linking macOS `Foundation`/`Metal`), then `dlopen`'d and verified by resolving an exported
+  probe symbol before the worker subscribes to work — no env, no `PATH`, no VM.
+- Runtime MSL compilation: the host binary renders Metal Shading Language, writes a content-addressed
+  source-metadata cache record, and dispatches through the bridge's `MTLDevice.makeLibrary(source:options:)`
+  with fast-math **off** (the determinism contract), reusing an in-process pipeline cache across calls.
+- The native Apple-Metal worker built on-host (targeting Apple Silicon unified memory) as a host worker
+  binary, **not** a container image; the optional Homebrew-`swiftc` + explicit-`SDKROOT` lane is available
+  for any non-core Swift parts but is never the cache-miss path and never a VM.
 
 ### Validation
 
-1. Provision the Tart VM and build the worker inside it; assert the produced binary targets Apple Silicon
-   and was built off the live host.
-2. Re-run the build from identical inputs and assert the same artifact (reproducible provenance).
-3. Dispose the Tart VM and assert no residue is left on the host (clean lifecycle).
+1. Build the fixed bridge with `/usr/bin/clang`, `dlopen` it, and pass its probe; assert no VM was started
+   and no keychain unlock was needed.
+2. Compile generated MSL at runtime through the bridge and dispatch a kernel; assert bit-stable output under
+   the fast-math-off determinism contract, and that the source-metadata cache record is content-addressed and
+   reproducible from identical inputs.
+3. Static/audit check: the build/dispatch path invokes only absolute-path tools, reads no environment
+   variable or `PATH`, and contains no `tart`, `swift build`, or offline `metal` invocation on the core path.
 
 ### Remaining Work
 
@@ -330,9 +361,9 @@ ingress.
   and a host compute daemon cannot publish wild ingress — its only inbound coordination is Pulsar/MinIO
   peering and its only privileged control path is the binary's channel 1.
 - The gate `.dhall` (`test/dhall/phase_07_apple_metal_peer.dhall`): bring up the apple cluster on Lima,
-  expose MinIO/Pulsar on the host-only loopback NodePort, build the worker via Tart, start the daemon as a
-  managed subprocess, dispatch a Metal inference job over Pulsar, land its output in the content-addressed
-  store, then tear the worker and cluster down.
+  expose MinIO/Pulsar on the host-only loopback NodePort, build the worker **headless on-host via the fixed
+  Metal bridge (no VM)**, start the daemon as a managed subprocess, dispatch a Metal inference job over
+  Pulsar, land its output in the content-addressed store, then tear the worker and cluster down.
 - A ledger artifact recording: NodePort-is-localhost-only as **tested on apple** (reachable from
   `127.0.0.1`, unreachable from the LAN), no-mTLS / no-bespoke-RPC as **tested**, and Apple-Metal physics as
   **assumed** (host-only feasibility evidenced by prodbox's loopback-Harbor precedent, not proven in
@@ -358,10 +389,13 @@ The whole sprint.
   decision / sibling evidence" to a delivered, apple-tested channel-2 peer (status recorded here in the plan,
   never as doctrine status); add the `Amoebius.HostComms.*` and `Amoebius.HostWorker.*` module paths to its
   cross-reference set.
+- `documents/engineering/apple_metal_headless_builds.md` — its §1/§3/§4/§6 honesty notes flip from "jitML
+  sibling evidence / design intent" to a delivered, apple-tested amoebius fixed-Metal-bridge build (status
+  recorded here in the plan, never as doctrine status).
 - `documents/engineering/substrate_doctrine.md` — its §8 planning-ownership pointer resolves to delivered
-  Phase 7 sprints; the §4.3 "Tart is design intent" note and the §5 host-worker description gain their first
-  amoebius datapoint on apple; record that the Lima/Tart providers and the brew lazy-tool-ensure were
-  exercised by full-path subprocess with no env/`PATH`.
+  Phase 7 sprints; the §4.3 "no macOS build VM" note and the §5 host-worker description gain their first
+  amoebius datapoint on apple; record that the Lima provider, the headless on-host Metal-bridge build, and the
+  brew lazy-tool-ensure were exercised by full-path subprocess with no env/`PATH`.
 
 **Cross-references to add:**
 - [README.md](README.md) Phase index — flip the Phase 7 row from "not started" to its delivered status and
@@ -369,7 +403,7 @@ The whole sprint.
 - [substrates.md](substrates.md) — record Phase 7's gate substrate (apple) in the per-phase substrate map,
   and note the windows-CUDA host worker as the structurally identical non-gate case.
 - [system_components.md](system_components.md) — add the host-worker and host-comms modules
-  (`Substrate/Apple`, `Substrate/Lima`, `Substrate/Tart`, `HostComms/NodePort`, `HostWorker/Lifecycle`,
+  (`Substrate/Apple`, `Substrate/Lima`, `HostWorker/MetalBridge`, `HostComms/NodePort`, `HostWorker/Lifecycle`,
   `HostWorker/Peer`) to the component inventory once they become concrete.
 
 ## Related Documents
@@ -380,7 +414,8 @@ The whole sprint.
 - [system_components.md](system_components.md) — the target component inventory for the module paths above
 - [substrates.md](substrates.md) — the substrate registry and per-phase substrate map
 - [Host ↔ Cluster Comms Doctrine](../documents/engineering/host_cluster_comms_doctrine.md) — the host-only NodePort, no-mTLS channel-2 design this phase implements
-- [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — the apple/windows host worker nodes and the Lima/Tart/WSL2 providers this phase implements
+- [Apple Metal Headless Builds](../documents/engineering/apple_metal_headless_builds.md) — the headless, on-host, no-Tart fixed-Metal-bridge build/run shape this phase implements
+- [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — the apple/windows host worker nodes and the Lima/WSL2 providers this phase implements
 - [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — the worker-role taxonomy, the control-plane singleton, and the composition lift (cross-reference, not adopted in Phase 7)
 - [Pulsar Client Doctrine](../documents/engineering/pulsar_client_doctrine.md) — the native-protocol client, no-WebSockets, and topology algebra the peer rides on (cross-reference, not adopted in Phase 7)
 - [Vault / PKI Doctrine](../documents/engineering/vault_pki_doctrine.md) — the secrets-by-name client auth the channel-2 peer resolves through (cross-reference, not adopted in Phase 7)

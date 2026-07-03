@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define amoebius testing as a self-tearing-down `.dhall` topology — spin up resources, run a
@@ -15,8 +15,8 @@
 ## 1. The one idea: a test is an amoebius spec
 
 Lead with the intuition: **amoebius does not have a test framework bolted on the side — a test *is* an
-amoebius deployment.** Everything amoebius already knows how to do — stand up a cluster, render opinionated
-Helm from Dhall, place workloads, inject secrets, fail a leader over — is exactly the machinery a test
+amoebius deployment.** Everything amoebius already knows how to do — stand up a cluster, render typed
+manifests from Dhall, place workloads, inject secrets, fail a leader over — is exactly the machinery a test
 needs. So a test is not written in some second language with its own runner; it is written in the *same*
 Dhall DSL, and it inherits the *same* illegal-state-unrepresentable guarantee. There is no "test mode" of
 the type system that lets a test express a broken cluster the production DSL would reject. The test suite may itself be driven by an amoebius root cluster — the root stands up the test topology, runs the workflow, and tears it down, exactly as it rolls out any child manifest.

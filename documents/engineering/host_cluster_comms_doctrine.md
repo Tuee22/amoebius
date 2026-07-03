@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define exactly how the host amoebius binary and any host-level worker daemons talk to the
@@ -31,6 +31,12 @@ Anything that is neither of these is *wild*, and wild traffic has no host-specia
 LoadBalancer → Envoy → Keycloak like everyone else. The carve-out is acceptable **precisely because** it is
 unreachable off the host; the moment such an access point were exposed to LAN or WAN it would become a
 backdoor around Keycloak, which the DSL makes unrepresentable (§7).
+
+Channel 2's "localhost-only" is the *steady-state, single-host* form of a more general boundary. When remote
+elastic compute must reach the home cluster's one Pulsar/MinIO across an untrusted network, the same channel
+generalizes to *"reachable only over the authenticated WireGuard fabric"* without becoming wild — the
+generalization is owned by §5.1 and [network_fabric_doctrine.md](./network_fabric_doctrine.md). Channel 1 and
+the wild-ingress door are unaffected.
 
 ```mermaid
 flowchart LR
@@ -126,7 +132,7 @@ identity; it consumes the distro's kubeconfig and talks to the apiserver like an
   bootstrap and total-authority root; the in-cluster control-plane singleton's elected authority is owned
   by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md). This doc only records that channel 1's
   transport is "whatever mTLS the distro already created," not an amoebius-bespoke scheme.
-- **Provider-managed clusters have no channel 1.** On AKS/EKS there is no host and no host binary; the in-cluster stateless singleton reaches its own control plane instead. The
+- **Provider-managed clusters have no channel 1.** On EKS there is no host and no host binary; the in-cluster stateless singleton reaches its own control plane instead. The
   per-distro split is owned by [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md); this doc's
   host-channel rules apply only where a host binary exists.
 
@@ -166,13 +172,43 @@ The bandwidth half of the argument (why we don't add crypto "just in case"):
 Net: **security from network restriction, bandwidth from plain sockets.** That is the trade the resolution
 buys.
 
+### 5.1 The generalization: localhost **or** the authenticated WireGuard fabric
+
+The §5 argument has one load-bearing premise — *no attacker can reach the wire* — and it is realized by
+localhost binding. Remote elastic compute breaks that premise: a spot node attached to the home cluster's one
+Pulsar/MinIO ([single_logical_data_plane_doctrine.md](./single_logical_data_plane_doctrine.md)) reaches
+channel 2 across the public internet, where "localhost-only" cannot hold. The invariant **generalizes rather
+than breaks**: channel 2 is reachable *either* from localhost *or* over the **authenticated WireGuard fabric**,
+and nowhere else.
+
+- **The listener binds to `wg0`, never to `0.0.0.0`/LAN/WAN.** The security property moves from *"reachable
+  only from localhost"* to *"reachable only over the authenticated fabric"* — only a peer holding a
+  Vault-minted WireGuard key can open the socket. The fabric itself (raw WireGuard, keys, rendered peer
+  config, the hub=gateway-role topology) is owned by
+  [network_fabric_doctrine.md](./network_fabric_doctrine.md); this doc owns only that channel 2 may ride it.
+- **The mTLS rejection (§2, option b) still holds — no tax returns.** The one thing localhost gave that the
+  WAN cannot, that an attacker cannot reach the wire, WireGuard now supplies with Curve25519 peer
+  authentication + ChaCha20-Poly1305 encryption at the tunnel. Because the peer is already authenticated and
+  the bytes already encrypted, the Pulsar/MinIO wire stays **mTLS-free**, so the high-bandwidth-bulk economics
+  of §5 survive over the WAN. The boundary moved from "localhost" to "authenticated fabric"; the per-byte
+  crypto tax did not come back.
+- **A fabric peer is still not wild ingress.** The fabric-reachable listener is a distinct endpoint kind —
+  a `FabricPeer`, sitting alongside `HostLocalPeer` and `WildIngress` with **no constructor turning it into a
+  `WildIngress`** ([illegal_state_catalog.md §4.3](./illegal_state_catalog.md)) — so "Keycloak owns all wild
+  ingress" ([platform_services_doctrine.md §9](./platform_services_doctrine.md)) is preserved: a spot worker
+  is an authenticated *peer* of MinIO/Pulsar, never a wild client, exactly as a host daemon is (§3).
+
+The rest of §6's host-only realization applies unchanged to the localhost case; the fabric case substitutes
+"authenticated-fabric-origin" for "host-origin" as the network restriction, with WireGuard providing the
+authentication a shared loopback did not need.
+
 ---
 
 ## 6. The host-only restriction in practice (and its sibling precedent)
 
 How the "host-origin only" property is realized is substrate-shaped, and the *substrate catalog* —
-apple / linux-cpu / linux-cuda / windows, and the virtualized substrates (Lima on Apple, WSL2 on Windows,
-Tart for Swift builds) — is owned by [substrate_doctrine.md](./substrate_doctrine.md). This doc owns only
+apple / linux-cpu / linux-cuda / windows, and the virtualized substrates (Lima on Apple, WSL2 on
+Windows) — is owned by [substrate_doctrine.md](./substrate_doctrine.md). This doc owns only
 the comms-relevant requirement each substrate must satisfy:
 
 - **The NodePort must be reachable from the host and from nowhere else.** The canonical shape is a NodePort

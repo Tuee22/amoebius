@@ -50,6 +50,13 @@ becomes a forest with an **asynchronous** boundary between its clusters. It does
    boundary (intra-cluster consensus is delegated to MinIO/Pulsar/Postgres-Patroni, which run their own),
    plus the per-run proven/tested/assumed ledger the gate checks.
 
+This phase is where the **cluster-topology types** (Phase 3, Sprint 3.6) are exercised live: a multi-node
+`rke2` child spawns one node **per Linux host** (SSH-keyed), so "more nodes than hosts" or "a host reused"
+— unrepresentable at decode ([`illegal_state_catalog.md`](../documents/engineering/illegal_state_catalog.md)
+§3.16, [`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md) §4) — is
+realized by actually standing up N nodes on N hosts, and a multi-node `kind` child stays on its single host
+(§3.15). The type layer forbids the illegal topology; this phase proves the legal one converges (grade-(3)).
+
 The phase consumes earlier phases and does not re-implement them: Phase 1's bootstrap of a `kind`/`rke2`
 cluster, Phase 2's root Vault/PKI + retained-PV storage + platform services, Phase 3's Dhall DSL +
 control-plane singleton, and Phase 4's native Pulsar client + content-addressed store. prodbox is treated

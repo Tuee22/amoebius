@@ -28,7 +28,9 @@ deliverables, all on a single substrate:
 1. **`amoebius-pulsar`** — one native-protocol Haskell Pulsar client forked from `cr-org/supernova`, speaking
    Pulsar's TCP binary protocol directly: lookup, produce, consume, the four subscription types, and seek.
    There is no WebSocket transport, no HTTP-upgrade side-door, and no second-language runtime; this client
-   replaces both sibling transports outright.
+   replaces both sibling transports outright. Every application **payload is exclusively CBOR** through a typed
+   codec (`serialise`/`cborg`) — no JSON/base64/protobuf application body — with the protocol framing staying
+   protobuf (§3.1).
 2. **The declarative topology algebra** — topic names are *derived* from a typed `RouteEntry` descriptor,
    never written by hand, and a routing graph that fails one-sided-link / duplicate / empty-lane validation
    cannot be reconciled.
@@ -42,6 +44,16 @@ deliverables, all on a single substrate:
    commands and unelected workers consume them over a **Failover** subscription, so killing the active worker
    yields hot-standby takeover via the kernel election seeded in Phases 1 and 3.
 
+This phase also **realizes the topic storage lifecycle** whose *type shape* lands in Phase 3 (Sprint 3.6): the
+mandatory `RetentionPolicy`, the **size-triggered** S3 offload high-water mark, and the backlog-quota
+back-pressure are enabled on the namespace as reconcile steps, per
+[`pulsar_client_doctrine.md`](../documents/engineering/pulsar_client_doctrine.md) §6.1 and the two-ceiling
+fold in [`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) §7. This is
+the **grade-(3) runtime residue** of [`illegal_state_catalog.md`](../documents/engineering/illegal_state_catalog.md)
+§3.20 — the type-layer guarantee (a time-only or retention-less topic cannot be *written*) is Phase 3's; that
+the broker *actually* offloads to S3 before BookKeeper fills, and that back-pressure holds under a burst, is
+what this phase tests.
+
 **Substrate:** linux-cpu (§L of [development_plan_standards.md](development_plan_standards.md): the gate
 requires exactly one substrate). The native protocol, the store CAS protocol, and worker failover are all
 substrate-agnostic in design but are *validated* only on `linux-cpu` here; the `apple` / `linux-cuda` /
@@ -49,9 +61,10 @@ substrate-agnostic in design but are *validated* only on `linux-cpu` here; the `
 
 **Gate:** an `amoebius.dhall` test topology that, on a `linux-cpu` kind cluster with Pulsar + MinIO up
 (Phase 2), **round-trips a workflow command → event over the native Pulsar protocol** (broker-side dedup
-enabled), **stores and fetches a content-addressed artifact** by its manifest SHA, and then **kills the
-active worker and observes the Failover-subscription standby take over** — the whole topology spinning up,
-running, and tearing down leak-free, idempotently on re-run.
+enabled) — **the command and event are CBOR payloads that round-trip byte-for-byte, and a non-CBOR payload
+fixture fails to type-check** — **stores and fetches a content-addressed artifact** by its manifest SHA, and
+then **kills the active worker and observes the Failover-subscription standby take over** — the whole topology
+spinning up, running, and tearing down leak-free, idempotently on re-run.
 
 ```mermaid
 flowchart LR
@@ -80,7 +93,10 @@ flowchart LR
   the
   [declarative topology algebra (§6)](../documents/engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra);
   and the
-  [at-least-once + broker-side dedup delivery contract (§7)](../documents/engineering/pulsar_client_doctrine.md#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default).
+  [at-least-once + broker-side dedup delivery contract (§7)](../documents/engineering/pulsar_client_doctrine.md#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default);
+  and the [exclusively-CBOR payload codec (§3.1)](../documents/engineering/pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor)
+  — every application payload is CBOR through a typed codec, and a non-CBOR body is unrepresentable
+  ([illegal_state_catalog.md §3.23](../documents/engineering/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent)).
 - **[`content_addressing_doctrine.md` §2 — The three-tier store: blobs ← manifests ← pointers](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers):**
   this phase builds the store's three object classes and two write protocols — write-once self-naming
   `blobs/<sha256>` and `manifests/<sha256>` under `If-None-Match: *` (with `412 Precondition Failed` treated
@@ -148,18 +164,24 @@ The whole sprint.
 **Implementation**: `amoebius-pulsar/src/Amoebius/Pulsar/Producer.hs`,
 `amoebius-pulsar/src/Amoebius/Pulsar/Consumer.hs`,
 `amoebius-pulsar/src/Amoebius/Pulsar/Subscription.hs`,
-`amoebius-pulsar/src/Amoebius/Pulsar/Seek.hs` (not yet built)
+`amoebius-pulsar/src/Amoebius/Pulsar/Seek.hs`,
+`amoebius-pulsar/src/Amoebius/Pulsar/Cbor.hs` (the typed CBOR payload codec, `serialise`/`cborg`) (not yet built)
 **Blocked by**: Sprint 4.1
 **Independent Validation**: a persistent producer sends N messages and collects N `SEND_RECEIPT`s with
 assigned `message_id`s; a consumer grants `FLOW` permits, receives `MESSAGE` frames up to the permits, and
 `ACK`s (confirmed by `ACK_RESPONSE`); each of the four subscription types exhibits its distinct delivery
-shape; a `SEEK` to an earlier `message_id` replays the log
-**Docs to update**: `documents/engineering/pulsar_client_doctrine.md` (§5)
+shape; a `SEEK` to an earlier `message_id` replays the log; a typed value round-trips through the CBOR codec,
+a non-CBOR payload has no constructor (fails to type-check), and a corrupt-CBOR body yields a structured
+`Left` on consume
+**Docs to update**: `documents/engineering/pulsar_client_doctrine.md` (§5, §3.1),
+`documents/engineering/illegal_state_catalog.md` (§3.23)
 
 ### Objective
-Adopt [`pulsar_client_doctrine.md` §5 — The capability surface: lookup · produce · consume · subscribe · seek](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek):
+Adopt [`pulsar_client_doctrine.md` §5 — The capability surface: lookup · produce · consume · subscribe · seek](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek)
+and [§3.1 — Payloads are exclusively CBOR](../documents/engineering/pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor):
 build the five-capability client surface — long-lived producers, flow-controlled consumers, all four
-subscription types, and seek-based replay — over the persistent session from Sprint 4.1.
+subscription types, and seek-based replay — over the persistent session from Sprint 4.1, with **every
+application payload encoded exclusively as CBOR** through a typed codec ([illegal_state_catalog.md §3.23](../documents/engineering/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent)).
 
 ### Deliverables
 - A producer: `PRODUCER` → `PRODUCER_SUCCESS` binds a `producer_id` + `producer_name`; each `SEND` carries
@@ -172,6 +194,12 @@ subscription types, and seek-based replay — over the persistent session from S
   **Shared** (round-robin), **Key_Shared** (same key → same consumer); the client exposes all four and does
   not pick (role-selection is owned by the daemon-topology doctrine).
 - `SEEK` repositioning a subscription to an earlier `message_id` or timestamp for replay.
+- A typed **CBOR payload codec** (`Amoebius.Pulsar.Cbor`, on `serialise`/`cborg`): `produce`/`consume` accept
+  only a `Serialise` value (equivalently a `CborPayload` whose sole constructor is `encodeCbor`); there is
+  **no** raw/JSON/protobuf payload constructor, so a non-CBOR body is unrepresentable (grade-1). Consume is a
+  total `Either DecodeError a`. Canonical CBOR (shared with the store's `encodeManifestCbor`, Sprint 4.5) is
+  used where the payload is content-addressed; a large-artifact payload carries a manifest SHA reference,
+  never the raw blob inline.
 
 ### Validation
 1. Produce N messages over one persistent producer and assert N `SEND_RECEIPT`s with monotonic
@@ -179,6 +207,9 @@ subscription types, and seek-based replay — over the persistent session from S
 2. For each subscription type, attach the matching consumer set and assert its delivery shape (single reader;
    primary-then-standby ordering; round-robin spread; per-key affinity).
 3. Consume a prefix, `SEEK` back, and assert the earlier messages are redelivered.
+4. A typed command/event round-trips through the CBOR codec byte-for-byte; a fixture attempting a non-CBOR
+   payload fails to type-check (grade-1); a corrupted CBOR body yields a structured `Left` on consume
+   (grade-2, like CRC32C), never a silent misread.
 
 ### Remaining Work
 The whole sprint.
@@ -372,8 +403,11 @@ The whole sprint.
 
 **Engineering docs to update:**
 - `documents/engineering/pulsar_client_doctrine.md` — record that §3–§7 (native protocol, supernova fork,
-  capability surface, topology algebra, dedup contract) are realized in `amoebius-pulsar`; flip the relevant
-  sibling-evidence honesty notes to live-proof status once the gate runs (status itself stays in this plan).
+  capability surface, topology algebra, dedup contract) **and §3.1 (the exclusively-CBOR payload codec)** are
+  realized in `amoebius-pulsar`; flip the relevant sibling-evidence honesty notes to live-proof status once the
+  gate runs (status itself stays in this plan).
+- `documents/engineering/illegal_state_catalog.md` — annotate §3.23 (non-CBOR payload) with its realized
+  grade: produce-side grade-(1) uninhabitable, consume-side grade-(2) total decode, no grade-(3) claim.
 - `documents/engineering/content_addressing_doctrine.md` — record that §2 (the three-tier store + the two
   write protocols) is realized in `amoebius-store`, namespaced under an opaque `experiment-hash` prefix, with
   the §3 `experimentHash` derivation and seed kernel explicitly deferred to Phase 5.

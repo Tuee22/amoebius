@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define the hard separation between an app's **application logic** (what it *is* to a user)
@@ -109,7 +109,14 @@ The deployment-rules surface declares:
   linux-cpu is a deployment decision, not app logic — see §7.
 - **Dynamic node provisioning policy.** Scaling nodes by arbitrary logic — load, spot-instance cost, or
   workflow completion — is a deployment rule, owned operationally by
-  [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md).
+  [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md), and typed as a `ScalingPolicy` owned by
+  [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md).
+- **Resource budgets, storage backings, and the compute engine.** The per-host/cluster capacities and storage
+  budgets a workload must fit, the `StorageBacking` each app's storage draws from, and the compute engine +
+  node topology (kind / rke2 / EKS) are all deployment rules — an app declares *what* it needs, never *how
+  much the cluster has* or *which engine runs it*. The capacity fold is owned by
+  [resource_capacity_doctrine.md](./resource_capacity_doctrine.md); the compute-engine/topology axis by
+  [cluster_topology_doctrine.md](./cluster_topology_doctrine.md).
 
 This surface is **keyed by app**: a deployment-rules layer references an app by name and says *how to run
 it*. The same app name can appear in two different deployment-rules layers and run two completely different
@@ -322,5 +329,7 @@ ledger; it states the target shape and links back for status.
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [Image Build Doctrine](./image_build_doctrine.md)
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md)
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — capacity budgets and scaling policy are deployment rules
+- [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the compute engine and node topology are deployment rules
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

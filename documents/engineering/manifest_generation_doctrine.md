@@ -361,6 +361,8 @@ phase. This doc states the target shape and links back for status.
 - [DSL Doctrine](./dsl_doctrine.md) — the spec surface the renderer consumes and the two typed gates
 - [Illegal State Catalog](./illegal_state_catalog.md) — the unrepresentability of the unsafe manifests §3 forecloses
 - [Platform Services Doctrine](./platform_services_doctrine.md) — the standard set, the derived-NetworkPolicy rule (§9), the cpu/ram rule (§10), substrate-equivalence (§12)
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — `render` consumes the capacity-checked IR; overcommit is rejected before render
+- [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the compute-engine/topology the rendered node set realizes
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — secrets-by-name; a rendered manifest never carries plaintext secret bytes
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — retained `no-provisioner` PVs for StatefulSet storage
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — the content-addressed store backing the optional applied-log

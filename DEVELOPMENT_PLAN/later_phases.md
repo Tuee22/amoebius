@@ -145,6 +145,26 @@ re-open it as a candidate phase.
 
 ---
 
+## Resolved — *not* a later phase: capacity / topology / bounded-storage type discipline
+
+Making dysfunctional deployment states unrepresentable — resource overcommit (host / VM / cluster),
+compute-engine ↔ substrate incompatibility, illegal cluster topology (rke2-on-bare-apple, multi-node kind on
+two hosts, multi-node rke2 with fewer hosts than nodes), unbounded storage, un-tiered Pulsar topics, and
+policy-less capacity growth — is **not** a new phase. It is **folded into Phase 3** as a spec-layer type
+discipline (Sprint 3.6, with the acceptance fixtures in the Sprint 3.7 gate), because it is pure
+type-checking with no forward dependency (§E one-canonical-phase). Its **runtime** residues distribute to the
+phases that already own each substrate: the Pulsar two-ceiling offload to Phase 4, the Lima `LinuxHost`
+witness + host/VM capacity cross-check to Phase 7, live multi-node rke2/kind topology to Phase 9, and the
+`Managed EKS` arm + `ScalingPolicy` enaction + cloud quota to Phase 10. So there is **zero phase renumber**:
+the discipline is owned by two new doctrines
+([`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md),
+[`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md)) and catalogued in
+[`illegal_state_catalog.md`](../documents/engineering/illegal_state_catalog.md) §3.13–§3.22 / §4.6 / §4.7,
+delivered without inserting a phase. Named here only to close the question: do not re-open it as a candidate
+phase.
+
+---
+
 ## Related Documents
 
 - [README.md](README.md) — the live tracker; the `13+ — Later phases` row this document expands

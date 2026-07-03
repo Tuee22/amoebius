@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define how amoebius bakes third-party service binaries into one multi-arch base container and
@@ -37,7 +37,8 @@ What this doctrine deliberately does **not** own:
 |---------|----------|
 | The in-cluster registry (`distribution`) as a standard service and the sole pull source | [platform_services_doctrine.md](./platform_services_doctrine.md), [service_capability_doctrine.md](./service_capability_doctrine.md) |
 | The registry's retained-PV storage backend | [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md), [platform_services_doctrine.md](./platform_services_doctrine.md) |
-| The substrate catalog (apple / linux-cpu / linux-cuda / windows), Tart/Lima/WSL2, host worker nodes, and the lazy-tool-ensure contract | [substrate_doctrine.md](./substrate_doctrine.md) |
+| The substrate catalog (apple / linux-cpu / linux-cuda / windows), Lima/WSL2, host worker nodes, and the lazy-tool-ensure contract | [substrate_doctrine.md](./substrate_doctrine.md) |
+| The Apple-Metal host worker's headless, on-host, **no-VM** build/run shape (fixed Metal bridge + runtime MSL compilation) | [apple_metal_headless_builds.md](./apple_metal_headless_builds.md) |
 | Pulumi-managed cloud registries/infra, the MinIO Pulumi backend, DNS (route53) + TLS (zerossl) | [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) |
 | The content-addressed **workflow-artifact** store (`experimentHash`, pointers→manifests→blobs) — distinct from OCI image digests | [content_addressing_doctrine.md](./content_addressing_doctrine.md) |
 | Cluster bring-up ordering, amoebic spawn, and teardown | [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md) |
@@ -197,12 +198,15 @@ that continues to be a host-daemon responsibility. Flagged as a
 The intuition: a builder needs a Docker/buildx engine *somewhere*. Two homes are possible — the host's
 build daemon (the prodbox model: `docker build` on the host, `local_registry_pipeline.md` §6) or an in-pod
 builder running inside the cluster. The vision states the strongest argument for host directly: a host
-builder is "guaranteed to keep all builds in the same place, eg apple silicon on Tart".
+builder is "guaranteed to keep all builds in the same place" — including Apple-Silicon native `arm64`
+builds, which happen headless on the host (no VM; see
+[apple_metal_headless_builds.md](./apple_metal_headless_builds.md)).
 
 **Recommended default: the host builder for v1.**
 
 - **Why host first.** amoebius already requires a sudo-capable host daemon and host build tooling for
-  bootstrap; the host is where Apple-Silicon native `arm64` builds happen (Tart), and a single host build
+  bootstrap; the host is where Apple-Silicon native `arm64` builds happen (headless on-host, no VM —
+  [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)), and a single host build
   location keeps arch coverage and build caches in one predictable place. This matches the substrate model
   in which host worker nodes exist precisely for substrate-specific hardware
   ([substrate_doctrine.md](./substrate_doctrine.md)).
@@ -244,7 +248,9 @@ fall into two classes, and the third-party services are **baked**, not mirrored.
   libraries, not separate images.
 
 **The seam to extend is already proven in hostbootstrap.** Baking a service binary is the same move
-hostbootstrap already uses for Go/helm/mc/pulumi: add a per-arch asset map + a version resolver + a
+hostbootstrap already uses for Go/helm/mc/pulumi — a mechanism amoebius reuses for its own baked binaries,
+though it does **not** bake `helm` ([manifest_generation_doctrine.md §1](./manifest_generation_doctrine.md)):
+add a per-arch asset map + a version resolver + a
 `<SVC>_DOWNLOAD_URL` field in `hostbootstrap/hostbootstrap/base_image.py`, and a matching
 `ARG <SVC>_DOWNLOAD_URL` + `RUN … && install -m0755 … /usr/local/bin/<svc>` block in
 `hostbootstrap/docker/basecontainer.Dockerfile` (which stays logic-free — every per-arch value is an ARG

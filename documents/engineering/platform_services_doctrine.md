@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define the fixed set of standard services every amoebius cluster runs (the concrete providers
@@ -243,6 +243,19 @@ policy that exposes an undeclared one, are both **unrepresentable**. This subsec
 connectivity rule that [illegal_state_catalog.md](./illegal_state_catalog.md) §3.6 turns into a
 compile-time impossibility.
 
+### Tolerations are derived from node taints, never hand-authored
+
+Placement scheduling is **derived**, exactly like east-west connectivity, and for the same reason: a
+free-text toleration is how a pod ends up unschedulable (it tolerates a taint no node carries, or fails to
+tolerate the taint it must). So amoebius does not let an operator *write* a toleration at all. A workload's
+tolerations are **generated** from the declared node taints — the closed `NodeTaintKind` set and per-node
+taints owned by the node inventory ([substrate_doctrine.md §8](./substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints))
+— so a `Toleration` handle exists only once its taint edge does. Consequently the decode rejects a workload
+unless **there exists** a node satisfying its affinity **and** tolerating all its taints: a schedulability
+*existence fold* over the single node inventory, never a `Pending` pod. This subsection is the SSoT for the
+derivation rule that [illegal_state_catalog.md](./illegal_state_catalog.md) §3.5 / §3.22 turns into a
+compile/decode-time impossibility (grade-1 for the derived-toleration shape, grade-2 for the existence fold).
+
 ---
 
 ## 10. Every container declares CPU and RAM
@@ -260,6 +273,13 @@ Whether this requirement is lifted into the Dhall type layer (so an under-declar
 *unrepresentable*, not merely rejected at render time) is catalogued by
 [illegal_state_catalog.md](./illegal_state_catalog.md), which is the SSoT for which platform invariants are
 type-enforced.
+
+This doc owns only the **per-container declaration** — the atom. The **aggregate** — that the summed cpu/ram
+`Demand` of a cluster's workloads does not exceed the cluster's `Capacity` (and, nested, that an engine/VM
+does not exceed its host) — is owned by [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) (the
+§4.6 capacity-accounting fold, [illegal_state_catalog.md §3.17](./illegal_state_catalog.md)), which *reads*
+these per-container declarations. There is no second capacity fold here: this doc supplies the atoms, the
+capacity doctrine sums them.
 
 ---
 
@@ -340,6 +360,7 @@ This doc never maintains a competing status ledger; it states the target shape a
 
 - [Engineering Doctrine Index](./README.md)
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md)
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the aggregate cpu/ram capacity fold over the per-container atoms
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [Image Build Doctrine](./image_build_doctrine.md)
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md)

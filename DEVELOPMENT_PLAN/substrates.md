@@ -58,14 +58,25 @@ The four members of the closed catalog
 each as a plan-side registry entry. The doctrine owns *why* each is special; this is the projection keyed to
 gates.
 
+> **Two axes — detected vs declared.** The four members below are the **detected** host substrate (a fact
+> about the machine, never a knob). The **compute engine** — `kind` / `rke2` / `Managed EKS` — is a separate
+> **declared** axis owned by
+> [`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md); EKS is therefore a
+> *managed provider entry* (below), **not** a fifth detected substrate. Each host entry also **advertises a
+> declared `Capacity`** (cpu / mem / disk / gpu) — the number the capacity fold
+> ([`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) §4) checks
+> workload/VM/engine demand against, cross-checked at runtime against detection (§2 of the substrate
+> doctrine). The registry records that a `Capacity` is declared per host/node; the fold and its grade are the
+> capacity doctrine's.
+
 ### apple
 
 | Field | Value |
 |-------|-------|
 | Host kind | macOS on Apple Silicon — the admin laptop / highest-level root cluster host |
 | Native arch | `arm64` (always; Intel-Mac is rejected outright, [`substrate_doctrine.md` §1](../documents/engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob)) |
-| GPU axis | Apple Metal — on-host, **not containerizable** (needs unified memory) |
-| Virtualization | Lima (Ubuntu-24.04 Linux VM); Tart (macOS VM for Swift/Xcode builds) — see §3 |
+| GPU axis | Apple Metal — on-host, **not containerizable** (needs unified memory); the worker is built **headless on the host, no VM** ([`apple_metal_headless_builds.md`](../documents/engineering/apple_metal_headless_builds.md)) |
+| Virtualization | Lima (Ubuntu-24.04 Linux VM) — see §3. **No macOS build VM (no Tart)**: Apple-Metal builds are headless on-host |
 | LoadBalancer | MetalLB (bare-metal / kind / rke2 lane) |
 | What it validates | The Phase 7 gate — an Apple-Silicon **host compute daemon** runs a Metal ML workload as an in-cluster Pulsar/MinIO peer over host-only NodePorts ([`substrate_doctrine.md` §5 — host worker nodes](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)) |
 | Gate phase(s) | 7 |
@@ -116,9 +127,25 @@ gates.
 > amoebius-built behaviour; amoebius has not built Phase 1
 > ([`substrate_doctrine.md` §1](../documents/engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob)).
 
+### eks (managed provider — a *declared engine*, not a detected substrate)
+
+EKS is a first-class citizen on the **compute-engine axis**, not a member of the detected substrate catalog:
+it has no host to detect and no `LinuxHost` witness. It is the `Managed Eks` arm of the `ComputeEngine` union
+([`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md) §2).
+
+| Field | Value |
+|-------|-------|
+| Kind | Provider-managed cluster (`Managed Eks`) — no host binary, no host worker daemons, only the in-cluster singleton |
+| Detected substrate? | **No** — declared, provisioned over the cloud API from inside a parent ([`pulumi_iac_doctrine.md` §4](../documents/engineering/pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog)) |
+| Node capacity | From the declared **instance types**, not a physical host; folded like any other `Capacity` ([`resource_capacity_doctrine.md` §3](../documents/engineering/resource_capacity_doctrine.md)) |
+| Storage ceiling | A **cloud quota** (`CloudQuota` `StorageBacking`); "unbounded" storage/compute only via a quota-bounded `ScalingPolicy` |
+| LoadBalancer | Cloud LoadBalancer (the one substrate-driven difference, [`substrate_doctrine.md` §7](../documents/engineering/substrate_doctrine.md#7-the-loadbalancer-is-the-one-substrate-driven-platform-difference)) |
+| Gate phase(s) | 10 (the `linux-cpu` parent drives the deploy; the provider target is not a hardware substrate) |
+| Status | 📋 Planned |
+
 ---
 
-## 3. Virtualized substrates: Lima / WSL2 / Tart
+## 3. Virtualized substrates: Lima / WSL2
 
 When the host is not natively Linux, amoebius synthesizes a Linux host in a VM and then treats it as an
 ordinary Linux substrate — same charts, same services, same DSL — per
@@ -148,16 +175,18 @@ Lima VM on Apple presents as `linux-cpu` to everything above it.
 | Used by | The Windows Linux-host role; firmware-virtualization-off and a required reboot are first-class fail-fast outcomes, never silent hangs |
 | Status | 📋 Planned |
 
-### tart
+> **VM budget.** Each virtualized substrate carves a **`Capacity`** from its host (`carve`,
+> [`resource_capacity_doctrine.md` §4](../documents/engineering/resource_capacity_doctrine.md)); the guest
+> Linux cluster folds against that sub-capacity, so "a VM asking for more than its host" is decode-rejected
+> ([`illegal_state_catalog.md` §3.17](../documents/engineering/illegal_state_catalog.md)). A Lima/WSL2 VM is
+> also the **only `LinuxHost` witness** its non-Linux host can produce — which is why an rke2/kind cluster on
+> apple/windows must interpose one (I1, §3.14).
 
-| Field | Value |
-|-------|-------|
-| Runs on | `apple` host substrate |
-| Provider / tool | Tart (macOS VM) |
-| Synthesizes | A clean, reproducible macOS VM for Swift/Xcode builds of the Apple-Metal host-worker ML parts |
-| Seed module | **Design intent — no seed code** (sibling `infernix` removed its legacy Tart; amoebius provisions fresh under the Apple phase) |
-| Used by | Phase 7 (`apple`) — keeps Apple build provenance off the developer's hand-configured machine |
-| Status | 📋 Planned (design intent, not seeded) |
+> **No Tart / no macOS build VM.** The Apple-Metal host worker's Swift/Metal parts are **not** built in a VM.
+> They build headless, directly on the macOS host via a fixed `/usr/bin/clang`-built Metal bridge with runtime
+> MSL compilation — a shape proven in the sibling jitML project and adopted after sibling `infernix` removed
+> its legacy Tart path. There is no Tart provider, and none is planned
+> ([`apple_metal_headless_builds.md`](../documents/engineering/apple_metal_headless_builds.md)).
 
 ---
 
@@ -198,7 +227,10 @@ This map owns only the **one substrate per gate** assignment.
 ([`development_plan_standards.md` §I](development_plan_standards.md#i-generated-section-markers)), but both
 tables above are **hand-authored** today and the header declares `Generated sections: none` accordingly. A
 future amoebius `dev docs generate` will own a generated **stack-surface table** (the per-substrate ×
-per-service provider/LB/arch matrix) fenced between `<!-- amoebius:stack_surface:start -->` /
+per-service provider/LB/arch matrix — and, alongside it, the **compute-engine × substrate compatibility
+matrix** that [`cluster_topology_doctrine.md` §5](../documents/engineering/cluster_topology_doctrine.md)
+defines, plus a **per-provider quota** column for the `CloudQuota` backing) fenced between
+`<!-- amoebius:stack_surface:start -->` /
 `<!-- amoebius:stack_surface:end -->` markers; until that generator exists, marking a table generated is
 premature, so the equivalent content is carried by hand and the header stays `none`
 ([`development_plan_standards.md` §I](development_plan_standards.md#i-generated-section-markers)).
@@ -206,7 +238,7 @@ premature, so the equivalent content is carried by hand and the header stays `no
 Delivery sequencing, completion status, and validation gates for everything above are owned by
 [README.md](README.md) and the per-phase documents, never by this registry — the same separation the doctrine
 keeps in
-[`substrate_doctrine.md` §8 — planning ownership](../documents/engineering/substrate_doctrine.md#8-planning-ownership).
+[`substrate_doctrine.md` §9 — planning ownership](../documents/engineering/substrate_doctrine.md#9-planning-ownership).
 
 ---
 
@@ -215,6 +247,8 @@ keeps in
 - [README.md](README.md) — the live tracker; the Phase index carries the same substrate column
 - [development_plan_standards.md](development_plan_standards.md) — §L one-substrate discipline, §I generated-section markers
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — the normative substrate catalog, detection, no-`PATH` contract, virtualization, and host-worker carve-out this registry projects
+- [Cluster Topology Doctrine](../documents/engineering/cluster_topology_doctrine.md) — the declared compute-engine axis (kind/rke2/EKS) this registry keeps distinct from the detected substrate
+- [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — the fold over the per-host `Capacity` this registry declares
 - [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — §9 the LoadBalancer + single wild-ingress path, §12 substrate equivalence as a structural invariant
 - [Host ↔ Cluster Comms Doctrine](../documents/engineering/host_cluster_comms_doctrine.md) — the host-worker wire (host-only NodePorts, no mTLS) behind Phase 7
 - [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — the composition lift and worker-role taxonomy

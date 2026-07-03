@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for amoebius cluster bring-up and teardown across kind / rke2 / provider clusters — bootstrap, recursive **amoebic spawning**, graceful teardown-with-cleanup versus chaos-failover, push-back on an unsatisfiable global `.dhall`, dynamic node provisioning, and ephemeral spin-up/down with deterministic rebind.
@@ -15,7 +15,7 @@ There are exactly **two** kinds of cluster amoebius drives, and the whole point 
 they share **one** lifecycle vocabulary — *bring-up → init → reconcile → teardown* — even though the
 bring-up mechanics differ underneath.
 
-| | **Self-managed** (`kind` / `rke2`) | **Provider-managed** (AKS; EKS is prodbox's reality) |
+| | **Self-managed** (`kind` / `rke2`) | **Provider-managed** (EKS — prodbox's reality) |
 |---|---|---|
 | Host binary present? | **Yes** — the binary lives on the host and owns bring-up | **No** — there is no direct host access |
 | How it comes up | `bootstrap.sh` on the host → `bootstrap --distro={kind,rke2}` (§2) | Provisioned **via cloud keys over the API, from inside an existing amoebius cluster** (Pulumi) |
@@ -23,14 +23,16 @@ bring-up mechanics differ underneath.
 | Typical role | Any tier, including the **root** (an admin's laptop kind, or a single-node rke2) | A **child** spawned by a parent; never the root |
 
 The shared shape is what lets the rest of this document treat "a cluster" uniformly: a child you spawn on
-AKS and a kind cluster on a laptop converge to the **same fungible shape** — the same nine standard
+EKS and a kind cluster on a laptop converge to the **same fungible shape** — the same nine standard
 services, wired the same way — owned by
 [platform_services_doctrine.md §1](./platform_services_doctrine.md). The *substrate-specific* mechanics —
 substrate detection, `bootstrap.sh`, the LoadBalancer choice, host worker nodes, and the
 no-environment-variables / no-`PATH` lazy-tool-ensure contract — are owned by
 [substrate_doctrine.md](./substrate_doctrine.md). The Pulumi spawn mechanism and the cloud-credential
-model are owned by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). This doc owns the **lifecycle
-verbs** that ride on top.
+model are owned by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). The **declared compute-engine axis** —
+the `Kind` / `Rke2` / `Managed Eks` types and their node topology (one host for kind, one Linux host per rke2
+node, hostless for EKS) — is owned by [cluster_topology_doctrine.md](./cluster_topology_doctrine.md). This doc
+owns the **lifecycle verbs** that ride on top.
 
 ---
 
@@ -224,7 +226,8 @@ flowchart TD
   configurable and govern *whether* push-back fires. Because every container
   declares explicit CPU and RAM ([platform_services_doctrine.md §10](./platform_services_doctrine.md)),
   the capacity arithmetic — "does the surviving forest have room for what C was running?" — is sound rather
-  than guesswork.
+  than guesswork; that arithmetic is the same §4.6 capacity-accounting fold owned by
+  [resource_capacity_doctrine.md](./resource_capacity_doctrine.md).
 - **Same fail-closed posture as the reconciler.** Refusing-by-default on an unsatisfiable spec is the
   lifecycle analogue of the §9 `Unreachable → refuse` rule: a state the system cannot safely reach is
   refused, and only an explicit operator override overrides it.
@@ -268,7 +271,10 @@ conditions:
 
 This lives on the **deployment-rules** surface, orthogonal to application logic
 ([app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md)): an app never asks for nodes; the
-deployment rules decide the cluster's elastic shape. The provider-side mechanics — provisioning EC2/managed
+deployment rules decide the cluster's elastic shape. That elastic shape is a typed **`ScalingPolicy`**
+(capacity thresholds + instance price-shopping, bounded by a quota) — the escape valve that lets a bounded
+budget grow, owned by [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md); "unbounded" node or
+storage growth is representable **only** through such a policy. The provider-side mechanics — provisioning EC2/managed
 nodes via Pulsar-driven Pulumi, and per-PV EBS sized to exactly match its PVC and **decoupled from the
 EC2/node lifecycle** so storage outlives the node — are owned by
 [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) and
@@ -338,6 +344,8 @@ node provisioning in **Phase 10**; and the storage-lifecycle safety that makes t
 - [Platform Services Doctrine](./platform_services_doctrine.md)
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)
+- [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the `Kind` / `Rke2` / `Managed Eks` engine types and their topology
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the push-back capacity fold and the `ScalingPolicy` escape valve
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md)
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md)

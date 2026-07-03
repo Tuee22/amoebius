@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: The single source of truth for the catalog of illegal and unsafe cluster states amoebius
@@ -59,8 +59,8 @@ Cash that out against the three correctness layers from the chaos/failover doctr
   field is present, every composition the user wrote has an inhabitant. When implemented as specified, that
   is a real proof — at the *spec* layer, in code, the cheapest and strongest of the three. It is the type
   system doing the "Extract the decision" move for free.
-- **What it is *not*.** It says **nothing** about whether the interpreter renders the spec to correct Helm,
-  whether the apiserver admits that Helm, whether the scheduler places the pods, whether the LB actually
+- **What it is *not*.** It says **nothing** about whether the interpreter renders the spec to correct
+  manifests, whether the apiserver admits those manifests, whether the scheduler places the pods, whether the LB actually
   comes up, or whether two geo-replicated clusters converge after a partition. Those are the **Protocol**
   and **Runtime** layers, and by the *blindness property* (`chaos_failover_doctrine.md` §4) a Decision-layer
   proof is structurally blind to them.
@@ -75,7 +75,7 @@ runtime-enforcement proof there on purpose**, and never report it here.
 flowchart LR
   spec[amoebius.dhall spec] -->|Dhall type-check: spec composes, PROVEN at spec layer| decode[Decode to GADT-indexed Haskell types]
   decode -->|smart constructors and indices reject illegal values, PROVEN at code layer| ir[Coherent in-memory cluster IR]
-  ir -->|interpret to Helm and cluster config, NOT proven by the type-check| render[Rendered manifests]
+  ir -->|interpret to typed manifests and cluster config, NOT proven by the type-check| render[Rendered manifests]
   render -->|apply, schedule, reconcile, NOT proven here| live[Running cluster]
   live -->|runtime enforcement proof owned by| chaos[chaos_failover_doctrine.md]
 ```
@@ -88,10 +88,13 @@ flowchart LR
 
 ## 3. The catalog — states a valid spec cannot represent
 
-The entries below enumerate the original illegal-state list (§3.1–§3.8), plus the isolation invariants
-(§3.9–§3.10) and the best-practice-by-construction states (§3.11–§3.12) the techniques in §4 demand. Each
-entry: the **intuition** (how it goes wrong in raw k8s), the **owning doctrine** (the SSoT for the rule),
-and the **technique** (§4) that forecloses it.
+The entries below enumerate the original illegal-state list (§3.1–§3.8), the isolation invariants
+(§3.9–§3.10), the best-practice-by-construction states (§3.11–§3.12), the **capacity / topology / bounded-
+storage** states (§3.13–§3.22), and the **CBOR-payload** rule (§3.23) the techniques in §4 demand. Each entry: the **intuition** (how it goes wrong
+in raw k8s), the **owning doctrine** (the SSoT for the rule), and the **technique** (§4) that forecloses it.
+The §3.13–§3.22 block is foreclosed by the two techniques added for it — §4.6 (the capacity-accounting total
+fold) and §4.7 (compatibility/topology relations over a collection) — and is where the honest grade split
+matters most: every capacity/storage/retention **sum** is grade-(2), never grade-(1) (§2, §6).
 
 ### 3.1 Bad / illegal durable storage
 
@@ -130,16 +133,25 @@ representation. **Owner:** [`pulumi_iac_doctrine.md`](./pulumi_iac_doctrine.md) 
 [`platform_services_doctrine.md` §9](./platform_services_doctrine.md). **Technique:** §4.5 (content-address
 totality, applied to the name→address map).
 
-### 3.5 Undeployable pods (taints & affinity)
+### 3.5 Undeployable pods (taints, tolerations & affinity)
 
-In raw k8s you can write a nodeSelector / affinity / toleration set that matches **no** node — the pod is
-admitted and then never schedules. amoebius constrains placement so that a workload's substrate/affinity
-requirement is checked against the *declared* node inventory of the cluster spec: a requirement no node in
-the spec can satisfy is a type/decode error, not a `Pending` pod. Placement is expressed as a capability the
-workload *requests* and a node *offers*, and an unmatchable request is uninhabitable. **Owner:**
-[`substrate_doctrine.md`](./substrate_doctrine.md) (substrate/arch capabilities) and
-[`platform_services_doctrine.md`](./platform_services_doctrine.md). **Technique:** §4.2 (capability tags) +
-§4.4 (the node inventory is the single owner of "what substrates exist").
+In raw k8s you can write a nodeSelector / affinity that matches **no** node, *or* a taint no workload
+tolerates, *or* a toleration for a taint no node declares — the pod is admitted and then never schedules.
+amoebius constrains placement so that a workload's substrate/affinity requirement **and** its taint
+tolerations are checked against the *declared* node inventory of the cluster spec: the decode rejects a
+workload unless **there exists** a node satisfying its affinity **and** tolerating all its taints — a
+schedulability *existence fold* over the single node inventory. Placement is expressed as a capability the
+workload *requests* and a node *offers*, and an unmatchable request is uninhabitable; a **toleration is never
+hand-authored** — it is *derived* from a declared node taint (the same "derived, never written" discipline as
+NetworkPolicy, §3.6), so "a toleration for a taint no node declares" is unrepresentable and "a taint no
+workload tolerates" leaves the existence fold with no landable node. This strengthens the original
+affinity-only entry to cover taints and tolerations. **Owner:**
+[`substrate_doctrine.md`](./substrate_doctrine.md) (substrate/arch capabilities, the closed node-taint set +
+node inventory) and [`platform_services_doctrine.md` §9](./platform_services_doctrine.md) (the
+derived-toleration rule, parallel to derived NetworkPolicy). **Technique:** §4.2 (capability tags) + §4.3 (a
+derived toleration handle exists only once its taint edge does) + §4.4 (the node inventory is the single
+owner of "what substrates and taints exist"), the existence check itself being a §4.4 value-level fold. Grade
+(2) for the existence fold; the derived-toleration shape is grade (1) (§3.22).
 
 ### 3.6 Blocking NetworkPolicy (services can't reach each other)
 
@@ -229,11 +241,149 @@ any binary runs. **Owner:** [`service_capability_doctrine.md`](./service_capabil
 capability abstraction; one canonical provider, the type admitting alternates). **Technique:** §4.2
 (capabilities as a closed union — a product name is uninhabitable).
 
+### 3.13 A compute engine incompatible with its substrates (managed providers first-class)
+
+Raw tooling lets you point kind, rke2, or a managed cluster at a substrate that cannot run it, and lets a
+managed provider (EKS) be a bolt-on afterthought rather than a first-class citizen. amoebius makes the
+compute engine a **declared axis** distinct from the *detected* substrate, and a `Node` is built by a
+compatible-pair smart constructor: only an `(engine, substrate-indexed host | hostless provider)` pair the
+relation permits has a constructor, checked **elementwise** so heterogeneous **multi-substrate clusters stay
+legal** while an incompatible pairing has no inhabitant. EKS is a first-class `Managed` arm of the closed
+`ComputeEngine` union (a product/unknown engine is uninhabitable). **Owner:**
+[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md) (+ the node inventory in
+[`substrate_doctrine.md`](./substrate_doctrine.md)). **Technique:** §4.7 (relation over a collection) + §4.2
+(closed union, EKS arm present) + §4.4 (the node inventory the compatibility reads). **Grade:** (2) for the
+elementwise compatibility fold; grade (1) sub-part (EKS is a union arm; a product/unknown engine is
+uninhabitable).
+
+### 3.14 rke2/kind on a host with no Linux node (apple/windows without an interposed Linux VM)
+
+kind and rke2 need a Linux kernel; on a bare apple or windows host there is none until one is synthesized in
+a VM. amoebius makes a `LinuxHost` a **witness** whose only constructor on a non-Linux substrate is the
+virtualization provider (`limaHost` on apple, `wsl2Host` on windows), so "rke2/kind on a bare Apple host"
+(the VM interposition [`substrate_doctrine.md` §4](./substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)
+describes as reconcile behaviour) becomes a *type demand* — the bare-host spec has no inhabitant. (Distinct
+from the Apple-Metal *build* carve-out, which is on-host by design,
+[`apple_metal_headless_builds.md`](./apple_metal_headless_builds.md).) **Owner:**
+[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md) (+ substrate §4 for the synthesis).
+**Technique:** §4.3 (a distro GADT indexed by a required `LinuxHost` witness). **Grade:** (1) uninhabitable;
+grade-(3) residue — that the Lima/WSL2 VM actually boots.
+
+### 3.15 A multi-node kind cluster not on a single Linux host
+
+kind runs every node as a container on one Docker host, so a multi-node kind cluster spanning machines is a
+category error. amoebius's `Kind` arm carries **exactly one** `LinuxHost` field; multi-node is `replicas` on
+that one host, and a second host has no field to bind. **Owner:**
+[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md). **Technique:** §4.1 (required-field: one
+`host`; `replicas` never adds a host). **Grade:** (1) uninhabitable.
+
+### 3.16 A multi-node rke2 cluster with fewer Linux hosts than nodes (or a host reused)
+
+A multi-node rke2 cluster needs one Linux host per node; raw tooling lets you ask for five nodes with three
+machines, or reuse one machine for two nodes. amoebius's `Rke2` arm carries a `NonEmpty LinuxHost` — the node
+list *is* the host list, so "more nodes than hosts" cannot be built. **Distinctness** ("no host reused") is
+the one part Dhall cannot express as a type (no Set-distinctness), so it degrades to a total decode-time fold
+that rejects a duplicate `HostId`. **Owner:**
+[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md). **Technique:** §4.1 (`node == host`
+cardinality) + §4.4 (distinctness fold). **Grade:** (2) — graded to its weaker distinctness floor; the
+cardinality sub-part is grade (1).
+
+### 3.17 An over-committed deploy or workload (host / VM / cluster capacity exceeded)
+
+Raw k8s admits a workload requesting more cpu/mem than any node has, a VM or engine asking for more than its
+host, or a cluster whose workloads out-total its nodes — each surfaces at runtime as `Pending`, eviction, or
+a full disk. amoebius folds the summed typed `Demand` against the enclosing `Capacity` at every nesting level
+(host → VM → guest; cluster → workload) and rejects an overflow at decode. Because capacity is a *value* not a
+type index (Dhall has no dependent arithmetic), this is a **total decode-time check**, honestly grade (2) —
+never claimed uninhabitable. **Owner:** [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md)
+(consuming the host numbers in [`substrate_doctrine.md`](./substrate_doctrine.md), the cpu/ram in
+[`platform_services_doctrine.md` §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram),
+and the PV sizes in [`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md)). **Technique:** §4.6
+(capacity-accounting total fold). **Grade:** (2).
+
+### 3.18 Unbounded storage anywhere
+
+Raw k8s lets a volume grow until it fills the disk; "unbounded" is the default. amoebius admits storage that
+is **either** host-level (bounded by a physical disk) **or** cloud (bounded by a quota) — the closed
+`StorageBacking` union has **no unbounded arm**, so unbounded storage has no syntax, and the aggregate
+`Σ(sizes) ≤ backing` fold bounds the total. **Owner:**
+[`storage_lifecycle_doctrine.md` §5.2](./storage_lifecycle_doctrine.md) (the union shape) +
+[`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) (the aggregate). **Technique:** §4.2
+(closed `StorageBacking` union — grade 1) + §4.6 (aggregate backing fold — grade 2). **Grade:** (2) aggregate;
+the union shape is grade (1).
+
+### 3.19 An application consuming more storage than its backing (MinIO and Pulsar)
+
+Even with each volume bounded, the *sum* of an app's object usage and a topic's retained bytes can exceed the
+backing. amoebius folds cumulative store size against the selected `StorageBacking` for **both** MinIO
+(`<app>/<bucket>` buckets) and Pulsar (retained topic bytes); "unbounded" is representable only through a
+`Growable` scaling policy whose ceiling is itself a quota (§3.21). **Owner:**
+[`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) +
+[`content_addressing_doctrine.md`](./content_addressing_doctrine.md) (the MinIO store) +
+[`pulsar_client_doctrine.md`](./pulsar_client_doctrine.md) (topic retention). **Technique:** §4.6
+(cumulative-size ≤ backing fold) + §4.2 (the `Growable` arm gates unboundedness). **Grade:** (2).
+
+### 3.20 A Pulsar topic without a bounded / tiered / retained lifecycle
+
+Raw Pulsar lets a topic keep bytes forever, or offload on a **time-only** trigger that never bounds the hot
+tier — so if ingest outpaces the offload lag, BookKeeper fills, bookies go read-only, and the topic (often
+the broker) goes **unavailable**. amoebius makes a topic's `RetentionPolicy` a **mandatory, non-optional**
+field with a **mandatory size-triggered S3 offload** (time may offload *sooner* for cost but is never the
+sole trigger — a time-only policy is uninhabitable), and folds two ceilings: the hot-tier cap **plus
+headroom** against the BookKeeper backing (the availability fit) and the retained total against the offload
+target (the durability fit). A mandatory backlog quota is the runtime fail-safe. **Owner:**
+[`pulsar_client_doctrine.md` §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra) (the policy
+shape) + [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) (the two-ceiling fold).
+**Technique:** §4.1 (mandatory `RetentionPolicy` + mandatory size offload — no forever-local arm) + §4.6
+(retention-budget room-fit). **Grade:** (1) for the mandatory shape; (2) for both room-fits; grade-(3) residue
+— the burst back-pressure actually holding.
+
+### 3.21 Capacity growth without an amoebius-owned scaling policy
+
+"Just let it autoscale to infinity" is how a bounded budget quietly becomes unbounded. amoebius makes growth
+representable **only** through a `Growable = Bounded | Autoscaled ScalingPolicy` union with **no
+bare-unbounded arm**: the sole path past a fixed cap carries a typed `ScalingPolicy` (capacity thresholds,
+instance price-shopping, a quota cap), and amoebius owns that logic. The fold re-runs against the grown bound,
+so "unbounded" storage/compute exists only behind a policy whose ceiling is a quota. **Owner:**
+[`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) (with enaction owned by
+[`cluster_lifecycle_doctrine.md` §8](./cluster_lifecycle_doctrine.md#8-dynamic-node-provisioning) and
+[`pulumi_iac_doctrine.md` §4](./pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog)).
+**Technique:** §4.2 (closed `Growable` union, no unbounded arm). **Grade:** (1) representation; grade-(3) that
+the autoscaler actually grows capacity and the cloud honors the quota.
+
+### 3.22 A hand-authored (un-derived) toleration
+
+A free-text toleration is how a pod "tolerates" a taint no node carries (or fails to tolerate the one it
+must). amoebius never lets an operator *write* a toleration: a `Toleration` handle has no exported
+constructor and is **projected** only from a declared node taint against the single node inventory — the same
+derive-don't-author discipline as NetworkPolicy (§3.6). So a toleration for a nonexistent taint is
+unrepresentable, and the schedulability existence fold (§3.5) does the rest. **Owner:**
+[`substrate_doctrine.md`](./substrate_doctrine.md) (the closed `NodeTaintKind` set + node inventory) +
+[`platform_services_doctrine.md` §9](./platform_services_doctrine.md) (the derivation rule). **Technique:**
+§4.4 (the node inventory is the single owner of what taints exist) + §4.3 (a `Toleration` handle exists only
+once its taint edge does). **Grade:** (1) uninhabitable.
+
+### 3.23 A non-CBOR Pulsar payload
+
+Raw messaging lets a producer put any bytes on a topic — JSON, base64-in-JSON (infernix's retired path),
+protobuf, an untyped blob — so two services silently disagree on the body format and a consumer mis-reads or
+drops. amoebius makes the Pulsar message **body** exclusively CBOR: the produce surface takes only a
+`Serialise` value (equivalently a `CborPayload` whose sole constructor is `encodeCbor`), with **no**
+`produceRaw` / JSON / protobuf / base64 constructor, so a non-CBOR payload has no inhabitant; consume is a
+total `Either DecodeError a`. Canonical CBOR is reused from the content store where a payload is
+content-addressed, and the protocol framing (`BaseCommand` / metadata) stays protobuf — Pulsar's wire, a
+different layer. **Owner:** [`pulsar_client_doctrine.md` §3.1](./pulsar_client_doctrine.md) (+
+[`content_addressing_doctrine.md`](./content_addressing_doctrine.md) for the canonical-CBOR discipline).
+**Technique:** §4.2 (a closed codec — only the CBOR constructor exists) + §4.3 (constructor-gating; there is
+no non-CBOR payload handle) — **no new technique**. **Grade:** (1) uninhabitable on the *produce* side; the
+*consume* decode is a total fail-fast check — grade (2), exactly like the CRC32C frame check — never a
+grade-(3) claim that a received body is valid.
+
 ---
 
 ## 4. The typing techniques
 
-The catalog is foreclosed by five reusable techniques operating across **two type layers**:
+The catalog is foreclosed by seven reusable techniques operating across **two type layers**:
 
 - **The Dhall layer** gives totality, sum types (unions), required fields, and a DSL prelude of *smart
   constructors* — functions that only ever produce valid values, so the user composes from a vocabulary
@@ -243,7 +393,9 @@ The catalog is foreclosed by five reusable techniques operating across **two typ
   **GADT-indexed** types carrying phantom tags and ownership indices, so the in-memory IR the interpreter
   walks has the same illegal-states-absent property as the spec it came from.
 
-The five techniques follow. Each leads with the intuition, then the mechanism.
+The seven techniques follow. Each leads with the intuition, then the mechanism. Techniques §4.6 and §4.7 were
+added for the capacity / topology / bounded-storage block (§3.13–§3.22); §4.6 is the one technique that is
+**irreducibly grade-(2)** (§2, §6).
 
 ### 4.1 PVC↔PV binding by construction
 
@@ -303,6 +455,35 @@ and the `experimentHash` identity are owned by
 [`content_addressing_doctrine.md`](./content_addressing_doctrine.md); this doc owns only the *totality
 technique* — names are derived, never asserted.
 
+### 4.6 Capacity-accounting total fold — Σ demand ≤ capacity, checked
+
+*Intuition:* don't ask "does this one pod fit a node" — **fold the whole demand of a scope and compare it
+once to that scope's capacity**, at every level of nesting, so an overflow anywhere is caught. *Mechanism:* a
+total pure `Σ(refined non-zero quantities)` compared against a single-owner `Capacity`/`Budget`, returning a
+checked `Left Overcommit` (`fits`/`carve`/`place`). It nests — host → VM → guest, cluster → workload — and
+**re-runs** after any §4.2 `Growable` policy grows the bound. This is distinct from §4.4 (which checks
+single-ownership, not arithmetic). **Honesty:** this technique is **irreducibly grade-(2)** — Dhall has no
+dependent arithmetic, so `Σ ≤ cap` is a *checked rejection of a constructible value*, never an absence of
+inhabitants. Any entry claiming a capacity/storage/retention sum is grade-(1) is dishonest. The model
+(`Capacity`/`Demand`/`Budget`, the `StorageBudget` and `Growable` unions, the two-ceiling Pulsar fold, and the
+declared-vs-probed cross-check) is owned by [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md);
+this doc owns only the *fold technique*. Forecloses §3.17–§3.21.
+
+### 4.7 Compatibility / topology relations by construction over a collection
+
+*Intuition:* a cluster is not a bag of settings — it is a *collection of nodes*, and "which engine may sit on
+which substrate" is a *relation* that should have no illegal pair. *Mechanism:* a `Topology` is a fold over a
+`NonEmpty Node`; only a compatible `(engine, substrate-indexed LinuxHost | hostless Provider)` pair has a
+constructor (§4.3 gating + §4.2 phantom index), and the cluster-wide check is a **total elementwise fold**
+(§4.4) that returns the full list of incompatible nodes. Because it is elementwise, a **heterogeneous
+multi-substrate cluster stays legal** while an incompatible pairing has no inhabitant. Cardinality (`node ==
+host` list length) is grade-(1) by construction; distinctness ("one host per node, no reuse") is the part
+Dhall cannot express as a type and degrades to a grade-(2) fold. This composes §4.2/§4.3/§4.4 applied to a
+**binary relation over a collection**, and reads the single node inventory owned by
+[`substrate_doctrine.md`](./substrate_doctrine.md). The types are owned by
+[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md); this doc owns the *relation technique*.
+Forecloses §3.13–§3.16.
+
 ---
 
 ## 5. Coverage matrix — which technique forecloses which illegal state
@@ -313,7 +494,7 @@ technique* — names are derived, never asserted.
 | 3.2 PVCs that don't bind PVs | 4.1 binding-by-construction | [storage_lifecycle](./storage_lifecycle_doctrine.md) |
 | 3.3 Misconfigured gateway | 4.3 GADT route-from-service + 4.5 totality | [platform_services §9](./platform_services_doctrine.md) |
 | 3.4 Wrong-IP DNS | 4.5 content-address totality | [pulumi_iac](./pulumi_iac_doctrine.md), [platform_services §9](./platform_services_doctrine.md) |
-| 3.5 Undeployable taints/affinity | 4.2 capability tags + 4.4 node-inventory owner | [substrate](./substrate_doctrine.md), [platform_services](./platform_services_doctrine.md) |
+| 3.5 Undeployable taints/tolerations/affinity | 4.2 capability tags + 4.4 node-inventory existence fold | [substrate](./substrate_doctrine.md), [platform_services](./platform_services_doctrine.md) |
 | 3.6 Blocking NetworkPolicy | 4.4 dependency-graph owner + 4.3 consumer handle | [platform_services](./platform_services_doctrine.md) |
 | 3.7 Accidental insecure ingress | 4.2 `ExposeToWild` capability + 4.3 endpoint indices | [platform_services §9](./platform_services_doctrine.md) |
 | 3.8 Cross-tenant refs / literal secrets | 4.2 phantom tenant tags + capabilities | [vault_pki](./vault_pki_doctrine.md) |
@@ -321,6 +502,17 @@ technique* — names are derived, never asserted.
 | 3.10 Child spec beyond its subtree | 4.2 subtree/tenant tags + 4.4 ownership indices | [cluster_lifecycle §3](./cluster_lifecycle_doctrine.md), [dsl_doctrine](./dsl_doctrine.md), [vault_pki §6](./vault_pki_doctrine.md) |
 | 3.11 Unsafe workload (no limits / securityContext) | 4.1 required-field-by-construction | [manifest_generation](./manifest_generation_doctrine.md), [platform_services §10](./platform_services_doctrine.md) |
 | 3.12 App names a product not a capability | 4.2 closed capability union | [service_capability](./service_capability_doctrine.md) |
+| 3.13 Engine incompatible w/ substrates; managed provider first-class | 4.7 relation-over-collection + 4.2 closed union + 4.4 node inventory | [cluster_topology](./cluster_topology_doctrine.md) |
+| 3.14 rke2/kind on a host with no Linux node / no VM | 4.3 `LinuxHost` witness | [cluster_topology](./cluster_topology_doctrine.md), [substrate §4](./substrate_doctrine.md) |
+| 3.15 Multi-node kind not on a single host | 4.1 one `host` field | [cluster_topology](./cluster_topology_doctrine.md) |
+| 3.16 Multi-node rke2 w/ fewer hosts than nodes / host reused | 4.1 `node==host` + 4.4 distinctness fold | [cluster_topology](./cluster_topology_doctrine.md) |
+| 3.17 Over-committed host / VM / cluster | 4.6 capacity total fold | [resource_capacity](./resource_capacity_doctrine.md) |
+| 3.18 Unbounded storage anywhere | 4.2 closed `StorageBacking` + 4.6 aggregate | [storage_lifecycle §5.2](./storage_lifecycle_doctrine.md), [resource_capacity](./resource_capacity_doctrine.md) |
+| 3.19 App consuming more storage than backing (MinIO & Pulsar) | 4.6 cumulative fold + 4.2 Growable gate | [resource_capacity](./resource_capacity_doctrine.md), [content_addressing](./content_addressing_doctrine.md), [pulsar_client](./pulsar_client_doctrine.md) |
+| 3.20 Pulsar topic w/o bounded/tiered/retained policy | 4.1 mandatory RetentionPolicy + size offload + 4.6 room-fit | [pulsar_client §6](./pulsar_client_doctrine.md), [resource_capacity](./resource_capacity_doctrine.md) |
+| 3.21 Capacity growth w/o an amoebius scaling policy | 4.2 closed `Growable` union | [resource_capacity](./resource_capacity_doctrine.md) |
+| 3.22 Hand-authored (un-derived) toleration | 4.4 node-inventory owner + 4.3 derived handle | [substrate](./substrate_doctrine.md), [platform_services §9](./platform_services_doctrine.md) |
+| 3.23 Non-CBOR Pulsar payload | 4.2 closed codec + 4.3 constructor-gating | [pulsar_client §3.1](./pulsar_client_doctrine.md), [content_addressing](./content_addressing_doctrine.md) |
 
 ---
 
@@ -350,6 +542,21 @@ that the *running* pod's cgroup limits are honored by the kernel — that is gra
 assert. Stating the grade is the whole point: it is the difference between "illegal state is impossible" as
 a slogan and as a defensible boundary.
 
+Second worked example, the one the §3.13–§3.22 block turns on: **capacity sums are the canonical grade-(2)
+case, and saying otherwise is dishonest.** `Σ demand ≤ capacity` (§3.17), `Σ(PV caps) ≤ backing` (§3.18),
+the store-size fold (§3.19), the Pulsar room-fit (§3.20), and the rke2 host-distinctness check (§3.16) are
+all **total decode-time rejections of constructible values** — because capacity is a *value*, not a type
+index, and Dhall has no dependent arithmetic to make `Σ ≤ cap` a statement about inhabitance (§4.6). By
+contrast, the grade-(1) "no constructor" examples are the topology *witnesses* (§3.14 `LinuxHost`, §3.15
+one-host `Kind`), the *derived* toleration (§3.22), the mandatory-shape unions (§3.20 non-optional
+`RetentionPolicy` + size offload, §3.21 `Growable` with no unbounded arm), and the CBOR-only payload codec
+(§3.23, whose *consume*-side decode is a grade-(2) total check like CRC32C). A single catalog entry may mix
+grades (§3.13, §3.16, §3.18, §3.20): it is then graded to its **weaker floor**, and the split is stated in
+the entry. And the physical residues — the host actually capping bytes/cgroups, the broker actually
+offloading to S3, the pod actually scheduling, the Lima/WSL2 VM actually interposing, the autoscaler actually
+growing capacity, and the cloud honoring the quota — are always grade-(3), owned by
+[`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) and the testing doctrine, never asserted here.
+
 > **Honesty.** amoebius has not built Phase 3. Every grade-(1) and grade-(2) claim above is the *intended*
 > property of the type discipline, not a tested result; grade-(3) is explicitly deferred. Where a technique
 > generalizes a behaviour proven in prodbox (single-owner SSoT, Keycloak-owns-ingress), that proof is
@@ -362,9 +569,14 @@ a slogan and as a defensible boundary.
 This document is normative catalog-and-technique doctrine only. Delivery sequencing, completion status, and
 validation gates are owned by [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md): the
 DSL and its illegal-state-unrepresentable contract land in **Phase 3** (a deliberately-illegal `.dhall` that
-fails to type-check is part of that phase's acceptance gate), and the runtime-enforcement layers this doc
-defers are exercised across the platform (Phase 2), multi-cluster failover (Phase 9), and testing (Phase 11)
-phases. This doc never maintains a competing status ledger.
+fails to type-check is part of that phase's acceptance gate). The §3.13–§3.22 capacity / topology /
+bounded-storage block and its §4.6/§4.7 techniques are the Phase-3 gate's added negative fixtures (with the
+multi-substrate and managed-EKS *positive* fixtures); their **runtime** residues distribute to the phases
+that own each substrate — the Pulsar two-ceiling offload in **Phase 4**, the Lima `LinuxHost` witness +
+host/VM capacity cross-check in **Phase 7**, live multi-node rke2/kind topology in **Phase 9**, and the
+`Managed Eks` arm + `ScalingPolicy` enaction + cloud quota in **Phase 10**. The runtime-enforcement layers
+this doc defers are otherwise exercised across the platform (Phase 2), multi-cluster failover (Phase 9), and
+testing (Phase 11) phases. This doc never maintains a competing status ledger.
 
 ---
 
@@ -374,7 +586,9 @@ phases. This doc never maintains a competing status ledger.
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — PVC↔PV, sizing, retained PVs
 - [Platform Services Doctrine](./platform_services_doctrine.md) — gateway / ingress / NetworkPolicy / cpu-ram
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — `SecretRef`-by-name, parent→child injection, tenant trust
-- [Substrate Doctrine](./substrate_doctrine.md) — substrate/arch capabilities for placement
+- [Substrate Doctrine](./substrate_doctrine.md) — substrate/arch capabilities for placement, node inventory + taints
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the §4.6 capacity fold (§3.17–§3.21)
+- [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the §4.7 compute-engine/topology relation (§3.13–§3.16)
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — pointers→manifests→blobs totality
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — route53 / zerossl name→address binding
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md) — the host-local NodePort carve-out

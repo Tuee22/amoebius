@@ -47,7 +47,19 @@ This is a large body of work spanning many phases; that is expected.
 - **No environment variables, ever — including `PATH`.** Host tools are discovered lazily via the
   substrate's package manager and invoked by full path.
 - **Illegal/unsafe cluster state is unrepresentable in Dhall** — PVC↔PV binding, gateway, DNS, certs,
-  taints/affinity, NetworkPolicy, and insecure ingress cannot be expressed wrongly.
+  taints/tolerations/affinity, NetworkPolicy, and insecure ingress cannot be expressed wrongly.
+- **Resource demand never exceeds capacity.** A workload / VM / compute-engine whose summed cpu/mem/storage
+  demand exceeds its host or cluster capacity is decode-rejected — a total fold over per-host/per-node
+  declared `Capacity` (grade-2; the substrate detects the real number and refuses if smaller).
+- **No unbounded storage, anywhere.** Storage is host-bounded or cloud-quota-bounded; an app (MinIO **and**
+  Pulsar) cannot consume more than its backing; every Pulsar topic carries a bounded retention + a
+  **size-triggered** S3 offload so the hot tier never overflows; "unbounded" is representable only behind a
+  quota-capped `ScalingPolicy`.
+- **The compute engine matches its substrate, and topology matches its hosts.** rke2/kind need a Linux host
+  (a Lima/WSL2 VM on apple/windows); multi-node kind is a single host; multi-node rke2 is one Linux host per
+  node; EKS is a first-class managed engine — while heterogeneous **multi-substrate clusters are allowed**.
+- **Dynamic provisioning is amoebius-owned and typed.** Capacity grows only through a `ScalingPolicy`
+  (capacity-based + instance price-shopping, quota-capped) — arbitrary logic, never a bare "unbounded."
 - **Application logic and deployment rules are separate DSL surfaces.** An app is written once; HA
   replicas, chaos testing, geo-replication, and failover are an orthogonal deployment-rules layer.
 - **Secrets never live in Dhall** — only names. Parents inject secrets into a child's Vault.
@@ -58,6 +70,9 @@ This is a large body of work spanning many phases; that is expected.
 - **Containers always declare cpu/ram.**
 - **Keycloak owns all wild ingress** via the LB + Gateway API; the sole exceptions are host-origin
   NodePorts (see the host↔cluster comms doctrine).
+- **Pulsar payloads are exclusively CBOR** (canonical where content-addressed) — one message-body format via
+  a typed codec; a non-CBOR application payload (JSON/base64/protobuf/raw) is unrepresentable. The protocol
+  framing stays protobuf (Pulsar's wire).
 
 ## Standard platform services (every cluster, HA)
 
@@ -109,7 +124,7 @@ sprints, and its gate. *Substrate* is the single substrate the gate runs on.
 | 0 | Documentation suite (whole DSL) | none | the documentation lint passes (headers, SSoT, no orphan links) | 🔄 Active | [phase_00](phase_00_documentation_suite.md) |
 | 1 | Bootstrap + kernel + single kind cluster | linux-cpu | `amoebius bootstrap` brings up an empty cluster; re-run is a no-op | 📋 Planned | [phase_01](phase_01_bootstrap_kernel_kind.md) |
 | 2 | Platform services + retained storage + root Vault/PKI | linux-cpu | all standard services up HA from generated manifests + baked binaries; ingress only via Keycloak; storage rebinds | 📋 Planned | [phase_02](phase_02_platform_services_storage_vault.md) |
-| 3 | Orchestration Dhall DSL + control-plane singleton | linux-cpu | a `.dhall` deploys the platform + a trivial app; an illegal `.dhall` fails to type-check | 📋 Planned | [phase_03](phase_03_dsl_control_plane_singleton.md) |
+| 3 | Orchestration Dhall DSL + control-plane singleton | linux-cpu | a `.dhall` deploys the platform + a trivial app; illegal `.dhall` files (bad PVC↔PV, open ingress, product-in-app-logic, overcommit, bad topology, unbounded storage, un-tiered topic) fail to type-check; a multi-substrate / managed-EKS `.dhall` decodes | 📋 Planned | [phase_03](phase_03_dsl_control_plane_singleton.md) |
 | 4 | Native Pulsar client + content-addressed store + workflow-runtime | linux-cpu | round-trip a workflow over native Pulsar + store/fetch a content-addressed artifact; a worker fails over | 📋 Planned | [phase_04](phase_04_pulsar_content_store_workflow.md) |
 | 5 | Determinism kernel + infernix migration | linux-cpu | an infernix CPU-inference workflow is reproducible (same `experimentHash` ⇒ same output) | 📋 Planned | [phase_05](phase_05_determinism_infernix.md) |
 | 6 | jitML migration + HA coordinator | linux-cuda | a jitML run is bit-deterministic per its contract; the coordinator fails over | 📋 Planned | [phase_06](phase_06_jitml_ha_coordinator.md) |

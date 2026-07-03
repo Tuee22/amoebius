@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/platform_services_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define `amoebius-pulsar` — the one native-protocol Haskell Pulsar client (forked from
@@ -56,13 +56,17 @@ This doc is the SSoT for **the client and its delivery contract**. It owns:
 2. The capability surface: lookup / produce / consume / subscribe / seek (§5).
 3. The **declarative topology algebra**: how topic names are *derived*, never written, and the
    one-sided-link validation that rejects an unroutable graph (§6).
-4. The **at-least-once + broker-side dedup** delivery contract (§7).
+4. The **topic storage lifecycle**: mandatory retention, a *size-triggered* S3 offload, and the two-ceiling
+   storage budget that keeps the hot tier from ever overflowing (§6.1).
+5. The **at-least-once + broker-side dedup** delivery contract (§7).
+6. The **payload codec**: application message payloads are **exclusively CBOR** (canonical where
+   content-addressed), §3.1.
 
 It deliberately does **not** own, and only references:
 
 | Concern | Owner |
 |---------|-------|
-| What rides *inside* a message (content-addressed refs, not blobs) | [content_addressing_doctrine.md](./content_addressing_doctrine.md) |
+| What a payload *references* (raw content-addressed blobs, the manifest CBOR shape) — the *encoding* of the payload envelope is CBOR, owned here (§3.1) | [content_addressing_doctrine.md](./content_addressing_doctrine.md) |
 | *Who* runs producers/consumers, topic-lifecycle coordinators, leadership election | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
 | *How* a host daemon reaches the broker (Pulsar peer over host-only NodePort, no mTLS) | [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md) |
 | That Pulsar is a standard HA service on every cluster | [platform_services_doctrine.md §6](./platform_services_doctrine.md) |
@@ -117,6 +121,66 @@ flowchart LR
   producer -->|SEND with sequence_id| broker[Broker]
   broker -->|SEND_RECEIPT with message_id| producer
 ```
+
+### 3.1 Payloads are exclusively CBOR
+
+Intuition: the frame (§3) has two independent layers, and this section is the SSoT for the *inner* one.
+The **command/metadata layer** is protobuf — that is Pulsar's own wire format (`BaseCommand`, message
+metadata, via `proto-lens`), and it is not amoebius's to change. The **application payload** — the raw
+`payload` tail after the metadata — is amoebius's, and it is **exclusively CBOR**. There is no JSON, no
+base64, no protobuf, and no untyped `ByteString` application payload: a Pulsar message body that is not CBOR
+is **unrepresentable** ([illegal_state_catalog.md §3.23](./illegal_state_catalog.md)).
+
+- **One codec, one body format.** A payload is produced only through a typed codec — `produce` takes a
+  `Serialise`-constrained value (equivalently, a `CborPayload` newtype whose sole constructor is
+  `encodeCbor :: Serialise a => a -> CborPayload`). There is **no** `produceRaw :: ByteString -> …` and no
+  JSON/protobuf/base64 path, so a non-CBOR payload has no inhabitant — grade-(1) uninhabitable
+  ([illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-grades-of-foreclosure-and-the-honesty-they-force)).
+  Consume is the mirror: `Serialise a => … -> Either DecodeError a`, a **total, fail-fast** decode — a
+  corrupt or mistyped body is a structured error, never a silent misread, exactly the posture the mandatory
+  CRC32C (§3) already takes on the frame.
+- **Canonical where content-addressed; fast elsewhere.** amoebius reuses — it does **not** restate — the
+  canonical-CBOR discipline the content store already owns: the `encodeManifestCbor` canonical encoder
+  ([content_addressing_doctrine.md §2.1](./content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers))
+  sorts components so equal logical content yields byte-identical CBOR. A payload that is **content-addressed
+  or hashed** (a result body, a manifest-SHA-bearing envelope) is encoded **canonically**; an ephemeral
+  command/event is not required to be, because dedup keys on `(producer_name, sequence_id)`, never on payload
+  bytes (§7), and determinism is scoped to the durable body only, never to broker-assigned ids/timestamps
+  ([content_addressing_doctrine.md §5](./content_addressing_doctrine.md)).
+- **Big data is a reference, still CBOR.** Frames are ≤ 5 MiB (§3); a payload that must carry a large
+  artifact carries the artifact's **manifest SHA** — a content-address reference — as a field of the CBOR
+  envelope, never the raw blob inline. The *reference* is CBOR (here); the *blob bytes* and the *manifest
+  CBOR shape* stay owned by [content_addressing_doctrine.md](./content_addressing_doctrine.md) (blobs are raw
+  opaque bytes; only manifests are CBOR).
+- **The broker sees opaque bytes.** amoebius owns the codec; it does **not** use Pulsar's schema registry.
+  The Pulsar message schema is `BYTES`, and the CBOR body is opaque to the broker — so the codec, not a
+  server-side schema, is the single source of truth for the wire body (the same "one client, one wire"
+  posture as §1).
+- **Why CBOR.** It is a dense, self-describing binary format — *functional* in the sense the vision wants
+  (no external `.proto` schema to keep in sync, unlike the protocol layer), it eliminates the ~33% base64
+  inflation of the retired WebSocket path (§1), and it is **already the project's chosen binary format** for
+  content-addressed manifests — so payloads and manifests share one format and one canonical encoder rather
+  than introducing a second.
+- **Toolchain.** The codec is built on **`serialise`** (the `Serialise` typeclass) over **`cborg`** (whose
+  `Codec.CBOR.Write` sorted-map writer gives canonical encoding), on the repo-wide GHC 9.12.4 pin; the
+  dependency is carried in the `amoebius-pulsar` cabal package and registered in the dependency-management
+  surface tracked by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Any codegen tool
+  is discovered lazily by full path (no env, no `PATH`), exactly as `protoc` is (§3).
+
+```mermaid
+flowchart LR
+  value[Typed workflow value, Serialise a] -->|encodeCbor, canonical if content-addressed| body[CBOR payload body]
+  body -->|becomes the raw payload tail| frame[Frame: protobuf command plus metadata, CRC32C, CBOR payload]
+  frame -->|SEND| broker[Broker sees opaque BYTES]
+  broker -->|MESSAGE| recv[Consumer]
+  recv -->|decode, total Either| out[Right a, or Left DecodeError, never a silent misread]
+```
+
+> **Honesty.** The CBOR-payload rule is Phase-4 design intent, not a tested amoebius result. Canonical CBOR
+> is *proven in the sibling jitML content store* (`encodeManifestCbor`) — that is sibling evidence, not
+> amoebius proof ([documentation_standards.md §6](../documentation_standards.md)). The grade-(1) claim is the
+> *produce* surface having no non-CBOR constructor; that a *received* body decodes is the same total-check /
+> runtime residue the CRC32C guarantee already carries, not a stronger claim.
 
 ---
 
@@ -240,6 +304,56 @@ flowchart LR
   check -->|Left errors| reject[Reject graph with full violation list]
 ```
 
+### 6.1 Topic storage lifecycle: bounded, tiered, retained — and the hot tier never overflows
+
+Intuition: a topic that keeps bytes forever, or offloads on a **time-only** trigger, is an outage waiting to
+happen. Pulsar's hot tier is BookKeeper (bookies on retained PVs); tiered storage offloads only **closed**
+ledgers to S3 and does **not** free BookKeeper until retention deletes them (there is a deletion lag), and the
+currently-open ledger can never be offloaded. So a time-only offload does not bound occupancy: if ingest ×
+offload-lag exceeds the bookie disk, BookKeeper fills, bookies go read-only, and the topic — often the
+broker — becomes **unavailable**. amoebius makes that state unrepresentable
+([illegal_state_catalog.md §3.20](./illegal_state_catalog.md)) by making a topic's lifecycle a **pure typed
+policy**, not an operator afterthought. This is the SSoT for that policy; the DSL *surface* that carries it is
+owned by [dsl_doctrine.md](./dsl_doctrine.md), and the two-ceiling *arithmetic* by
+[resource_capacity_doctrine.md §7](./resource_capacity_doctrine.md).
+
+Every topic carries three mandatory, non-optional fields and folds against **two** ceilings:
+
+- **A mandatory `RetentionPolicy`.** There is no "keep forever" arm and no optional retention — a topic
+  without a bounded retention (by time and/or size, on acknowledged messages) has no inhabitant (grade-1
+  shape). Backlog (unacknowledged) is bounded separately by the backlog quota below.
+- **A mandatory *size-triggered* S3 offload.** The offload trigger is a **size high-water mark on the primary
+  (BookKeeper) tier** — an optional time threshold may offload *sooner* for cost, but is **never** the sole
+  trigger, so a time-only policy is uninhabitable. This is the load-bearing difference: the size trigger is
+  what bounds the hot tier.
+- **The hot-tier fit (availability-critical).** The per-topic hot-tier cap **plus headroom** — the open
+  ledger, in-flight ingest during offload, and the deletion lag — folds against the BookKeeper
+  `StorageBacking`: `Σ(hot caps + headroom) ≤ bookie disk`. A hot-tier overflow is a grade-2 decode-time
+  rejection ([resource_capacity_doctrine.md §7](./resource_capacity_doctrine.md)).
+- **The durable-total fit.** The total retained bytes fold against the selected offload target's ceiling — a
+  provider-S3 quota ([pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md)) for cloud clusters, or the MinIO
+  content store ([content_addressing_doctrine.md](./content_addressing_doctrine.md)) for host-bounded ones
+  — the `StorageBacking` arm ([storage_lifecycle_doctrine.md §5.2](./storage_lifecycle_doctrine.md)) selecting
+  which owner's number the fold reads.
+- **A mandatory backlog quota (runtime fail-safe).** A burst, or a stalled/S3-unreachable offload, can still
+  race the cap at runtime — no spec-layer check prevents that. So the policy carries a mandatory backlog
+  quota (`producer_request_hold` / back-pressure at the high-water mark), so overflow degrades to **per-topic
+  producer throttling, never a disk-full broker outage**. The decode-time two-ceiling fit is grade-2; the
+  back-pressure actually holding is grade-3, owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md).
+
+The retention/offload/backlog policy is enabled on the namespace as a reconcile step, the same shape as the
+broker-side dedup namespace policy (§7) — a pure typed value the coordinator reconciles, not a hand-set knob.
+
+```mermaid
+flowchart LR
+  produce[Producer writes to a topic] -->|hot tier| bk[BookKeeper closed ledgers, bounded by size high-water mark]
+  bk -->|size trigger, optionally sooner by time| offload[Offload closed ledgers to S3 target]
+  offload -->|retention deletes after deletion lag| free[BookKeeper space reclaimed]
+  bk -->|hot cap plus headroom at most bookie disk, decode fold| avail[Hot tier never overflows, grade 2]
+  offload -->|total retained at most offload target ceiling, decode fold| durable[Durable total bounded, grade 2]
+  bk -->|high-water mark reached before offload catches up| hold[Backlog quota holds producer, grade 3 fail-safe]
+```
+
 ---
 
 ## 7. Delivery: at-least-once with broker-side dedup (the robust default)
@@ -312,6 +426,7 @@ The whole point of `amoebius-pulsar` is collapse: two transports, two runtimes, 
 |-----|----------------------------|---------|
 | infernix Pulsar I/O | direct in-process **WebSocket** gateway, one producer per publish, base64-in-JSON payloads (`Infernix.Runtime.Pulsar`) | `amoebius-pulsar` native protocol |
 | jitML Pulsar I/O | **Node.js subprocess** owning the WebSocket client | `amoebius-pulsar` native protocol |
+| **message payload encoding** | **base64-in-JSON** envelope (infernix), ~33% inflation | **exclusively CBOR** — a dense binary body via a typed codec, canonical where content-addressed (§3.1) |
 | jitML topic strings | typed `RouteEntry` + `validateTopology` (`JitML.Coordinator.Topology`) | the topology algebra (§6), promoted into the client doctrine |
 | infernix dedup wiring | namespace dedup policy + `(producer_name, sequence_id)` + `initialSequenceId` URL hack | broker-side dedup with `sequence_id` as a native field (§7) |
 
@@ -334,6 +449,9 @@ is **Phase 5**. This doc never maintains a competing status ledger.
 
 - [Engineering Doctrine Index](./README.md)
 - [Content Addressing Doctrine](./content_addressing_doctrine.md)
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the two-ceiling topic-storage fold
+- [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — the `StorageBacking` union the offload target selects
+- [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — the cloud-S3 offload target quota
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md)
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md)
 - [Platform Services Doctrine](./platform_services_doctrine.md)

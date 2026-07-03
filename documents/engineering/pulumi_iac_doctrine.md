@@ -2,10 +2,66 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
-> **Purpose**: Single Source of Truth for how amoebius runs Pulumi — only from inside an existing amoebius cluster, with every byte of state held as a Vault-Transit-enveloped object in MinIO — to provision provider-managed clusters (EKS now, AKS later), spawn self-managed children, materialize per-PV EBS volumes under the create-but-never-delete credential model, and integrate DNS (route53) and TLS (zerossl); and how independent deploys are parallelized applicatively.
+> **Purpose**: Single Source of Truth for how amoebius runs Pulumi — only from inside an existing amoebius cluster, with every byte of state held as a Vault-Transit-enveloped object in MinIO — to provision provider-managed clusters (EKS), spawn self-managed children, materialize per-PV EBS volumes under the create-but-never-delete credential model, and integrate DNS (route53) and TLS (zerossl); and how independent deploys are parallelized applicatively.
+
+---
+
+## 0. Decision record: why Pulumi stays — and why that is not the Helm decision
+
+amoebius dropped Helm ([manifest_generation_doctrine.md §1](./manifest_generation_doctrine.md)) but keeps
+Pulumi, and the two decisions can look inconsistent until you see the asymmetry that separates them.
+
+**Helm sat on a substrate that already reconciles; Pulumi sits on one that does not.** Kubernetes *is* a
+reconciler — the apiserver, its controllers, and server-side apply already drive observed state toward a
+declared desired state. Helm was a (stringly-typed) wrapper over `kubectl apply` on top of that engine, so
+dropping it costs little: amoebius renders better-typed inputs and hands them straight to the reconciler
+that already exists. Cloud provider APIs (EKS, EC2/EBS, route53, ACME) have **no** built-in declarative
+reconciler — Pulumi *is* the state, diff, dependency-ordering, and `destroy` engine. Dropping Pulumi would
+mean building or adopting an engine that otherwise does not exist. The work Pulumi does is therefore
+materially harder to replace than the work Helm did; the two removals are *not* symmetric.
+
+**The v1 decision: keep Pulumi.** It brings mature multi-cloud CRUD/diff/destroy and provider coverage, and
+its encrypted-MinIO-backend + Vault-Transit envelope shape (§2) is *proven in the sibling prodbox project*.
+Reimplementing that surface is a far larger and riskier undertaking than the Helm removal was, for no
+present gain.
+
+**The tension, stated honestly.** Pulumi's checkpoint is a *stored* second state store — exactly the shape
+amoebius convicts Helm's release Secret of, whose "the stored state and the world disagree" desync mode the
+manifest doctrine calls out ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md)). And
+§8 of this very doc argues *against* a global stored state machine ("data in, data out — each `discover`
+queries the right authority at the moment of use"), which points toward tag-based discovery of live cloud
+state rather than toward a checkpoint. So keeping Pulumi is the pragmatic v1 choice, not a perfect fit for
+the thesis.
+
+**Crossplane is rejected.** The tempting alternative — modelling cloud resources as typed CRs reconciled
+*in-cluster*, collapsing this engine into the server-side-apply manifest reconciler and removing the external
+checkpoint — is **declined** for a provability-first system. Crossplane requires parent/management clusters to
+run its provider controllers **continuously** (a standing footprint on even the laptop root, *and* an
+autonomous substrate authority acting on its own reconcile loop beside the elected singleton — a categorically
+larger delegation than the in-cluster operators the manifest doctrine blesses
+([manifest_generation_doctrine.md §4](./manifest_generation_doctrine.md))); it stores state in **k8s Secrets,
+at odds with the Vault-centric secrets model** the whole forest trust tree rests on
+([vault_pki_doctrine.md](./vault_pki_doctrine.md)); and its continuous autonomous reconcile is **harder to
+formally prove** than Pulumi's batch invocation under the singleton plus amoebius's own typed reconciler. This
+closes the open `notes.txt` question *"do we actually need pulumi? can our state be the dhall just as it was
+with helm?"*: **yes — Pulumi stays for v1, Crossplane is out.**
+
+**But the checkpoint wart is contained, not tolerated everywhere.** Where a resource class is high-churn,
+self-describing, and holds **no durable state** — the elastic spot worker pool that
+[single_logical_data_plane_doctrine.md](./single_logical_data_plane_doctrine.md) attaches to the home data
+plane — the checkpoint is pure liability and §8's "data in, data out, discover each time" is strictly better.
+That class is **carved out of Pulumi into a bespoke checkpoint-free reconciler** (`create → tag → join-fabric
+→ drain-by-tag`, discovering live state by an `amoebius`-fleet tag each tick), realizing §8 exactly. **Pulumi
+therefore stays the engine for the coarse, durable, dependency-ordered substrate** (EKS spawn, per-PV EBS,
+route53, zerossl, self-managed children) where a checkpoint earns its keep, and nothing else.
+
+> **Honesty.** This is a design decision recorded before any amoebius provisioning code exists, per
+> [documentation_standards.md §6](../documentation_standards.md). The Pulumi backend shape is prodbox-proven
+> evidence, not an amoebius result; the Crossplane rejection and the bespoke checkpoint-free fleet reconciler
+> are recorded design decisions, not built or tested capabilities.
 
 ---
 
@@ -16,7 +72,7 @@ credentials, a plaintext state file, and the unilateral power to mutate live inf
 ad-hoc, env-var-driven, secret-on-disk shape amoebius exists to abolish. So amoebius makes Pulumi a
 *cluster capability*, not a host tool: **"via pulumi, amoebius may spawn other k8s clusters … in all cases
 these deployments are to be tracked using pulumi, using minio backend, locally encrypted via vault
-transport engine"** and **"aks clusters, along with all pulumi deploys of all assets, only happens within
+transport engine"** and **"eks clusters, along with all pulumi deploys of all assets, only happens within
 an existing amoebius cluster, using MinIO as the backend and vault envelope encryption for that backend"**.
 
 Concretely:
@@ -133,17 +189,19 @@ credential class.* In prodbox this is machine-enforced — every stack is one `S
 
 ## 4. What Pulumi provisions (the resource catalog)
 
-Pulumi is amoebius's hands for everything that is *not* a Helm-deployed in-cluster object. The intuition:
-in-cluster workloads are reconciled through the kube API and Helm; the **substrate beneath and around** a
+Pulumi is amoebius's hands for everything that is *not* a typed-manifest-reconciled in-cluster object. The
+intuition: in-cluster workloads are reconciled through the kube API by amoebius's own typed reconciler
+([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)); the **substrate beneath and around** a
 cluster — the cloud account, the other clusters, the DNS, the certs — is reconciled through Pulumi. This
 table is the catalog; the **owner** column names where each resource's *meaning* lives, so this doc never
 duplicates it.
 
 | Resource | What Pulumi does here | Owned by |
 |---|---|---|
-| **Provider-managed clusters** (EKS now — prodbox's reality; AKS later) | Provision the managed cluster via cloud keys over the API, from inside a parent; land the stateless in-cluster singleton daemon | Lifecycle meaning: [cluster_lifecycle_doctrine.md §1, §3](./cluster_lifecycle_doctrine.md) |
+| **Provider-managed clusters** (EKS — prodbox's reality) | Provision the managed cluster via cloud keys over the API, from inside a parent; land the stateless in-cluster singleton daemon | Lifecycle meaning: [cluster_lifecycle_doctrine.md §1, §3](./cluster_lifecycle_doctrine.md) |
 | **Spawned self-managed children** (`kind` / `rke2`) | Provision nodes via one or more SSH keys, then bring up the standard service set | Spawn lifecycle: [cluster_lifecycle_doctrine.md §3](./cluster_lifecycle_doctrine.md) |
-| **Dynamic node provisioning** | Add/drain EC2 or managed nodes driven by load / spot cost / workflow completion | Elastic-shape policy: [cluster_lifecycle_doctrine.md §8](./cluster_lifecycle_doctrine.md) |
+| **Dynamic node provisioning** | Add/drain EC2 or managed nodes driven by load / spot cost / workflow completion, enacting a typed `ScalingPolicy` | Elastic-shape policy: [cluster_lifecycle_doctrine.md §8](./cluster_lifecycle_doctrine.md); the `ScalingPolicy` type + capacity fold: [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md) |
+| **Cloud resource quota** | The outer bound on cloud storage/compute — the `CloudQuota` backing ceiling and the `ScalingPolicy` cap, so "unbounded" cloud storage is never truly unbounded | Backing union: [storage_lifecycle_doctrine.md §5.2](./storage_lifecycle_doctrine.md); the fold: [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) |
 | **Per-PV EBS volumes** | One EBS per PV, sized 1:1 to its PVC, decoupled from the EC2/node lifecycle | Sizing/rebind invariant: [storage_lifecycle_doctrine.md §5, §5.1](./storage_lifecycle_doctrine.md); credential model: §6 here |
 | **DNS — route53** | Provision/maintain hosted zones and records | This doctrine, §5 |
 | **TLS — zerossl** | ACME (DNS-01) certificate issuance and retention | This doctrine, §5 |
@@ -369,7 +427,7 @@ gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the DNS (route53) + TLS (zerossl) provider integration and root
 Vault/PKI land in **Phase 2**; amoebic spawning via SSH-key Pulumi with the MinIO backend + Vault-envelope
-encryption lands in **Phase 9**; provider-managed clusters (EKS now, AKS later) and dynamic node
+encryption lands in **Phase 9**; provider-managed clusters (EKS) and dynamic node
 provisioning land in **Phase 10**; the elevated-harness storage-deletion safety that makes the §6
 create-vs-delete model leak-free lands in **Phase 11**. Per
 [documentation_standards.md §6](../documentation_standards.md), no statement here is a proven amoebius
@@ -383,6 +441,8 @@ credential model is an explicit *resolution of an open question*, not a tested c
 - [Engineering Doctrine Index](./README.md)
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md)
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md)
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the `ScalingPolicy` this provisions and the cloud-quota ceiling
+- [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the `Managed Eks` engine arm this provisions
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [Testing Doctrine](./testing_doctrine.md)
 - [Platform Services Doctrine](./platform_services_doctrine.md)

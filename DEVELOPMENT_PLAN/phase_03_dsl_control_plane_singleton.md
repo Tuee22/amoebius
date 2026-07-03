@@ -33,7 +33,9 @@ buckets named `<app>/<bucket>`, and an in-namespace `Sql` database, deployed fro
 
 Scope owned here: the Dhall prelude (types + smart constructors), the GADT-indexed Haskell IR and its
 `Dhall.inputFile auto` decoder (the two typed gates), the capability→provider→shape binding, the
-smart-constructor / phantom-tag / GADT-index discipline that forecloses the illegal-state catalog, the
+smart-constructor / phantom-tag / GADT-index discipline that forecloses the illegal-state catalog (including
+the capacity-accounting fold, the compute-engine/topology relation, and the bounded-storage / topic-retention
+/ scaling type discipline of catalog §3.13–§3.22 / §4.6 / §4.7), the
 control-plane singleton role wrapping the Phase 2 typed reconciler, and the app-tenancy projection
 (namespace + `ObjectStore` + `Sql`). Out of scope (deferred, by design): the *runtime* enforcement and the
 *election correctness* proof — those are reconcile/runtime facts owned by the chaos/failover surface and
@@ -54,9 +56,13 @@ flowchart LR
 this phase's gate.
 
 **Gate:** a `.dhall` deploys the platform + a trivial app (its own namespace, an `ObjectStore` bucket
-`<app>/<bucket>`, and an in-namespace `Sql` database) on the linux-cpu cluster; and a deliberately-illegal
-`.dhall` — a bad PVC↔PV pairing, an open (Keycloak-bypassing) ingress, or a product named in application
-logic — **fails to type-check**. Both halves run before the next phase opens.
+`<app>/<bucket>`, and an in-namespace `Sql` database) on the linux-cpu cluster; a battery of
+deliberately-illegal `.dhall` files — a bad PVC↔PV pairing, an open (Keycloak-bypassing) ingress, a product
+named in application logic, **and** the capacity/topology/bounded-storage set (rke2-on-bare-apple, an
+engine/substrate mismatch, a multi-node kind on two hosts, rke2 with more nodes than hosts, host/VM/cluster
+overcommit, an unbounded storage backing, an over-backing store, a time-only or retention-less topic, and
+policy-less growth) — each **fails to type-check or decode**; and the positive `legal_multisubstrate_cluster`
+and `legal_managed_eks` fixtures **decode**. All three halves run before the next phase opens.
 
 ## Doctrine adopted
 
@@ -80,6 +86,19 @@ logic — **fails to type-check**. Both halves run before the next phase opens.
   and the three foreclosure grades
   ([§6](../documents/engineering/illegal_state_catalog.md#6-three-grades-of-foreclosure-and-the-honesty-they-force))
   that a type-check proves the *spec composes*, not that the *running cluster enforces it*.
+- [`resource_capacity_doctrine.md` — the capacity model + §4.6 total fold](../documents/engineering/resource_capacity_doctrine.md)
+  and [`cluster_topology_doctrine.md` — the compute-engine/topology relation + §4.7](../documents/engineering/cluster_topology_doctrine.md):
+  this phase (Sprint 3.6) builds the `Capacity`/`Demand`/`Budget` fold (`fits`/`carve`/`place`), the
+  `ComputeEngine`/`LinuxHost`-witness/`Topology` types and the elementwise compatible-pair fold, the closed
+  `StorageBacking`/`Growable` unions, and the mandatory `RetentionPolicy` + two-ceiling Pulsar fold — honoring
+  the honest grade split ([`illegal_state_catalog.md` §6](../documents/engineering/illegal_state_catalog.md#6-three-grades-of-foreclosure-and-the-honesty-they-force))
+  that every capacity **sum** is grade-(2), never grade-(1).
+- [`illegal_state_catalog.md` §3.13–§3.22 — the capacity / topology / bounded-storage block](../documents/engineering/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent)
+  and its two techniques [`§4.6` (capacity fold)](../documents/engineering/illegal_state_catalog.md#4-the-typing-techniques)
+  and [`§4.7` (topology relation)](../documents/engineering/illegal_state_catalog.md#4-the-typing-techniques):
+  Sprint 3.6 makes each of §3.13–§3.22 uninhabitable or total-decode-rejected, and the strengthened
+  [`§3.5`](../documents/engineering/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent)
+  covers taints/tolerations (derived, never hand-authored) as well as affinity.
 - [`daemon_topology_doctrine.md` §3 — The control-plane singleton — exactly one, elected](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected):
   this phase delivers the in-cluster **control-plane singleton role** — total cluster + secret authority
   fused into one elected daemon that runs the reconcile loop — including the degenerate single-rank
@@ -298,16 +317,82 @@ in-namespace `Sql` database — as a tenant-tagged projection of the app spec ne
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 3.6: Phase gate harness — deploy-a-trivial-app + reject-the-illegal-spec 📋
+## Sprint 3.6: Capacity / topology / compute-engine / storage-backing / retention / scaling / placement type discipline 📋
 
 **Status**: Planned
-**Implementation**: `dhall/examples/{trivial_app,illegal_pvc,illegal_open_ingress,illegal_product}.dhall`
-(gate fixtures); `test/integration/Phase3Gate.hs` (linux-cpu spin-up / reconcile / teardown + negative
-type-check assertions) — target paths, not yet built.
-**Blocked by**: Sprint 3.3, Sprint 3.4, Sprint 3.5
+**Implementation**: `dhall/amoebius/{Topology,Capacity,Storage,Retention}.dhall` (typed surfaces + smart
+constructors); `src/Amoebius/Dsl/Topology.hs` (`ComputeEngine` / `LinuxHost` witness / `Topology`);
+`src/Amoebius/Capacity/{Types,Fold,Growable}.hs` (`Capacity`/`Demand`/`Budget`, the §4.6 fold,
+`Growable`/`ScalingPolicy`); `src/Amoebius/Dsl/SmartConstructors.hs` (extend: compatible-pair `Node` ctor,
+`StorageBacking` union, mandatory `RetentionPolicy`, derived `Toleration`) — target paths, not yet built.
+**Blocked by**: Sprint 3.1, Sprint 3.2, Sprint 3.3
+**Independent Validation**: a unit suite decodes each new fixture through `Dhall.inputFile auto`; the negative
+fixtures return a structured `Left` (Gate 2) or fail `dhall type` (Gate 1), each annotated with its catalog
+entry (§3.13–§3.22) and honest grade (1/2); the positive multi-substrate and managed-EKS fixtures decode; no
+grade-(3) runtime claim is made.
+**Docs to update**: `documents/engineering/resource_capacity_doctrine.md`,
+`documents/engineering/cluster_topology_doctrine.md`, `documents/engineering/illegal_state_catalog.md`
+(per-entry grade reconciliation), `documents/engineering/storage_lifecycle_doctrine.md` (§5.2),
+`documents/engineering/pulsar_client_doctrine.md` (§6.1), `documents/engineering/platform_services_doctrine.md`
+(§9 derived toleration, §10 aggregate deferral), `documents/engineering/substrate_doctrine.md` (§8 node
+inventory), `DEVELOPMENT_PLAN/system_components.md`
+
+### Objective
+Adopt [`illegal_state_catalog.md` §3.13–§3.22 — the capacity / topology / bounded-storage block](../documents/engineering/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent)
+and its two new techniques [`§4.6` — the capacity-accounting total fold](../documents/engineering/illegal_state_catalog.md#4-the-typing-techniques)
+and [`§4.7` — compatibility/topology relations over a collection](../documents/engineering/illegal_state_catalog.md#4-the-typing-techniques),
+grounded in [`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) and
+[`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md): make an
+over-committed, substrate-incompatible, badly-topologized, unbounded-storage, un-tiered-topic, or
+policy-less-growth spec fail to type-check or decode, at the honest grade the catalog records (every capacity
+**sum** is grade-(2), never grade-(1)).
+
+### Deliverables
+- A `ComputeEngine` union (`Kind { host, replicas }` / `Rke2 (NonEmpty LinuxHost)` / `Managed Eks`) with a
+  substrate-indexed `LinuxHost` witness whose only apple/windows constructor is `limaHost`/`wsl2Host`, and a
+  `Topology` fold over `NonEmpty Node` — so §3.14 (rke2 on bare apple), §3.15 (multi-node kind), and §3.16
+  (rke2 nodes>hosts / host reused) have no inhabitant / decode-reject.
+- An engine↔substrate **compatible-pair** smart constructor and an **elementwise** compatibility fold
+  (multi-substrate clusters stay legal) — §3.13; EKS is the first-class `Managed` arm (§3.13/I13).
+- A §4.6 **capacity fold** (`fits`/`carve`/`place`) over the `resourceEnvelope`, nesting host → VM → workload,
+  reading the per-host `Capacity` from the substrate node inventory — so §3.17 (host/VM/cluster overcommit)
+  decode-rejects.
+- A closed `StorageBacking` union (no unbounded arm) + the aggregate `Σ(sizes) ≤ backing` fold — §3.18/§3.19;
+  a mandatory non-optional `RetentionPolicy` + mandatory size-triggered offload + the two-ceiling Pulsar fold
+  (hot-tier vs BookKeeper + total vs offload target) — §3.20; a `Growable = Bounded | Autoscaled ScalingPolicy`
+  union with no unbounded arm — §3.21.
+- A **derived** `Toleration` constructor (no exported bare constructor; projected from a declared node taint)
+  and the placeable-node existence fold — §3.5-strengthened / §3.22 — extending Sprint 3.3's
+  `test/dsl/IllegalSpecSpec.hs` negative suite with one fixture per new catalog entry.
+
+### Validation
+1. Every new negative fixture is rejected at the spec/code layer (Gate 1 or Gate 2); the suite is red if any
+   illegal fixture decodes; the positive `legal_multisubstrate_cluster` and `legal_managed_eks` fixtures
+   decode.
+2. Each assertion is annotated with its catalog entry (§3.13–§3.22) and grade (1/2), and the suite makes
+   **no** grade-(3) runtime claim — VM boot, pod schedule, S3 offload, and autoscaler growth are deferred to
+   Phases 4/7/9/10.
+
+### Remaining Work
+The whole sprint (📋 Planned).
+
+## Sprint 3.7: Phase gate harness — deploy-a-trivial-app + reject-the-illegal-spec 📋
+
+**Status**: Planned
+**Implementation**: `dhall/examples/{trivial_app,illegal_pvc,illegal_open_ingress,illegal_product,
+illegal_rke2_on_bare_apple,illegal_engine_substrate_mismatch,illegal_multinode_kind_two_hosts,
+illegal_rke2_nodes_gt_hosts,illegal_rke2_reused_host,illegal_overcommit_host,illegal_overcommit_vm,
+illegal_overcommit_cluster,illegal_untolerated_taint,illegal_handauthored_toleration,illegal_unbounded_storage,
+illegal_store_over_backing,illegal_topic_no_retention,illegal_topic_time_only_offload,illegal_hot_tier_over_bookie,
+illegal_unbounded_without_policy,legal_multisubstrate_cluster,legal_managed_eks}.dhall` (gate fixtures);
+`test/integration/Phase3Gate.hs` (linux-cpu spin-up / reconcile / teardown + negative type-check assertions)
+— target paths, not yet built.
+**Blocked by**: Sprint 3.3, Sprint 3.4, Sprint 3.5, Sprint 3.6
 **Independent Validation**: the harness deploys the platform + trivial app from one `.dhall` on linux-cpu and
-tears down leak-free, then asserts each of the three deliberately-illegal fixtures fails to type-check;
-the run emits a proven/tested/assumed ledger artifact.
+tears down leak-free, then asserts each deliberately-illegal fixture (the original three plus the §3.13–§3.22
+capacity/topology/bounded-storage set) fails to type-check or decode, and each positive fixture
+(`legal_multisubstrate_cluster`, `legal_managed_eks`) decodes; the run emits a proven/tested/assumed ledger
+artifact.
 **Docs to update**: `DEVELOPMENT_PLAN/substrates.md` (Phase-3 linux-cpu gate row),
 `documents/engineering/illegal_state_catalog.md` (gate-case backlink),
 `documents/engineering/testing_doctrine.md` (the test-as-`.dhall` gate)
@@ -316,21 +401,33 @@ the run emits a proven/tested/assumed ledger artifact.
 Adopt [`dsl_doctrine.md` §5 — The illegal-state-unrepresentable contract](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
 and [`illegal_state_catalog.md` §3 — The catalog](../documents/engineering/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent):
 assemble the phase's single acceptance gate — one `.dhall` deploys the platform + a trivial app on
-linux-cpu, and three deliberately-illegal `.dhall` files each fail to type-check.
+linux-cpu, the deliberately-illegal `.dhall` files (the original three plus the §3.13–§3.22 set) each fail to
+type-check or decode, and the positive multi-substrate / managed-EKS fixtures decode.
 ### Deliverables
 - A positive gate `.dhall` composing the platform spec + the trivial app (Sprint 3.5) that the singleton
   (Sprint 3.4) reconciles to ready and then tears down leak-free, as a test-topology `.dhall` with a
   teardown obligation.
-- Three negative gate fixtures — a bad PVC↔PV pairing, an open Keycloak-bypassing ingress, and a product
-  named in application logic — each asserted to fail at Gate 1 or Gate 2 (Sprint 3.3).
+- Negative gate fixtures — the original three (a bad PVC↔PV pairing, an open Keycloak-bypassing ingress, a
+  product named in application logic, Sprint 3.3) **plus** the capacity/topology/bounded-storage set (Sprint
+  3.6): `illegal_rke2_on_bare_apple` (§3.14), `illegal_engine_substrate_mismatch` (§3.13),
+  `illegal_multinode_kind_two_hosts` (§3.15), `illegal_rke2_nodes_gt_hosts` + `illegal_rke2_reused_host`
+  (§3.16), `illegal_overcommit_{host,vm,cluster}` (§3.17), `illegal_untolerated_taint` +
+  `illegal_handauthored_toleration` (§3.5/§3.22), `illegal_unbounded_storage` (§3.18),
+  `illegal_store_over_backing` (§3.19), `illegal_topic_no_retention` + `illegal_topic_time_only_offload` +
+  `illegal_hot_tier_over_bookie` (§3.20), `illegal_unbounded_without_policy` (§3.21) — each asserted to fail
+  at Gate 1 or Gate 2, annotated with its grade.
+- Positive gate fixtures — `legal_multisubstrate_cluster` (a heterogeneous multi-substrate cluster decodes,
+  the §3.13 carve-out) and `legal_managed_eks` (EKS is first-class, I13) — each asserted to decode.
 - A proven/tested/assumed ledger artifact emitted by the run, recording the Decision-layer (type-check)
-  result and explicitly marking runtime/election layers as deferred.
+  result and explicitly marking runtime/election layers (VM boot, pod schedule, S3 offload, autoscaler
+  growth) as deferred to Phases 4/7/9/10.
 
 ### Validation
 1. The positive `.dhall` brings the platform + trivial app up on the linux-cpu cluster, the app's
    `ObjectStore` + `Sql` resources are reachable, and teardown leaves no leaked resources.
-2. Each of the three illegal `.dhall` fixtures is rejected before any binary acts; the ledger artifact is
-   present and honestly grades each foreclosure (no grade-(3) runtime claim is reported as proven).
+2. Every illegal `.dhall` fixture (the original three plus the §3.13–§3.22 set) is rejected before any binary
+   acts, and the positive multi-substrate / managed-EKS fixtures decode; the ledger artifact is present and
+   honestly grades each foreclosure (no grade-(3) runtime claim is reported as proven).
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -343,8 +440,15 @@ The whole sprint (📋 Planned).
   the gate runs.
 - `documents/engineering/service_capability_doctrine.md` — backlink the §1/§4/§5 binding to the implemented
   `CapabilityBinding`; confirm the alternate-admitting provider union stayed one-arm.
-- `documents/engineering/illegal_state_catalog.md` — annotate each catalog entry exercised by Sprint 3.3
-  with its realized foreclosure grade (1/2), keeping grade-(3) runtime claims deferred.
+- `documents/engineering/illegal_state_catalog.md` — annotate each catalog entry exercised by Sprint 3.3 and
+  Sprint 3.6 (§3.13–§3.22) with its realized foreclosure grade (1/2), keeping grade-(3) runtime claims deferred.
+- `documents/engineering/resource_capacity_doctrine.md` — backlink the §4.6 fold + `StorageBudget`/`Growable`
+  types to the implemented `Amoebius.Capacity.*`; confirm every capacity sum stayed grade-(2).
+- `documents/engineering/cluster_topology_doctrine.md` — backlink `ComputeEngine`/`LinuxHost`/`Topology` and
+  the §4.7 compatible-pair fold to the implemented `Amoebius.Dsl.Topology`.
+- `documents/engineering/storage_lifecycle_doctrine.md` (§5.2), `documents/engineering/pulsar_client_doctrine.md`
+  (§6.1), `documents/engineering/platform_services_doctrine.md` (§9 derived toleration, §10 aggregate deferral),
+  `documents/engineering/substrate_doctrine.md` (§8 node inventory) — reconcile each with the as-built types.
 - `documents/engineering/daemon_topology_doctrine.md` — backlink §3 to the implemented singleton role; keep
   the §5 election-correctness obligation owned by the chaos/failover surface.
 - `documents/engineering/manifest_generation_doctrine.md` — record that the control-plane singleton is the
@@ -365,4 +469,6 @@ The whole sprint (📋 Planned).
 - [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — the two typed gates and the illegal-state contract
 - [Service Capability Doctrine](../documents/engineering/service_capability_doctrine.md) — capabilities, not products; the provider+shape binding
 - [Illegal State Catalog](../documents/engineering/illegal_state_catalog.md) — the catalog and the typing techniques (and the honest limit)
+- [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — the §4.6 capacity fold + `StorageBudget`/`Growable` (Sprint 3.6)
+- [Cluster Topology Doctrine](../documents/engineering/cluster_topology_doctrine.md) — the `ComputeEngine`/`Topology` types + §4.7 relation (Sprint 3.6)
 - [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — the elected control-plane singleton that runs the reconciler

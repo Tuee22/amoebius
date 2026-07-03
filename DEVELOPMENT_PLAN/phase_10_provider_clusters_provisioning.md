@@ -5,7 +5,7 @@
 **Referenced by**: README.md, overview.md, system_components.md
 **Generated sections**: none
 
-> **Purpose**: Provision provider-managed clusters (EKS now — prodbox's reality; AKS later) via Pulumi
+> **Purpose**: Provision provider-managed clusters (EKS — prodbox's reality) via Pulumi
 > issued from inside an amoebius parent, land the stateless in-cluster singleton daemon (no host),
 > provision nodes dynamically by logic, decouple per-PV EBS from the EC2/node lifecycle under the
 > create-vs-delete credential model, and gate on spinning a provider cluster, dynamically provisioning a
@@ -28,7 +28,7 @@ This phase extends amoebius's reach from self-managed `kind`/`rke2` children (Ph
 **provider-managed clusters**, where there is no host binary and the cloud provider owns the control
 plane. It owns four deliverables, all driven from a single linux-cpu parent:
 
-1. **Provider-cluster Pulumi deploy from inside a parent.** A provider cluster (EKS now; AKS later) is
+1. **Provider-cluster Pulumi deploy from inside a parent.** A provider cluster (EKS) is
    provisioned via cloud keys over the cloud API, by a `pulumi up` that runs **only from inside an
    already-running amoebius cluster**, under the elected control-plane singleton, with the checkpoint
    held as a Vault-Transit-enveloped object in MinIO. There is no laptop `pulumi up`, no plaintext state,
@@ -46,6 +46,14 @@ plane. It owns four deliverables, all driven from a single linux-cpu parent:
    normal teardown of the per-run cluster stack never includes it; the operational credential can *create*
    EBS but is *denied* `ec2:DeleteVolume`, so accidental durable-data destruction is unauthorized at the
    cloud API, not merely discouraged.
+
+This phase realizes the **first-class managed-provider arm** of the compute-engine axis: EKS is the
+`Managed Eks` constructor of the `ComputeEngine` union ([`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md)
+§2, [`illegal_state_catalog.md`](../documents/engineering/illegal_state_catalog.md) §3.13 / I13), a hostless
+arm carrying no `LinuxHost` witness — the type shape lands in Phase 3 (Sprint 3.6), and this phase provisions
+it. The dynamic-provisioning deliverable is the runtime enaction of a typed `ScalingPolicy`
+([`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) §6, catalog §3.21)
+whose cloud quota is the outer ceiling on the `CloudQuota` storage/compute backing.
 
 This phase consumes — and does not re-implement — the Phase 2 platform/storage/Vault substrate, the
 Phase 3 control-plane singleton + typed reconciler, and the Phase 9 amoebic-spawn machinery (SSH-key
@@ -187,7 +195,10 @@ provider child is the same machine as any other cluster from the reconciler's po
   (there is no host).
 - Substrate-shape honesty in the spec: a provider child cannot declare host-substrate workloads (Apple
   Metal / Windows CUDA) — those belong to host-bearing clusters only — so an illegal "host workload on a
-  hostless provider child" spec is refused.
+  hostless provider child" spec is refused. This is the runtime face of the `Managed Eks` arm carrying **no**
+  `LinuxHost` / host-worker index ([`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md)
+  §2, [`illegal_state_catalog.md`](../documents/engineering/illegal_state_catalog.md) §3.13/§3.14): the type
+  makes it unrepresentable in Phase 3; this sprint confirms the provider child advertises no host substrate.
 
 ### Validation
 
@@ -275,9 +286,13 @@ living on the deployment-rules surface and never inside an app's logic.
 
 ### Deliverables
 
-- An `Amoebius.Cluster.NodeProvisioner` that reads the declared elastic-node rule (driven by **load**,
-  **spot-instance cost**, and **workflow completion**) and computes the desired node set, then drives the
-  live set toward it through the §9 reconciler — no bespoke node state machine.
+- An `Amoebius.Cluster.NodeProvisioner` that reads the declared elastic-node rule — a typed `ScalingPolicy`
+  ([`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) §6, catalog
+  §3.21) driven by **load**, **spot-instance cost** (instance price-shopping), and **workflow completion** —
+  and computes the desired node set, then drives the live set toward it through the §9 reconciler — no bespoke
+  node state machine. Each provisioning step **re-runs the §4.6 capacity fold** against the grown bound, and
+  the cloud quota is the outer ceiling, so a bounded budget grows only through this policy and never to
+  "unbounded."
 - An `Amoebius.Pulumi.NodeGroup` enaction that adds an EC2/managed node (Pulumi, under the singleton,
   encrypted backend) and drains+releases one when demand or the workflow recedes; node lifetime is the
   per-run/ephemeral class (its EBS, if any, is the durable class from Sprint 10.3).

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for what the amoebius Dhall DSL is — a typed orchestration surface
@@ -31,8 +31,12 @@ This document owns four things about that surface:
 It does **not** own: the *catalog* of specific illegal states and the typing techniques that defeat each
 one ([illegal_state_catalog.md](./illegal_state_catalog.md)); the application-logic-vs-deployment-rules
 *split* substance ([app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md)); the SecretRef /
-Vault / parent-injection *mechanism* ([vault_pki_doctrine.md](./vault_pki_doctrine.md)); or the standard
-service *set* the DSL compiles to ([platform_services_doctrine.md](./platform_services_doctrine.md)).
+Vault / parent-injection *mechanism* ([vault_pki_doctrine.md](./vault_pki_doctrine.md)); the standard
+service *set* the DSL compiles to ([platform_services_doctrine.md](./platform_services_doctrine.md)); or the
+*types* the surface carries but does not define — the capacity model
+([resource_capacity_doctrine.md](./resource_capacity_doctrine.md)) and the compute-engine / topology axis
+([cluster_topology_doctrine.md](./cluster_topology_doctrine.md)). The DSL *carries* those fields; those docs
+*own* what makes each unrepresentable.
 Phase order and status live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -90,9 +94,13 @@ every binary reads one project-local `.dhall` carrying three kinds of typed valu
 the shape the sibling prodbox project proved as its Tier-0 `parameters + context + witness` surface in its
 `config_doctrine.md` §0).
 
-- **Parameters** — the operator's typed knobs: which substrate and distro, replica counts, the app specs,
-  the deployment rules. This is the bulk of what an operator authors and the part most people mean when
-  they say "the DSL."
+- **Parameters** — the operator's typed knobs: the compute engine and its node topology
+  ([cluster_topology_doctrine.md](./cluster_topology_doctrine.md)), replica counts, the per-host capacities,
+  storage backings and budgets, topic retention/offload policies, and scaling policies
+  ([resource_capacity_doctrine.md](./resource_capacity_doctrine.md)), the app specs, the deployment rules.
+  This is the bulk of what an operator authors and the part most people mean when they say "the DSL." The DSL
+  *carries* these typed fields; the types that make an over-committed, unbounded, or incompatible value
+  unrepresentable live in those owning docs, not here (§5).
 - **Context** — *where this binary sits* in the composed topology: its `contextKind`, its place in the
   `topologyFrames` chain, its `currentFrame`, the `capabilities` it claims, the `allowedCommandClasses`
   it may run, the `resourceEnvelope` it lives inside, and the `childContextKinds` it may spawn
@@ -172,9 +180,11 @@ form an operator can hold onto:
 
 That guarantee is bought by **two typed gates** in front of any effect. This section owns the *principle*
 and the *mechanism*; the **inventory** of specific illegal states (PVC↔PV binding, gateway misconfig, DNS
-binding the wrong address, certs, taints/affinity, NetworkPolicy partitions, backdoor ingress) and the
-**techniques** that defeat each (capability/phantom tags, GADT-indexed state machines, ownership indices,
-content-address totality) are owned in full by
+binding the wrong address, certs, taints/tolerations/affinity, NetworkPolicy partitions, backdoor ingress,
+resource overcommit, compute-engine/substrate incompatibility, illegal cluster topology, unbounded storage,
+and un-tiered topic lifecycles) and the **techniques** that defeat each (capability/phantom tags,
+GADT-indexed state machines, ownership indices, content-address totality, the capacity-accounting fold, and
+topology relations over a collection) are owned in full by
 [illegal_state_catalog.md](./illegal_state_catalog.md) — do not look for them restated here.
 
 ### Gate 1 — the Dhall typechecker
@@ -303,6 +313,12 @@ set are owned by the dependency-management surface tracked in
 intermediate JSON projection on the supported path: the on-disk artifact is the typed Dhall expression,
 and the in-memory value is the Haskell record produced by `Dhall.inputFile auto` (§5).
 
+Dhall is the **config** surface, not the **data plane**: runtime *message payloads* are never Dhall. They are
+dense binary **CBOR** on the wire, owned by
+[pulsar_client_doctrine.md §3.1](./pulsar_client_doctrine.md) — Dhall carries typed
+*params*, a payload carries runtime *bytes*, and the two never mix (the `notes.txt` "does dhall make sense
+for a payload? probably not" answer).
+
 ---
 
 ## 10. Planning ownership
@@ -329,5 +345,8 @@ states the target shape and links back for status.
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [Platform Services Doctrine](./platform_services_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the capacity/budget/scaling types the surface carries
+- [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the compute-engine/topology types the surface carries
+- [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — §3.1 runtime message payloads are CBOR, not Dhall
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

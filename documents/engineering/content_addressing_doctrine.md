@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define amoebius's cross-project content-addressed store (blobs ← manifests ← pointers), the
@@ -89,7 +89,11 @@ fixed prefix schema. The `jitML` key renderers in `jitML/src/JitML/Checkpoint/Fo
   encoder is **canonical** — `encodeManifestCbor` sorts tensors by name, optimizer blobs by kind, RNG blobs by
   stream id, metrics by name, and so on — so two writers with equal *logical* content emit byte-identical CBOR
   and therefore the same key. Same `If-None-Match: *` protocol. The manifest SHA is the canonical *checkpoint
-  id* used in Pulsar events and `--resume <checkpoint-id>`.
+  id* used in Pulsar events and `--resume <checkpoint-id>`. Those Pulsar events are themselves **CBOR
+  payloads** — the message-body encoding is owned by [pulsar_client_doctrine.md §3.1](./pulsar_client_doctrine.md);
+  a payload carries this manifest SHA (a content-address reference), never the raw blob inline. So *this doc*
+  owns the blob/manifest bytes (blobs raw, manifests canonical CBOR); the *Pulsar payload envelope* that
+  references them is CBOR owned there — one format, two owners of two layers.
 - **`pointers/*` — the only mutable objects.** Each pointer body is a 32-byte manifest SHA. Updates use S3
   conditional PUT with `If-Match: <etag>` — textbook compare-and-swap. The `pointers/latest` update is the
   **single atomic commit point** of a checkpoint: blob writes may happen in any order and may even orphan bytes
@@ -381,6 +385,7 @@ design intent.
 - [Engineering Doctrine Index](./README.md)
 - [Illegal State Catalog](./illegal_state_catalog.md) — content-address totality (§4.5)
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md)
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the MinIO content store is a `StorageBacking` ceiling for host-bounded clusters (§3.19)
 - [Platform Services Doctrine](./platform_services_doctrine.md)
 - [DSL Doctrine](./dsl_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)

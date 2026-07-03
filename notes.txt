@@ -1,14 +1,16 @@
-- vpn and linkerd service mesh story (certs ? )
-- pulsar payload ? protobuf ? something more functional like CBOR ? does dhall make sense ? (probably not a dense binary format)
-- semantics for full pulsar topic lifecycle management, including teired storage (bound topic sizes, movement to s3 mandatory after some amount of time, user sets retention policy; no way to represent keeping more storage than you have room for. unbounded minio only possible if there are autoscaling)
+- vpn and linkerd service mesh story (certs ? ) [RESOLVED — raw kernel WireGuard configured by amoebius (Vault-KV Curve25519 peer keys, rendered peer config, hub = gateway role); NOT Netmaker (a duplicate control plane — the Harbor/Helm of networking). Linkerd deferred/rejected for v1 (redundant for a Pulsar-async architecture; gateway-migration traffic-split comes from Gateway-API HTTPRoute weights). See documents/engineering/network_fabric_doctrine.md]
+x pulsar payload ? protobuf ? something more functional like CBOR ? does dhall make sense ? (probably not a dense binary format)
+x semantics for full pulsar topic lifecycle management, including teired storage (bound topic sizes, movement to s3 mandatory after some amount of time, user sets retention policy; no way to represent keeping more storage than you have room for. unbounded minio only possible if there are autoscaling)
 - resource scaling semantics. autoscaling, compute price shopping
 - can a host binary's dhall ever get changed ? i think only the parent should do that
 - test dhall generating topology
 - should infernix/jitML be extensions ? what about spectralmc ?
 - do infernix inference engines download / build their engines at startup from dhall ?
-- no tart !
-- do we actually need pulumi ? can our state be the dhall just as it was with helm ?
+- no tart ! [RESOLVED — committed to doctrine: Apple-Metal builds are headless on-host via a fixed clang-built Metal bridge, no VM. See documents/engineering/apple_metal_headless_builds.md]
+- do we actually need pulumi ? can our state be the dhall just as it was with helm ? [RESOLVED — keep Pulumi for v1. The Helm analogy breaks on an asymmetry: Helm sat on k8s, which already reconciles, so dropping it just means rendering better-typed inputs; cloud APIs (EKS/EBS/route53/ACME) have no built-in reconciler, so Pulumi *is* the diff/state/destroy engine and is far harder to replace. Dhall stays desired-state; Pulumi's checkpoint is the honest wart (a stored second state store §8 argues against), contained by carving the high-churn spot fleet into a bespoke checkpoint-free tag-discovery reconciler. Crossplane is OUT (see line 16: continuous parent-cluster controllers, k8s-Secrets vs Vault, harder to prove). See documents/engineering/pulumi_iac_doctrine.md §0]
 - specifics for how rke2 clusters are rolled out, including control plane and worker nodes 
 - amoebius extensions, eg spectralMC ?
 - story for migrations / CICD
-
+- make it impossible to represent illegal deployments, eg rke2 on an apple host without a vm, a multi-node rke2 cluster on a single machine, a workload deployment needing more memory/storage/cpu resources than is available on the cluster, an rke2 or kind deploy with more resources available on the host, a vm deploy with more resources aviailable on the host. a compute engine not compatible with available substrates (multi-supstrate clusters are allowed). taints tolerations or node affinity rules that stop pods from being run at all. multi-node kind clusters can only be deployed on single linux machine/vm/wsl2 instances. multi-node rke2 clusters can only be deployed on as many linux machine/vm/wsl2 instances. we need an explicit pure pulsar topic lifecycle managemnt policy, including resource availability and multi-tier storage. unbounded storage is never acceptable, we either have host level storage based on physical machines, or cloud storage capped by quotas. either way it is impossoble to represent an application that can consume more storage than is available. this goes for pulsar and minio. dynamic resource provision is acceptable, and amoebius owns dynamic resource logic. it can be arbitrary, including capacity based as well as instance pricing. we also support eks as a first class citizen.
+- incorporate the new <prodbox>.dhall child generation method (recent commits)
+- i think crossplane should be out it's too opinionated (requires parent clusters to run continuously, uses k8s secrets which are at odds with our vault centric secrets policy)
