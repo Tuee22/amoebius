@@ -33,8 +33,8 @@ adoption sequencing live only in [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_
 
 > **Honesty up front.** amoebius has not built Phases 1–11. Every prescriptive statement below is **design
 > intent**, and every result attributed to prodbox is **evidence from a sibling system**, not a tested or
-> proven amoebius result. The proven/tested/assumed rule ([documentation_standards.md §6](../documentation_standards.md))
-> is this document's own moral core (§12); it is enforced on the document itself.
+> proven amoebius result. The proven/tested/assumed rule ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline))
+> is this document's own moral core ([§12](#12-the-moral-core--proven-tested-assumed)); it is enforced on the document itself.
 
 ---
 
@@ -60,7 +60,7 @@ inside one cluster's election, and across the asynchronous gap between two clust
 Everything that follows is a campaign against trusting a premise you cannot prove is still current. The
 campaign has three moves — **Extract**, **Model**, **Inject** — and the rest of this document argues why it
 takes all three, because each is blind to the failures the other two were built to catch. The
-amoebius-specific twist (§6) is *where* the campaign must be waged: because the standard platform services
+amoebius-specific twist ([§6](#6-the-concentration-principle--where-the-obligation-lives)) is *where* the campaign must be waged: because the standard platform services
 run their own consensus, the obligation does not spread across every app — it **concentrates** at two
 boundaries.
 
@@ -76,12 +76,12 @@ This discipline earns its cost only when **all three** of these hold:
 2. **Coordination only through shared, durable substrates** — actors share no in-memory state; they agree
    only through a log, a broker, an object store, or a database. In amoebius that substrate is the
    **coordination plane: Pulsar + MinIO + the signed, hash-chained commit log**
-   ([daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md)).
+   ([daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#51-the-coordination-plane-pulsar--minio--the-commit-log)).
 3. **A safety invariant no single actor can enforce alone** — *exactly one control-plane singleton*,
    *exactly-once effect under redelivery*, *no split-brain gateway across clusters* — belongs to a
    protocol spanning several actors plus the substrate, not to any one process.
 
-If your subsystem meets all three, the §3 defect is **present whether or not you have ever observed it**.
+If your subsystem meets all three, the [§3](#3-the-defect-class--one-shape-two-disguises) defect is **present whether or not you have ever observed it**.
 If it fails the gate — a single process, or no cross-actor invariant — most of what follows is
 over-engineering, and the honest thing is to stop.
 
@@ -95,11 +95,11 @@ over-engineering, and the honest thing is to stop.
   explicit *not-yet-known*. An Observation is the opposite of quietly turning "I couldn't tell" into a
   definite answer.
 - **The three layers** — *Decision* (inside one process), *Protocol* (across processes), *Runtime* (the
-  live, deployed forest). They are the spine of §5, and each has its own move.
+  live, deployed forest). They are the spine of [§5](#5-three-layers-and-the-blindness-that-binds-them), and each has its own move.
 
 A harder vocabulary — *consistency boundary*, *invariant-confluence*, *escrow* — is needed only by data
-replicated across more than one strongly-consistent domain. It is deferred to §16, behind a gate. In
-amoebius that boundary is the **cluster boundary**: synchronous within a cluster (delegated, §6),
+replicated across more than one strongly-consistent domain. It is deferred to [§16](#16-the-second-axis--when-one-cluster-becomes-a-forest), behind a gate. In
+amoebius that boundary is the **cluster boundary**: synchronous within a cluster (delegated, [§6](#6-the-concentration-principle--where-the-obligation-lives)),
 asynchronous across.
 
 ---
@@ -134,7 +134,7 @@ The shape wears two recurring disguises:
 Why does this bug survive your test suite? Because surfacing it requires a *specific interleaving of two
 actors*, and a single-threaded test never runs two actors. It is the canonical "once in N thousand runs"
 defect: real, rare, and never reproducible on demand. **You cannot test your way to confidence here; you
-have to reason and experiment in three different registers** — which §5 makes precise.
+have to reason and experiment in three different registers** — which [§5](#5-three-layers-and-the-blindness-that-binds-them) makes precise.
 
 ---
 
@@ -182,7 +182,7 @@ Three traditions, three layers, three moves:
 **And in amoebius, all three are Haskell.** The quiet third move is the native idiom of a typed functional
 language. The constituent **prodbox** behaviour already lives there — pure decision functions over a
 commit log (`canWriteDns`, `nodeDisposition` in `/home/matthewnowak/prodbox/src/Prodbox/Gateway/Types.hs`),
-the Plan / Apply split, the type system as a zero-cost design check. The payoff, and the spine of §10, is
+the Plan / Apply split, the type system as a zero-cost design check. The payoff, and the spine of [§10](#10-simulate--the-pure-program-lifted-io-sim), is
 one ladder: make the **decision** pure (Extract), then the **command** pure (Plan / Apply), then — with
 `io-classes` and `io-sim` — the **whole concurrent program** pure, run as a deterministic model under test
 and as the production daemon from a single source. *Build it pure; lift it whole.*
@@ -197,9 +197,9 @@ because they are *looking somewhere else*.
 
 | Layer | The move that guards it | What that move still cannot see | Strongest claim it yields |
 |---|---|---|---|
-| **Decision** (one process) | **Extract** (§8), with the type system as a free head start | whether the *protocol* those decisions compose into is sound | **proven** (purity/totality in code; the property when finite) |
-| **Protocol** (across processes) | **Model** (§9) | whether the *code* refines the model; real-time / clock-skew premises | **proven for the model only** |
-| **Runtime** (the live forest) | **Inject** (§11) | the interleavings you did not inject; soundness | **tested**, never proven |
+| **Decision** (one process) | **Extract** ([§8](#8-move-i--extract-make-the-decision-a-value)), with the type system as a free head start | whether the *protocol* those decisions compose into is sound | **proven** (purity/totality in code; the property when finite) |
+| **Protocol** (across processes) | **Model** ([§9](#9-move-ii--model-prove-the-protocol-not-the-program)) | whether the *code* refines the model; real-time / clock-skew premises | **proven for the model only** |
+| **Runtime** (the live forest) | **Inject** ([§11](#11-move-iii--inject-break-the-running-thing-on-purpose)) | the interleavings you did not inject; soundness | **tested**, never proven |
 
 Stated as three flat facts: a perfect Decision-layer proof says **nothing** about whether the protocol is
 sound; a green Protocol model says **nothing** about whether the code refines it or the live timeouts hold;
@@ -210,7 +210,7 @@ There is a **fourth blindness**, orthogonal to these three: **every move is blin
 boundary unless that boundary is explicitly modeled in.** In amoebius that boundary is the cluster
 boundary. A forest whose data is geo-replicated across clusters has a whole second axis of failure that no
 amount of Extract, Model, or Inject on a single cluster will reveal. That axis is real, it is hard, and it
-is deferred on purpose to §16.
+is deferred on purpose to [§16](#16-the-second-axis--when-one-cluster-becomes-a-forest).
 
 ---
 
@@ -219,7 +219,7 @@ is deferred on purpose to §16.
 This is the section that makes amoebius's doctrine *different* from a generic one, and it is the reason this
 document is tractable at all.
 
-**Intuition first.** A naive reading of §2 is terrifying: amoebius runs Pulsar, MinIO, Vault, Postgres,
+**Intuition first.** A naive reading of [§2](#2-when-this-applies--the-gate) is terrifying: amoebius runs Pulsar, MinIO, Vault, Postgres,
 nine standard services, N worker daemons, and an arbitrary app on every cluster in a recursive forest — so
 it sounds as if *every* component carries its own split-brain proof obligation. It does not. The obligation
 **concentrates**, because of two structural facts amoebius commits to.
@@ -228,7 +228,7 @@ it sounds as if *every* component carries its own split-brain proof obligation. 
 their own, already-proven distributed consensus and synchronous replication: MinIO erasure-codes and
 quorum-replicates within a cluster; Pulsar's brokers/bookies own subscription and acknowledgment
 semantics; Percona/Patroni Postgres runs synchronous replication with its own leader election
-([platform_services_doctrine.md §6, §8](./platform_services_doctrine.md)). amoebius **delegates** the
+([platform_services_doctrine.md §6, §8](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox)). amoebius **delegates** the
 synchronous-HA correctness obligation to these systems rather than re-deriving it. A Pulsar
 topic-lifecycle coordinator that needs single-consumer semantics gets it from Pulsar's subscription model
 and the at-least-once + dedup discipline, not from a bespoke amoebius election
@@ -257,14 +257,14 @@ flowchart TD
 - **First Axis — the control-plane singleton election.** Within one cluster's consistency boundary, exactly
   one daemon must hold total cluster + secret authority. This is the **prodbox gateway single-writer
   invariant, generalized** from "owns the public DNS record" to "owns the whole cluster and its secrets"
-  ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md)). It is a genuine cross-actor invariant
+  ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected)). It is a genuine cross-actor invariant
   no system off the shelf provides, so it earns the full Extract → Model → Inject treatment (Appendix A).
 - **Second Axis — the async cross-cluster boundary.** Across clusters, geo-replication is asynchronous and
   the gateway can fail over from one cluster to another. *This* is where the genuinely new, hard amoebius
   obligation lives — the boundary no single system proves end-to-end, the one this doctrine flags as genuinely
   "tricky": *asynchronous geo-replication is hard. what exactly happens if a cluster goes down mid
   geo-sync and we try to failover the gateway to that cluster? we need to prove we always have well-defined
-  behaviour.* The whole of §16–§19 and Appendix B exist to answer that question.
+  behaviour.* The whole of [§16](#16-the-second-axis--when-one-cluster-becomes-a-forest)–[§19](#19-the-cross-boundary-ledger-and-conformance-rows) and Appendix B exist to answer that question.
 
 **The slogan, cashed out:** *delegate the easy proofs, concentrate the hard one.* Everything intra-cluster
 and synchronous is somebody else's solved problem; amoebius spends its formal-verification budget on the
@@ -276,14 +276,14 @@ app logic, or that someone is re-proving what Pulsar/MinIO/Postgres already prov
 
 ## 7. The honest limits the moves inherit
 
-Each tradition hands its move both its power and its limits; record the limits now, because §12 turns them
+Each tradition hands its move both its power and its limits; record the limits now, because [§12](#12-the-moral-core--proven-tested-assumed) turns them
 into ledger rows.
 
 **Model cannot:** check your *code* (only a model — model and code drift); explore beyond a **bounded,
 finite scope** (you check 2–3 actors, not 3,000); reason in **real time** (it runs in logical time, so
 clock skew and lease timing are abstracted away, not verified — R8); or check invariants you forgot to
 state. These are not weaknesses to apologize for — they are exactly where Model hands off to Inject and to
-the §13 rules.
+the [§13](#13-the-supporting-rules--the-conditions-the-moves-need) rules.
 
 **Inject cannot:** be exhaustive (it **samples** the faults you inject); prove *soundness* (a green chaos
 run is evidence, not proof); or mean anything without observability, a steady-state signal, and disciplined
@@ -306,7 +306,7 @@ result, but it **must not compute the branch in the middle of a race.** Every de
 pipeline:
 
 ```mermaid
-flowchart LR
+flowchart TD
   T1["anti-pattern: read premise"] --> T2["probe authority"]
   T2 --> T3["branch inside effects"]
   T3 --> T4["act on possibly stale premise"]
@@ -319,11 +319,11 @@ flowchart LR
 Three sub-rules make it sound:
 
 - **The typed-unknown rule.** A probe that times out, errors, or has not resolved must yield an explicit
-  *not-yet-observed* value — never a coerced definite. This is the direct remedy for both disguises of §3.
+  *not-yet-observed* value — never a coerced definite. This is the direct remedy for both disguises of [§3](#3-the-defect-class--one-shape-two-disguises).
   A decision may deliberately coerce an unknown to a definite **only when** the coercion can affect
   **liveness** but **not** the safety invariant — i.e. a separate mechanism (a convergent-log gate, a
   fail-closed apply step) enforces safety regardless. State which case you are in; an unexamined coercion is
-  the §3 defect by default.
+  the [§3](#3-the-defect-class--one-shape-two-disguises) defect by default.
 - **Bound everything.** Every probe, retry, queue, and wait carries an explicit finite bound. An unbounded
   effect reintroduces an instant the decision cannot reason about.
 - **Fence or revalidate safety-critical freshness.** If safety depends on "the premise is still true," the
@@ -343,16 +343,16 @@ convergent commit log; the owner-only action (reconcile the cluster, act as secr
 gateway DNS record) is gated by a second pure predicate over the **log**: *may-act = (I am the computed
 owner) ∧ (my latest claim is unsuperseded by a later yield)*. Because the gate folds over the convergent
 log rather than local belief, it is pure *because its input converges*. The election *shape* is owned by
-[daemon_topology_doctrine.md §5](./daemon_topology_doctrine.md); this doctrine owns the rule that the
+[daemon_topology_doctrine.md §5](./daemon_topology_doctrine.md#5-leadership-election--the-mechanism-the-proof-lives-elsewhere); this doctrine owns the rule that the
 decision must be Extracted before it can be modeled.
 
 **The deeper structural form, and its boundary limit.** The strongest Extract makes the observation a
 *fold over a replicated append-only log* (the commit log over Pulsar + MinIO), so the decision is pure
 *because its input is convergent*, not merely because it was wrapped. But that convergent-fold form
-converges **only within one consistency boundary** (§16): where the log is geo-replicated asynchronously
+converges **only within one consistency boundary** ([§16](#16-the-second-axis--when-one-cluster-becomes-a-forest)): where the log is geo-replicated asynchronously
 across the cluster boundary and both sides append, each side's fold stays perfectly pure and the two
 results can still disagree. **Purity does not imply agreement once the substrate has a boundary** — a
-thread §16 picks up.
+thread [§16](#16-the-second-axis--when-one-cluster-becomes-a-forest) picks up.
 
 ---
 
@@ -368,7 +368,7 @@ tools; the technique, not the tool, is the rule.)
 **Why it works.** The *catastrophic* failure — two daemons both believing they are the singleton, or two
 clusters both believing they hold the gateway — lives in the Protocol layer, which Extract cannot reach. A
 flaw there is wrong *regardless of how perfectly the code is written*, so no test of the implementation can
-reveal it; only checking the algorithm can. The DynamoDB 35-step trace (§4) is the canonical proof that
+reveal it; only checking the algorithm can. The DynamoDB 35-step trace ([§4](#4-two-traditions-and-the-quiet-third)) is the canonical proof that
 "astronomically lucky" is not a plan.
 
 **How you know you've done it.** There is a model of the protocol; it encodes crash and reordering, not
@@ -379,7 +379,7 @@ observation *types* — should be the very ones Extract named.
 
 The canonical failover hazard the model must rule out is a **deposed actor that still believes it owns the
 resource and keeps acting.** The remedy is not a local flag but to gate every owner-only action on
-**convergent proof of current ownership** — the §8 log-fold, where the action is permitted only when the
+**convergent proof of current ownership** — the [§8](#8-move-i--extract-make-the-decision-a-value) log-fold, where the action is permitted only when the
 actor observes its own current, unsuperseded claim in the replicated log — so a stale owner cannot act on a
 belief the rest of the cluster has already overwritten.
 
@@ -389,7 +389,7 @@ invariant holds inside the condition, and that any violation outside it (under p
 self-healing** rather than permanent.
 
 **SSoT — who owns the spec.** This doctrine owns the *requirement* to model the two concentrated invariants
-(§6) and the honesty rule on what a green model means. The **concrete TLA+ spec, its invariant catalog, its
+([§6](#6-the-concentration-principle--where-the-obligation-lives)) and the honesty rule on what a green model means. The **concrete TLA+ spec, its invariant catalog, its
 model↔code correspondence, and its divergence record** are owned by
 [tla_modelling_assumptions.md](./tla_modelling_assumptions.md) (Phase 9). The sibling prodbox spec
 (`/home/matthewnowak/prodbox/documents/engineering/tla/gateway_orders_rule.tla`, six invariants explored to
@@ -401,12 +401,12 @@ must re-establish for its own model.
 does not prove the implementation refines it; model and code drift, and a bounded scope hides any bug that
 needs more actors than the scope allows. A model in **logical time** says nothing about the
 **real-time / clock-skew** premises the implementation depends on (R8). Record these limits explicitly
-(§12) so a green model is never mistaken for a proof of the running system.
+([§12](#12-the-moral-core--proven-tested-assumed)) so a green model is never mistaken for a proof of the running system.
 
-(Once the substrate has a **consistency boundary** (§16), the deposed-actor remedy *weakens*: the proof of
+(Once the substrate has a **consistency boundary** ([§16](#16-the-second-axis--when-one-cluster-becomes-a-forest)), the deposed-actor remedy *weakens*: the proof of
 supersession must now propagate across an asynchronous gate, so its latency is the replication lag, and a
 deposed side can keep acting for up to that lag. The remedy then no longer *prevents* the deposed-actor
-window — it only **bounds it to the lag** — leaving a residual, self-healing violation §18 must reconcile.)
+window — it only **bounds it to the lag** — leaving a residual, self-healing violation [§18](#18-the-rules-scale-to-the-boundary) must reconcile.)
 
 ---
 
@@ -440,12 +440,12 @@ interleaving returns as a *minimal, replayable counterexample*. io-sim was harde
 `ouroboros-network` (IOG / Well-Typed; maintained under IntersectMBO) — the Haskell peer of FoundationDB's
 deterministic "Flow" and its descendants Antithesis and TigerBeetle.
 
-**Why it would close amoebius's real gap.** Model's honest limit (§9) is that a green TLA+ model does not
+**Why it would close amoebius's real gap.** Model's honest limit ([§9](#9-move-ii--model-prove-the-protocol-not-the-program)) is that a green TLA+ model does not
 prove the *code* refines it. Lifting the singleton daemon onto io-classes would let the **real loops** run
 under `IOSimPOR`, exercising interleavings neither the TLA+ model nor a pure decision test can reach, and
 turning the model↔code correspondence from prose into something a test executes. amoebius starts from a
 good place: the shared daemon spine already forbids `forkIO` and mandates structured `withAsync` /
-`bracket` ([daemon_topology_doctrine.md §6](./daemon_topology_doctrine.md)), so the shapes lift cleanly.
+`bracket` ([daemon_topology_doctrine.md §6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine)), so the shapes lift cleanly.
 
 **The cost, named (why it is optional and kept subordinate).** Lifting onto io-classes makes every
 concurrency-touching signature polymorphic in `m` — a **standing tax on all future change**, not a one-time
@@ -454,7 +454,7 @@ faithfully reproduces production when they genuinely share *in-process* state. a
 they coordinate through Pulsar + MinIO + the commit log, so an `IOSim` run of one daemon rests on a
 hand-built stub of its peers, and the catastrophic *cross-actor* invariant is still better served by the
 TLA+ model. So Simulate stays parenthetical: never a fourth move, scoped to one subsystem, gated on
-evidence the tax is worth paying, and **not adopted in amoebius today** — the honest ledger entry (§12)
+evidence the tax is worth paying, and **not adopted in amoebius today** — the honest ledger entry ([§12](#12-the-moral-core--proven-tested-assumed))
 reads that the concurrent *schedule* is **unexercised** until it is.
 
 ---
@@ -473,7 +473,7 @@ up resources, runs a workflow, and — by definition — always tears down, simu
 leadership elections; `suggest-test` detects the substrate and emits a representative one. That entire
 machinery — the test-as-`.dhall` contract, `suggest-test`, the flagged test credentials, and the per-run
 ledger artifact — is owned by [testing_doctrine.md](./testing_doctrine.md). This doctrine owns only the
-rule that each concentrated invariant (§6) must have an adversarial scenario asserting its *declared form*.
+rule that each concentrated invariant ([§6](#6-the-concentration-principle--where-the-obligation-lives)) must have an adversarial scenario asserting its *declared form*.
 
 **Extend, don't build.** Most HA systems already inject *some* faults. The work is rarely to build a
 harness from nothing; it is to **extend** the existing one with the scenarios that target what Extract and
@@ -494,7 +494,7 @@ Model newly assert. A parallel harness is waste.
 a synchronization event, hands off the gateway, and releases compute while preserving storage — so it is
 **lossless by construction**. A *chaos-failover* is the lead simply vanishing — no drain, no flush — so its
 loss is bounded by the declared **data-loss budget**, not zero. That distinction is normative and owned by
-[cluster_lifecycle_doctrine.md §5](./cluster_lifecycle_doctrine.md); Inject must drill the *chaos* case,
+[cluster_lifecycle_doctrine.md §5](./cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction); Inject must drill the *chaos* case,
 because a graceful teardown that silently skips its cleanup steps is downgrading itself to a chaos event
 and forfeiting the lossless guarantee.
 
@@ -525,7 +525,7 @@ assumed result and report it as proven. Keep this ledger explicitly:
 | Synchrony / real-time assumption (R8) | The timing premise (clock skew, lease, heartbeat) is named, bounded, monitored | **Assumed** — monitored at runtime, never proven by any move | Behaviour when the bound is exceeded; that it holds in the field |
 
 (Three further rows — the cross-boundary consistency premise, the failover budget, and the
-invariant-confluence classification — belong to the Second Axis and are recorded in §19.)
+invariant-confluence classification — belong to the Second Axis and are recorded in [§19](#19-the-cross-boundary-ledger-and-conformance-rows).)
 
 **Applied to amoebius today, the ledger is blunt — and that is the point.** Nothing in Phases 1–11 is
 built. So **every** layer above is, for amoebius, **UNVERIFIED** pending implementation; the only
@@ -548,31 +548,31 @@ partition.
 ## 13. The supporting rules — the conditions the moves need
 
 The three moves rest on standing conditions. Each is also a portable best practice. (R1–R8 have a
-first-axis core stated here; several gain a cross-boundary extension in §18, and R9 is purely
+first-axis core stated here; several gain a cross-boundary extension in [§18](#18-the-rules-scale-to-the-boundary), and R9 is purely
 cross-boundary.)
 
 - **R1 — No shared in-memory state between replicas; name the substrate's consistency boundary.** amoebius
   daemons coordinate only through Pulsar + MinIO + the commit log. Any in-memory cross-replica assumption
   is split-brain in waiting, invisible to Model. A substrate's atomicity and convergence hold only *within*
-  one boundary; across one (the cluster boundary) it is asynchronous — the §16 axis.
+  one boundary; across one (the cluster boundary) it is asynchronous — the [§16](#16-the-second-axis--when-one-cluster-becomes-a-forest) axis.
 - **R2 — Determinism in tests: inject time and scheduling; never assert on wall-clock.** Tests drive timing
   and ordering through injected seams, not real delays. Wall-clock tests cannot deterministically reproduce
-  the interleaving that exposes a §3 defect. This is what makes Extract and Simulate fast and repeatable.
+  the interleaving that exposes a [§3](#3-the-defect-class--one-shape-two-disguises) defect. This is what makes Extract and Simulate fast and repeatable.
 - **R3 — At-least-once delivery with idempotent handlers is a named invariant.** Treat "no effect lost,
   none double-applied under redelivery and crash-mid-acknowledge" as a first-class protocol invariant — the
   Pulsar at-least-once + dedup discipline ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)). The
   idempotency key must be a **stable identity** (content- or call-identity, not a local sequence number),
-  because §18 will ask it to survive geo-replication.
+  because [§18](#18-the-rules-scale-to-the-boundary) will ask it to survive geo-replication.
 - **R4 — Crash-only / fail-closed recovery.** On an unrecoverable fault, fail loudly and let the supervisor
   restart from clean state, rather than attempting intricate in-process recovery. This is the daemon
   spine's fail-fast posture and the reconciler's *Unreachable → refuse* rule
-  ([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md)). Crash-only paths have far smaller
+  ([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)). Crash-only paths have far smaller
   state spaces for Model and Inject. (Candea & Fox, *Crash-Only Software*, HotOS 2003.)
 - **R5 — Bound everything.** Every timeout, retry budget, queue depth, and wait is explicitly finite. An
   unbounded effect is an instant no decision can reason about and no model can scope.
 - **R6 — Structured concurrency only.** Coordination paths use scoped concurrency (`withAsync`, race,
   cancel-on-exit) — never `forkIO` or ad-hoc sleeps, which the daemon spine already forbids
-  ([daemon_topology_doctrine.md §6](./daemon_topology_doctrine.md)). Structured scopes make cancellation and
+  ([daemon_topology_doctrine.md §6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine)). Structured scopes make cancellation and
   async-exception safety analyzable. (Popularized by Smith's 2018 essay; descends from structured
   programming.)
 - **R7 — Impossibility-bounded invariants are stated conditionally, with the failure mode chosen
@@ -587,7 +587,7 @@ cross-boundary.)
   *availability-first* (act, accept a **bounded** violation that deterministically heals on reconvergence)
   — and document which; (c) **record** the chosen mode in the ledger. amoebius inherits prodbox's explicit
   **availability-first** election choice (an isolated singleton candidate self-elects as a failsafe;
-  [daemon_topology_doctrine.md §5.4](./daemon_topology_doctrine.md)).
+  [daemon_topology_doctrine.md §5.4](./daemon_topology_doctrine.md#54-the-safety-boundary-stated-honestly)).
 - **R8 — Name and bound every synchrony assumption; no move verifies it.** Where correctness rests on a
   real-time premise — bounded cross-node clock skew, a lease/TTL, heartbeat timing — that premise is proven
   by **none** of the moves: Extract abstracts it, Model uses logical time, Inject only samples. Therefore
@@ -607,7 +607,7 @@ judgment). Keep them apart.
 Each move emits the vocabulary the next consumes. This ordering is structural, not preferential:
 
 ```mermaid
-flowchart LR
+flowchart TD
   A["Extract: pure decision names the snapshot + observation types"]
   B["Model: protocol model states the cross-actor invariant"]
   S["Simulate (optional): schedule-checks the real code"]
@@ -644,20 +644,20 @@ concern**, name the demonstration. The cell is not "is there a test" but "what d
 
 | Concern | Extract (pure decision) | Sequential state-machine test | **Concurrent / interleaved test** | Model (cross-process) | Inject (live adversarial fault) |
 |---|:--:|:--:|:--:|:--:|:--:|
-| Each branch reading externally-mutable state | required (+ fence if safety-critical, §8) | — | required where the branch races | — | — |
+| Each branch reading externally-mutable state | required (+ fence if safety-critical, [§8](#8-move-i--extract-make-the-decision-a-value)) | — | required where the branch races | — | — |
 | Each take-then-act / claim primitive | — | required | **required** (contention + async-exception) | — | — |
-| Control-plane singleton ownership (§6 First Axis) | the decision is pure | — | required | **required** | **required** (kill mid-claim) |
+| Control-plane singleton ownership ([§6](#6-the-concentration-principle--where-the-obligation-lives) First Axis) | the decision is pure | — | required | **required** | **required** (kill mid-claim) |
 | At-least-once + idempotency (R3) | — | required | required | **required** | **required** (reorder/redeliver, incl. post-failover cross-cluster replay) |
 | Crash / recovery & failover (R4) | — | the recovery decision is pure | — | recommended | **required** (failover under load, incl. cross-cluster) |
 | Impossibility-bounded invariant (R7) | — | — | — | **required** (state condition; choose mode; model the *conditional* invariant) | **required** (partition; assert violation bounded & self-healing) |
 | Synchrony / real-time assumption (R8) | name + bound | — | — | recorded *assumed* | **required** (inject skew/lease beyond the bound) |
 
-(Systems that cross the cluster boundary add three further rows — §19.) Reading the matrix: a **blank** cell
+(Systems that cross the cluster boundary add three further rows — [§19](#19-the-cross-boundary-ledger-and-conformance-rows).) Reading the matrix: a **blank** cell
 where the column applies is a conformance *gap*, not a neutral absence; the **"Concurrent / interleaved"**
-column is where single-threaded suites are empty and cannot, even in principle, surface a §3 defect; the
+column is where single-threaded suites are empty and cannot, even in principle, surface a [§3](#3-the-defect-class--one-shape-two-disguises) defect; the
 **"Model"** and **"Inject"** columns are where benign-only suites stop, leaving the catastrophic invariant
 and its survival under stress simply unverified. Conformance is layered — a project fully conformant at the
-Decision layer can be entirely non-conformant at Protocol and Runtime, and by the blindness property (§5)
+Decision layer can be entirely non-conformant at Protocol and Runtime, and by the blindness property ([§5](#5-three-layers-and-the-blindness-that-binds-them))
 the first tells you nothing about the other two. Audit all three.
 
 ---
@@ -665,31 +665,31 @@ the first tells you nothing about the other two. Audit all three.
 ## 16. The Second Axis — when one cluster becomes a forest
 
 > **Gate.** Everything above assumed a single, strongly-consistent domain: one cluster, where a committed
-> write is immediately visible to every reader and the standard services run their own consensus (§6). If
+> write is immediately visible to every reader and the standard services run their own consensus ([§6](#6-the-concentration-principle--where-the-obligation-lives)). If
 > that describes your subsystem, **you can stop here** — Appendix A is your worked example. Read on only if
 > your data is geo-replicated across more than one cluster with *asynchronous* replication between them.
 
 For amoebius this gate is not a rare edge case — it is **Phase 9**. The moment a parent spawns a child and
-the two geo-replicate, the forest crosses this line, and the §3 defect returns in a new and more dangerous
-form. Recall the fourth blindness (§5): **every move is blind to the cluster boundary unless the boundary
+the two geo-replicate, the forest crosses this line, and the [§3](#3-the-defect-class--one-shape-two-disguises) defect returns in a new and more dangerous
+form. Recall the fourth blindness ([§5](#5-three-layers-and-the-blindness-that-binds-them)): **every move is blind to the cluster boundary unless the boundary
 is modeled in.** Extract's convergent fold is pure *because its input converges* — and is blind to the fact
 that convergence *stops at the boundary*. Model, written against a single cluster in logical time, sees no
 boundary unless it encodes **two** clusters with asynchronous replication between them. Inject exercises
 only the lag and partitions it happens to inject. So the boundary — exactly like the R8 synchrony premise —
-must be **named (§17), its lag bounded and monitored (R8), and its failover budgeted (R9)**, because no
+must be **named ([§17](#17-the-boundary-and-its-classifier)), its lag bounded and monitored (R8), and its failover budgeted (R9)**, because no
 move proves it.
 
 And the defect itself recurs, with **replication lag** now playing the role of the gap between `t0` and
 `t1`. A read from a cluster that lags the authoritative history is a premise true at that cluster's
-last-applied instant but trusted after the history has moved on — the stale-premise decision of §3 lifted to
+last-applied instant but trusted after the history has moved on — the stale-premise decision of [§3](#3-the-defect-class--one-shape-two-disguises) lifted to
 the storage layer. This is the precise shape of the open cross-cluster failover question: *what happens if a cluster
 goes down mid geo-sync and we try to failover the gateway to that cluster?* A surviving sibling that reads
 its lagging replica at offset `X` and treats `X` as the complete history is committing
 *timeout-coerces-unknown* at topology scale; one that reads "partitioned-from-peer" as "peer-cluster-dead"
-is committing *state-conflation*. The typed-unknown remedy (§8) applies unchanged — an un-fresh read is
+is committing *state-conflation*. The typed-unknown remedy ([§8](#8-move-i--extract-make-the-decision-a-value)) applies unchanged — an un-fresh read is
 *not-yet-known*, not *current* — and the safety remedy is bounded authority (R7), never a coerced "I read
-it, therefore it holds." The next three sections give that world its vocabulary (§17), scale the rules to
-it (§18), and extend the honest ledger (§19).
+it, therefore it holds." The next three sections give that world its vocabulary ([§17](#17-the-boundary-and-its-classifier)), scale the rules to
+it ([§18](#18-the-rules-scale-to-the-boundary)), and extend the honest ledger ([§19](#19-the-cross-boundary-ledger-and-conformance-rows)).
 
 ---
 
@@ -781,17 +781,17 @@ invariant defaults to non-confluent**, and to R7's bounded-authority treatment, 
 
 ## 18. The rules scale to the boundary
 
-Each first-axis rule (§13) gains a cross-boundary extension, and one new rule — R9 — exists only here.
+Each first-axis rule ([§13](#13-the-supporting-rules--the-conditions-the-moves-need)) gains a cross-boundary extension, and one new rule — R9 — exists only here.
 
 - **R1, cross-boundary.** Naming the cluster boundary is mandatory, and so is classifying every crossing
-  mutable multi-record invariant by confluence (§17) before choosing a mechanism. Coordination that
-  silently assumes a single global view across clusters is a cross-cluster split-brain in waiting — the §3
+  mutable multi-record invariant by confluence ([§17](#17-the-boundary-and-its-classifier)) before choosing a mechanism. Coordination that
+  silently assumes a single global view across clusters is a cross-cluster split-brain in waiting — the [§3](#3-the-defect-class--one-shape-two-disguises)
   defect one level up, invisible to a single-cluster model.
 - **R3, cross-boundary.** Asynchronous geo-replication can re-present, after a failover, work a now-lost
   cluster already applied — so the idempotency key must be a stable identity that *survives replication*
   (content- or call-identity, not a local sequence number). The invariant widens to "none double-applied
   under **post-failover cross-cluster replay**." amoebius gets this for free wherever effects are
-  content-addressed MinIO blobs or Pulsar-log folds keyed by work-id (§17).
+  content-addressed MinIO blobs or Pulsar-log folds keyed by work-id ([§17](#17-the-boundary-and-its-classifier)).
 - **R4, cross-boundary.** When a whole cluster is lost, the surviving cluster recovers from its own durable,
   geo-replicated — and therefore *stale-by-the-lag* — state, rather than reaching across the boundary to
   reconcile with the failed cluster. This keeps the failover state space small and turns the accepted
@@ -804,7 +804,7 @@ Each first-axis rule (§13) gains a cross-boundary extension, and one new rule �
   boundary and **both clusters advanced independently**, there is no single ordering to defer to; healing
   must be *active* — a deterministic, **total** reconciliation/merge over the divergent histories, with any
   unmergeable conflict surfaced explicitly rather than silently dropped. A merge may be claimed total **only
-  for a confluent invariant** (§17). "Active-active" on a **non-confluent** invariant is reached only by
+  for a confluent invariant** ([§17](#17-the-boundary-and-its-classifier)). "Active-active" on a **non-confluent** invariant is reached only by
   *bounding concurrent authority*. **Safety-first additionally means a fail-closed promotion gate:** the
   surviving cluster withholds gateway authority until it proves freshness — caught up to a known commit
   watermark, or holding a fence — trading recovery time (R9's RTO) for zero divergence beyond the suffix
@@ -826,29 +826,29 @@ Each first-axis rule (§13) gains a cross-boundary extension, and one new rule �
   **assumed** under real disaster. Every other rule's violation is transient and heals; R9's data-loss
   dimension is permanent, accepted, and never heals — which is why no other rule can host it. The
   declarative **push-back on an unsatisfiable global `.dhall`**, and the data-loss-budget thresholds, are
-  configured as deployment-rules ([cluster_lifecycle_doctrine.md §5, §6](./cluster_lifecycle_doctrine.md));
+  configured as deployment-rules ([cluster_lifecycle_doctrine.md §5, §6](./cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction));
   this doctrine owns the *proof obligation* that the declared budget actually holds.
 
 ---
 
 ## 19. The cross-boundary ledger and conformance rows
 
-The honesty discipline (§12) scales with the hardness. A forest that crosses the cluster boundary adds
+The honesty discipline ([§12](#12-the-moral-core--proven-tested-assumed)) scales with the hardness. A forest that crosses the cluster boundary adds
 these rows to its ledger —
 
 | Technique | Establishes | Strength | Does **not** establish |
 |---|---|---|---|
-| Cross-cluster consistency premise (R1/§17, R8) | The boundary is named; replication lag is bounded and its observed maximum monitored; the data-loss window equals the lag at the instant of failover; a fail-closed promotion gate can refuse a too-stale cluster | **Assumed** — monitored at runtime, never proven | That field lag stays within bound during a real disaster; the data already lost beyond the bound; that a single-cluster / logical-time model saw the boundary at all |
+| Cross-cluster consistency premise (R1/[§17](#17-the-boundary-and-its-classifier), R8) | The boundary is named; replication lag is bounded and its observed maximum monitored; the data-loss window equals the lag at the instant of failover; a fail-closed promotion gate can refuse a too-stale cluster | **Assumed** — monitored at runtime, never proven | That field lag stays within bound during a real disaster; the data already lost beyond the bound; that a single-cluster / logical-time model saw the boundary at all |
 | Cross-cluster failover budget (R9) + reconciliation (R7) | The two-dimensional budget — bounded permanent data loss and bounded recovery time — is declared and exercised by drill; where divergence is admitted, a deterministic merge reconciles divergent histories | Recovery time + reconciliation **tested** (drilled), never proven; data-loss bound **assumed** under real disaster | That an un-drilled disaster stays within budget; that every conflict is mergeable; behaviour beyond modeled scope |
-| Invariant-confluence classification + bounded-authority protocol (§17, R7) | Each crossing mutable invariant is classified confluent or held by single-writer / escrow / namespace-partition / downgrade / restructure; the chosen protocol never overspends the global budget or collides a namespace, and fails closed on exhaustion | Classification **proven only when** the invariant and merge are formalized and closure under merge is shown; otherwise an explicit design assumption. Protocol safety **proven for the model**; exhaustion-under-partition survival **tested** (Inject) | Per-cluster lease/rebalance bound (R8, **assumed**); replication-lag bound (R8, **assumed**); model↔code refinement; behaviour above scope; the suffix lost at failover (R9) |
+| Invariant-confluence classification + bounded-authority protocol ([§17](#17-the-boundary-and-its-classifier), R7) | Each crossing mutable invariant is classified confluent or held by single-writer / escrow / namespace-partition / downgrade / restructure; the chosen protocol never overspends the global budget or collides a namespace, and fails closed on exhaustion | Classification **proven only when** the invariant and merge are formalized and closure under merge is shown; otherwise an explicit design assumption. Protocol safety **proven for the model**; exhaustion-under-partition survival **tested** (Inject) | Per-cluster lease/rebalance bound (R8, **assumed**); replication-lag bound (R8, **assumed**); model↔code refinement; behaviour above scope; the suffix lost at failover (R9) |
 
-— and these rows to the conformance matrix (§15):
+— and these rows to the conformance matrix ([§15](#15-the-conformance-matrix--what-does-this-project-demonstrate)):
 
 | Concern | Extract (pure decision) | Model (cross-process) | Inject (live adversarial fault) |
 |---|:--:|:--:|:--:|
-| Cross-cluster consistency / replication lag (R1/§17, R8) | name the boundary + lag bound | recorded *assumed* unless replication is modeled as two clusters | **required** (partition the boundary; drive lag beyond bound; assert the promotion-freshness gate fires before a too-stale cluster resumes service; measure induced loss against the budget) |
+| Cross-cluster consistency / replication lag (R1/[§17](#17-the-boundary-and-its-classifier), R8) | name the boundary + lag bound | recorded *assumed* unless replication is modeled as two clusters | **required** (partition the boundary; drive lag beyond bound; assert the promotion-freshness gate fires before a too-stale cluster resumes service; measure induced loss against the budget) |
 | Cross-cluster failover budget & reconciliation (R9, R7) | the merge/reconciliation decision is pure | **required** (model divergence + merge; assert merge converges and preserves the invariant) | **required** (drill gateway failover across the boundary; assert measured loss ≤ declared window, recovery ≤ bound, histories reconcile, no double-applied effect) |
-| Non-confluent invariant across a boundary (§17, R7) | classify; the per-cluster allowance-or-namespace spend is a pure decision | **required** (model the budget/namespace partition: each per-cluster allowance confluent; no path overspends or collides; exhaustion fails closed) | **required** (exhaust an allowance under partition; assert fail-closed, *not* overspend; assert the global budget is honored after reconvergence) |
+| Non-confluent invariant across a boundary ([§17](#17-the-boundary-and-its-classifier), R7) | classify; the per-cluster allowance-or-namespace spend is a pure decision | **required** (model the budget/namespace partition: each per-cluster allowance confluent; no path overspends or collides; exhaustion fails closed) | **required** (exhaust an allowance under partition; assert fail-closed, *not* overspend; assert the global budget is honored after reconvergence) |
 
 The rule is unchanged across the axis: **never report an assumed-and-monitored result as proven.** A
 confluence claim is proof only when its closure argument is shown; the data-loss bound is forever an
@@ -892,7 +892,7 @@ silently violates under partition. Build the first kind. Write down which kind y
 > premise (R8).
 >
 > **SSoT note.** This appendix narrates the singleton to teach the method; it does **not** own it. The
-> election *shape* is owned by [daemon_topology_doctrine.md §5](./daemon_topology_doctrine.md); the formal
+> election *shape* is owned by [daemon_topology_doctrine.md §5](./daemon_topology_doctrine.md#5-leadership-election--the-mechanism-the-proof-lives-elsewhere); the formal
 > model, invariant catalog, and divergence record are owned by
 > [tla_modelling_assumptions.md](./tla_modelling_assumptions.md) (Phase 9). Cite those when implementing;
 > cite this appendix for the method it illustrates.
@@ -905,9 +905,9 @@ The candidates share no in-memory state; they coordinate only through the **coor
 signed, hash-chained, append-only commit log** (`claim` / `yield` / `heartbeat` / domain events, merged
 idempotently by event hash). The externally-visible effect is the cluster gateway's DNS A record (route53).
 The invariant: **at most one daemon exercises singleton authority — once views have converged.** That
-conditional clause is load-bearing (R7). It meets the §2 gate.
+conditional clause is load-bearing (R7). It meets the [§2](#2-when-this-applies--the-gate) gate.
 
-**The defect (§3 made concrete).** Each candidate decides "am I the singleton, and may I act?" from its
+**The defect ([§3](#3-the-defect-class--one-shape-two-disguises) made concrete).** Each candidate decides "am I the singleton, and may I act?" from its
 local view of peer liveness (heartbeat ages) and the log. The naive path reads a *peer heartbeat older than
 the timeout* as "that peer is dead," self-elects, and acts on "I am the sole brain" — a premise that may
 already be false. This is *timeout-coerces-unknown*: a missing heartbeat means *unreachable-or-slow*, not
@@ -915,7 +915,7 @@ provably *dead*. It compounds with *state-conflation* if the daemon collapses "I
 socket" (outbound reachability) with "the peer is alive and emitting" (inbound freshness) — two distinct
 facts a one-way partition drives apart, which must be tracked as **separate** observations.
 
-**Extract applied.** Make the decision a pure function of a convergent input (§8, log-fold form). Election
+**Extract applied.** Make the decision a pure function of a convergent input ([§8](#8-move-i--extract-make-the-decision-a-value), log-fold form). Election
 is `decide : (orders, heartbeat-observations, up-set) → owner`, a *deterministic total* function over the
 ranked set — given identical observations, every candidate computes the same owner, so convergence alone
 removes accidental split-brain. The owner-only action is gated by a second pure predicate over the **log**:
@@ -926,7 +926,7 @@ attempts to lead* (liveness); it never authorizes an action, because the action 
 heartbeat — so the coercion is licensed and cannot violate safety.
 
 ```mermaid
-flowchart LR
+flowchart TD
   T1["before: read peer heartbeats"] --> T2["coerce stale heartbeat to peer dead"]
   T2 --> T3["self-elect and act"]
   T3 --> T4["act on sole-owner belief"]
@@ -966,7 +966,7 @@ after convergence; drive a **one-way** partition and confirm inbound-vs-outbound
 inject **clock skew beyond the bound** and confirm the daemon rejects the out-of-bound events (R8) rather
 than corrupting the ordering.
 
-**The ledger this example keeps (§12).** *Proven* (once built) — election purity and the may-act fold
+**The ledger this example keeps ([§12](#12-the-moral-core--proven-tested-assumed)).** *Proven* (once built) — election purity and the may-act fold
 (decision layer), and the modeled safety/liveness properties (for the model, at scope). *Tested* — the
 partition and kill-mid-claim scenarios. *Assumed* — the clock-skew premise (R8), model↔code refinement, and
 behaviour above scope. **For amoebius today, all of this is UNVERIFIED pending Phases 3 and 9;** the prodbox
@@ -976,14 +976,14 @@ analogues are evidence, not amoebius proof.
 
 | Claim / mechanism | Doctrine home it instantiates |
 |---|---|
-| Ranked candidates, HA chart, `replicas=1` self-elect | [daemon_topology_doctrine.md §3, §5](./daemon_topology_doctrine.md); [platform_services_doctrine.md §2](./platform_services_doctrine.md) |
-| Coordination plane: Pulsar + MinIO + signed commit log | [daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md); R1 |
-| Pure `decide` + `may-act` log-fold; typed-unknown scoping | §8 (convergent-log fold); §8 typed-unknown |
-| Stale-heartbeat coercion licensed for liveness only | §8 typed-unknown scoping |
+| Ranked candidates, HA chart, `replicas=1` self-elect | [daemon_topology_doctrine.md §3, §5](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected); [platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1) |
+| Coordination plane: Pulsar + MinIO + signed commit log | [daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#51-the-coordination-plane-pulsar--minio--the-commit-log); R1 |
+| Pure `decide` + `may-act` log-fold; typed-unknown scoping | [§8](#8-move-i--extract-make-the-decision-a-value) (convergent-log fold); [§8](#8-move-i--extract-make-the-decision-a-value) typed-unknown |
+| Stale-heartbeat coercion licensed for liveness only | [§8](#8-move-i--extract-make-the-decision-a-value) typed-unknown scoping |
 | Availability-first; bounded self-healing split | R7 |
 | Clock-skew bound named/enforced/monitored | R8 |
-| Deposed-daemon hazard barred by unsuperseded-claim gate | §9 |
-| Partition / kill-mid-claim / skew faults | §11 Inject (extend the test-`.dhall` harness) |
+| Deposed-daemon hazard barred by unsuperseded-claim gate | [§9](#9-move-ii--model-prove-the-protocol-not-the-program) |
+| Partition / kill-mid-claim / skew faults | [§11](#11-move-iii--inject-break-the-running-thing-on-purpose) Inject (extend the test-`.dhall` harness) |
 | Concrete TLA+ spec + invariant catalog | [tla_modelling_assumptions.md](./tla_modelling_assumptions.md) |
 
 ---
@@ -992,7 +992,7 @@ analogues are evidence, not amoebius proof.
 
 > The Second-Axis example, and the one the whole async-replication concern exists for: **what happens if a
 > cluster goes down mid geo-sync and we fail the gateway over to it?** It crosses the cluster boundary
-> (R1/§17, R9), rests on a bounded-staleness / data-loss premise and an explicit failover budget (R8, R9),
+> (R1/[§17](#17-the-boundary-and-its-classifier), R9), rests on a bounded-staleness / data-loss premise and an explicit failover budget (R8, R9),
 > and reconciles divergent histories under an availability-first choice (R7). It is **forward-looking**:
 > amoebius runs no cross-cluster geo-replication today, but Phase 9 is exactly this shape, so the doctrine
 > works it through before the need is live.
@@ -1000,18 +1000,18 @@ analogues are evidence, not amoebius proof.
 **The system.** Two sibling child clusters with the same parent geo-replicate a realtime workflow
 (`command → event* → result`) over **Pulsar geo-replication** (native binary protocol, no WebSockets) with
 durable outputs written as **content-addressed, write-once MinIO blobs** plus a single mutable **CAS "latest"
-pointer**. *Within* one cluster the log and object store are strongly consistent (delegated, §6). *Across*
+pointer**. *Within* one cluster the log and object store are strongly consistent (delegated, [§6](#6-the-concentration-principle--where-the-obligation-lives)). *Across*
 clusters they replicate **asynchronously**. The cluster **gateway DNS owner** (route53) = the active cluster
 — a meta-election that is *itself* only R7-conditional (both may briefly self-elect under partition; this is
 Appendix A's singleton lifted to cluster scale). The invariant: *for effects that have replicated or are
 later reconciled, no effect is double-applied; at most one cluster holds gateway authority once views
-converge; acknowledged-but-un-replicated work is bounded by the R9 data-loss budget.* Per §17's classifier,
+converge; acknowledged-but-un-replicated work is bounded by the R9 data-loss budget.* Per [§17](#17-the-boundary-and-its-classifier)'s classifier,
 the content-addressed blobs and the Pulsar log are confluent and cross safely; the CAS pointer and the
 gateway authority are non-confluent singletons that cross only in R7's conditional form with reconciliation.
 
-**The defect (§3 made concrete), and the literal open cross-cluster failover question.** On chaos-failover (the lead
+**The defect ([§3](#3-the-defect-class--one-shape-two-disguises) made concrete), and the literal open cross-cluster failover question.** On chaos-failover (the lead
 cluster *vanishes* mid geo-sync — no drain, no flush; contrast the **graceful, lossless-by-construction**
-teardown owned by [cluster_lifecycle_doctrine.md §5](./cluster_lifecycle_doctrine.md)):
+teardown owned by [cluster_lifecycle_doctrine.md §5](./cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction)):
 
 - *Topology-scale timeout-coerces-unknown.* The surviving cluster reads its lagging replica at offset `X`
   and treats `X` as the *complete* history — coercing *not-yet-replicated* into *does-not-exist*. The
@@ -1027,7 +1027,7 @@ log dedup is a pure fold keyed by a **replication-surviving work-id**, **duplica
 arrival after heal are absorbed structurally for any effect that eventually appears in the merged history**
 (R3). The **typed-unknown scoping** is the crux of "well-defined": "I have not seen entries past `X`, so I
 will serve" decides *which cluster serves* — a **liveness** coercion that authorizes no effect, hence
-licensed; "those effects do not exist / were never durable" is a durability **safety** claim and is the §3
+licensed; "those effects do not exist / were never durable" is a durability **safety** claim and is the [§3](#3-the-defect-class--one-shape-two-disguises)
 defect — the tail beyond `X` stays a typed *not-yet-observed* value, reconciled when the boundary heals, and
 if the failed cluster is permanently lost, accounted for **only** by the R9 data-loss budget, never silently
 resolved to "absent." So the answer to "what happens if a cluster goes down mid geo-sync?" is precise:
@@ -1036,7 +1036,7 @@ promotes only through the R7 fail-closed freshness gate; the CAS pointer is reco
 total merge; every replicated-or-recovered effect is deduplicated exactly once.**
 
 ```mermaid
-flowchart LR
+flowchart TD
   DNS["gateway DNS owner: active cluster (meta-election is itself R7-conditional)"]
   PA["Cluster A: command -> event* -> result"] --> LA["Cluster A log + blobs + CAS latest"]
   LB["Cluster B log + blobs + CAS latest"] --> CB["Cluster B pure consumer"]
@@ -1053,7 +1053,7 @@ scale). amoebius chooses **availability-first**: both clusters serve and **recon
 divergence is the *normal* case. Two sources of lost/divergent state stay separate: (1) the **irrecoverable
 data-loss window** — the un-replicated tail gone at the instant of failover (R8/R9); and (2) the
 **deposed-cluster window** — a cluster that loses gateway authority keeps acting for up to the replication
-lag until the superseding claim propagates (§9's remedy *weakened across the boundary*) — a bounded,
+lag until the superseding claim propagates ([§9](#9-move-ii--model-prove-the-protocol-not-the-program)'s remedy *weakened across the boundary*) — a bounded,
 self-healing R7 violation. The merge: **content-addressed blobs merge trivially** (the union of immutable,
 self-naming objects is conflict-free); the **CAS pointer is the only divergent point** and needs an explicit
 deterministic, **total**, **timestamp-free** merge (ordered by `(causal-predecessor-set, cluster-rank)`), so
@@ -1087,7 +1087,7 @@ the recovery-time budget (R9); **inject replication lag** toward and past the bo
 duplicate arrivals** and assert idempotency absorbs them (content-addressed + log-fold dedup — R3) and the
 CAS-pointer merge converges deterministically (R7).
 
-**The ledger this example keeps (§12, §19).** *Proven* (once built) — the consumer decision's purity and the
+**The ledger this example keeps ([§12](#12-the-moral-core--proven-tested-assumed), [§19](#19-the-cross-boundary-ledger-and-conformance-rows)).** *Proven* (once built) — the consumer decision's purity and the
 dedup + pointer-merge fold (decision layer); the modeled two-cluster safety/liveness properties at scope 2.
 *Tested* — the partition, kill-cluster-mid-workflow (recovery within budget, loss ≤ measured window),
 replication-lag/promotion-gate, and failback-idempotency drills. *Assumed* — the data-loss-window /
@@ -1099,20 +1099,20 @@ Phase-9 obligation, and the single place the per-system proof concentrates.**
 
 | Claim / mechanism | Doctrine home it instantiates |
 |---|---|
-| Strong within a cluster, async across; blobs/log confluent, CAS pointer + gateway authority singletons | §17 classifier; R1; [content_addressing_doctrine.md](./content_addressing_doctrine.md) |
-| Chaos-failover (vanish) vs lossless graceful teardown | [cluster_lifecycle_doctrine.md §5](./cluster_lifecycle_doctrine.md); §11 |
-| Topology-scale timeout-coerces-unknown; partitioned ≠ dead | §16 |
-| Pure dedup + pointer-merge fold over convergent log + content-addressed artifacts | §8; R3 (replication-surviving key) |
-| Coercion licensed for liveness, forbidden for a durability safety claim | §8 typed-unknown scoping |
+| Strong within a cluster, async across; blobs/log confluent, CAS pointer + gateway authority singletons | [§17](#17-the-boundary-and-its-classifier) classifier; R1; [content_addressing_doctrine.md](./content_addressing_doctrine.md) |
+| Chaos-failover (vanish) vs lossless graceful teardown | [cluster_lifecycle_doctrine.md §5](./cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction); [§11](#11-move-iii--inject-break-the-running-thing-on-purpose) |
+| Topology-scale timeout-coerces-unknown; partitioned ≠ dead | [§16](#16-the-second-axis--when-one-cluster-becomes-a-forest) |
+| Pure dedup + pointer-merge fold over convergent log + content-addressed artifacts | [§8](#8-move-i--extract-make-the-decision-a-value); R3 (replication-surviving key) |
+| Coercion licensed for liveness, forbidden for a durability safety claim | [§8](#8-move-i--extract-make-the-decision-a-value) typed-unknown scoping |
 | No strong cross-cluster singleton; availability-first | R7 |
-| Blobs merge trivially; CAS pointer via timestamp-free deterministic total merge | §17 bucket (i) for state; R7 |
-| Deposed cluster keeps acting up to the lag = bounded self-healing violation | §9 note + R7 |
+| Blobs merge trivially; CAS pointer via timestamp-free deterministic total merge | [§17](#17-the-boundary-and-its-classifier) bucket (i) for state; R7 |
+| Deposed cluster keeps acting up to the lag = bounded self-healing violation | [§9](#9-move-ii--model-prove-the-protocol-not-the-program) note + R7 |
 | Replication lag named/bounded/monitored; data-loss window; promotion gate | R8; R7 (fail-closed promotion gate) |
 | Failover budget = (data-loss window assumed, recovery time drilled) | R9 |
 | PACELC: async posture chosen | R7 (PACELC) |
-| Two-cluster model; ≤ 1 authority once converged | §9 Model; R7; [tla_modelling_assumptions.md](./tla_modelling_assumptions.md) |
-| Extend the harness with partition / kill-cluster / lag / failback | §11 Inject; [testing_doctrine.md](./testing_doctrine.md) |
-| Ledger proven/tested/assumed; conformance rows | §12 + §19 |
+| Two-cluster model; ≤ 1 authority once converged | [§9](#9-move-ii--model-prove-the-protocol-not-the-program) Model; R7; [tla_modelling_assumptions.md](./tla_modelling_assumptions.md) |
+| Extend the harness with partition / kill-cluster / lag / failback | [§11](#11-move-iii--inject-break-the-running-thing-on-purpose) Inject; [testing_doctrine.md](./testing_doctrine.md) |
+| Ledger proven/tested/assumed; conformance rows | [§12](#12-the-moral-core--proven-tested-assumed) + [§19](#19-the-cross-boundary-ledger-and-conformance-rows) |
 
 ---
 
@@ -1120,21 +1120,21 @@ Phase-9 obligation, and the single place the per-system proof concentrates.**
 
 > A third worked example, included because it exercises what A and B do not: a **mutable, multi-record**
 > source of truth replicated **active-active** across clusters, where the governing classifier is
-> **invariant-confluence / CALM** (§17). Appendices A/B kept their substrates confluent *by construction*;
+> **invariant-confluence / CALM** ([§17](#17-the-boundary-and-its-classifier)). Appendices A/B kept their substrates confluent *by construction*;
 > this one cannot, and shows what changes when a schema carries invariants that **do not merge**. It is
 > **forward-looking** — amoebius runs no active-active OLTP today; per-service Patroni Postgres
-> ([platform_services_doctrine.md §8](./platform_services_doctrine.md)) is synchronous *within* a cluster,
+> ([platform_services_doctrine.md §8](./platform_services_doctrine.md#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin)) is synchronous *within* a cluster,
 > and any cross-cluster active-active variant is future work — but the method should exist before the
 > schema does.
 
-**The system and the §2 gate.** A workflow's source of truth is a per-service relational store
+**The system and the [§2](#2-when-this-applies--the-gate) gate.** A workflow's source of truth is a per-service relational store
 (Percona/Patroni), geo-replicated **active-active** across `cluster_west` and `cluster_east`. Both accept
-local writes and serve local reads; the link between them is the **cluster boundary** (§17): strong inside a
-cluster, asynchronous across. It meets the §2 gate: decisions under concurrency (debit/reject, mint-key/
+local writes and serve local reads; the link between them is the **cluster boundary** ([§17](#17-the-boundary-and-its-classifier)): strong inside a
+cluster, asynchronous across. It meets the [§2](#2-when-this-applies--the-gate) gate: decisions under concurrency (debit/reject, mint-key/
 reject, promote/wait); coordination only through durable substrates; safety invariants no single cluster can
 enforce alone (a global balance floor; a global uniqueness constraint).
 
-**Classify every invariant by the boundary (R1, §17), before bucketing:**
+**Classify every invariant by the boundary (R1, [§17](#17-the-boundary-and-its-classifier)), before bucketing:**
 
 - **(i) Confluent** — maintained active-active with no coordination, bounded only by lag: an **insert-only
   event/audit table**; a **grow-only counter** (monotone in the safe direction); **content-addressed
@@ -1150,11 +1150,11 @@ enforce alone (a global balance floor; a global uniqueness constraint).
   scope; **which cluster is the promotion authority** at failover → the R7-conditional **singleton
   claim/yield** pattern (reused from Appendices A/B). Naming the sub-form **is** the design decision.
 
-**The defect (§3 made concrete).** Both clusters hold `balance = 1`; each debits the last unit; **each
+**The defect ([§3](#3-the-defect-class--one-shape-two-disguises) made concrete).** Both clusters hold `balance = 1`; each debits the last unit; **each
 commit is locally valid and locally floor-respecting**; replication carries both debits across. A merge that
 replays both yields `balance = -1`; a last-writer-wins merge hides one committed debit and violates
 conservation/audit instead. Either way a *cross-cluster* invariant was breached by two *locally correct*
-decisions. **A per-record merge cannot manufacture a non-I-confluent cross-record invariant** (§17): two
+decisions. **A per-record merge cannot manufacture a non-I-confluent cross-record invariant** ([§17](#17-the-boundary-and-its-classifier)): two
 pure folds over two divergently-advanced histories can each be pure yet jointly violate a global bound.
 
 **Extract applied — three paths, by sub-form.** *Confluent path:* a pure, deterministic, **total** merge
@@ -1223,17 +1223,17 @@ exists so the invariant-confluence machinery is in place before any future schem
 
 | Claim / mechanism | Doctrine home it instantiates |
 |---|---|
-| Active-active mutable relational state across the cluster boundary | §17 classifier; [platform_services_doctrine.md §8](./platform_services_doctrine.md) (per-service Patroni) |
-| Merge the confluent invariants (events, counter, blobs, tags, causal FK inserts) | §17 bucket (i); R7 |
-| Numeric floor → per-cluster escrow allowance | §17 escrow; R7 |
-| Uniqueness → per-cluster disjoint key-block (not escrow) | §17 namespace-partition; R7 |
-| "sum = total" → restructure (derived fold) or single-writer | §17 restructure / single-writer; R7 |
-| Pure `decide(allowance,amount)` / `mint(block,n)` | §8 (pure decision; typed-unknown scoping) |
-| Stale lagging-replica read driving a debit | §16; §8 typed-unknown |
-| Escrow/namespace lease + rebalance on a bounded timer; exhaustion → fail-closed | §17 escrow term (R8/R4); R4, R8 |
+| Active-active mutable relational state across the cluster boundary | [§17](#17-the-boundary-and-its-classifier) classifier; [platform_services_doctrine.md §8](./platform_services_doctrine.md#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin) (per-service Patroni) |
+| Merge the confluent invariants (events, counter, blobs, tags, causal FK inserts) | [§17](#17-the-boundary-and-its-classifier) bucket (i); R7 |
+| Numeric floor → per-cluster escrow allowance | [§17](#17-the-boundary-and-its-classifier) escrow; R7 |
+| Uniqueness → per-cluster disjoint key-block (not escrow) | [§17](#17-the-boundary-and-its-classifier) namespace-partition; R7 |
+| "sum = total" → restructure (derived fold) or single-writer | [§17](#17-the-boundary-and-its-classifier) restructure / single-writer; R7 |
+| Pure `decide(allowance,amount)` / `mint(block,n)` | [§8](#8-move-i--extract-make-the-decision-a-value) (pure decision; typed-unknown scoping) |
+| Stale lagging-replica read driving a debit | [§16](#16-the-second-axis--when-one-cluster-becomes-a-forest); [§8](#8-move-i--extract-make-the-decision-a-value) typed-unknown |
+| Escrow/namespace lease + rebalance on a bounded timer; exhaustion → fail-closed | [§17](#17-the-boundary-and-its-classifier) escrow term (R8/R4); R4, R8 |
 | Data lost / allowance & block stranded at failover; RTO reclaim | R9 (data-loss assumed, recovery-time tested) |
 | Idempotent absorption of duplicate replayed writes | R3 (replication-surviving identity key) |
-| No global cross-record invariant fabricated by merge | §17 (I-confluence corollary); §8 boundary-scoped note |
+| No global cross-record invariant fabricated by merge | [§17](#17-the-boundary-and-its-classifier) (I-confluence corollary); [§8](#8-move-i--extract-make-the-decision-a-value) boundary-scoped note |
 | Concrete TLA+ spec + invariant catalog | [tla_modelling_assumptions.md](./tla_modelling_assumptions.md) |
 
 ---

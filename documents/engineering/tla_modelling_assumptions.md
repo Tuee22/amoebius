@@ -83,7 +83,7 @@ confluence "Second Axis"** named in [chaos_failover_doctrine.md](./chaos_failove
 and it is the *only* boundary this TLA+ model targets.
 
 ```mermaid
-flowchart LR
+flowchart TD
   app[Workflow / gateway decision] -->|intra-cluster consensus| delegated[MinIO / Pulsar / Patroni — they prove it]
   app -->|async cross-cluster failover| obligation[Second Axis — amoebius proves it here]
   obligation -->|formal artifact owned by| thisdoc[tla_modelling_assumptions.md]

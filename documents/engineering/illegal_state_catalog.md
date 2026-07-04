@@ -30,16 +30,16 @@ entry uninhabitable.
 
 - [`dsl_doctrine.md`](./dsl_doctrine.md) owns the **DSL surface and the contract** ("a valid spec cannot
   represent illegal state") as a property of the language.
-- **This document** owns the **catalog** (§3 — *which* states are illegal) and the **techniques** (§4 —
+- **This document** owns the **catalog** ([§3](#3-the-catalog--states-a-valid-spec-cannot-represent) — *which* states are illegal) and the **techniques** ([§4](#4-the-typing-techniques) —
   *how* the types foreclose them), and is the SSoT for **which platform invariants are type-enforced**
-  (the question [`platform_services_doctrine.md` §10](./platform_services_doctrine.md) defers here).
+  (the question [`platform_services_doctrine.md` §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram) defers here).
 - The *normative rule* behind each catalog entry lives in that entry's owning doctrine
   (storage, gateway/ingress, secrets, …). This doc names the owner and never restates its content.
 
 Everything below is **design intent for Phase 3** (the orchestration Dhall DSL + control-plane singleton),
 not a tested amoebius result. Status and gates live only in
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md); per
-[`documentation_standards.md` §6](../documentation_standards.md) this doc states the target shape and links
+[`documentation_standards.md` §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) this doc states the target shape and links
 back for status.
 
 ---
@@ -54,7 +54,7 @@ Cash that out against the three correctness layers from the chaos/failover doctr
 ([`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md), generalized from prodbox's
 `chaos_hardening_doctrine.md`):
 
-- **What a green type-check *is*.** A Dhall type-check (and the GADT-indexed Haskell decode behind it, §4)
+- **What a green type-check *is*.** A Dhall type-check (and the GADT-indexed Haskell decode behind it, [§4](#4-the-typing-techniques))
   is a **Decision-layer** proof: the spec value is well-formed, every reference resolves, every required
   field is present, every composition the user wrote has an inhabitant. When implemented as specified, that
   is a real proof — at the *spec* layer, in code, the cheapest and strongest of the three. It is the type
@@ -62,7 +62,7 @@ Cash that out against the three correctness layers from the chaos/failover doctr
 - **What it is *not*.** It says **nothing** about whether the interpreter renders the spec to correct
   manifests, whether the apiserver admits those manifests, whether the scheduler places the pods, whether the LB actually
   comes up, or whether two geo-replicated clusters converge after a partition. Those are the **Protocol**
-  and **Runtime** layers, and by the *blindness property* (`chaos_failover_doctrine.md` §4) a Decision-layer
+  and **Runtime** layers, and by the *blindness property* (`chaos_failover_doctrine.md` [§4](./chaos_failover_doctrine.md#4-two-traditions-and-the-quiet-third)) a Decision-layer
   proof is structurally blind to them.
 
 So the catalog's promise is exact: *a PVC that cannot bind a PV is unrepresentable in the spec* — meaning
@@ -72,7 +72,7 @@ is bound*; that is a reconcile-time fact whose verification is owned by
 runtime-enforcement proof there on purpose**, and never report it here.
 
 ```mermaid
-flowchart LR
+flowchart TD
   spec[amoebius.dhall spec] -->|Dhall type-check: spec composes, PROVEN at spec layer| decode[Decode to GADT-indexed Haskell types]
   decode -->|smart constructors and indices reject illegal values, PROVEN at code layer| ir[Coherent in-memory cluster IR]
   ir -->|interpret to typed manifests and cluster config, NOT proven by the type-check| render[Rendered manifests]
@@ -88,14 +88,14 @@ flowchart LR
 
 ## 3. The catalog — states a valid spec cannot represent
 
-The entries below enumerate the original illegal-state list (§3.1–§3.8), the isolation invariants
-(§3.9–§3.10), the best-practice-by-construction states (§3.11–§3.12), the **capacity / topology / bounded-
-storage** states (§3.13–§3.22), the **CBOR-payload** rule (§3.23), and the **rke2-quorum / ML-asset-lifecycle /
-release-promotion** states (§3.24–§3.26) the techniques in §4 demand. Each entry: the **intuition** (how it goes wrong
-in raw k8s), the **owning doctrine** (the SSoT for the rule), and the **technique** (§4) that forecloses it.
-The §3.13–§3.22 block is foreclosed by the two techniques added for it — §4.6 (the capacity-accounting total
-fold) and §4.7 (compatibility/topology relations over a collection) — and is where the honest grade split
-matters most: every capacity/storage/retention **sum** is grade-(2), never grade-(1) (§2, §6).
+The entries below enumerate the original illegal-state list ([§3.1](#31-bad--illegal-durable-storage)–[§3.8](#38-cross-tenant-references-and-literal-secrets)), the isolation invariants
+([§3.9](#39-a-plaintext-spec-at-rest)–[§3.10](#310-a-child-spec-that-reaches-beyond-its-own-subtree)), the best-practice-by-construction states ([§3.11](#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)–[§3.12](#312-an-app-that-names-a-product-instead-of-a-capability)), the **capacity / topology / bounded-
+storage** states ([§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](#322-a-hand-authored-un-derived-toleration)), the **CBOR-payload** rule ([§3.23](#323-a-non-cbor-pulsar-payload)), and the **rke2-quorum / ML-asset-lifecycle /
+release-promotion** states ([§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)–[§3.26](#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence)) the techniques in [§4](#4-the-typing-techniques) demand. Each entry: the **intuition** (how it goes wrong
+in raw k8s), the **owning doctrine** (the SSoT for the rule), and the **technique** ([§4](#4-the-typing-techniques)) that forecloses it.
+The [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](#322-a-hand-authored-un-derived-toleration) block is foreclosed by the two techniques added for it — [§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked) (the capacity-accounting total
+fold) and [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) (compatibility/topology relations over a collection) — and is where the honest grade split
+matters most: every capacity/storage/retention **sum** is grade-(2), never grade-(1) ([§2](#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it), [§6](#6-three-grades-of-foreclosure-and-the-honesty-they-force)).
 
 ### 3.1 Bad / illegal durable storage
 
@@ -103,7 +103,7 @@ Raw k8s lets you mix arbitrary storage classes, dynamic provisioners, and unsize
 data can quietly live on an ephemeral, auto-provisioned volume that vanishes with the node. amoebius admits
 **only** `no-provisioner`, explicitly-sized, retained PVs — the dynamic-provisioner
 path, the unsized claim, and the "default storage class we didn't choose" are simply not constructible.
-**Owner:** [`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md). **Technique:** §4.1
+**Owner:** [`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md). **Technique:** [§4.1](#41-pvcpv-binding-by-construction)
 (PVC↔PV binding by construction) + refined non-zero sizes.
 
 ### 3.2 PVCs that don't bind PVs
@@ -111,8 +111,8 @@ path, the unsized claim, and the "default storage class we didn't choose" are si
 The canonical k8s footgun: a StatefulSet's `volumeClaimTemplate` and the cluster's PVs are two independent
 objects that bind only if their sizes, access modes, and selectors happen to match — and a typo means a pod
 hangs in `Pending` forever. amoebius removes the independence: there is no way to declare a claim *without*
-its exactly-matching PV (§4.1). The mismatched pair has no inhabitant. **Owner:**
-[`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md). **Technique:** §4.1.
+its exactly-matching PV ([§4.1](#41-pvcpv-binding-by-construction)). The mismatched pair has no inhabitant. **Owner:**
+[`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md). **Technique:** [§4.1](#41-pvcpv-binding-by-construction).
 
 ### 3.3 Misconfigured gateway
 
@@ -120,9 +120,9 @@ A hand-written Gateway/HTTPRoute can listen on a port nothing serves, terminate 
 wrong host, or route to a backend that doesn't exist. In amoebius the gateway is not free-form: routes are
 emitted from the same value that declares the service, so a route to a non-existent backend, or a listener
 with no matching service, cannot be written. **Owner:**
-[`platform_services_doctrine.md` §9](./platform_services_doctrine.md) (Envoy + Gateway API, the single
-wild-ingress path). **Technique:** §4.3 (GADT-indexed: a route is constructed *from* a live service handle)
-+ §4.5 totality (the cert/host name is a function of the declared identity, not a free string).
+[`platform_services_doctrine.md` §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) (Envoy + Gateway API, the single
+wild-ingress path). **Technique:** [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (GADT-indexed: a route is constructed *from* a live service handle)
++ [§4.5](#45-content-address-totality--names-are-total-functions-of-content) totality (the cert/host name is a function of the declared identity, not a free string).
 
 ### 3.4 DNS that binds to the wrong IP
 
@@ -131,7 +131,7 @@ cluster never owned. amoebius never lets the operator *type* the target IP: a DN
 function of the allocated LoadBalancer address** — you bind a name to a *service handle*, and the address is
 computed from the realized LB, not supplied. A record pointing at an unowned address therefore has no
 representation. **Owner:** [`pulumi_iac_doctrine.md`](./pulumi_iac_doctrine.md) (route53 + zerossl) and
-[`platform_services_doctrine.md` §9](./platform_services_doctrine.md). **Technique:** §4.5 (content-address
+[`platform_services_doctrine.md` §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path). **Technique:** [§4.5](#45-content-address-totality--names-are-total-functions-of-content) (content-address
 totality, applied to the name→address map).
 
 ### 3.5 Undeployable pods (taints, tolerations & affinity)
@@ -144,15 +144,15 @@ workload unless **there exists** a node satisfying its affinity **and** tolerati
 schedulability *existence fold* over the single node inventory. Placement is expressed as a capability the
 workload *requests* and a node *offers*, and an unmatchable request is uninhabitable; a **toleration is never
 hand-authored** — it is *derived* from a declared node taint (the same "derived, never written" discipline as
-NetworkPolicy, §3.6), so "a toleration for a taint no node declares" is unrepresentable and "a taint no
+NetworkPolicy, [§3.6](#36-blocking-networkpolicy-services-cant-reach-each-other)), so "a toleration for a taint no node declares" is unrepresentable and "a taint no
 workload tolerates" leaves the existence fold with no landable node. This strengthens the original
 affinity-only entry to cover taints and tolerations. **Owner:**
 [`substrate_doctrine.md`](./substrate_doctrine.md) (substrate/arch capabilities, the closed node-taint set +
-node inventory) and [`platform_services_doctrine.md` §9](./platform_services_doctrine.md) (the
-derived-toleration rule, parallel to derived NetworkPolicy). **Technique:** §4.2 (capability tags) + §4.3 (a
-derived toleration handle exists only once its taint edge does) + §4.4 (the node inventory is the single
-owner of "what substrates and taints exist"), the existence check itself being a §4.4 value-level fold. Grade
-(2) for the existence fold; the derived-toleration shape is grade (1) (§3.22).
+node inventory) and [`platform_services_doctrine.md` §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) (the
+derived-toleration rule, parallel to derived NetworkPolicy). **Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (capability tags) + [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a
+derived toleration handle exists only once its taint edge does) + [§4.4](#44-ownership-indices--single-owner-ssot-structurally) (the node inventory is the single
+owner of "what substrates and taints exist"), the existence check itself being a [§4.4](#44-ownership-indices--single-owner-ssot-structurally) value-level fold. Grade
+(2) for the existence fold; the derived-toleration shape is grade (1) ([§3.22](#322-a-hand-authored-un-derived-toleration)).
 
 ### 3.6 Blocking NetworkPolicy (services can't reach each other)
 
@@ -162,8 +162,8 @@ Connectivity is **derived** from the declared dependency graph — if service A 
 B, the policy permitting A→B is generated, and a dependency you declared can never be a connection the
 policy blocks. The "service stranded from a dependency it declared" state is not expressible because the
 human never writes the policy. **Owner:**
-[`platform_services_doctrine.md`](./platform_services_doctrine.md). **Technique:** §4.4 (the dependency
-graph is the single owner of connectivity) + §4.3 (a consumer handle only exists once the dependency edge
+[`platform_services_doctrine.md`](./platform_services_doctrine.md). **Technique:** [§4.4](#44-ownership-indices--single-owner-ssot-structurally) (the dependency
+graph is the single owner of connectivity) + [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a consumer handle only exists once the dependency edge
 does).
 
 ### 3.7 Accidental insecure / backdoor ingress
@@ -176,8 +176,8 @@ carve-out — host-origin, localhost-only NodePorts with no mTLS — is a *diffe
 (`HostLocalPeer`, not `WildIngress`), reachable only from the host and never from WAN/LAN, owned by
 [`host_cluster_comms_doctrine.md`](./host_cluster_comms_doctrine.md). There is no constructor that turns a
 host-local peer into a wild endpoint, and none that exposes a workload to the wild without the edge.
-**Owner:** [`platform_services_doctrine.md` §9](./platform_services_doctrine.md). **Technique:** §4.2
-(capability: only the edge holds the "expose-to-wild" capability) + §4.3 (endpoint kinds are distinct
+**Owner:** [`platform_services_doctrine.md` §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path). **Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
+(capability: only the edge holds the "expose-to-wild" capability) + [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (endpoint kinds are distinct
 indices that do not interconvert).
 
 ### 3.8 Cross-tenant references and literal secrets
@@ -187,10 +187,10 @@ is unrepresentable; the spec carries a `SecretRef` (a name), and the parent inje
 into the child's Vault. **(b) Tenant isolation** — a child cluster knows
 *nothing* about its siblings, so a spec for child *X* must not be able to name
 child *Y*'s resources or secrets. Both are foreclosed the same way: references are **tenant-tagged**, and
-there is no function that re-tags a reference from one tenant to another (§4.2). A `SecretRef` is a name
+there is no function that re-tags a reference from one tenant to another ([§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)). A `SecretRef` is a name
 under *this* tenant's tag; a cross-tenant reference has no inhabitant. **Owner:**
 [`vault_pki_doctrine.md`](./vault_pki_doctrine.md) (the `SecretRef`-by-name contract, parent→child
-injection, the trust tree). **Technique:** §4.2 (phantom tenant tags + capabilities).
+injection, the trust tree). **Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom tenant tags + capabilities).
 
 ### 3.9 A plaintext spec at rest
 
@@ -200,9 +200,9 @@ value, only the means to fetch and decrypt it; at runtime the control-plane sing
 Vault-Transit MinIO envelope **in-process** and never writes it to a plaintext ConfigMap or to etcd. A spec
 materialized to a cluster-legible store is therefore not something a workload's typed inputs can even name
 (a workload reads only the unencrypted-basics floor plus the Vault objects its policy allows). **Owner:**
-[`vault_pki_doctrine.md`](./vault_pki_doctrine.md) §4 (decrypt-in-process, never-plaintext) and
-[`pulumi_iac_doctrine.md`](./pulumi_iac_doctrine.md) §2 (the enveloped backend). **Technique:** §4.5
-(an envelope/handle, not a plaintext value) — note this row's *enforcement* is partly runtime (per the §2
+[`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) (decrypt-in-process, never-plaintext) and
+[`pulumi_iac_doctrine.md` §2](./pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio) (the enveloped backend). **Technique:** [§4.5](#45-content-address-totality--names-are-total-functions-of-content)
+(an envelope/handle, not a plaintext value) — note this row's *enforcement* is partly runtime (per the [§2](#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)
 limit); the type only removes any plaintext-spec input.
 
 ### 3.10 A child spec that reaches beyond its own subtree
@@ -210,12 +210,12 @@ limit); the type only removes any plaintext-spec input.
 A child cluster's spec is, by construction, a projection of **exactly its own subtree** (its own config
 including its children's). There is no field in a `ChildSpec` in which a sibling or ancestor-only branch can
 appear, so a parent cannot hand a child anything wider than its subtree, and a child cannot name a sibling's
-resources — the §3.8 tenant-isolation invariant lifted to the whole spec tree, reinforced cryptographically
+resources — the [§3.8](#38-cross-tenant-references-and-literal-secrets) tenant-isolation invariant lifted to the whole spec tree, reinforced cryptographically
 by per-child Transit keys (a child cannot even *decrypt* a sibling's subtree). **Owner:**
-[`cluster_lifecycle_doctrine.md`](./cluster_lifecycle_doctrine.md) §3 (the `project(subtree)` handoff),
+[`cluster_lifecycle_doctrine.md` §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest) (the `project(subtree)` handoff),
 [`dsl_doctrine.md`](./dsl_doctrine.md) (the `ChildSpec` type), and
-[`vault_pki_doctrine.md`](./vault_pki_doctrine.md) §6 (per-child keys). **Technique:** §4.2 (phantom
-tenant/subtree tags) + §4.4 (ownership indices).
+[`vault_pki_doctrine.md` §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes) (per-child keys). **Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom
+tenant/subtree tags) + [§4.4](#44-ownership-indices--single-owner-ssot-structurally) (ownership indices).
 
 ### 3.11 An unsafe workload (no resource limits, no hardened securityContext)
 
@@ -227,9 +227,9 @@ missing either is not a value `render` can return — there is nothing to lint b
 to lint. The cpu/ram rule is owned by
 [`platform_services_doctrine.md` §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram);
 the generation discipline that makes the unsafe shape unconstructible is owned by
-[`manifest_generation_doctrine.md` §3](./manifest_generation_doctrine.md). **Owner:**
+[`manifest_generation_doctrine.md` §3](./manifest_generation_doctrine.md#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible). **Owner:**
 [`manifest_generation_doctrine.md`](./manifest_generation_doctrine.md) (best-practice-by-construction) +
-[`platform_services_doctrine.md`](./platform_services_doctrine.md) (the cpu/ram rule). **Technique:** §4.1
+[`platform_services_doctrine.md`](./platform_services_doctrine.md) (the cpu/ram rule). **Technique:** [§4.1](#41-pvcpv-binding-by-construction)
 (required-field-by-construction — a record without the field has no inhabitant).
 
 ### 3.12 An app that names a product instead of a capability
@@ -239,7 +239,7 @@ clusters that deploy the capability differently. amoebius's app surface offers a
 `ObjectStore`, `SecretStore`, `MessageBus`, `Sql`, `Identity`, `Observability`, `Registry`, `Edge` — with no
 product arms, so "depend on `minio` directly" has no syntax: it fails Gate 1 (the Dhall typechecker) before
 any binary runs. **Owner:** [`service_capability_doctrine.md`](./service_capability_doctrine.md) (the
-capability abstraction; one canonical provider, the type admitting alternates). **Technique:** §4.2
+capability abstraction; one canonical provider, the type admitting alternates). **Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (capabilities as a closed union — a product name is uninhabitable).
 
 ### 3.13 A compute engine incompatible with its substrates (managed providers first-class)
@@ -252,8 +252,8 @@ relation permits has a constructor, checked **elementwise** so heterogeneous **m
 legal** while an incompatible pairing has no inhabitant. EKS is a first-class `Managed` arm of the closed
 `ComputeEngine` union (a product/unknown engine is uninhabitable). **Owner:**
 [`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md) (+ the node inventory in
-[`substrate_doctrine.md`](./substrate_doctrine.md)). **Technique:** §4.7 (relation over a collection) + §4.2
-(closed union, EKS arm present) + §4.4 (the node inventory the compatibility reads). **Grade:** (2) for the
+[`substrate_doctrine.md`](./substrate_doctrine.md)). **Technique:** [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) (relation over a collection) + [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
+(closed union, EKS arm present) + [§4.4](#44-ownership-indices--single-owner-ssot-structurally) (the node inventory the compatibility reads). **Grade:** (2) for the
 elementwise compatibility fold; grade (1) sub-part (EKS is a union arm; a product/unknown engine is
 uninhabitable).
 
@@ -266,8 +266,8 @@ virtualization provider (`limaHost` on apple, `wsl2Host` on windows), so "rke2/k
 describes as reconcile behaviour) becomes a *type demand* — the bare-host spec has no inhabitant. (Distinct
 from the Apple-Metal *build* carve-out, which is on-host by design,
 [`apple_metal_headless_builds.md`](./apple_metal_headless_builds.md).) **Owner:**
-[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md) (+ substrate §4 for the synthesis).
-**Technique:** §4.3 (a distro GADT indexed by a required `LinuxHost` witness). **Grade:** (1) uninhabitable;
+[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md) (+ substrate [§4](#4-the-typing-techniques) for the synthesis).
+**Technique:** [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a distro GADT indexed by a required `LinuxHost` witness). **Grade:** (1) uninhabitable;
 grade-(3) residue — that the Lima/WSL2 VM actually boots.
 
 ### 3.15 A multi-node kind cluster not on a single Linux host
@@ -275,7 +275,7 @@ grade-(3) residue — that the Lima/WSL2 VM actually boots.
 kind runs every node as a container on one Docker host, so a multi-node kind cluster spanning machines is a
 category error. amoebius's `Kind` arm carries **exactly one** `LinuxHost` field; multi-node is `replicas` on
 that one host, and a second host has no field to bind. **Owner:**
-[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md). **Technique:** §4.1 (required-field: one
+[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md). **Technique:** [§4.1](#41-pvcpv-binding-by-construction) (required-field: one
 `host`; `replicas` never adds a host). **Grade:** (1) uninhabitable.
 
 ### 3.16 A multi-node rke2 cluster with fewer Linux hosts than nodes (or a host reused)
@@ -283,14 +283,14 @@ that one host, and a second host has no field to bind. **Owner:**
 A multi-node rke2 cluster needs one distinct Linux host per node; raw tooling lets you ask for five nodes with
 three machines, or reuse one machine for two nodes. amoebius's `Rke2` arm carries
 `{ servers : Rke2Servers, agents : List LinuxHost }`: the server arm fixes the server count structurally
-(`Single`/`Ha3`/`Ha5`, §3.24) and the `agents` list binds one `LinuxHost` per worker, so every node names its
+(`Single`/`Ha3`/`Ha5`, [§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)) and the `agents` list binds one `LinuxHost` per worker, so every node names its
 own host field and "more nodes than hosts" cannot be built. **Distinctness** ("no host reused") is the one part
 Dhall cannot express as a type (no Set-distinctness), so it degrades to the total decode-time `mkRke2` fold that
 rejects a duplicate `HostId` **over `servers ∪ agents`** — a server host reused as an agent, or two agents on one
 machine, is caught alongside two servers on one machine. This **generalizes** the original "the node list *is*
-the host list" cardinality to the split server/agent inventory (the quorum shape itself is §3.24). **Owner:**
-[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md). **Technique:** §4.1 (`node == host`
-cardinality) + §4.4 (distinctness fold over `servers ∪ agents`). **Grade:** (2) — graded to its weaker
+the host list" cardinality to the split server/agent inventory (the quorum shape itself is [§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)). **Owner:**
+[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md). **Technique:** [§4.1](#41-pvcpv-binding-by-construction) (`node == host`
+cardinality) + [§4.4](#44-ownership-indices--single-owner-ssot-structurally) (distinctness fold over `servers ∪ agents`). **Grade:** (2) — graded to its weaker
 distinctness floor; the cardinality sub-part is grade (1).
 
 ### 3.17 An over-committed deploy or workload (host / VM / cluster capacity exceeded)
@@ -303,7 +303,7 @@ type index (Dhall has no dependent arithmetic), this is a **total decode-time ch
 never claimed uninhabitable. **Owner:** [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md)
 (consuming the host numbers in [`substrate_doctrine.md`](./substrate_doctrine.md), the cpu/ram in
 [`platform_services_doctrine.md` §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram),
-and the PV sizes in [`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md)). **Technique:** §4.6
+and the PV sizes in [`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md)). **Technique:** [§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked)
 (capacity-accounting total fold). **Grade:** (2).
 
 ### 3.18 Unbounded storage anywhere
@@ -312,9 +312,9 @@ Raw k8s lets a volume grow until it fills the disk; "unbounded" is the default. 
 is **either** host-level (bounded by a physical disk) **or** cloud (bounded by a quota) — the closed
 `StorageBacking` union has **no unbounded arm**, so unbounded storage has no syntax, and the aggregate
 `Σ(sizes) ≤ backing` fold bounds the total. **Owner:**
-[`storage_lifecycle_doctrine.md` §5.2](./storage_lifecycle_doctrine.md) (the union shape) +
-[`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) (the aggregate). **Technique:** §4.2
-(closed `StorageBacking` union — grade 1) + §4.6 (aggregate backing fold — grade 2). **Grade:** (2) aggregate;
+[`storage_lifecycle_doctrine.md` §5.2](./storage_lifecycle_doctrine.md#52-the-storage-backing-is-bounded--the-closed-storagebacking-union) (the union shape) +
+[`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) (the aggregate). **Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
+(closed `StorageBacking` union — grade 1) + [§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked) (aggregate backing fold — grade 2). **Grade:** (2) aggregate;
 the union shape is grade (1).
 
 ### 3.19 An application consuming more storage than its backing (MinIO and Pulsar)
@@ -322,11 +322,11 @@ the union shape is grade (1).
 Even with each volume bounded, the *sum* of an app's object usage and a topic's retained bytes can exceed the
 backing. amoebius folds cumulative store size against the selected `StorageBacking` for **both** MinIO
 (`<app>/<bucket>` buckets) and Pulsar (retained topic bytes); "unbounded" is representable only through a
-`Growable` scaling policy whose ceiling is itself a quota (§3.21). **Owner:**
+`Growable` scaling policy whose ceiling is itself a quota ([§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy)). **Owner:**
 [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) +
 [`content_addressing_doctrine.md`](./content_addressing_doctrine.md) (the MinIO store) +
-[`pulsar_client_doctrine.md`](./pulsar_client_doctrine.md) (topic retention). **Technique:** §4.6
-(cumulative-size ≤ backing fold) + §4.2 (the `Growable` arm gates unboundedness). **Grade:** (2).
+[`pulsar_client_doctrine.md`](./pulsar_client_doctrine.md) (topic retention). **Technique:** [§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked)
+(cumulative-size ≤ backing fold) + [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (the `Growable` arm gates unboundedness). **Grade:** (2).
 
 ### 3.20 A Pulsar topic without a bounded / tiered / retained lifecycle
 
@@ -339,7 +339,7 @@ headroom** against the BookKeeper backing (the availability fit) and the retaine
 target (the durability fit). A mandatory backlog quota is the runtime fail-safe. **Owner:**
 [`pulsar_client_doctrine.md` §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra) (the policy
 shape) + [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) (the two-ceiling fold).
-**Technique:** §4.1 (mandatory `RetentionPolicy` + mandatory size offload — no forever-local arm) + §4.6
+**Technique:** [§4.1](#41-pvcpv-binding-by-construction) (mandatory `RetentionPolicy` + mandatory size offload — no forever-local arm) + [§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked)
 (retention-budget room-fit). **Grade:** (1) for the mandatory shape; (2) for both room-fits; grade-(3) residue
 — the burst back-pressure actually holding.
 
@@ -353,7 +353,7 @@ so "unbounded" storage/compute exists only behind a policy whose ceiling is a qu
 [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) (with enaction owned by
 [`cluster_lifecycle_doctrine.md` §8](./cluster_lifecycle_doctrine.md#8-dynamic-node-provisioning) and
 [`pulumi_iac_doctrine.md` §4](./pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog)).
-**Technique:** §4.2 (closed `Growable` union, no unbounded arm). **Grade:** (1) representation; grade-(3) that
+**Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `Growable` union, no unbounded arm). **Grade:** (1) representation; grade-(3) that
 the autoscaler actually grows capacity and the cloud honors the quota.
 
 ### 3.22 A hand-authored (un-derived) toleration
@@ -361,11 +361,11 @@ the autoscaler actually grows capacity and the cloud honors the quota.
 A free-text toleration is how a pod "tolerates" a taint no node carries (or fails to tolerate the one it
 must). amoebius never lets an operator *write* a toleration: a `Toleration` handle has no exported
 constructor and is **projected** only from a declared node taint against the single node inventory — the same
-derive-don't-author discipline as NetworkPolicy (§3.6). So a toleration for a nonexistent taint is
-unrepresentable, and the schedulability existence fold (§3.5) does the rest. **Owner:**
+derive-don't-author discipline as NetworkPolicy ([§3.6](#36-blocking-networkpolicy-services-cant-reach-each-other)). So a toleration for a nonexistent taint is
+unrepresentable, and the schedulability existence fold ([§3.5](#35-undeployable-pods-taints-tolerations--affinity)) does the rest. **Owner:**
 [`substrate_doctrine.md`](./substrate_doctrine.md) (the closed `NodeTaintKind` set + node inventory) +
-[`platform_services_doctrine.md` §9](./platform_services_doctrine.md) (the derivation rule). **Technique:**
-§4.4 (the node inventory is the single owner of what taints exist) + §4.3 (a `Toleration` handle exists only
+[`platform_services_doctrine.md` §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) (the derivation rule). **Technique:**
+[§4.4](#44-ownership-indices--single-owner-ssot-structurally) (the node inventory is the single owner of what taints exist) + [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a `Toleration` handle exists only
 once its taint edge does). **Grade:** (1) uninhabitable.
 
 ### 3.23 A non-CBOR Pulsar payload
@@ -377,9 +377,9 @@ drops. amoebius makes the Pulsar message **body** exclusively CBOR: the produce 
 `produceRaw` / JSON / protobuf / base64 constructor, so a non-CBOR payload has no inhabitant; consume is a
 total `Either DecodeError a`. Canonical CBOR is reused from the content store where a payload is
 content-addressed, and the protocol framing (`BaseCommand` / metadata) stays protobuf — Pulsar's wire, a
-different layer. **Owner:** [`pulsar_client_doctrine.md` §3.1](./pulsar_client_doctrine.md) (+
+different layer. **Owner:** [`pulsar_client_doctrine.md` §3.1](./pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor) (+
 [`content_addressing_doctrine.md`](./content_addressing_doctrine.md) for the canonical-CBOR discipline).
-**Technique:** §4.2 (a closed codec — only the CBOR constructor exists) + §4.3 (constructor-gating; there is
+**Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (a closed codec — only the CBOR constructor exists) + [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (constructor-gating; there is
 no non-CBOR payload handle) — **no new technique**. **Grade:** (1) uninhabitable on the *produce* side; the
 *consume* decode is a total fail-fast check — grade (2), exactly like the CRC32C frame check — never a
 grade-(3) claim that a received body is valid.
@@ -390,14 +390,14 @@ Raw rke2 HA lets you stand up a **two**-server control plane — two etcd voters
 the first partition is a split-brain — or a **zero**-server "cluster" of agents with nowhere to join. amoebius
 makes the server set a **closed union** `Rke2Servers = < Single : LinuxHost | Ha3 : {…} | Ha5 : {…} >` whose
 only arms are the legal **odd etcd quorums {1, 3, 5}**: a 0- or 2-server control plane has no constructor. This
-is the same "no unbounded arm" idiom as the `StorageBacking`/`Growable` unions (§3.18, §3.21) — the illegal
+is the same "no unbounded arm" idiom as the `StorageBacking`/`Growable` unions ([§3.18](#318-unbounded-storage-anywhere), [§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy)) — the illegal
 cardinality is not rejected, it is *unrepresentable*. The root cluster is
 `{ servers = Rke2Servers.Single host, agents = [] }` (the existing zero-secret single node); HA is capped at 5
 by design, and a `Ha7` arm is a deliberate future add, not an omission. A quorum change (`Single` → `Ha3`) is a
 deliberate re-provision, **never** a `ScalingPolicy`/autoscale — `ScalingPolicy` grows the `agents` list only.
 The control-plane taint and its tolerations are **derived** from the server set, never hand-authored (the
-§3.5/§3.22 derive-don't-author discipline). **Owner:**
-[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md). **Technique:** §4.2 (closed `Rke2Servers`
+[§3.5](#35-undeployable-pods-taints-tolerations--affinity)/[§3.22](#322-a-hand-authored-un-derived-toleration) derive-don't-author discipline). **Owner:**
+[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md). **Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `Rke2Servers`
 union — the even/zero arm has no constructor). **Grade:** (1) uninhabitable; grade-(3) residue — that etcd
 actually forms and holds quorum, owned by [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md).
 
@@ -410,14 +410,14 @@ no `Url`/`Download`/`Fetch` arm**: the engine is *selected* by the detected subs
 the numeric libraries LINK in, the engine exists the moment the pod does. A startup download has no syntax.
 **(b) A `ModelArtifact` without a completed `.ready`.** A `ModelArtifact` yields an `ArtifactRef` **only** once
 its `.ready` sentinel exists — staging writes `.ready` LAST — so a reference to a half-staged model has no
-constructor (the same `.ready`-gating the release `PromotionGate` mirrors, §3.26). **(c) A model with no landing
+constructor (the same `.ready`-gating the release `PromotionGate` mirrors, [§3.26](#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence)). **(c) A model with no landing
 engine.** A `ModelArtifact` must be servable by an `EngineRuntime` present on the deployment's substrate; an
-unmatched model has no landing engine — a **grade-(2) total relation** (§4.7), the same relation-over-a-
-collection shape as the engine↔substrate fold (§3.13). **Owner:**
+unmatched model has no landing engine — a **grade-(2) total relation** ([§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection)), the same relation-over-a-
+collection shape as the engine↔substrate fold ([§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)). **Owner:**
 [`content_addressing_doctrine.md`](./content_addressing_doctrine.md) (the `EngineRuntime`/`ModelArtifact` asset
 tiers + the content-addressed store) + [`service_capability_doctrine.md`](./service_capability_doctrine.md) (the
-engine as a substrate-selected capability). **Technique:** §4.2 (closed `EngineRuntime` union — no `Url` arm) +
-§4.3 (an `ArtifactRef` handle exists only once its `.ready` edge does) + §4.7 (the model↔engine relation).
+engine as a substrate-selected capability). **Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `EngineRuntime` union — no `Url` arm) +
+[§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (an `ArtifactRef` handle exists only once its `.ready` edge does) + [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) (the model↔engine relation).
 **Grade:** (1) for the no-fetch engine and the `.ready`-gated `ArtifactRef`; (2) for the model↔engine relation
 (a checked total fold, not an absence of inhabitants); grade-(3) residue — that the staged bytes actually load
 on the substrate.
@@ -430,9 +430,9 @@ ETag-CAS pointer to a `Release` **requires** that the `Release`'s test-topology 
 ([`testing_doctrine.md`](./testing_doctrine.md) proven/tested/assumed) meet that environment's required evidence
 strength (Prod requires the chaos layer). The advance constructor demands an **evidence witness**, so
 "promote-unverified → prod" has no inhabitant — the same constructor-gating shape as the `.ready`-gated
-`ArtifactRef` (§3.25), applied to release evidence rather than model bytes. **Owner:**
-[`release_lifecycle_doctrine.md`](./release_lifecycle_doctrine.md) §4 (the `PromotionGate` precondition + the
-immutable release ledger). **Technique:** §4.3 (a promotion handle exists only once its evidence edge does).
+`ArtifactRef` ([§3.25](#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model)), applied to release evidence rather than model bytes. **Owner:**
+[`release_lifecycle_doctrine.md` §4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable) (the `PromotionGate` precondition + the
+immutable release ledger). **Technique:** [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a promotion handle exists only once its evidence edge does).
 **Grade:** (1) uninhabitable; grade-(3) residue — that the tests actually ran and that prod actually converged
 on the promoted `Release`, owned by [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) and the testing
 doctrine.
@@ -451,9 +451,9 @@ The catalog is foreclosed by seven reusable techniques operating across **two ty
   **GADT-indexed** types carrying phantom tags and ownership indices, so the in-memory IR the interpreter
   walks has the same illegal-states-absent property as the spec it came from.
 
-The seven techniques follow. Each leads with the intuition, then the mechanism. Techniques §4.6 and §4.7 were
-added for the capacity / topology / bounded-storage block (§3.13–§3.22); §4.6 is the one technique that is
-**irreducibly grade-(2)** (§2, §6).
+The seven techniques follow. Each leads with the intuition, then the mechanism. Techniques [§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked) and [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) were
+added for the capacity / topology / bounded-storage block ([§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](#322-a-hand-authored-un-derived-toleration)); [§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked) is the one technique that is
+**irreducibly grade-(2)** ([§2](#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it), [§6](#6-three-grades-of-foreclosure-and-the-honesty-they-force)).
 
 ### 4.1 PVC↔PV binding by construction
 
@@ -461,7 +461,7 @@ added for the capacity / topology / bounded-storage block (§3.13–§3.22); §4
 pair. *Mechanism:* a single `BoundVolume` smart constructor takes one size (a refined non-zero quantity)
 and emits *both* the StatefulSet claim request *and* the exactly-matching `no-provisioner` PV, sharing size
 and access mode, named `<namespace>/<statefulset>/pv_<integer>`. There is no constructor for a bare PVC and
-none for a free-floating PV, so §3.1 and §3.2 have no inhabitants. The *binding* is the value. The retain,
+none for a free-floating PV, so [§3.1](#31-bad--illegal-durable-storage) and [§3.2](#32-pvcs-that-dont-bind-pvs) have no inhabitants. The *binding* is the value. The retain,
 sizing, and deterministic-rebind rules are owned by
 [`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md); this doc owns only the
 *pairing-by-construction* technique.
@@ -473,7 +473,7 @@ belongs to is *baked into its type* — so the dangerous operation is not "disco
 by anyone without the token. *Mechanism:* a reference is `Ref tenant a`, phantom-tagged by a tenant index;
 the only constructors that produce a `Ref t a` demand a capability scoped to `t`, and crucially **there is
 no function `Ref t1 a -> Ref t2 a`**. A child spec is decoded under its own tenant tag, so it cannot even
-*name* a sibling's resources (§3.8). The same shape forecloses §3.7: only the Keycloak edge holds the
+*name* a sibling's resources ([§3.8](#38-cross-tenant-references-and-literal-secrets)). The same shape forecloses [§3.7](#37-accidental-insecure--backdoor-ingress): only the Keycloak edge holds the
 `ExposeToWild` capability, so no app-authored value can produce a wild endpoint. This is the type-level form
 of the locked rules "secrets are names only / parents inject into child Vault" and "Keycloak owns all wild
 ingress."
@@ -484,9 +484,9 @@ ingress."
 host-local vs wild; a route that needs a live backend) should make the *illegal* transition simply have no
 constructor. *Mechanism:* a GADT indexed by phase, where each operation's type names its precondition phase
 and its postcondition phase. An operation that requires a `Bound` volume cannot be applied to an `Unbound`
-one; a wild route can only be built *from* a constructed service handle, so §3.3's "route to a non-existent
-backend" and §3.6's "consumer with no provider" cannot be written; endpoint kinds (`WildIngress` vs
-`HostLocalPeer`, §3.7) are distinct indices that do not interconvert. The illegal transition is not rejected
+one; a wild route can only be built *from* a constructed service handle, so [§3.3](#33-misconfigured-gateway)'s "route to a non-existent
+backend" and [§3.6](#36-blocking-networkpolicy-services-cant-reach-each-other)'s "consumer with no provider" cannot be written; endpoint kinds (`WildIngress` vs
+`HostLocalPeer`, [§3.7](#37-accidental-insecure--backdoor-ingress)) are distinct indices that do not interconvert. The illegal transition is not rejected
 at runtime — it was never a value.
 
 ### 4.4 Ownership indices — single-owner SSoT, structurally
@@ -494,11 +494,11 @@ at runtime — it was never a value.
 *Intuition:* every resource has **exactly one** owner; "two owners" and "no owner" should both be impossible,
 because shared ownership is how SSoT rots. *Mechanism:* resources are aggregated through an *ownership index*
 — building the cluster IR is a total fold from resource to its single owner. A node-inventory owns "which
-substrates exist" (so §3.5's unmatchable affinity is caught against one authoritative list), and the declared
-dependency graph owns connectivity (so §3.6's NetworkPolicies are *derived*, never hand-authored). Where the
+substrates exist" (so [§3.5](#35-undeployable-pods-taints-tolerations--affinity)'s unmatchable affinity is caught against one authoritative list), and the declared
+dependency graph owns connectivity (so [§3.6](#36-blocking-networkpolicy-services-cant-reach-each-other)'s NetworkPolicies are *derived*, never hand-authored). Where the
 index is type-level (distinct owner keys), a double-claim fails to type-check; where it is value-level, the
 fold is a **total decode-time check** that rejects a duplicate or missing owner. (That distinction is exactly
-the §6 honesty grade — we do not pretend a decode-time check is a type-inhabitance proof.) This is the
+the [§6](#6-three-grades-of-foreclosure-and-the-honesty-they-force) honesty grade — we do not pretend a decode-time check is a type-inhabitance proof.) This is the
 amoebius generalization of the prodbox single-owner SSoT discipline, lifted into the type/decode layer.
 
 ### 4.5 Content-address totality — names are total functions of content
@@ -506,7 +506,7 @@ amoebius generalization of the prodbox single-owner SSoT discipline, lifted into
 *Intuition:* a name that doesn't correspond to a real thing is the root of dangling pointers, wrong-IP DNS,
 and stale image refs — so make the name a *computed function of the content*, never a free string an operator
 types. *Mechanism:* `contentAddress :: Manifest -> Digest` is a total pure function; the only way to obtain a
-reference is to hash an actual artifact, so a dangling reference has no inhabitant. Applied to DNS (§3.4): a
+reference is to hash an actual artifact, so a dangling reference has no inhabitant. Applied to DNS ([§3.4](#34-dns-that-binds-to-the-wrong-ip)): a
 name binds to an *allocated LB address* computed from the realized service, not a typed IP, so "DNS bound to
 the wrong/unowned IP" cannot be expressed. The content-addressed MinIO store (pointers → manifests → blobs)
 and the `experimentHash` identity are owned by
@@ -519,65 +519,65 @@ technique* — names are derived, never asserted.
 once to that scope's capacity**, at every level of nesting, so an overflow anywhere is caught. *Mechanism:* a
 total pure `Σ(refined non-zero quantities)` compared against a single-owner `Capacity`/`Budget`, returning a
 checked `Left Overcommit` (`fits`/`carve`/`place`). It nests — host → VM → guest, cluster → workload — and
-**re-runs** after any §4.2 `Growable` policy grows the bound. This is distinct from §4.4 (which checks
+**re-runs** after any [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) `Growable` policy grows the bound. This is distinct from [§4.4](#44-ownership-indices--single-owner-ssot-structurally) (which checks
 single-ownership, not arithmetic). **Honesty:** this technique is **irreducibly grade-(2)** — Dhall has no
 dependent arithmetic, so `Σ ≤ cap` is a *checked rejection of a constructible value*, never an absence of
 inhabitants. Any entry claiming a capacity/storage/retention sum is grade-(1) is dishonest. The model
 (`Capacity`/`Demand`/`Budget`, the `StorageBudget` and `Growable` unions, the two-ceiling Pulsar fold, and the
 declared-vs-probed cross-check) is owned by [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md);
-this doc owns only the *fold technique*. Forecloses §3.17–§3.21.
+this doc owns only the *fold technique*. Forecloses [§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)–[§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy).
 
 ### 4.7 Compatibility / topology relations by construction over a collection
 
 *Intuition:* a cluster is not a bag of settings — it is a *collection of nodes*, and "which engine may sit on
 which substrate" is a *relation* that should have no illegal pair. *Mechanism:* a `Topology` is a fold over a
 `NonEmpty Node`; only a compatible `(engine, substrate-indexed LinuxHost | hostless Provider)` pair has a
-constructor (§4.3 gating + §4.2 phantom index), and the cluster-wide check is a **total elementwise fold**
-(§4.4) that returns the full list of incompatible nodes. Because it is elementwise, a **heterogeneous
+constructor ([§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) gating + [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) phantom index), and the cluster-wide check is a **total elementwise fold**
+([§4.4](#44-ownership-indices--single-owner-ssot-structurally)) that returns the full list of incompatible nodes. Because it is elementwise, a **heterogeneous
 multi-substrate cluster stays legal** while an incompatible pairing has no inhabitant. Cardinality (`node ==
 host` list length) is grade-(1) by construction; distinctness ("one host per node, no reuse") is the part
-Dhall cannot express as a type and degrades to a grade-(2) fold. This composes §4.2/§4.3/§4.4 applied to a
+Dhall cannot express as a type and degrades to a grade-(2) fold. This composes [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)/[§4.4](#44-ownership-indices--single-owner-ssot-structurally) applied to a
 **binary relation over a collection**, and reads the single node inventory owned by
 [`substrate_doctrine.md`](./substrate_doctrine.md). The types are owned by
 [`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md); this doc owns the *relation technique*. The
-same **binary-relation-over-a-collection** shape covers the **model↔engine** relation (§3.25): a `ModelArtifact`
+same **binary-relation-over-a-collection** shape covers the **model↔engine** relation ([§3.25](#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model)): a `ModelArtifact`
 is servable only by an `EngineRuntime` present on the deployment's substrate, so an unmatched model has no
 landing engine — a grade-(2) total fold exactly like the engine↔substrate check, owned by
 [`content_addressing_doctrine.md`](./content_addressing_doctrine.md) and
 [`service_capability_doctrine.md`](./service_capability_doctrine.md). And the rke2 **server/agent** inventory
-(§3.24, §3.16) is this same collection shape with a *closed-cardinality* server set (`Rke2Servers`, grade-(1))
+([§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain), [§3.16](#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused)) is this same collection shape with a *closed-cardinality* server set (`Rke2Servers`, grade-(1))
 plus a variable `agents` list whose host-distinctness runs over `servers ∪ agents` (a grade-(2) fold).
-Forecloses §3.13–§3.16, §3.24, and the model↔engine relation of §3.25.
+Forecloses [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.16](#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused), [§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain), and the model↔engine relation of [§3.25](#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model).
 
 ---
 
 ## 5. Coverage matrix — which technique forecloses which illegal state
 
-| Illegal state (§3) | Technique(s) (§4) | Owning doctrine |
+| Illegal state ([§3](#3-the-catalog--states-a-valid-spec-cannot-represent)) | Technique(s) ([§4](#4-the-typing-techniques)) | Owning doctrine |
 |---|---|---|
 | 3.1 Bad / illegal durable storage | 4.1 binding-by-construction + refined sizes | [storage_lifecycle](./storage_lifecycle_doctrine.md) |
 | 3.2 PVCs that don't bind PVs | 4.1 binding-by-construction | [storage_lifecycle](./storage_lifecycle_doctrine.md) |
-| 3.3 Misconfigured gateway | 4.3 GADT route-from-service + 4.5 totality | [platform_services §9](./platform_services_doctrine.md) |
-| 3.4 Wrong-IP DNS | 4.5 content-address totality | [pulumi_iac](./pulumi_iac_doctrine.md), [platform_services §9](./platform_services_doctrine.md) |
+| 3.3 Misconfigured gateway | 4.3 GADT route-from-service + 4.5 totality | [platform_services §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) |
+| 3.4 Wrong-IP DNS | 4.5 content-address totality | [pulumi_iac](./pulumi_iac_doctrine.md), [platform_services §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) |
 | 3.5 Undeployable taints/tolerations/affinity | 4.2 capability tags + 4.4 node-inventory existence fold | [substrate](./substrate_doctrine.md), [platform_services](./platform_services_doctrine.md) |
 | 3.6 Blocking NetworkPolicy | 4.4 dependency-graph owner + 4.3 consumer handle | [platform_services](./platform_services_doctrine.md) |
-| 3.7 Accidental insecure ingress | 4.2 `ExposeToWild` capability + 4.3 endpoint indices | [platform_services §9](./platform_services_doctrine.md) |
+| 3.7 Accidental insecure ingress | 4.2 `ExposeToWild` capability + 4.3 endpoint indices | [platform_services §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) |
 | 3.8 Cross-tenant refs / literal secrets | 4.2 phantom tenant tags + capabilities | [vault_pki](./vault_pki_doctrine.md) |
-| 3.9 Plaintext spec at rest | 4.5 envelope handle (+ runtime decrypt-in-process) | [vault_pki §4](./vault_pki_doctrine.md), [pulumi_iac §2](./pulumi_iac_doctrine.md) |
-| 3.10 Child spec beyond its subtree | 4.2 subtree/tenant tags + 4.4 ownership indices | [cluster_lifecycle §3](./cluster_lifecycle_doctrine.md), [dsl_doctrine](./dsl_doctrine.md), [vault_pki §6](./vault_pki_doctrine.md) |
-| 3.11 Unsafe workload (no limits / securityContext) | 4.1 required-field-by-construction | [manifest_generation](./manifest_generation_doctrine.md), [platform_services §10](./platform_services_doctrine.md) |
+| 3.9 Plaintext spec at rest | 4.5 envelope handle (+ runtime decrypt-in-process) | [vault_pki §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init), [pulumi_iac §2](./pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio) |
+| 3.10 Child spec beyond its subtree | 4.2 subtree/tenant tags + 4.4 ownership indices | [cluster_lifecycle §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest), [dsl_doctrine](./dsl_doctrine.md), [vault_pki §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes) |
+| 3.11 Unsafe workload (no limits / securityContext) | 4.1 required-field-by-construction | [manifest_generation](./manifest_generation_doctrine.md), [platform_services §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram) |
 | 3.12 App names a product not a capability | 4.2 closed capability union | [service_capability](./service_capability_doctrine.md) |
 | 3.13 Engine incompatible w/ substrates; managed provider first-class | 4.7 relation-over-collection + 4.2 closed union + 4.4 node inventory | [cluster_topology](./cluster_topology_doctrine.md) |
-| 3.14 rke2/kind on a host with no Linux node / no VM | 4.3 `LinuxHost` witness | [cluster_topology](./cluster_topology_doctrine.md), [substrate §4](./substrate_doctrine.md) |
+| 3.14 rke2/kind on a host with no Linux node / no VM | 4.3 `LinuxHost` witness | [cluster_topology](./cluster_topology_doctrine.md), [substrate §4](./substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux) |
 | 3.15 Multi-node kind not on a single host | 4.1 one `host` field | [cluster_topology](./cluster_topology_doctrine.md) |
 | 3.16 Multi-node rke2 w/ fewer hosts than nodes / host reused | 4.1 `node==host` + 4.4 distinctness fold | [cluster_topology](./cluster_topology_doctrine.md) |
 | 3.17 Over-committed host / VM / cluster | 4.6 capacity total fold | [resource_capacity](./resource_capacity_doctrine.md) |
-| 3.18 Unbounded storage anywhere | 4.2 closed `StorageBacking` + 4.6 aggregate | [storage_lifecycle §5.2](./storage_lifecycle_doctrine.md), [resource_capacity](./resource_capacity_doctrine.md) |
+| 3.18 Unbounded storage anywhere | 4.2 closed `StorageBacking` + 4.6 aggregate | [storage_lifecycle §5.2](./storage_lifecycle_doctrine.md#52-the-storage-backing-is-bounded--the-closed-storagebacking-union), [resource_capacity](./resource_capacity_doctrine.md) |
 | 3.19 App consuming more storage than backing (MinIO & Pulsar) | 4.6 cumulative fold + 4.2 Growable gate | [resource_capacity](./resource_capacity_doctrine.md), [content_addressing](./content_addressing_doctrine.md), [pulsar_client](./pulsar_client_doctrine.md) |
-| 3.20 Pulsar topic w/o bounded/tiered/retained policy | 4.1 mandatory RetentionPolicy + size offload + 4.6 room-fit | [pulsar_client §6](./pulsar_client_doctrine.md), [resource_capacity](./resource_capacity_doctrine.md) |
+| 3.20 Pulsar topic w/o bounded/tiered/retained policy | 4.1 mandatory RetentionPolicy + size offload + 4.6 room-fit | [pulsar_client §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra), [resource_capacity](./resource_capacity_doctrine.md) |
 | 3.21 Capacity growth w/o an amoebius scaling policy | 4.2 closed `Growable` union | [resource_capacity](./resource_capacity_doctrine.md) |
-| 3.22 Hand-authored (un-derived) toleration | 4.4 node-inventory owner + 4.3 derived handle | [substrate](./substrate_doctrine.md), [platform_services §9](./platform_services_doctrine.md) |
-| 3.23 Non-CBOR Pulsar payload | 4.2 closed codec + 4.3 constructor-gating | [pulsar_client §3.1](./pulsar_client_doctrine.md), [content_addressing](./content_addressing_doctrine.md) |
+| 3.22 Hand-authored (un-derived) toleration | 4.4 node-inventory owner + 4.3 derived handle | [substrate](./substrate_doctrine.md), [platform_services §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) |
+| 3.23 Non-CBOR Pulsar payload | 4.2 closed codec + 4.3 constructor-gating | [pulsar_client §3.1](./pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor), [content_addressing](./content_addressing_doctrine.md) |
 | 3.24 Even/zero-server rke2 control plane (no etcd quorum) | 4.2 closed `Rke2Servers` union (no even/zero arm) | [cluster_topology](./cluster_topology_doctrine.md) |
 | 3.25 ML asset fetched/built at startup; unready or unlanded model | 4.2 closed `EngineRuntime` (no `Url` arm) + 4.3 `.ready`-gated `ArtifactRef` + 4.7 model↔engine relation | [content_addressing](./content_addressing_doctrine.md), [service_capability](./service_capability_doctrine.md) |
 | 3.26 Unverified environment promotion (promote→prod) | 4.3 evidence-gated `PromotionGate` handle | [release_lifecycle](./release_lifecycle_doctrine.md) |
@@ -587,39 +587,39 @@ Forecloses §3.13–§3.16, §3.24, and the model↔engine relation of §3.25.
 ## 6. Three grades of foreclosure (and the honesty they force)
 
 Not every entry above is foreclosed the *same* way, and saying otherwise would violate the
-proven/tested/assumed discipline ([`documentation_standards.md` §6](../documentation_standards.md)). There
+proven/tested/assumed discipline ([`documentation_standards.md` §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)). There
 are three grades, and a conformant claim names which one it is reaching:
 
 1. **Uninhabitable by type.** The illegal value has *no constructor* — the strongest grade. A cross-tenant
-   reference (§3.8) and a bare PVC (§3.2) are meant to live here. The "proof" is type-inhabitance, checked
+   reference ([§3.8](#38-cross-tenant-references-and-literal-secrets)) and a bare PVC ([§3.2](#32-pvcs-that-dont-bind-pvs)) are meant to live here. The "proof" is type-inhabitance, checked
    by Dhall + GHC at the spec/code layer.
 2. **Rejected by total decode-time check.** A looser type *can* hold the value, but a **total** smart
-   constructor or fold rejects it during decode (e.g. a value-level ownership double-claim, §4.4; a size
+   constructor or fold rejects it during decode (e.g. a value-level ownership double-claim, [§4.4](#44-ownership-indices--single-owner-ssot-structurally); a size
    that fails its refinement). This is still a *spec-layer* guarantee — the spec never reaches the
    interpreter — but it is a *checked rejection*, not an absence of inhabitants. Call it that.
 3. **Enforced only at reconcile/runtime.** Some invariants (does the LB actually come up? did the pod
    actually schedule? did two clusters converge after a partition?) cannot be settled by inspecting the
    spec at all. These are **not** in this catalog's promise; their verification is owned by
-   [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) and the testing doctrine (§2).
+   [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) and the testing doctrine ([§2](#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)).
 
 Worked example of the discipline: **every container declares cpu/ram**
-([`platform_services_doctrine.md` §10](./platform_services_doctrine.md)). As specified, a workload value
+([`platform_services_doctrine.md` §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)). As specified, a workload value
 *requires* a `Resources` field whose cpu and ram are refined non-zero quantities — grade (1)/(2): a
 container with no resources is unrepresentable / rejected at decode. What the catalog does **not** claim is
 that the *running* pod's cgroup limits are honored by the kernel — that is grade (3), and it is not ours to
 assert. Stating the grade is the whole point: it is the difference between "illegal state is impossible" as
 a slogan and as a defensible boundary.
 
-Second worked example, the one the §3.13–§3.22 block turns on: **capacity sums are the canonical grade-(2)
-case, and saying otherwise is dishonest.** `Σ demand ≤ capacity` (§3.17), `Σ(PV caps) ≤ backing` (§3.18),
-the store-size fold (§3.19), the Pulsar room-fit (§3.20), and the rke2 host-distinctness check (§3.16) are
+Second worked example, the one the [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](#322-a-hand-authored-un-derived-toleration) block turns on: **capacity sums are the canonical grade-(2)
+case, and saying otherwise is dishonest.** `Σ demand ≤ capacity` ([§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)), `Σ(PV caps) ≤ backing` ([§3.18](#318-unbounded-storage-anywhere)),
+the store-size fold ([§3.19](#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)), the Pulsar room-fit ([§3.20](#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)), and the rke2 host-distinctness check ([§3.16](#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused)) are
 all **total decode-time rejections of constructible values** — because capacity is a *value*, not a type
-index, and Dhall has no dependent arithmetic to make `Σ ≤ cap` a statement about inhabitance (§4.6). By
-contrast, the grade-(1) "no constructor" examples are the topology *witnesses* (§3.14 `LinuxHost`, §3.15
-one-host `Kind`), the *derived* toleration (§3.22), the mandatory-shape unions (§3.20 non-optional
-`RetentionPolicy` + size offload, §3.21 `Growable` with no unbounded arm), and the CBOR-only payload codec
-(§3.23, whose *consume*-side decode is a grade-(2) total check like CRC32C). A single catalog entry may mix
-grades (§3.13, §3.16, §3.18, §3.20): it is then graded to its **weaker floor**, and the split is stated in
+index, and Dhall has no dependent arithmetic to make `Σ ≤ cap` a statement about inhabitance ([§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked)). By
+contrast, the grade-(1) "no constructor" examples are the topology *witnesses* ([§3.14](#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm) `LinuxHost`, [§3.15](#315-a-multi-node-kind-cluster-not-on-a-single-linux-host)
+one-host `Kind`), the *derived* toleration ([§3.22](#322-a-hand-authored-un-derived-toleration)), the mandatory-shape unions ([§3.20](#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle) non-optional
+`RetentionPolicy` + size offload, [§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy) `Growable` with no unbounded arm), and the CBOR-only payload codec
+([§3.23](#323-a-non-cbor-pulsar-payload), whose *consume*-side decode is a grade-(2) total check like CRC32C). A single catalog entry may mix
+grades ([§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class), [§3.16](#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused), [§3.18](#318-unbounded-storage-anywhere), [§3.20](#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)): it is then graded to its **weaker floor**, and the split is stated in
 the entry. And the physical residues — the host actually capping bytes/cgroups, the broker actually
 offloading to S3, the pod actually scheduling, the Lima/WSL2 VM actually interposing, the autoscaler actually
 growing capacity, and the cloud honoring the quota — are always grade-(3), owned by
@@ -637,8 +637,8 @@ growing capacity, and the cloud honoring the quota — are always grade-(3), own
 This document is normative catalog-and-technique doctrine only. Delivery sequencing, completion status, and
 validation gates are owned by [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md): the
 DSL and its illegal-state-unrepresentable contract land in **Phase 3** (a deliberately-illegal `.dhall` that
-fails to type-check is part of that phase's acceptance gate). The §3.13–§3.22 capacity / topology /
-bounded-storage block and its §4.6/§4.7 techniques are the Phase-3 gate's added negative fixtures (with the
+fails to type-check is part of that phase's acceptance gate). The [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](#322-a-hand-authored-un-derived-toleration) capacity / topology /
+bounded-storage block and its [§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked)/[§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) techniques are the Phase-3 gate's added negative fixtures (with the
 multi-substrate and managed-EKS *positive* fixtures); their **runtime** residues distribute to the phases
 that own each substrate — the Pulsar two-ceiling offload in **Phase 4**, the Lima `LinuxHost` witness +
 host/VM capacity cross-check in **Phase 7**, live multi-node rke2/kind topology in **Phase 9**, and the
@@ -655,11 +655,11 @@ testing (Phase 11) phases. This doc never maintains a competing status ledger.
 - [Platform Services Doctrine](./platform_services_doctrine.md) — gateway / ingress / NetworkPolicy / cpu-ram
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — `SecretRef`-by-name, parent→child injection, tenant trust
 - [Substrate Doctrine](./substrate_doctrine.md) — substrate/arch capabilities for placement, node inventory + taints
-- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the §4.6 capacity fold (§3.17–§3.21)
-- [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the §4.7 compute-engine/topology relation (§3.13–§3.16)
-- [Content Addressing Doctrine](./content_addressing_doctrine.md) — pointers→manifests→blobs totality, `EngineRuntime` / `ModelArtifact` tiers (§3.25)
-- [Service Capability Doctrine](./service_capability_doctrine.md) — the engine as a substrate-selected capability (§3.25)
-- [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — the §3.26 `PromotionGate` (promote→prod unrepresentable)
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the [§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked) capacity fold ([§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)–[§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy))
+- [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) compute-engine/topology relation ([§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.16](#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused))
+- [Content Addressing Doctrine](./content_addressing_doctrine.md) — pointers→manifests→blobs totality, `EngineRuntime` / `ModelArtifact` tiers ([§3.25](#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model))
+- [Service Capability Doctrine](./service_capability_doctrine.md) — the engine as a substrate-selected capability ([§3.25](#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model))
+- [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — the [§3.26](#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) `PromotionGate` (promote→prod unrepresentable)
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — route53 / zerossl name→address binding
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md) — the host-local NodePort carve-out
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md) — the runtime-enforcement proof (the honest limit)

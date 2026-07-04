@@ -30,20 +30,20 @@ Both transports are deleted. One native client replaces both. The payoff is conc
 - **No per-publish connection churn.** A native producer is a long-lived session that sends framed binary
   messages; infernix's "one WebSocket per message" pattern (with its repeated HTTP upgrade and handshake)
   disappears.
-- **No base64 inflation.** The native protocol carries raw payload bytes with a CRC32C checksum (§3); the
+- **No base64 inflation.** The native protocol carries raw payload bytes with a CRC32C checksum ([§3](#3-the-native-binary-protocol)); the
   WebSocket path inflated every payload ~33% into base64 inside a JSON object.
 - **No second runtime.** jitML's Node subprocess and its IPC are gone; the client is plain Haskell on the
   pinned toolchain.
 - **`sequence_id` is a first-class protocol field**, not a smuggled URL parameter — which makes the dedup
-  contract in §6 clean rather than a hack.
+  contract in [§6](#6-the-declarative-topology-algebra) clean rather than a hack.
 
-> **Honesty (per [documentation_standards.md §6](../documentation_standards.md)).** "Performance via the
+> **Honesty (per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).** "Performance via the
 > native protocol" is the **design rationale** — base64 elimination, persistent producers, no process hop —
 > not a benchmarked amoebius result. amoebius has not yet built Phase 4. The WebSocket costs above are read
 > off the infernix/jitML source as *sibling evidence*; the amoebius speedup is expected, not measured.
 
 The no-WebSockets rule is a **locked invariant**, recorded as a standard-service fact in
-[platform_services_doctrine.md §6](./platform_services_doctrine.md): lookup, produce, consume, subscribe,
+[platform_services_doctrine.md §6](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox): lookup, produce, consume, subscribe,
 and seek all ride the native protocol or they do not happen.
 
 ---
@@ -52,24 +52,24 @@ and seek all ride the native protocol or they do not happen.
 
 This doc is the SSoT for **the client and its delivery contract**. It owns:
 
-1. The `amoebius-pulsar` library: the native binary-protocol implementation and the supernova fork (§3–§4).
-2. The capability surface: lookup / produce / consume / subscribe / seek (§5).
+1. The `amoebius-pulsar` library: the native binary-protocol implementation and the supernova fork ([§3](#3-the-native-binary-protocol)–[§4](#4-forked-from-supernova--what-we-inherit-and-what-we-build)).
+2. The capability surface: lookup / produce / consume / subscribe / seek ([§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)).
 3. The **declarative topology algebra**: how topic names are *derived*, never written, and the
-   one-sided-link validation that rejects an unroutable graph (§6).
+   one-sided-link validation that rejects an unroutable graph ([§6](#6-the-declarative-topology-algebra)).
 4. The **topic storage lifecycle**: mandatory retention, a *size-triggered* S3 offload, and the two-ceiling
-   storage budget that keeps the hot tier from ever overflowing (§6.1).
-5. The **at-least-once + broker-side dedup** delivery contract (§7).
+   storage budget that keeps the hot tier from ever overflowing ([§6.1](#61-topic-storage-lifecycle-bounded-tiered-retained--and-the-hot-tier-never-overflows)).
+5. The **at-least-once + broker-side dedup** delivery contract ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)).
 6. The **payload codec**: application message payloads are **exclusively CBOR** (canonical where
-   content-addressed), §3.1.
+   content-addressed), [§3.1](#31-payloads-are-exclusively-cbor).
 
 It deliberately does **not** own, and only references:
 
 | Concern | Owner |
 |---------|-------|
-| What a payload *references* (raw content-addressed blobs, the manifest CBOR shape) — the *encoding* of the payload envelope is CBOR, owned here (§3.1) | [content_addressing_doctrine.md](./content_addressing_doctrine.md) |
+| What a payload *references* (raw content-addressed blobs, the manifest CBOR shape) — the *encoding* of the payload envelope is CBOR, owned here ([§3.1](#31-payloads-are-exclusively-cbor)) | [content_addressing_doctrine.md](./content_addressing_doctrine.md) |
 | *Who* runs producers/consumers, topic-lifecycle coordinators, leadership election | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
 | *How* a host daemon reaches the broker (Pulsar peer over host-only NodePort, no mTLS) | [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md) |
-| That Pulsar is a standard HA service on every cluster | [platform_services_doctrine.md §6](./platform_services_doctrine.md) |
+| That Pulsar is a standard HA service on every cluster | [platform_services_doctrine.md §6](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox) |
 | The app-spec surface that *declares* topic lifecycles | [dsl_doctrine.md](./dsl_doctrine.md) |
 | Intra-cluster HA correctness (delegated to brokers/bookies) | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
 
@@ -104,7 +104,7 @@ Implementation rules for `amoebius-pulsar`:
   decode error, never a silent drop.
 - **One persistent TCP session per broker**, multiplexing producers and consumers by `producer_id` /
   `consumer_id` / `request_id`, exactly as the protocol intends. This is the structural reason the
-  per-publish-connection cost of the old WebSocket path vanishes (§1).
+  per-publish-connection cost of the old WebSocket path vanishes ([§1](#1-one-client-one-wire-no-websockets)).
 - **Toolchain & discovery.** The fork builds on **GHC 9.12.4** (the repo-wide pin). Any code-generation
   tool it needs (e.g. `protoc` for `proto-lens`) is discovered **lazily through the substrate's package
   manager and invoked by full path** — there is **no `PATH` lookup and no environment variable** anywhere
@@ -113,7 +113,7 @@ Implementation rules for `amoebius-pulsar`:
   conform to it.
 
 ```mermaid
-flowchart LR
+flowchart TD
   app[amoebius caller] -->|connect over TCP| handshake[CONNECT then CONNECTED handshake]
   handshake -->|LOOKUP_TOPIC| lookup[Broker resolves topic owner]
   lookup -->|Connect or Redirect| owner[Owning broker session]
@@ -124,12 +124,12 @@ flowchart LR
 
 ### 3.1 Payloads are exclusively CBOR
 
-Intuition: the frame (§3) has two independent layers, and this section is the SSoT for the *inner* one.
+Intuition: the frame ([§3](#3-the-native-binary-protocol)) has two independent layers, and this section is the SSoT for the *inner* one.
 The **command/metadata layer** is protobuf — that is Pulsar's own wire format (`BaseCommand`, message
 metadata, via `proto-lens`), and it is not amoebius's to change. The **application payload** — the raw
 `payload` tail after the metadata — is amoebius's, and it is **exclusively CBOR**. There is no JSON, no
 base64, no protobuf, and no untyped `ByteString` application payload: a Pulsar message body that is not CBOR
-is **unrepresentable** ([illegal_state_catalog.md §3.23](./illegal_state_catalog.md)).
+is **unrepresentable** ([illegal_state_catalog.md §3.23](./illegal_state_catalog.md#323-a-non-cbor-pulsar-payload)).
 
 - **One codec, one body format.** A payload is produced only through a typed codec — `produce` takes a
   `Serialise`-constrained value (equivalently, a `CborPayload` newtype whose sole constructor is
@@ -138,16 +138,16 @@ is **unrepresentable** ([illegal_state_catalog.md §3.23](./illegal_state_catalo
   ([illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-grades-of-foreclosure-and-the-honesty-they-force)).
   Consume is the mirror: `Serialise a => … -> Either DecodeError a`, a **total, fail-fast** decode — a
   corrupt or mistyped body is a structured error, never a silent misread, exactly the posture the mandatory
-  CRC32C (§3) already takes on the frame.
+  CRC32C ([§3](#3-the-native-binary-protocol)) already takes on the frame.
 - **Canonical where content-addressed; fast elsewhere.** amoebius reuses — it does **not** restate — the
   canonical-CBOR discipline the content store already owns: the `encodeManifestCbor` canonical encoder
-  ([content_addressing_doctrine.md §2.1](./content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers))
+  ([content_addressing_doctrine.md §2.1](./content_addressing_doctrine.md#21-three-object-classes-two-write-protocols))
   sorts components so equal logical content yields byte-identical CBOR. A payload that is **content-addressed
   or hashed** (a result body, a manifest-SHA-bearing envelope) is encoded **canonically**; an ephemeral
   command/event is not required to be, because dedup keys on `(producer_name, sequence_id)`, never on payload
-  bytes (§7), and determinism is scoped to the durable body only, never to broker-assigned ids/timestamps
-  ([content_addressing_doctrine.md §5](./content_addressing_doctrine.md)).
-- **Big data is a reference, still CBOR.** Frames are ≤ 5 MiB (§3); a payload that must carry a large
+  bytes ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)), and determinism is scoped to the durable body only, never to broker-assigned ids/timestamps
+  ([content_addressing_doctrine.md §5](./content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)).
+- **Big data is a reference, still CBOR.** Frames are ≤ 5 MiB ([§3](#3-the-native-binary-protocol)); a payload that must carry a large
   artifact carries the artifact's **manifest SHA** — a content-address reference — as a field of the CBOR
   envelope, never the raw blob inline. The *reference* is CBOR (here); the *blob bytes* and the *manifest
   CBOR shape* stay owned by [content_addressing_doctrine.md](./content_addressing_doctrine.md) (blobs are raw
@@ -155,20 +155,20 @@ is **unrepresentable** ([illegal_state_catalog.md §3.23](./illegal_state_catalo
 - **The broker sees opaque bytes.** amoebius owns the codec; it does **not** use Pulsar's schema registry.
   The Pulsar message schema is `BYTES`, and the CBOR body is opaque to the broker — so the codec, not a
   server-side schema, is the single source of truth for the wire body (the same "one client, one wire"
-  posture as §1).
+  posture as [§1](#1-one-client-one-wire-no-websockets)).
 - **Why CBOR.** It is a dense, self-describing binary format — *functional* in the sense the vision wants
   (no external `.proto` schema to keep in sync, unlike the protocol layer), it eliminates the ~33% base64
-  inflation of the retired WebSocket path (§1), and it is **already the project's chosen binary format** for
+  inflation of the retired WebSocket path ([§1](#1-one-client-one-wire-no-websockets)), and it is **already the project's chosen binary format** for
   content-addressed manifests — so payloads and manifests share one format and one canonical encoder rather
   than introducing a second.
 - **Toolchain.** The codec is built on **`serialise`** (the `Serialise` typeclass) over **`cborg`** (whose
   `Codec.CBOR.Write` sorted-map writer gives canonical encoding), on the repo-wide GHC 9.12.4 pin; the
   dependency is carried in the `amoebius-pulsar` cabal package and registered in the dependency-management
   surface tracked by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Any codegen tool
-  is discovered lazily by full path (no env, no `PATH`), exactly as `protoc` is (§3).
+  is discovered lazily by full path (no env, no `PATH`), exactly as `protoc` is ([§3](#3-the-native-binary-protocol)).
 
 ```mermaid
-flowchart LR
+flowchart TD
   value[Typed workflow value, Serialise a] -->|encodeCbor, canonical if content-addressed| body[CBOR payload body]
   body -->|becomes the raw payload tail| frame[Frame: protobuf command plus metadata, CRC32C, CBOR payload]
   frame -->|SEND| broker[Broker sees opaque BYTES]
@@ -178,7 +178,7 @@ flowchart LR
 
 > **Honesty.** The CBOR-payload rule is Phase-4 design intent, not a tested amoebius result. Canonical CBOR
 > is *proven in the sibling jitML content store* (`encodeManifestCbor`) — that is sibling evidence, not
-> amoebius proof ([documentation_standards.md §6](../documentation_standards.md)). The grade-(1) claim is the
+> amoebius proof ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)). The grade-(1) claim is the
 > *produce* surface having no non-CBOR constructor; that a *received* body decodes is the same total-check /
 > runtime residue the CRC32C guarantee already carries, not a stronger claim.
 
@@ -199,12 +199,12 @@ Forking — rather than depending on the published package — is the honest cho
    production concerns (robust reconnection, partitioned topics, dedup wiring, the topology algebra) are
    amoebius's to add.
 2. **Toolchain pinning.** Supernova's dependency bounds predate GHC 9.12.4; the fork carries the bumps and
-   the pin (§3).
-3. **Layering.** The topology algebra (§6) and the dedup contract (§7) are amoebius doctrine, not generic
+   the pin ([§3](#3-the-native-binary-protocol)).
+3. **Layering.** The topology algebra ([§6](#6-the-declarative-topology-algebra)) and the dedup contract ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)) are amoebius doctrine, not generic
    client features; they live in the fork, above supernova's transport core.
 
 > **Honesty.** Treat supernova as a *starting point with sibling provenance*, not a proven foundation.
-> Every capability in §5 is "supernova demonstrates it" or "the protocol provides it" — neither is an
+> Every capability in [§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek) is "supernova demonstrates it" or "the protocol provides it" — neither is an
 > amoebius test result. Hardening, reconnection semantics, and the dedup proof are Phase 4 work tracked in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
@@ -222,7 +222,7 @@ These five are the whole client. Each maps to a protocol exchange and to a daemo
 - **Produce.** `PRODUCER` → `PRODUCER_SUCCESS` binds a `producer_id` and a `producer_name` (client-chosen
   or broker-generated). Each `SEND` carries that `producer_id` and a `sequence_id`; the broker replies
   `SEND_RECEIPT` (with the assigned `message_id`) or `SEND_ERROR`. The `(producer_name, sequence_id)` pair
-  is the dedup key (§7).
+  is the dedup key ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)).
 - **Consume.** `SUBSCRIBE` binds a `consumer_id` and a subscription. Consumers grant credit with `FLOW`
   permits; the broker pushes `MESSAGE` frames up to the granted permits; the consumer replies `ACK`
   (confirmed by `ACK_RESPONSE`). Flow control is the consumer's backpressure knob.
@@ -297,7 +297,7 @@ The DSL *surface* that lets an app declare its topic lifecycles is owned by
 [dsl_doctrine.md](./dsl_doctrine.md); the **algebra and its validation** are owned here.
 
 ```mermaid
-flowchart LR
+flowchart TD
   descriptor[Typed RouteEntry descriptor] -->|topicFor derivation| topics[Derived topic set]
   descriptor -->|validateTopology| check[One-sided / duplicate / empty-lane check]
   check -->|Right unit| reconcile[Coordinator reconciles topics]
@@ -312,10 +312,10 @@ ledgers to S3 and does **not** free BookKeeper until retention deletes them (the
 currently-open ledger can never be offloaded. So a time-only offload does not bound occupancy: if ingest ×
 offload-lag exceeds the bookie disk, BookKeeper fills, bookies go read-only, and the topic — often the
 broker — becomes **unavailable**. amoebius makes that state unrepresentable
-([illegal_state_catalog.md §3.20](./illegal_state_catalog.md)) by making a topic's lifecycle a **pure typed
+([illegal_state_catalog.md §3.20](./illegal_state_catalog.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)) by making a topic's lifecycle a **pure typed
 policy**, not an operator afterthought. This is the SSoT for that policy; the DSL *surface* that carries it is
 owned by [dsl_doctrine.md](./dsl_doctrine.md), and the two-ceiling *arithmetic* by
-[resource_capacity_doctrine.md §7](./resource_capacity_doctrine.md).
+[resource_capacity_doctrine.md §7](./resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total).
 
 Every topic carries three mandatory, non-optional fields and folds against **two** ceilings:
 
@@ -329,11 +329,11 @@ Every topic carries three mandatory, non-optional fields and folds against **two
 - **The hot-tier fit (availability-critical).** The per-topic hot-tier cap **plus headroom** — the open
   ledger, in-flight ingest during offload, and the deletion lag — folds against the BookKeeper
   `StorageBacking`: `Σ(hot caps + headroom) ≤ bookie disk`. A hot-tier overflow is a grade-2 decode-time
-  rejection ([resource_capacity_doctrine.md §7](./resource_capacity_doctrine.md)).
+  rejection ([resource_capacity_doctrine.md §7](./resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total)).
 - **The durable-total fit.** The total retained bytes fold against the selected offload target's ceiling — a
   provider-S3 quota ([pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md)) for cloud clusters, or the MinIO
   content store ([content_addressing_doctrine.md](./content_addressing_doctrine.md)) for host-bounded ones
-  — the `StorageBacking` arm ([storage_lifecycle_doctrine.md §5.2](./storage_lifecycle_doctrine.md)) selecting
+  — the `StorageBacking` arm ([storage_lifecycle_doctrine.md §5.2](./storage_lifecycle_doctrine.md#52-the-storage-backing-is-bounded--the-closed-storagebacking-union)) selecting
   which owner's number the fold reads.
 - **A mandatory backlog quota (runtime fail-safe).** A burst, or a stalled/S3-unreachable offload, can still
   race the cap at runtime — no spec-layer check prevents that. So the policy carries a mandatory backlog
@@ -342,10 +342,10 @@ Every topic carries three mandatory, non-optional fields and folds against **two
   back-pressure actually holding is grade-3, owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md).
 
 The retention/offload/backlog policy is enabled on the namespace as a reconcile step, the same shape as the
-broker-side dedup namespace policy (§7) — a pure typed value the coordinator reconciles, not a hand-set knob.
+broker-side dedup namespace policy ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)) — a pure typed value the coordinator reconciles, not a hand-set knob.
 
 ```mermaid
-flowchart LR
+flowchart TD
   produce[Producer writes to a topic] -->|hot tier| bk[BookKeeper closed ledgers, bounded by size high-water mark]
   bk -->|size trigger, optionally sooner by time| offload[Offload closed ledgers to S3 target]
   offload -->|retention deletes after deletion lag| free[BookKeeper space reclaimed]
@@ -385,7 +385,7 @@ pairs and **rejects duplicates** at ingest. The contract has two halves:
 
 Broker-side is the **robust default** rather than client-side memoization because it survives the things
 that break client memory: a restarted producer replica, a second coordinator elected after failover, a
-consumer rebuild from seek (§5). The dedup state is the broker's, so it outlives any single process.
+consumer rebuild from seek ([§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)). The dedup state is the broker's, so it outlives any single process.
 
 ### The native protocol makes this clean
 
@@ -403,7 +403,7 @@ generated request id, paired with a request-scoped producer name so unordered ha
 > **Honesty.** infernix's source records that its dedup duplicate-collapse was validated against a real
 > broker (its Sprint 7.14 chaos validation) — but **over WebSockets, in infernix**. That is *sibling
 > evidence*, not an amoebius result: amoebius re-implements the same contract over the native protocol and
-> has not yet run it. Per [documentation_standards.md §6](../documentation_standards.md) and
+> has not yet run it. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and
 > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), read this section as the specified contract,
 > not a proven amoebius behaviour.
 
@@ -412,7 +412,7 @@ generated request id, paired with a request-scoped producer name so unordered ha
 amoebius does **not** re-prove Pulsar's intra-cluster HA. Synchronous broker/bookie replication is Pulsar's
 own consensus problem and is delegated to it; the only proof obligation that concentrates on amoebius is the
 **asynchronous cross-cluster** boundary (the "Second Axis"), owned by
-[chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Seek (§5) and at-least-once + dedup are the
+[chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Seek ([§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)) and at-least-once + dedup are the
 client-side primitives that the cross-cluster reasoning is built on, but the durable-replication correctness
 itself is not this doc's claim.
 
@@ -426,9 +426,9 @@ The whole point of `amoebius-pulsar` is collapse: two transports, two runtimes, 
 |-----|----------------------------|---------|
 | infernix Pulsar I/O | direct in-process **WebSocket** gateway, one producer per publish, base64-in-JSON payloads (`Infernix.Runtime.Pulsar`) | `amoebius-pulsar` native protocol |
 | jitML Pulsar I/O | **Node.js subprocess** owning the WebSocket client | `amoebius-pulsar` native protocol |
-| **message payload encoding** | **base64-in-JSON** envelope (infernix), ~33% inflation | **exclusively CBOR** — a dense binary body via a typed codec, canonical where content-addressed (§3.1) |
-| jitML topic strings | typed `RouteEntry` + `validateTopology` (`JitML.Coordinator.Topology`) | the topology algebra (§6), promoted into the client doctrine |
-| infernix dedup wiring | namespace dedup policy + `(producer_name, sequence_id)` + `initialSequenceId` URL hack | broker-side dedup with `sequence_id` as a native field (§7) |
+| **message payload encoding** | **base64-in-JSON** envelope (infernix), ~33% inflation | **exclusively CBOR** — a dense binary body via a typed codec, canonical where content-addressed ([§3.1](#31-payloads-are-exclusively-cbor)) |
+| jitML topic strings | typed `RouteEntry` + `validateTopology` (`JitML.Coordinator.Topology`) | the topology algebra ([§6](#6-the-declarative-topology-algebra)), promoted into the client doctrine |
+| infernix dedup wiring | namespace dedup policy + `(producer_name, sequence_id)` + `initialSequenceId` URL hack | broker-side dedup with `sequence_id` as a native field ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)) |
 
 infernix and jitML remain **ML extension libraries**; they stop shipping their own transports and consume
 `amoebius-pulsar` instead — one subsystem at a time, per the Phase 5 migration in

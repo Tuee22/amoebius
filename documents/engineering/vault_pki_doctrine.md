@@ -22,18 +22,18 @@ password at the root that the whole forest's liveness depends on.
 This document owns six things:
 
 1. **Vault as the fail-closed secrets root** — the sole backend for every secret, key, and certificate;
-   sealed means *bricked*, never *degraded* (§2).
+   sealed means *bricked*, never *degraded* ([§2](#2-vault-is-the-fail-closed-secrets-root)).
 2. **The SecretRef contract** — the typed *reference* the DSL carries, and the validator that rejects a
-   literal secret in a production `.dhall` (§3).
+   literal secret in a production `.dhall` ([§3](#3-the-secretref-contract-a-name-never-a-value)).
 3. **Fail-closed Vault init that follows readiness** — *init Vault, then give it its `.dhall`*,
-   init-once / unseal-on-rebuild (§4).
+   init-once / unseal-on-rebuild ([§4](#4-init-follows-readiness-fail-closed-vault-init)).
 4. **The root cluster's single-node, password-encrypted unseal** — *root single-node "prodbox"
-   behaviour, init to password-encrypted Vault keys*, human-on-init (§5).
+   behaviour, init to password-encrypted Vault keys*, human-on-init ([§5](#5-the-root-cluster-single-node-password-encrypted-unseal)).
 5. **The two parent/child unseal modes and parent secret injection** — self-unseal via a k8s secret
    **or** parent-owns-the-secret-and-the-child-requests-an-unlock, and *parents directly inject the
-   secrets into the child's Vault* (§6, §7).
+   secrets into the child's Vault* ([§6](#6-parentchild-unseal-two-sanctioned-modes), [§7](#7-parent-injects-secrets-into-the-childs-vault)).
 6. **The root-owned PKI trust anchor** — the root cluster owns the self-signed anchor *for everything
-   else*; trust flows down the tree, never sideways (§8).
+   else*; trust flows down the tree, never sideways ([§8](#8-the-root-cluster-owns-the-pki-trust-anchor)).
 
 It does **not** own: the DSL-surface rule that secrets are names not values
 ([dsl_doctrine.md §6](./dsl_doctrine.md#6-secrets-are-names-never-values)); the fact that Vault is one
@@ -50,7 +50,7 @@ Phase order and status live only in [../../DEVELOPMENT_PLAN/README.md](../../DEV
 > and `secret_derivation_doctrine.md` are the realized version of most of this — but that is *evidence
 > from a sibling system, not proof in amoebius*, which has not yet built the relevant phases. Read every
 > prescriptive statement as the contract amoebius intends to satisfy, never as a tested amoebius result
-> ([documentation_standards.md §6](../documentation_standards.md)).
+> ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---
 
@@ -64,8 +64,8 @@ pile of durable data that reveals nothing.
 > unwrap, no certificate issued. PVs and MinIO objects may still exist, but they yield no secret, no
 > in-force config, and no downstream-cluster inventory until Vault is unsealed.
 
-Three invariants make that concrete (generalized from prodbox's `vault_doctrine.md §2` and
-`secret_derivation_doctrine.md §3`, lifted from "prodbox-managed cluster" to "every amoebius cluster"):
+Three invariants make that concrete (generalized from prodbox's `vault_doctrine.md [§2](#2-vault-is-the-fail-closed-secrets-root)` and
+`secret_derivation_doctrine.md [§3](#3-the-secretref-contract-a-name-never-a-value)`, lifted from "prodbox-managed cluster" to "every amoebius cluster"):
 
 1. **Sole-backend invariant.** Every secret / credential / key / certificate is a Vault object. There
    is no second store and no plaintext fallback; no secret reconstructs from any non-Vault source.
@@ -75,7 +75,7 @@ Three invariants make that concrete (generalized from prodbox's `vault_doctrine.
    Already-running workloads may continue only to the extent they need no *new* Vault operation; a new
    Pod must never reconstruct a secret from a non-Vault source, because none exists.
 3. **Metadata-is-secret invariant.** Downstream-cluster names, endpoints, kubeconfigs, and account IDs
-   are themselves secret data; a sealed cluster reveals none of them (§6; the federation consequence is
+   are themselves secret data; a sealed cluster reveals none of them ([§6](#6-parentchild-unseal-two-sanctioned-modes); the federation consequence is
    owned by [cluster_lifecycle_doctrine.md §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)).
 
 Every amoebius secret is one of **three Vault object shapes**:
@@ -84,13 +84,13 @@ Every amoebius secret is one of **three Vault object shapes**:
 |---|---|---|
 | KV v2 secret | `secret/` engine | passwords, API keys, OIDC client secrets, SMTP creds, cloud IAM creds, ACME EAB material |
 | Transit key | `transit/` engine | envelope encryption of MinIO objects (in-force config, Pulumi backend state, the content store) — the backend encryption itself is owned by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) and [content_addressing_doctrine.md](./content_addressing_doctrine.md) |
-| PKI certificate | `pki/` engine | internal TLS leaf/intermediate certs chaining to the root anchor (§8) |
+| PKI certificate | `pki/` engine | internal TLS leaf/intermediate certs chaining to the root anchor ([§8](#8-the-root-cluster-owns-the-pki-trust-anchor)) |
 
 This *replaces*, rather than extends, any earlier "derive secrets from a seed" scheme: prodbox's
 master-seed HMAC-derivation model was retired in favour of exactly this Vault-object model
-(`secret_derivation_doctrine.md §1, §4`), and amoebius adopts the finished shape — there is no seed, no
+(`secret_derivation_doctrine.md [§1](#1-why-this-doctrine-exists), [§4](#4-init-follows-readiness-fail-closed-vault-init)`), and amoebius adopts the finished shape — there is no seed, no
 host-side cache, and no chart-template `lookup`+`randAlphaNum` path. A secret is **generated once and
-persisted on Vault's durable storage**, then fetched by each consumer (§9). Vault is a singleton HA
+persisted on Vault's durable storage**, then fetched by each consumer ([§9](#9-in-cluster-consumers-authenticate-to-vault-directly)). Vault is a singleton HA
 platform service on every cluster ([platform_services_doctrine.md §5](./platform_services_doctrine.md#5-vault--the-secrets-root-reference-only)),
 and its durable PV is owned by [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md).
 
@@ -105,7 +105,7 @@ this section owns the *typed mechanism* it defers to). The reference names *wher
 Vault holds *what* it is.
 
 Conceptual Dhall union, imported by every app/cluster schema (adapted from prodbox's proven `SecretRef`
-in its `config_doctrine.md` / `vault_doctrine.md §3`):
+in its `config_doctrine.md` / `vault_doctrine.md [§3](#3-the-secretref-contract-a-name-never-a-value)`):
 
 ```dhall
 -- Example: shared SecretRef type, imported wherever a sensitive value would otherwise appear
@@ -140,17 +140,17 @@ run → always tear down, elevated-only storage deletion) is owned by
 
 ### 3.1 The parent-custody KV secret family: SSH keys, WireGuard keys, and the `Rke2NodeToken`
 
-Some secrets are not read by an in-cluster workload reaching Vault (§9) but are **node-provisioning
+Some secrets are not read by an in-cluster workload reaching Vault ([§9](#9-in-cluster-consumers-authenticate-to-vault-directly)) but are **node-provisioning
 material** the parent must place *before* (or as) a node comes up — SSH host/login keys, the Curve25519
 WireGuard peer keypairs
 ([network_fabric_doctrine.md §3](./network_fabric_doctrine.md#3-keys-config-and-distribution--wireguard-as-just-another-reconcile)),
-and the rke2 cluster's join token. These share **one custody shape**, and it is exactly the shape §7
+and the rke2 cluster's join token. These share **one custody shape**, and it is exactly the shape [§7](#7-parent-injects-secrets-into-the-childs-vault)
 gives every named secret:
 
-- **KV v2 objects, referenced by `SecretRef` name** (§2 shape table, §3 contract). The key/token
+- **KV v2 objects, referenced by `SecretRef` name** ([§2](#2-vault-is-the-fail-closed-secrets-root) shape table, [§3](#3-the-secretref-contract-a-name-never-a-value) contract). The key/token
   **never** appears as a value in any `.dhall`; the config names *where* it lives and Vault holds *what*
   it is.
-- **Parent-minted, parent-injected** (§7). The parent mints/resolves the material into its own unsealed
+- **Parent-minted, parent-injected** ([§7](#7-parent-injects-secrets-into-the-childs-vault)). The parent mints/resolves the material into its own unsealed
   Vault and injects it into the child's Vault over the spawn-time trust channel; no operator ever handles
   the bytes, and a child names only its own subtree's material.
 - **Rotatable.** Because consumers resolve by name, rotating the value is a Vault write plus a reconcile —
@@ -167,7 +167,7 @@ token, rendered read-only into each node's `config.yaml`) is a host-level reconc
 [cluster_lifecycle_doctrine.md §8](./cluster_lifecycle_doctrine.md#8-dynamic-node-provisioning)); this
 section owns only the token's **custody**. Distinguish it sharply from the rke2 cluster **CA**: the
 node-token is a *Vault-owned, rotatable KV secret*, whereas rke2's self-signed cluster CA is chicken-and-egg
-**floor** Vault cannot own (§8 plane 3, §10).
+**floor** Vault cannot own ([§8](#8-the-root-cluster-owns-the-pki-trust-anchor) plane 3, [§10](#10-the-chicken-and-egg-floor-what-stays-outside-vault)).
 
 ```dhall
 -- The node-provisioning KV secret family — every member a `SecretRef.Vault { mount, path, field }`
@@ -184,9 +184,9 @@ node-token is a *Vault-owned, rotatable KV secret*, whereas rke2's self-signed c
 
 The three-tier ML-asset lifecycle stages **Tier-2** model artifacts *eagerly*: an elected singleton pulls
 the parent-named model set from upstream and re-keys it onto the content-addressed store, writing `.ready`
-last ([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-infernix-inference-is-made-deterministic-too)).
+last ([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)).
 That staging step needs **two** credentials, and **both resolve from Vault by name** as ordinary
-`SecretRef`s (§3):
+`SecretRef`s ([§3](#3-the-secretref-contract-a-name-never-a-value)):
 
 - the **object-store** credential the singleton uses to write the MinIO content store, and
 - the **upstream** credential it uses to pull weights from the model source.
@@ -194,10 +194,10 @@ That staging step needs **two** credentials, and **both resolve from Vault by na
 Neither is a second secret store and neither has a hardcoded fallback. This is a deliberate, load-bearing
 correction of the sibling: infernix stages models via a **Kubernetes-Secret store** plus a hardcoded
 `minioadmin` / `minioadmin123` default when that Secret is absent (its `model_cache.py`). That fallback is
-precisely the **sole-backend invariant** violation §2 forbids — a secret reconstructed from a non-Vault
+precisely the **sole-backend invariant** violation [§2](#2-vault-is-the-fail-closed-secrets-root) forbids — a secret reconstructed from a non-Vault
 source — and the k8s-Secret store is the "no second secret store" divergence amoebius refuses. In amoebius
-both credentials are `SecretRef.Vault` names, parent-injected (§7) and resolved in-cluster via Vault
-Kubernetes auth (§9); a missing credential **fails closed** rather than silently defaulting to a well-known
+both credentials are `SecretRef.Vault` names, parent-injected ([§7](#7-parent-injects-secrets-into-the-childs-vault)) and resolved in-cluster via Vault
+Kubernetes auth ([§9](#9-in-cluster-consumers-authenticate-to-vault-directly)); a missing credential **fails closed** rather than silently defaulting to a well-known
 account. This is **sibling evidence of the anti-pattern, not an amoebius result** — amoebius has not built
 the staging path; it specifies that the path carry no second store and no default.
 
@@ -226,17 +226,17 @@ This section owns the Vault-init contract those two point at.
   backend — is owned by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) and the content store
   ([content_addressing_doctrine.md](./content_addressing_doctrine.md)); the relevant fact here is that
   while Vault is sealed that object is opaque ciphertext, so a sealed cluster reveals nothing about its
-  own setup beyond the minimal seal-mode basics it needs to reach and unseal its Vault (§6).
+  own setup beyond the minimal seal-mode basics it needs to reach and unseal its Vault ([§6](#6-parentchild-unseal-two-sanctioned-modes)).
 - **The decrypted spec never lands in a cluster-legible store.** The control-plane daemon fetches the
   envelope and **decrypts it in-process, on demand** (prodbox's `Settings.loadConfigFile`-via-
   `Prodbox.Minio.EncryptedObject` pattern); the in-force spec is **never** written to a plaintext
-  Kubernetes ConfigMap or to etcd. Any ConfigMap a workload reads may carry only the §6 unencrypted-basics
+  Kubernetes ConfigMap or to etcd. Any ConfigMap a workload reads may carry only the [§6](#6-parentchild-unseal-two-sanctioned-modes) unencrypted-basics
   floor — never the spec, secrets, or downstream inventory. As defense-in-depth, etcd is configured with
   an `--encryption-provider-config` so even that floor is encrypted at rest. A plaintext spec at rest is
   therefore *unrepresentable* ([illegal_state_catalog.md](./illegal_state_catalog.md)).
 - **Ready-before-consumer is absolute.** No consumer of a secret may run before Vault reports
   reachable, initialized, and unsealed. A consumer that reaches a sealed Vault fails closed rather than
-  racing it (§2). This generalizes prodbox's `secret_derivation_doctrine.md §7` bootstrap-order rule.
+  racing it ([§2](#2-vault-is-the-fail-closed-secrets-root)). This generalizes prodbox's `secret_derivation_doctrine.md [§7](#7-parent-injects-secrets-into-the-childs-vault)` bootstrap-order rule.
 
 ---
 
@@ -256,7 +256,7 @@ consequence this section owns is the unseal model that zero-secret bootstrap ena
 
 The model:
 
-- **Root Vault uses Shamir seal mode.** First-ever `vault init` (§4) produces unseal/recovery keys plus
+- **Root Vault uses Shamir seal mode.** First-ever `vault init` ([§4](#4-init-follows-readiness-fail-closed-vault-init)) produces unseal/recovery keys plus
   the initial root token. amoebius captures that material exactly once and immediately seals it under
   the operator's password into **password-encrypted unlock material** — then never prints raw keys.
 - **The password is the sole ephemeral secret.** It is *memorized*, *persisted nowhere*, and supplied
@@ -277,10 +277,10 @@ operator memorized password (entered on init / unseal; stored nowhere persistent
      and is the unseal authority that lets child clusters come up (§6)
 ```
 
-The consequence is exactly the §2 brick, viewed from the top: **no password this boot → root Vault
+The consequence is exactly the [§2](#2-vault-is-the-fail-closed-secrets-root) brick, viewed from the top: **no password this boot → root Vault
 stays sealed → nothing below it can come up.** The concrete realization — a password-AEAD-sealed
 *unlock bundle*, where it is stored, and how the bootstrap path reaches it before Vault is up — is
-proven in prodbox (`vault_doctrine.md §6`–`§6.1`); amoebius keeps that backend deliberately *pluggable*
+proven in prodbox (`vault_doctrine.md [§6](#6-parentchild-unseal-two-sanctioned-modes)`–`§6.1`); amoebius keeps that backend deliberately *pluggable*
 (a sealed object in durable MinIO, a host-side `.age` file, a cloud KMS, a TPM/YubiKey identity) behind
 one interface, because the load-bearing property is only that the unseal material is **password-AEAD-
 sealed and never plaintext at rest**, not which vault holds the ciphertext.
@@ -306,7 +306,7 @@ Both are legal; neither is a human prompt. Mode (b) is the stricter, fail-closed
 choice, and it is the mode prodbox realizes in full: a child Vault configured with a transit seal
 pointed at its parent, so the child *literally cannot unseal without a live, unsealed parent*, with the
 child's recovery keys and initial root token custodied in the parent's Vault KV
-(prodbox `cluster_federation_doctrine.md §2`–§3). amoebius treats prodbox's transit-seal tree as the
+(prodbox `cluster_federation_doctrine.md [§2](#2-vault-is-the-fail-closed-secrets-root)`–[§3](#3-the-secretref-contract-a-name-never-a-value)). amoebius treats prodbox's transit-seal tree as the
 **evidence-backed realization of mode (b)**, while keeping mode (a) available for clusters that should
 hold their own unseal key locally.
 
@@ -333,12 +333,12 @@ here only because they are *unseal-trust* facts:
   (including its own children's) and nothing about siblings or any wider part of the forest
   ([cluster_lifecycle_doctrine.md §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)).
   A child's unseal request reaches *up* to its parent and never *sideways*. A sealed cluster therefore
-  cannot be made to reveal whether it even *has* children, how many, or where (§2 metadata invariant).
+  cannot be made to reveal whether it even *has* children, how many, or where ([§2](#2-vault-is-the-fail-closed-secrets-root) metadata invariant).
 - **The brick cascades down, by design.** In mode (b), if any parent is sealed or unreachable, its
   children cannot unseal, and their children cannot unseal, down the whole subtree. This is the safety
   property, not a fault: a sealed parent must brick its descendants rather than let them come up with
   secrets recovered from any non-Vault source. Cluster liveness for the entire forest roots in one
-  operator unsealing the root (§5). The cascade is depth-generic: it bricks the whole subtree to
+  operator unsealing the root ([§5](#5-the-root-cluster-single-node-password-encrypted-unseal)). The cascade is depth-generic: it bricks the whole subtree to
   **arbitrary depth**, exactly as the transit-seal trust tree nests parent→child→grandchild.
 - **Each child's spec is sliced under its own Transit key.** Need-to-know is not only a *distribution*
   rule (a child receives only its own subtree, above) — it is a *cryptographic* one. Each child's subtree
@@ -364,26 +364,26 @@ materializes *what* it is into the child during spawn/reconcile.
 
 The end-to-end path, in order:
 
-1. **The `.dhall` names the secret** (§3) — a `SecretRef` coordinate, no value, safe to roll out from
+1. **The `.dhall` names the secret** ([§3](#3-the-secretref-contract-a-name-never-a-value)) — a `SecretRef` coordinate, no value, safe to roll out from
    the root across the whole tree.
 2. **The parent resolves the value from its own (unsealed) Vault** and **injects it into the child's
    Vault** over a trusted parent→child channel established at spawn time. The spawn itself — a Pulumi
    deploy from inside the parent, with a MinIO backend encrypted via Vault Transit — is owned by
    [cluster_lifecycle_doctrine.md §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)
    and [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md); the injection rides that established trust.
-3. **In-cluster consumers on the child read it via Vault Kubernetes auth** (§9) — never from a
+3. **In-cluster consumers on the child read it via Vault Kubernetes auth** ([§9](#9-in-cluster-consumers-authenticate-to-vault-directly)) — never from a
    Dhall-mounted plaintext fragment, never from an environment variable.
 
 This is why secrets-by-name is not a loophole: there is no point at which a secret value sits in a
 file an operator hands around. The value lives only in Vault, injected downward by the parent that
 already holds it, and resolved in-cluster by the workload that needs it. A child only ever receives the
-secrets for *its own* subtree — the same children-know-nothing-about-siblings boundary as §6, applied
+secrets for *its own* subtree — the same children-know-nothing-about-siblings boundary as [§6](#6-parentchild-unseal-two-sanctioned-modes), applied
 to secret material: injecting a parent's or a sibling's secret into a child is not expressible, because
 a child's `.dhall` names only its own.
 
 > **Honesty.** Parent→child secret injection is *specified* here and scheduled with amoebic spawning;
 > prodbox proves the adjacent custody flow (a parent writing a child's init keys and downstream
-> metadata into the parent's own Vault KV, `cluster_federation_doctrine.md §3`), which is evidence for
+> metadata into the parent's own Vault KV, `cluster_federation_doctrine.md [§3](#3-the-secretref-contract-a-name-never-a-value)`), which is evidence for
 > the trust channel but is *not* itself the same "inject arbitrary named secrets into the child's Vault"
 > operation. Treat this as design intent, not a tested amoebius result.
 
@@ -393,7 +393,7 @@ a child's `.dhall` names only its own.
 
 There is exactly **one** self-signed root of trust in the forest, and it sits at the root cluster: *that
 root cluster's kind owns the (self-signed) PKI trust anchor for everything else*. Internal trust flows **down** the tree from that anchor; it is never minted independently at a
-leaf and never shared sideways between siblings — the same direction as unseal authority (§6).
+leaf and never shared sideways between siblings — the same direction as unseal authority ([§6](#6-parentchild-unseal-two-sanctioned-modes)).
 
 - **Vault PKI is the anchor.** The root cluster's Vault `pki/` engine holds the self-signed **root
   CA**. As the forest grows, the root issues an **intermediate CA** to each child, the child issues to
@@ -406,19 +406,19 @@ leaf and never shared sideways between siblings — the same direction as unseal
      *between* amoebius clusters.
   2. **Public-edge TLS:** the certificates Keycloak's wild-ingress edge presents to the outside world,
      provisioned via ZeroSSL and DNS (route53). That ACME path — including the EAB material, which is a
-     Vault KV secret referenced by `SecretRef` (§2, §3) — is owned by
+     Vault KV secret referenced by `SecretRef` ([§2](#2-vault-is-the-fail-closed-secrets-root), [§3](#3-the-secretref-contract-a-name-never-a-value)) — is owned by
      [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md); the single wild-ingress door is owned by
      [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path).
   3. **Distro mTLS:** the Kubernetes distro's own self-signed cluster CA for kube-apiserver — for an
      `rke2` cluster, rke2's own self-signed cluster CA — over which the host amoebius binary talks to the
-     control plane. This is part of the chicken-and-egg floor (§10), not something Vault owns — Vault
+     control plane. This is part of the chicken-and-egg floor ([§10](#10-the-chicken-and-egg-floor-what-stays-outside-vault)), not something Vault owns — Vault
      runs *inside* that PKI. The rke2 *join token* is **not** this CA: it is a Vault-owned, rotatable KV
-     secret (§3.1).
+     secret ([§3.1](#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken)).
 - **The host-comms hop is deliberately not PKI-secured.** Host compute daemons reach in-cluster MinIO
   and Pulsar as **peers over host-only NodePorts with no mTLS** — that hop is safe by being
   localhost-only and unreachable off-box, not by certificate, so the PKI anchor does **not** extend to
   it ([host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md);
-  [platform_services_doctrine.md §9](./platform_services_doctrine.md#the-sole-exception-host-origin-localhost-only-traffic)).
+  [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)).
 
 ```mermaid
 flowchart TD
@@ -432,7 +432,7 @@ flowchart TD
 
 > **Honesty.** The Vault-PKI-as-root-anchor design is specified here; prodbox uses Vault as its TLS/PKI
 > authority with cert-manager driving ZeroSSL and Vault holding the EAB material
-> (`vault_doctrine.md §11`), and the native-Vault-PKI internal-CA hierarchy is a deferred,
+> (`vault_doctrine.md [§11](#11-error-model-and-no-leak-logging)`), and the native-Vault-PKI internal-CA hierarchy is a deferred,
 > live-proof-pending option even there. Read the cross-cluster CA hierarchy as amoebius's intended end
 > state, not a tested result.
 
@@ -442,8 +442,8 @@ flowchart TD
 
 There is exactly **one** in-cluster secret-delivery path: a workload authenticates to Vault with its
 Kubernetes service account and reads only what its policy grants. This is the amoebius adoption of
-prodbox's proven model (`secret_derivation_doctrine.md §5`–§6,
-[prodbox `vault_doctrine.md §12`]); the inventory table there is the evidence, not restated here.
+prodbox's proven model (`secret_derivation_doctrine.md [§5](#5-the-root-cluster-single-node-password-encrypted-unseal)`–[§6](#6-parentchild-unseal-two-sanctioned-modes),
+[prodbox `vault_doctrine.md [§12](#12-planning-ownership)`]); the inventory table there is the evidence, not restated here.
 
 - **Vault Kubernetes auth per consumer.** Each component has a service account; a Vault role bound to
   that namespace + service account; a least-privilege policy granting read on exactly its own KV paths
@@ -452,10 +452,10 @@ prodbox's proven model (`secret_derivation_doctrine.md §5`–§6,
 - **No Secret-mounted plaintext, no env var, no PATH.** There is no Dhall fragment mounted as a k8s
   Secret and no credential read from the environment — consistent with amoebius's locked
   no-environment-variables / no-`PATH` contract ([substrate_doctrine.md](./substrate_doctrine.md)):
-  the only inputs a workload reads are its typed config (names, §3) and the Vault objects its policy
+  the only inputs a workload reads are its typed config (names, [§3](#3-the-secretref-contract-a-name-never-a-value)) and the Vault objects its policy
   allows.
 - **Generated once, never derived.** A secret a chart needs is minted once into Vault (KV) or issued
-  by Vault (PKI) at install and persisted on the durable PV (§2, §4); no chart template generates or
+  by Vault (PKI) at install and persisted on the durable PV ([§2](#2-vault-is-the-fail-closed-secrets-root), [§4](#4-init-follows-readiness-fail-closed-vault-init)); no chart template generates or
   stores a secret value, and there is no seed to derive from.
 
 ---
@@ -467,14 +467,14 @@ generalization of prodbox's `vault_doctrine.md §17`. The **only** data that may
 
 1. **The distro's self-signed cluster CA + admin kubeconfig** — for an `rke2` cluster, rke2's own
    self-signed cluster CA. Vault runs *inside* this cluster's PKI, so it cannot be the thing that mints
-   it (§8 plane 3). The rke2 *node-join token*, by contrast, is **not** floor material: it is a
-   Vault-owned, rotatable KV `SecretRef` (§3.1).
+   it ([§8](#8-the-root-cluster-owns-the-pki-trust-anchor) plane 3). The rke2 *node-join token*, by contrast, is **not** floor material: it is a
+   Vault-owned, rotatable KV `SecretRef` ([§3.1](#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken)).
 2. **The Vault PV binding itself** — owned by [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md).
-3. **Root cluster only:** the operator's memorized unseal password — the sole ephemeral secret (§5).
+3. **Root cluster only:** the operator's memorized unseal password — the sole ephemeral secret ([§5](#5-the-root-cluster-single-node-password-encrypted-unseal)).
    The password-AEAD-sealed unlock material it decrypts is not a Vault-owned object; it is what
    *unseals* Vault, and its body is password-sealed regardless of where the ciphertext rests.
 4. **Child cluster only:** the bootstrap reference and unseal credential the child uses to reach its
-   unseal authority — in mode (b) provisioned and owned by the parent (§6), in mode (a) the local
+   unseal authority — in mode (b) provisioned and owned by the parent ([§6](#6-parentchild-unseal-two-sanctioned-modes)), in mode (a) the local
    Kubernetes secret holding its own unseal key.
 
 Everything else — all generated secrets, cloud creds, OIDC and SMTP material, internal TLS, the
@@ -491,7 +491,7 @@ and they never carry secret material. A conceptual error type (adapted from prod
 policy-missing / secret-missing / decrypt-denied* so a caller can fail closed with an actionable,
 non-leaking message.
 
-The logging rule extends the §2 and §6 invariants to output: on a sealed-state path, a log line never
+The logging rule extends the [§2](#2-vault-is-the-fail-closed-secrets-root) and [§6](#6-parentchild-unseal-two-sanctioned-modes) invariants to output: on a sealed-state path, a log line never
 emits a SecretRef-resolved value, a Vault token, child init keys, a downstream-cluster name, or an
 exists-vs-absent oracle that would distinguish "this child/secret is present" from "absent" — presence
 is itself metadata. Prefer redacted structured logs
@@ -527,8 +527,8 @@ states the target shape and links back for status.
 - [Platform Services Doctrine](./platform_services_doctrine.md) — Vault as a standard HA platform service and the Vault-ready ordering edge
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — the retained Vault PV and init-once / unseal-on-rebuild durability
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — Vault-Transit-envelope encryption of the MinIO Pulumi backend and the public-edge ZeroSSL/route53 path
-- [Content Addressing & Determinism](./content_addressing_doctrine.md) — the content-addressed model store the Tier-2 staging credentials write to (§4.5)
-- [Network Fabric Doctrine](./network_fabric_doctrine.md) — the Curve25519 WireGuard peer keys in the same parent-custody KV secret family as the `Rke2NodeToken` (§3.1)
+- [Content Addressing & Determinism](./content_addressing_doctrine.md) — the content-addressed model store the Tier-2 staging credentials write to ([§4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd))
+- [Network Fabric Doctrine](./network_fabric_doctrine.md) — the Curve25519 WireGuard peer keys in the same parent-custody KV secret family as the `Rke2NodeToken` ([§3.1](#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken))
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md) — the host-only NodePort hop that is deliberately not PKI-secured
 - [Substrate Doctrine](./substrate_doctrine.md) — the no-environment-variables / no-`PATH` contract
 - [Testing Doctrine](./testing_doctrine.md) — flagged test credentials and the elevated-only storage-deletion model

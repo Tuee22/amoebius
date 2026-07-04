@@ -22,7 +22,7 @@ repo and reconciles the diff, Flux does the same with its own CRDs, Tekton runs 
 its own operator, its own RBAC surface, its own upgrade treadmill, its own store of "what should be deployed."
 That second plane is, to delivery, exactly what Helm is to manifests and Harbor is to the registry: an
 unowned, unreviewed intermediary that re-introduces the *"valid YAML, wrong cluster"* failure class
-([illegal_state_catalog.md §1](./illegal_state_catalog.md)) at the delivery layer — a git-polling controller
+([illegal_state_catalog.md §1](./illegal_state_catalog.md#1-the-promise-illegal-states-fail-to-type-check)) at the delivery layer — a git-polling controller
 can apply a manifest set no amoebius type ever inspected.
 
 **amoebius refuses the second control plane, exactly as it refuses Helm and Harbor.** Delivery is not a
@@ -33,10 +33,10 @@ elsewhere. There is nothing to install, nothing to poll, and nothing to reconcil
   half — producing multi-arch images and pushing them to the in-cluster `distribution` registry — is enacted
   by the **sudo host daemon** ([image_build_doctrine.md](./image_build_doctrine.md)). The
   **test / promote / rollout** half is enacted by the **elected in-cluster singleton**
-  ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md)). No third process arbitrates between them.
+  ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected)). No third process arbitrates between them.
 - **Auditability comes from an immutable ledger, not a controller's opinion.** What a conventional platform
-  gets from "the state Argo believes is desired," amoebius gets from the immutable `Release` ledger (§2) plus
-  the ETag-CAS pointer history (§3): a content-addressed, append-only record of every generation ever built
+  gets from "the state Argo believes is desired," amoebius gets from the immutable `Release` ledger ([§2](#2-release-and-the-immutable-release-ledger-releasehash)) plus
+  the ETag-CAS pointer history ([§3](#3-environment-and-the-etag-cas-promotion-pointer)): a content-addressed, append-only record of every generation ever built
   and every promotion ever made. There is no polling loop to trust — the desired state is
   `render(release)`, recomputed from a value, exactly as the manifest reconciler recomputes desired from
   `render(.dhall)` ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderdhall-observed-is-etcd-a-diff-is-typed)).
@@ -60,7 +60,7 @@ and how they chain. Every primitive they compose is owned elsewhere:
 > **Honesty.** This whole doctrine is **Phase-0 reference-only design intent**. None of the four values is
 > built in amoebius. Where a sibling exhibits the shape — jitML's phased rollout, jitML's pre/post-grant
 > schema phase, infernix's `.ready`-gated artifact — that is **sibling evidence, not an amoebius result**
-> ([documentation_standards.md §6](../documentation_standards.md)). Read every prescriptive statement below as
+> ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)). Read every prescriptive statement below as
 > the contract amoebius intends to satisfy.
 
 ---
@@ -93,10 +93,10 @@ data Release = Release
   the content-addressed store." **This doctrine promotes that optional log to THE canonical, immutable release
   ledger**: every built generation is an append-only `Release` entry in the content-addressed store (pointers
   → manifests → blobs), keyed by `releaseHash`. What was a nice-to-have revision history for the manifest
-  reconciler is load-bearing here — it is the record a promotion advances a pointer *onto* (§3) and the record
-  a rollback re-applies *from* (§5).
+  reconciler is load-bearing here — it is the record a promotion advances a pointer *onto* ([§3](#3-environment-and-the-etag-cas-promotion-pointer)) and the record
+  a rollback re-applies *from* ([§5](#5-rolloutplan--rolloutphase-the-readiness-gated-apply)).
 - **A `Release` is immutable; only pointers move.** No field of a `Release` is ever edited. Promotion,
-  rollback, and drift-correction are all expressed as **pointer** operations (§3) over a fixed set of ledger
+  rollback, and drift-correction are all expressed as **pointer** operations ([§3](#3-environment-and-the-etag-cas-promotion-pointer)) over a fixed set of ledger
   entries — the same discipline as a `trial` pointer flipping over immutable manifests
   ([content_addressing_doctrine.md §2](./content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers)).
   This is why "no release store to desync" holds: unlike Helm's mutable, gzip-blob release Secret, an
@@ -130,7 +130,7 @@ data Environment = Dev | Staging | Prod          -- closed union; no fourth, unn
   new one, using the same ETag-CAS write protocol that advances a `trial` or `model` pointer
   ([content_addressing_doctrine.md §2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds),
   where the `environment` pointer kind is registered as owned by this doctrine). Once the pointer moves, the
-  in-cluster SSA reconciler (§5) converges `render(release)` for that environment. The CAS is the atomic,
+  in-cluster SSA reconciler ([§5](#5-rolloutplan--rolloutphase-the-readiness-gated-apply)) converges `render(release)` for that environment. The CAS is the atomic,
   race-free commit; the reconcile is the enactment.
 - **App bytes are byte-identical across environments.** Dev, staging, and prod run the **same image digests**
   and the **same application logic** — an app is
@@ -159,7 +159,7 @@ evidence for the mechanism, not an amoebius result for environment promotion.
 
 ## 4. `PromotionGate`: promote-unverified→prod is unrepresentable
 
-A `PromotionGate` is a **typed precondition on advancing an environment pointer**: the CAS of §3 cannot fire
+A `PromotionGate` is a **typed precondition on advancing an environment pointer**: the CAS of [§3](#3-environment-and-the-etag-cas-promotion-pointer) cannot fire
 unless the `Release` being promoted carries the evidence that environment requires.
 
 ```haskell
@@ -187,7 +187,7 @@ advance :: Environment -> Release -> EvidenceWitness -> PointerCas
   constructed. This is the same idiom as infernix's `.ready`-gated `ArtifactRef` (an artifact handle exists
   only once the `.ready` sentinel does) and as amoebius's own `ModelArtifact` (§ content-addressing) — *a
   handle exists only once its evidence edge does*. This state is catalogued at
-  [illegal_state_catalog.md §3.26](./illegal_state_catalog.md#326-an-unverified-environment-promotion) (an
+  [illegal_state_catalog.md §3.26](./illegal_state_catalog.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) (an
   unverified environment promotion), owned by this doctrine, technique "a handle exists only once its evidence
   edge does."
 - **Generalizes the already-planned `Multicluster/PromotionGate.hs`.** amoebius already scopes a
@@ -248,7 +248,7 @@ data RolloutPhase = RolloutPhase
 - **Rollback is re-apply or CAS-back.** A failed convergence has two equivalent recoveries, both already in
   the primitive set: **re-apply the prior generation's object set** via the same SSA-declare-and-prune path
   ([manifest_generation_doctrine.md §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)),
-  or **CAS the environment pointer back** to the previous `Release` (§3) and let the reconciler converge. Both
+  or **CAS the environment pointer back** to the previous `Release` ([§3](#3-environment-and-the-etag-cas-promotion-pointer)) and let the reconciler converge. Both
   are ordinary operations over the immutable ledger — there is no special "undo" machinery, because a prior
   generation is still a valid `Release` and a prior pointer value is still a valid CAS target.
 
@@ -289,12 +289,12 @@ elsewhere:
 | The proven/tested/assumed evidence ledger the `PromotionGate` reads, and the no-skip / UNVERIFIED rule | [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) |
 | The Extract → Model → Inject chaos methodology and the layer-strength grammar | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
 | That environment differences are deployment rules and app bytes are identical across environments | [app_vs_deployment_doctrine.md §3 / §4](./app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs) |
-| `create-new → verified-migrate → retire-old` and the durable-data-deletion prohibition the schema phase inherits | [storage_lifecycle_doctrine.md §7 / §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction) |
+| `create-new → verified-migrate → retire-old` and the durable-data-deletion prohibition the schema phase inherits | [storage_lifecycle_doctrine.md §7 / §8](./storage_lifecycle_doctrine.md#7-the-cardinal-rule-deleting-durable-data-is-forbidden-under-normal-operation) |
 | Gateway-API `HTTPRoute` weights the canary shifts, and the no-mesh verdict | [network_fabric_doctrine.md](./network_fabric_doctrine.md) |
 | Pulsar subscription / consumer-group cutover mechanics | [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) |
 | The build half of the pipeline (multi-arch images, the `distribution` registry) | [image_build_doctrine.md](./image_build_doctrine.md) |
 | The sudo host daemon and the elected in-cluster singleton that enact the two halves | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
-| The catalogued unrepresentability of an unverified promotion | [illegal_state_catalog.md §3.26](./illegal_state_catalog.md#326-an-unverified-environment-promotion) |
+| The catalogued unrepresentability of an unverified promotion | [illegal_state_catalog.md §3.26](./illegal_state_catalog.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) |
 
 **Planning ownership.** This document is normative release-lifecycle doctrine only. Delivery sequencing,
 completion status, and validation gates are owned by
@@ -310,17 +310,17 @@ extension mechanism remains at Phase-15. This doc states the target shape and li
 ## Cross-references
 
 - [Engineering Doctrine Index](./README.md)
-- [Content Addressing Doctrine](./content_addressing_doctrine.md) — §2.3 the hash/pointer master registry (`releaseHash`, the `environment` pointer kind), §4 determinism; the store the ledger writes into
-- [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — §5 the SSA/ApplySet reconciler `RolloutPlan` enacts, §6 the applied-log this doctrine promotes to the canonical ledger
-- [Testing Doctrine](./testing_doctrine.md) — §4 the per-run proven/tested/assumed evidence ledger the `PromotionGate` consumes
+- [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) the hash/pointer master registry (`releaseHash`, the `environment` pointer kind), [§4](./content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) determinism; the store the ledger writes into
+- [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — [§5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait) the SSA/ApplySet reconciler `RolloutPlan` enacts, [§6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderdhall-observed-is-etcd-a-diff-is-typed) the applied-log this doctrine promotes to the canonical ledger
+- [Testing Doctrine](./testing_doctrine.md) — [§4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run proven/tested/assumed evidence ledger the `PromotionGate` consumes
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md) — the Extract → Model → Inject grammar behind the evidence-strength the gate requires
-- [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — §3/§4 env differences are deployment rules; app bytes are byte-identical across environments
-- [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — §8 `create-new → verified-migrate → retire-old` for the schema-migration `RolloutPhase`
+- [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — [§3](./app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)/[§4](./app_vs_deployment_doctrine.md#4-the-dividing-line--a-litmus-test) env differences are deployment rules; app bytes are byte-identical across environments
+- [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — [§8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction) `create-new → verified-migrate → retire-old` for the schema-migration `RolloutPhase`
 - [Network Fabric Doctrine](./network_fabric_doctrine.md) — Gateway-API `HTTPRoute` weights the canary phase shifts; the no-mesh verdict
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — consumer-group / subscription cutover for Pulsar workloads
-- [Illegal State Catalog](./illegal_state_catalog.md) — §3.26 promote-unverified→prod is grade-(1) unrepresentable
+- [Illegal State Catalog](./illegal_state_catalog.md) — [§3.26](./illegal_state_catalog.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) promote-unverified→prod is grade-(1) unrepresentable
 - [Image Build Doctrine](./image_build_doctrine.md) — the build half (multi-arch images, the `distribution` registry)
-- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — §3 the elected singleton that runs promote/rollout; the host daemon that builds
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§3](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected) the elected singleton that runs promote/rollout; the host daemon that builds
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — reconciler tiers (a) cloud-IaC and (b) the tag-discovery host reconciler, distinct from tier (c)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — the promoted Phase-14 schema-migration candidate this doctrine homes
@@ -331,5 +331,5 @@ extension mechanism remains at Phase-15. This doc states the target shape and li
 > amoebius** and compose primitives that are themselves Phase-2-and-later. The shapes are **generalized from
 > siblings** — jitML's phased readiness-gated rollout and its pre/post-grant schema phase, infernix's
 > `.ready`-gated artifact, the content store's ETag-CAS `trial` pointer — each of which is **sibling evidence,
-> not proof in amoebius**. Per [documentation_standards.md §6](../documentation_standards.md), read every
+> not proof in amoebius**. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every
 > prescriptive statement as the contract amoebius intends to satisfy, never as a tested amoebius result.

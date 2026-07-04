@@ -38,7 +38,7 @@ cross-cutting invariant "Application logic and deployment rules are separate DSL
 > the mattandjames reduction in Phase 8 — neither phase has been built. Read every prescriptive statement
 > here as design intent, never as a tested amoebius result. Status and gates live only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
-> [documentation_standards.md §6](../documentation_standards.md)).
+> [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---
 
@@ -55,20 +55,20 @@ The app-spec surface declares:
 - **UI and user lifecycles** — what surfaces the app exposes and what a user can do with them.
 - **LB services** — *which* of the app's services are reachable from the edge. (Whether they are reachable
   is never the app's call: all wild ingress is owned by Keycloak via the LB + Gateway API — see
-  [platform_services_doctrine.md §9](./platform_services_doctrine.md). The app declares *what to publish*;
+  [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path). The app declares *what to publish*;
   it cannot publish a backdoor.)
 - **Keycloak-backed auth rules** — the OIDC identity and authorization rules that gate the app's surfaces.
 - **Durable-storage needs** — the MinIO buckets it keeps (named `<app>/<bucket>`), any `no-provisioner`
   block storage it provisions, and any Postgres database it requests in its own namespace. The app declares
   *what data it keeps*; the retained-PV mechanics, sizing, and deterministic rebind that make that data
   durable are owned by [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md), and the
-  one-Patroni-cluster-per-consumer rule by [platform_services_doctrine.md §8](./platform_services_doctrine.md).
+  one-Patroni-cluster-per-consumer rule by [platform_services_doctrine.md §8](./platform_services_doctrine.md#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin).
 - **Pulsar topic lifecycles** — the event/workflow topics the app owns and how they live and die. The
   native-protocol client and topology algebra are owned by
   [pulsar_client_doctrine.md](./pulsar_client_doctrine.md); the app surface owns *which topics exist for
   this app*.
 - **Use of shared libraries** — that the app builds on infernix, jitML, or (later) a Haskell extension
-  module is part of what the app *is* (see §8).
+  module is part of what the app *is* (see [§8](#8-shared-library-use-is-application-logic)).
 
 Two structural facts pin app identity to the cluster: an app's **name is unique per
 cluster**, and the app gets **its own namespace with that same name**. Secrets appear here **by name only** —
@@ -76,7 +76,7 @@ the app references a secret; it never contains one. The secret-by-name `SecretRe
 parent-injects-into-child model are owned by [vault_pki_doctrine.md](./vault_pki_doctrine.md) and must not
 be restated here.
 
-What is *conspicuously absent* from this surface is the whole vocabulary of §3: there is no replica count, no
+What is *conspicuously absent* from this surface is the whole vocabulary of [§3](#3-the-deployment-rules-surface--how-the-same-app-runs): there is no replica count, no
 region, no failover policy, no chaos knob, no substrate selector. The app author cannot write those words
 because the type does not have those fields.
 
@@ -84,20 +84,20 @@ because the type does not have those fields.
 
 ## 3. The deployment-rules surface — how the same app *runs*
 
-The intuition is the mirror image of §2: **everything on this surface is about robustness, scale, and
+The intuition is the mirror image of [§2](#2-the-application-logic-surface--what-an-app-is): **everything on this surface is about robustness, scale, and
 placement — and none of it changes what the app is.** Turn every one of these dials and a user sees the
 identical app; they just see it survive more, scale wider, or run on different hardware.
 
 The deployment-rules surface declares:
 
 - **HA replica counts.** How many of each component run. The app spec never names a number; the chart is
-  **HA even at `replicas=1`** ([platform_services_doctrine.md §2](./platform_services_doctrine.md)), so the
+  **HA even at `replicas=1`** ([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1)), so the
   replica value is a pure deployment dial that rides an unchanged chart. Where the replica value physically
   lives in the DSL (a cluster-scoped `cluster.dhall` value seeded at `bootstrap` vs a per-app deployment
   block) is a [dsl_doctrine.md](./dsl_doctrine.md) concern; this doc owns only the rule that it is **never**
   app logic.
 - **Geo-replication topology.** Whether the app runs on one cluster or N geographically-replicated clusters,
-  and how their durable state is kept in step (via the Pulsar / MinIO / Postgres idioms — see §9). The
+  and how their durable state is kept in step (via the Pulsar / MinIO / Postgres idioms — see [§9](#9-composition-one-cluster--n-geo-replicated-clusters-zero-app-change)). The
   cross-cluster mechanics are owned by [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md).
 - **Failover policy.** When and how the lead cluster's gateway fails over and DNS is repointed. The async cross-cluster correctness boundary — the one place a per-system proof
   obligation concentrates — is owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md).
@@ -106,11 +106,11 @@ The deployment-rules surface declares:
   owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), and the test-as-a-`.dhall`-topology
   model by [testing_doctrine.md](./testing_doctrine.md).
 - **Inference substrate.** Whether an ML workload runs on Apple Metal on the host, CUDA on the cluster, or
-  linux-cpu is a deployment decision, not app logic — see §7.
+  linux-cpu is a deployment decision, not app logic — see [§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule).
 - **Dynamic node provisioning policy.** Scaling nodes by arbitrary logic — load, spot-instance cost, or
   workflow completion — is a deployment rule, owned operationally by
   [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md), and typed as a `ScalingPolicy` owned by
-  [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md).
+  [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns).
 - **Resource budgets, storage backings, and the compute engine.** The per-host/cluster capacities and storage
   budgets a workload must fit, the `StorageBacking` each app's storage draws from, and the compute engine +
   node topology (kind / rke2 / EKS) are all deployment rules — an app declares *what* it needs, never *how
@@ -122,8 +122,8 @@ The deployment-rules surface declares:
   The environment is not a field in the app spec but a mutable, per-environment **ETag-CAS pointer** — living
   in the content store — that resolves to a `Release`; "promote to prod" is a pointer CAS. The `Environment`
   type, the promotion pointer, and the immutable release ledger are owned by
-  [release_lifecycle_doctrine.md §3](./release_lifecycle_doctrine.md). This is the type-level reason there is
-  no separate "dev version" and "prod version" of an app (§5).
+  [release_lifecycle_doctrine.md §3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer). This is the type-level reason there is
+  no separate "dev version" and "prod version" of an app ([§5](#5-why-the-split-matters--cashing-it-out)).
 
 This surface is **keyed by app**: a deployment-rules layer references an app by name and says *how to run
 it*. The same app name can appear in two different deployment-rules layers and run two completely different
@@ -148,11 +148,11 @@ deliberately tricky cases:
 | "Run 5 replicas of the chat backend" | deployment rule | a scale dial; same app at 1 or 5 |
 | "The app keeps a `messages` bucket and a Postgres DB" | application logic | *what data it keeps* |
 | "Those PVs are 50Gi, retained, host-bound" | neither — owned by [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) | a platform mechanic, not an app or deployment dial |
-| "The app uses infernix for inference" | application logic | a shared-library dependency (§8) |
-| "Inference runs on Apple Metal vs CUDA" | deployment rule | a placement choice (§7) |
-| "Replicate the app across us-east and eu-west and fail over" | deployment rule | topology + robustness; the app is unchanged (§9) |
+| "The app uses infernix for inference" | application logic | a shared-library dependency ([§8](#8-shared-library-use-is-application-logic)) |
+| "Inference runs on Apple Metal vs CUDA" | deployment rule | a placement choice ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)) |
+| "Replicate the app across us-east and eu-west and fail over" | deployment rule | topology + robustness; the app is unchanged ([§9](#9-composition-one-cluster--n-geo-replicated-clusters-zero-app-change)) |
 | "Inject a broker kill every 10 minutes" | deployment rule | the app does not know it is being tested |
-| "Promote a build from staging to prod" | deployment rule | a pointer CAS over byte-identical app bytes; only the deployment rules differ (§3) |
+| "Promote a build from staging to prod" | deployment rule | a pointer CAS over byte-identical app bytes; only the deployment rules differ ([§3](#3-the-deployment-rules-surface--how-the-same-app-runs)) |
 | "A login requires MFA for the admin role" | application logic | an auth rule that *defines* the app's behaviour |
 
 **Misfiling is a bug, not a style preference.** A replica count that leaks into the app spec re-couples
@@ -172,13 +172,13 @@ Three concrete payoffs, each a direct consequence of keeping the line clean:
   "prod version" of the app spec; there is one app spec and many deployment-rules layers. This kills the
   whole *works-on-my-laptop, breaks-in-prod* class of bug at the source — the laptop deployment and the
   production deployment run the **same app bytes on the same HA charts**
-  ([platform_services_doctrine.md §2](./platform_services_doctrine.md)); only the deployment dials differ.
+  ([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1)); only the deployment dials differ.
 - **Orthogonal evolution.** Operators tune replicas, add a failover region, or schedule chaos without ever
   opening the app's source — and app authors ship features without ever reasoning about topology. The two
   teams change different files.
 - **Composability.** Because the surfaces are separable inputs, the *same* app composes with *any* valid
-  deployment-rules layer (total composability). The proof case is §6 and the
-  extreme case is §9.
+  deployment-rules layer (total composability). The proof case is [§6](#6-the-proof-case-mattandjames-boiled-to-application-logic-only) and the
+  extreme case is [§9](#9-composition-one-cluster--n-geo-replicated-clusters-zero-app-change).
 
 The deepest payoff is that the split makes a whole category of mistakes **unrepresentable**: the app surface
 literally has no field in which to name a replica count or a region, and the deployment surface has no field
@@ -210,8 +210,8 @@ layer configures, **with zero extra effort from the application itself**:
 
 The mock-3-replica pattern collapses to a `replicas=n` value; the multi-kind-cluster HA simulation collapses
 to the standard HA stack at the chosen replica count
-([platform_services_doctrine.md §2](./platform_services_doctrine.md)); the naive CPU inference is replaced
-by an infernix workflow (§7).
+([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1)); the naive CPU inference is replaced
+by an infernix workflow ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)).
 
 > **Honesty.** This reduction is **Phase 8** in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
 > and is **not started**. The current mattandjames behaviour above is observed fact; the boiled-down target
@@ -224,7 +224,7 @@ by an infernix workflow (§7).
 This is the subtlest application of the litmus test, so make the distinction explicit:
 
 - **"The app uses infernix"** is **application logic.** infernix is an ML extension *library*; depending on
-  it is part of what the app is (§8). A workflow that calls infernix is the same call graph regardless of
+  it is part of what the app is ([§8](#8-shared-library-use-is-application-logic)). A workflow that calls infernix is the same call graph regardless of
   where it runs.
 - **"Inference runs on Apple Metal vs CUDA vs linux-cpu"** is a **deployment rule.** *Where* the inference
   workload is placed — a host compute daemon using Apple Silicon's unified memory, a CUDA pod on the
@@ -235,7 +235,7 @@ infernix is "an amoebius extension: a single Haskell binary that can be deployed
 either at node-system level (in an Apple cluster) or cluster level (as a stateless deployment)". That *dual* placement is precisely a deployment decision — the same infernix logic,
 two placements. Consequently **the infernix `.dhall` nests inside the amoebius `.dhall`**: infernix's own configuration is composed into the larger deployment spec rather than living as a
 parallel system. The host-vs-cluster placement mechanics (host compute daemons as Pulsar/MinIO peers over
-host-only NodePorts, no mTLS) are owned by [platform_services_doctrine.md §9](./platform_services_doctrine.md)
+host-only NodePorts, no mTLS) are owned by [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)
 and the host↔cluster comms doctrine; the determinism and content-addressing that make an infernix run
 reproducible are owned by the content-addressing doctrine. This section owns only the *classification*: the
 dependency is app logic, the placement is a deployment rule.
@@ -246,7 +246,7 @@ dependency is app logic, the placement is a deployment rule.
 
 Which libraries an app builds on — infernix, jitML, and (a later phase) Haskell extension modules validated
 by a custom AST checker — is part of what the app *is*, and therefore lives
-on the application-logic surface. The clean way to hold this with §7:
+on the application-logic surface. The clean way to hold this with [§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule):
 
 - The library **call graph** — *that* the app invokes infernix, *which* workflows it composes — is
   application logic; it would travel with the app to any cluster.
@@ -256,11 +256,11 @@ on the application-logic surface. The clean way to hold this with §7:
 The typed shape of that dependency is the **`ExtensionSpec`** contract. Each in-tree extension in the v1
 closed set — **{infernix, jitML, mattandjames}** — plugs in by contributing one
 `ExtensionSpec { extDhall, extChain, extCapabilities }`: a typed Dhall sub-catalog **nested inside the
-amoebius `.dhall`** (§7), a `cfg -> [Step]` chain, and the `List Capability` it declares. These specs are
+amoebius `.dhall`** ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)), a `cfg -> [Step]` chain, and the `List Capability` it declares. These specs are
 merged at **compile/link time into the single binary** — there is no per-extension image and no `dlopen`.
 That the app *contributes* an `ExtensionSpec` is application logic (it travels with the app); the
-*placement* of the linked workload stays a deployment rule (§7). The `ExtensionSpec` grammar and its
-nested-Dhall composition are owned by [dsl_doctrine.md §4](./dsl_doctrine.md) — this is specified DSL design
+*placement* of the linked workload stays a deployment rule ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)). The `ExtensionSpec` grammar and its
+nested-Dhall composition are owned by [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability) — this is specified DSL design
 intent, not a built mechanism. An app unwilling to be linked is **not** an extension — it runs as an
 ordinary app-spec `.dhall` workload; the one path for a non-vendored third party is the later-phase Haskell
 extension DSL + AST checker below.
@@ -280,7 +280,7 @@ geographically-distributed clusters with automatic gateway failover — **and ch
 spec.** Everything that makes that move happen lives in deployment rules and platform idioms.
 
 ```mermaid
-flowchart LR
+flowchart TD
   app[App spec dhall written once: UI, LB services, auth rules, durable storage, Pulsar topics, shared libraries] -->|joined with| r1[Deployment rules A: single cluster, replicas=1]
   app -->|same bytes, joined with| r2[Deployment rules B: N clusters, geo-replicated, gateway failover]
   r1 -->|renders| d1[Deployment: one cluster, one region]
@@ -289,7 +289,7 @@ flowchart LR
 
 Cashing out "zero app change":
 
-- The app already declares its durable state — MinIO buckets, Pulsar topics, a Postgres DB (§2). The
+- The app already declares its durable state — MinIO buckets, Pulsar topics, a Postgres DB ([§2](#2-the-application-logic-surface--what-an-app-is)). The
   deployment-rules layer says *replicate them across clusters*; the **platform idioms carry the state**:
   Pulsar geo-replication, MinIO replication, and Patroni/Postgres replication. The app's data model is unchanged; only its replication topology is.
 - Gateway failover and route53 repointing are deployment-rules + cluster-lifecycle

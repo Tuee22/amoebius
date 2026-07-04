@@ -17,7 +17,7 @@
 ## 1. Why this doctrine exists: the inter-cluster wire is an open gap
 
 amoebius has, until now, described exactly two network surfaces: the single **wild-ingress** door
-(LoadBalancer → Envoy → Gateway API → Keycloak, [platform_services_doctrine.md §9](./platform_services_doctrine.md))
+(LoadBalancer → Envoy → Gateway API → Keycloak, [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path))
 and the two **localhost-only** host channels ([host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md)).
 Neither covers the case the elastic single-logical-data-plane design needs: **a remote node reaching the home
 cluster's Pulsar/MinIO across an untrusted network.** The cross-cluster geo-replication link
@@ -37,13 +37,13 @@ if it has a route to that store that no one else can use.
 "WireGuard" — it is a WireGuard *control-plane product*, and every subsystem it brings duplicates one
 amoebius already owns, in a weaker, unreviewed form carrying its own desync-able state store. It is the
 Harbor/Helm of networking: exactly the pattern the project exists to abolish
-([manifest_generation_doctrine.md §1](./manifest_generation_doctrine.md),
+([manifest_generation_doctrine.md §1](./manifest_generation_doctrine.md#1-why-this-doctrine-exists-types-render-manifests-helm-does-not),
 [image_build_doctrine.md](./image_build_doctrine.md)).
 
 | Netmaker brings | amoebius already owns |
 |---|---|
 | Its own control server | The elected control-plane singleton ([daemon_topology_doctrine.md](./daemon_topology_doctrine.md)) |
-| Its own DB (a desired-state store) | `render(dhall)` — **no external release store** ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md)) |
+| Its own DB (a desired-state store) | `render(dhall)` — **no external release store** ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderdhall-observed-is-etcd-a-diff-is-typed)) |
 | Its own MQTT broker to push peer changes | Pulsar — the one coordination plane ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)) |
 | Its own PKI / mTLS | The Vault forest CA + secrets model ([vault_pki_doctrine.md](./vault_pki_doctrine.md)) |
 | Its own node/peer inventory | The typed node inventory ([substrate_doctrine.md](./substrate_doctrine.md)) + the Dhall spec |
@@ -61,19 +61,19 @@ WireGuard fits the amoebius disciplines cleanly because it is a *primitive*, not
   Curve25519 static keypairs, not X.509. So peer keys are a **Vault KV secret class** under the
   secrets-by-name + parent-injection model ([vault_pki_doctrine.md](./vault_pki_doctrine.md)) — Vault mints
   and holds the keypair, the Dhall names it, the parent injects it into a child's Vault. Be precise: the
-  forest CA hierarchy's "any mesh" clause ([vault_pki_doctrine.md §8](./vault_pki_doctrine.md)) is reserved
-  for a *later* TLS/mesh layer (§6), **not** consumed by WireGuard.
+  forest CA hierarchy's "any mesh" clause ([vault_pki_doctrine.md §8](./vault_pki_doctrine.md#8-the-root-cluster-owns-the-pki-trust-anchor)) is reserved
+  for a *later* TLS/mesh layer ([§6](#6-the-service-mesh-verdict-no-linkerd-for-v1)), **not** consumed by WireGuard.
 - **Peer config is rendered, not managed.** `render(nodeInventory) -> [WireGuardPeerConfig]` — the pure
-  `render()` discipline of [manifest_generation_doctrine.md §2](./manifest_generation_doctrine.md) lifted to
+  `render()` discipline of [manifest_generation_doctrine.md §2](./manifest_generation_doctrine.md#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects) lifted to
   `wg` config. Illegal peer configurations — overlapping VPN IPs, a keyless peer, an `AllowedIPs` outside the
   fabric CIDR — become unrepresentable in the typed inventory rather than caught at runtime.
 - **Distribution is a reconcile, not an agent.** The singleton reconciles the interface the same way it
-  reconciles everything else ([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md)):
+  reconciles everything else ([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)):
   `discover` (`wg show`) → diff against `render(inventory)` → enact (`wg set`). No Netmaker agent, no side
   channel; peer-set changes propagate as reconciles rolled out from the root.
 
 ```mermaid
-flowchart LR
+flowchart TD
   inv[Typed node inventory in the in-force dhall] -->|render, pure| cfg[WireGuard peer configs]
   cfg -->|singleton reconcile: wg show, diff, wg set| iface[wg0 interface on each node]
   vault[Vault KV: Curve25519 peer keypairs] -->|secrets-by-name, parent-injected| iface
@@ -100,7 +100,7 @@ flowchart LR
 ## 5. The security boundary generalizes: localhost → authenticated fabric
 
 Today, channel 2 (host → Pulsar/MinIO) binds NodePorts to loopback and is safe *because the packet never
-leaves the box* ([host_cluster_comms_doctrine.md §5](./host_cluster_comms_doctrine.md)). A remote spot worker
+leaves the box* ([host_cluster_comms_doctrine.md §5](./host_cluster_comms_doctrine.md#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary)). A remote spot worker
 crosses the public internet, so "localhost-only" no longer holds. The invariant **generalizes**, it does not
 break:
 
@@ -109,17 +109,17 @@ break:
   fabric."* Only a peer holding a Vault-minted WireGuard key can open a socket on `wg0`.
 - **No amoebius principle is actually traded.** The one thing localhost gave that the WAN cannot — that no
   attacker can reach the wire — WireGuard supplies with Curve25519 peer authentication + ChaCha20-Poly1305
-  encryption. Crucially, the [host_cluster_comms_doctrine.md §2](./host_cluster_comms_doctrine.md) **option-(b)
+  encryption. Crucially, the [host_cluster_comms_doctrine.md §2](./host_cluster_comms_doctrine.md#2-the-decision-that-was-open-and-is-now-resolved) **option-(b)
   mTLS rejection still holds**: WireGuard has already authenticated and encrypted the peer, so the Pulsar/MinIO
   wire itself stays mTLS-free and the high-bandwidth-bulk argument survives even over the WAN. The boundary
   moved; the tax did not return.
 - **`FabricPeer` is a distinct endpoint kind.** A fabric-reachable listener is *not* a wild ingress: a new
   `FabricPeer` endpoint index sits alongside `WildIngress` and `HostLocalPeer`
-  ([illegal_state_catalog.md §4.3](./illegal_state_catalog.md)), with **no constructor turning a `FabricPeer`
+  ([illegal_state_catalog.md §4.3](./illegal_state_catalog.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)), with **no constructor turning a `FabricPeer`
   into a `WildIngress`** — so "Keycloak owns all wild ingress"
-  ([platform_services_doctrine.md §9](./platform_services_doctrine.md)) is preserved by construction. The
+  ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)) is preserved by construction. The
   detailed generalization of the channel-2 rule is owned by
-  [host_cluster_comms_doctrine.md §5](./host_cluster_comms_doctrine.md); this doc owns the fabric that makes
+  [host_cluster_comms_doctrine.md §5](./host_cluster_comms_doctrine.md#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary); this doc owns the fabric that makes
   it safe.
 
 ---
@@ -131,7 +131,7 @@ features have little surface to act on, and each is already covered:
 
 | Mesh feature | Why it is redundant / declined here |
 |---|---|
-| East-west pod-to-pod mTLS | East-west is authorized by NetworkPolicy (default-deny + derived-allow, [platform_services_doctrine.md §9](./platform_services_doctrine.md)), identity is Vault PKI, and the cross-cluster wire is WireGuard-encrypted (§5). The in-cluster network is already treated as trusted, and coordination is broker-mediated Pulsar + MinIO, not synchronous pod-to-pod HTTP — little east-west surface to encrypt. |
+| East-west pod-to-pod mTLS | East-west is authorized by NetworkPolicy (default-deny + derived-allow, [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), identity is Vault PKI, and the cross-cluster wire is WireGuard-encrypted ([§5](#5-the-security-boundary-generalizes-localhost--authenticated-fabric)). The in-cluster network is already treated as trusted, and coordination is broker-mediated Pulsar + MinIO, not synchronous pod-to-pod HTTP — little east-west surface to encrypt. |
 | Retries / timeouts / circuit-breaking | The bus already gives at-least-once + dedup ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)) at the typed application layer, where amoebius wants it — not hidden in a sidecar. |
 | Golden metrics | Prometheus/Grafana is already a standard service ([platform_services_doctrine.md](./platform_services_doctrine.md)). |
 | Traffic-split (the *one* relevant feature, for gateway migration) | **Gateway-API `HTTPRoute` `backendRefs` carry weights natively**, on the Envoy edge amoebius already renders and Keycloak-fronts. A planned home→provider migration is a weight shift on the edge already in the stack — no mesh needed. |
@@ -143,7 +143,7 @@ residual is that declining Linkerd means accepting **unencrypted in-cluster east
 not encrypted) — consistent with the existing no-in-cluster-mTLS posture. **The reconsideration trigger:** if
 a future compliance/threat requirement demands in-cluster encryption-in-transit *and* per-workload
 cryptographic identity beyond NetworkPolicy + Vault, revisit — and even then prefer **Vault-PKI-issued
-workload certs consumed directly** (the reserved "any mesh" CA clause, §3) over a mandatory sidecar fleet.
+workload certs consumed directly** (the reserved "any mesh" CA clause, [§3](#3-keys-config-and-distribution--wireguard-as-just-another-reconcile)) over a mandatory sidecar fleet.
 
 ---
 
@@ -152,11 +152,11 @@ workload certs consumed directly** (the reserved "any mesh" CA clause, §3) over
 | Owned here (SSoT) | Owned elsewhere (referenced) |
 |-------------------|------------------------------|
 | Raw-WireGuard-over-Netmaker; the fabric primitive amoebius configures directly | — |
-| Rendered peer config, `wg`-reconcile distribution, disjoint-namespace VPN-IP allocation | The `render()` discipline → [manifest_generation_doctrine.md](./manifest_generation_doctrine.md); the reconcile shape → [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md) |
+| Rendered peer config, `wg`-reconcile distribution, disjoint-namespace VPN-IP allocation | The `render()` discipline → [manifest_generation_doctrine.md](./manifest_generation_doctrine.md); the reconcile shape → [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) |
 | The hub = gateway-role topology; the fabric moves with the gateway | The gateway authority + failover/migration → [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
-| The service-mesh (Linkerd) verdict + Gateway-API-weights-for-migration | The Gateway-API / Envoy edge → [platform_services_doctrine.md §9](./platform_services_doctrine.md) |
+| The service-mesh (Linkerd) verdict + Gateway-API-weights-for-migration | The Gateway-API / Envoy edge → [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) |
 | That WireGuard peer keys are a Vault KV secret class (not PKI certs) | The Vault secret model + the reserved "any mesh" CA clause → [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
-| The fabric that makes the localhost→fabric generalization safe | The channel-2 rule generalization itself → [host_cluster_comms_doctrine.md §5](./host_cluster_comms_doctrine.md) |
+| The fabric that makes the localhost→fabric generalization safe | The channel-2 rule generalization itself → [host_cluster_comms_doctrine.md §5](./host_cluster_comms_doctrine.md#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary) |
 
 ---
 
@@ -167,13 +167,13 @@ validation gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPME
 orientation only: the fabric is promoted from the provisional Phase 16 "WireGuard / Linkerd vs Envoy"
 candidate into a first-class phase (the network fabric is now *load-bearing* for the attach topology, not the
 "redundant, do not adopt" default the Phase-16 framing assumed when it measured only against north-south
-ingress); the Linkerd half collapses to the written verdict in §6.
+ingress); the Linkerd half collapses to the written verdict in [§6](#6-the-service-mesh-verdict-no-linkerd-for-v1).
 
 > **Honesty.** Everything here is Phase 0 **design intent**. A WireGuard fabric, its rendered-config
 > reconcile, and the localhost→fabric generalization are **new amoebius design with no sibling proof** —
 > WireGuard, `wg`, and Gateway-API HTTPRoute weights are real, documented mechanisms, but *that amoebius wires
 > them into this specific fabric* is specified here and unproven until the phase lands. Per
-> [documentation_standards.md §6](../documentation_standards.md), read every prescriptive statement as the
+> [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every prescriptive statement as the
 > contract amoebius intends to satisfy, never as a tested result.
 
 ---
@@ -182,9 +182,9 @@ ingress); the Linkerd half collapses to the written verdict in §6.
 
 - [Engineering Doctrine Index](./README.md)
 - [Single Logical Data Plane Doctrine](./single_logical_data_plane_doctrine.md) — the attach topology this wire enables
-- [Host ↔ Cluster Communication](./host_cluster_comms_doctrine.md) — §5, the localhost→fabric generalization
+- [Host ↔ Cluster Communication](./host_cluster_comms_doctrine.md) — [§5](./host_cluster_comms_doctrine.md#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary), the localhost→fabric generalization
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — WireGuard peer keys as a KV secret class; the reserved "any mesh" CA clause
-- [Platform Services Doctrine](./platform_services_doctrine.md) — §9 the single wild-ingress path + Gateway-API weights
+- [Platform Services Doctrine](./platform_services_doctrine.md) — [§9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) the single wild-ingress path + Gateway-API weights
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md) — the gateway role the hub tracks; failover/migration
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the singleton that reconciles the fabric
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — the `render()` discipline the peer config reuses

@@ -15,7 +15,7 @@
 
 Start from the picture. Everything that reaches an amoebius cluster from the *wild* — WAN, LAN, even a
 browser on the same machine — goes through one door, and Keycloak is the bouncer
-([platform_services_doctrine.md §9](./platform_services_doctrine.md)). This document owns the **one
+([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)). This document owns the **one
 carve-out** from that rule: the traffic that originates *on the host itself* and never touches a network
 anyone else can see.
 
@@ -25,21 +25,21 @@ available only from the host, with no WAN or LAN access:
 | # | Who | Reaches | Transport | Why this transport |
 |---|-----|---------|-----------|--------------------|
 | 1 | The **host binary** (CLI / sudo host-daemon context) | `kube-apiserver` | The k8s distro's **default mTLS** (kind/rke2 client cert) | It is the cluster's control path; the distro already issues a trusted client identity, so amoebius reuses it rather than inventing one |
-| 2 | **Host compute daemons** (e.g. Apple-Metal inference) — and the host binary when it coordinates rather than controls | In-cluster **MinIO + Pulsar** | **Host-only NodePort, no mTLS** | Bulk artifact / event I/O needs raw socket bandwidth; security is the network restriction, not transport crypto (§3–§5) |
+| 2 | **Host compute daemons** (e.g. Apple-Metal inference) — and the host binary when it coordinates rather than controls | In-cluster **MinIO + Pulsar** | **Host-only NodePort, no mTLS** | Bulk artifact / event I/O needs raw socket bandwidth; security is the network restriction, not transport crypto ([§3](#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)–[§5](#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary)) |
 
 Anything that is neither of these is *wild*, and wild traffic has no host-special path: it goes through the
 LoadBalancer → Envoy → Keycloak like everyone else. The carve-out is acceptable **precisely because** it is
 unreachable off the host; the moment such an access point were exposed to LAN or WAN it would become a
-backdoor around Keycloak, which the DSL makes unrepresentable (§7).
+backdoor around Keycloak, which the DSL makes unrepresentable ([§7](#7-what-the-dsl-makes-unrepresentable-here)).
 
 Channel 2's "localhost-only" is the *steady-state, single-host* form of a more general boundary. When remote
 elastic compute must reach the home cluster's one Pulsar/MinIO across an untrusted network, the same channel
 generalizes to *"reachable only over the authenticated WireGuard fabric"* without becoming wild — the
-generalization is owned by §5.1 and [network_fabric_doctrine.md](./network_fabric_doctrine.md). Channel 1 and
+generalization is owned by [§5.1](#51-the-generalization-localhost-or-the-authenticated-wireguard-fabric) and [network_fabric_doctrine.md](./network_fabric_doctrine.md). Channel 1 and
 the wild-ingress door are unaffected.
 
 ```mermaid
-flowchart LR
+flowchart TD
   wild[Wild traffic: WAN / LAN / localhost browser] -->|TLS| lb[LoadBalancer: MetalLB or cloud LB]
   lb -->|Gateway API listener| envoy[Envoy Gateway data plane]
   envoy -->|OIDC and JWT enforcement| kc[Keycloak: owns all wild ingress]
@@ -66,7 +66,7 @@ This document **resolves it.** The three options as posed, and the verdict:
 | Option | What it buys | Why rejected |
 |---------------------------------|--------------|--------------|
 | **(a)** Same Keycloak / Envoy / Gateway-API path as wild traffic | One uniform ingress story | Defeats the point: host daemons exist for *performance* (e.g. Apple unified memory), and forcing bulk model/blob/event I/O through OIDC + L7 routing + edge TLS adds auth and proxy overhead to the one path that most needs to be cheap. A host daemon is also not "wild" — treating it as such conflates trust boundaries. |
-| **(b)** Separate NodePort with **mTLS issued by root** | Network-level confidentiality + authenticity | The mTLS handshake and per-record encryption are real overhead on high-bandwidth bulk transfer (model weights, content-addressed blobs, Pulsar streams). You pay a tax on every channel-2 byte to defend against an attacker who, by the network restriction (§5), cannot reach the socket in the first place. |
+| **(b)** Separate NodePort with **mTLS issued by root** | Network-level confidentiality + authenticity | The mTLS handshake and per-record encryption are real overhead on high-bandwidth bulk transfer (model weights, content-addressed blobs, Pulsar streams). You pay a tax on every channel-2 byte to defend against an attacker who, by the network restriction ([§5](#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary)), cannot reach the socket in the first place. |
 | **(c)** A **Unix domain socket** | A *hard* guarantee of no network traffic — attractive | One socket becomes the single pipe through which **all** MinIO and Pulsar I/O is funnelled and bottlenecked. It is also not cross-substrate-uniform: the loopback-NodePort shape generalizes cleanly across kind/rke2/Lima/WSL2, a single named socket does not. |
 
 **Resolution — chosen design: a host compute daemon is a plain Pulsar + MinIO *client/peer* over
@@ -77,9 +77,9 @@ keeping option (b)'s bandwidth headroom (a real socket per stream) without payin
 
 > **Honesty.** This is a *resolved design decision* for Phase 7, argued from the threat model and bandwidth
 > economics below — **not** a tested or proven amoebius result. The loopback-NodePort pattern has a sibling
-> precedent in prodbox (§6), which is evidence from another system, not proof here. Status and gates live
+> precedent in prodbox ([§6](#6-the-host-only-restriction-in-practice-and-its-sibling-precedent)), which is evidence from another system, not proof here. Status and gates live
 > only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
-> [documentation_standards.md §6](../documentation_standards.md)).
+> [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---
 
@@ -96,7 +96,7 @@ Concretely:
   MinIO store. That is the entire interaction shape. The native-protocol client, topic algebra, and
   at-least-once + dedup semantics are owned by [pulsar_client_doctrine.md](./pulsar_client_doctrine.md);
   the artifact store is owned by the content-addressing doctrine
-  (see [platform_services_doctrine.md §4 and §6](./platform_services_doctrine.md)).
+  (see [platform_services_doctrine.md §4 and §6](./platform_services_doctrine.md#4-minio--the-object-substrate)).
 - **The host daemon and an in-cluster worker are the same kind of thing.** A daemon is a worker role that
   happens to run on the host for hardware reasons; its *coordination* is identical to a worker Pod's. The
   daemon roles, the elected control-plane singleton's authority, and leadership election are owned by
@@ -106,9 +106,9 @@ Concretely:
   amoebius for safety, or should there be ingress rules there?" — **neither.** The daemon does not proxy
   through the binary, and it gets no bespoke *wild* ingress rule. It is a direct peer of MinIO/Pulsar over
   the host-only NodePort, authenticating as an ordinary client. The NodePort plus the network restriction
-  (§5) *is* the access grant.
+  ([§5](#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary)) *is* the access grant.
 - **The host binary uses the same path for coordination.** When the binary needs to *control* cluster
-  state it uses channel 1 (kubeapi, §4); when it needs to *coordinate* with the in-cluster daemon
+  state it uses channel 1 (kubeapi, [§4](#4-channel-1--the-host-binary--kube-apiserver-via-distro-mtls)); when it needs to *coordinate* with the in-cluster daemon
   it is itself a Pulsar/MinIO client on
   channel 2 — no separate binary↔daemon RPC exists.
 
@@ -156,7 +156,7 @@ The threat model, made explicit:
 - **"Absolutely certain only localhost can reach these"** is the load-bearing
   property, and it is enforced by the network restriction, *not* by going through Envoy/Keycloak. The
   whole reason channel 2 exists is to be the path that does **not** pass through the wild gateway; routing
-  it back through Envoy would re-introduce exactly the overhead §2 rejected.
+  it back through Envoy would re-introduce exactly the overhead [§2](#2-the-decision-that-was-open-and-is-now-resolved) rejected.
 
 The bandwidth half of the argument (why we don't add crypto "just in case"):
 
@@ -174,7 +174,7 @@ buys.
 
 ### 5.1 The generalization: localhost **or** the authenticated WireGuard fabric
 
-The §5 argument has one load-bearing premise — *no attacker can reach the wire* — and it is realized by
+The [§5](#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary) argument has one load-bearing premise — *no attacker can reach the wire* — and it is realized by
 localhost binding. Remote elastic compute breaks that premise: a spot node attached to the home cluster's one
 Pulsar/MinIO ([single_logical_data_plane_doctrine.md](./single_logical_data_plane_doctrine.md)) reaches
 channel 2 across the public internet, where "localhost-only" cannot hold. The invariant **generalizes rather
@@ -186,19 +186,19 @@ and nowhere else.
   Vault-minted WireGuard key can open the socket. The fabric itself (raw WireGuard, keys, rendered peer
   config, the hub=gateway-role topology) is owned by
   [network_fabric_doctrine.md](./network_fabric_doctrine.md); this doc owns only that channel 2 may ride it.
-- **The mTLS rejection (§2, option b) still holds — no tax returns.** The one thing localhost gave that the
+- **The mTLS rejection ([§2](#2-the-decision-that-was-open-and-is-now-resolved), option b) still holds — no tax returns.** The one thing localhost gave that the
   WAN cannot, that an attacker cannot reach the wire, WireGuard now supplies with Curve25519 peer
   authentication + ChaCha20-Poly1305 encryption at the tunnel. Because the peer is already authenticated and
   the bytes already encrypted, the Pulsar/MinIO wire stays **mTLS-free**, so the high-bandwidth-bulk economics
-  of §5 survive over the WAN. The boundary moved from "localhost" to "authenticated fabric"; the per-byte
+  of [§5](#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary) survive over the WAN. The boundary moved from "localhost" to "authenticated fabric"; the per-byte
   crypto tax did not come back.
 - **A fabric peer is still not wild ingress.** The fabric-reachable listener is a distinct endpoint kind —
   a `FabricPeer`, sitting alongside `HostLocalPeer` and `WildIngress` with **no constructor turning it into a
-  `WildIngress`** ([illegal_state_catalog.md §4.3](./illegal_state_catalog.md)) — so "Keycloak owns all wild
-  ingress" ([platform_services_doctrine.md §9](./platform_services_doctrine.md)) is preserved: a spot worker
-  is an authenticated *peer* of MinIO/Pulsar, never a wild client, exactly as a host daemon is (§3).
+  `WildIngress`** ([illegal_state_catalog.md §4.3](./illegal_state_catalog.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)) — so "Keycloak owns all wild
+  ingress" ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)) is preserved: a spot worker
+  is an authenticated *peer* of MinIO/Pulsar, never a wild client, exactly as a host daemon is ([§3](#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)).
 
-The rest of §6's host-only realization applies unchanged to the localhost case; the fabric case substitutes
+The rest of [§6](#6-the-host-only-restriction-in-practice-and-its-sibling-precedent)'s host-only realization applies unchanged to the localhost case; the fabric case substitutes
 "authenticated-fabric-origin" for "host-origin" as the network restriction, with WireGuard providing the
 authentication a shared loopback did not need.
 
@@ -223,7 +223,7 @@ the comms-relevant requirement each substrate must satisfy:
 - **The DSL never lets a substrate "fix" a missing piece by widening exposure.** If a substrate's node
   networking makes the loopback binding awkward, the resolution is to extend that substrate's installer to
   honor the host-only contract — not to publish the port wider. Substrate equivalence is structural
-  ([platform_services_doctrine.md §12](./platform_services_doctrine.md)).
+  ([platform_services_doctrine.md §12](./platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant)).
 
 ---
 
@@ -261,7 +261,7 @@ channel-2 client auth resolves through it, not through any host environment vari
 | "No bespoke control channel; coordination is Pulsar/MinIO" as the host-comms wire rule | Daemon roles, control-plane singleton, election → [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
 | The host-only network-restriction requirement each substrate must meet | The substrate catalog, virtualized substrates, no-env/PATH contract → [substrate_doctrine.md](./substrate_doctrine.md) |
 | That channel-2 transport is plain Pulsar/MinIO peering | The native-protocol client, no-WebSockets, topology algebra → [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) |
-| Naming the one carve-out from Keycloak-owns-all-ingress | The wild-ingress rule itself → [platform_services_doctrine.md §9](./platform_services_doctrine.md) |
+| Naming the one carve-out from Keycloak-owns-all-ingress | The wild-ingress rule itself → [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) |
 | That channel-2 auth is secrets-by-name | The Vault secret/inject model → [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 
 ---

@@ -31,7 +31,7 @@ both on the host:
 > package, asks for an Xcode license, or depends on a user login keychain.*
 
 ```mermaid
-flowchart LR
+flowchart TD
   render[Host binary renders MSL plus launch metadata] --> cache[Write content-addressed source-metadata cache record]
   cache --> bridge[Call fixed host Metal bridge]
   bridge --> compile[Bridge calls MTLDevice.makeLibrary source options]
@@ -44,7 +44,7 @@ flowchart LR
 > path). That is **sibling evidence, not an amoebius result**: amoebius has not built its Apple phase
 > (Phase 7), so every prescriptive statement below is a **target shape**, not a tested amoebius fact. Status
 > and gates live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), per
-> [documentation_standards.md §6](../documentation_standards.md).
+> [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
 ---
 
@@ -55,7 +55,7 @@ flowchart LR
   ([substrate_doctrine.md §5](./substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)),
   never an interactive foreground app.
 - **No keychain requirement.** No unlocked `login.keychain-db`, Secure Enclave prompt, or
-  `security unlock-keychain`. (This is the exact blocker that rules out Tart — §6.)
+  `security unlock-keychain`. (This is the exact blocker that rules out Tart — [§6](#6-why-tart-is-not-viable-the-no-vm-rationale).)
 - **No full-Xcode dependency.** Full Xcode is a GUI app with license/first-run surfaces and large mutable
   host state outside the typed prerequisite boundary; it is not installed by `bootstrap`.
 - **No offline `metal` compiler.** The Command Line Tools do not reliably ship `metal`; the core path must
@@ -78,7 +78,7 @@ loaded before the Apple host worker subscribes to work. The bridge exposes a **s
 and keeps all Metal API detail out of generated artifacts:
 
 - Built once by the host binary invoking `/usr/bin/clang` **by absolute path** (no `PATH`, no env, per the
-  [substrate_doctrine.md §3](./substrate_doctrine.md) lazy-tool-ensure contract), linking the macOS
+  [substrate_doctrine.md §3](./substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) lazy-tool-ensure contract), linking the macOS
   `Foundation` and `Metal` frameworks, producing a host-resident dylib; then loaded with `dlopen` and
   verified by resolving an exported probe symbol via `dlsym` before any work is dispatched.
 - The bridge owns `MTLCreateSystemDefaultDevice()`, `MTLCompileOptions` with **fast math disabled**,
@@ -121,7 +121,7 @@ The headless Apple substrate has these typed prerequisites:
 |--------------|--------------|-----------------|
 | `apple.metal-runtime` | **Core** execution | Probe `MTLCreateSystemDefaultDevice` and a tiny runtime `makeLibrary(source:)` dispatch. |
 | `apple.metal-bridge` | **Core** execution | Build or verify the fixed bridge (`/usr/bin/clang`, absolute path), then `dlopen` + call its probe symbol. |
-| `apple.swiftc` | *Optional* non-core Swift lane (§5) | Prefer Homebrew `swift`; verify `swiftc --version` and a Swift + Metal probe compiled with an explicit SDK. |
+| `apple.swiftc` | *Optional* non-core Swift lane ([§5](#5-optional-swift-lane-non-core)) | Prefer Homebrew `swift`; verify `swiftc --version` and a Swift + Metal probe compiled with an explicit SDK. |
 | `apple.macos-sdk` | *Optional* Swift / ObjC source builds | Verify `xcrun --sdk macosx --show-sdk-path` (or an explicitly configured SDK path). |
 
 The **core** Metal path requires only `apple.metal-runtime` and `apple.metal-bridge`; it does **not** require
@@ -171,7 +171,7 @@ practice it **violates the headless contract**, which is why the design commits 
 - **A VM makes every first compile depend on VM lifecycle health** — guest boot, guest-agent readiness,
   shared-mount behaviour, resource sizing, host security state — far too many moving parts for a JIT miss.
 - **A VM build lane is an extra unowned surface.** amoebius's no-`PATH`/no-env, lazy-tool-ensure host
-  contract ([substrate_doctrine.md §3](./substrate_doctrine.md)) already discovers `/usr/bin/clang` and the
+  contract ([substrate_doctrine.md §3](./substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract)) already discovers `/usr/bin/clang` and the
   OS Metal runtime by absolute path; a Tart VM would add a whole second host-security/VM-lifecycle surface
   the contract would have to own, for zero benefit over building on the host directly.
 
@@ -197,7 +197,7 @@ headless fixed-Metal-bridge build + the native Apple-Metal host worker land in *
 gate ([phase_07_host_compute_daemons.md](../../DEVELOPMENT_PLAN/phase_07_host_compute_daemons.md)) brings up
 the Apple cluster on Lima, builds the worker **headless on-host via the fixed bridge**, and dispatches a
 Metal inference job over Pulsar. This doc never maintains a competing status ledger; it states the target
-shape and links back for status, per [documentation_standards.md §6](../documentation_standards.md).
+shape and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
 ---
 

@@ -24,16 +24,16 @@ points at the wrong thing, or at nothing, has no inhabitant.
 That single move buys three properties that this doctrine is the SSoT for, applied uniformly to **both**
 `infernix` (LLM inference) and `jitML` (training + JIT codegen):
 
-1. **A three-tier store** (§2) where the only mutable objects are tiny pointers, and everything heavy is
+1. **A three-tier store** ([§2](#2-the-three-tier-store-blobs--manifests--pointers)) where the only mutable objects are tiny pointers, and everything heavy is
    write-once and self-naming.
-2. **A run identity** (§3) — `experimentHash` — that folds *what you asked for* and *where it ran* into one
+2. **A run identity** ([§3](#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)) — `experimentHash` — that folds *what you asked for* and *where it ran* into one
    digest, so two runs share a namespace only when they are genuinely the same experiment on the same
    substrate.
-3. **Reproducibility by construction** (§4) — pinned content-addressed inputs + pure stages + a derived RNG
+3. **Reproducibility by construction** ([§4](#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed)) — pinned content-addressed inputs + pure stages + a derived RNG
    seed — where the type system makes the bookkeeping *total*.
 
 It also buys a fourth property that pays off elsewhere: content-addressed data is **confluent**, so it crosses
-cluster boundaries without a divergence proof (§5).
+cluster boundaries without a divergence proof ([§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)).
 
 **The extension-library set is closed.** `infernix` and `jitML` are the two ML members of the v1
 extension-library set, which is **closed** at {`infernix`, `jitML`, `mattandjames`} — three libraries that LINK
@@ -43,18 +43,18 @@ future ML family is **Phase-N design intent**, entering later through the same l
 [`dsl_doctrine.md`](./dsl_doctrine.md)); it is not a v1 member, and nothing in this doctrine is written for one.
 
 **What this doc does not own.** This doctrine owns the shared *mechanism*. It does **not** re-derive the
-*totality typing* that makes names un-forgeable — that is technique §4.5 in
+*totality typing* that makes names un-forgeable — that is technique [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) in
 [`illegal_state_catalog.md`](./illegal_state_catalog.md). It does **not** own the per-substrate floating-point
 contract or the JIT cache key — those are owned by the sibling `jitML` project's
 `jitML/documents/engineering/determinism_contract.md`, which this doc references rather than restates. And it
 does **not** own where the bytes physically live (retained-PV MinIO) — that is
-[`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md). §7 draws every boundary explicitly.
+[`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md). [§7](#7-what-this-doctrine-deliberately-does-not-own) draws every boundary explicitly.
 
 **Honesty up front.** Everything below is amoebius **design intent**, generalized from two working sibling
 libraries (`jitML/src/JitML/Checkpoint/Format.hs`, `jitML/src/JitML/Engines/Rng.hs`, and the `infernix`
 artifact store). Evidence inherited from a sibling project is evidence, not an amoebius proof — amoebius has
-not yet built this layer. Per [documentation_standards.md §6](../documentation_standards.md), no statement
-here is a proven amoebius result, and §6 is explicit about which claims are *proven-in-types*, which are
+not yet built this layer. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), no statement
+here is a proven amoebius result, and [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) is explicit about which claims are *proven-in-types*, which are
 *tested* in a sibling, and which are deliberately *not asserted*. Delivery sequencing and gates live only in
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
 
@@ -97,7 +97,7 @@ fixed prefix schema. The `jitML` key renderers in `jitML/src/JitML/Checkpoint/Fo
   stream id, metrics by name, and so on — so two writers with equal *logical* content emit byte-identical CBOR
   and therefore the same key. Same `If-None-Match: *` protocol. The manifest SHA is the canonical *checkpoint
   id* used in Pulsar events and `--resume <checkpoint-id>`. Those Pulsar events are themselves **CBOR
-  payloads** — the message-body encoding is owned by [pulsar_client_doctrine.md §3.1](./pulsar_client_doctrine.md);
+  payloads** — the message-body encoding is owned by [pulsar_client_doctrine.md §3.1](./pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor);
   a payload carries this manifest SHA (a content-address reference), never the raw blob inline. So *this doc*
   owns the blob/manifest bytes (blobs raw, manifests canonical CBOR); the *Pulsar payload envelope* that
   references them is CBOR owned there — one format, two owners of two layers.
@@ -109,7 +109,7 @@ fixed prefix schema. The `jitML` key renderers in `jitML/src/JitML/Checkpoint/Fo
   harness and the typed `AdvancePredicate` that resolves a lost CAS.
 
 ```mermaid
-flowchart LR
+flowchart TD
   parts[Checkpoint parts: weights, optimizer, rng, replay] -->|"sha256(bytes), If-None-Match * (412 = success)"| blobs[blobs/sha256 write-once]
   blobs -->|named by their SHAs inside| manifest[manifests/sha256 canonical CBOR]
   manifest -->|"manifest-sha = sha256(canonical-cbor)"| ptr[pointers latest / best metric / trial id]
@@ -146,30 +146,30 @@ differ), and **a pointer is the only mutable object, advanced only by ETag-CAS, 
 
 | class | formula / source | identifies | status |
 |-------|------------------|-----------|--------|
-| `experimentHash` | `sha256(resolved-dhall ‖ substrate-fingerprint)` | an ML run / artifact (§3) | existing (sibling `jitML`/`infernix`) |
-| `kernelKey` | `sha256(kernel-source ‖ substrate-fingerprint)` | a Tier-3 JIT kernel (§4.5) | Phase-N design intent (Q8) |
+| `experimentHash` | `sha256(resolved-dhall ‖ substrate-fingerprint)` | an ML run / artifact ([§3](#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)) | existing (sibling `jitML`/`infernix`) |
+| `kernelKey` | `sha256(kernel-source ‖ substrate-fingerprint)` | a Tier-3 JIT kernel ([§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)) | Phase-N design intent (Q8) |
 | `releaseHash` | `sha256(resolved-deployment-dhall ‖ image-digests ‖ substrate-fingerprint)` | a deployment generation | Phase-N design intent (Q13) |
-| OCI image digest | registry-owned (not amoebius-computed) | a container image | existing ([`image_build_doctrine.md` §5](./image_build_doctrine.md)) |
+| OCI image digest | registry-owned (not amoebius-computed) | a container image | existing ([`image_build_doctrine.md` §5](./image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)) |
 
 **Pointer kinds** — mutable, ETag-CAS only, namespaced by kind:
 
 | kind | points at | owner |
 |------|-----------|-------|
-| `trial` (`latest` / `best/<metric>`) | a manifest SHA | this doc, §2 |
-| `model` | a `ModelArtifact` manifest; the `.ready` sentinel is the commit | §4.5 (Q8) |
-| `environment` (`dev` / `staging` / `prod`) | a `Release` (keyed by `releaseHash`) | [`release_lifecycle_doctrine.md` §3](./release_lifecycle_doctrine.md) |
+| `trial` (`latest` / `best/<metric>`) | a manifest SHA | this doc, [§2](#2-the-three-tier-store-blobs--manifests--pointers) |
+| `model` | a `ModelArtifact` manifest; the `.ready` sentinel is the commit | [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) (Q8) |
+| `environment` (`dev` / `staging` / `prod`) | a `Release` (keyed by `releaseHash`) | [`release_lifecycle_doctrine.md` §3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer) |
 
 Ownership and honesty for the registry:
 
-- `experimentHash` (§3) and the `trial` pointer (§2) are the **existing** pair — the only members with a working
+- `experimentHash` ([§3](#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)) and the `trial` pointer ([§2](#2-the-three-tier-store-blobs--manifests--pointers)) are the **existing** pair — the only members with a working
   sibling implementation. Everything else here is amoebius **design intent**, not a built result.
 - `kernelKey` folds *kernel source* and the substrate fingerprint the same way `experimentHash` folds the
   resolved `.dhall`; the finer JIT cache-key composition is owned by the sibling
-  `jitML/documents/engineering/determinism_contract.md`. `kernelKey` is consumed by Tier 3 in §4.5.
+  `jitML/documents/engineering/determinism_contract.md`. `kernelKey` is consumed by Tier 3 in [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd).
 - `releaseHash` and the `environment` pointer are **defined here** (this table is their canonical registry), but
   their *lifecycle* — the immutable release ledger, the promotion CAS, the `PromotionGate` — is owned by
-  [`release_lifecycle_doctrine.md` §2/§3](./release_lifecycle_doctrine.md). "Promote to prod" is an
-  `environment`-pointer CAS onto a `Release`, exactly the ETag-CAS discipline of a `trial` pointer flip (§2.2).
+  [`release_lifecycle_doctrine.md` §2/§3](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash). "Promote to prod" is an
+  `environment`-pointer CAS onto a `Release`, exactly the ETag-CAS discipline of a `trial` pointer flip ([§2.2](#22-why-this-shape-removes-the-races)).
 - The **OCI image digest** is registry-owned, not computed by amoebius; it appears here only so `releaseHash`
   can pin it. Its format and build path are owned by [`image_build_doctrine.md`](./image_build_doctrine.md).
 
@@ -208,7 +208,7 @@ experimentHash = sha256(resolved-dhall ‖ substrate-fingerprint)
   finer-grained JIT cache key) is owned by `jitML/documents/engineering/determinism_contract.md`; this doc
   treats it as an opaque pinned string.
 
-**Why fold the substrate into identity at all?** Because cross-substrate bit-equality is *not* guaranteed (§6).
+**Why fold the substrate into identity at all?** Because cross-substrate bit-equality is *not* guaranteed ([§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic)).
 The same program on a different accelerator produces different bytes, so it must occupy a different namespace —
 otherwise an `apple-silicon` checkpoint and a `linux-cuda` checkpoint would fight over the same `latest`
 pointer and the `best/<metric>` comparison would be comparing apples to ULP-shifted apples. Making the
@@ -219,7 +219,7 @@ This is where the two DSL surfaces meet without colliding: the **application-log
 `resolved-dhall`'s model and config, the **deployment-rules** surface chooses the substrate, and the
 substrate-fingerprint folds the latter into the identity — the split itself is owned by
 [`app_vs_deployment_doctrine.md`](./app_vs_deployment_doctrine.md). `experimentHash` gives **identity**, not a
-guarantee that two runs sharing it produce equal bits; that stronger claim is §4 (when it holds) and §6 (where
+guarantee that two runs sharing it produce equal bits; that stronger claim is [§4](#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) (when it holds) and [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) (where
 it stops).
 
 ---
@@ -236,7 +236,7 @@ separate, **tested/assumed** contract, scoped honestly in the determinism-ceilin
 "by construction" as covering the compute.
 
 ```mermaid
-flowchart LR
+flowchart TD
   dhall[Resolved Dhall + substrate fingerprint] -->|"sha256 join"| eh[experimentHash]
   eh -->|namespaces| store[Content-addressed store]
   store -->|"every input is a hash: re-run pins the same bytes"| stage[Pure stages: no I/O in the math]
@@ -247,7 +247,7 @@ flowchart LR
 
 ### 4.1 Leg one — pinned content-addressed inputs
 
-Every input a stage reads is named by its hash (§2): the dataset blob, the parent checkpoint manifest, the
+Every input a stage reads is named by its hash ([§2](#2-the-three-tier-store-blobs--manifests--pointers)): the dataset blob, the parent checkpoint manifest, the
 prior weights. Re-running an experiment re-pins the *same* bytes, because a content address cannot refer to
 anything else. There is no "latest version of the dataset" that could drift underfoot — there is only a SHA,
 and a SHA is forever.
@@ -288,7 +288,7 @@ from ambient entropy." A stream's seed is reachable only through `deriveSplitMix
 typed `SplitMixSeed` and a `Word64` index — both pinned. An artifact's name is reachable only by hashing real
 bytes (`deriveExperimentHash`, `blobKey`, `manifestContentSha`); there is no constructor that takes a free
 string. So "use whatever entropy the worker had" and "point at a checkpoint that was never written" are not
-states you can *fix at runtime* — they are states you cannot *write down*. This is the totality technique §4.5
+states you can *fix at runtime* — they are states you cannot *write down*. This is the totality technique [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)
 in [`illegal_state_catalog.md`](./illegal_state_catalog.md), applied to seeds and store keys; this doc owns the
 content-addressing/determinism *use* of it, the catalog owns the typing discipline.
 
@@ -307,15 +307,15 @@ Two types carry the axis:
   vLLM / pytorch / diffusers / transformers / Audiveris — enumerated as a closed provider union). It has **no
   `Url`/`Download`/`Fetch` arm**: the `.dhall` *selects* an engine by substrate, it can never *author* a
   download. An engine fetched or built at pod startup is therefore **grade-(1) unrepresentable**
-  ([`illegal_state_catalog.md` §3.25](./illegal_state_catalog.md)).
-- **`ModelArtifact`** — a by-name / content-address reference into the store of §2. An `ArtifactRef` is
+  ([`illegal_state_catalog.md` §3.25](./illegal_state_catalog.md#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model)).
+- **`ModelArtifact`** — a by-name / content-address reference into the store of [§2](#2-the-three-tier-store-blobs--manifests--pointers). An `ArtifactRef` is
   obtainable **only** once the `.ready` sentinel exists: a half-staged model has no serveable reference
   (**grade-(1)**, the existing `.ready`-gate discipline generalized — no constructor without the sentinel).
 
 **The engine↔model relation.** A `ModelArtifact` must be servable by an `EngineRuntime` that is available on the
 deployment's substrate — an unmatched model has no landing engine. This is a **grade-(2)** total relation
-(technique [`illegal_state_catalog.md` §4.7](./illegal_state_catalog.md)); the substrate `InferenceEngine`
-capability a model must match is owned by [`service_capability_doctrine.md` §4](./service_capability_doctrine.md).
+(technique [`illegal_state_catalog.md` §4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection)); the substrate `InferenceEngine`
+capability a model must match is owned by [`service_capability_doctrine.md` §4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding).
 
 The three tiers, three lifecycles:
 
@@ -326,20 +326,20 @@ The three tiers, three lifecycles:
   replaces `infernix`'s per-engine Poetry-venv + curl-tar-at-image-build.
 - **Tier 2 — `ModelArtifact` = eager STAGE-THEN-SERVE.** The parent-minted nested `infernix.dhall` names the
   model *set*; the elected in-cluster singleton stages each model, and the `.ready` sentinel is written **last**
-  so the `model` pointer (§2.3) commits only a complete artifact. Staging **re-keys** the model off `infernix`'s
+  so the `model` pointer ([§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)) commits only a complete artifact. Staging **re-keys** the model off `infernix`'s
   name-addressed `infernix-models/<modelId>/…` layout onto the content-addressed **blob ← manifest ← pointer**
-  store of §2 — the same three-tier shape training already uses. **Staging credentials — object-store and
+  store of [§2](#2-the-three-tier-store-blobs--manifests--pointers) — the same three-tier shape training already uses. **Staging credentials — object-store and
   upstream — resolve from Vault BY NAME** (a `SecretRef`, never a value in `.dhall`); this **kills** `infernix`'s
   second k8s-Secret store and its hardcoded `minioadmin/minioadmin123` fallback. Vault custody is the one
   amoebius secret contract, not a per-project store.
 - **Tier 3 — Kernel = LAZY content-addressed JIT.** A compiled kernel is materialized on the *first cache miss*
   (the sibling `jitML` `ensureKernelArtifact`: cache HIT returns a handle, MISS compiles then stores), keyed by
-  `kernelKey` (§2.3). It is **not** a startup build — a cold pod serves as soon as its baked engine and staged
+  `kernelKey` ([§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)). It is **not** a startup build — a cold pod serves as soon as its baked engine and staged
   model are ready, and pays JIT cost only on first use of a given kernel.
 
 **Inference determinism still holds.** With the engine baked, the model pinned by content-address, and decoding
-pure, `infernix` inference is deterministic by the same recipe as §4.1–§4.4: greedy decoding, or seeded sampling
-with the seed carried *in the request* rather than drawn from ambient entropy. The honest ceiling in §6 applies
+pure, `infernix` inference is deterministic by the same recipe as [§4.1](#41-leg-one--pinned-content-addressed-inputs)–[§4.4](#44-what-the-types-make-these-total-cashes-out-to): greedy decoding, or seeded sampling
+with the seed carried *in the request* rather than drawn from ambient entropy. The honest ceiling in [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) applies
 unchanged — same-substrate reproducibility is the contract, cross-substrate bit-equality is not asserted. The
 cross-project artifact + `.ready` readiness contract is owned by `infernix`'s
 `infernix/documents/architecture/pulsar_ml_workflow.md`; this doc owns the content-addressing, re-keying, and
@@ -351,7 +351,7 @@ seed-derivation contract those tiers instantiate.
 last — while `model_cache.py`'s `minioadmin` fallback is exactly the Vault violation this tier removes.
 `jitML`'s `Engines/Loader.hs` is the lazy per-kernel JIT (HIT→handle, MISS→compile). These are working sibling
 behaviors this doctrine *generalizes*; amoebius has built none of the three-tier asset lifecycle itself. The
-illegal states it closes are catalogued at [`illegal_state_catalog.md` §3.25](./illegal_state_catalog.md).
+illegal states it closes are catalogued at [`illegal_state_catalog.md` §3.25](./illegal_state_catalog.md#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model).
 
 ---
 
@@ -391,7 +391,7 @@ any content hash.
 
 **Honesty.** Confluence here is a property of the *store*, proven-in-types by the immutability + lattice
 argument above. Whether two clusters *produce the same bytes to merge* in the first place is a separate
-question, and its ceiling is §6.
+question, and its ceiling is [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic).
 
 ---
 
@@ -409,7 +409,7 @@ that ceiling sits, and amoebius adopts its contract verbatim rather than inventi
 
 - **Same-substrate bit-equality is the contract; cross-substrate bit-equality is *not guaranteed* and *not
   asserted*.** There is no numeric-parity check and no tolerance band across substrates — RNG draws and float
-  reduction order differ. The substrate is folded into `experimentHash` (§3) precisely so this is honest by
+  reduction order differ. The substrate is folded into `experimentHash` ([§3](#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)) precisely so this is honest by
   construction rather than papered over.
 - **Off-policy RL is downgraded to a *tested* first-N-step prefix.** For DQN, DDPG, TD3, SAC, CrossQ, and TQC,
   the replay-buffer write discipline is async, so two same-substrate same-seed runs may differ in which step
@@ -423,7 +423,7 @@ that ceiling sits, and amoebius adopts its contract verbatim rather than inventi
 
 ### 6.1 Proven / tested / assumed, spelled out
 
-Per the moral rule in [documentation_standards.md §6](../documentation_standards.md) and the ledger discipline
+Per the moral rule in [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and the ledger discipline
 in [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md), each claim states the layer it actually
 reaches:
 
@@ -447,12 +447,12 @@ specification to validate, never as a proven amoebius result. Status and gates: 
 
 | Concern | Owned by |
 |---------|----------|
-| The totality *typing* — names as total functions of content, no inhabitant for a dangling reference | [`illegal_state_catalog.md` §4.5](./illegal_state_catalog.md) |
+| The totality *typing* — names as total functions of content, no inhabitant for a dangling reference | [`illegal_state_catalog.md` §4.5](./illegal_state_catalog.md#45-content-address-totality--names-are-total-functions-of-content) |
 | Where the bytes physically live: `no-provisioner` retained-PV MinIO, deterministic rebind | [`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md) |
 | MinIO/Pulsar as HA-always standard services | [`platform_services_doctrine.md`](./platform_services_doctrine.md) |
 | The resolved-`.dhall` identity input and the purity boundary | [`dsl_doctrine.md`](./dsl_doctrine.md) |
 | The substrate-fingerprint composition, no-env/no-PATH probing, the four-substrate catalog | [`substrate_doctrine.md`](./substrate_doctrine.md) |
-| The application-logic ÷ deployment-rules split that feeds §3's two inputs | [`app_vs_deployment_doctrine.md`](./app_vs_deployment_doctrine.md) |
+| The application-logic ÷ deployment-rules split that feeds [§3](#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)'s two inputs | [`app_vs_deployment_doctrine.md`](./app_vs_deployment_doctrine.md) |
 | The async cross-cluster confluence "Second Axis" proof obligation | [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) |
 | The native-protocol Pulsar transport (no WebSockets), at-least-once + dedup | [`pulsar_client_doctrine.md`](./pulsar_client_doctrine.md) |
 | Host↔cluster comms: the daemon as MinIO/Pulsar peer over host-only NodePorts (no mTLS) | [`host_cluster_comms_doctrine.md`](./host_cluster_comms_doctrine.md) |
@@ -469,7 +469,7 @@ This document is normative content-addressing and determinism doctrine only. Del
 status, validation gates, and remaining work are owned by
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). This doc never maintains a competing
 status ledger; it states the target shape and links back for status. Per
-[documentation_standards.md §6](../documentation_standards.md), no statement here is a proven amoebius result:
+[documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), no statement here is a proven amoebius result:
 the model generalizes mechanisms built and tested in the sibling `jitML` and `infernix` libraries into amoebius
 design intent.
 
@@ -478,13 +478,13 @@ design intent.
 ## Cross-references
 
 - [Engineering Doctrine Index](./README.md)
-- [Illegal State Catalog](./illegal_state_catalog.md) — content-address totality (§4.5)
+- [Illegal State Catalog](./illegal_state_catalog.md) — content-address totality ([§4.5](./illegal_state_catalog.md#45-content-address-totality--names-are-total-functions-of-content))
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md)
-- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the MinIO content store is a `StorageBacking` ceiling for host-bounded clusters (§3.19)
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the MinIO content store is a `StorageBacking` ceiling for host-bounded clusters ([§3.19](./illegal_state_catalog.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar))
 - [Platform Services Doctrine](./platform_services_doctrine.md)
-- [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — `releaseHash` + the `environment` promotion pointer (§2/§3), registered in the §2.3 master table
-- [Service Capability Doctrine](./service_capability_doctrine.md) — the substrate `InferenceEngine` capability a `ModelArtifact` must match (§4), the engine↔model grade-(2) relation
-- [Image Build Doctrine](./image_build_doctrine.md) — baked `EngineRuntime`s (§4.5 Tier 1) + the OCI image digest (§5)
+- [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — `releaseHash` + the `environment` promotion pointer ([§2](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash)/[§3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer)), registered in the [§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) master table
+- [Service Capability Doctrine](./service_capability_doctrine.md) — the substrate `InferenceEngine` capability a `ModelArtifact` must match ([§4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding)), the engine↔model grade-(2) relation
+- [Image Build Doctrine](./image_build_doctrine.md) — baked `EngineRuntime`s ([§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) Tier 1) + the OCI image digest ([§5](./image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest))
 - [DSL Doctrine](./dsl_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)

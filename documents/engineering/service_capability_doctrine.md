@@ -35,11 +35,11 @@ reads those as the *resources of a capability*: a `<app>/<bucket>` is an **Objec
 database is a **Sql** resource, a declared topic lifecycle is a **MessageBus** resource. The app declares
 resources *against a capability*; the capability is the abstract interface that keeps the provider swappable.
 The app-surface inventory those resources belong to is owned by
-[app_vs_deployment_doctrine.md §2](./app_vs_deployment_doctrine.md); this doctrine owns the *interface* behind
+[app_vs_deployment_doctrine.md §2](./app_vs_deployment_doctrine.md#2-the-application-logic-surface--what-an-app-is); this doctrine owns the *interface* behind
 it.
 
 The payoff is the fungibility goal stated from the app's side: an app that names capabilities is portable
-across every cluster amoebius can build, because every cluster offers the same capabilities (§6). An app that
+across every cluster amoebius can build, because every cluster offers the same capabilities ([§6](#6-fungibility-reconciled-app-surface-invariant-shape-deployment-ruled)). An app that
 named products would be portable only across clusters that ran the same products in the same shapes — which is
 exactly the coupling amoebius exists to dissolve.
 
@@ -49,7 +49,7 @@ exactly the coupling amoebius exists to dissolve.
 
 amoebius defines a **fixed, small set of capabilities** — the abstract interfaces application logic is allowed
 to name. They are not a new service set; they are the abstraction *over* the standard service set owned by
-[platform_services_doctrine.md §1](./platform_services_doctrine.md). One line each:
+[platform_services_doctrine.md §1](./platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster). One line each:
 
 | Capability | What application logic means by it |
 |---|---|
@@ -64,8 +64,8 @@ to name. They are not a new service set; they are the abstraction *over* the sta
 
 These eight are the Phase-0 core vocabulary an app spec has for "a service I depend on." There is no arm for
 "some other service," and no arm that names a product. An app that needs object storage selects
-`ObjectStore`; it has no syntax with which to select `minio` (§8). A ninth capability, **InferenceEngine**, is
-added for ML serving as Phase-N design intent (§4.1); it is one more *specific* closed-union capability — not
+`ObjectStore`; it has no syntax with which to select `minio` ([§8](#8-capabilities-and-the-illegal-state-contract)). A ninth capability, **InferenceEngine**, is
+added for ML serving as Phase-N design intent ([§4.1](#41-the-inferenceengine-capability--the-engine-is-baked-and-substrate-selected-never-fetched)); it is one more *specific* closed-union capability — not
 the generic "some other service" escape hatch this rule forbids, and its provider still has no product arm and
 no URL arm.
 
@@ -78,11 +78,11 @@ operator choice:
 
 | Capability | Canonical provider (today) | Provider notes |
 |---|---|---|
-| ObjectStore | **MinIO** | distributed/erasure-coded at steady state; single-node shape on small clusters (§5) |
+| ObjectStore | **MinIO** | distributed/erasure-coded at steady state; single-node shape on small clusters ([§5](#5-per-cluster-structural-shapes--beyond-values)) |
 | SecretStore | **Vault** | the fail-closed secrets root; owned in full by [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | MessageBus | **Pulsar** (with ZooKeeper + BookKeeper) | native binary protocol, no WebSockets |
 | Sql | **Patroni**, via the Percona operator | one Patroni cluster *per consuming capability instance*, never a shared mega-DB |
-| Identity | **Keycloak** | owns all wild ingress through the Edge (§7) |
+| Identity | **Keycloak** | owns all wild ingress through the Edge ([§7](#7-expressing-a-capability-in-the-dsl)) |
 | Observability | **Prometheus / Grafana** | reachable only through the Identity-owned edge |
 | Registry | **`distribution`** (the `registry:2` single-binary OCI registry) | **replaces Harbor** — see below |
 | Edge | **Envoy + Gateway API** | the L4 LoadBalancer beneath it (MetalLB or cloud LB) is the one substrate-driven choice |
@@ -125,11 +125,11 @@ surfaces:
 
 1. **The capability** is chosen by **application logic** — the app declares *that* it needs an ObjectStore, a
    Sql database, a set of MessageBus topics. This is the app's identity; it is written once and travels.
-2. **The provider** is chosen by **deployment rules** — and defaults to the §3 canonical provider. An operator
+2. **The provider** is chosen by **deployment rules** — and defaults to the [§3](#3-one-canonical-provider-the-type-admits-alternates) canonical provider. An operator
    does not pick a provider per app in the common case; the canonical binding *is* the default. The provider
-   slot exists so that a future alternate (§3) is a deployment-rules edit, never an app-spec edit.
+   slot exists so that a future alternate ([§3](#3-one-canonical-provider-the-type-admits-alternates)) is a deployment-rules edit, never an app-spec edit.
 3. **The shape** is chosen by **deployment rules** — single-node vs distributed, replica counts, the structural
-   object graph the provider is deployed as (§5).
+   object graph the provider is deployed as ([§5](#5-per-cluster-structural-shapes--beyond-values)).
 
 ```dhall
 -- Illustrative only; the real grammar and the two typed gates are owned by dsl_doctrine.md.
@@ -145,14 +145,14 @@ let ObjectStoreBinding =
 ```
 
 The app's `ObjectStoreNeed` is byte-identical on a laptop and in a five-region production forest; only the
-`ObjectStoreBinding` differs. This is the §1 split made mechanical: the capability is the *what*, the
+`ObjectStoreBinding` differs. This is the [§1](#1-why-capabilities-not-products) split made mechanical: the capability is the *what*, the
 provider-and-shape is the *how/where/how-robust*. Which DSL surface each part physically lives on, and the
 total composability that nests an app's needs inside a cluster spec, are owned by
 [dsl_doctrine.md](./dsl_doctrine.md); the classification of each part as logic vs rules is owned by
 [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md). This doctrine owns only the *binding model*.
 
 ```mermaid
-flowchart LR
+flowchart TD
   app[Application logic: names a capability need, e.g. ObjectStore with buckets] -->|written once, travels| need[Capability need]
   rules[Deployment rules: pick provider default-canonical and shape] -->|bind| need
   need -->|capability plus provider plus shape| bound[Bound capability]
@@ -163,7 +163,7 @@ flowchart LR
 
 ML serving adds a **ninth capability, `InferenceEngine`** — the abstract interface an ML workload names when it
 says *"I serve inference,"* exactly as an app names `ObjectStore` when it says "I keep durable objects." It
-exercises the §4 binding at its strictest: where a generic capability's provider *defaults* to the §3
+exercises the [§4](#4-capability--provider--shape-the-binding) binding at its strictest: where a generic capability's provider *defaults* to the [§3](#3-one-canonical-provider-the-type-admits-alternates)
 canonical (part 2 above) and could later admit an alternate, an `InferenceEngine`'s provider is a union with
 **no arm to fetch and nothing to author** — it is **selected by the detected substrate**, full stop.
 
@@ -177,30 +177,30 @@ one arm per substrate lane and per baked engine family, and — the load-bearing
 | Baked engine family | `llama.cpp` · `whisper.cpp` · `ONNX` · `vLLM` · `pytorch` · `diffusers` · `transformers` · `Audiveris` |
 
 Every arm is a runtime already **baked into the amoebius base container**
-([image_build_doctrine.md §7](./image_build_doctrine.md)); because the ML siblings **link as libraries** rather
+([image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)); because the ML siblings **link as libraries** rather
 than run as fetched sidecars, the engine exists the moment the pod does. The deployment `.dhall` **selects** an
 arm by the *detected* substrate (the substrate is DETECTED, [substrate_doctrine.md](./substrate_doctrine.md));
-it has no syntax with which to *author* a download or a build. This is the §1 object-storage lesson taken to
+it has no syntax with which to *author* a download or a build. This is the [§1](#1-why-capabilities-not-products) object-storage lesson taken to
 its limit: an app can no more write "curl this engine tarball at boot" than it can write "deploy `minio`."
 
 `InferenceEngine` is **Tier 1** of the three-tier ML-asset lifecycle
-([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md)); the model and kernel tiers live
+([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)); the model and kernel tiers live
 there, not here:
 
 - **Tier 1 — the engine (this capability)** is baked and substrate-selected, as above.
 - **Tier 2 — `ModelArtifact`** is an eager stage-then-serve into the content-addressed store, its `ArtifactRef`
-  obtainable **only** once a `.ready` sentinel exists. Owned by content_addressing §4.5.
+  obtainable **only** once a `.ready` sentinel exists. Owned by content_addressing [§4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd).
 - **Tier 3 — the JIT kernel** is lazily materialized behind a content address on first cache miss, never a
-  startup build. Owned by content_addressing §4.5.
+  startup build. Owned by content_addressing [§4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd).
 
 **The engine↔model invariant this doctrine co-owns.** A served `ModelArtifact` must be servable by an
 `EngineRuntime` *available on the deployment's substrate* — an unmatched model has **no landing engine**. This
 is a **grade-(2)** total decode-time relation (the topology/relation-over-collection technique,
-[illegal_state_catalog.md §4.7](./illegal_state_catalog.md)): content_addressing owns the `ModelArtifact`
+[illegal_state_catalog.md §4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection)): content_addressing owns the `ModelArtifact`
 side; this doctrine owns the engine-as-capability side a model must match.
 
 **Two mistakes become unrepresentable**, lifted at
-[illegal_state_catalog.md §3.25](./illegal_state_catalog.md):
+[illegal_state_catalog.md §3.25](./illegal_state_catalog.md#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model):
 
 - **An engine fetched or built at pod startup is grade-(1) unrepresentable** — the `EngineRuntime` union is
   closed with no `Url`/`Download`/`Build` arm, so "fetch the engine at boot" has no syntax and fails Gate 1
@@ -226,10 +226,10 @@ let InferenceBinding =
 ```
 
 The three-tier store, the `.ready` commit, the re-keying onto content addresses, and the Tier-3 JIT are owned
-by [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md); the baked base container that
-carries every `EngineRuntime` arm is owned by [image_build_doctrine.md §7](./image_build_doctrine.md); the lift
+by [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd); the baked base container that
+carries every `EngineRuntime` arm is owned by [image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain); the lift
 of these mistakes into unrepresentable states is owned by
-[illegal_state_catalog.md §3.25](./illegal_state_catalog.md). This doctrine owns only that the **engine is a
+[illegal_state_catalog.md §3.25](./illegal_state_catalog.md#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model). This doctrine owns only that the **engine is a
 capability whose provider is baked-and-substrate-selected.**
 
 > **Honesty.** `InferenceEngine` is Phase-N design intent — the ML-serving capability, specified before
@@ -242,8 +242,8 @@ capability whose provider is baked-and-substrate-selected.**
 > installs per-engine Poetry venvs at image build**, and its
 > [python/adapters/model_cache.py](file:///home/matthewnowak/infernix/python/adapters/model_cache.py) carries a
 > hardcoded `minioadmin/minioadmin123` fallback — a second secret store that violates the Vault-by-name rule
-> (§7). amoebius keeps infernix's engine-selection idiom, promotes those payloads into the *one* baked base
-> container (image_build §7), and routes every staging credential through Vault by name. amoebius has built
+> ([§7](#7-expressing-a-capability-in-the-dsl)). amoebius keeps infernix's engine-selection idiom, promotes those payloads into the *one* baked base
+> container (image_build [§7](#7-expressing-a-capability-in-the-dsl)), and routes every staging credential through Vault by name. amoebius has built
 > none of this; read it as the contract amoebius intends to satisfy, never a tested result. Status lives only
 > in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
@@ -272,7 +272,7 @@ templating layer** — is [manifest_generation_doctrine.md](./manifest_generatio
 owns *that* a capability has a per-cluster shape; that doctrine owns *how* a shape becomes manifests.
 
 This generalizes, rather than abandons, the HA-always posture of
-[platform_services_doctrine.md §2](./platform_services_doctrine.md). The replica count was already a
+[platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1). The replica count was already a
 deployment-rules dial; **shape is the structural generalization of that dial** — from a scalar (how many
 replicas of one fixed graph) to a choice of graph (which provider topology). A single-node shape is still the
 canonical provider deployed honestly at small scale, never a hand-special-cased substitute product: a
@@ -284,7 +284,7 @@ not get bypassed.
 > [/home/matthewnowak/prodbox/src/Prodbox/Lib/Storage.hs](file:///home/matthewnowak/prodbox/src/Prodbox/Lib/Storage.hs)
 > renders `Namespace`/`PV`/`PVC`/`StorageClass` from a typed `ChartStorageSpec → ChartStorageBinding →
 > Data.Aeson.object` — but prodbox renders **one** shape per service and *enforces substrate-equivalence with a
-> lint*. The per-cluster *structural* shape is the new, unproven move (§6).
+> lint*. The per-cluster *structural* shape is the new, unproven move ([§6](#6-fungibility-reconciled-app-surface-invariant-shape-deployment-ruled)).
 
 ---
 
@@ -295,20 +295,20 @@ This section resolves the one real tension in the doctrine, head-on.
 **prodbox enforces substrate-equivalence with a lint** — the two substrates (`home`, `AWS`) must stand up the
 *identical* set of services in the *identical* shape, and a code path that re-pins a chart or image
 conditionally on the active substrate is a build-time error. amoebius's
-[platform_services_doctrine.md §12](./platform_services_doctrine.md) generalized that lint from two substrates
+[platform_services_doctrine.md §12](./platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant) generalized that lint from two substrates
 to all of them. **This doctrine deliberately reverses the part of that rule that fixes the *shape*.** Per-cluster
-structural shapes (§5) are *exactly* the thing the prodbox lint forbade.
+structural shapes ([§5](#5-per-cluster-structural-shapes--beyond-values)) are *exactly* the thing the prodbox lint forbade.
 
 The reversal is clean, not a contradiction, because **fungibility moves up a level.** What is fungible is no
 longer "every cluster runs the identical manifest graph"; it is:
 
-- **The application is cluster-invariant.** The app's capability needs (§2) are byte-identical on every
+- **The application is cluster-invariant.** The app's capability needs ([§2](#2-the-capability-set)) are byte-identical on every
   cluster. The app runs the same everywhere — same bytes, same capabilities, same surfaces. This is the
   invariant that actually matters, and it is owned as a classification by
   [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md).
 - **The capability set is cluster-invariant.** Every amoebius cluster offers all eight capabilities with their
-  canonical providers (§2, §3). A child cluster you have never seen still has an ObjectStore, a Sql, an
-  Identity. This is the residue of [platform_services_doctrine.md §1](./platform_services_doctrine.md)
+  canonical providers ([§2](#2-the-capability-set), [§3](#3-one-canonical-provider-the-type-admits-alternates)). A child cluster you have never seen still has an ObjectStore, a Sql, an
+  Identity. This is the residue of [platform_services_doctrine.md §1](./platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster)
   fungibility, refined from "same shape" to "same *capability set*."
 - **The platform realization varies.** The capability → provider → **shape** binding is a deployment-rules
   concern that legitimately differs per cluster. The shape is *supposed* to vary; that is what lets one app
@@ -321,7 +321,7 @@ refuses a different *capability set* per cluster (no "no-Registry" cluster); it 
 *shape* per cluster.
 
 ```mermaid
-flowchart LR
+flowchart TD
   appspec[App spec: capability needs, written once] -->|invariant across all clusters| laptop[Laptop cluster]
   appspec -->|invariant across all clusters| prod[Production forest]
   laptop -->|deployment rules bind shape| s1[ObjectStore single-node, Sql one-member Patroni]
@@ -341,8 +341,8 @@ composability, and the two typed gates that make "if it decodes, it is deployabl
 - **App logic declares needs against a capability.** Buckets against `ObjectStore`, a database against `Sql`,
   topic lifecycles against `MessageBus`, OIDC auth rules against `Identity`, published services against `Edge`.
   These are the same app-surface declarations catalogued by
-  [app_vs_deployment_doctrine.md §2](./app_vs_deployment_doctrine.md), now read as capability resources.
-- **Deployment rules declare the binding.** Provider (default canonical) + shape (§4, §5). The same app
+  [app_vs_deployment_doctrine.md §2](./app_vs_deployment_doctrine.md#2-the-application-logic-surface--what-an-app-is), now read as capability resources.
+- **Deployment rules declare the binding.** Provider (default canonical) + shape ([§4](#4-capability--provider--shape-the-binding), [§5](#5-per-cluster-structural-shapes--beyond-values)). The same app
   composes with a single-node binding or a distributed one with zero app-spec change.
 - **Secrets and identity tie to Vault by name, never by value.** A provider that needs a credential — a `Sql`
   superuser password, an `Identity` OIDC client secret, a `Registry` push credential — carries a typed
@@ -352,11 +352,11 @@ composability, and the two typed gates that make "if it decodes, it is deployabl
 - **Connectivity is derived from the declared capability dependencies.** Because an app declares *which*
   capabilities it consumes, that dependency graph is exactly what the platform derives east-west connectivity
   from — an app that does not declare consuming `Sql` cannot reach the Sql provider. The derivation rule
-  itself is owned by [platform_services_doctrine.md §9](./platform_services_doctrine.md#east-west-connectivity-is-derived-from-the-dependency-graph),
-  and its lift into a compile-time impossibility by [illegal_state_catalog.md](./illegal_state_catalog.md) §3.6.
+  itself is owned by [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path),
+  and its lift into a compile-time impossibility by [illegal_state_catalog.md §3.6](./illegal_state_catalog.md#36-blocking-networkpolicy-services-cant-reach-each-other).
 - **The Edge capability does not let an app open a backdoor.** An app declares *what to publish* through
   `Edge`; *whether* wild traffic reaches it is still gated by the Identity-owned (Keycloak) wild-ingress door
-  ([platform_services_doctrine.md §9](./platform_services_doctrine.md)). The capability publishes a route; it
+  ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)). The capability publishes a route; it
   cannot publish an un-authenticated one.
 
 ---
@@ -369,14 +369,14 @@ alternative is unrepresentable* is owned, as a typing claim, by
 [illegal_state_catalog.md](./illegal_state_catalog.md); this section records the capability-specific instances
 it foreclosed:
 
-- **An app cannot name a product.** The app surface offers a capability union (§2) with no product arms, so
+- **An app cannot name a product.** The app surface offers a capability union ([§2](#2-the-capability-set)) with no product arms, so
   "deploy `minio` directly" has no syntax — it fails Gate 1 (the Dhall typechecker) before any binary runs.
-- **A capability cannot bind to a provider with no inhabitant.** The provider union (§3) admits only providers
+- **A capability cannot bind to a provider with no inhabitant.** The provider union ([§3](#3-one-canonical-provider-the-type-admits-alternates)) admits only providers
   amoebius has built; an unbuilt alternate has no arm, so a binding to it does not decode (Gate 2).
 - **A capability cannot be left unbound.** Every declared capability resource requires a binding; a capability
   need with no provider+shape is an undecodable record, not a runtime `Pending`.
 
-The honest limit is the catalog's limit ([illegal_state_catalog.md §2](./illegal_state_catalog.md)): a green
+The honest limit is the catalog's limit ([illegal_state_catalog.md §2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)): a green
 type-check proves the *spec composes* — that the capability binding is coherent — not that the *running
 provider* came up. The latter is a reconcile-time fact owned by the typed reconciler
 ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)) and verified by the chaos/testing
@@ -425,14 +425,14 @@ status.
 
 - [Engineering Doctrine Index](./README.md)
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — the application-logic-vs-deployment-rules split this model rides on
-- [Platform Services Doctrine](./platform_services_doctrine.md) — the concrete provider set, the derived-connectivity rule (§9), and the single wild-ingress path
+- [Platform Services Doctrine](./platform_services_doctrine.md) — the concrete provider set, the derived-connectivity rule ([§9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), and the single wild-ingress path
 - [DSL Doctrine](./dsl_doctrine.md) — the typed Dhall surface, total composability, and the two typed gates a capability binding decodes through
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — rendering a chosen shape into typed manifests and the idempotent typed reconciler (no Helm)
-- [Image Build Doctrine](./image_build_doctrine.md) — the build pipeline, the `distribution` registry refs, the baked base container (§7 bakes every `EngineRuntime` arm), and the Temurin JVM toolchain
-- [Content Addressing Doctrine](./content_addressing_doctrine.md) — the three-tier ML-asset lifecycle (§4.5) whose Tier-1 baked engine is the `InferenceEngine` provider; `ModelArtifact`/`.ready` and the JIT kernel
+- [Image Build Doctrine](./image_build_doctrine.md) — the build pipeline, the `distribution` registry refs, the baked base container ([§7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain) bakes every `EngineRuntime` arm), and the Temurin JVM toolchain
+- [Content Addressing Doctrine](./content_addressing_doctrine.md) — the three-tier ML-asset lifecycle ([§4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)) whose Tier-1 baked engine is the `InferenceEngine` provider; `ModelArtifact`/`.ready` and the JIT kernel
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — secrets-by-name, `SecretRef`, and Vault Kubernetes auth for provider credentials
 - [Substrate Doctrine](./substrate_doctrine.md) — the substrate catalog, the DETECTED substrate that selects an `EngineRuntime`, and the substrate-driven LoadBalancer choice beneath Edge
-- [Illegal State Catalog](./illegal_state_catalog.md) — best-practice-by-construction, which capability invariants are type-enforced, and the engine-fetch / unmatched-model states (§3.25)
+- [Illegal State Catalog](./illegal_state_catalog.md) — best-practice-by-construction, which capability invariants are type-enforced, and the engine-fetch / unmatched-model states ([§3.25](./illegal_state_catalog.md#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model))
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
 
@@ -441,6 +441,6 @@ status.
 > generalized from evidence in the sibling **prodbox** project (typed-Haskell→Aeson→`kubectl apply` rendering,
 > a chart-platform planner) but **not yet built or proven in amoebius**, and prodbox itself names products and
 > enforces the very substrate-equivalence lint this doctrine reverses. Per
-> [documentation_standards.md §6](../documentation_standards.md), read every prescriptive statement here as the
+> [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every prescriptive statement here as the
 > contract amoebius intends to satisfy, never as a tested amoebius result; status lives only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).

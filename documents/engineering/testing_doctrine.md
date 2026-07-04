@@ -40,14 +40,14 @@ Three consequences fall straight out of "a test is a spec":
   [dsl_doctrine.md](./dsl_doctrine.md) / [illegal_state_catalog.md](./illegal_state_catalog.md).
 - **The test runs the real thing.** There is no parallel mock cluster. A test stands up real platform
   services (or a representative subset) and runs a real workflow against them; the only thing that makes it
-  a *test* rather than a deployment is the chaos schedule and the always-teardown contract of §3.
+  a *test* rather than a deployment is the chaos schedule and the always-teardown contract of [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).
 
 > **Honesty.** Test-as-a-`.dhall`-topology, `suggest-test`, flagged credentials, and the elevated
 > storage-deleting harness are **Phase 11** in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
 > and are **not started**. This document generalizes patterns *proven in the sibling prodbox project*
 > (`prodbox/documents/engineering/unit_testing_policy.md`,
 > `prodbox/documents/engineering/integration_fixture_doctrine.md`) into amoebius *design intent*. Per
-> [documentation_standards.md §6](../documentation_standards.md), read every prescriptive statement here as
+> [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every prescriptive statement here as
 > a specification to be validated — evidence inherited from prodbox is evidence from a sibling system, never
 > proof in amoebius. Sequencing, status, and gates live only in the development plan.
 
@@ -63,7 +63,7 @@ first, and never confuses one for another.
 |----------|-------------------|---------------|-----------------|
 | **Pure** | DSL decoding, renderers, validation helpers, decision functions, DAG logic | in-process, no cluster | **none** — pure code never touches a mock |
 | **Boundary integration** | The binary's CLI routing, subprocess behaviour, config load — through fake tools or controlled subprocesses | in-process + fake/real tool binaries | mocking only at the subprocess/interpreter boundary |
-| **Test-`.dhall` topology** | The whole system: a real cluster spun up, a real workflow run, real chaos injected, then torn down | a live substrate (§8) | no mocks — the real platform |
+| **Test-`.dhall` topology** | The whole system: a real cluster spun up, a real workflow run, real chaos injected, then torn down | a live substrate ([§8](#8-one-substrate-per-validation)) | no mocks — the real platform |
 
 The first two registers **generalize the prodbox interpreter-only mocking doctrine**: *pure code never
 touches mocks; all mocking happens at the subprocess or interpreter boundary* — pure helpers, DAG logic,
@@ -75,7 +75,7 @@ toolchain owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/REA
 doc does not restate the version pins.
 
 The third register is the amoebius novelty and the subject of the rest of this document. It is where "a
-test is a spec" (§1) cashes out, and it is the only register that can prove the deployed system survives a
+test is a spec" ([§1](#1-the-one-idea-a-test-is-an-amoebius-spec)) cashes out, and it is the only register that can prove the deployed system survives a
 fault — at the cost of needing a live substrate and an honest teardown.
 
 The blindness between registers is load-bearing, not incidental: a green pure suite says nothing about
@@ -114,7 +114,7 @@ isolated ephemeral stacks, unique names per run, aggressive tagging, *always* te
    integration-fixture rule: *cleanup failures are real failures*.)
 
 ```mermaid
-flowchart LR
+flowchart TD
   spec["test .dhall topology (deployment-rules layer + chaos schedule + teardown)"] -->|spin up| up["allocate resources: cluster, PVs, stacks, workloads (tagged test-owned)"]
   up -->|run workflow| run["exercise workflow + inject faults (HA failover, leadership election)"]
   run -->|success| down["teardown: idempotent destroy of every allocated resource"]
@@ -163,7 +163,7 @@ machine-visible by emitting a ledger.
   is **grade-(1) unrepresentable** (mirroring the sibling infernix `.ready`-gated `ArtifactRef` idiom —
   sibling evidence, not an amoebius result). The `PromotionGate` type, the `Environment` promotion pointer,
   and the required-evidence-strength-per-environment mapping are **owned by**
-  [release_lifecycle_doctrine.md §4](./release_lifecycle_doctrine.md); this doc owns only the ledger the gate
+  [release_lifecycle_doctrine.md §4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable); this doc owns only the ledger the gate
   reads. *(Design intent: the release lifecycle is Phase-0 reference doctrine and this ledger harness is
   Phase 11 / not started — read as a specification to be validated, never a proven amoebius result.)*
 
@@ -196,7 +196,7 @@ Per the original vision, `suggest-test`:
    leadership elections** as appropriate to the substrate.
 
 ```mermaid
-flowchart LR
+flowchart TD
   host["host substrate (pure classification): compute, memory, storage"] -->|feeds| gen["suggest-test generator"]
   creds["SSH + AWS credentials: inspect permissions + quotas"] -->|feeds| gen
   gen -->|sizes a representative topology| res["resource set scaled to detected capacity + authority"]
@@ -209,7 +209,7 @@ Three boundaries keep `suggest-test` honest and within doctrine:
 
 - **The output is a proposal, not an oracle.** `suggest-test` emits a *starting-point* test `.dhall` the
   operator reads, edits, and runs — it is a generator of representative topologies, never a self-certifying
-  pass. The emitted topology is an ordinary test spec and inherits §3 (always tears down) and §8 (one
+  pass. The emitted topology is an ordinary test spec and inherits [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down) (always tears down) and [§8](#8-one-substrate-per-validation) (one
   substrate) unconditionally.
 - **It inspects credentials but never embeds them.** Although it *reads* SSH/AWS credentials to learn their
   authority, the test `.dhall` it writes references those credentials **by name only** — secrets never live
@@ -229,7 +229,7 @@ Three boundaries keep `suggest-test` honest and within doctrine:
 
 The intuition straight from the vision: the credentials used for testing (e.g. AWS deployments) need to be
 specifically flagged, as is done in `~/prodbox`. A test must be able to do things
-production must not — most sharply, *delete durable storage* (§7) — so the authority to do them must be a
+production must not — most sharply, *delete durable storage* ([§7](#7-the-elevated-harness-is-the-sole-deleter-of-durable-storage-leak-free-cycles)) — so the authority to do them must be a
 **separate, marked** credential, never the everyday one wearing a different hat.
 
 amoebius adopts the prodbox `aws_admin_for_test_simulation` pattern, generalized:
@@ -241,9 +241,9 @@ amoebius adopts the prodbox `aws_admin_for_test_simulation` pattern, generalized
 - **Test-generated resources carry a test flag.** All test-generated resources carry a flag for the harness
   to see, and these get deleted by the elevated test credentials. Every
   resource a topology allocates is tagged test-owned at creation, so the harness can later find *exactly*
-  what it created and reclaim it without guessing — the basis of the leak-free sweep in §7.
+  what it created and reclaim it without guessing — the basis of the leak-free sweep in [§7](#7-the-elevated-harness-is-the-sole-deleter-of-durable-storage-leak-free-cycles).
 - **The flagged credential is still a secret-by-name.** The credential's *material* lives in Vault and is
-  referenced from Dhall by name only, exactly as in §5 — flagging changes *which* credential a test uses and
+  referenced from Dhall by name only, exactly as in [§5](#5-suggest-test-detect-the-world-emit-a-representative-test-dhall) — flagging changes *which* credential a test uses and
   *what it is allowed to do*, not *where the secret lives*. The vaulting and injection are owned by
   [vault_pki_doctrine.md](./vault_pki_doctrine.md).
 
@@ -265,15 +265,15 @@ reconciles the two by making harness deletion the **one** sanctioned exception.
 
 The cardinal "no normal-operation deletion of durable data" rule, the retained `no-provisioner` PV model,
 and the deterministic rebind it protects are **owned by**
-[storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) (§7 and §7.1, which explicitly delegate the
+[storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) ([§7](./storage_lifecycle_doctrine.md#7-the-cardinal-rule-deleting-durable-data-is-forbidden-under-normal-operation) and [§7.1](./storage_lifecycle_doctrine.md#71-the-single-exception-the-elevated-test-harness), which explicitly delegate the
 exception to this doc). This doc owns the **exception mechanism**:
 
 - **One deleter, one credential.** Only the **elevated test harness**, holding the flagged delete-capable
-  credential of §6, may destroy durable storage — and only storage flagged test-owned. No normal-operation
+  credential of [§6](#6-flagged-test-credentials), may destroy durable storage — and only storage flagged test-owned. No normal-operation
   code path, and no non-harness test code path, can delete a retained PV or its backing bytes. The DSL
   surface exposes no "delete this durable volume" primitive at all; deletion is an *act of the harness*, not
   a value in a `.dhall`.
-- **Flag, then sweep.** A leak-free cycle is: tag every allocated resource test-owned at creation (§6); run
+- **Flag, then sweep.** A leak-free cycle is: tag every allocated resource test-owned at creation ([§6](#6-flagged-test-credentials)); run
   the workflow; then have the elevated harness **sweep** for test-flagged resources and destroy exactly
   those. The sweep is scoped by the flag, so it can never reach a production volume — it is structurally
   incapable of deleting something it did not create.
@@ -321,7 +321,7 @@ doctrine:
   not interchangeable — a fixture never silences a missing-substrate-config error. (This is the prodbox
   fixtures-vs-substrate-config distinction, inherited intact.)
 
-What "at most one substrate per validation" buys is precisely the thing the ledger (§4) needs to stay
+What "at most one substrate per validation" buys is precisely the thing the ledger ([§4](#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)) needs to stay
 honest: when a run reports a layer proven on `linux-cpu`, it means proven *on `linux-cpu`* — not "proven
 somewhere amoebius decided to retreat to."
 
@@ -337,7 +337,7 @@ To keep the SSoT boundaries crisp:
 | The async cross-cluster failover correctness obligation + TLA+/io-sim proof artifacts | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), [tla_modelling_assumptions.md](./tla_modelling_assumptions.md) |
 | The retained `no-provisioner` PV model, deterministic rebind, and the cardinal "no normal-operation deletion" rule | [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) |
 | The create-vs-delete credential model and Pulumi create/destroy mechanics (MinIO backend, Vault-envelope) | [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) |
-| The `PromotionGate`, the `Environment` promotion pointer, and each environment's required evidence strength (the gate that *consumes* this doc's §4 ledger) | [release_lifecycle_doctrine.md](./release_lifecycle_doctrine.md) (§4) |
+| The `PromotionGate`, the `Environment` promotion pointer, and each environment's required evidence strength (the gate that *consumes* this doc's [§4](#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) ledger) | [release_lifecycle_doctrine.md](./release_lifecycle_doctrine.md) ([§4](#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)) |
 | That chaos injection lives in deployment rules; the app/deployment dividing line | [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md) |
 | Secrets-by-name, `SecretRef`, parent-injects-into-child Vault | [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | Substrate detection and the substrate catalog | [substrate_doctrine.md](./substrate_doctrine.md) |
@@ -354,7 +354,7 @@ and remaining work — the test-topology DSL, `suggest-test`, flagged credential
 storage-deleting harness, and the per-run ledger artifact — are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (Phase 11; with the cross-cluster
 failover proof artifacts in Phase 9). This doc never maintains a competing status ledger; it states the
-target shape and links back for status. Per [documentation_standards.md §6](../documentation_standards.md),
+target shape and links back for status. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline),
 no statement here is a proven amoebius result: the model generalizes patterns proven in prodbox into
 amoebius design intent.
 

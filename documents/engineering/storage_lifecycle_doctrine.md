@@ -25,7 +25,7 @@ be explicitly deleted… they don't get deleted automatically with the rest of t
 automatically rebind. A cluster destroy releases the claims; it never reclaims the volumes. The next
 bring-up re-creates the exact same claims, which re-bind to the exact same volumes, which still hold the
 exact same data. That round-trip — *delete the cluster, recreate it, find your data unchanged* — is the
-**lossless-teardown guarantee**, and §6 cashes out exactly when it holds.
+**lossless-teardown guarantee**, and [§6](#6-the-lossless-teardown-guarantee-deterministic-rebind) cashes out exactly when it holds.
 
 This doctrine is the SSoT for *how durable bytes live and rebind*. It does **not** own which services
 produce those bytes (that is [platform_services_doctrine.md](./platform_services_doctrine.md)), the cluster
@@ -79,7 +79,7 @@ creation path to exactly one shape.
 
 - **Durable state ⇒ StatefulSet.** Anything that needs to persist bytes is a StatefulSet, so its claims get
   stable per-ordinal identity (`<claim>-<statefulset>-<ordinal>`) that survives Pod reschedules — the
-  identity the deterministic rebind in §6 depends on.
+  identity the deterministic rebind in [§6](#6-the-lossless-teardown-guarantee-deterministic-rebind) depends on.
 - **Stateless ⇒ no claim.** A workload with no StatefulSet has no durable storage by construction; shared
   state for such workloads lives in a platform service (MinIO, Postgres, Pulsar), never in an ad-hoc PV.
 - **The DSL is the gate.** The amoebius Dhall DSL does not expose a "make me a loose PVC" primitive at all;
@@ -112,10 +112,10 @@ pins each PV to its claim *before the claim exists*.
 - **Node affinity for host-backed PVs.** A host-path volume lives on one specific node, so its PV declares
   node affinity to that node and the consuming Pod schedules there. On a single-node cluster this is the
   trivial case; on a multi-node kind/rke2 cluster each ordinal's PV is pinned to the node holding its
-  bytes. (Provider/EBS volumes are node-independent — §5.)
+  bytes. (Provider/EBS volumes are node-independent — [§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim).)
 
 ```mermaid
-flowchart LR
+flowchart TD
   sts[StatefulSet volumeClaimTemplate] -->|renders one PVC per ordinal| pvc[PVC data-statefulset-ordinal]
   ident[Identity: namespace, statefulset, ordinal] -->|pure function| pvname[PV name namespace/statefulset/pv_integer]
   ident -->|pure function| claimref[claimRef: namespace, PVC name]
@@ -156,16 +156,16 @@ moment a node is replaced. amoebius requires the two backings to deliver that in
   When a node is terminated, the EBS volume **detaches and survives**; the
   replacement node re-attaches the same volume to the same claim. Node churn is invisible to the data.
 - **Host-backed:** the bytes live in the host's retained storage root, not in the container or the kubelet's
-  ephemeral scratch. A Pod reschedule re-mounts the same host path; the node-affinity pin (§4) keeps the
+  ephemeral scratch. A Pod reschedule re-mounts the same host path; the node-affinity pin ([§4](#4-deterministic-pv-naming-and-the-explicit-bind)) keeps the
   ordinal landing where its bytes are.
 
 Either way, the rule is the same: **node lifecycle and storage lifecycle are decoupled**, which is the
-node-level precondition for the cluster-level guarantee in §6.
+node-level precondition for the cluster-level guarantee in [§6](#6-the-lossless-teardown-guarantee-deterministic-rebind).
 
 ### 5.2 The storage backing is bounded — the closed `StorageBacking` union
 
-§5 caps each *volume*; this subsection caps the *backing* a set of volumes draws from, so "unbounded storage"
-([illegal_state_catalog.md §3.18](./illegal_state_catalog.md)) has no syntax. There is no such thing as
+[§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim) caps each *volume*; this subsection caps the *backing* a set of volumes draws from, so "unbounded storage"
+([illegal_state_catalog.md §3.18](./illegal_state_catalog.md#318-unbounded-storage-anywhere)) has no syntax. There is no such thing as
 unbounded storage in amoebius: durable storage is **either** host-level (bounded by a physical disk) **or**
 cloud (bounded by a quota), encoded as a **closed union with no unbounded arm**:
 
@@ -179,27 +179,27 @@ StorageBacking = HostDisk Capacity | Ebs Capacity | CloudQuota Quota
   content-addressed MinIO store is a `HostDisk`/`CloudQuota` backing owned by
   [content_addressing_doctrine.md](./content_addressing_doctrine.md). Each arm names exactly one owner of its
   ceiling number, so "available storage" has one definition.
-- **The aggregate fold lives elsewhere.** This doc owns the *union shape* and the per-volume sizing (§5);
+- **The aggregate fold lives elsewhere.** This doc owns the *union shape* and the per-volume sizing ([§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim));
   the **aggregate arithmetic** — `Σ(PV caps) ≤ backing`, and the Pulsar two-ceiling fold — is owned by
-  [resource_capacity_doctrine.md §5, §7](./resource_capacity_doctrine.md) (the §4.6 capacity-accounting
+  [resource_capacity_doctrine.md §5, §7](./resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm) (the [§4.6](./illegal_state_catalog.md#46-capacity-accounting-total-fold--σ-demand--capacity-checked) capacity-accounting
   technique). An app that would consume more storage than its backing
-  ([illegal_state_catalog.md §3.19](./illegal_state_catalog.md)) is rejected by that fold at decode; "unbounded"
+  ([illegal_state_catalog.md §3.19](./illegal_state_catalog.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)) is rejected by that fold at decode; "unbounded"
   is representable **only** through a `Growable` scaling policy whose ceiling is itself a quota
-  ([resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md)).
+  ([resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)).
 
 ---
 
 ## 6. The lossless-teardown guarantee: deterministic rebind
 
-The intuition: because the PV name and `claimRef` are pure functions of identity (§4), and because Retain
-keeps the volume alive after the claim is gone (§2), a destroyed-then-recreated cluster recomputes the
+The intuition: because the PV name and `claimRef` are pure functions of identity ([§4](#4-deterministic-pv-naming-and-the-explicit-bind)), and because Retain
+keeps the volume alive after the claim is gone ([§2](#2-one-storage-class-and-it-provisions-nothing)), a destroyed-then-recreated cluster recomputes the
 *same* claims, which match the *same* still-living volumes. Nothing is restored from a backup; the original
 bytes were never released. That is the lossless-teardown guarantee: clusters can be torn down and spun
 back up ephemerally with zero data loss because of the no-provisioner PVC/PV policy, which guarantees
 identical rebinding.
 
 ```mermaid
-flowchart LR
+flowchart TD
   run1[Cluster running, PVC bound to PV] -->|cluster delete: claims released, Retain keeps PV| retained[PV Released, bytes intact, EBS/host path preserved]
   retained -->|cluster recreate: same StatefulSet recomputes same PVC| pvc2[Identical PVC, same name and namespace]
   pvc2 -->|claimRef and PV name match by identity| rebind[Re-bind to the same retained PV]
@@ -210,12 +210,12 @@ flowchart LR
 prodbox rebinding rules):
 
 1. The PVC name and namespace are unchanged across rebuild — guaranteed because both derive from the
-   StatefulSet identity (§3), not from operator input.
-2. The PV name and `claimRef` are recomputed deterministically from `(namespace, statefulset, ordinal)` (§4).
+   StatefulSet identity ([§3](#3-pvcs-are-born-only-from-statefulsets)), not from operator input.
+2. The PV name and `claimRef` are recomputed deterministically from `(namespace, statefulset, ordinal)` ([§4](#4-deterministic-pv-naming-and-the-explicit-bind)).
 3. The backing store is still present: the EBS volume was not deleted, or the host path still exists on its
    node.
 4. A **host-backed** ordinal re-schedules to the **same node** its node-affinity-pinned PV lives on; a
-   provider/EBS ordinal may land on any node because the volume re-attaches (§5.1).
+   provider/EBS ordinal may land on any node because the volume re-attaches ([§5.1](#51-storage-is-independent-of-the-node-lifecycle)).
 5. Any secret that must match the preserved data (e.g. a Patroni role password against a preserved
    `pg_authid`) re-attaches to the same material — owned by [vault_pki_doctrine.md](./vault_pki_doctrine.md);
    a mismatch must surface as a loud failure, never a silent data reset.
@@ -239,7 +239,7 @@ normal circumstances." amoebius takes the strong reading: **forbid it.**
   default as "all durable storage must exist forever"; amoebius softens "forever" only to "until a
   deliberate, privileged deletion," never to "until the next teardown."
 - **No normal-operation code path deletes a retained PV or its bytes.** Cluster delete releases claims and
-  leaves volumes Retained (§2, §6). `chart`/app delete removes the PVC/PV *objects* it owns but never the
+  leaves volumes Retained ([§2](#2-one-storage-class-and-it-provisions-nothing), [§6](#6-the-lossless-teardown-guarantee-deterministic-rebind)). `chart`/app delete removes the PVC/PV *objects* it owns but never the
   backing bytes on a retained volume. The DSL surface exposes **no** "delete this durable volume"
   primitive; a `.dhall` value cannot denote "destroy these bytes." This is the storage-side reading of the
   illegal-state contract owned by [dsl_doctrine.md](./dsl_doctrine.md) /
@@ -277,7 +277,7 @@ The hardest case the vision flags: "this requires more thought for things like
 elastic storage requirements (how can we ever shrink them?). We need to enable storage shrinking while still
 making it impossible to represent destruction of data." Growth is easy — a larger size strictly contains the
 old bytes. Shrinking is the trap, because the naïve "delete the volume, make a smaller one" is exactly the
-forbidden op of §7 wearing a different hat.
+forbidden op of [§7](#7-the-cardinal-rule-deleting-durable-data-is-forbidden-under-normal-operation) wearing a different hat.
 
 amoebius's design position: **a shrink is never an in-place truncation; it is a verified migration.**
 
@@ -288,7 +288,7 @@ amoebius's design position: **a shrink is never an in-place truncation; it is a 
   reconciler realizes it by provisioning a new, correctly-sized retained volume, copying the live bytes,
   **verifying the copy**, and only then retiring the old volume. No `.dhall` value ever denotes "discard
   these bytes," so destruction stays unrepresentable even while the effective size goes down.
-- **The retire-old step is itself a durable-data deletion** and therefore inherits §7: under normal
+- **The retire-old step is itself a durable-data deletion** and therefore inherits [§7](#7-the-cardinal-rule-deleting-durable-data-is-forbidden-under-normal-operation): under normal
   operation it is forbidden, and the actual reclaim of the now-orphaned old volume is gated to the same
   elevated path that the test harness uses (or to a deliberate, privileged operator action). A shrink that
   cannot verify its copy leaves *both* volumes intact and fails loud — it never trades the old bytes for an
@@ -322,11 +322,11 @@ To keep the SSoT boundaries crisp:
 ## 10. Planning ownership
 
 This document is normative storage-lifecycle doctrine only. Delivery sequencing, completion status,
-validation gates, and remaining work — including the host-side hard-cap enforcement mechanism (§5) and the
-verified-shrink migration (§8) — are owned by
+validation gates, and remaining work — including the host-side hard-cap enforcement mechanism ([§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim)) and the
+verified-shrink migration ([§8](#8-shrinking-storage-without-representing-data-destruction)) — are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). This doc never maintains a competing
 status ledger; it states the target shape and links back for status. Per
-[documentation_standards.md §6](../documentation_standards.md), no statement here is a proven amoebius
+[documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), no statement here is a proven amoebius
 result: the model generalizes behaviour proven in prodbox into amoebius design intent.
 
 ---

@@ -22,7 +22,7 @@ offers the **same standard services / capabilities, wired the same way**. There 
 [service_capability_doctrine.md](./service_capability_doctrine.md): the *set* is invariant, the *shape* may
 vary. This refines the prodbox **substrate-equivalence** rule (`home` vs `AWS`): amoebius keeps "every
 cluster stands up the same *set*" while deliberately relaxing "the same *shape*." The structural enforcement
-of the set-invariant is §12.
+of the set-invariant is [§12](#12-substrate-equivalence-as-a-structural-invariant).
 
 Why this matters: it is what makes amoebic spawning, ephemeral teardown/rebuild, and geo-replicated
 failover even *expressible*. A child cluster you have never seen is the same machine as the parent; a
@@ -35,14 +35,14 @@ The standard service set (DEVELOPMENT_PLAN "Standard platform services"):
 | Service | Role on every cluster | Deeper mechanics owned by |
 |---------|-----------------------|---------------------------|
 | **LoadBalancer** (MetalLB *or* cloud LB) | The single L4 entry point to the cluster | [substrate_doctrine.md](./substrate_doctrine.md) (the LB choice is the one substrate-driven difference) |
-| **Envoy + Gateway API** | L7 routing and edge TLS termination | §9; [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md) (the carve-out) |
-| **Keycloak** | OIDC identity; **owns all wild ingress** | §9 |
+| **Envoy + Gateway API** | L7 routing and edge TLS termination | [§9](#9-the-loadbalancer-and-the-single-wild-ingress-path); [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md) (the carve-out) |
+| **Keycloak** | OIDC identity; **owns all wild ingress** | [§9](#9-the-loadbalancer-and-the-single-wild-ingress-path) |
 | **Registry** (`distribution`) | The single-binary OCI image registry; **every image is pulled from here** (replaces Harbor) | [image_build_doctrine.md](./image_build_doctrine.md), [service_capability_doctrine.md](./service_capability_doctrine.md) |
 | **MinIO** | S3 object substrate: content store, Pulumi backend, app buckets | [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md), [content_addressing_doctrine.md](./content_addressing_doctrine.md), [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) |
 | **Vault** | Fail-closed secrets root + PKI trust anchor | [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | **Pulsar** | Native-protocol pub/sub event + workflow backbone (**new vs prodbox**) | [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) |
-| **Prometheus / Grafana** | Cluster-local metrics + dashboards | (this doc, §7) |
-| **Percona/Patroni Postgres + pgAdmin** | Relational store: **one Patroni cluster per consuming service** | §8; [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) |
+| **Prometheus / Grafana** | Cluster-local metrics + dashboards | (this doc, [§7](#7-prometheus--grafana--observability-is-not-an-add-on)) |
+| **Percona/Patroni Postgres + pgAdmin** | Relational store: **one Patroni cluster per consuming service** | [§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin); [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) |
 
 Application logic never names these products directly; it names the **capabilities** they realize, owned by
 [service_capability_doctrine.md](./service_capability_doctrine.md). This document is the SSoT for *which*
@@ -68,7 +68,7 @@ Concretely (DEVELOPMENT_PLAN cross-cutting invariants):
   surface is owned by [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md).
 - **HA chart even at `replicas=1`.** A single-replica deployment is still the HA chart with one replica —
   never a hand-special-cased single-pod variant. Postgres at one node is still a Patroni-via-Percona
-  cluster (§8), not a bare `postgres` Pod.
+  cluster ([§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin)), not a bare `postgres` Pod.
 - **No degenerate single-node path.** prodbox historically simulated HA by deploying *multiple kind
   clusters*; amoebius replaces that with one HA stack whose replica count is declarative. The mattandjames
   "mock 3-replica" pattern collapses to a `replicas=n` value.
@@ -76,7 +76,7 @@ Concretely (DEVELOPMENT_PLAN cross-cutting invariants):
 > **Honesty.** The HA-always model is *specified* here and inherited from prodbox where parts of it are
 > proven; in amoebius it is design intent for Phase 2, not a tested amoebius result. Status and gates live
 > only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
-> [documentation_standards.md §6](../documentation_standards.md) and
+> [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and
 > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)).
 
 ---
@@ -90,9 +90,9 @@ either baked into the base container or built by amoebius and served from here. 
 
 - **No bootstrap chicken-and-egg.** Because the registry is a baked binary — not a multi-process stack that
   must pull its own prerequisites — it comes up like any other baked service; there is no pre-registry
-  public-pull window (the prodbox Harbor bootstrap problem dissolves). The ordering edge is in §11.
+  public-pull window (the prodbox Harbor bootstrap problem dissolves). The ordering edge is in [§11](#11-bring-up-and-dependency-ordering).
 - **It needs no relational database.** Unlike Harbor, `distribution` stores blobs on a retained PV (or
-  MinIO) and runs no Postgres/Redis of its own — it does **not** take a Patroni cluster under the §8 rule.
+  MinIO) and runs no Postgres/Redis of its own — it does **not** take a Patroni cluster under the [§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin) rule.
   amoebius drops Harbor's scanning, web UI, robot RBAC, and replication as separate concerns, revisited only
   if ever needed.
 - **The build side is not owned here.** Baking binaries, buildx multi-arch (`amd64`/`arm64`),
@@ -116,7 +116,7 @@ standard HA service:
 Its on-disk durability — the `no-provisioner` retained PV that survives cluster delete/recreate and
 rebinds deterministically — is owned entirely by [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md).
 MinIO runs HA (distributed). The one path by which something *outside* the cluster reaches MinIO — a host
-compute daemon as a MinIO peer over a host-only NodePort — is the carve-out in §9, owned by
+compute daemon as a MinIO peer over a host-only NodePort — is the carve-out in [§9](#9-the-loadbalancer-and-the-single-wild-ingress-path), owned by
 [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md).
 
 ---
@@ -152,7 +152,7 @@ everything here is forward design, not inherited-proven behaviour.
   correctness obligation to Pulsar's brokers/bookies rather than re-proving it — the only proof obligation
   that concentrates on amoebius is the asynchronous cross-cluster boundary (the "Second Axis" in
   [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)).
-- **Host compute daemons join as Pulsar peers** over host-only NodePorts (no mTLS) — §9 and
+- **Host compute daemons join as Pulsar peers** over host-only NodePorts (no mTLS) — [§9](#9-the-loadbalancer-and-the-single-wild-ingress-path) and
   [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md).
 
 ---
@@ -161,8 +161,8 @@ everything here is forward design, not inherited-proven behaviour.
 
 Every cluster ships its own metrics and dashboards; observability is part of the standard set, not an
 optional bolt-on. Prometheus scrapes platform and app workloads; Grafana is reachable **only** through the
-Keycloak-owned edge like every other browser surface (§9), never via a private side-door. If Grafana is
-configured against a SQL backend, that database follows the per-service Patroni rule in §8.
+Keycloak-owned edge like every other browser surface ([§9](#9-the-loadbalancer-and-the-single-wild-ingress-path)), never via a private side-door. If Grafana is
+configured against a SQL backend, that database follows the per-service Patroni rule in [§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin).
 
 ---
 
@@ -175,18 +175,18 @@ mega-database, each paired with **its own pgAdmin**.
 Why separate-per-service: blast-radius isolation (one service's DB incident can't take down another's),
 independent version and lifecycle, and clean per-namespace teardown.
 
-- **The Percona operator is itself a platform component**, drawn from the shared inventory (§12) so it
+- **The Percona operator is itself a platform component**, drawn from the shared inventory ([§12](#12-substrate-equivalence-as-a-structural-invariant)) so it
   installs identically on every substrate. A service needing SQL renders a `PerconaPGCluster` in its own
   namespace; the cluster-wide operator reconciles it. (This generalizes the prodbox
-  `helm_chart_platform_doctrine.md` §4 Patroni dependency contract, where Keycloak is the proven
+  `helm_chart_platform_doctrine.md` [§4](#4-minio--the-object-substrate) Patroni dependency contract, where Keycloak is the proven
   consumer — without restating its prodbox-specific naming.)
-- **HA always applies here too (§2).** At its configured steady state a Patroni cluster runs multiple
+- **HA always applies here too ([§2](#2-ha-always--including-replicas1)).** At its configured steady state a Patroni cluster runs multiple
   replicas with synchronous replication; at `replicas=1` it is still a Patroni cluster, never a bare Pod.
   This doc deliberately fixes **no specific replica count** — the count is a deployment-rules value, not a
   doctrine constant.
 - **Canonical consumers.** Keycloak is the proven prodbox consumer; other standard services that need a
   relational database each get their own Patroni cluster + pgAdmin. (The registry does **not** —
-  `distribution` needs no database, §3 — which is one fewer Patroni consumer than prodbox's Harbor.) The
+  `distribution` needs no database, [§3](#3-the-registry--the-single-image-source) — which is one fewer Patroni consumer than prodbox's Harbor.) The
   authoritative list of which standard services take a database is a Phase 2 delivery detail tracked in
   [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), not frozen here.
 - **Storage is not owned here.** Retained PVs, the `<namespace>/<statefulset>/pv_<integer>` naming, sizing,
@@ -224,7 +224,7 @@ is recorded here only so the "Keycloak owns everything" rule names its one excep
 is acceptable *precisely because* it is unreachable off the host.
 
 ```mermaid
-flowchart LR
+flowchart TD
   wild[Wild traffic: WAN / LAN / localhost browser] -->|TLS| lb[LoadBalancer: MetalLB or cloud LB]
   lb -->|Gateway API listener| envoy[Envoy Gateway data plane]
   envoy -->|OIDC and JWT enforcement| kc[Keycloak identity]
@@ -240,7 +240,7 @@ hand-authored. An app declares which services it consumes; amoebius generates th
 exactly those edges are allowed and every other is denied. A service that does not declare consuming `B`
 cannot reach `B`. Consequently a blocking NetworkPolicy that severs a declared dependency, and an open
 policy that exposes an undeclared one, are both **unrepresentable**. This subsection is the SSoT for the
-connectivity rule that [illegal_state_catalog.md](./illegal_state_catalog.md) §3.6 turns into a
+connectivity rule that [illegal_state_catalog.md §3.6](./illegal_state_catalog.md#36-blocking-networkpolicy-services-cant-reach-each-other) turns into a
 compile-time impossibility.
 
 ### Tolerations are derived from node taints, never hand-authored
@@ -253,7 +253,7 @@ taints owned by the node inventory ([substrate_doctrine.md §8](./substrate_doct
 — so a `Toleration` handle exists only once its taint edge does. Consequently the decode rejects a workload
 unless **there exists** a node satisfying its affinity **and** tolerating all its taints: a schedulability
 *existence fold* over the single node inventory, never a `Pending` pod. This subsection is the SSoT for the
-derivation rule that [illegal_state_catalog.md](./illegal_state_catalog.md) §3.5 / §3.22 turns into a
+derivation rule that [illegal_state_catalog.md §3.5](./illegal_state_catalog.md#35-undeployable-pods-taints-tolerations--affinity) / [§3.22](./illegal_state_catalog.md#322-a-hand-authored-un-derived-toleration) turns into a
 compile/decode-time impossibility (grade-1 for the derived-toleration shape, grade-2 for the existence fold).
 
 ---
@@ -277,7 +277,7 @@ type-enforced.
 This doc owns only the **per-container declaration** — the atom. The **aggregate** — that the summed cpu/ram
 `Demand` of a cluster's workloads does not exceed the cluster's `Capacity` (and, nested, that an engine/VM
 does not exceed its host) — is owned by [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) (the
-§4.6 capacity-accounting fold, [illegal_state_catalog.md §3.17](./illegal_state_catalog.md)), which *reads*
+[§4.6](./illegal_state_catalog.md#46-capacity-accounting-total-fold--σ-demand--capacity-checked) capacity-accounting fold, [illegal_state_catalog.md §3.17](./illegal_state_catalog.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)), which *reads*
 these per-container declarations. There is no second capacity fold here: this doc supplies the atoms, the
 capacity doctrine sums them.
 
@@ -291,16 +291,16 @@ platform-service ordering edges — full cluster lifecycle, teardown ordering, a
 
 - **LoadBalancer before the Envoy/Gateway edge** — the Gateway needs an LB address to publish a listener.
 - **The registry up before later app-image pulls** — the `distribution` registry is a baked binary with no
-  upstream prerequisites; it simply must be serving before amoebius publishes or pulls app images (§3).
+  upstream prerequisites; it simply must be serving before amoebius publishes or pulls app images ([§3](#3-the-registry--the-single-image-source)).
 - **The Percona operator before any Postgres consumer** — a `PerconaPGCluster` has nothing to reconcile it
-  otherwise (§8).
+  otherwise ([§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin)).
 - **Vault initialized and unsealed before secret-dependent startup** — a sealed Vault fails secret-dependent
   Pod startup *closed*, with no plaintext fallback ([vault_pki_doctrine.md](./vault_pki_doctrine.md)).
 - **Keycloak before the authenticated edge admits wild traffic** — there is no un-authenticated wild path
-  to fall back to (§9).
+  to fall back to ([§9](#9-the-loadbalancer-and-the-single-wild-ingress-path)).
 
 ```mermaid
-flowchart LR
+flowchart TD
   lb[LoadBalancer] -->|provides listener address| edge[Envoy and Gateway API]
   reg[Registry up and responsive] -->|all later image pulls resolve here| services[MinIO, Vault, Pulsar, Prometheus and Grafana, Postgres consumers]
   operator[Percona operator] -->|reconciles| pg[Per-service Patroni clusters]
@@ -314,7 +314,7 @@ flowchart LR
 
 "Same service set on every cluster" is **enforced structurally**, not maintained by parallel hand-edited
 installers. This generalizes the prodbox substrate-equivalence mechanism (prodbox CLAUDE.md "Substrate
-Equivalence" and `helm_chart_platform_doctrine.md` §3A) from two substrates to all of them. The three
+Equivalence" and `helm_chart_platform_doctrine.md` [§3](#3-the-registry--the-single-image-source)A) from two substrates to all of them. The three
 mechanisms, adapted:
 
 1. **One release/version value per platform-component image, shared across substrates.** A platform
@@ -326,13 +326,13 @@ mechanisms, adapted:
    conditionally on the active substrate. Divergence is a build-time error, never a silent drift — "the
    cloud substrate needs a different Envoy" cannot be expressed.
 3. **One platform-component inventory drives every substrate's installer.** A coverage check asserts that
-   no substrate silently drops a component another installs. Each substrate keeps its own *ordering* (§11),
+   no substrate silently drops a component another installs. Each substrate keeps its own *ordering* ([§11](#11-bring-up-and-dependency-ordering)),
    but never a different *set*. The cloud substrate is **not** a "no-registry" cluster — when a managed
    substrate looks like it is missing a piece the local cluster has, the fix is to extend the shared
    inventory and that substrate's installer, never to render a different service set. **This equivalence
    governs the service *set* and *image refs*, not the deployment *shape*: a service may legitimately take a
    different shape per cluster (single-node vs distributed), owned by
-   [service_capability_doctrine.md §6](./service_capability_doctrine.md), and that is not a violation of this
+   [service_capability_doctrine.md §6](./service_capability_doctrine.md#6-fungibility-reconciled-app-surface-invariant-shape-deployment-ruled), and that is not a violation of this
    rule.**
 
 The substrate *catalog* itself (apple / linux-cpu / linux-cuda / windows, virtualized substrates, the LB

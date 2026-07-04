@@ -36,11 +36,11 @@ members:
 | **windows** | Windows | `amd64` | CUDA present ⇒ on-host worker node | Linux substrates via WSL2; Windows-CUDA host worker nodes |
 
 Two axes are orthogonal and both matter: the **OS** chooses the package manager and the VM-provider
-strategy (§4); the **architecture** (`amd64` / `arm64`) is what makes mixed-arch clusters and multi-arch
+strategy ([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)); the **architecture** (`amd64` / `arm64`) is what makes mixed-arch clusters and multi-arch
 images expressible — it feeds the buildx pipeline owned by
 [image_build_doctrine.md](./image_build_doctrine.md). amoebius supports mixed-arch clusters; it does
 **not** support Windows containers (in or outside WSL2) — Windows participates either as a Linux host (via
-WSL2) or as the on-host CUDA worker case (§5).
+WSL2) or as the on-host CUDA worker case ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)).
 
 > **Honesty.** The four-name catalog is the amoebius DSL surface. The seed detector in the `hostbootstrap`
 > library distinguishes a *finer* granularity — `apple-silicon`, `linux-cpu`, `linux-gpu`, `windows-cpu`,
@@ -70,9 +70,9 @@ Two classification rules are load-bearing and stated as hard failures, not warni
 
 - **Apple is always `arm64`.** macOS on a non-`arm64` architecture is rejected outright — there is no
   Intel-Mac substrate. Apple Silicon's unified memory is the whole reason the Apple substrate is special
-  (§5), and that is an `arm64` fact.
+  ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)), and that is an `arm64` fact.
 - **GPU presence promotes the substrate.** A Linux host with an NVIDIA GPU classifies as `linux-cuda`
-  (seed: `linux-gpu`), not `linux-cpu`; the CUDA container runtime is then a reconciler precondition (§3).
+  (seed: `linux-gpu`), not `linux-cpu`; the CUDA container runtime is then a reconciler precondition ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)).
 
 > **Honesty.** This is the `hostbootstrap` seed, ported from a prior Python detector. It is *evidence from
 > a sibling library*, not a tested amoebius result — amoebius has not built Phase 1. Read every mechanism
@@ -129,7 +129,7 @@ package manager; only the driver is `IO`. Each reconciler is gated by a substrat
 `diagnostic`).
 
 ```mermaid
-flowchart LR
+flowchart TD
   need[A reconcile step needs a host tool] -->|probe| sat{Already satisfied?}
   sat -->|yes| noop[Verified no-op]
   sat -->|no| plan[Substrate-branched install plan via the package manager]
@@ -141,7 +141,7 @@ flowchart LR
 ### The exact boundary of the no-`PATH` rule
 
 The rule governs **the host invocation surface**, and only that surface. When amoebius crosses a context
-boundary — running a subcommand of itself inside a VM or container (§4; the composition lift owned by
+boundary — running a subcommand of itself inside a VM or container ([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux); the composition lift owned by
 [daemon_topology_doctrine.md](./daemon_topology_doctrine.md)) — only the **outermost** host tool is
 resolved to an absolute path; every **nested** tool is the guest's *own* bare name run against the guest's
 own `PATH`, which is legitimate because it is that guest's environment, not the host's
@@ -205,12 +205,12 @@ PowerShell so the absolute-path discipline holds at the host boundary.
 
 The Apple-Metal host worker's native Swift/Metal parts are **built headless, directly on the macOS host** —
 **there is no macOS build VM, and specifically no Tart.** amoebius commits to this by design: a single fixed
-Objective-C/C Metal bridge is source-built once on the host with `/usr/bin/clang` (by absolute path, per §3)
+Objective-C/C Metal bridge is source-built once on the host with `/usr/bin/clang` (by absolute path, per [§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract))
 and `dlopen`'d, and generated Metal Shading Language is compiled *at runtime* in-process via
 `MTLDevice.makeLibrary(source:options:)`. No VM, no login-keychain dependency, no SwiftPM/per-kernel Swift
 build, no full Xcode, no offline `metal` compiler. The full requirements, architecture, prerequisite model,
 and the "why not a VM" rationale are owned by
-[apple_metal_headless_builds.md](./apple_metal_headless_builds.md); §5 below owns only *which hardware forces
+[apple_metal_headless_builds.md](./apple_metal_headless_builds.md); [§5](#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained) below owns only *which hardware forces
 a host worker*.
 
 > **Honesty.** Lima, WSL2, and Incus are implemented VM providers in the `hostbootstrap` seed. The headless,
@@ -229,13 +229,13 @@ host subprocess of the host binary:
 
 | Hardware | Substrate | Why not a container / VM | What runs on the host |
 |----------|-----------|--------------------------|-----------------------|
-| **Apple Metal GPU** | apple | Metal needs Apple Silicon **unified memory**; it cannot run in a Linux container or a Linux VM | An on-host inference/ML worker, built natively **headless on the host — no VM** (§4.3, [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)) |
+| **Apple Metal GPU** | apple | Metal needs Apple Silicon **unified memory**; it cannot run in a Linux container or a Linux VM | An on-host inference/ML worker, built natively **headless on the host — no VM** ([§4.3](#43-no-macos-build-vm-apple-builds-are-headless-on-host), [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)) |
 | **NVIDIA CUDA on Windows** | windows | The CUDA stack does **not** run performantly from inside WSL2 | An on-host CUDA worker, built natively on Windows |
 
 The defining properties of a host worker node:
 
 - **Built directly on the host** — headless, with **no VM** (the Apple Swift/Metal parts build on-host via
-  the fixed Metal bridge, §4.3 / [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)), not
+  the fixed Metal bridge, [§4.3](#43-no-macos-build-vm-apple-builds-are-headless-on-host) / [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)), not
   pulled as a container image. This is the one place amoebius compute lives *outside* a cluster pod.
 - **Managed as a subprocess by the host amoebius binary**, which owns its lifecycle. The stateless-role
   skeleton the seed uses is Load → Prereq → Acquire → Ready → Serve → Drain → Exit
@@ -246,7 +246,7 @@ The defining properties of a host worker node:
   access. That communication model — including the kube-apiserver-over-distro-mTLS path and the host-only
   network restriction — is owned in full by
   [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md); the carve-out is recorded in
-  [platform_services_doctrine.md §9](./platform_services_doctrine.md). This doc owns only *which hardware
+  [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path). This doc owns only *which hardware
   forces a host worker and why*, not the wire.
 - **Is a worker role, not the control plane.** The worker-role taxonomy and the in-cluster control-plane
   singleton are owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md). The CUDA *in-cluster*
@@ -255,7 +255,7 @@ The defining properties of a host worker node:
   on Windows and GPU on Apple are the ones that escape to the host.
 
 ```mermaid
-flowchart LR
+flowchart TD
   metal[Apple Metal GPU: needs unified memory] -->|cannot containerize| hostworker[Host worker node: built on host, subprocess of the host binary]
   wincuda[Windows CUDA: poor perf under WSL2] -->|cannot containerize| hostworker
   hostworker -->|host-only NodePort, no mTLS, localhost only| peers[In-cluster MinIO and Pulsar peers]
@@ -268,7 +268,7 @@ flowchart LR
 
 `bootstrap.sh` is the **only shell script amoebius owns**, and it does as little as possible. Its entire
 job is to get a built amoebius binary onto the host and then get out of the way — because the no-`PATH` /
-no-env, lazy-tool-ensure discipline (§3) cannot start until there is a Haskell binary to enforce it.
+no-env, lazy-tool-ensure discipline ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)) cannot start until there is a Haskell binary to enforce it.
 Everything after the binary exists is the binary's responsibility, in Haskell, under this doctrine: the
 script does not install brew packages, it just ensures brew is installed, builds the project Haskell binary,
 then calls `bootstrap`, which takes over from there.
@@ -287,8 +287,8 @@ The contract, on the canonical Apple lane:
 5. **Hand off to the binary.** The script's final act is to invoke the freshly built binary's `bootstrap`
    subcommand with its mandatory distro flag — `amoebius bootstrap --distro={kind,rke2} [--replicas=n]`
    (`replicas` defaults to `1` on `kind`). From here the binary takes over: it installs further build tools
-   and dependencies through the package manager **as needed and by full path** (§3) — including, on Apple,
-   source-building the fixed Metal bridge headless on the host with `/usr/bin/clang` (§4.3 /
+   and dependencies through the package manager **as needed and by full path** ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)) — including, on Apple,
+   source-building the fixed Metal bridge headless on the host with `/usr/bin/clang` ([§4.3](#43-no-macos-build-vm-apple-builds-are-headless-on-host) /
    [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)), never in a VM — and drives cluster
    bring-up.
 
@@ -298,7 +298,7 @@ toolchain pin, the same build, the same `bootstrap` hand-off — so the per-subs
 the package-manager-root bootstrap and nothing else.
 
 ```mermaid
-flowchart LR
+flowchart TD
   sh[Substrate bootstrap.sh] -->|ensure package-manager root| pm[brew / apt / winget]
   pm -->|install| ghcup[ghcup]
   ghcup -->|install GHC 9.12.4 and Cabal 3.16.1.0| tc[Pinned toolchain on host]
@@ -331,46 +331,46 @@ the substrate dictates is the **LoadBalancer implementation**:
 Everything *above* the LB — Envoy + Gateway API, Keycloak-owns-all-wild-ingress, the whole standard service
 set — is substrate-identical. This doc owns the **LB-choice-by-substrate** mapping; the LB's role as a
 standard service and the ingress shape it fronts are owned by
-[platform_services_doctrine.md §9](./platform_services_doctrine.md), and cloud-LB provisioning is owned by
+[platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path), and cloud-LB provisioning is owned by
 [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). When a provider substrate appears to be "missing" a
 piece the local cluster has, the fix is to extend the shared platform installer for that substrate — never
 to render a different service set (the structural-equivalence rule,
-[platform_services_doctrine.md §12](./platform_services_doctrine.md)).
+[platform_services_doctrine.md §12](./platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant)).
 
 ---
 
 ## 8. The node inventory: the single owner of hosts, capacity, and taints
 
-The substrate is a *fact about the host* (§1); the **node inventory** is the typed projection of those facts
+The substrate is a *fact about the host* ([§1](#1-the-substrate-is-a-fact-about-the-host-not-a-knob)); the **node inventory** is the typed projection of those facts
 that the rest of amoebius reads. It is the **single owner** (an ownership index,
-[illegal_state_catalog.md §4.4](./illegal_state_catalog.md)) of three things no other doc may re-declare:
+[illegal_state_catalog.md §4.4](./illegal_state_catalog.md#44-ownership-indices--single-owner-ssot-structurally)) of three things no other doc may re-declare:
 *which hosts/substrates exist*, *how much each host advertises*, and *which taints a node carries*. Three
 consumers read it, and each is a foreclosure that depends on there being exactly one such list.
 
 - **Per-host `Capacity`.** Each host entry advertises a declared `Capacity` (cpu/mem/storage/gpu). This is the
-  number the capacity fold ([resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md)) checks a
-  workload/VM/engine `Demand` against, and the number the detection classifier (§2) cross-checks against
+  number the capacity fold ([resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)) checks a
+  workload/VM/engine `Demand` against, and the number the detection classifier ([§2](#2-detection-a-pure-classification-over-three-reads)) cross-checks against
   reality at runtime (the declared value is a ceiling the fold trusts; a host smaller than its declaration
-  refuses, [resource_capacity_doctrine.md §8](./resource_capacity_doctrine.md)). Detection reads the *real*
+  refuses, [resource_capacity_doctrine.md §8](./resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-at-decode-cross-checked-at-runtime)). Detection reads the *real*
   numbers; the inventory *declares* them; the fold trusts the declaration and the reconcile checks it.
 - **A closed `NodeTaintKind` set.** Taints are not free strings — the set of taint kinds a node may carry is a
-  **closed union** owned here, exactly as the substrate catalog and `HostTool` enum are closed (§1, §3). This
+  **closed union** owned here, exactly as the substrate catalog and `HostTool` enum are closed ([§1](#1-the-substrate-is-a-fact-about-the-host-not-a-knob), [§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)). This
   is what lets a **`Toleration` be *derived*, never hand-authored**: the platform derives a workload's
   tolerations from the declared node taints ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)),
   so "a toleration for a taint no node declares" is unrepresentable and "a taint no workload tolerates" leaves
   the schedulability existence fold with no landable node
-  ([illegal_state_catalog.md §3.5, §3.22](./illegal_state_catalog.md)).
+  ([illegal_state_catalog.md §3.5, §3.22](./illegal_state_catalog.md#35-undeployable-pods-taints-tolerations--affinity)).
 - **The `LinuxHost` witnesses and substrate tags the topology relation reads.** The declared compute-engine
   axis ([cluster_topology_doctrine.md](./cluster_topology_doctrine.md)) pairs an engine with a node only when
   the relation permits it, and it reads *this* inventory for "what substrates exist" — so the compatibility
   fold (I2) and the `LinuxHost`-witness gating (I1) are checked against one authoritative list. On apple and
-  windows the only `LinuxHost` constructor is the virtualization provider (§4), which is why an rke2/kind
+  windows the only `LinuxHost` constructor is the virtualization provider ([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)), which is why an rke2/kind
   cluster on those hosts must interpose a Lima/WSL2 Linux VM.
 
 This document owns the inventory *record*, the closed `NodeTaintKind` set, and the per-host `Capacity`
 *declaration*; it does **not** own the capacity arithmetic ([resource_capacity_doctrine.md](./resource_capacity_doctrine.md)),
 the compute-engine relation ([cluster_topology_doctrine.md](./cluster_topology_doctrine.md)), or the
-toleration-derivation rule ([platform_services_doctrine.md §9](./platform_services_doctrine.md)). It is the
+toleration-derivation rule ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)). It is the
 single list they all read.
 
 ---
@@ -382,7 +382,7 @@ gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/REA
 and the `bootstrap` contract land in **Phase 1** (`linux-cpu`); host compute daemons, the Lima/WSL2
 providers, and the headless Apple-Metal fixed-bridge build land in **Phase 7** (`apple`); the in-cluster CUDA path is exercised in
 **Phase 6** (`linux-cuda`). This doc never maintains a competing status ledger; it states the target shape
-and links back for status, per [documentation_standards.md §6](../documentation_standards.md).
+and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
 ---
 

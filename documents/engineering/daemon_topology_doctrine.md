@@ -17,8 +17,8 @@ package"; there is one Haskell binary that *runs* in three different ways:
 | Context | How it runs | What it is for |
 |---------|-------------|----------------|
 | **CLI tool** | A one-shot invocation on a host, exits when done | Operator commands, `bootstrap`, reconcile triggers, status queries |
-| **Sudo host daemon** | A long-running host process with `sudo` powers | Bring up the distro (kind / rke2) — including installing the **root rke2 server** (§2.1) — install host tooling, talk to `kube-apiserver` over distro mTLS, **supervise host-level worker subprocesses** |
-| **In-cluster pod** | Deployed as a generated typed manifest (the typed reconciler, no Helm) inside the cluster | Hosts the **control-plane singleton role** (§3) *or* a **worker role** (§4) |
+| **Sudo host daemon** | A long-running host process with `sudo` powers | Bring up the distro (kind / rke2) — including installing the **root rke2 server** ([§2.1](#21-a-third-orthogonal-axis-rke2-serveragent-declared)) — install host tooling, talk to `kube-apiserver` over distro mTLS, **supervise host-level worker subprocesses** |
+| **In-cluster pod** | Deployed as a generated typed manifest (the typed reconciler, no Helm) inside the cluster | Hosts the **control-plane singleton role** ([§3](#3-the-control-plane-singleton--exactly-one-elected)) *or* a **worker role** ([§4](#4-worker-daemons--n-unelected)) |
 
 The **same-binary policy** is generalized directly from the prodbox sibling
 (`/home/matthewnowak/prodbox/documents/engineering/distributed_gateway_architecture.md` → "Same-binary
@@ -35,7 +35,7 @@ policy"). The payoff is not stylistic — it is structural:
   parser. This is the prodbox **daemon-as-Command** pattern.
 
 The *constituent behaviours* of the binary map onto the role taxonomy below: **prodbox** is the root
-single-node control-plane behaviour (§3), **infernix** + **jitML** are the ML worker roles (§4),
+single-node control-plane behaviour ([§3](#3-the-control-plane-singleton--exactly-one-elected)), **infernix** + **jitML** are the ML worker roles ([§4](#4-worker-daemons--n-unelected)),
 **hostbootstrap** is the bootstrap + DSL-`chain` core that the host daemon drives, and **mattandjames** is
 the application logic a web-service worker hosts ([README](../../README.md);
 [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md)). They are libraries inside one binary, not separate
@@ -59,8 +59,8 @@ pod" is not a role, and "the control-plane singleton" is not a context.
 |                         | **Control-plane singleton role** | **Worker role** |
 |-------------------------|----------------------------------|-----------------|
 | **CLI context**         | — (a CLI run is not a daemon)     | — |
-| **Sudo host daemon**    | Pre-cluster bootstrap *acts on behalf of* the future singleton, then hands off | Supervises host-level workers (e.g. Apple-Metal inference, §4) |
-| **In-cluster pod**      | **Exactly one active**, elected (§3) | **N**, unelected (§4) |
+| **Sudo host daemon**    | Pre-cluster bootstrap *acts on behalf of* the future singleton, then hands off | Supervises host-level workers (e.g. Apple-Metal inference, [§4](#4-worker-daemons--n-unelected)) |
+| **In-cluster pod**      | **Exactly one active**, elected ([§3](#3-the-control-plane-singleton--exactly-one-elected)) | **N**, unelected ([§4](#4-worker-daemons--n-unelected)) |
 
 Two facts fall out of the grid:
 
@@ -83,13 +83,13 @@ The rke2 distro adds a **third, fully independent typed axis** that this doctrin
 the other two:
 
 - **(i) Substrate — DETECTED.** kind / rke2 / EKS, discovered at bring-up
-  ([cluster_topology_doctrine.md §1](./cluster_topology_doctrine.md),
+  ([cluster_topology_doctrine.md §1](./cluster_topology_doctrine.md#1-two-axes-the-substrate-is-detected-the-engine-is-declared),
   [substrate_doctrine.md](./substrate_doctrine.md)).
-- **(ii) amoebius daemon-role — ELECTED.** the control-plane singleton (§3) versus an unelected worker (§4).
+- **(ii) amoebius daemon-role — ELECTED.** the control-plane singleton ([§3](#3-the-control-plane-singleton--exactly-one-elected)) versus an unelected worker ([§4](#4-worker-daemons--n-unelected)).
 - **(iii) rke2 server/agent — DECLARED.** which *nodes* carry the Kubernetes control plane
   (kube-apiserver + the etcd quorum) versus which are pure workload nodes. This is the `Rke2Servers` closed
   union — `Single` / `Ha3` / `Ha5`, the only legal odd etcd quorums {1,3,5} — plus an `agents` list, owned by
-  [cluster_topology_doctrine.md §2, §4](./cluster_topology_doctrine.md). An even- or zero-server (no-quorum /
+  [cluster_topology_doctrine.md §2, §4](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm). An even- or zero-server (no-quorum /
   split-brain) control plane has no constructor: **grade-(1) unrepresentable**.
 
 (Two further declared axes exist system-wide — environment dev/staging/prod, and the engine/model/kernel asset
@@ -99,26 +99,26 @@ is normative only about axis (iii)'s orthogonality to (i) and (ii).)
 **The three axes never fuse.** An rke2 *server* node is **not** the amoebius control-plane singleton, and an
 rke2 *agent* is **not** an amoebius worker. Axis (iii) is a property of *Kubernetes nodes* (which host runs
 etcd / kube-apiserver); axis (ii) is a property of *amoebius daemon pods* (which pod holds cluster + secret
-authority, §3). They are independent: a worker pod may be scheduled onto an rke2 server node, and the elected
+authority, [§3](#3-the-control-plane-singleton--exactly-one-elected)). They are independent: a worker pod may be scheduled onto an rke2 server node, and the elected
 singleton pod may run on an rke2 agent — the scheduler places pods without regard to the etcd quorum, and the
-election (§5) picks a pod without regard to its node's rke2 kind. Axis (iii) is equally independent of axis
+election ([§5](#5-leadership-election--the-mechanism-the-proof-lives-elsewhere)) picks a pod without regard to its node's rke2 kind. Axis (iii) is equally independent of axis
 (i): rke2 server/agent is meaningful *only* on the rke2 substrate — it does not exist on kind or on EKS (which
 owns its own managed control plane) — so a detected substrate never *implies* a server/agent split.
 
-**Enactment splits across exactly the two daemon contexts (§1).** This is the one place the rke2 axis touches
+**Enactment splits across exactly the two daemon contexts ([§1](#1-one-binary-three-contexts)).** This is the one place the rke2 axis touches
 daemon topology:
 
 - **The sudo host daemon installs the ROOT rke2 server** — the zero-secret single node
-  `{ servers = Rke2Servers.Single host, agents = [] }`. This makes the §2 *midwife* concrete: before any
+  `{ servers = Rke2Servers.Single host, agents = [] }`. This makes the [§2](#2-context--role-an-orthogonal-grid) *midwife* concrete: before any
   cluster exists there is no singleton to elect, so the host daemon (acting on behalf of the future singleton)
   brings up the first `rke2-server`, then defers. This is the prodbox single-node `rke2-server` base —
   **sibling evidence, not an amoebius result** (prodbox's `Rke2.hs` proves the single-node install only).
 - **The elected in-cluster singleton enacts child server/agent rollout over SSH.** Once kube-apiserver is up
   and the singleton is elected, growing the cluster (further `Ha3` / `Ha5` servers, and all agents) is part of
-  the singleton's cluster authority — the *dynamic node provisioning* of §3.2, owned by
+  the singleton's cluster authority — the *dynamic node provisioning* of [§3.2](#32-what-total-authority-over-the-cluster-and-its-secrets-cashes-out-to), owned by
   [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md). It runs the **checkpoint-free
   tag-discovery host reconciler** — `create → tag → join-fabric → drain-by-tag`, home
-  [pulumi_iac_doctrine.md §0](./pulumi_iac_doctrine.md) — reaching each new host over SSH. The first server
+  [pulumi_iac_doctrine.md §0](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision) — reaching each new host over SSH. The first server
   mints the `Rke2NodeToken` (a Vault-KV `SecretRef`, parent-minted, referenced by name); further servers and
   agents join via a `server:` URL + that token; rejoin is idempotent. This is a **reconcile, not a state
   machine**.
@@ -147,7 +147,7 @@ cluster" ([README](../../README.md): *prodbox = the root single-node control-pla
 
 The in-cluster daemon is a singleton service daemon (**exactly one pod**), yet
 the platform invariant is **HA always — including `replicas=1`**
-([platform_services_doctrine.md §2](./platform_services_doctrine.md)). These are not in tension once you
+([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1)). These are not in tension once you
 read "exactly one pod" as **exactly one *active* (elected) singleton**, not "the chart only ever schedules
 one replica":
 
@@ -155,7 +155,7 @@ one replica":
   pods, each a ranked election candidate. This mirrors the prodbox gateway chart, which renders **one
   Deployment per ranked node** and elects one owner among them.
 - **Election guarantees exactly one *active* singleton** at a time; the other candidates are warm standbys
-  that take over on failure (§5).
+  that take over on failure ([§5](#5-leadership-election--the-mechanism-the-proof-lives-elsewhere)).
 - At the **root single-node case** (`replicas=1`, the laptop kind / single-node rke2), the population is
   one: the sole candidate self-elects. This is the **degenerate single-rank** instance of the same protocol
   — exactly the prodbox home single-host shared-fate case — not a second, hand-special-cased "dev"
@@ -165,10 +165,10 @@ one replica":
 
 - **Cluster authority.** The active singleton runs the idempotent `discover → diff → enact → re-observe`
   reconciler that owns bring-up, spawn, dynamic node provisioning, and teardown — owned by
-  [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md), which names this doc as the owner of
+  [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine), which names this doc as the owner of
   *who runs* that loop. It is also the single writer of the cluster's one canonical mutable external
   surface — the public DNS record for the cluster gateway (route53), gated by the claim/yield discipline of
-  §5.
+  [§5](#5-leadership-election--the-mechanism-the-proof-lives-elsewhere).
 - **Secret authority.** The singleton is the in-cluster principal that **operates Vault** — it is the only
   role that holds cluster-wide secret authority. The Vault *model* it operates — fail-closed unseal, the
   root password-encrypted unseal, the parent-injects-secrets-into-the-child's-Vault contract, the root PKI
@@ -180,7 +180,7 @@ one replica":
 Fusing cluster control and secret authority into a *single elected role* is what makes "one brain per
 cluster" enforceable: there is never a moment when two daemons both believe they may reconcile the cluster
 or mint its secrets. *That* this fusion is safe — that the election never produces two simultaneous active
-singletons — is a correctness obligation, not something this section asserts; see §5 and the honesty note
+singletons — is a correctness obligation, not something this section asserts; see [§5](#5-leadership-election--the-mechanism-the-proof-lives-elsewhere) and the honesty note
 there.
 
 ---
@@ -201,18 +201,18 @@ each kind. The canonical worker kinds:
 Properties shared by all workers:
 
 - **Unelected and horizontally scaled.** Workers do not run a leadership election among themselves. They
-  coordinate through the shared **coordination plane** — Pulsar + MinIO + the commit log (§5) — whose
+  coordinate through the shared **coordination plane** — Pulsar + MinIO + the commit log ([§5](#5-leadership-election--the-mechanism-the-proof-lives-elsewhere)) — whose
   intra-system consensus is *delegated* to those systems, not re-proved by amoebius
-  ([platform_services_doctrine.md §6, §8](./platform_services_doctrine.md)). A Pulsar topic-lifecycle
+  ([platform_services_doctrine.md §6, §8](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox)). A Pulsar topic-lifecycle
   coordinator that needs single-consumer semantics gets it from Pulsar's subscription model and the
   at-least-once + dedup discipline ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)), not from a
   bespoke amoebius election.
 - **HA like everything else.** A worker Deployment runs the HA chart at a configurable replica count, even
-  at `replicas=1` ([platform_services_doctrine.md §2](./platform_services_doctrine.md)). Every worker
-  container declares explicit CPU and RAM ([platform_services_doctrine.md §10](./platform_services_doctrine.md)).
+  at `replicas=1` ([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1)). Every worker
+  container declares explicit CPU and RAM ([platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)).
 - **Host-level workers are subprocesses, not pods.** When hardware forbids containerization (Apple-Metal
   unified-memory inference, CUDA stacks that do not run performantly under WSL2), the worker runs as a
-  **host subprocess supervised by the sudo host daemon** (§1). It reaches in-cluster MinIO and Pulsar as a
+  **host subprocess supervised by the sudo host daemon** ([§1](#1-one-binary-three-contexts)). It reaches in-cluster MinIO and Pulsar as a
   **peer over a host-only NodePort with no mTLS** — localhost only, no WAN or LAN — owned by
   [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md). It discovers its host tooling lazily
   through the substrate's package manager and invokes it by full path, never through `PATH`
@@ -222,7 +222,7 @@ Properties shared by all workers:
 > Pulsar and no ML workers. Everything in this section is forward design intent for the relevant phase, not
 > an inherited-proven behaviour; status and gates live only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
-> ([documentation_standards.md §6](../documentation_standards.md)).
+> ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---
 
@@ -330,10 +330,10 @@ Lifecycle"); this doc records only the contract amoebius daemons share:
   on a file-watch, boot fields trigger a drain-and-restart so the supervisor relaunches against the new
   file. No `PATH`, no `PRODBOX_*`-style environment-variable precedence on supported paths
   ([substrate_doctrine.md](./substrate_doctrine.md) for the no-env/no-`PATH` contract). **That single file
-  arrives differently per context (§1):** a **CLI / host** binary reads the sibling `.dhall` written by
+  arrives differently per context ([§1](#1-one-binary-three-contexts)):** a **CLI / host** binary reads the sibling `.dhall` written by
   `init`; a binary **descending a bootstrap-lift frame** (VM/container) has it **streamed on `stdin` and
   written once before `exec`** — the parent's `context-init` mint
-  ([dsl_doctrine.md §3](./dsl_doctrine.md)); an **in-cluster pod** receives it as a rendered `ConfigMap`
+  ([dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness)); an **in-cluster pod** receives it as a rendered `ConfigMap`
   mount ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)). In every case a frame
   receives its config from its parent and never rewrites its own.
 
@@ -346,7 +346,7 @@ Lifecycle"); this doc records only the contract amoebius daemons share:
 
 The topology, in one picture. Note the carve-out: the singleton and the host daemon do **not** enter
 through the wild-ingress edge — that path (LoadBalancer → Envoy/Gateway-API → Keycloak, which owns all wild
-ingress) is owned by [platform_services_doctrine.md §9](./platform_services_doctrine.md). Daemon-to-daemon
+ingress) is owned by [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path). Daemon-to-daemon
 control traffic rides the coordination plane and the host-only carve-out instead.
 
 ```mermaid
@@ -373,7 +373,7 @@ validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) and never restated here. For orientation
 only (the plan is authoritative): the contexts and the same-binary spine ride **Phase 1**; the in-cluster
 **control-plane singleton** lands in **Phase 3** (per
-[cluster_lifecycle_doctrine.md §10](./cluster_lifecycle_doctrine.md)); and the **election correctness** plus
+[cluster_lifecycle_doctrine.md §10](./cluster_lifecycle_doctrine.md#10-planning-ownership)); and the **election correctness** plus
 cross-cluster gateway failover are owned, modeled, and gated by
 [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) in the failover phase. This doc states the target
 shape and links back for status.
@@ -388,13 +388,13 @@ shape and links back for status.
 - [Substrate Doctrine](./substrate_doctrine.md)
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [Platform Services Doctrine](./platform_services_doctrine.md)
-- [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — owns the node-lifecycle enactment the singleton drives for child rke2 server/agent rollout (§2.1)
-- [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — §2/§4 the `Rke2Servers` closed union and the topology fold (the declared server/agent axis of §2.1)
-- [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — §0 the checkpoint-free tag-discovery host reconciler (tier (b)) that enacts child rke2 rollout over SSH
+- [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — owns the node-lifecycle enactment the singleton drives for child rke2 server/agent rollout ([§2.1](#21-a-third-orthogonal-axis-rke2-serveragent-declared))
+- [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — [§2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)/[§4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction) the `Rke2Servers` closed union and the topology fold (the declared server/agent axis of [§2.1](#21-a-third-orthogonal-axis-rke2-serveragent-declared))
+- [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — [§0](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision) the checkpoint-free tag-discovery host reconciler (tier (b)) that enacts child rke2 rollout over SSH
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md)
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the control-plane singleton runs the capacity fold at decode
-- [DSL Doctrine](./dsl_doctrine.md) — §3 how each context's `.dhall` is delivered (sibling / stdin / ConfigMap)
+- [DSL Doctrine](./dsl_doctrine.md) — [§3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness) how each context's `.dhall` is delivered (sibling / stdin / ConfigMap)
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — the rendered `ConfigMap` that delivers an in-cluster pod's config
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

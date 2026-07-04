@@ -54,7 +54,7 @@ the expensive case is never mistaken for the cheap one.
 | Owned by | **This doc** + [network_fabric_doctrine.md](./network_fabric_doctrine.md) | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), Phase 9 |
 
 The load-bearing decision: **the worker pool is NOT a fourth arm of the closed `ComputeEngine` union**
-([cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md)). Making it an engine arm would give it a
+([cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)). Making it an engine arm would give it a
 cluster identity and therefore its own data plane — exactly the second boundary we must avoid. It is a
 *separate deployment-rules type keyed to an existing cluster's data plane*, so the `ComputeEngine` union
 stays closed and the attach topology provably creates no second store.
@@ -64,11 +64,11 @@ stays closed and the attach topology provably creates no second store.
 ## 3. The binding: reachability is a type, not a runtime probe
 
 A `DataPlane` is a typed handle to **one cluster's one Pulsar + one object/KV store**. It is a single-owner
-value (an ownership index, [illegal_state_catalog.md §4.4](./illegal_state_catalog.md)) *projected* from the
+value (an ownership index, [illegal_state_catalog.md §4.4](./illegal_state_catalog.md#44-ownership-indices--single-owner-ssot-structurally)) *projected* from the
 platform-service set, never authored — so "two logical stores for one cluster" has no constructor.
 
 The crux — "a workload bound to a store it cannot reach" — is foreclosed by making **fabric membership a
-capability** ([illegal_state_catalog.md §4.2](./illegal_state_catalog.md)) phantom-indexed by the owning
+capability** ([illegal_state_catalog.md §4.2](./illegal_state_catalog.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)) phantom-indexed by the owning
 cluster. A logical binding resolves to a physical handle *only* on presentation of that capability:
 
 ```haskell
@@ -94,7 +94,7 @@ Two illegal states die here:
   `BoundTopic` must all unify. A worker holding `FabricMember home` can bind only `DataPlane home`; it cannot
   name another cluster's plane.
 - **Cross-tenant reach** (grade-1): the tenant tag `t` must unify; there is no `Ref t1 -> Ref t2` coercion
-  ([illegal_state_catalog.md §4.2](./illegal_state_catalog.md)).
+  ([illegal_state_catalog.md §4.2](./illegal_state_catalog.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)).
 
 The vision's "single logical store irrespective of how many nodes or where" then becomes **a theorem of the
 type**: the home CUDA node, the home Apple-Metal host worker, and every remote spot node each hold
@@ -120,7 +120,7 @@ workload as Pulsar/MinIO clients. It is a **deployment rule**, not app logic
 - **Its trigger already exists.** Scenario (a) — "run the batch job on AWS only when spot instances are below
   a price threshold" — needs no new type: `ScalingPolicy` already carries *instance price-shopping (a
   candidate instance-type set + a price ceiling)*, owned by
-  [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md). The pool binds that policy; it does
+  [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns). The pool binds that policy; it does
   not reinvent it.
 - **Statelessness is the teardown guarantee.** The workload's durable state is entirely in `DataPlane home`
   (a Pulsar topic + a KV bucket). The spot nodes are stateless clients: per
@@ -132,7 +132,7 @@ workload as Pulsar/MinIO clients. It is a **deployment rule**, not app logic
   normal path; the sole deleter of durable data remains the elevated test harness, on test-flagged resources
   only ([storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md),
   [testing_doctrine.md](./testing_doctrine.md)). The credential/`Retain` mechanics are owned there and by
-  [pulumi_iac_doctrine.md §6](./pulumi_iac_doctrine.md); this doc only requires the storage-arm-free shape.
+  [pulumi_iac_doctrine.md §6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model); this doc only requires the storage-arm-free shape.
 
 ```haskell
 data ElasticWorkerPool c t = ElasticWorkerPool
@@ -147,7 +147,7 @@ data Deprovision = Deprovision { releaseCompute :: ComputeSet }  -- NO deleteSto
 
 - **Elastic growth stays capacity-checked.** When the price trigger fires and the `Growable` policy adds
   nodes, the `place` fold re-runs against the enlarged topology capacity
-  ([resource_capacity_doctrine.md §4, §6](./resource_capacity_doctrine.md)), so "the pool grew but the job
+  ([resource_capacity_doctrine.md §4, §6](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)), so "the pool grew but the job
   still does not fit" is caught at the same grade-2 check. "Job too big for the hardware" is never
   representable, elastic or not.
 - **The wire is owned elsewhere.** *How* a remote node reaches the home Pulsar/MinIO — the WireGuard fabric,
@@ -206,7 +206,7 @@ host-compute-daemon peer model it generalizes (Phase 7), and cloud spot provisio
 > `DataPlane`/`FabricMember` binding, the remote-worker-pool-as-client model, and the attach-vs-second-cluster
 > distinction are **new amoebius design** — the host-compute-daemon peer model they generalize is itself an
 > unbuilt Phase-7 design, and its loopback-NodePort shape has only a prodbox precedent (evidence, not amoebius
-> proof). Per [documentation_standards.md §6](../documentation_standards.md), read every prescriptive
+> proof). Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every prescriptive
 > statement as the contract amoebius intends to satisfy, never as a tested result.
 
 ---

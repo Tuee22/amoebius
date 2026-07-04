@@ -74,7 +74,7 @@ This is the load-bearing idea, so cash it out:
   steps*, written in Haskell, that invoke tools by absolute path — never a Dhall-embedded shell string.
 
 ```mermaid
-flowchart LR
+flowchart TD
   author[Operator authors typed amoebius.dhall] -->|imports and composition| expr[One Dhall expression]
   expr -->|Dhall typechecker total and pure| typed[Well-typed Dhall value]
   expr -->|schema mismatch| reject1[Rejected before any effect]
@@ -100,13 +100,13 @@ the shape the sibling prodbox project proved as its Tier-0 `parameters + context
   ([resource_capacity_doctrine.md](./resource_capacity_doctrine.md)), the app specs, the deployment rules.
   This is the bulk of what an operator authors and the part most people mean when they say "the DSL." The DSL
   *carries* these typed fields; the types that make an over-committed, unbounded, or incompatible value
-  unrepresentable live in those owning docs, not here (§5).
+  unrepresentable live in those owning docs, not here ([§5](#5-the-illegal-state-unrepresentable-contract)).
 - **Context** — *where this binary sits* in the composed topology: its `contextKind`, its place in the
   `topologyFrames` chain, its `currentFrame`, the `capabilities` it claims, the `allowedCommandClasses`
   it may run, the `resourceEnvelope` it lives inside, and the `childContextKinds` it may spawn
   (`Context.hs`, `BinaryContext`). The same `.dhall` that an operator writes for the root is *minted
   forward* into each child frame (`contextForKind`, `childContext`, the `context-init` step), which is
-  what makes the recursive descent of §2 self-describing.
+  what makes the recursive descent of [§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) self-describing.
 - **Witness** — locally-checkable runtime facts (`RuntimeWitness`, `Context.hs`): e.g. *a required file or
   unix socket exists*. A command is gated on its witnesses passing (`validateRuntimeContext`,
   `commandAllowed`), so a binary refuses to act in a context it does not actually inhabit. Amoebius
@@ -117,7 +117,7 @@ the shape the sibling prodbox project proved as its Tier-0 `parameters + context
 The point of separating these three is that the orchestration surface is **self-validating before it
 acts**: parameters say what to build, context says who is allowed to build it here, and witnesses confirm
 the binary is actually standing where the context claims. All three are typed Dhall, none is a secret
-(§6), and none is logic (§2).
+([§6](#6-secrets-are-names-never-values)), and none is logic ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)).
 
 **How the minted context reaches each frame.** The child `.dhall` of the Context bullet is not written to a
 host file and bind-mounted in; it is **delivered in place, on the lift's `stdin` channel**. At each frame
@@ -127,7 +127,7 @@ entrypoint writes it to that frame's own sibling `.dhall` and then `exec`s the b
 `runChainFromFrame`
 (`/home/matthewnowak/hostbootstrap/core/hostbootstrap-core/src/HostBootstrap/Lift.hs`,
 `.../Chain.hs`); the container handoff keeps stdin open and overrides the entrypoint to
-`sh -c "cat > <sibling>.dhall && exec <binary>"`. Two invariants fall out, and §5 leans on both:
+`sh -c "cat > <sibling>.dhall && exec <binary>"`. Two invariants fall out, and [§5](#5-the-illegal-state-unrepresentable-contract) leans on both:
 
 - **Only the projection crosses.** The narrowed child config travels on `stdin` alone — never in `argv`,
   never as a bind-mount, and never as a host-side file at rest. The parent's *full* config never crosses the
@@ -139,9 +139,9 @@ entrypoint writes it to that frame's own sibling `.dhall` and then `exec`s the b
 
 The one exception is the terminal **in-cluster pod** frame, whose config is delivered as a rendered
 `ConfigMap` mount ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)) rather than on
-`stdin`; the `stdin` mechanism covers the VM/container bootstrap-lift frames. Like the rest of §2–§3, this
+`stdin`; the `stdin` mechanism covers the VM/container bootstrap-lift frames. Like the rest of [§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)–[§3](#3-the-orchestration-surface-parameters-context-witness), this
 delivery is **proven in hostbootstrap and inherited as evidence** — not an amoebius-built result
-([documentation_standards.md §6](../documentation_standards.md)).
+([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---
 
@@ -150,7 +150,7 @@ delivery is **proven in hostbootstrap and inherited as evidence** — not an amo
 The phrase to cash out is from the original vision: *"the key to making amoebius really work well is a great
 .dhall DSL that ties everything together. total composability."* An amoebius `.dhall` is never one
 monolith — it is a composition built from smaller typed pieces via Dhall's native import system. Because
-every piece is typed, total, side-effect-free data (§2), the pieces nest *without limit and without
+every piece is typed, total, side-effect-free data ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)), the pieces nest *without limit and without
 leakage*: importing a fragment can never smuggle in an effect or a partial value.
 
 Total composability runs along four concrete axes, each owned in detail by a sibling doc:
@@ -185,7 +185,7 @@ obligation. The testing surface is owned by the testing doctrine; it is named he
 *testing* is expressed in the one composable DSL rather than a parallel harness language.
 
 ```mermaid
-flowchart LR
+flowchart TD
   root[Root cluster amoebius.dhall] -->|imports| deploy[Deployment-rules surface replicas chaos geo failover]
   root -->|imports| apps[App specs]
   apps -->|imports| ext[Extension-lib specs infernix and jitML]
@@ -205,8 +205,8 @@ plugs into the surface:
       , extCapabilities : List Capability
       }
 
-Three parts, each already load-bearing above: `extDhall` is a nested typed Dhall sub-catalog (§4's
-composition); `extChain :: cfg -> [Step]` is the extension's slice of the chain/Step algebra (§2 — an
+Three parts, each already load-bearing above: `extDhall` is a nested typed Dhall sub-catalog ([§4](#4-total-composability)'s
+composition); `extChain :: cfg -> [Step]` is the extension's slice of the chain/Step algebra ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) — an
 extension carries *no* logic the DSL does not already carry as `[Step]`); and `extCapabilities` are the
 capability declarations it exports into the capability surface
 ([service_capability_doctrine.md](./service_capability_doctrine.md)).
@@ -220,9 +220,9 @@ ids or constructors; but it **drops hostbootstrap's packaging** (no per-project 
 This is *sibling evidence, not an amoebius result*: hostbootstrap proves the `ProjectSpec` algebra and the
 anti-shadow validator; amoebius reuses the algebra and discards the packaging.
 
-**A nested `extDhall` is not privileged.** It faces exactly the two gates of §5 and the catalog's total
+**A nested `extDhall` is not privileged.** It faces exactly the two gates of [§5](#5-the-illegal-state-unrepresentable-contract) and the catalog's total
 folds — no unbounded arm, capacity accounted, topology relations satisfied — like any other fragment. In
-particular it introduces **no second secret store**: an extension names its secrets as `SecretRef`s (§6) and
+particular it introduces **no second secret store**: an extension names its secrets as `SecretRef`s ([§6](#6-secrets-are-names-never-values)) and
 may **not** carry a key/secret store of its own. (infernix's k8s-`Secret` store is exactly the divergence
 this forbids — *sibling evidence of an anti-pattern*, corrected here, not a shipped amoebius behavior.)
 
@@ -233,7 +233,7 @@ The `ExtensionSpec` seam is **Path 1**, and it is deliberately *not* open to the
 - **v1 — Path 1 (linked).** The closed set `{infernix, jitML, mattandjames}` is *vendored*: each links into
   the one binary through its `ExtensionSpec`. This is the only extension mechanism v1 ships.
 - **v2 — Path 2 (the Haskell extension DSL).** A non-vendored third party enters *only* through the future
-  **Haskell-as-DSL + custom AST checker + native JIT** — the forward pointer of §8, scheduled as provisional
+  **Haskell-as-DSL + custom AST checker + native JIT** — the forward pointer of [§8](#8-the-haskell-extension-dsl-forward-pointer-only), scheduled as provisional
   **Phase 15**
   ([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md#candidate-phase-haskell-extension-dsl--custom-ast-checker--native-jit)).
   Path 2 is Phase-15 design intent, not built.
@@ -249,7 +249,7 @@ a later family would enter via Path 1 once its math is absorbed into a vendored 
 ### The ML-asset types an extension `.dhall` carries: `EngineRuntime` vs `ModelArtifact`
 
 Because infernix and jitML nest as `ExtensionSpec`s, their `extDhall` carries two ML-asset types the surface
-must hold apart — and, per §1, *carries but does not define*:
+must hold apart — and, per [§1](#1-why-this-doctrine-exists), *carries but does not define*:
 
 - **`EngineRuntime`** — a **closed** union of substrate-tagged, *baked* engine identities. It has **no
   `Url`/`Download`/`Fetch` arm**: an engine is *selected by substrate*, never fetched, and exists the moment
@@ -260,10 +260,10 @@ must hold apart — and, per §1, *carries but does not define*:
 
 The relation between them is itself typed: **a `ModelArtifact` must be servable by an `EngineRuntime` present
 on the deployment's substrate** — an unmatched model has no landing engine (a grade-(2) total relation over
-the substrate's engine set, the same topology-relation-over-a-collection technique §5 defers to the catalog).
+the substrate's engine set, the same topology-relation-over-a-collection technique [§5](#5-the-illegal-state-unrepresentable-contract) defers to the catalog).
 The *detail* of all three — the no-`Url` closure, the `.ready` gate, and the model↔engine match — is owned by
-[illegal_state_catalog.md](./illegal_state_catalog.md) §3.25 and
-[content_addressing_doctrine.md](./content_addressing_doctrine.md) §4.5; this doc records only that the
+[illegal_state_catalog.md §3.25](./illegal_state_catalog.md#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model) and
+[content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd); this doc records only that the
 extension seam *carries* these typed fields and defers their unrepresentability there.
 
 ---
@@ -297,10 +297,10 @@ every PVC gives no way to omit it. The schema is the boundary, and the boundary 
 
 ### Gate 2 — the Haskell typed decoder
 
-A well-typed Dhall value still has to become a Haskell value before the chain (§2) can use it. Every
+A well-typed Dhall value still has to become a Haskell value before the chain ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)) can use it. Every
 amoebius binary decodes its Dhall **in-process** through the native `dhall` library —
 `Dhall.inputFile auto` (the exact call hostbootstrap uses: `decodeContextFile = inputFile auto`,
-`Context.hs`; the same pattern the sibling prodbox project documents in its `config_doctrine.md` §4). Two
+`Context.hs`; the same pattern the sibling prodbox project documents in its `config_doctrine.md` [§4](#4-total-composability)). Two
 things happen here:
 
 - **Decoding is total and fail-fast.** A malformed or out-of-domain value surfaces as an `Either`/
@@ -325,19 +325,19 @@ ancestor-only branch can appear, so over-sharing the tree is as unrepresentable 
 `project : ForestSpec → ChildId → ChildSpec` can only ever yield a node's own subtree. That subtree is handed
 to the child by the **spawn** handoff (a Pulumi deploy) owned by
 [cluster_lifecycle_doctrine.md §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest),
-which shares its *projection-only, parent-mints* discipline with the intra-host **frame descent** of §3 — the
+which shares its *projection-only, parent-mints* discipline with the intra-host **frame descent** of [§3](#3-the-orchestration-surface-parameters-context-witness) — the
 same rule one level down, delivering each frame's minted context on the lift's `stdin` — the two differing
 only in **transport**;
 the at-rest encryption under a per-child Transit key (so a child cannot even decrypt a sibling's subtree) is
 owned by [vault_pki_doctrine.md §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes); the
-unrepresentability is catalogued at [illegal_state_catalog.md](./illegal_state_catalog.md) §3.10. This doc
+unrepresentability is catalogued at [illegal_state_catalog.md §3.10](./illegal_state_catalog.md#310-a-child-spec-that-reaches-beyond-its-own-subtree). This doc
 owns only the `ChildSpec` type and its projection.
 
 > **Honesty.** The *strength* of this contract is a property of the type designs catalogued in
 > [illegal_state_catalog.md](./illegal_state_catalog.md). This doc states the contract and the decode
 > mechanism; it does **not** claim any specific illegal state is *proven* unrepresentable — that claim is
 > made, state by state, only where the catalog exhibits the type that excludes it. Per
-> [documentation_standards.md §6](../documentation_standards.md), a typing argument is evidence, not a
+> [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), a typing argument is evidence, not a
 > tested or proven result, until the catalog and Phase 3 make it concrete.
 
 ---
@@ -345,7 +345,7 @@ owns only the `ChildSpec` type and its projection.
 ## 6. Secrets are names, never values
 
 A locked invariant: **secrets never live in Dhall — only names** (DEVELOPMENT_PLAN
-cross-cutting invariants). The intuition is a direct consequence of §4 and §5: a `.dhall` is composed,
+cross-cutting invariants). The intuition is a direct consequence of [§4](#4-total-composability) and [§5](#5-the-illegal-state-unrepresentable-contract): a `.dhall` is composed,
 diffed, rolled out from the root across an entire tree of clusters, and stored — so it must be **safe to
 read**. A surface you can safely hand to a child cluster, paste into a review, or keep in an object store
 is a surface that holds no secret bytes.
@@ -355,7 +355,7 @@ So the DSL carries a typed **reference** to each secret — a *name/coordinate*,
 - **Parents inject; children resolve.** The actual value is materialized into the child's Vault by its
   parent. The DSL names *where* a secret will be; Vault holds *what* it is.
 - **The typechecker never sees a literal secret**, because there is no literal secret in the tree to see —
-  only a reference. This is what lets Gate 1 and Gate 2 (§5) run over the full config tree without ever
+  only a reference. This is what lets Gate 1 and Gate 2 ([§5](#5-the-illegal-state-unrepresentable-contract)) run over the full config tree without ever
   touching sensitive material.
 
 This is the SSoT-deferring summary. The typed reference (the `SecretRef`-style union), the
@@ -381,7 +381,7 @@ canonical providers behind the **capabilities** owned by
 by [platform_services_doctrine.md](./platform_services_doctrine.md). The DSL *parameterizes a fixed shape*;
 it does not let you redesign it.
 
-This is why §5's contract is even tractable. The set of legal worlds is small and opinionated, so the
+This is why [§5](#5-the-illegal-state-unrepresentable-contract)'s contract is even tractable. The set of legal worlds is small and opinionated, so the
 types that exclude the illegal ones are *writable*. A DSL that tried to express every possible Kubernetes
 topology could not also guarantee that every expressible topology is safe. Amoebius narrows the surface
 first — one service set, one ingress path, one storage model, HA always — and *then* makes the residue of
@@ -399,7 +399,7 @@ v1 can be an orchestrator for arbitrary containers."*
 
 This doc is the SSoT for the **orchestration** DSL (the Dhall surface). The **extension** DSL — the
 Haskell-as-DSL plus its custom AST checker and native JIT — is a scheduled **later phase**, not specified
-here. In §4's extension taxonomy this is **Path 2** — the *only* path by which a non-vendored third party
+here. In [§4](#4-total-composability)'s extension taxonomy this is **Path 2** — the *only* path by which a non-vendored third party
 extends amoebius (Path 1, the closed linked set `{infernix, jitML, mattandjames}`, is vendored) — scheduled
 as provisional **Phase 15**
 ([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md#candidate-phase-haskell-extension-dsl--custom-ast-checker--native-jit)).
@@ -417,11 +417,11 @@ dependencies require `allow-newer` to build on the pinned GHC — the precise to
 set are owned by the dependency-management surface tracked in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), not restated here. There is **no**
 intermediate JSON projection on the supported path: the on-disk artifact is the typed Dhall expression,
-and the in-memory value is the Haskell record produced by `Dhall.inputFile auto` (§5).
+and the in-memory value is the Haskell record produced by `Dhall.inputFile auto` ([§5](#5-the-illegal-state-unrepresentable-contract)).
 
 Dhall is the **config** surface, not the **data plane**: runtime *message payloads* are never Dhall. They are
 dense binary **CBOR** on the wire, owned by
-[pulsar_client_doctrine.md §3.1](./pulsar_client_doctrine.md) — Dhall carries typed
+[pulsar_client_doctrine.md §3.1](./pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor) — Dhall carries typed
 *params*, a payload carries runtime *bytes*, and the two never mix (the `notes.txt` "does dhall make sense
 for a payload? probably not" answer).
 
@@ -439,23 +439,23 @@ states the target shape and links back for status.
 > it borrows behaviour proven in prodbox or implemented in hostbootstrap, that is *evidence from a sibling
 > system*, not proof in amoebius — which has not yet built Phase 3. Read every prescriptive statement here
 > as the contract amoebius intends to satisfy, never as a tested amoebius result
-> ([documentation_standards.md §6](../documentation_standards.md)).
+> ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---
 
 ## Cross-references
 
 - [Engineering Doctrine Index](./README.md)
-- [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — §8 an arbitrary container app is application logic, not an extension
-- [Illegal State Catalog](./illegal_state_catalog.md) — §3.25 an ML asset fetched/built at pod startup, and an unready/unlanded model, are unrepresentable
-- [Content Addressing Doctrine](./content_addressing_doctrine.md) — §4.5 the three-tier ML-asset lifecycle (`EngineRuntime` baked, `ModelArtifact` `.ready`-gated)
+- [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — [§8](./app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic) an arbitrary container app is application logic, not an extension
+- [Illegal State Catalog](./illegal_state_catalog.md) — [§3.25](./illegal_state_catalog.md#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model) an ML asset fetched/built at pod startup, and an unready/unlanded model, are unrepresentable
+- [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) the three-tier ML-asset lifecycle (`EngineRuntime` baked, `ModelArtifact` `.ready`-gated)
 - [Service Capability Doctrine](./service_capability_doctrine.md) — the capability surface an `ExtensionSpec` declares into
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [Platform Services Doctrine](./platform_services_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the capacity/budget/scaling types the surface carries
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the compute-engine/topology types the surface carries
-- [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — §3.1 runtime message payloads are CBOR, not Dhall
-- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — Phase 15 Haskell extension DSL (§4/§8 Path 2 for third parties)
+- [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — [§3.1](./pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor) runtime message payloads are CBOR, not Dhall
+- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — Phase 15 Haskell extension DSL ([§4](#4-total-composability)/[§8](#8-the-haskell-extension-dsl-forward-pointer-only) Path 2 for third parties)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
