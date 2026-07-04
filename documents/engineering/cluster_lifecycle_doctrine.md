@@ -344,19 +344,94 @@ node provisioning in **Phase 10**; and the storage-lifecycle safety that makes t
 
 ---
 
+## 11. RKE2 rollout as a reconcile
+
+A multi-node `rke2` cluster does not come up by a bespoke bring-up script — it comes up the same way
+everything else in this doctrine does: as a **reconcile** (§9) that drives the live node set toward a
+**declared, typed server/agent topology**. That topology — the closed `Rke2Servers` union
+`< Single | Ha3 | Ha5 >` (the only legal odd etcd quorums {1,3,5}) plus `agents : List LinuxHost` — is owned
+by [cluster_topology_doctrine.md §2/§4](./cluster_topology_doctrine.md); this doc owns only the lifecycle
+verbs that stand it up. There is no rke2 state machine, exactly as there is no lifecycle state machine (§9).
+
+- **Root = the zero-secret degenerate.** The root cluster is
+  `{ servers = Rke2Servers.Single host, agents = [] }` — the single-node rke2 of §2. One server, an empty
+  agent list, no join token minted, no SSH key required: the same **zero-secret** bring-up §2 already depends
+  on. Every larger cluster is this base plus a reconcile that adds nodes; the base is not a special case but
+  the `Single`/`[]` corner of the general shape.
+- **First server: `etcd cluster-init`, then mint the token.** On an empty control plane the reconcile's
+  first enacted step is `etcd cluster-init` on the first server, which brings up the single-member etcd
+  quorum and the kube-apiserver. **Only then** does the parent MINT the `Rke2NodeToken` — the shared join
+  secret — and inject it (below).
+- **Every later node joins via `server:` URL + token.** The further servers (the `Ha3`/`Ha5` arms) and all
+  `agents` join by pointing their config at the first server's `server:` URL and presenting the minted token.
+  Server-join grows the etcd quorum; agent-join adds a worker. **Rejoin is idempotent**: a node already
+  joined is a no-op; a node that dropped re-presents the same token and re-attaches — the §9
+  `discover → diff → enact → re-observe` loop, keyed by node identity/tag, applied to rke2 membership.
+- **`config.yaml` is RENDERED read-only, not managed.** Each node's `/etc/rancher/rke2/config.yaml` is
+  `render(nodeInventory)` — computed wholesale by the parent from the typed topology and written **read-only,
+  never edited in place** — the same *render-not-manage* discipline as the WireGuard peer config. It is
+  delivered on the lift's **`stdin`** for the intra-host frame descent ([dsl_doctrine.md §3](./dsl_doctrine.md)),
+  or as a **ConfigMap** for the in-cluster pod frame. The token appears in that rendered config as a
+  name-resolved value **at render time**, never as a literal in any `.dhall`.
+- **The join secret is `Rke2NodeToken`.** A parent-minted, parent-injected **Vault-KV `SecretRef`**,
+  referenced strictly **by name** (never a value in `.dhall`) and rotatable — the same custody family as the
+  SSH keys and Curve25519 WireGuard keys, owned by [vault_pki_doctrine.md](./vault_pki_doctrine.md). Dhall
+  carries only the name; the bytes are injected out-of-band into the child's Vault, exactly as §3 already
+  requires for every secret.
+- **Two enactors, one reconciler tier — tier (b).** The rke2 host rollout is the **checkpoint-free
+  tag-discovery HOST reconciler** — tier **(b)** of the reconciler taxonomy (create→tag→join-fabric→drain-by-tag),
+  whose home is the spot-fleet reconciler in [pulumi_iac_doctrine.md §0](./pulumi_iac_doctrine.md). It has
+  **two enactors**: the **sudo host daemon** installs the *root* server on the host; the **elected in-cluster
+  singleton** rolls out *child* servers and agents **over SSH** (the singleton's total cluster + secret
+  authority is owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md)). It is **not** the
+  tier-(a) Pulumi-checkpointed cloud reconciler and **not** the tier-(c) SSA reconciler.
+- **The SSA reconciler only fills the cluster *after* kube-apiserver is up.** The tier-(c) in-cluster
+  **SSA/ApplySet** manifest reconciler ([manifest_generation_doctrine.md §5](./manifest_generation_doctrine.md))
+  does **not** install rke2 — it applies workloads once the apiserver answers. The two tiers **compose in
+  sequence**: tier (b) stands up the machines + the etcd/apiserver control plane; tier (c) then fills the
+  running cluster. Neither is a state machine; each is `discover → diff → enact`.
+- **A quorum change is a deliberate re-provision, never autoscale.** Changing the server arm
+  (`Single`→`Ha3`, `Ha3`→`Ha5`) is a **declared topology change** reconciled toward — a deliberate
+  re-provision, **never** triggered by a `ScalingPolicy`. The `ScalingPolicy` escape valve (§8;
+  [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md)) grows the **`agents` list only**; it
+  can never mint or drop an etcd voter. A 0- or 2-server (no-quorum / split-brain) control plane has no
+  constructor at all — **grade-(1) unrepresentable** via the closed `Rke2Servers` union
+  ([cluster_topology_doctrine.md §2/§4](./cluster_topology_doctrine.md);
+  [illegal_state_catalog.md §3.24](./illegal_state_catalog.md)). Host distinctness across `servers ∪ agents`
+  is the **grade-(2)** `mkRke2` decode fold, likewise owned by cluster_topology.
+- **The server/agent axis is orthogonal.** Whether a host is a server or an agent is **DECLARED**, and it is
+  independent of the **DETECTED** substrate and the **ELECTED** daemon role — orthogonal typed axes
+  ([daemon_topology_doctrine.md](./daemon_topology_doctrine.md)), never fused: an rke2 server can run on any
+  substrate, and the singleton is elected independently of a node's server/agent role.
+
+> **Honesty (sibling evidence, not an amoebius result).** prodbox proves the **single-node base only**:
+> `~/prodbox/src/Prodbox/CLI/Rke2.hs` installs `rke2-server.service`, writes
+> `/etc/rancher/rke2/config.yaml` + `registries.yaml`, and tracks install markers, an inotify drop-in, and
+> `uninstall.sh`; the golden plan `~/prodbox/test/golden/plans/rke2-reconcile.txt` is exactly the STEP-list
+> `ensure_rke2_server_installed → enable/restart_rke2_service → sync_user_kubeconfig →
+> wait_for_cluster_nodes_ready`. That is single-node `rke2-server` **only**. Multi-node server/agent +
+> etcd-HA + the `Rke2NodeToken` join is **net-new across the whole sibling family** — hostbootstrap has
+> **zero** rke2 code (its `HostTool` enum is Kubectl/Helm/Kind). Read this section as **design intent**, not
+> a tested amoebius result; the plan owns sequencing (§10,
+> [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)).
+
+---
+
 ## Cross-references
 
 - [Engineering Doctrine Index](./README.md)
 - [Platform Services Doctrine](./platform_services_doctrine.md)
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)
-- [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the `Kind` / `Rke2` / `Managed Eks` engine types and their topology
-- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the push-back capacity fold and the `ScalingPolicy` escape valve
-- [Vault / PKI Doctrine](./vault_pki_doctrine.md)
+- [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the `Kind` / `Rke2` / `Managed Eks` engine types and their topology; §2/§4 own the closed `Rke2Servers` server/agent union (§11)
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the push-back capacity fold and the `ScalingPolicy` escape valve (grows the `agents` list only, §11)
+- [Vault / PKI Doctrine](./vault_pki_doctrine.md) — the `Rke2NodeToken` join secret's custody (§11)
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md)
-- [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md)
+- [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — §0 is the home of the checkpoint-free tag-discovery host reconciler, tier (b) (§11)
+- [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — §5, the in-cluster SSA/ApplySet reconciler, tier (c), that fills the cluster after the apiserver is up (§11)
+- [Illegal State Catalog](./illegal_state_catalog.md) — §3.24, an even/zero-server rke2 control plane as grade-(1) unrepresentable (§11)
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
-- [Daemon Topology Doctrine](./daemon_topology_doctrine.md)
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the sudo host daemon and elected in-cluster singleton enactors of the rke2 rollout (§11)
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md)
 - [Testing Doctrine](./testing_doctrine.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

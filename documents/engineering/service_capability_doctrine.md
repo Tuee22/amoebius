@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the abstraction by which amoebius application logic names abstract
@@ -62,9 +62,12 @@ to name. They are not a new service set; they are the abstraction *over* the sta
 | **Registry** | The OCI image registry every workload pulls from. |
 | **Edge** | L7 routing and edge TLS termination — *which* of the app's services are reachable from the edge. |
 
-These eight are the whole vocabulary an app spec has for "a service I depend on." There is no ninth arm for
+These eight are the Phase-0 core vocabulary an app spec has for "a service I depend on." There is no arm for
 "some other service," and no arm that names a product. An app that needs object storage selects
-`ObjectStore`; it has no syntax with which to select `minio` (§8).
+`ObjectStore`; it has no syntax with which to select `minio` (§8). A ninth capability, **InferenceEngine**, is
+added for ML serving as Phase-N design intent (§4.1); it is one more *specific* closed-union capability — not
+the generic "some other service" escape hatch this rule forbids, and its provider still has no product arm and
+no URL arm.
 
 ---
 
@@ -155,6 +158,94 @@ flowchart LR
   need -->|capability plus provider plus shape| bound[Bound capability]
   bound -->|rendered into typed manifests and applied by the typed reconciler| live[Running provider on this cluster]
 ```
+
+### 4.1 The InferenceEngine capability — the engine is baked and substrate-selected, never fetched
+
+ML serving adds a **ninth capability, `InferenceEngine`** — the abstract interface an ML workload names when it
+says *"I serve inference,"* exactly as an app names `ObjectStore` when it says "I keep durable objects." It
+exercises the §4 binding at its strictest: where a generic capability's provider *defaults* to the §3
+canonical (part 2 above) and could later admit an alternate, an `InferenceEngine`'s provider is a union with
+**no arm to fetch and nothing to author** — it is **selected by the detected substrate**, full stop.
+
+**The canonical provider is a closed union of substrate-tagged, baked `EngineRuntime`s.** `EngineRuntime` has
+one arm per substrate lane and per baked engine family, and — the load-bearing rule — **no
+`Url` / `Download` / `Build` / `Fetch` arm**:
+
+| Provider dimension | Arms (closed union) |
+|---|---|
+| Substrate lane | `Apple-Metal` · `CUDA` · `linux-cpu` |
+| Baked engine family | `llama.cpp` · `whisper.cpp` · `ONNX` · `vLLM` · `pytorch` · `diffusers` · `transformers` · `Audiveris` |
+
+Every arm is a runtime already **baked into the amoebius base container**
+([image_build_doctrine.md §7](./image_build_doctrine.md)); because the ML siblings **link as libraries** rather
+than run as fetched sidecars, the engine exists the moment the pod does. The deployment `.dhall` **selects** an
+arm by the *detected* substrate (the substrate is DETECTED, [substrate_doctrine.md](./substrate_doctrine.md));
+it has no syntax with which to *author* a download or a build. This is the §1 object-storage lesson taken to
+its limit: an app can no more write "curl this engine tarball at boot" than it can write "deploy `minio`."
+
+`InferenceEngine` is **Tier 1** of the three-tier ML-asset lifecycle
+([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md)); the model and kernel tiers live
+there, not here:
+
+- **Tier 1 — the engine (this capability)** is baked and substrate-selected, as above.
+- **Tier 2 — `ModelArtifact`** is an eager stage-then-serve into the content-addressed store, its `ArtifactRef`
+  obtainable **only** once a `.ready` sentinel exists. Owned by content_addressing §4.5.
+- **Tier 3 — the JIT kernel** is lazily materialized behind a content address on first cache miss, never a
+  startup build. Owned by content_addressing §4.5.
+
+**The engine↔model invariant this doctrine co-owns.** A served `ModelArtifact` must be servable by an
+`EngineRuntime` *available on the deployment's substrate* — an unmatched model has **no landing engine**. This
+is a **grade-(2)** total decode-time relation (the topology/relation-over-collection technique,
+[illegal_state_catalog.md §4.7](./illegal_state_catalog.md)): content_addressing owns the `ModelArtifact`
+side; this doctrine owns the engine-as-capability side a model must match.
+
+**Two mistakes become unrepresentable**, lifted at
+[illegal_state_catalog.md §3.25](./illegal_state_catalog.md):
+
+- **An engine fetched or built at pod startup is grade-(1) unrepresentable** — the `EngineRuntime` union is
+  closed with no `Url`/`Download`/`Build` arm, so "fetch the engine at boot" has no syntax and fails Gate 1
+  (the Dhall typechecker) before any binary runs. (A `ModelArtifact` with no completed `.ready` is likewise
+  grade-(1), owned with the content store in content_addressing.)
+- **A model with no matching substrate engine is grade-(2) rejected** at decode, by the total relation above —
+  not a runtime `Unschedulable`.
+
+```dhall
+-- Illustrative only; the real grammar is owned by dsl_doctrine.md and the asset tiers by
+-- content_addressing_doctrine.md §4.5.
+
+-- APPLICATION LOGIC names an inference need (no engine, no URL, no build):
+let InferenceNeed = { serves : List ModelArtifact }    -- "I serve these models" — that is all an app says
+
+-- DEPLOYMENT RULES bind a BAKED engine, SELECTED by the DETECTED substrate — no Url/Download/Build arm exists:
+let EngineRuntime =
+      < AppleMetal | Cuda | LinuxCpu >                  -- substrate lane; CLOSED, never fetched
+let InferenceBinding =
+      { engine : EngineRuntime                           -- selected by detected substrate, never authored
+      , family : < LlamaCpp | WhisperCpp | Onnx | Vllm | Pytorch | Diffusers | Transformers | Audiveris >
+      }                                                  -- every arm baked into the base container (image_build §7)
+```
+
+The three-tier store, the `.ready` commit, the re-keying onto content addresses, and the Tier-3 JIT are owned
+by [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md); the baked base container that
+carries every `EngineRuntime` arm is owned by [image_build_doctrine.md §7](./image_build_doctrine.md); the lift
+of these mistakes into unrepresentable states is owned by
+[illegal_state_catalog.md §3.25](./illegal_state_catalog.md). This doctrine owns only that the **engine is a
+capability whose provider is baked-and-substrate-selected.**
+
+> **Honesty.** `InferenceEngine` is Phase-N design intent — the ML-serving capability, specified before
+> implementation like the rest of this doctrine. The sibling **infernix** project is *evidence* that the
+> select-don't-fetch engine binding is real code — **sibling evidence, not an amoebius result**:
+> [/home/matthewnowak/infernix/src/Infernix/Runtime/Worker.hs](file:///home/matthewnowak/infernix/src/Infernix/Runtime/Worker.hs)
+> selects the engine by `adapterType` (`case engineBindingAdapterType engineBinding of …`) and **never fetches
+> it** — precisely the Tier-1 discipline above. But infernix also shows the exact divergences amoebius fixes:
+> its [docker/Dockerfile](file:///home/matthewnowak/infernix/docker/Dockerfile) **curl-tars native payloads and
+> installs per-engine Poetry venvs at image build**, and its
+> [python/adapters/model_cache.py](file:///home/matthewnowak/infernix/python/adapters/model_cache.py) carries a
+> hardcoded `minioadmin/minioadmin123` fallback — a second secret store that violates the Vault-by-name rule
+> (§7). amoebius keeps infernix's engine-selection idiom, promotes those payloads into the *one* baked base
+> container (image_build §7), and routes every staging credential through Vault by name. amoebius has built
+> none of this; read it as the contract amoebius intends to satisfy, never a tested result. Status lives only
+> in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
@@ -337,10 +428,11 @@ status.
 - [Platform Services Doctrine](./platform_services_doctrine.md) — the concrete provider set, the derived-connectivity rule (§9), and the single wild-ingress path
 - [DSL Doctrine](./dsl_doctrine.md) — the typed Dhall surface, total composability, and the two typed gates a capability binding decodes through
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — rendering a chosen shape into typed manifests and the idempotent typed reconciler (no Helm)
-- [Image Build Doctrine](./image_build_doctrine.md) — the build pipeline, the `distribution` registry refs, the baked base container, and the Temurin JVM toolchain
+- [Image Build Doctrine](./image_build_doctrine.md) — the build pipeline, the `distribution` registry refs, the baked base container (§7 bakes every `EngineRuntime` arm), and the Temurin JVM toolchain
+- [Content Addressing Doctrine](./content_addressing_doctrine.md) — the three-tier ML-asset lifecycle (§4.5) whose Tier-1 baked engine is the `InferenceEngine` provider; `ModelArtifact`/`.ready` and the JIT kernel
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — secrets-by-name, `SecretRef`, and Vault Kubernetes auth for provider credentials
-- [Substrate Doctrine](./substrate_doctrine.md) — the substrate catalog and the substrate-driven LoadBalancer choice beneath Edge
-- [Illegal State Catalog](./illegal_state_catalog.md) — best-practice-by-construction and which capability invariants are type-enforced
+- [Substrate Doctrine](./substrate_doctrine.md) — the substrate catalog, the DETECTED substrate that selects an `EngineRuntime`, and the substrate-driven LoadBalancer choice beneath Edge
+- [Illegal State Catalog](./illegal_state_catalog.md) — best-practice-by-construction, which capability invariants are type-enforced, and the engine-fetch / unmatched-model states (§3.25)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
 

@@ -194,6 +194,21 @@ Growable = Bounded Capacity | Autoscaled ScalingPolicy
   and realized as Pulumi node provisioning by
   [pulumi_iac_doctrine.md §4](./pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog); this
   doc owns the *type* and its place in the fold.
+- **A `ScalingPolicy` grows the rke2 `agents` pool ONLY — the `Rke2Servers` quorum is never autoscaled.** The
+  rke2 node topology is two typed pools owned by
+  [cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm):
+  a `Rke2Servers` control-plane quorum (the closed `Single | Ha3 | Ha5` union — the only legal odd etcd
+  quorums {1,3,5}) and an `agents : List LinuxHost` worker pool. A `Growable`/`Autoscaled` budget scales the
+  **agents** list and nothing else; the server quorum is **fixed by declaration**. A quorum change
+  (`Single`→`Ha3`→`Ha5`) is a deliberate **re-provision** — a re-declared topology re-folded through the
+  cardinality-by-construction relation
+  ([cluster_topology_doctrine.md §4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction))
+  and enacted by the host reconciler — **never** a `ScalingPolicy`/autoscale action, because etcd membership
+  is a consensus decision, not an elastic-capacity one. So the elastic axis and the quorum axis stay
+  orthogonal: the price-shopping / threshold policy above ranges over agents; the fold re-runs (§4, below)
+  against the grown *agent* set only. This is **Phase-10 design intent** (the `ScalingPolicy` enaction lands
+  in Phase 10, §10); the closed-union quorum shape it relies on is grade-1 and owned by cluster topology, not
+  claimed here.
 - **The fold re-runs after growth (§4).** A `Growable` budget the fold checked at decode is re-checked
   against the grown capacity when the policy fires — so "unbounded" MinIO/Pulsar is representable **only**
   through such a policy whose ceiling is a quota, and the storage fold still holds against that ceiling.
@@ -296,7 +311,7 @@ links back for status, per [documentation_standards.md §6](../documentation_sta
 
 - [Engineering Doctrine Index](./README.md)
 - [Illegal State Catalog](./illegal_state_catalog.md) — the catalog (§3.17-§3.21) and technique (§4.6) this model realizes
-- [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the `ComputeEngine` / `Topology` the fold ranges over
+- [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the `ComputeEngine` / `Topology` the fold ranges over; owns the `Rke2Servers` quorum + `agents` pools (§2/§4) that §6 scales agents-only
 - [Substrate Doctrine](./substrate_doctrine.md) — the node inventory + per-host capacity numbers
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — per-volume sizing + the `StorageBacking` union
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — the topic-lifecycle policy the two-ceiling fold checks

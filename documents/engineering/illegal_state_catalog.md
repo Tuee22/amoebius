@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: The single source of truth for the catalog of illegal and unsafe cluster states amoebius
@@ -90,7 +90,8 @@ flowchart LR
 
 The entries below enumerate the original illegal-state list (§3.1–§3.8), the isolation invariants
 (§3.9–§3.10), the best-practice-by-construction states (§3.11–§3.12), the **capacity / topology / bounded-
-storage** states (§3.13–§3.22), and the **CBOR-payload** rule (§3.23) the techniques in §4 demand. Each entry: the **intuition** (how it goes wrong
+storage** states (§3.13–§3.22), the **CBOR-payload** rule (§3.23), and the **rke2-quorum / ML-asset-lifecycle /
+release-promotion** states (§3.24–§3.26) the techniques in §4 demand. Each entry: the **intuition** (how it goes wrong
 in raw k8s), the **owning doctrine** (the SSoT for the rule), and the **technique** (§4) that forecloses it.
 The §3.13–§3.22 block is foreclosed by the two techniques added for it — §4.6 (the capacity-accounting total
 fold) and §4.7 (compatibility/topology relations over a collection) — and is where the honest grade split
@@ -279,14 +280,18 @@ that one host, and a second host has no field to bind. **Owner:**
 
 ### 3.16 A multi-node rke2 cluster with fewer Linux hosts than nodes (or a host reused)
 
-A multi-node rke2 cluster needs one Linux host per node; raw tooling lets you ask for five nodes with three
-machines, or reuse one machine for two nodes. amoebius's `Rke2` arm carries a `NonEmpty LinuxHost` — the node
-list *is* the host list, so "more nodes than hosts" cannot be built. **Distinctness** ("no host reused") is
-the one part Dhall cannot express as a type (no Set-distinctness), so it degrades to a total decode-time fold
-that rejects a duplicate `HostId`. **Owner:**
+A multi-node rke2 cluster needs one distinct Linux host per node; raw tooling lets you ask for five nodes with
+three machines, or reuse one machine for two nodes. amoebius's `Rke2` arm carries
+`{ servers : Rke2Servers, agents : List LinuxHost }`: the server arm fixes the server count structurally
+(`Single`/`Ha3`/`Ha5`, §3.24) and the `agents` list binds one `LinuxHost` per worker, so every node names its
+own host field and "more nodes than hosts" cannot be built. **Distinctness** ("no host reused") is the one part
+Dhall cannot express as a type (no Set-distinctness), so it degrades to the total decode-time `mkRke2` fold that
+rejects a duplicate `HostId` **over `servers ∪ agents`** — a server host reused as an agent, or two agents on one
+machine, is caught alongside two servers on one machine. This **generalizes** the original "the node list *is*
+the host list" cardinality to the split server/agent inventory (the quorum shape itself is §3.24). **Owner:**
 [`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md). **Technique:** §4.1 (`node == host`
-cardinality) + §4.4 (distinctness fold). **Grade:** (2) — graded to its weaker distinctness floor; the
-cardinality sub-part is grade (1).
+cardinality) + §4.4 (distinctness fold over `servers ∪ agents`). **Grade:** (2) — graded to its weaker
+distinctness floor; the cardinality sub-part is grade (1).
 
 ### 3.17 An over-committed deploy or workload (host / VM / cluster capacity exceeded)
 
@@ -378,6 +383,59 @@ different layer. **Owner:** [`pulsar_client_doctrine.md` §3.1](./pulsar_client_
 no non-CBOR payload handle) — **no new technique**. **Grade:** (1) uninhabitable on the *produce* side; the
 *consume* decode is a total fail-fast check — grade (2), exactly like the CRC32C frame check — never a
 grade-(3) claim that a received body is valid.
+
+### 3.24 An even/zero-server rke2 control plane (no etcd quorum / split-brain)
+
+Raw rke2 HA lets you stand up a **two**-server control plane — two etcd voters can never form a majority, so
+the first partition is a split-brain — or a **zero**-server "cluster" of agents with nowhere to join. amoebius
+makes the server set a **closed union** `Rke2Servers = < Single : LinuxHost | Ha3 : {…} | Ha5 : {…} >` whose
+only arms are the legal **odd etcd quorums {1, 3, 5}**: a 0- or 2-server control plane has no constructor. This
+is the same "no unbounded arm" idiom as the `StorageBacking`/`Growable` unions (§3.18, §3.21) — the illegal
+cardinality is not rejected, it is *unrepresentable*. The root cluster is
+`{ servers = Rke2Servers.Single host, agents = [] }` (the existing zero-secret single node); HA is capped at 5
+by design, and a `Ha7` arm is a deliberate future add, not an omission. A quorum change (`Single` → `Ha3`) is a
+deliberate re-provision, **never** a `ScalingPolicy`/autoscale — `ScalingPolicy` grows the `agents` list only.
+The control-plane taint and its tolerations are **derived** from the server set, never hand-authored (the
+§3.5/§3.22 derive-don't-author discipline). **Owner:**
+[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md). **Technique:** §4.2 (closed `Rke2Servers`
+union — the even/zero arm has no constructor). **Grade:** (1) uninhabitable; grade-(3) residue — that etcd
+actually forms and holds quorum, owned by [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md).
+
+### 3.25 An ML asset fetched or built at pod startup (or an unready / unlanded model)
+
+Three ML-asset illegal states ride together. **(a) An engine fetched or built at pod startup.** Sibling ML
+runtimes curl-tar native payloads and install venvs at image *build* and then re-select per engine — amoebius
+makes the compute engine an `EngineRuntime`, a **closed union of substrate-tagged, baked engine identities with
+no `Url`/`Download`/`Fetch` arm**: the engine is *selected* by the detected substrate, never fetched, and since
+the numeric libraries LINK in, the engine exists the moment the pod does. A startup download has no syntax.
+**(b) A `ModelArtifact` without a completed `.ready`.** A `ModelArtifact` yields an `ArtifactRef` **only** once
+its `.ready` sentinel exists — staging writes `.ready` LAST — so a reference to a half-staged model has no
+constructor (the same `.ready`-gating the release `PromotionGate` mirrors, §3.26). **(c) A model with no landing
+engine.** A `ModelArtifact` must be servable by an `EngineRuntime` present on the deployment's substrate; an
+unmatched model has no landing engine — a **grade-(2) total relation** (§4.7), the same relation-over-a-
+collection shape as the engine↔substrate fold (§3.13). **Owner:**
+[`content_addressing_doctrine.md`](./content_addressing_doctrine.md) (the `EngineRuntime`/`ModelArtifact` asset
+tiers + the content-addressed store) + [`service_capability_doctrine.md`](./service_capability_doctrine.md) (the
+engine as a substrate-selected capability). **Technique:** §4.2 (closed `EngineRuntime` union — no `Url` arm) +
+§4.3 (an `ArtifactRef` handle exists only once its `.ready` edge does) + §4.7 (the model↔engine relation).
+**Grade:** (1) for the no-fetch engine and the `.ready`-gated `ArtifactRef`; (2) for the model↔engine relation
+(a checked total fold, not an absence of inhabitants); grade-(3) residue — that the staged bytes actually load
+on the substrate.
+
+### 3.26 An unverified environment promotion (promote → prod without the required evidence)
+
+Raw delivery lets you point prod at any build — tested, untested, or actively red. amoebius makes
+`Environment = < Dev | Staging | Prod >` advance through a typed `PromotionGate`: advancing an environment's
+ETag-CAS pointer to a `Release` **requires** that the `Release`'s test-topology ledger
+([`testing_doctrine.md`](./testing_doctrine.md) proven/tested/assumed) meet that environment's required evidence
+strength (Prod requires the chaos layer). The advance constructor demands an **evidence witness**, so
+"promote-unverified → prod" has no inhabitant — the same constructor-gating shape as the `.ready`-gated
+`ArtifactRef` (§3.25), applied to release evidence rather than model bytes. **Owner:**
+[`release_lifecycle_doctrine.md`](./release_lifecycle_doctrine.md) §4 (the `PromotionGate` precondition + the
+immutable release ledger). **Technique:** §4.3 (a promotion handle exists only once its evidence edge does).
+**Grade:** (1) uninhabitable; grade-(3) residue — that the tests actually ran and that prod actually converged
+on the promoted `Release`, owned by [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) and the testing
+doctrine.
 
 ---
 
@@ -481,8 +539,15 @@ host` list length) is grade-(1) by construction; distinctness ("one host per nod
 Dhall cannot express as a type and degrades to a grade-(2) fold. This composes §4.2/§4.3/§4.4 applied to a
 **binary relation over a collection**, and reads the single node inventory owned by
 [`substrate_doctrine.md`](./substrate_doctrine.md). The types are owned by
-[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md); this doc owns the *relation technique*.
-Forecloses §3.13–§3.16.
+[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md); this doc owns the *relation technique*. The
+same **binary-relation-over-a-collection** shape covers the **model↔engine** relation (§3.25): a `ModelArtifact`
+is servable only by an `EngineRuntime` present on the deployment's substrate, so an unmatched model has no
+landing engine — a grade-(2) total fold exactly like the engine↔substrate check, owned by
+[`content_addressing_doctrine.md`](./content_addressing_doctrine.md) and
+[`service_capability_doctrine.md`](./service_capability_doctrine.md). And the rke2 **server/agent** inventory
+(§3.24, §3.16) is this same collection shape with a *closed-cardinality* server set (`Rke2Servers`, grade-(1))
+plus a variable `agents` list whose host-distinctness runs over `servers ∪ agents` (a grade-(2) fold).
+Forecloses §3.13–§3.16, §3.24, and the model↔engine relation of §3.25.
 
 ---
 
@@ -513,6 +578,9 @@ Forecloses §3.13–§3.16.
 | 3.21 Capacity growth w/o an amoebius scaling policy | 4.2 closed `Growable` union | [resource_capacity](./resource_capacity_doctrine.md) |
 | 3.22 Hand-authored (un-derived) toleration | 4.4 node-inventory owner + 4.3 derived handle | [substrate](./substrate_doctrine.md), [platform_services §9](./platform_services_doctrine.md) |
 | 3.23 Non-CBOR Pulsar payload | 4.2 closed codec + 4.3 constructor-gating | [pulsar_client §3.1](./pulsar_client_doctrine.md), [content_addressing](./content_addressing_doctrine.md) |
+| 3.24 Even/zero-server rke2 control plane (no etcd quorum) | 4.2 closed `Rke2Servers` union (no even/zero arm) | [cluster_topology](./cluster_topology_doctrine.md) |
+| 3.25 ML asset fetched/built at startup; unready or unlanded model | 4.2 closed `EngineRuntime` (no `Url` arm) + 4.3 `.ready`-gated `ArtifactRef` + 4.7 model↔engine relation | [content_addressing](./content_addressing_doctrine.md), [service_capability](./service_capability_doctrine.md) |
+| 3.26 Unverified environment promotion (promote→prod) | 4.3 evidence-gated `PromotionGate` handle | [release_lifecycle](./release_lifecycle_doctrine.md) |
 
 ---
 
@@ -589,7 +657,9 @@ testing (Phase 11) phases. This doc never maintains a competing status ledger.
 - [Substrate Doctrine](./substrate_doctrine.md) — substrate/arch capabilities for placement, node inventory + taints
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the §4.6 capacity fold (§3.17–§3.21)
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the §4.7 compute-engine/topology relation (§3.13–§3.16)
-- [Content Addressing Doctrine](./content_addressing_doctrine.md) — pointers→manifests→blobs totality
+- [Content Addressing Doctrine](./content_addressing_doctrine.md) — pointers→manifests→blobs totality, `EngineRuntime` / `ModelArtifact` tiers (§3.25)
+- [Service Capability Doctrine](./service_capability_doctrine.md) — the engine as a substrate-selected capability (§3.25)
+- [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — the §3.26 `PromotionGate` (promote→prod unrepresentable)
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — route53 / zerossl name→address binding
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md) — the host-local NodePort carve-out
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md) — the runtime-enforcement proof (the honest limit)

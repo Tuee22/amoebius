@@ -138,6 +138,69 @@ deployments are specifically flagged so the harness can recognize and clean them
 run → always tear down, elevated-only storage deletion) is owned by
 [testing_doctrine.md](./testing_doctrine.md).
 
+### 3.1 The parent-custody KV secret family: SSH keys, WireGuard keys, and the `Rke2NodeToken`
+
+Some secrets are not read by an in-cluster workload reaching Vault (§9) but are **node-provisioning
+material** the parent must place *before* (or as) a node comes up — SSH host/login keys, the Curve25519
+WireGuard peer keypairs
+([network_fabric_doctrine.md §3](./network_fabric_doctrine.md#3-keys-config-and-distribution--wireguard-as-just-another-reconcile)),
+and the rke2 cluster's join token. These share **one custody shape**, and it is exactly the shape §7
+gives every named secret:
+
+- **KV v2 objects, referenced by `SecretRef` name** (§2 shape table, §3 contract). The key/token
+  **never** appears as a value in any `.dhall`; the config names *where* it lives and Vault holds *what*
+  it is.
+- **Parent-minted, parent-injected** (§7). The parent mints/resolves the material into its own unsealed
+  Vault and injects it into the child's Vault over the spawn-time trust channel; no operator ever handles
+  the bytes, and a child names only its own subtree's material.
+- **Rotatable.** Because consumers resolve by name, rotating the value is a Vault write plus a reconcile —
+  no `.dhall` edit and no re-roll from the root.
+
+`Rke2NodeToken` is the newest member of this family: the single shared secret every rke2 server and agent
+presents to join the cluster's etcd / control-plane fabric. It is a **Vault-KV `SecretRef` class**,
+parent-minted and parent-injected, referenced **by name**, and rotatable like any other KV secret — the
+same custody family as the SSH keys and the Curve25519 WireGuard keys above. The **rollout** that consumes
+it (first server runs etcd `cluster-init`; further servers and all agents join by a `server:` URL + this
+token, rendered read-only into each node's `config.yaml`) is a host-level reconcile owned by
+[cluster_lifecycle_doctrine.md §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)
+(elastic agent growth by
+[cluster_lifecycle_doctrine.md §8](./cluster_lifecycle_doctrine.md#8-dynamic-node-provisioning)); this
+section owns only the token's **custody**. Distinguish it sharply from the rke2 cluster **CA**: the
+node-token is a *Vault-owned, rotatable KV secret*, whereas rke2's self-signed cluster CA is chicken-and-egg
+**floor** Vault cannot own (§8 plane 3, §10).
+
+```dhall
+-- The node-provisioning KV secret family — every member a `SecretRef.Vault { mount, path, field }`
+-- named in `.dhall`, minted into the child's Vault by its parent (§7), never a literal:
+--   SSH host/login keys · Curve25519 WireGuard peer keypairs · Rke2NodeToken (the rke2 join token)
+```
+
+> **Honesty.** `Rke2NodeToken` custody is Phase-0 design intent. The single-node rke2 base (one
+> `rke2-server` with its `config.yaml` / install markers) is **sibling evidence** in prodbox's `Rke2.hs`;
+> a multi-node server/agent rollout that mints and injects a *shared join token* is net-new across the
+> whole family — sibling evidence, not an amoebius result.
+
+### 3.2 ML asset-staging credentials resolve from Vault by name — no second store
+
+The three-tier ML-asset lifecycle stages **Tier-2** model artifacts *eagerly*: an elected singleton pulls
+the parent-named model set from upstream and re-keys it onto the content-addressed store, writing `.ready`
+last ([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-infernix-inference-is-made-deterministic-too)).
+That staging step needs **two** credentials, and **both resolve from Vault by name** as ordinary
+`SecretRef`s (§3):
+
+- the **object-store** credential the singleton uses to write the MinIO content store, and
+- the **upstream** credential it uses to pull weights from the model source.
+
+Neither is a second secret store and neither has a hardcoded fallback. This is a deliberate, load-bearing
+correction of the sibling: infernix stages models via a **Kubernetes-Secret store** plus a hardcoded
+`minioadmin` / `minioadmin123` default when that Secret is absent (its `model_cache.py`). That fallback is
+precisely the **sole-backend invariant** violation §2 forbids — a secret reconstructed from a non-Vault
+source — and the k8s-Secret store is the "no second secret store" divergence amoebius refuses. In amoebius
+both credentials are `SecretRef.Vault` names, parent-injected (§7) and resolved in-cluster via Vault
+Kubernetes auth (§9); a missing credential **fails closed** rather than silently defaulting to a well-known
+account. This is **sibling evidence of the anti-pattern, not an amoebius result** — amoebius has not built
+the staging path; it specifies that the path carry no second store and no default.
+
 ---
 
 ## 4. Init follows readiness: fail-closed Vault init
@@ -346,9 +409,11 @@ leaf and never shared sideways between siblings — the same direction as unseal
      Vault KV secret referenced by `SecretRef` (§2, §3) — is owned by
      [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md); the single wild-ingress door is owned by
      [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path).
-  3. **Distro mTLS:** the Kubernetes distro's own self-signed cluster CA for kube-apiserver, over which
-     the host amoebius binary talks to the control plane. This is part of the chicken-and-egg floor
-     (§10), not something Vault owns — Vault runs *inside* that PKI.
+  3. **Distro mTLS:** the Kubernetes distro's own self-signed cluster CA for kube-apiserver — for an
+     `rke2` cluster, rke2's own self-signed cluster CA — over which the host amoebius binary talks to the
+     control plane. This is part of the chicken-and-egg floor (§10), not something Vault owns — Vault
+     runs *inside* that PKI. The rke2 *join token* is **not** this CA: it is a Vault-owned, rotatable KV
+     secret (§3.1).
 - **The host-comms hop is deliberately not PKI-secured.** Host compute daemons reach in-cluster MinIO
   and Pulsar as **peers over host-only NodePorts with no mTLS** — that hop is safe by being
   localhost-only and unreachable off-box, not by certificate, so the PKI anchor does **not** extend to
@@ -400,8 +465,10 @@ prodbox's proven model (`secret_derivation_doctrine.md §5`–§6,
 Vault owns everything except the minimal floor it cannot bootstrap itself from. This is the amoebius
 generalization of prodbox's `vault_doctrine.md §17`. The **only** data that may live outside Vault:
 
-1. **The distro's self-signed cluster CA + admin kubeconfig.** Vault runs *inside* this cluster's PKI,
-   so it cannot be the thing that mints it (§8 plane 3).
+1. **The distro's self-signed cluster CA + admin kubeconfig** — for an `rke2` cluster, rke2's own
+   self-signed cluster CA. Vault runs *inside* this cluster's PKI, so it cannot be the thing that mints
+   it (§8 plane 3). The rke2 *node-join token*, by contrast, is **not** floor material: it is a
+   Vault-owned, rotatable KV `SecretRef` (§3.1).
 2. **The Vault PV binding itself** — owned by [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md).
 3. **Root cluster only:** the operator's memorized unseal password — the sole ephemeral secret (§5).
    The password-AEAD-sealed unlock material it decrypts is not a Vault-owned object; it is what
@@ -460,6 +527,8 @@ states the target shape and links back for status.
 - [Platform Services Doctrine](./platform_services_doctrine.md) — Vault as a standard HA platform service and the Vault-ready ordering edge
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — the retained Vault PV and init-once / unseal-on-rebuild durability
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — Vault-Transit-envelope encryption of the MinIO Pulumi backend and the public-edge ZeroSSL/route53 path
+- [Content Addressing & Determinism](./content_addressing_doctrine.md) — the content-addressed model store the Tier-2 staging credentials write to (§4.5)
+- [Network Fabric Doctrine](./network_fabric_doctrine.md) — the Curve25519 WireGuard peer keys in the same parent-custody KV secret family as the `Rke2NodeToken` (§3.1)
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md) — the host-only NodePort hop that is deliberately not PKI-secured
 - [Substrate Doctrine](./substrate_doctrine.md) — the no-environment-variables / no-`PATH` contract
 - [Testing Doctrine](./testing_doctrine.md) — flagged test credentials and the elevated-only storage-deletion model

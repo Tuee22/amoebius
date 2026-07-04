@@ -76,6 +76,19 @@ later phase because it presupposes a working app-with-Postgres deployment from P
 guarantees from Phase 11 (durable bytes are not destroyed under normal credentials) — a schema migration must
 move data *without* representing destruction.
 
+**Folded into the release lifecycle (forward pointer).** The migration half of this candidate is now positioned
+as a *phase of the delivery doctrine* rather than a standalone engine: a DB-schema migration is a
+**`RolloutPhase`** — an ordered, readiness-gated phase obeying create-new → verified-migrate → retire-old,
+enacted as one step of a `RolloutPlan` on the in-cluster SSA/ApplySet reconciler
+([`release_lifecycle_doctrine.md` §5 — `RolloutPlan` / `RolloutPhase`](../documents/engineering/release_lifecycle_doctrine.md)).
+Its "zero silent data loss" gate is exactly the `storage_lifecycle` create-new→migrate→retire discipline carried
+on that phase, so the migration *ordering + idempotence* work belongs to the release rollout, not to a separate
+mechanism. The manifest-change-correctness half stays as stated — the hardening of the typed reconcile diff
+(`manifest_generation_doctrine.md` §6, above) — because a typed diff that refuses a destructive
+immutable-field replace is a precondition the `RolloutPlan`'s phases depend on. This remains 📋 Planned design
+intent: jitML's `Bootstrap.hs` schema-grant pre/post-migration phase is *sibling evidence* that the phased shape
+runs in a sibling, not an amoebius result.
+
 ## Candidate phase: Haskell extension DSL + custom AST checker + native JIT
 
 **Status**: 📋 Planned (provisional Phase 15)
@@ -125,8 +138,14 @@ rather than a feature keeps that outcome admissible.
 Cross-cluster failover is especially valuable for a VPN host that flattens the node-network topology: when the
 cluster carrying that role fails over, the flattened mesh moves with it, so peers keep a single, stable view of
 the network. If first-class VPN/mesh is adopted, the proposed semantics are: the root node deploys an HA
-cluster; that cluster configures a WireGuard gateway; every cluster (root included) receives a VPN IP from that
-gateway; and a Linkerd service mesh then becomes active across the VPN.
+cluster; that cluster configures a WireGuard gateway; and every cluster (root included) receives a VPN IP from
+that gateway. Whether a *service* mesh should then ride on top of that VPN is a separate, still-open
+sub-question: a cross-VPN mesh is only **one candidate**, weighed against the existing Envoy + Gateway-API
+baseline rather than pre-selected. Linkerd is *not* the chosen answer — it is merely the most-cited
+implementation to evaluate — and the honest default outcome is **reject-as-redundant**, because Gateway-API
+`HTTPRoute` weights already carry the one traffic-split feature a mesh would add, on the Envoy edge amoebius
+already renders. That evaluation and its written verdict are owned by
+[`network_fabric_doctrine.md` §6 — the service-mesh verdict](../documents/engineering/network_fabric_doctrine.md#6-the-service-mesh-verdict-no-linkerd-for-v1).
 
 ---
 
@@ -186,3 +205,8 @@ phase.
   niche-substrate candidate probes
 - [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — §9 the single
   wild-ingress path the WireGuard/Linkerd evaluation measures against
+- [Release Lifecycle Doctrine](../documents/engineering/release_lifecycle_doctrine.md) — §5 `RolloutPlan` /
+  `RolloutPhase`, where the Phase-14 candidate's DB schema-migration half is folded in as a readiness-gated
+  phase (create-new→verified-migrate→retire-old)
+- [Network Fabric Doctrine](../documents/engineering/network_fabric_doctrine.md) — §6 the service-mesh
+  (Linkerd) verdict the WireGuard/Linkerd niche-substrate mesh evaluation defers to

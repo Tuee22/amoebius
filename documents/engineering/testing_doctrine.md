@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define amoebius testing as a self-tearing-down `.dhall` topology — spin up resources, run a
@@ -153,6 +153,19 @@ machine-visible by emitting a ledger.
   topology that exercises a singleton-ownership invariant at the Decision layer but never injects the
   adversarial fault that targets it at the Runtime layer must say so — the Runtime layer is unverified, and
   the ledger says exactly that.
+- **This ledger is the typed evidence a `PromotionGate` consumes.** The per-run proven/tested/assumed
+  artifact is not only a confession for the operator — it is the *input* a release `PromotionGate` reads to
+  decide whether an environment pointer may advance. Advancing an `Environment` pointer (dev/staging → prod)
+  **requires** the `Release`'s test-topology ledger to reach that environment's required evidence strength:
+  **Prod requires the Runtime/chaos layer proven**, not merely a green Decision layer. It follows directly
+  from the UNVERIFIED rule above that a **skipped-but-applicable layer BLOCKS prod promotion** — a layer
+  recorded UNVERIFIED gives the advance constructor no evidence witness to consume, so promote-unverified→prod
+  is **grade-(1) unrepresentable** (mirroring the sibling infernix `.ready`-gated `ArtifactRef` idiom —
+  sibling evidence, not an amoebius result). The `PromotionGate` type, the `Environment` promotion pointer,
+  and the required-evidence-strength-per-environment mapping are **owned by**
+  [release_lifecycle_doctrine.md §4](./release_lifecycle_doctrine.md); this doc owns only the ledger the gate
+  reads. *(Design intent: the release lifecycle is Phase-0 reference doctrine and this ledger harness is
+  Phase 11 / not started — read as a specification to be validated, never a proven amoebius result.)*
 
 The **methodology and grammar** of the ledger — the Extract → Model → Inject moves, the
 proven/tested/assumed strengths, and what each move can and cannot establish — are **owned by**
@@ -324,6 +337,7 @@ To keep the SSoT boundaries crisp:
 | The async cross-cluster failover correctness obligation + TLA+/io-sim proof artifacts | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), [tla_modelling_assumptions.md](./tla_modelling_assumptions.md) |
 | The retained `no-provisioner` PV model, deterministic rebind, and the cardinal "no normal-operation deletion" rule | [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) |
 | The create-vs-delete credential model and Pulumi create/destroy mechanics (MinIO backend, Vault-envelope) | [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) |
+| The `PromotionGate`, the `Environment` promotion pointer, and each environment's required evidence strength (the gate that *consumes* this doc's §4 ledger) | [release_lifecycle_doctrine.md](./release_lifecycle_doctrine.md) (§4) |
 | That chaos injection lives in deployment rules; the app/deployment dividing line | [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md) |
 | Secrets-by-name, `SecretRef`, parent-injects-into-child Vault | [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | Substrate detection and the substrate catalog | [substrate_doctrine.md](./substrate_doctrine.md) |
@@ -352,6 +366,7 @@ amoebius design intent.
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md)
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md)
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md)
+- [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md)
 - [Application Logic vs Deployment Rules](./app_vs_deployment_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)

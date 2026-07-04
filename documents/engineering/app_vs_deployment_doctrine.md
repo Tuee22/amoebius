@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define the hard separation between an app's **application logic** (what it *is* to a user)
@@ -117,6 +117,13 @@ The deployment-rules surface declares:
   much the cluster has* or *which engine runs it*. The capacity fold is owned by
   [resource_capacity_doctrine.md](./resource_capacity_doctrine.md); the compute-engine/topology axis by
   [cluster_topology_doctrine.md](./cluster_topology_doctrine.md).
+- **Environment (dev/staging/prod).** *Which* environment a deployment targets is a deployment rule, never
+  app logic: the **app bytes are byte-identical across environments**, and only the deployment rules differ.
+  The environment is not a field in the app spec but a mutable, per-environment **ETag-CAS pointer** — living
+  in the content store — that resolves to a `Release`; "promote to prod" is a pointer CAS. The `Environment`
+  type, the promotion pointer, and the immutable release ledger are owned by
+  [release_lifecycle_doctrine.md §3](./release_lifecycle_doctrine.md). This is the type-level reason there is
+  no separate "dev version" and "prod version" of an app (§5).
 
 This surface is **keyed by app**: a deployment-rules layer references an app by name and says *how to run
 it*. The same app name can appear in two different deployment-rules layers and run two completely different
@@ -145,6 +152,7 @@ deliberately tricky cases:
 | "Inference runs on Apple Metal vs CUDA" | deployment rule | a placement choice (§7) |
 | "Replicate the app across us-east and eu-west and fail over" | deployment rule | topology + robustness; the app is unchanged (§9) |
 | "Inject a broker kill every 10 minutes" | deployment rule | the app does not know it is being tested |
+| "Promote a build from staging to prod" | deployment rule | a pointer CAS over byte-identical app bytes; only the deployment rules differ (§3) |
 | "A login requires MFA for the admin role" | application logic | an auth rule that *defines* the app's behaviour |
 
 **Misfiling is a bug, not a style preference.** A replica count that leaks into the app spec re-couples
@@ -245,6 +253,18 @@ on the application-logic surface. The clean way to hold this with §7:
 - The **placement** of the workload that executes that call graph — host vs cluster, Metal vs CUDA vs CPU,
   at what replica count — is a deployment rule.
 
+The typed shape of that dependency is the **`ExtensionSpec`** contract. Each in-tree extension in the v1
+closed set — **{infernix, jitML, mattandjames}** — plugs in by contributing one
+`ExtensionSpec { extDhall, extChain, extCapabilities }`: a typed Dhall sub-catalog **nested inside the
+amoebius `.dhall`** (§7), a `cfg -> [Step]` chain, and the `List Capability` it declares. These specs are
+merged at **compile/link time into the single binary** — there is no per-extension image and no `dlopen`.
+That the app *contributes* an `ExtensionSpec` is application logic (it travels with the app); the
+*placement* of the linked workload stays a deployment rule (§7). The `ExtensionSpec` grammar and its
+nested-Dhall composition are owned by [dsl_doctrine.md §4](./dsl_doctrine.md) — this is specified DSL design
+intent, not a built mechanism. An app unwilling to be linked is **not** an extension — it runs as an
+ordinary app-spec `.dhall` workload; the one path for a non-vendored third party is the later-phase Haskell
+extension DSL + AST checker below.
+
 Treating shared-library use as app logic is what lets jitML and infernix be *unified libraries under the
 DSL* rather than separate products (DEVELOPMENT_PLAN: "the constituent projects are not separate products").
 The later-phase Haskell extension DSL is tracked in
@@ -304,6 +324,7 @@ mechanics it points at:
 | Geo-replication / failover mechanics, dynamic node provisioning, teardown | [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md) |
 | The async cross-cluster proof obligation + chaos methodology | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
 | Test-as-a-`.dhall`-topology, `suggest-test`, the ledger | [testing_doctrine.md](./testing_doctrine.md) |
+| The `Environment` promotion pointer, the immutable `Release` ledger, `RolloutPlan` | [release_lifecycle_doctrine.md](./release_lifecycle_doctrine.md) |
 
 ---
 
@@ -331,5 +352,6 @@ ledger; it states the target shape and links back for status.
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md)
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — capacity budgets and scaling policy are deployment rules
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the compute engine and node topology are deployment rules
+- [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — the environment (dev/staging/prod) promotion pointer is a deployment rule
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

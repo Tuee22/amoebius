@@ -169,7 +169,9 @@ Total composability runs along four concrete axes, each owned in detail by a sib
 - **Extension-lib-in-app.** ML extension libraries nest the same way: *"the infernix .dhall can be
   contained inside an amoebius.dhall"*. infernix and jitML are libraries unified
   under the DSL, not separate products (DEVELOPMENT_PLAN), so an inference workload is a nested typed
-  fragment, not a bolt-on.
+  fragment, not a bolt-on. The precise seam by which such a library registers — the typed **`ExtensionSpec`**,
+  merged at link time into the one binary — is spelled out below; this axis's closed v1 set is
+  `{infernix, jitML, mattandjames}`.
 - **Child-cluster-in-parent.** The name *amoebius* is the recursion: a cluster spawns children, which
   spawn their own. A child receives *only its own* `.dhall` — *"including
   their childrens'"* but nothing about siblings — and the whole tree is rolled out from the root. The
@@ -190,6 +192,79 @@ flowchart LR
   root -->|nests| child[Child cluster amoebius.dhall]
   child -->|nests| grandchild[Grandchild cluster amoebius.dhall]
 ```
+
+### The v1 extension seam: `ExtensionSpec` (linked, not loaded)
+
+The Extension-lib-in-app axis has a precise **registration seam**. A `.dhall` cannot nest an arbitrary
+foreign product; what it nests is an **`ExtensionSpec`** — the one typed handle by which a *vendored* library
+plugs into the surface:
+
+    ExtensionSpec :
+      { extDhall        : <a typed Dhall sub-catalog nested inside amoebius.dhall>
+      , extChain        : cfg -> [Step]
+      , extCapabilities : List Capability
+      }
+
+Three parts, each already load-bearing above: `extDhall` is a nested typed Dhall sub-catalog (§4's
+composition); `extChain :: cfg -> [Step]` is the extension's slice of the chain/Step algebra (§2 — an
+extension carries *no* logic the DSL does not already carry as `[Step]`); and `extCapabilities` are the
+capability declarations it exports into the capability surface
+([service_capability_doctrine.md](./service_capability_doctrine.md)).
+
+**Linked, not loaded.** The v1 set is **closed at `{infernix, jitML, mattandjames}`**; each contributes one
+`ExtensionSpec`, and the specs are merged at **compile/link time into the one binary** — no dlopen, no
+per-extension image, no runtime plugin path. The merge adopts hostbootstrap's additive `ProjectSpec` stream
+algebra and its **anti-shadow `validateProjectSpec`** (`.../CLI.hs`) — the duplicate-id,
+constructor-collision, and empty-suite rejections — so two extensions cannot silently shadow each other's
+ids or constructors; but it **drops hostbootstrap's packaging** (no per-project binary or image, no dlopen).
+This is *sibling evidence, not an amoebius result*: hostbootstrap proves the `ProjectSpec` algebra and the
+anti-shadow validator; amoebius reuses the algebra and discards the packaging.
+
+**A nested `extDhall` is not privileged.** It faces exactly the two gates of §5 and the catalog's total
+folds — no unbounded arm, capacity accounted, topology relations satisfied — like any other fragment. In
+particular it introduces **no second secret store**: an extension names its secrets as `SecretRef`s (§6) and
+may **not** carry a key/secret store of its own. (infernix's k8s-`Secret` store is exactly the divergence
+this forbids — *sibling evidence of an anti-pattern*, corrected here, not a shipped amoebius behavior.)
+
+### v1 vs v2: linked extensions vs the third-party extension DSL
+
+The `ExtensionSpec` seam is **Path 1**, and it is deliberately *not* open to the world:
+
+- **v1 — Path 1 (linked).** The closed set `{infernix, jitML, mattandjames}` is *vendored*: each links into
+  the one binary through its `ExtensionSpec`. This is the only extension mechanism v1 ships.
+- **v2 — Path 2 (the Haskell extension DSL).** A non-vendored third party enters *only* through the future
+  **Haskell-as-DSL + custom AST checker + native JIT** — the forward pointer of §8, scheduled as provisional
+  **Phase 15**
+  ([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md#candidate-phase-haskell-extension-dsl--custom-ast-checker--native-jit)).
+  Path 2 is Phase-15 design intent, not built.
+
+And the boundary that keeps the seam honest: **an arbitrary container app is NOT an extension.** A party
+unwilling to be linked gets no `ExtensionSpec`; it runs as an ordinary app-spec `.dhall` workload —
+*"v1 can be an orchestrator for arbitrary containers"* — which is application logic, not extension
+([app_vs_deployment_doctrine.md §8](./app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic)).
+Extension = linked-and-vendored; container app = composed-and-orchestrated; the two are different axes. A
+future ML family is **deferred**: this pass provisions the seam but names no member beyond the closed set —
+a later family would enter via Path 1 once its math is absorbed into a vendored library, or via Path 2.
+
+### The ML-asset types an extension `.dhall` carries: `EngineRuntime` vs `ModelArtifact`
+
+Because infernix and jitML nest as `ExtensionSpec`s, their `extDhall` carries two ML-asset types the surface
+must hold apart — and, per §1, *carries but does not define*:
+
+- **`EngineRuntime`** — a **closed** union of substrate-tagged, *baked* engine identities. It has **no
+  `Url`/`Download`/`Fetch` arm**: an engine is *selected by substrate*, never fetched, and exists the moment
+  the pod does (because the extension links as a library, not a build-time download).
+- **`ModelArtifact`** — a by-name / content-address **reference** into the content store. Its `ArtifactRef`
+  is obtainable **only once the `.ready` sentinel exists** — there is no constructor for an unready reference
+  (grade-(1)).
+
+The relation between them is itself typed: **a `ModelArtifact` must be servable by an `EngineRuntime` present
+on the deployment's substrate** — an unmatched model has no landing engine (a grade-(2) total relation over
+the substrate's engine set, the same topology-relation-over-a-collection technique §5 defers to the catalog).
+The *detail* of all three — the no-`Url` closure, the `.ready` gate, and the model↔engine match — is owned by
+[illegal_state_catalog.md](./illegal_state_catalog.md) §3.25 and
+[content_addressing_doctrine.md](./content_addressing_doctrine.md) §4.5; this doc records only that the
+extension seam *carries* these typed fields and defers their unrepresentability there.
 
 ---
 
@@ -324,7 +399,11 @@ v1 can be an orchestrator for arbitrary containers."*
 
 This doc is the SSoT for the **orchestration** DSL (the Dhall surface). The **extension** DSL — the
 Haskell-as-DSL plus its custom AST checker and native JIT — is a scheduled **later phase**, not specified
-here. See the "Later phases" entry in
+here. In §4's extension taxonomy this is **Path 2** — the *only* path by which a non-vendored third party
+extends amoebius (Path 1, the closed linked set `{infernix, jitML, mattandjames}`, is vendored) — scheduled
+as provisional **Phase 15**
+([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md#candidate-phase-haskell-extension-dsl--custom-ast-checker--native-jit)).
+See also the "Later phases" entry in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). It is named here only so the
 boundary is explicit: when this document says "the DSL," it means the typed Dhall orchestration surface,
 not the future Haskell extension language.
@@ -367,13 +446,16 @@ states the target shape and links back for status.
 ## Cross-references
 
 - [Engineering Doctrine Index](./README.md)
-- [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
-- [Illegal State Catalog](./illegal_state_catalog.md)
+- [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — §8 an arbitrary container app is application logic, not an extension
+- [Illegal State Catalog](./illegal_state_catalog.md) — §3.25 an ML asset fetched/built at pod startup, and an unready/unlanded model, are unrepresentable
+- [Content Addressing Doctrine](./content_addressing_doctrine.md) — §4.5 the three-tier ML-asset lifecycle (`EngineRuntime` baked, `ModelArtifact` `.ready`-gated)
+- [Service Capability Doctrine](./service_capability_doctrine.md) — the capability surface an `ExtensionSpec` declares into
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [Platform Services Doctrine](./platform_services_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the capacity/budget/scaling types the surface carries
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the compute-engine/topology types the surface carries
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — §3.1 runtime message payloads are CBOR, not Dhall
+- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — Phase 15 Haskell extension DSL (§4/§8 Path 2 for third parties)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

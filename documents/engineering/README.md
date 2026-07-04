@@ -55,6 +55,7 @@ authoring of this doc is itself complete; 📝 = a Phase 0 deliverable still to 
 | [network_fabric_doctrine.md](./network_fabric_doctrine.md) | The inter-node/inter-cluster fabric: **raw kernel WireGuard configured by amoebius (not Netmaker)**, Vault-KV peer keys, rendered peer config, hub = gateway role; the localhost→authenticated-fabric generalization; and the **no-Linkerd-for-v1** service-mesh verdict | ✅ |
 | [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) | The native-protocol Haskell Pulsar client (`amoebius-pulsar`, forked from supernova): TCP binary protocol, **no WebSockets**, the declarative topology algebra, at-least-once + dedup | ✅ |
 | [content_addressing_doctrine.md](./content_addressing_doctrine.md) | The content-addressed MinIO store (pointers→manifests→blobs), `experimentHash = sha256(dhall‖substrate)` identity, and seed-derivation determinism — applied to **both** infernix and jitML | ✅ |
+| [release_lifecycle_doctrine.md](./release_lifecycle_doctrine.md) | Delivery as typed composition on primitives amoebius already owns — **no external CI/CD control plane** (no Argo/Flux/Tekton): the immutable `Release` ledger (`releaseHash`), the per-`Environment` (Dev/Staging/Prod) ETag-CAS promotion pointer, the `PromotionGate` that makes promote-unverified→prod unrepresentable, and the readiness-gated `RolloutPlan`/`RolloutPhase` apply (schema-migration as a phase, canary, rollback) on the in-cluster SSA reconciler | ✅ |
 
 ## Verification
 

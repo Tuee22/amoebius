@@ -17,7 +17,7 @@ package"; there is one Haskell binary that *runs* in three different ways:
 | Context | How it runs | What it is for |
 |---------|-------------|----------------|
 | **CLI tool** | A one-shot invocation on a host, exits when done | Operator commands, `bootstrap`, reconcile triggers, status queries |
-| **Sudo host daemon** | A long-running host process with `sudo` powers | Bring up the distro (kind / rke2), install host tooling, talk to `kube-apiserver` over distro mTLS, **supervise host-level worker subprocesses** |
+| **Sudo host daemon** | A long-running host process with `sudo` powers | Bring up the distro (kind / rke2) — including installing the **root rke2 server** (§2.1) — install host tooling, talk to `kube-apiserver` over distro mTLS, **supervise host-level worker subprocesses** |
 | **In-cluster pod** | Deployed as a generated typed manifest (the typed reconciler, no Helm) inside the cluster | Hosts the **control-plane singleton role** (§3) *or* a **worker role** (§4) |
 
 The **same-binary policy** is generalized directly from the prodbox sibling
@@ -75,6 +75,63 @@ Two facts fall out of the grid:
 Which roles run, how many replicas each gets, and which workers are host-level versus in-cluster are all
 **deployment-rules** decisions, never application logic — that orthogonal DSL split is owned by
 [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md).
+
+### 2.1 A third orthogonal axis: rke2 server/agent (declared)
+
+The grid above crosses two axes — **context** (where the binary runs) and **role** (what job it is doing).
+The rke2 distro adds a **third, fully independent typed axis** that this doctrine must keep from fusing with
+the other two:
+
+- **(i) Substrate — DETECTED.** kind / rke2 / EKS, discovered at bring-up
+  ([cluster_topology_doctrine.md §1](./cluster_topology_doctrine.md),
+  [substrate_doctrine.md](./substrate_doctrine.md)).
+- **(ii) amoebius daemon-role — ELECTED.** the control-plane singleton (§3) versus an unelected worker (§4).
+- **(iii) rke2 server/agent — DECLARED.** which *nodes* carry the Kubernetes control plane
+  (kube-apiserver + the etcd quorum) versus which are pure workload nodes. This is the `Rke2Servers` closed
+  union — `Single` / `Ha3` / `Ha5`, the only legal odd etcd quorums {1,3,5} — plus an `agents` list, owned by
+  [cluster_topology_doctrine.md §2, §4](./cluster_topology_doctrine.md). An even- or zero-server (no-quorum /
+  split-brain) control plane has no constructor: **grade-(1) unrepresentable**.
+
+(Two further declared axes exist system-wide — environment dev/staging/prod, and the engine/model/kernel asset
+tier — but they are owned by the release-lifecycle and content-addressing doctrines, not here; this document
+is normative only about axis (iii)'s orthogonality to (i) and (ii).)
+
+**The three axes never fuse.** An rke2 *server* node is **not** the amoebius control-plane singleton, and an
+rke2 *agent* is **not** an amoebius worker. Axis (iii) is a property of *Kubernetes nodes* (which host runs
+etcd / kube-apiserver); axis (ii) is a property of *amoebius daemon pods* (which pod holds cluster + secret
+authority, §3). They are independent: a worker pod may be scheduled onto an rke2 server node, and the elected
+singleton pod may run on an rke2 agent — the scheduler places pods without regard to the etcd quorum, and the
+election (§5) picks a pod without regard to its node's rke2 kind. Axis (iii) is equally independent of axis
+(i): rke2 server/agent is meaningful *only* on the rke2 substrate — it does not exist on kind or on EKS (which
+owns its own managed control plane) — so a detected substrate never *implies* a server/agent split.
+
+**Enactment splits across exactly the two daemon contexts (§1).** This is the one place the rke2 axis touches
+daemon topology:
+
+- **The sudo host daemon installs the ROOT rke2 server** — the zero-secret single node
+  `{ servers = Rke2Servers.Single host, agents = [] }`. This makes the §2 *midwife* concrete: before any
+  cluster exists there is no singleton to elect, so the host daemon (acting on behalf of the future singleton)
+  brings up the first `rke2-server`, then defers. This is the prodbox single-node `rke2-server` base —
+  **sibling evidence, not an amoebius result** (prodbox's `Rke2.hs` proves the single-node install only).
+- **The elected in-cluster singleton enacts child server/agent rollout over SSH.** Once kube-apiserver is up
+  and the singleton is elected, growing the cluster (further `Ha3` / `Ha5` servers, and all agents) is part of
+  the singleton's cluster authority — the *dynamic node provisioning* of §3.2, owned by
+  [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md). It runs the **checkpoint-free
+  tag-discovery host reconciler** — `create → tag → join-fabric → drain-by-tag`, home
+  [pulumi_iac_doctrine.md §0](./pulumi_iac_doctrine.md) — reaching each new host over SSH. The first server
+  mints the `Rke2NodeToken` (a Vault-KV `SecretRef`, parent-minted, referenced by name); further servers and
+  agents join via a `server:` URL + that token; rejoin is idempotent. This is a **reconcile, not a state
+  machine**.
+
+A **quorum change** (e.g. `Single → Ha3`) is a deliberate re-provision of the declared server set, **never** an
+autoscale; a `ScalingPolicy` grows the `agents` list only. Because axis (iii) is *declared* — not elected, not
+detected — the singleton never promotes a node from agent to server at runtime; it re-provisions against the
+new declaration.
+
+> **Honesty.** Multi-node rke2 server/agent, etcd-HA, and the join-token flow are **Phase-N design intent** —
+> net-new across the whole sibling family (hostbootstrap has zero rke2 code). Only the single-node
+> `rke2-server` base is proven in the prodbox sibling; that is **sibling evidence, not a tested amoebius
+> result**.
 
 ---
 
@@ -331,7 +388,9 @@ shape and links back for status.
 - [Substrate Doctrine](./substrate_doctrine.md)
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [Platform Services Doctrine](./platform_services_doctrine.md)
-- [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md)
+- [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — owns the node-lifecycle enactment the singleton drives for child rke2 server/agent rollout (§2.1)
+- [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — §2/§4 the `Rke2Servers` closed union and the topology fold (the declared server/agent axis of §2.1)
+- [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — §0 the checkpoint-free tag-discovery host reconciler (tier (b)) that enacts child rke2 rollout over SSH
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md)
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the control-plane singleton runs the capacity fold at decode

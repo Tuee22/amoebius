@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define how amoebius bakes third-party service binaries into one multi-arch base container and
@@ -246,6 +246,31 @@ fall into two classes, and the third-party services are **baked**, not mirrored.
   (GHC 9.12.4), role-selected at the pod level — CLI, control-plane singleton, worker — adapting prodbox's
   union-image pattern (`local_registry_pipeline.md` §6). infernix and jitML are linked in as extension
   libraries, not separate images.
+- **The infernix/jitML engine runtimes are baked, not fetched.** The ML engine layer obeys the same
+  bake-not-mirror discipline as the platform services. Every infernix/jitML *engine runtime* — the adapter
+  processes, the native inference payloads (`llama.cpp`, `whisper.cpp`, the ONNX runtime, Audiveris), and
+  the JIT toolchain (`nvcc`, `g++`, the Apple-Metal bridge) — is installed into the multi-arch base image
+  at build time by the **same MinIO/Vault/`distribution` asset-map + version resolver** this section already
+  uses for the service binaries (the hostbootstrap seam below). Because infernix and jitML link as extension
+  libraries (bullet above), the engine exists the moment the pod does; **none is fetched at pod startup** —
+  not `curl`-tar'd, not `pip`/venv-installed. This explicitly **replaces infernix's per-engine Poetry-venv +
+  `curl`-tar-at-build** shape. The *type-level* guarantee that an engine can never be fetched — `EngineRuntime`
+  is a closed, substrate-selected union with **no `Url`/`Download`/`Fetch` arm (grade-(1))** — and the full
+  three-tier engine/model/kernel asset lifecycle are owned by
+  [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md) and
+  [service_capability_doctrine.md §4](./service_capability_doctrine.md); this doc owns only the build-side
+  fact that the runtimes land in the base image. *Sibling evidence, not an amoebius result:* infernix's
+  `docker/Dockerfile` `curl`-tars the native payloads and installs per-engine venvs at IMAGE BUILD — amoebius
+  keeps the bake-at-build move but drops the per-engine venv and sources every asset from the asset-map. Read
+  as design intent for the ML phase, not a tested amoebius result.
+- **A baked engine runtime is OCI-digest bytes, not workflow-store bytes.** Because the engine runtimes are
+  part of the base image, each is identified by the **OCI image digest** (registry-owned, §5) — never by the
+  `experimentHash` of an ML run or the `releaseHash` of a deployment generation. The models an engine serves
+  (Tier 2 `ModelArtifact`) and the kernels it JITs (Tier 3, `kernelKey`) are the *content-addressed* tiers
+  that live in the `experimentHash`/`kernelKey` workflow store — distinct namespaces owned by
+  [content_addressing_doctrine.md](./content_addressing_doctrine.md). The §5 separation of OCI image digests
+  from the `experimentHash`-keyed workflow store extends unchanged to the ML engine layer: baked engine =
+  image digest; staged model / JIT kernel = workflow-store hash.
 
 **The seam to extend is already proven in hostbootstrap.** Baking a service binary is the same move
 hostbootstrap already uses for Go/helm/mc/pulumi — a mechanism amoebius reuses for its own baked binaries,
@@ -342,6 +367,7 @@ the build-and-registry pipeline and links back for status; it never maintains a 
 ## Cross-references
 
 - [Platform Services Doctrine](./platform_services_doctrine.md)
+- [Service Capability Doctrine](./service_capability_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md)
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md)

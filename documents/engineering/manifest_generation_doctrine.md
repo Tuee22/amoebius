@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/service_capability_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/release_lifecycle_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for how amoebius turns a typed cluster spec into running Kubernetes objects — a pure `render(spec)` that emits the full per-service object set from Haskell ADTs, and amoebius's own idempotent server-side-apply reconciler that applies, prunes, and waits — with **no Helm, no templating layer, and no third-party charts**.
@@ -228,9 +228,10 @@ The mechanism, four parts:
 - **Wait-for-ready.** After apply, the engine waits for the relevant readiness condition (rollout complete,
   `Ready`/`Available`, CR `status` healthy) before declaring the generation converged — replacing Helm's
   `--wait`. Readiness is observed from the live object, never assumed by a `threadDelay`.
-- **Rollback.** Because each applied generation is recorded (§6), a failed convergence can re-apply the prior
-  generation's object set — the same SSA-declare-and-prune path, pointed at the last known-good desired
-  state.
+- **Rollback.** Because each applied generation is recorded in the release ledger (§6.1), a failed
+  convergence can re-apply the prior generation's object set — the same SSA-declare-and-prune path, pointed at
+  the last known-good desired state. A *phased* or canary rollout is the ordered form of this same apply,
+  driven by the typed `RolloutPlan` of §5.1.
 
 **What is genuinely new vs. prodbox.** prodbox applies with `kubectl apply -f <manifest>` and owns objects by
 the `prodbox.io/id` label, but it does **not** drive SSA with a named field manager, does **not** do
@@ -254,6 +255,75 @@ flowchart TD
 > *that amoebius wires them into this specific reconciler* is specified here and unproven until the phase
 > lands. The idempotent `discover → diff → enact` shape it specializes is *proven in prodbox* for AWS/cluster
 > teardown — evidence from a sibling, not amoebius proof ([documentation_standards.md §6](../documentation_standards.md)).
+
+### 5.1 The `RolloutPlan`: ordered, readiness-gated phases on this same reconciler (tier (c))
+
+§5 converges *one* generation in a single declare-and-prune pass. Some changes must not land as one pass: a
+schema migration, a canary, a message-bus consumer cutover need **ordered, readiness-gated steps**, each
+gated on the *previous* step's live readiness before the next is applied. amoebius expresses that as a typed
+value the reconciler folds — not an imperative script and not a Helm release list:
+
+```haskell
+-- Conceptual shape. A RolloutPlan is data; the tier-(c) reconciler folds it phase by phase.
+type RolloutPlan  = [RolloutPhase]            -- ordered; phase n+1 waits on phase n's readiness
+data RolloutPhase = RolloutPhase
+  { phaseObjects   :: [K8sObject]             -- the render(spec) object subset this phase applies (§2)
+  , phaseReadiness :: ReadinessGate           -- the live condition that must hold before the next phase
+  }
+```
+
+- **Same reconciler, no new one.** Each `RolloutPhase` is one SSA-declare-and-prune pass over its object
+  subset (§5); between phases, the engine's existing **wait-for-ready** (§5) is the gate. Enactment is
+  **this doc's tier-(c) reconciler** — the in-cluster SSA/ApplySet manifest engine; tier (a) (Pulumi-checkpointed
+  cloud IaC) and tier (b) (checkpoint-free tag-discovery host) live in
+  [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). A `RolloutPlan` introduces **no new reconciler** and no
+  orchestration daemon — the plan is a `render(spec)`-derived value folded by the engine already run by the
+  control-plane singleton ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected)).
+- **Where the plan is owned.** The typed `RolloutPlan` / `RolloutPhase`, the `Environment` promotion pointer,
+  and the `Release` a rollout advances are owned by [release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md)
+  (and §2 for the ledger it advances); **this doc owns only their *enactment* on the tier-(c) reconciler.**
+- **DB-schema migration is a `RolloutPhase` (grade-(3) runtime residue; deferred).** A schema change is a
+  phase sequence obeying **create-new → verified-migrate → retire-old** — the exact anti-in-place-destruction
+  ordering owned by [storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction):
+  stand up the new schema/table, run the migration and *verify it behind a readiness gate*, and only then
+  retire the old — never an in-place mutation. The ordering is enforced by the reconciler's readiness gate at
+  runtime, **grade-(3)**: the list is data, and the "no retire-old before verified-migrate" property holds
+  because the engine will not apply phase *n+1* until phase *n* is live-ready — it is not a type-level
+  impossibility.
+- **Canary and cutover.** A canary phase is a **Gateway-API `HTTPRoute` `backendRefs` weight shift** on the
+  Envoy edge amoebius already renders — the traffic-split mechanism owned by
+  [network_fabric_doctrine.md §6](./network_fabric_doctrine.md#6-the-service-mesh-verdict-no-linkerd-for-v1)
+  (no service mesh needed). A Pulsar workload cuts over by **consumer-group**, not by weight.
+  **Rollback** is not special-cased: re-apply the prior generation's object set (the §5 rollback path) or
+  CAS the environment pointer back to the prior `Release` — both are ordinary reconciles.
+
+```mermaid
+flowchart LR
+  plan[RolloutPlan: ordered RolloutPhase list from render of spec] --> p1[Phase 1: SSA apply and prune its object subset]
+  p1 --> g1[Wait for readiness]
+  g1 -->|ready| p2[Phase 2: SSA apply and prune its object subset]
+  p2 --> g2[Wait for readiness]
+  g2 -->|ready| pn[Final phase converged]
+  g1 -->|failure| rb[Re-apply prior generation or CAS pointer back]
+```
+
+> **Sibling evidence (the PATTERN, not Helm; not an amoebius result).** jitML's
+> `~/jitML/src/JitML/Cluster/Helm.hs` carries exactly this shape: a closed
+> `data HelmPhase = HarborPhase | PlatformPhase | FinalPhase` and a `phasedReleases :: [HelmRelease]` whose
+> every element is tagged with a `releasePhase`, folded by `helmPhasedRolloutPlan` into an ordered plan;
+> `~/jitML/src/JitML/Cluster/Readiness.hs` supplies the between-phase gates (`postgresReadinessSubprocesses`,
+> `rolloutStatusSubprocess`, `runMinioBucketReadinessIO`); and `~/jitML/src/JitML/Bootstrap.hs` **splits its
+> rollout around a live schema grant** — `livePreGrantSubprocessesForPort` brings the operator and cluster up
+> *through readiness*, the typed Haskell schema grant then runs, and `livePostGrantSubprocessesForPort`
+> continues — the readiness-gated pre/post migration shape, LIVE in a sibling. But jitML enacts every phase
+> with `helm install`; amoebius keeps only the **phase-tagged ordered list + readiness gate**, renames
+> `HelmPhase` → `RolloutPhase`, and enacts each phase as a `render(spec)` SSA pass with **no Helm**. This is
+> sibling evidence, not an amoebius result.
+
+> **Honesty.** The `RolloutPlan` is **Phase-2 design intent** — it rides the tier-(c) SSA reconciler, itself
+> Phase 2 and unbuilt; the DB-schema-migration `RolloutPhase` is the **deferred Phase-14** shape, proven
+> *only* as the Helm-driven pattern in the jitML sibling. Read as the contract amoebius intends, never as a
+> tested amoebius result.
 
 ---
 
@@ -279,19 +349,22 @@ release as an opaque gzipped Secret holding the rendered manifests, and the clus
 - **Pruning recovers the prior set from etcd, not from a release manifest.** When a service is removed from
   the spec, its objects are found by their `amoebius/owner` label on the live objects (§5) and pruned — the
   prior object set is reconstructed from the cluster, never from a stored Helm release.
-- **Optionally, each applied generation is persisted content-addressed.** amoebius *may* write each rendered
-  generation into the content-addressed MinIO store (pointers → manifests → blobs), reusing the mechanism
-  owned by [content_addressing_doctrine.md](./content_addressing_doctrine.md). That buys a **typed revision
-  history**, **rollback** to any prior generation (§5), and **drift detection** (diff live objects against
-  the recorded generation) — and it is strictly *more* than Helm offers: typed, content-addressed,
+- **Each applied generation is persisted content-addressed — the canonical release ledger.** amoebius writes
+  each rendered generation into the content-addressed MinIO store (pointers → manifests → blobs), reusing the
+  mechanism owned by [content_addressing_doctrine.md](./content_addressing_doctrine.md). That buys a **typed
+  revision history**, **rollback** to any prior generation (§5), and **drift detection** (diff live objects
+  against the recorded generation) — and it is strictly *more* than Helm offers: typed, content-addressed,
   deduplicated, and confluent across clusters, where Helm's release Secret is an opaque gzip blob with no
-  cross-cluster story.
+  cross-cluster story. **§6.1 promotes this applied-log from *optional* to THE canonical immutable release
+  ledger keyed by `releaseHash`** — a durable record of *what was applied*, never a second desired-state
+  store.
 
 The contrast is the point. Helm's release store has well-known desync failure modes — the stored release and
 the live cluster disagree after a manual `kubectl edit`, a `helm rollback` to a release whose manifests no
 longer match the chart, or a half-applied upgrade that leaves the release marked `deployed` over a broken
 object set. amoebius has **no release store to desync**: desired state is always exactly `render(spec)`, and
-the only persisted history is the optional, immutable, content-addressed applied-log.
+the only persisted history is the immutable, content-addressed release ledger (§6.1) — a record of *what was
+applied*, not a competing source of desired state.
 
 ```mermaid
 flowchart LR
@@ -299,8 +372,45 @@ flowchart LR
   desired -->|server-side apply, declare owned fields| live[Live objects in etcd]
   live -->|read through SSA: observed state only| diff[Engine compares desired to observed]
   diff -->|enact and prune| live
-  desired -->|optional content-addressed write| log[Typed revision log: history, rollback, drift]
+  desired -->|content-addressed write, releaseHash-keyed| log[Release ledger: history, rollback, drift]
 ```
+
+### 6.1 The release ledger: the applied-log is canonical, not optional
+
+§6's applied-log is described as *optional*. **This subsection promotes it: the immutable, content-addressed
+applied-log is THE canonical release ledger** — the one durable record of what amoebius has deployed. The
+promotion changes *nothing* about desired state: **desired is still `render(in-force .dhall)`, and there is
+still no separate desired-state store** (§6). The ledger records *what was applied*; it never becomes a thing
+the reconciler converges *toward*.
+
+- **A `Release` is one immutable ledger entry, keyed by `releaseHash`.** Each converged generation is written
+  content-addressed as a `Release = { releaseHash, deploymentDhallRef, imageDigests, substrateFp }`, where
+  `releaseHash = sha256(resolved-deployment-dhall ‖ image-digests ‖ substrate-fp)` — a hash **class**
+  registered in the
+  [content_addressing_doctrine.md §2.3 master table](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds),
+  namespaced away from `experimentHash` / `kernelKey` / the OCI image digest and never shared with them. The
+  ledger reuses the same pointer → manifest → blob store §6 already names; the `Release` type, the ledger, the
+  `Environment` promotion pointer, and the `PromotionGate` are owned by
+  [release_lifecycle_doctrine.md §2](./release_lifecycle_doctrine.md) (ledger) and §3–§4 (pointer, gate) —
+  **this doc owns only that the reconciler *writes* the entry on convergence.**
+- **Why canonical, not optional.** An append-only `releaseHash`-keyed ledger is what makes rollback (§5),
+  drift detection (diff live objects against a recorded `Release`), typed revision history, and cross-cluster
+  confluence *always* available rather than best-effort — and it is the auditability substrate that lets
+  amoebius refuse an external CI/CD control plane (no Argo/Flux/Tekton), owned by
+  [release_lifecycle_doctrine.md §1](./release_lifecycle_doctrine.md). Leaving it optional would reintroduce a
+  "sometimes there is no history" mode; promoting it closes that.
+- **Still not a Helm release store.** The ledger is immutable and content-addressed — a *new* `releaseHash`
+  per generation, never an in-place-mutated blob — so it has none of the desync modes of Helm's gzipped
+  release Secret (§6). The environment pointers that *select* a `Release` (dev / staging / prod, advanced by
+  ETag-CAS under a `PromotionGate`) are pointer kinds in the same
+  [§2.3 master table](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)
+  and are owned by release_lifecycle_doctrine.md §3–§4, not here.
+
+> **Honesty.** The release ledger is **Phase-N design intent** — it composes with the content-store phase
+> (§9) and the tier-(c) reconciler (Phase 2), neither built in amoebius. Content-addressed immutable storage
+> is proven mechanism; *that amoebius records each converged generation as a `releaseHash`-keyed `Release` and
+> promotes environments by CAS over it* is specified across this §6.1 and release_lifecycle_doctrine.md and is
+> unbuilt.
 
 ---
 
@@ -354,8 +464,10 @@ status, validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the **typed manifest renderer and the server-side-apply reconciler** land
 with platform services in **Phase 2**; the **capability abstraction and per-cluster shapes** ride the DSL
-type-family work in **Phase 3**; and the **content-addressed applied-log** composes with the content-store
-phase. This doc states the target shape and links back for status.
+type-family work in **Phase 3**; the **content-addressed release ledger (§6.1)** composes with the
+content-store phase; and the **`RolloutPlan` / `RolloutPhase`** enactment (§5.1) rides the tier-(c) reconciler,
+with the DB-schema-migration phase deferred to **Phase 14**. This doc states the target shape and links back
+for status.
 
 ---
 
@@ -369,8 +481,10 @@ phase. This doc states the target shape and links back for status.
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — `render` consumes the capacity-checked IR; overcommit is rejected before render
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the compute-engine/topology the rendered node set realizes
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — secrets-by-name; a rendered manifest never carries plaintext secret bytes
-- [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — retained `no-provisioner` PVs for StatefulSet storage
-- [Content Addressing Doctrine](./content_addressing_doctrine.md) — the content-addressed store backing the optional applied-log
+- [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — retained `no-provisioner` PVs for StatefulSet storage; §8 create-new→verified-migrate→retire-old is the DB-schema-migration `RolloutPhase` (§5.1)
+- [Content Addressing Doctrine](./content_addressing_doctrine.md) — the content-addressed store backing the §6.1 release ledger; the §2.3 master table registers `releaseHash`
+- [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — `Release` / `releaseHash` ledger (§2), the `Environment` promotion pointer / `PromotionGate` (§3–§4), and the `RolloutPlan` / `RolloutPhase` (§5) this doc's tier-(c) reconciler enacts (§5.1)
+- [Network Fabric Doctrine](./network_fabric_doctrine.md) — the Gateway-API `HTTPRoute` weight shift (§6) that is the canary `RolloutPhase` (§5.1)
 - [Image Build Doctrine](./image_build_doctrine.md) — the build pipeline, baked base container, and registry refs
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the control-plane singleton that runs the reconciler
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — the `discover → diff → enact` reconciler shape this specializes
