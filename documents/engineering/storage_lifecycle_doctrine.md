@@ -181,7 +181,7 @@ StorageBacking = HostDisk Capacity | Ebs Capacity | CloudQuota Quota
   ceiling number, so "available storage" has one definition.
 - **The aggregate fold lives elsewhere.** This doc owns the *union shape* and the per-volume sizing ([§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim));
   the **aggregate arithmetic** — `Σ(PV caps) ≤ backing`, and the Pulsar two-ceiling fold — is owned by
-  [resource_capacity_doctrine.md §5, §7](./resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm) (the [§4.6](./illegal_state_catalog.md#46-capacity-accounting-total-fold--σ-demand--capacity-checked) capacity-accounting
+  [resource_capacity_doctrine.md §5, §7](./resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm) (the [§4.6](./illegal_state_catalog.md#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) capacity-accounting
   technique). An app that would consume more storage than its backing
   ([illegal_state_catalog.md §3.19](./illegal_state_catalog.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)) is rejected by that fold at decode; "unbounded"
   is representable **only** through a `Growable` scaling policy whose ceiling is itself a quota

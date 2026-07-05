@@ -237,9 +237,14 @@ flowchart LR
 
 This doctrine owns the *shape* of a legal cluster; two siblings own what rides on it:
 
-- **Capacity.** `resource_capacity`'s `place` fold ranges over *this* `Topology` — the summed workload demand
-  against the summed node capacity ([resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)).
-  Topology owns the node set; capacity owns the arithmetic over it.
+- **Capacity.** `resource_capacity`'s `place` fold ranges over *this* `Topology`, and it is a **placement**, not
+  a sum ([resource_capacity_doctrine.md §4.1](./resource_capacity_doctrine.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope)):
+  the `ComputeEngine` shape selects the check. A **fixed** node set (`Kind` with `replicas`, `Rke2` `servers` +
+  statically-declared `agents`) yields a concrete pod→node **witness** bin-pack; an **elastic** node set
+  (`Autoscaled` agents, a `Managed Eks` node group up to a `CloudQuota`) yields a two-**envelope** check
+  (per-pod-fits-largest-candidate-instance + Σ-at-max-scale ≤ quota) the autoscaler can always satisfy; a hybrid
+  witness-packs its fixed floor and envelope-checks the headroom. Topology owns the node set (and thus the
+  fixed-vs-elastic distinction); capacity owns the placement arithmetic over it.
 - **Lifecycle.** The bring-up, spawn, teardown, and dynamic-provisioning *verbs* over these engines are owned
   by [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md) (the root-single-node rule in [§2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap), the
   provider-managed vs self-managed split in [§1](./cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape)). This doc supplies the *types* those verbs act on; it does not

@@ -268,18 +268,24 @@ No pod is a freeloader: **every container — platform service and app alike —
   [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md).
 - A runaway workload cannot starve the platform out from under itself.
 
-amoebius requires explicit CPU and RAM **requests and limits** on every container the chart layer renders.
-Whether this requirement is lifted into the Dhall type layer (so an under-declared workload is
-*unrepresentable*, not merely rejected at render time) is catalogued by
+amoebius requires explicit CPU and RAM **requests and limits** on every container the chart layer renders —
+the `Resources = { requests, limits }` pair whose shape is owned by
+[resource_capacity_doctrine.md §3](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget).
+The two are read at *different* layers: **`requests`** is the scheduling number — it is what the placement fold
+sums against allocatable capacity, because it is what the scheduler reserves — while **`limits`** is the runtime
+cgroup ceiling (throttle/OOM), a grade-3 enforcement fact, never summed by the fold. Both are mandatory, with
+`requests ≤ limits` per axis (and `requests == limits` for gpu, which cannot be overcommitted). Whether this
+requirement is lifted into the Dhall type layer (so an under-declared workload is *unrepresentable*, not merely
+rejected at render time) is catalogued by
 [illegal_state_catalog.md](./illegal_state_catalog.md), which is the SSoT for which platform invariants are
 type-enforced.
 
-This doc owns only the **per-container declaration** — the atom. The **aggregate** — that the summed cpu/ram
-`Demand` of a cluster's workloads does not exceed the cluster's `Capacity` (and, nested, that an engine/VM
-does not exceed its host) — is owned by [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) (the
-[§4.6](./illegal_state_catalog.md#46-capacity-accounting-total-fold--σ-demand--capacity-checked) capacity-accounting fold, [illegal_state_catalog.md §3.17](./illegal_state_catalog.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)), which *reads*
-these per-container declarations. There is no second capacity fold here: this doc supplies the atoms, the
-capacity doctrine sums them.
+This doc owns only the **per-container declaration** — the atom. The **aggregate** — that a cluster's workloads
+admit a feasible placement of their `requests` against the cluster's allocatable `Capacity` (and, nested, that
+an engine/VM does not exceed its host) — is owned by [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) (the
+[§4.6](./illegal_state_catalog.md#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) capacity-accounting fold, [illegal_state_catalog.md §3.17](./illegal_state_catalog.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)/[§3.27](./illegal_state_catalog.md#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing)), which *reads*
+these per-container declarations. There is no second capacity fold here: this doc supplies the atoms (the
+`requests`), the capacity doctrine packs them.
 
 ---
 

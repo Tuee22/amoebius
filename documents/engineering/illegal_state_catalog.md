@@ -91,9 +91,9 @@ flowchart TD
 The entries below enumerate the original illegal-state list ([§3.1](#31-bad--illegal-durable-storage)–[§3.8](#38-cross-tenant-references-and-literal-secrets)), the isolation invariants
 ([§3.9](#39-a-plaintext-spec-at-rest)–[§3.10](#310-a-child-spec-that-reaches-beyond-its-own-subtree)), the best-practice-by-construction states ([§3.11](#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)–[§3.12](#312-an-app-that-names-a-product-instead-of-a-capability)), the **capacity / topology / bounded-
 storage** states ([§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](#322-a-hand-authored-un-derived-toleration)), the **CBOR-payload** rule ([§3.23](#323-a-non-cbor-pulsar-payload)), and the **rke2-quorum / ML-asset-lifecycle /
-release-promotion** states ([§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)–[§3.26](#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence)) the techniques in [§4](#4-the-typing-techniques) demand. Each entry: the **intuition** (how it goes wrong
+release-promotion** states ([§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)–[§3.26](#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence)), and the **schedulability / bin-packing** refinement ([§3.27](#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing)) the techniques in [§4](#4-the-typing-techniques) demand. Each entry: the **intuition** (how it goes wrong
 in raw k8s), the **owning doctrine** (the SSoT for the rule), and the **technique** ([§4](#4-the-typing-techniques)) that forecloses it.
-The [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](#322-a-hand-authored-un-derived-toleration) block is foreclosed by the two techniques added for it — [§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked) (the capacity-accounting total
+The [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](#322-a-hand-authored-un-derived-toleration) block is foreclosed by the two techniques added for it — [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) (the capacity-accounting total
 fold) and [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) (compatibility/topology relations over a collection) — and is where the honest grade split
 matters most: every capacity/storage/retention **sum** is grade-(2), never grade-(1) ([§2](#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it), [§6](#6-three-grades-of-foreclosure-and-the-honesty-they-force)).
 
@@ -146,7 +146,10 @@ workload *requests* and a node *offers*, and an unmatchable request is uninhabit
 hand-authored** — it is *derived* from a declared node taint (the same "derived, never written" discipline as
 NetworkPolicy, [§3.6](#36-blocking-networkpolicy-services-cant-reach-each-other)), so "a toleration for a taint no node declares" is unrepresentable and "a taint no
 workload tolerates" leaves the existence fold with no landable node. This strengthens the original
-affinity-only entry to cover taints and tolerations. **Owner:**
+affinity-only entry to cover taints and tolerations. This entry checks placement *constraints*
+(affinity/taints); the complementary *resource-fit* existence check — that a matching node also has enough
+allocatable room once every other pod is placed — is [§3.27](#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing),
+and the two compose in `place`'s `podFits`. **Owner:**
 [`substrate_doctrine.md`](./substrate_doctrine.md) (substrate/arch capabilities, the closed node-taint set +
 node inventory) and [`platform_services_doctrine.md` §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) (the
 derived-toleration rule, parallel to derived NetworkPolicy). **Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (capability tags) + [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a
@@ -297,13 +300,17 @@ distinctness floor; the cardinality sub-part is grade (1).
 
 Raw k8s admits a workload requesting more cpu/mem than any node has, a VM or engine asking for more than its
 host, or a cluster whose workloads out-total its nodes — each surfaces at runtime as `Pending`, eviction, or
-a full disk. amoebius folds the summed typed `Demand` against the enclosing `Capacity` at every nesting level
+a full disk. amoebius folds the typed `Demand` against the enclosing `Capacity` at every nesting level
 (host → VM → guest; cluster → workload) and rejects an overflow at decode. Because capacity is a *value* not a
 type index (Dhall has no dependent arithmetic), this is a **total decode-time check**, honestly grade (2) —
-never claimed uninhabitable. **Owner:** [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md)
+never claimed uninhabitable. This entry is the **aggregate** overcommit (Σ demand exceeds Σ capacity); the
+distinct case where a set fits in aggregate but an *atomic pod* fits no single node (bin-packing / indivisible
+GPU) is [§3.27](#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing), caught by
+the same [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked)
+placement fold. **Owner:** [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md)
 (consuming the host numbers in [`substrate_doctrine.md`](./substrate_doctrine.md), the cpu/ram in
 [`platform_services_doctrine.md` §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram),
-and the PV sizes in [`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md)). **Technique:** [§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked)
+and the PV sizes in [`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md)). **Technique:** [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked)
 (capacity-accounting total fold). **Grade:** (2).
 
 ### 3.18 Unbounded storage anywhere
@@ -314,7 +321,7 @@ is **either** host-level (bounded by a physical disk) **or** cloud (bounded by a
 `Σ(sizes) ≤ backing` fold bounds the total. **Owner:**
 [`storage_lifecycle_doctrine.md` §5.2](./storage_lifecycle_doctrine.md#52-the-storage-backing-is-bounded--the-closed-storagebacking-union) (the union shape) +
 [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) (the aggregate). **Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
-(closed `StorageBacking` union — grade 1) + [§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked) (aggregate backing fold — grade 2). **Grade:** (2) aggregate;
+(closed `StorageBacking` union — grade 1) + [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) (aggregate backing fold — grade 2). **Grade:** (2) aggregate;
 the union shape is grade (1).
 
 ### 3.19 An application consuming more storage than its backing (MinIO and Pulsar)
@@ -325,7 +332,7 @@ backing. amoebius folds cumulative store size against the selected `StorageBacki
 `Growable` scaling policy whose ceiling is itself a quota ([§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy)). **Owner:**
 [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) +
 [`content_addressing_doctrine.md`](./content_addressing_doctrine.md) (the MinIO store) +
-[`pulsar_client_doctrine.md`](./pulsar_client_doctrine.md) (topic retention). **Technique:** [§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked)
+[`pulsar_client_doctrine.md`](./pulsar_client_doctrine.md) (topic retention). **Technique:** [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked)
 (cumulative-size ≤ backing fold) + [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (the `Growable` arm gates unboundedness). **Grade:** (2).
 
 ### 3.20 A Pulsar topic without a bounded / tiered / retained lifecycle
@@ -339,7 +346,7 @@ headroom** against the BookKeeper backing (the availability fit) and the retaine
 target (the durability fit). A mandatory backlog quota is the runtime fail-safe. **Owner:**
 [`pulsar_client_doctrine.md` §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra) (the policy
 shape) + [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) (the two-ceiling fold).
-**Technique:** [§4.1](#41-pvcpv-binding-by-construction) (mandatory `RetentionPolicy` + mandatory size offload — no forever-local arm) + [§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked)
+**Technique:** [§4.1](#41-pvcpv-binding-by-construction) (mandatory `RetentionPolicy` + mandatory size offload — no forever-local arm) + [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked)
 (retention-budget room-fit). **Grade:** (1) for the mandatory shape; (2) for both room-fits; grade-(3) residue
 — the burst back-pressure actually holding.
 
@@ -437,6 +444,28 @@ immutable release ledger). **Technique:** [§4.3](#43-gadt-indexed-state-machine
 on the promoted `Release`, owned by [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) and the testing
 doctrine.
 
+### 3.27 A schedulable-in-aggregate but unplaceable workload (atomic-pod / GPU bin-packing)
+
+Raw k8s admits a workload whose demand fits a cluster *in aggregate* but whose individual pods cannot be packed
+onto individual nodes — a 5-CPU pod on a cluster of 4-CPU nodes (aggregate CPU sufficient, no single node big
+enough), or a 2-GPU pod where every node has one GPU. Each is well-formed and admits, then hangs `Pending`
+forever, because **pods are atomic and cannot straddle nodes** and GPU is indivisible. This is the resource-fit
+generalization of [§3.5](#35-undeployable-pods-taints-tolerations--affinity): §3.5 asks whether *a node
+matching affinity + tolerating taints exists*; this entry adds *with enough allocatable room, given everything
+else placed*. amoebius makes the cluster check a **placement**, not a sum: for a **fixed** node set the decode
+computes a concrete pod→node witness by bin-pack (`place`) and rejects `Left Unschedulable` if none exists; for
+an **elastic** (autoscaled / `Managed Eks`) set it checks a growth envelope — every pod fits the largest
+candidate instance and Σ-at-max-scale ≤ quota — that the autoscaler can always satisfy. The old aggregate-sum
+([§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)) does not catch this;
+the placement does. **Owner:** [`resource_capacity_doctrine.md` §4.1](./resource_capacity_doctrine.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope)
+(the `place` witness/envelope; `Capacity` is *allocatable*, cpu/mem divisible but `gpu` an indivisible `Count`)
++ [`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md) (the fixed-vs-elastic `Topology` shape that
+selects the branch). **Technique:** [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked)
+(the placement upgrade of the capacity fold). **Grade:** (2) — a checked construction of a placement witness /
+envelope proof, **sound-not-complete** (may reject a packable spec, never admits an unplaceable one); grade-(3)
+residue — that the scheduler actually reproduces a feasible placement and the autoscaler actually grows, owned
+by [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md).
+
 ---
 
 ## 4. The typing techniques
@@ -451,8 +480,8 @@ The catalog is foreclosed by seven reusable techniques operating across **two ty
   **GADT-indexed** types carrying phantom tags and ownership indices, so the in-memory IR the interpreter
   walks has the same illegal-states-absent property as the spec it came from.
 
-The seven techniques follow. Each leads with the intuition, then the mechanism. Techniques [§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked) and [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) were
-added for the capacity / topology / bounded-storage block ([§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](#322-a-hand-authored-un-derived-toleration)); [§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked) is the one technique that is
+The seven techniques follow. Each leads with the intuition, then the mechanism. Techniques [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) and [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) were
+added for the capacity / topology / bounded-storage block ([§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](#322-a-hand-authored-un-derived-toleration)); [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) is the one technique that is
 **irreducibly grade-(2)** ([§2](#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it), [§6](#6-three-grades-of-foreclosure-and-the-honesty-they-force)).
 
 ### 4.1 PVC↔PV binding by construction
@@ -513,19 +542,29 @@ and the `experimentHash` identity are owned by
 [`content_addressing_doctrine.md`](./content_addressing_doctrine.md); this doc owns only the *totality
 technique* — names are derived, never asserted.
 
-### 4.6 Capacity-accounting total fold — Σ demand ≤ capacity, checked
+### 4.6 Capacity accounting — placement witness (compute) and Σ demand ≤ capacity (storage), checked
 
-*Intuition:* don't ask "does this one pod fit a node" — **fold the whole demand of a scope and compare it
-once to that scope's capacity**, at every level of nesting, so an overflow anywhere is caught. *Mechanism:* a
-total pure `Σ(refined non-zero quantities)` compared against a single-owner `Capacity`/`Budget`, returning a
-checked `Left Overcommit` (`fits`/`carve`/`place`). It nests — host → VM → guest, cluster → workload — and
-**re-runs** after any [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) `Growable` policy grows the bound. This is distinct from [§4.4](#44-ownership-indices--single-owner-ssot-structurally) (which checks
+*Intuition:* an aggregate `Σ demand ≤ Σ capacity` is **necessary but not sufficient** for compute — pods are
+**atomic and cannot straddle nodes**, so a set can fit in aggregate yet leave a single pod that fits no node
+(3×4-CPU nodes admit a 5-CPU pod by the sum; it is `Pending` forever). So the compute check is a **placement**,
+not a sum, while genuinely divisible storage/retention stays a `Σ`. *Mechanism:* two shapes selected by
+topology ([`resource_capacity_doctrine.md §4.1`](./resource_capacity_doctrine.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope)):
+a **fixed** node set → a first-fit-decreasing **witness bin-pack** honoring per-node allocatable, affinity/taints
+(`podFits`), and anti-affinity, returning a concrete `Placement` or `Left Unschedulable`; an **elastic** node
+set → a **two-envelope** check (each pod fits the largest candidate instance; Σ at max scale ≤ quota) the
+autoscaler can always satisfy. Single-owner *carves* below the cluster (VM out of host) stay pure subtractions;
+storage is `Σ(sizes) ≤ backing`. It nests — host → VM → guest, cluster → workload — and **re-runs** after any
+[§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) `Growable` policy grows the
+bound. Distinct from [§4.4](#44-ownership-indices--single-owner-ssot-structurally) (which checks
 single-ownership, not arithmetic). **Honesty:** this technique is **irreducibly grade-(2)** — Dhall has no
-dependent arithmetic, so `Σ ≤ cap` is a *checked rejection of a constructible value*, never an absence of
-inhabitants. Any entry claiming a capacity/storage/retention sum is grade-(1) is dishonest. The model
-(`Capacity`/`Demand`/`Budget`, the `StorageBudget` and `Growable` unions, the two-ceiling Pulsar fold, and the
-declared-vs-probed cross-check) is owned by [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md);
-this doc owns only the *fold technique*. Forecloses [§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)–[§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy).
+dependent arithmetic, so both "a feasible packing exists" and `Σ ≤ cap` are *checked rejections of a
+constructible value*, never an absence of inhabitants; any entry claiming a capacity/storage/retention check is
+grade-(1) is dishonest. The compute bin-pack is additionally **sound-not-complete** (NP-hard, so a heuristic
+that may false-reject a packable spec but never admits an unplaceable one); the storage `Σ` carries no such
+caveat. The model (`Capacity`/`Demand`/`Budget`, `podFits`/`place`, the static-vs-elastic branch, the
+`StorageBudget` and `Growable` unions, the two-ceiling Pulsar fold, and the declared-vs-probed *allocatable*
+cross-check) is owned by [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md); this doc owns only
+the *technique*. Forecloses [§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)–[§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy) and [§3.27](#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing).
 
 ### 4.7 Compatibility / topology relations by construction over a collection
 
@@ -571,7 +610,7 @@ Forecloses [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-manag
 | 3.14 rke2/kind on a host with no Linux node / no VM | 4.3 `LinuxHost` witness | [cluster_topology](./cluster_topology_doctrine.md), [substrate §4](./substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux) |
 | 3.15 Multi-node kind not on a single host | 4.1 one `host` field | [cluster_topology](./cluster_topology_doctrine.md) |
 | 3.16 Multi-node rke2 w/ fewer hosts than nodes / host reused | 4.1 `node==host` + 4.4 distinctness fold | [cluster_topology](./cluster_topology_doctrine.md) |
-| 3.17 Over-committed host / VM / cluster | 4.6 capacity total fold | [resource_capacity](./resource_capacity_doctrine.md) |
+| 3.17 Over-committed host / VM / cluster (aggregate Σ) | 4.6 capacity fold (Σ demand ≤ capacity) | [resource_capacity](./resource_capacity_doctrine.md) |
 | 3.18 Unbounded storage anywhere | 4.2 closed `StorageBacking` + 4.6 aggregate | [storage_lifecycle §5.2](./storage_lifecycle_doctrine.md#52-the-storage-backing-is-bounded--the-closed-storagebacking-union), [resource_capacity](./resource_capacity_doctrine.md) |
 | 3.19 App consuming more storage than backing (MinIO & Pulsar) | 4.6 cumulative fold + 4.2 Growable gate | [resource_capacity](./resource_capacity_doctrine.md), [content_addressing](./content_addressing_doctrine.md), [pulsar_client](./pulsar_client_doctrine.md) |
 | 3.20 Pulsar topic w/o bounded/tiered/retained policy | 4.1 mandatory RetentionPolicy + size offload + 4.6 room-fit | [pulsar_client §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra), [resource_capacity](./resource_capacity_doctrine.md) |
@@ -581,6 +620,7 @@ Forecloses [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-manag
 | 3.24 Even/zero-server rke2 control plane (no etcd quorum) | 4.2 closed `Rke2Servers` union (no even/zero arm) | [cluster_topology](./cluster_topology_doctrine.md) |
 | 3.25 ML asset fetched/built at startup; unready or unlanded model | 4.2 closed `EngineRuntime` (no `Url` arm) + 4.3 `.ready`-gated `ArtifactRef` + 4.7 model↔engine relation | [content_addressing](./content_addressing_doctrine.md), [service_capability](./service_capability_doctrine.md) |
 | 3.26 Unverified environment promotion (promote→prod) | 4.3 evidence-gated `PromotionGate` handle | [release_lifecycle](./release_lifecycle_doctrine.md) |
+| 3.27 Schedulable-in-aggregate but unplaceable pod (atomic / GPU bin-packing) | 4.6 placement fold (witness bin-pack / growth envelope) | [resource_capacity §4.1](./resource_capacity_doctrine.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope), [cluster_topology](./cluster_topology_doctrine.md) |
 
 ---
 
@@ -614,7 +654,7 @@ Second worked example, the one the [§3.13](#313-a-compute-engine-incompatible-w
 case, and saying otherwise is dishonest.** `Σ demand ≤ capacity` ([§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)), `Σ(PV caps) ≤ backing` ([§3.18](#318-unbounded-storage-anywhere)),
 the store-size fold ([§3.19](#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)), the Pulsar room-fit ([§3.20](#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)), and the rke2 host-distinctness check ([§3.16](#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused)) are
 all **total decode-time rejections of constructible values** — because capacity is a *value*, not a type
-index, and Dhall has no dependent arithmetic to make `Σ ≤ cap` a statement about inhabitance ([§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked)). By
+index, and Dhall has no dependent arithmetic to make `Σ ≤ cap` a statement about inhabitance ([§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked)). By
 contrast, the grade-(1) "no constructor" examples are the topology *witnesses* ([§3.14](#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm) `LinuxHost`, [§3.15](#315-a-multi-node-kind-cluster-not-on-a-single-linux-host)
 one-host `Kind`), the *derived* toleration ([§3.22](#322-a-hand-authored-un-derived-toleration)), the mandatory-shape unions ([§3.20](#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle) non-optional
 `RetentionPolicy` + size offload, [§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy) `Growable` with no unbounded arm), and the CBOR-only payload codec
@@ -638,7 +678,7 @@ This document is normative catalog-and-technique doctrine only. Delivery sequenc
 validation gates are owned by [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md): the
 DSL and its illegal-state-unrepresentable contract land in **Phase 3** (a deliberately-illegal `.dhall` that
 fails to type-check is part of that phase's acceptance gate). The [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](#322-a-hand-authored-un-derived-toleration) capacity / topology /
-bounded-storage block and its [§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked)/[§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) techniques are the Phase-3 gate's added negative fixtures (with the
+bounded-storage block and its [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked)/[§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) techniques are the Phase-3 gate's added negative fixtures (with the
 multi-substrate and managed-EKS *positive* fixtures); their **runtime** residues distribute to the phases
 that own each substrate — the Pulsar two-ceiling offload in **Phase 4**, the Lima `LinuxHost` witness +
 host/VM capacity cross-check in **Phase 7**, live multi-node rke2/kind topology in **Phase 9**, and the
@@ -655,7 +695,7 @@ testing (Phase 11) phases. This doc never maintains a competing status ledger.
 - [Platform Services Doctrine](./platform_services_doctrine.md) — gateway / ingress / NetworkPolicy / cpu-ram
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — `SecretRef`-by-name, parent→child injection, tenant trust
 - [Substrate Doctrine](./substrate_doctrine.md) — substrate/arch capabilities for placement, node inventory + taints
-- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the [§4.6](#46-capacity-accounting-total-fold--σ-demand--capacity-checked) capacity fold ([§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)–[§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy))
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) capacity fold ([§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)–[§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy))
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) compute-engine/topology relation ([§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.16](#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused))
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — pointers→manifests→blobs totality, `EngineRuntime` / `ModelArtifact` tiers ([§3.25](#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model))
 - [Service Capability Doctrine](./service_capability_doctrine.md) — the engine as a substrate-selected capability ([§3.25](#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model))

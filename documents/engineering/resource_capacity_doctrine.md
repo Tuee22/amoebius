@@ -6,10 +6,11 @@
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the amoebius capacity model — the `Capacity` / `Demand` / `Budget`
-> types, the total *capacity-accounting fold* that rejects any deploy whose summed demand exceeds its
-> enclosing capacity (host → cluster/VM → workload, and storage), the closed `StorageBudget` union that makes
-> *unbounded* storage unrepresentable, and the `Growable` / `ScalingPolicy` escape valve that is the **only**
-> way a bounded budget grows.
+> types, the *capacity-accounting fold* that rejects any deploy with no feasible placement of its typed demands
+> against its enclosing capacity (a pod→node **witness** bin-pack for a fixed cluster, a growth **envelope** for
+> an elastic one, `Σ ≤ backing` for divisible storage; host → cluster/VM → workload), the closed `StorageBudget`
+> union that makes *unbounded* storage unrepresentable, and the `Growable` / `ScalingPolicy` escape valve that
+> is the **only** way a bounded budget grows.
 
 ---
 
@@ -18,13 +19,16 @@
 Raw Kubernetes lets you admit a Deployment that requests more memory than any node has, a StatefulSet whose
 volumes sum past the disk, or a cluster whose workloads out-total its nodes. Each is well-formed YAML; each
 surfaces at runtime as a `Pending` pod, an evicted workload, or a full disk. amoebius lifts that whole class
-to *does-not-decode*: a deploy is a **total fold** of typed demands compared against a single-owner capacity,
-and a fold that overflows returns `Left Overcommit` — the spec never reaches the interpreter.
+to *does-not-decode*: a deploy must produce a **feasible placement** of its typed demands against a
+single-owner capacity — a concrete pod→node witness for a fixed cluster, a sound growth envelope for an elastic
+one, and `Σ ≤ backing` for divisible storage — and a spec with no feasible placement returns `Left Overcommit`
+/ `Left Unschedulable` before it ever reaches the interpreter. The aggregate sum alone is *not* enough, because
+pods are atomic ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)).
 
 This document owns the *capacity arithmetic* and nothing else. It owns:
 
 1. The `Capacity` / `Demand` / `Budget` records and the refined non-zero `Quantity` they are built from ([§3](#3-the-types-quantity-capacity-demand-budget)).
-2. The total fold — `fits` / `carve` / `place` — and its nesting (host → cluster/VM → workload) ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)).
+2. The fold — `fits` / `podFits` / `carve` / `place` — the static-vs-elastic `place` branch, and the nesting (host → cluster/VM → workload) ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)).
 3. The closed `StorageBudget` union — no *unbounded* arm — and how each arm names its single ceiling owner
    ([§5](#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)).
 4. The `Growable` / `ScalingPolicy` escape valve: dynamic provisioning owned by amoebius, the only path by
@@ -36,7 +40,7 @@ advertises ([substrate_doctrine.md](./substrate_doctrine.md)), the per-volume ha
 ([platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)),
 the cloud quota ([pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md)), and the Pulsar topic retention
 ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)). Each number has exactly one owner elsewhere; this
-doc owns only the *sum-does-not-exceed* relation over them. The **catalog** of which capacity states are
+doc owns only the *placement / does-not-exceed* relation over them. The **catalog** of which capacity states are
 illegal and the technique that forecloses them is
 [illegal_state_catalog.md §3.17-§3.21 / §4.6](./illegal_state_catalog.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded); this doc is the normative home of
 the model that catalog names.
@@ -49,15 +53,27 @@ Everything below is **design intent for Phase 3** (the type discipline) with run
 
 ## 2. The load-bearing honesty limit: a capacity sum is a grade-2 check, never grade-1
 
-This is the most important sentence in the document, so it gets its own section. **`Σ demand ≤ capacity` is a
-grade-2 foreclosure — a total decode-time check — never a grade-1 uninhabitable-by-type proof.** Dhall (and
-the GADT-indexed Haskell it decodes into) has **no dependent arithmetic**: capacity is a *value*, not a type
-index, so "the sum fits" cannot be a statement about type inhabitance. It is a **total smart constructor / fold**
-that inspects a constructible value and rejects it (`Left Overcommit`) at decode. Per the three foreclosure
-grades ([illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-grades-of-foreclosure-and-the-honesty-they-force)),
+This is the most important sentence in the document, so it gets its own section. **A capacity check — whether
+the compute *placement witness* ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)) or the
+storage/retention `Σ demand ≤ capacity` — is a grade-2 foreclosure, a total decode-time check, never a grade-1
+uninhabitable-by-type proof.** Dhall (and the GADT-indexed Haskell it decodes into) has **no dependent
+arithmetic**: capacity is a *value*, not a type index, so neither "a feasible packing exists" nor "the sum fits"
+can be a statement about type inhabitance. Each is a **total smart constructor / fold** that inspects a
+constructible value and rejects it (`Left Overcommit` / `Left Unschedulable`) at decode. Per the three
+foreclosure grades ([illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-grades-of-foreclosure-and-the-honesty-they-force)),
 this is grade (2): a *spec-layer guarantee* (the spec never reaches the interpreter), but a *checked rejection*,
-not an absence of inhabitants. Any doc that calls a capacity sum "uninhabitable" is reporting the wrong grade,
+not an absence of inhabitants. Any doc that calls a capacity check "uninhabitable" is reporting the wrong grade,
 and this doc forbids that.
+
+**The compute placement is sound, not complete.** Optimal bin-packing is NP-hard, so `place`
+([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)) searches for a feasible pod→node assignment by a
+total heuristic (first-fit-decreasing) rather than an exhaustive optimum. The honesty this buys is
+one-directional: `place` may *reject* a spec that is in principle packable (a false `Left Unschedulable`), but
+it never *admits* one that is not — **soundness over completeness**, the correct trade when the whole point is
+"no runtime `Pending`." A rejected-but-packable spec is fixed by the operator declaring more headroom, never by
+the model quietly admitting an unplaceable workload. (Storage and retention `Σ` folds are genuine sums, not
+packings — volume bytes *are* divisible — so they carry no completeness caveat; the bin-pack is a
+**compute-only** upgrade, [§4](#4-the-total-fold-fits-carve-place-and-the-nesting).)
 
 The grade-1 pieces near capacity live elsewhere and are cited, not claimed here: the `StorageBudget` union
 having **no unbounded arm** ([§5](#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)) and the `Growable` union having **no bare-unbounded arm** ([§6](#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)) are grade-1
@@ -73,10 +89,10 @@ runtime cross-check the model *requires* (declared capacity ≤ real capacity) a
 ```mermaid
 flowchart TD
   spec[amoebius.dhall: declared capacities plus typed demands] -->|Dhall typecheck, well-formed| typed[Well-typed value with StorageBudget and Growable union shapes, grade 1]
-  typed -->|Gate 2 decode: total capacity fold| fold{Sum of demand at most capacity?}
-  fold -->|yes| ir[Coherent capacity-checked IR, grade 2 proven at decode]
-  fold -->|no| reject[Left Overcommit, rejected before any effect]
-  ir -->|reconcile| runtime[Live cluster: host caps, scheduler, autoscaler, quota]
+  typed -->|Gate 2 decode: placement witness or Sigma fold| fold{Feasible pod placement exists / growth envelope sound / Sigma within capacity?}
+  fold -->|yes| ir[Coherent capacity-checked IR plus placement witness, grade 2 proven at decode]
+  fold -->|no| reject[Left Overcommit or Left Unschedulable, rejected before any effect]
+  ir -->|reconcile| runtime[Live cluster: host caps, scheduler reproduces witness, autoscaler, quota]
   runtime -->|declared at most real capacity cross-check, and actual enforcement| grade3[Runtime residue owned by chaos_failover and testing, grade 3]
 ```
 
@@ -92,40 +108,68 @@ subtraction that must not underflow.
   `gpu` count). A zero or negative quantity is not constructible (the same refined-non-zero discipline the
   storage doctrine uses for PV sizes, [storage_lifecycle_doctrine.md §5](./storage_lifecycle_doctrine.md#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim),
   and platform services for cpu/ram, [platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)).
-- **`Capacity`** — what a *provider* offers: a record of `Quantity` per axis. A physical host advertises one
-  (from the substrate node inventory, [substrate_doctrine.md](./substrate_doctrine.md)); a VM carves a
-  sub-`Capacity` out of its host; a managed provider's node advertises the `Capacity` of its instance type;
-  a `StorageBacking` advertises a storage `Capacity` ([§5](#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)).
-- **`Demand`** — what a *consumer* needs: the same record shape. A container's cpu/ram request is a `Demand`;
-  a StatefulSet's volume claims are a storage `Demand`; a whole workload's `Demand` is the fold of its
-  containers and volumes; a VM's `Demand` on its host is the fold of everything the VM runs plus its own
-  overhead.
+  cpu and mem are **divisible** (fractional millicores/bytes, overcommittable at the limit); **`gpu` is an
+  indivisible `Count`** — a 2-GPU pod needs a single node with ≥2 *free* GPUs, no fractional or straddled
+  allocation. That indivisibility is exactly why the cluster fold is an integer bin-pack, not a sum
+  ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)).
+- **`Capacity`** — what a *provider* offers: a record of `Quantity` per axis, and it is the **allocatable**
+  (schedulable) capacity, **not** the raw hardware total — kube/system-reserved and the eviction threshold are
+  already netted out, so the fold never trusts a number larger than the scheduler can hand out ([§8](#8-where-the-numbers-come-from-declared-at-decode-cross-checked-at-runtime)). A
+  physical host advertises one (from the substrate node inventory,
+  [substrate_doctrine.md §8](./substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints)); a VM
+  carves a sub-`Capacity` out of its host; a managed provider's node advertises the `Capacity` of its instance
+  type; a `StorageBacking` advertises a storage `Capacity` ([§5](#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)).
+- **`Demand`** — what a *consumer* needs: the same record shape. Each container declares a **`Resources`** pair
+  — **`requests`** and **`limits`**, both `ResourceVec` (cpu/mem `Quantity`, optional `gpu` `Count`) — and it
+  is the **`requests`** vector that becomes the container's `Demand` and is summed by the fold, because
+  `requests` is what the scheduler reserves against allocatable. **`limits`** is carried but *never* summed by
+  `place`; it is the grade-3 cgroup ceiling (throttle/OOM) enforced at runtime, not a scheduling number. A
+  decode invariant holds per axis — **`requests ≤ limits`** (a limit below its request is itself an illegal
+  state, foreclosed here), and **`gpu` requires `requests == limits`** since an extended resource cannot be
+  overcommitted. A StatefulSet's volume claims are a storage `Demand`; a whole workload's `Demand` is the fold
+  of its containers' `requests` and volumes; a VM's `Demand` on its host is the fold of everything the VM runs
+  plus its own overhead.
 - **`Budget`** — a `Capacity` an owner is *allowed to consume against*, which may be a fixed cap or a
   quota-capped growable ([§5](#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm), [§6](#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)). `Budget` is where capacity meets the escape valve; `Capacity` is the raw
   number, `Budget` is the *policy-wrapped* number the fold checks against.
 
-`Demand` and `Capacity` share one record shape so the fold is defined once and reused at every layer.
+```
+Resources   = { requests : ResourceVec, limits : ResourceVec }   -- requests ≤ limits; gpu requests == limits
+ResourceVec = { cpu : Quantity, mem : Quantity, gpu : Optional Count }   -- storage is per-volume, not here
+```
+
+`Demand` and `Capacity` share one record shape (a `ResourceVec` per axis) so the fold is defined once and
+reused at every layer; the compute fold ranges over container `requests`, the storage fold over PV sizes.
 
 ---
 
 ## 4. The total fold: `fits`, `carve`, `place`, and the nesting
 
-Intuition: don't check "does this one pod fit a node" in isolation — **fold the whole demand of a scope and
-compare it once to that scope's capacity**, at every level of nesting, so overcommit is caught wherever it
-occurs.
+Intuition: an aggregate `Σ demand ≤ Σ capacity` is **necessary but not sufficient** for schedulability —
+because pods are **atomic and cannot straddle nodes**, a workload set can fit in aggregate yet have a single
+pod that fits no individual node (3 nodes × 4 CPU = 12 total admits a 5-CPU pod by the sum, but the pod is
+`Pending` forever). So the cluster-level check is not a sum but a **placement**: for a fixed node set, compute
+a concrete pod→node assignment (a witness); for an elastic node set, check a growth envelope the autoscaler can
+always satisfy. Only the single-owner *carves* below the cluster (a VM out of a host) stay pure subtractions.
 
-The fold is three total functions (grade-2 checked rejections, [§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-grade-2-check-never-grade-1)):
+The fold is four total functions (grade-2 checked rejections, [§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-grade-2-check-never-grade-1)):
 
 - **`fits :: Demand -> Capacity -> Either Overcommit Headroom`** — the leaf check: one demand against one
   capacity, returning the leftover headroom or `Left Overcommit` with the offending axis and magnitudes.
+- **`podFits :: Demand -> Node -> Bool`** — the per-pod placement primitive: one pod's `requests` against one
+  node's *allocatable* `Capacity` **and** that node's affinity/taint eligibility
+  ([illegal_state_catalog.md §3.5](./illegal_state_catalog.md#35-undeployable-pods-taints-tolerations--affinity)).
+  A pod that satisfies `podFits` on *no* eligible node (or, in the elastic case, no candidate instance type)
+  is `Left Unschedulable` immediately. This is the check the old aggregate sum omitted.
 - **`carve :: Capacity -> Demand -> Either Overcommit Capacity`** — allocate a sub-capacity (a VM out of a
   host, a namespace budget out of a cluster) by total subtraction; an underflow on any axis is
-  `Left Overcommit`.
-- **`place :: Topology -> [Workload] -> Either Overcommit Placement`** — the cluster-level fold: the summed
-  `Demand` of all workloads against the summed `Capacity` of the topology's nodes
-  ([cluster_topology_doctrine.md](./cluster_topology_doctrine.md) owns the topology; this doc owns the sum).
-  A workload's placement `Demand` includes its scheduling constraints so the fold composes with the
-  schedulability existence check ([illegal_state_catalog.md §3.5](./illegal_state_catalog.md#35-undeployable-pods-taints-tolerations--affinity)).
+  `Left Overcommit`. Carves are genuine subtractions: a VM reserves one contiguous slice of its host.
+- **`place :: Topology -> [Workload] -> Either PlacementError Placement`** — the cluster-level **feasibility
+  result**, not a sum. It branches on the topology's budget shape ([§4.1](#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope)):
+  a **fixed** node set yields a concrete `Placement` witness (bin-pack); an **elastic** node set yields a
+  proof that the growth envelope holds. `PlacementError` is `Overcommit | Unschedulable`.
+  ([cluster_topology_doctrine.md](./cluster_topology_doctrine.md) owns the `Topology`; this doc owns the
+  placement/envelope arithmetic over it.)
 
 The nesting is where the illegal states [§3.17](./illegal_state_catalog.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded) (I5/I6/I7) live:
 
@@ -134,14 +178,49 @@ The nesting is where the illegal states [§3.17](./illegal_state_catalog.md#317-
 - **Host → VM → guest.** A Lima/WSL2 VM `carve`s a sub-`Capacity` from its host; everything the VM runs then
   folds against *that* sub-capacity — nested budgets, so "a VM asking for more than its host" (I6) and "a
   guest asking for more than its VM" are the same relation at different depths.
-- **Cluster → workload.** The whole workload set `place`s against the topology capacity (I7). Because every
-  container declares cpu/ram ([platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram))
+- **Cluster → workload.** The whole workload set `place`s against the topology (I7) — a **bin-pack**, not a
+  sum ([§4.1](#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope)). Because every
+  container declares cpu/ram *requests* ([platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram))
   and every durable volume declares a hard-capped size ([storage_lifecycle_doctrine.md §5](./storage_lifecycle_doctrine.md#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim)),
-  the sum is exact, not a guess — this is the same soundness the cluster-lifecycle push-back relies on
+  the per-pod inputs are exact, not a guess — so the packing is over known integers, the same soundness the
+  cluster-lifecycle push-back relies on
   ([cluster_lifecycle_doctrine.md §6](./cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-global-dhall)).
 
 The fold is **total and re-runnable**: after any `Growable` policy grows a capacity ([§6](#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)) the fold re-runs
 against the new bound, so growth never silently invalidates an earlier check.
+
+### 4.1 `place` branches: static proves a placement, dynamic proves a growth envelope
+
+Intuition: a **fixed** node set is fully known at decode, so you can compute an actual packing and reject if
+none exists; an **elastic** node set has no nodes yet at decode, but the autoscaler removes the straddle
+problem — it can always add a right-sized node for a pending pod — so the sound check is a *growth envelope*,
+not a packing. `place` selects on the topology's budget shape ([§6](#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)):
+
+- **Fixed node set** (`Kind` with `replicas`, `Rke2` `servers` + statically-declared `agents`, any `Bounded`
+  budget) → **witness bin-pack.** `place` computes a concrete pod→node assignment by first-fit-decreasing,
+  honoring each node's allocatable `Capacity`, `podFits` eligibility (affinity/taints), and anti-affinity.
+  Success returns a `Placement` — a **witness** that a feasible schedule exists; failure returns
+  `Left Unschedulable`. Schedulability is proven **by construction of the witness**, sound-not-complete
+  ([§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-grade-2-check-never-grade-1)).
+- **Elastic node set** (`Autoscaled` agents, a `Managed Eks` node group up to a `CloudQuota`) → **two-envelope
+  check**, no witness (the nodes do not exist at decode):
+  1. **per-pod-fits-an-instance** — every pod `podFits` the *largest* instance type in the `ScalingPolicy`
+     candidate set ([§6](#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)); a pod larger than any candidate is unplaceable at *any* scale →
+     `Left Unschedulable`.
+  2. **aggregate-≤-quota** — the summed `Demand` at maximum scale ≤ the quota cap → else `Left Overcommit`.
+  If both hold, every pod fits *some* candidate instance and the total stays under quota, so the autoscaler can
+  always grow to place a pending pod. These two conditions are the *complete* schedulability story for the
+  elastic case, and the fold re-runs against the grown node set when the policy fires.
+- **Hybrid** (a fixed floor with elastic headroom — e.g. `Rke2` fixed servers + `Autoscaled` agents):
+  witness-bin-pack the workloads pinned to the fixed floor (notably host-backed StatefulSet ordinals, whose
+  node affinity already pins them, [storage_lifecycle_doctrine.md §4](./storage_lifecycle_doctrine.md#4-deterministic-pv-naming-and-the-explicit-bind));
+  everything beyond the floor must satisfy the elastic envelope.
+
+**The witness is a feasibility proof, not a universal pin.** `place` emits the placement so the reconciler
+*can* reproduce it, but pods are hard-pinned to nodes **only** where storage already pins them (host-backed
+ordinals, the hybrid case above); elsewhere the runtime scheduler is left free to reproduce an equivalent placement, so
+HA rescheduling after a node failure still works. Pinning every pod would defeat failover. That the scheduler
+*actually* reproduces a feasible placement is the grade-3 residue ([§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-grade-2-check-never-grade-1)).
 
 ---
 
@@ -256,15 +335,20 @@ against must be a **spec input** — you cannot type-check a demand against a nu
 So amoebius **declares** capacity in the spec and folds at decode (grade-2), then **cross-checks** the
 declaration against reality at reconcile (grade-3).
 
-- **Declared (grade-2).** Each host/node advertises a `Capacity` in the substrate node inventory
-  ([substrate_doctrine.md](./substrate_doctrine.md)); each cloud account declares a quota
-  ([pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md)); each `StorageBacking` declares its size. The [§4](#4-the-total-fold-fits-carve-place-and-the-nesting) fold
+- **Declared (grade-2).** Each host/node advertises an **allocatable** `Capacity` in the substrate node
+  inventory ([substrate_doctrine.md §8](./substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints)) —
+  the schedulable total with kube/system-reserved and the eviction threshold already netted out, *not* the raw
+  hardware figure; each cloud account declares a quota ([pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md));
+  each `StorageBacking` declares its size. The [§4](#4-the-total-fold-fits-carve-place-and-the-nesting) fold
   runs over these declared numbers at decode, so an over-committed spec never decodes.
-- **Cross-checked (grade-3).** A reconcile-time check refuses if the *real* probed capacity is **smaller**
-  than the declared `Capacity` (a host that claims 64 GiB but has 32 GiB), fail-closed like every other
+- **Cross-checked (grade-3).** A reconcile-time check refuses if the *real* probed **allocatable** capacity is
+  **smaller** than the declared `Capacity` (a host that claims 64 GiB allocatable but has 32, or a node whose
+  kubelet reserves more than declared), fail-closed like every other
   `Unreachable → refuse` observation ([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)).
-  This keeps the decode-time guarantee honest: the declaration is a *ceiling the fold trusts*, and reality is
-  required to be at least that generous or the deploy refuses. Detection of the real number is owned by
+  Comparing *allocatable* against *allocatable* is what keeps the guarantee honest: declaring raw capacity would
+  let the fold "prove" an overcommit-free cluster that still evicts once the kubelet's reservation is subtracted.
+  The declaration is a *ceiling the fold trusts*, and reality must be at least that generous or the deploy
+  refuses. Detection of the real number is owned by
   [substrate_doctrine.md §2](./substrate_doctrine.md#2-detection-a-pure-classification-over-three-reads);
   this doc owns only the requirement that the cross-check exist and its grade.
 
@@ -290,7 +374,7 @@ To keep SSoT boundaries crisp:
 | Cloud quota provisioning; dynamic node provisioning enaction; per-PV EBS | [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) |
 | The Pulsar topic-lifecycle policy (retention, size-triggered offload, backlog quota) | [pulsar_client_doctrine.md §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra) |
 | The content-addressed MinIO store as a storage backing | [content_addressing_doctrine.md](./content_addressing_doctrine.md) |
-| Which capacity states are illegal and the [§4.6](./illegal_state_catalog.md#46-capacity-accounting-total-fold--σ-demand--capacity-checked) technique that forecloses them | [illegal_state_catalog.md](./illegal_state_catalog.md) |
+| Which capacity states are illegal and the [§4.6](./illegal_state_catalog.md#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) technique that forecloses them | [illegal_state_catalog.md](./illegal_state_catalog.md) |
 | Runtime enforcement (host actually caps, scheduler places, autoscaler grows, quota holds) | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), [testing_doctrine.md](./testing_doctrine.md) |
 | Capacity/scaling as a deployment-rules surface, never app logic | [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md) |
 
@@ -310,7 +394,7 @@ links back for status, per [documentation_standards.md §6](../documentation_sta
 ## Cross-references
 
 - [Engineering Doctrine Index](./README.md)
-- [Illegal State Catalog](./illegal_state_catalog.md) — the catalog ([§3.17](./illegal_state_catalog.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)-[§3.21](./illegal_state_catalog.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)) and technique ([§4.6](./illegal_state_catalog.md#46-capacity-accounting-total-fold--σ-demand--capacity-checked)) this model realizes
+- [Illegal State Catalog](./illegal_state_catalog.md) — the catalog ([§3.17](./illegal_state_catalog.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)-[§3.21](./illegal_state_catalog.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)) and technique ([§4.6](./illegal_state_catalog.md#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked)) this model realizes
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the `ComputeEngine` / `Topology` the fold ranges over; owns the `Rke2Servers` quorum + `agents` pools ([§2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)/[§4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction)) that [§6](./cluster_topology_doctrine.md#6-where-topology-meets-capacity-and-lifecycle) scales agents-only
 - [Substrate Doctrine](./substrate_doctrine.md) — the node inventory + per-host capacity numbers
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — per-volume sizing + the `StorageBacking` union

@@ -232,7 +232,7 @@ flowchart TD
   configurable and govern *whether* push-back fires. Because every container
   declares explicit CPU and RAM ([platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)),
   the capacity arithmetic — "does the surviving forest have room for what C was running?" — is sound rather
-  than guesswork; that arithmetic is the same [§4.6](./illegal_state_catalog.md#46-capacity-accounting-total-fold--σ-demand--capacity-checked) capacity-accounting fold owned by
+  than guesswork; that arithmetic is the same [§4.6](./illegal_state_catalog.md#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) capacity-accounting fold owned by
   [resource_capacity_doctrine.md](./resource_capacity_doctrine.md).
 - **Same fail-closed posture as the reconciler.** Refusing-by-default on an unsatisfiable spec is the
   lifecycle analogue of the [§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) `Unreachable → refuse` rule: a state the system cannot safely reach is

@@ -18,3 +18,20 @@ x semantics for full pulsar topic lifecycle management, including teired storage
 Jul 4 review
 
 - documentation seems a little too colloquial at points "The instinct from a decade of bash and Helm templating is to put the how in the config" this overly dramatizes the problem it seeks to solve 
+
+
+a cluster is the consistency boundary--good. but in jitML it is impossible to reperesent inference with an untrained model. and a trained model is an artefact guaranteed to be reproducible, even though it is only reproducible on similar hardware. does that mean each cluster must train its own models, since that is the consistency boundary ? does that mean 
+
+- have we made it impossible to represent deployment readiness races. we don't want arbitrary wait periods till a port becomes responsive, we want event driven sequences 
+
+- how does a new dhall get implemented or unlock keys provided in the root node ? does the project binary provide a thin cli tool to interact with the amoebius daemon api or something else ?
+
+- to what extent does prodbox need to be kept in alignment with amoebius doctrine ? should infernix/jitML be migrated to hostbootstrap before amoebius ? is daemon-substrate still worth doing ?
+
+- when the host daemon is bootstrapping a cluster, what is the exact sequence, and handoff of control to the cluster daemon ? 
+
+why not have the host daemon have it's own rest unseal endpoint, reachable by nodeport, which takes the password and performs the remaining steps ? the main shape we want here is that the host binary only directly interacts with the cluster and k8s control plane during initial bootstrap, including deploying the host daemon. once all services are up and running (even before vault init) all further interactions occur through the prodbox-daemon service, a nodeport
+
+- are we fully leveraging pulsar to avoid race conditions and cluster-level leadership elections more robustly handled by pulsar ?
+
+- would it make sense to build and validate / simulate the entire dsl before implementing anything else ?

@@ -347,10 +347,13 @@ that the rest of amoebius reads. It is the **single owner** (an ownership index,
 *which hosts/substrates exist*, *how much each host advertises*, and *which taints a node carries*. Three
 consumers read it, and each is a foreclosure that depends on there being exactly one such list.
 
-- **Per-host `Capacity`.** Each host entry advertises a declared `Capacity` (cpu/mem/storage/gpu). This is the
-  number the capacity fold ([resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)) checks a
-  workload/VM/engine `Demand` against, and the number the detection classifier ([§2](#2-detection-a-pure-classification-over-three-reads)) cross-checks against
-  reality at runtime (the declared value is a ceiling the fold trusts; a host smaller than its declaration
+- **Per-host `Capacity` (allocatable).** Each host entry advertises a declared `Capacity` (cpu/mem/storage/gpu),
+  and it is the **allocatable** (schedulable) capacity — the raw hardware total with kube/system-reserved and
+  the eviction threshold already netted out — **not** the raw figure, so the fold never trusts more than the
+  scheduler can hand out. This is the number the capacity fold ([resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting))
+  packs a workload/VM/engine `Demand` against, and the number the detection classifier ([§2](#2-detection-a-pure-classification-over-three-reads)) cross-checks against
+  reality at runtime — *allocatable against allocatable* (the declared value is a ceiling the fold trusts; a
+  host whose real allocatable is smaller than its declaration
   refuses, [resource_capacity_doctrine.md §8](./resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-at-decode-cross-checked-at-runtime)). Detection reads the *real*
   numbers; the inventory *declares* them; the fold trusts the declaration and the reconcile checks it.
 - **A closed `NodeTaintKind` set.** Taints are not free strings — the set of taint kinds a node may carry is a
