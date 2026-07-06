@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: The single source of truth for the catalog of illegal and unsafe cluster states amoebius
@@ -781,6 +781,29 @@ to the sanctioned `Readiness`-typed surface, not the whole `IO` monad — a raw 
 out by the [`daemon_topology_doctrine.md` §6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine) ban, a
 `runtime-checked` discipline.)*
 
+### 3.42 An admin mutation without a root-token capability + an unsealed-Vault witness
+
+Raw k8s hands anyone with a kubeconfig a mutating control surface — a new manifest, a config change — with no
+proof of authority beyond the cert, and no ordering against secret readiness. amoebius routes **all
+post-bootstrap admin through the elected singleton's REST API** ([`bootstrap_sequence_doctrine.md` §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api)),
+and the mutating endpoint (`dhall update`) is constructed **only** from a `RootToken` capability **and** an
+`Unsealed`-Vault witness — so "push a new spec to an unsealed-less or unauthenticated cluster" has no
+constructor, the same capability + edge-gated-handle discipline as the `PromotionGate`
+([§3.26](#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence)) and the
+`Readiness` edge ([§3.41](#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race)). Its sibling
+— an admin action **bypassing** the singleton — is foreclosed too: channel 1 (host binary ↔ kube-apiserver) is
+a **bootstrap-only** privilege with no exported control verb after the host-daemon→singleton handoff, so the
+only control-surface constructor is an admin-REST call. **Owner:**
+[`bootstrap_sequence_doctrine.md`](./bootstrap_sequence_doctrine.md) (the admin control plane) +
+[`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) (the
+unsealed-Vault precondition). **Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
+(the `RootToken` capability — an admin verb has no inhabitant without it) + [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
+(a `dhall update` handle exists only once its `Unsealed`-Vault edge does; channel-1 verbs do not survive the
+handoff transition). **Layer:** `type-foreclosed` for the cap-and-witness-gated mutation and the retired
+channel-1 verb; `runtime-checked` residue — that the elected singleton actually holds *sole* authority
+(no split-brain admin), owned by [`daemon_topology_doctrine.md` §5](./daemon_topology_doctrine.md#5-leadership-election--the-mechanism-the-proof-lives-elsewhere)
+and [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md).
+
 ---
 
 ## 4. The typing techniques
@@ -972,6 +995,7 @@ Forecloses [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-manag
 | 3.39 Split-`Site` etcd quorum | 4.3 phantom-`Site` unification + 4.7 servers collection | [cluster_topology](./cluster_topology_doctrine.md), [substrate](./substrate_doctrine.md) |
 | 3.40 Secure-gateway reach collapsing into wild ingress | 4.2 `ExposeToWild` capability + 4.3 distinct endpoint indices | [network_fabric](./network_fabric_doctrine.md), [host_cluster_comms](./host_cluster_comms_doctrine.md) |
 | 3.41 Duration-gated / hand-ordered bring-up (readiness race) | 4.2 no-duration `Readiness` union + 4.3 derived readiness edge + 4.4 dep-graph owner + 4.6 `mkBringUpOrder` fold | [readiness_ordering](./readiness_ordering_doctrine.md), [platform_services §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering) |
+| 3.42 Admin mutation without root-token cap + unsealed-Vault witness | 4.2 `RootToken` capability + 4.3 `Unsealed`-edge-gated `dhall update` handle (channel-1 verb retired at handoff) | [bootstrap_sequence](./bootstrap_sequence_doctrine.md), [vault_pki §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) |
 
 ---
 
@@ -1055,6 +1079,7 @@ testing (Phase 11) phases. This doc never maintains a competing status ledger.
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md) — the host-local NodePort carve-out
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md) — the runtime-enforcement proof (the honest limit)
 - [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§3.41](#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race) the readiness race foreclosed (readiness is an edge, not a wait)
+- [Bootstrap Sequence Doctrine](./bootstrap_sequence_doctrine.md) — [§3.42](#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness) the admin control plane; an unauthenticated/unsealed admin mutation foreclosed
 - [Engineering Doctrine Index](./README.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

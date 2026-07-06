@@ -72,6 +72,10 @@ the sibling **prodbox** project — that is prior-art evidence, not amoebius pro
 - [`cluster_lifecycle_doctrine.md` §1 — Two cluster kinds, one lifecycle shape](../documents/engineering/cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape):
   this phase documents bootstrap, amoebic spawning, teardown-with-cleanup vs chaos-failover, and push-back on
   unsatisfiable `.dhall`.
+- [`readiness_ordering_doctrine.md` §1 — Why this doctrine exists](../documents/engineering/readiness_ordering_doctrine.md#1-why-this-doctrine-exists):
+  this phase documents event-driven bring-up sequencing — a dependent starts on a dependency's observed
+  readiness edge, never an elapsed duration — with the honest limit that the spec forecloses the sequence
+  shape, not the port's liveness.
 - [`substrate_doctrine.md` §1 — The substrate is a fact about the host, not a knob](../documents/engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob):
   this phase specifies substrate detection, virtualized substrates, and the no-env/no-`PATH` lazy
   tool-ensure contract.
@@ -205,16 +209,18 @@ The whole sprint.
 **Implementation**: `documents/engineering/platform_services_doctrine.md`,
 `documents/engineering/storage_lifecycle_doctrine.md`,
 `documents/engineering/cluster_lifecycle_doctrine.md`,
+`documents/engineering/readiness_ordering_doctrine.md`,
 `documents/engineering/substrate_doctrine.md`,
 `documents/engineering/image_build_doctrine.md`,
 `documents/engineering/manifest_generation_doctrine.md` (target documentation files; not yet complete)
 **Blocked by**: Sprint 0.1
-**Independent Validation**: lint the six platform/cluster docs together — manifest generation owns the
+**Independent Validation**: lint the seven platform/cluster docs together — manifest generation owns the
 render/reconcile model, platform-services owns the standard-service inventory, and no doc restates another's
 normative content.
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`,
 `documents/engineering/storage_lifecycle_doctrine.md`,
-`documents/engineering/cluster_lifecycle_doctrine.md`, `documents/engineering/substrate_doctrine.md`,
+`documents/engineering/cluster_lifecycle_doctrine.md`, `documents/engineering/readiness_ordering_doctrine.md`,
+`documents/engineering/substrate_doctrine.md`,
 `documents/engineering/image_build_doctrine.md`,
 `documents/engineering/manifest_generation_doctrine.md`, `documents/engineering/README.md`
 
@@ -391,8 +397,8 @@ The whole sprint.
 - `documents/engineering/dsl_doctrine.md`, `app_vs_deployment_doctrine.md`, `illegal_state_catalog.md`,
   `service_capability_doctrine.md` — authored in Sprint 0.2.
 - `documents/engineering/platform_services_doctrine.md`, `storage_lifecycle_doctrine.md`,
-  `cluster_lifecycle_doctrine.md`, `substrate_doctrine.md`, `image_build_doctrine.md`,
-  `manifest_generation_doctrine.md` — authored in Sprint 0.3.
+  `cluster_lifecycle_doctrine.md`, `readiness_ordering_doctrine.md`, `substrate_doctrine.md`,
+  `image_build_doctrine.md`, `manifest_generation_doctrine.md` — authored in Sprint 0.3.
 - `documents/engineering/vault_pki_doctrine.md`, `pulumi_iac_doctrine.md`, `daemon_topology_doctrine.md`,
   `host_cluster_comms_doctrine.md`, `pulsar_client_doctrine.md`, `content_addressing_doctrine.md` — authored
   in Sprint 0.4.

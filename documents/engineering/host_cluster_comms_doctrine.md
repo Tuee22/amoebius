@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define exactly how the host amoebius binary and any host-level worker daemons talk to the
@@ -115,6 +115,18 @@ Concretely:
 No WebSockets anywhere: the daemon speaks the native Pulsar TCP binary protocol via the shared
 `amoebius-pulsar` client, which is a locked invariant of
 [pulsar_client_doctrine.md](./pulsar_client_doctrine.md).
+
+**This is a workload-plane rule, not an admin-plane one.** [§1](#1-the-whole-surface-two-channels-both-localhost-only)'s
+two channels and this section's "coordination *is* Pulsar + MinIO, no bespoke RPC" govern the
+**worker/workload** plane — host compute daemons, and the host binary when it *coordinates* with workers.
+They do **not** govern the **operator admin control plane**: administering the cluster's own configuration
+(Vault init/unseal, delivering a new `.dhall`) is a *control* concern, not worker coordination, and rides a
+distinct authenticated REST channel — the operator CLI → the amoebius NodePort service → the elected
+singleton — owned by [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api).
+That channel is privileged, not wild (so it is not a Keycloak bypass, [§1](#1-the-whole-surface-two-channels-both-localhost-only)),
+and channel 1 ([§4](#4-channel-1--the-host-binary--kube-apiserver-via-distro-mtls)) is retired to
+bootstrap-only once it takes over. The "no bespoke channel" verdict here is about the *bulk worker wire*, which
+this doc still owns in full.
 
 ---
 

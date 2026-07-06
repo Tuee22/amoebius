@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/illegal_state_catalog.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for how amoebius sequences bring-up — a dependent starts on a
@@ -241,6 +241,7 @@ states the target shape and links back for status.
 - [Engineering Doctrine Index](./README.md)
 - [Illegal State Catalog](./illegal_state_catalog.md) — [§3.41](./illegal_state_catalog.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race) the readiness race as a foreclosed illegal state; [§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)/[§6](./illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) the load-bearing limit and the three layers
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — [§2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap) init-follows-readiness, [§9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) the reconciler that enacts every edge
+- [Bootstrap Sequence Doctrine](./bootstrap_sequence_doctrine.md) — [§4](./bootstrap_sequence_doctrine.md#4-the-host-daemon--singleton-handoff) consumes the [§5](#5-the-bootstrap-tier-local-observed-witnesses-never-timers) handoff trigger (`/readyz` + election-commit) as the host-daemon→singleton gate
 - [Platform Services Doctrine](./platform_services_doctrine.md) — [§11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering) the derived bring-up DAG
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — [§4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) ready-before-consumer / fail-closed
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine) the daemon spine forbids `threadDelay`/`sd_notify`/marker probes

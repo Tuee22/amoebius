@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for amoebius cluster bring-up and teardown across kind / rke2 / provider clusters — bootstrap, recursive **amoebic spawning**, graceful teardown-with-cleanup versus chaos-failover, push-back on an unsatisfiable global `.dhall`, dynamic node provisioning, and ephemeral spin-up/down with deterministic rebind.
@@ -103,12 +103,14 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
   gate. A **co-located** agent (same `Site` as the servers) keeps the plain
   [§11](#11-rke2-rollout-as-a-reconcile) `server:` URL + token join with no added precondition.
 
-> **Open question.** The shape of the bootstrap config and first-manifest delivery: one candidate is a
-> transient `bootstrap.dhall` the binary consumes and then deletes once bring-up completes; and whether the
-> initial amoebius manifest is embedded directly in that bootstrap config or supplied separately after the
-> kernel is up remains undecided. This is now scoped to the **root** bootstrap config only: every deeper
-> **child-frame** config is delivered by in-place `stdin` streaming rather than a persistent file, per
-> [dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness).
+> **Resolved — the bootstrap sequence.** The shape of the root bootstrap config + first-manifest delivery is
+> owned by [bootstrap_sequence_doctrine.md §3](./bootstrap_sequence_doctrine.md#3-the-ordered-bootstrap-sequence):
+> the initial in-force manifest is supplied **separately**, via the admin control plane's `dhall update`
+> **after** the singleton is up (never embedded in the igniter config), and the transient root config is the
+> binary-sibling `.dhall` `bootstrap.sh` establishes. Every deeper **child-frame** config is delivered by
+> in-place `stdin` streaming rather than a persistent file, per
+> [dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness). (Whether the
+> root may ever be **multi-node** remains the one open sub-question, [§2](#2-bring-up-and-bootstrap) above.)
 
 ---
 

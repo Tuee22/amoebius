@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the one amoebius binary's three runtime contexts (CLI / sudo host-daemon / in-cluster pod) and its daemon role taxonomy — exactly one elected control-plane singleton with total authority over the cluster and its secrets, plus N unelected worker daemons — and the shape (not the proof) of the leadership election that picks the singleton.
@@ -171,6 +171,11 @@ one replica":
   surface — the public DNS record for the cluster gateway (route53), *ordered* by the claim/yield discipline
   of [§5](#5-leadership-election--the-mechanism-the-proof-lives-elsewhere) (an ordering + signed-audit gate,
   **not** a resource-side fence — [§5.3](#53-ownership-transitions-and-the-single-writer-gate)).
+- **Admin-surface authority.** After the host-daemon→singleton handoff, the singleton is the **sole control
+  surface**: the operator CLI drives the cluster only through the singleton's **admin REST API**
+  (`vault init/unseal`, `dhall update`) over the amoebius NodePort, and the host binary's channel-1
+  kube-apiserver access is retired to **bootstrap-only** — the sequence, the handoff, and the admin plane are
+  owned by [bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api).
 - **Secret authority.** The singleton is the in-cluster principal that **operates Vault** — it is the only
   role that holds cluster-wide secret authority. The Vault *model* it operates — fail-closed unseal, the
   root password-encrypted unseal, the parent-injects-secrets-into-the-child's-Vault contract, the root PKI
