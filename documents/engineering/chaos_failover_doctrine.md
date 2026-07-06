@@ -259,6 +259,11 @@ flowchart TD
   invariant, generalized** from "owns the public DNS record" to "owns the whole cluster and its secrets"
   ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected)). It is a genuine cross-actor invariant
   no system off the shelf provides, so it earns the full Extract → Model → Inject treatment (Appendix A).
+  *Why* no system provides it is precise and load-bearing: the authority is exercised as **external side
+  effects** — route53 and Vault — that validate no broker epoch, so even Pulsar's purpose-built
+  exclusive-producer fence ([daemon_topology_doctrine.md §5.5](./daemon_topology_doctrine.md#55-pulsar-primitives-evaluated-for-the-election--and-why-the-custom-election-stays))
+  cannot discharge it. This external single-writer invariant is the irreducible First-Axis core; it is **not**
+  among the delegated intra-cluster consensus of Fact one.
 - **Second Axis — the async cross-cluster boundary.** Across clusters, geo-replication is asynchronous and
   the gateway can fail over from one cluster to another. *This* is where the genuinely new, hard amoebius
   obligation lives — the boundary no single system proves end-to-end, the one this doctrine flags as genuinely
@@ -913,9 +918,17 @@ silently violates under partition. Build the first kind. Write down which kind y
 replica count; at `replicas=1` the sole candidate self-elects — the degenerate single-rank instance, not a
 special-cased dev path) must keep **exactly one active singleton** holding total cluster + secret authority.
 The candidates share no in-memory state; they coordinate only through the **coordination plane: Pulsar
-(native binary protocol, no WebSockets) for the live event stream + MinIO for durable log segments + a
-signed, hash-chained, append-only commit log** (`claim` / `yield` / `heartbeat` / domain events, merged
-idempotently by event hash). The externally-visible effect is the cluster gateway's DNS A record (route53).
+(native binary protocol, no WebSockets) for the live event stream, Pulsar's tiered/retained topic lifecycle
+(offloading to MinIO/S3) for durable retention, and a signed, hash-chained, append-only commit log**
+(`claim` / `yield` / `heartbeat` / domain events, merged idempotently by event hash), with the current-state
+projection materialized as a compacted-topic **TableView** — a read-model only, computing no ownership
+([daemon_topology_doctrine.md §5.1, §5.5](./daemon_topology_doctrine.md#51-the-coordination-plane-pulsar--minio--the-commit-log)). Crucially the availability-first
+isolation failsafe reads *nothing* — it fires on the *absence* of fresh peer heartbeats — so the election
+stays sound even when its own broker is down (the bootstrap/DR independence that keeps it a custom, not a
+Pulsar-native, election). The externally-visible effects are the cluster gateway's DNS A record (route53) and,
+via the fused secret authority ([daemon_topology_doctrine.md §3.2](./daemon_topology_doctrine.md#32-what-total-authority-over-the-cluster-and-its-secrets-cashes-out-to)), Vault — and **no Pulsar primitive
+can fence either** (they validate no broker epoch), which is exactly why this invariant is amoebius's own to
+prove.
 The invariant: **at most one daemon exercises singleton authority — once views have converged.** That
 conditional clause is load-bearing (R7). It meets the [§2](#2-when-this-applies--the-gate) gate.
 
@@ -982,14 +995,19 @@ than corrupting the ordering.
 (decision layer), and the modeled safety/liveness properties (for the model, at scope). *Tested* — the
 partition and kill-mid-claim scenarios. *Assumed* — the clock-skew premise (R8), model↔code refinement, and
 behaviour above scope. **For amoebius today, all of this is UNVERIFIED pending Phases 3 and 9;** the prodbox
-analogues are evidence, not amoebius proof.
+analogues are evidence, not amoebius proof. The compacted-topic/TableView read-model
+([daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#51-the-coordination-plane-pulsar--minio--the-commit-log)) adds **no** new ledger row: it is a
+projection whose authority is the ownership fold, and a bounded-retention *uncompacted* signed audit trail is
+retained beside it, so compaction's per-key discard does not erode the hash-chain tamper-evidence under
+amoebius's crash/omission threat model — the swap is proof-neutral, not a laundered assumption.
 
 **Appendix A rests on doctrine (zero orphans).**
 
 | Claim / mechanism | Doctrine home it instantiates |
 |---|---|
 | Ranked candidates, HA chart, `replicas=1` self-elect | [daemon_topology_doctrine.md §3, §5](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected); [platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1) |
-| Coordination plane: Pulsar + MinIO + signed commit log | [daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#51-the-coordination-plane-pulsar--minio--the-commit-log); R1 |
+| Coordination plane: Pulsar live stream + tiered/MinIO retention + signed commit log; compacted-topic TableView read-model (projection only) | [daemon_topology_doctrine.md §5.1, §5.5](./daemon_topology_doctrine.md#51-the-coordination-plane-pulsar--minio--the-commit-log); R1 |
+| External route53/Vault effects unfenceable by any Pulsar primitive; availability-first bounded self-healing | [daemon_topology_doctrine.md §3.2, §5.3](./daemon_topology_doctrine.md#32-what-total-authority-over-the-cluster-and-its-secrets-cashes-out-to); R7 |
 | Pure `decide` + `may-act` log-fold; typed-unknown scoping | [§8](#8-move-i--extract-make-the-decision-a-value) (convergent-log fold); [§8](#8-move-i--extract-make-the-decision-a-value) typed-unknown |
 | Stale-heartbeat coercion licensed for liveness only | [§8](#8-move-i--extract-make-the-decision-a-value) typed-unknown scoping |
 | Availability-first; bounded self-healing split | R7 |

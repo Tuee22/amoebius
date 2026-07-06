@@ -168,8 +168,9 @@ one replica":
   reconciler that owns bring-up, spawn, dynamic node provisioning, and teardown — owned by
   [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine), which names this doc as the owner of
   *who runs* that loop. It is also the single writer of the cluster's one canonical mutable external
-  surface — the public DNS record for the cluster gateway (route53), gated by the claim/yield discipline of
-  [§5](#5-leadership-election--the-mechanism-the-proof-lives-elsewhere).
+  surface — the public DNS record for the cluster gateway (route53), *ordered* by the claim/yield discipline
+  of [§5](#5-leadership-election--the-mechanism-the-proof-lives-elsewhere) (an ordering + signed-audit gate,
+  **not** a resource-side fence — [§5.3](#53-ownership-transitions-and-the-single-writer-gate)).
 - **Secret authority.** The singleton is the in-cluster principal that **operates Vault** — it is the only
   role that holds cluster-wide secret authority. The Vault *model* it operates — fail-closed unseal, the
   root password-encrypted unseal, the parent-injects-secrets-into-the-child's-Vault contract, the root PKI
@@ -183,6 +184,18 @@ cluster" enforceable: there is never a moment when two daemons both believe they
 or mint its secrets. *That* this fusion is safe — that the election never produces two simultaneous active
 singletons — is a correctness obligation, not something this section asserts; see [§5](#5-leadership-election--the-mechanism-the-proof-lives-elsewhere) and the honesty note
 there.
+
+**The external single-writer invariant is amoebius's own — not delegated.** Both authorities above are
+exercised as **external side effects** — route53 DNS writes and Vault operations — that live *outside* the
+coordination plane. The "intra-system consensus is delegated, not re-proved" posture ([§4](#4-worker-daemons--n-unelected))
+covers the *internal* plane (Pulsar / MinIO / Postgres do their own consensus); it does **not** reach these
+external effects. No Pulsar primitive — not even exclusive-producer fencing
+([§5.5](#55-pulsar-primitives-evaluated-for-the-election--and-why-the-custom-election-stays)) — can fence a
+route53 or Vault write, because those resources do not validate a broker epoch. So *exactly one route53
+writer / exactly one Vault operator* is an **irreducibly amoebius** obligation, discharged by the election
+plus the availability-first bounded self-healing posture of [§5.3](#53-ownership-transitions-and-the-single-writer-gate) / [§5.4](#54-the-safety-boundary-stated-honestly),
+and modeled as a **First-Axis** proof obligation ([chaos_failover_doctrine.md](./chaos_failover_doctrine.md) Appendix A) —
+never a Second-Axis obligation and never a delegated one.
 
 ---
 
@@ -207,7 +220,9 @@ Properties shared by all workers:
   ([platform_services_doctrine.md §6, §8](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox)). A Pulsar topic-lifecycle
   coordinator that needs single-consumer semantics gets it from Pulsar's subscription model and the
   at-least-once + dedup discipline ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)), not from a
-  bespoke amoebius election.
+  bespoke amoebius election. (This delegation covers the *internal* coordination plane only; the control-plane
+  singleton's *external* single-writer authority — route53 / Vault — is **not** delegated and no Pulsar
+  primitive discharges it, [§3.2](#32-what-total-authority-over-the-cluster-and-its-secrets-cashes-out-to).)
 - **HA like everything else.** A worker Deployment runs the HA chart at a configurable replica count, even
   at `replicas=1` ([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1)). Every worker
   container declares explicit CPU and RAM ([platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)).
@@ -314,6 +329,15 @@ is **not** a second trainer on the same feed — a Continuous run is single-clus
 First-Axis coordinator); other clusters **serve by replication** of the immutable checkpoints, never train a
 second authority on the feed.
 
+**Why this reuse stops at the singleton.** The trainer's commit point is **CAS-fenceable at MinIO and
+confluent** — a monotone `AdvancePredicate` absorbs a bounded two-writer overlap without corrupting HEAD
+([content_addressing_doctrine.md §2](./content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers), [§5](./content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)).
+The control-plane singleton's authority — route53 and Vault ([§3.2](#32-what-total-authority-over-the-cluster-and-its-secrets-cashes-out-to)) — is **non-confluent and
+not CAS-fenceable**: there is no monotone join that makes two DNS writers safe. So §4.3's "delegate liveness
+to a subscription, safety to CAS" pattern reuse **stops at the external boundary** and does *not* license
+folding the singleton election into the same delegation
+([§5.5](#55-pulsar-primitives-evaluated-for-the-election--and-why-the-custom-election-stays)).
+
 ---
 
 ## 5. Leadership election — the mechanism (the proof lives elsewhere)
@@ -333,12 +357,36 @@ lifted directly from the prodbox gateway daemon
 by their emitter**, merged **idempotently by event hash** (`appendIfNew`), and ownership is derived from the
 unique event set. The event classes carry over: `heartbeat`, `claim`, `yield`, and domain events.
 
-The one deliberate change from prodbox: **transport.** Prodbox kept its commit log as an in-memory
-anti-entropy gossip log pushed over signed HTTP between gateway peers. amoebius lifts the *same event and
-ownership discipline* onto the standard platform backbone — **Pulsar** for the live event stream (native
-TCP binary protocol, **no WebSockets** — [pulsar_client_doctrine.md](./pulsar_client_doctrine.md)) and
-**MinIO** for durable log segments. This keeps the idempotent-by-hash, signed, hash-chained contract while
+The deliberate changes from prodbox are **transport** and **read-model.** Prodbox kept its commit log as an
+in-memory anti-entropy gossip log pushed over signed HTTP between gateway peers. amoebius lifts the *same
+event and ownership discipline* onto the standard platform backbone — **Pulsar** for the live event stream
+(native TCP binary protocol, **no WebSockets** — [pulsar_client_doctrine.md](./pulsar_client_doctrine.md))
+and Pulsar's own **bounded/tiered/retained topic lifecycle**
+([pulsar_client_doctrine.md §6.1](./pulsar_client_doctrine.md#61-topic-storage-lifecycle-bounded-tiered-retained--and-the-hot-tier-never-overflows))
+for durable retention (offloading to **MinIO/S3** as the cold tier) — retiring prodbox's bespoke,
+hand-managed durable-segment carry. This keeps the idempotent-by-hash, signed, hash-chained contract while
 reusing systems that already do their own consensus.
+
+**The current-state read-model is a compacted topic + TableView (adopted — [§5.5](#55-pulsar-primitives-evaluated-for-the-election--and-why-the-custom-election-stays)).**
+The *projection* the election reads — the latest `heartbeat`/`claim`/`yield` per candidate, and the resolved
+singleton identity that workers consume — is materialized natively as a **log-compacted topic read through a
+Pulsar TableView**, replacing the hand-written fold that derived the current-state map from the signed event
+log (the `appendIfNew`-merged log above is retained as the audit trail — third guard). This is a plumbing
+simplification, not a change of authority, held safe by three guards:
+
+- **Ownership stays custom.** A TableView yields only `key → latest value`; *who leads* remains the
+  deterministic ownership fold + log gate ([§5.2](#52-the-ranked-failover-rule), [§5.3](#53-ownership-transitions-and-the-single-writer-gate)),
+  which a TableView neither computes nor is trusted to.
+- **The failsafe needs no read-model.** The availability-first isolation-timeout self-candidacy
+  ([§5.2](#52-the-ranked-failover-rule), [§5.4](#54-the-safety-boundary-stated-honestly)) fires on the *absence* of fresh peer heartbeats and reads
+  nothing — so cold-start and Pulsar-DR election never depend on a live compacted topic/TableView. This is
+  the same bootstrap/DR-independence that keeps the election custom at all
+  ([§5.5](#55-pulsar-primitives-evaluated-for-the-election--and-why-the-custom-election-stays)); the compacted read-model is a **steady-state layer only.**
+- **Tamper-evidence is retained.** Compaction discards superseded per-key entries, so the compacted topic is
+  not an audit trail. A separate **bounded-retention, uncompacted, signed** ownership-event topic is kept
+  beside it, so the hash-chained signed history survives regardless of whether per-event signing is
+  load-bearing under the threat model — crash/omission today; a future Byzantine assumption would simply make
+  that audit trail, not the compacted view, the authority.
 
 > **Honesty.** Carrying the commit log over Pulsar + MinIO is **forward design, new vs prodbox** — prodbox
 > deliberately did *not* use a durable queue for its gateway log. The signed/hash-chained/idempotent
@@ -384,6 +432,27 @@ predicate generalized to the singleton's whole authority:
   adopting a newer topology is a drain-and-restart, never an in-process version bump — the prodbox
   refuse-to-reclaim-while-behind gate.
 
+**The gate is ordering + signed audit, not a resource-side fence.** `claim`-precedes-write establishes a
+*total order* over authority transitions in the signed log and an auditable record of who held authority
+when; it does **not** hand route53 or Vault a token they check on each write. Between the gate passing (t0)
+and the external call landing (t1) a GC pause or partition can depose the caller — the `t0→t1` defect
+([chaos_failover_doctrine.md §3](./chaos_failover_doctrine.md#3-the-defect-class--one-shape-two-disguises)). A true fence would require the
+*resource itself* to reject a stale writer, and only one of the two external surfaces can offer that:
+
+- **route53 is unfenceable at the resource** — `ChangeResourceRecordSets` has no conditional / compare-and-swap
+  on record content — so it stays a **single A-record with a short record TTL**, self-healing on
+  reconvergence; the residual window is *bounded*, not closed.
+- **Vault could be fenced** end-to-end (a short-TTL, continuously-renewed single-active authority lease +
+  KV-v2 check-and-set, so Vault itself rejects a stale operator). This was **evaluated and deliberately
+  rejected** for v1: it would couple secret authority to Vault availability and add a named clock-skew /
+  lease-TTL premise, in tension with the design's explicit **availability-first** choice ([§5.4](#54-the-safety-boundary-stated-honestly)).
+  Vault therefore keeps the same availability-first bounded self-healing posture as route53.
+
+So the external single-writer invariant is **availability-first and bounded, not fenced** — the honest,
+impossibility-bounded (R7) conditional invariant Appendix A of
+[chaos_failover_doctrine.md](./chaos_failover_doctrine.md) models. The rejected Vault-lease alternative is recorded so the choice is
+auditable ([§5.5](#55-pulsar-primitives-evaluated-for-the-election--and-why-the-custom-election-stays)).
+
 ### 5.4 The safety boundary, stated honestly
 
 In a fully asynchronous system with partitions and no consensus primitive, you **cannot** have both
@@ -400,6 +469,56 @@ cannot bypass the impossibility result.
 > control-plane election and the asynchronous cross-cluster gateway-failover "Second Axis" — are owned by
 > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). This section must never report that election
 > correctness as proven in amoebius.
+
+### 5.5 Pulsar primitives evaluated for the election — and why the custom election stays
+
+**The question this subsection answers** ([notes.txt](../../notes.txt) line 35): *is the singleton election
+custom logic that Pulsar could handle more robustly?* The rest of [§5](#5-leadership-election--the-mechanism-the-proof-lives-elsewhere) describes a hand-rolled
+ranked-failover rule over a signed commit log — the **one** place amoebius does not delegate coordination to
+a platform service (contrast the workers of [§4](#4-worker-daemons--n-unelected), who take single-consumer semantics straight from
+Pulsar's subscription model). That exception is deliberate; this subsection records the Pulsar primitives
+weighed for the job so the choice is an **auditable trade, not a silent omission.**
+
+| Pulsar primitive | Role considered | Verdict |
+|---|---|---|
+| **Exclusive producer access mode** (`Exclusive` / `WaitForExclusive` / `ExclusiveWithFencing`) — Pulsar's purpose-built single-writer-with-fencing primitive (a broker-enforced topic epoch) | *the* election / single-writer mechanism | **Rejected as the election** — three independent reasons below |
+| **`Failover` / `Exclusive` subscription** | worker single-consumer semantics | **Adopted for workers, not the singleton** ([§4](#4-worker-daemons--n-unelected), [§4.3](#43-the-feed-sourced-continuous-trainer-an-existing-coordinator-single-writer-delegated)) — a liveness/dispatch property, never a fence for external effects |
+| **TableView + topic compaction** | the current-state read-model + resolved-singleton dissemination | **Adopted as a steady-state layer** ([§5.1](#51-the-coordination-plane-pulsar--minio--the-commit-log)) — projection only; it decides no ownership |
+| **Transactions** | exactly-once effect | **Rejected — redundant** with broker-side dedup on `(producer_name, sequence_id)`, which is cheaper ([pulsar_client_doctrine.md §7](./pulsar_client_doctrine.md#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)) |
+
+**Why the exclusive producer is not the election.** It is the closest fit — Pulsar's own
+single-writer-with-fencing primitive, and more in the "delegate consensus, don't re-prove it" spirit than a
+hand-rolled rule — yet three independent reasons each disqualify it as *the* election substrate:
+
+1. **Bootstrap / disaster-recovery circularity (decisive).** The singleton is the role that **brings up and
+   disaster-recovers Pulsar itself** — it is elected at `kube-apiserver`-up and then owns platform-service
+   bring-up ([§2.1](#21-a-third-orthogonal-axis-rke2-serveragent-declared), [§3.2](#32-what-total-authority-over-the-cluster-and-its-secrets-cashes-out-to)). An election *hosted on Pulsar* would deadlock exactly at cold-start and at
+   Pulsar-DR — the moments leadership is most needed — and would delete the availability-first self-election
+   failsafe ([§5.2](#52-the-ranked-failover-rule), [§5.4](#54-the-safety-boundary-stated-honestly)). The election must be able to run when its own broker is down; a
+   Pulsar-native election cannot.
+2. **It fences the wrong thing (decisive).** Exclusive-producer fencing binds an evicted producer's writes
+   **to the Pulsar topic**; the singleton's authority is **external side effects** — the route53 DNS record
+   and Vault ([§3.2](#32-what-total-authority-over-the-cluster-and-its-secrets-cashes-out-to)). route53 and Vault do not validate a Pulsar epoch, so no broker fence stops a
+   deposed daemon's *external* write (a fencing token only fences a resource that checks it). This irreducible
+   core is owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) Appendix A; see [§5.3](#53-ownership-transitions-and-the-single-writer-gate).
+3. **Mechanism incompatibility.** `Exclusive` forbids all-but-one producer — incompatible with the
+   **multi-writer** heartbeat/`claim`/`yield` commit log every candidate appends to ([§5.1](#51-the-coordination-plane-pulsar--minio--the-commit-log)).
+   `ExclusiveWithFencing` is last-writer-wins, which would **thrash** against the deterministic ranked,
+   refuse-to-reclaim-while-behind failover ([§5.2](#52-the-ranked-failover-rule), [§5.3](#53-ownership-transitions-and-the-single-writer-gate)); and `WaitForExclusive` parks a
+   contender in a queue but will **not evict a hung incumbent** — precisely the failure the isolation failsafe
+   exists to handle.
+
+**What is delegated, and what is not.** Two Pulsar mechanisms *are* adopted — but as layers on top of the
+custom election, never as the election itself: the worker single-consumer semantics ([§4](#4-worker-daemons--n-unelected)) and the
+TableView + compaction read-model ([§5.1](#51-the-coordination-plane-pulsar--minio--the-commit-log)). Both decide nothing about who leads; the deterministic
+ownership fold ([§5.2](#52-the-ranked-failover-rule)) and the log gate ([§5.3](#53-ownership-transitions-and-the-single-writer-gate)) stay amoebius's. The net answer to line 35:
+**Pulsar carries every *delegable* coordination concern already; the one custom exception is the singleton
+election, and it is a considered trade the primitives above cannot improve on.**
+
+> **Honesty.** This is a design decision recorded before Phase 3/9 implementation, not a benchmarked amoebius
+> result. The exclusive-producer / TableView / compaction semantics cited are Pulsar 3.x/4.x features; that
+> they behave as described in an amoebius deployment is **assumed**, not tested
+> ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---
 

@@ -212,7 +212,9 @@ Forking — rather than depending on the published package — is the honest cho
 
 ## 5. The capability surface: lookup · produce · consume · subscribe · seek
 
-These five are the whole client. Each maps to a protocol exchange and to a daemon role
+These five verbs are the whole **primitive** surface; two derived read-model capabilities and two
+deliberately-absent features are recorded in [§5.1](#51-two-derived-capabilities-read-model-and-two-deliberately-absent-ones).
+Each verb maps to a protocol exchange and to a daemon role
 ([daemon_topology_doctrine.md](./daemon_topology_doctrine.md) owns *who* uses which).
 
 - **Lookup (service discovery).** Before producing or consuming, the client issues `LOOKUP_TOPIC` and
@@ -240,6 +242,27 @@ These five are the whole client. Each maps to a protocol exchange and to a daemo
 - **Seek (replay).** `SEEK` repositions a subscription to an earlier `message_id` (or timestamp), letting a
   consumer replay the log. This is the mechanism behind rebuild-from-log and the geo-replication
   catch-up that [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) reasons about.
+
+### 5.1 Two derived capabilities (read-model), and two deliberately absent ones
+
+The five verbs above are the whole *primitive* surface. Two **derived** capabilities layer on them and are
+exposed for v1; two Pulsar features are deliberately **not** exposed. This subsection records that surface
+choice so the omissions are auditable, not silent.
+
+- **Exposed (derived): topic compaction + TableView.** *Compaction* is a namespace/topic policy the
+  coordinator reconciles exactly like retention and dedup ([§6.1](#61-topic-storage-lifecycle-bounded-tiered-retained--and-the-hot-tier-never-overflows), [§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default));
+  a *TableView* is a client-side `key → latest-value` materialization over a compacted `consume`. Together
+  they give the control-plane its current-state **read-model** and resolved-singleton dissemination — adopted,
+  and owned, by [daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#51-the-coordination-plane-pulsar--minio--the-commit-log) / [§5.5](./daemon_topology_doctrine.md#55-pulsar-primitives-evaluated-for-the-election--and-why-the-custom-election-stays).
+  They are a *projection*, never a decision primitive: no ownership or election logic lives in a TableView.
+- **Not exposed: exclusive-producer access mode** (`Exclusive` / `WaitForExclusive` / `ExclusiveWithFencing`).
+  Pulsar's purpose-built single-writer-with-fencing primitive is deliberately absent from the client surface —
+  it was evaluated and rejected as the control-plane election substrate (bootstrap/DR circularity; it fences
+  only Pulsar-topic writes, not the external route53/Vault effects; and it is incompatible with the
+  multi-writer commit log). Full rationale: [daemon_topology_doctrine.md §5.5](./daemon_topology_doctrine.md#55-pulsar-primitives-evaluated-for-the-election--and-why-the-custom-election-stays).
+- **Not exposed: transactions.** Cross-topic atomicity is unused — at-least-once + broker-side dedup
+  ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)) delivers exactly-once *effect* more cheaply, so a transaction coordinator earns no place
+  in the surface.
 
 ---
 
