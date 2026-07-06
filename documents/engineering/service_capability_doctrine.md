@@ -189,7 +189,7 @@ doctrine owns that mapping.** `EngineRuntime` is a *coarsening* of the four-memb
 [cluster_topology_doctrine.md §1](./cluster_topology_doctrine.md#1-two-axes-the-substrate-is-detected-the-engine-is-declared)):
 `apple → AppleMetal`, `linux-cpu → LinuxCpu`, and — the one place two substrates collapse onto one arm —
 `{ linux-cuda, windows } → Cuda`. `Cuda` is therefore **OS-agnostic**: there is no Linux-vs-Windows split inside
-the union (that distinction has **no constructor** — grade-(1)), and a node's engine is *projected from* its
+the union (that distinction has **no constructor** — type-foreclosed), and a node's engine is *projected from* its
 detected substrate, never declared free of it. The only freedom the quotient grants is that two substrates share
 one engine arm; it never lets a spec author an engine its substrate cannot provide — that would reopen the
 "selected by the detected substrate, full stop" foreclosure above, which the quotient **preserves** rather than
@@ -231,7 +231,7 @@ content-addressed), not substrate-identical, so a model produced on one lane may
 **introduces** that decoupling — the relation keys on the serving lane, not on where the model was produced (there
 is no "already checks the deployment's substrate" here). Availability is a **partial** family×lane relation — a
 family may be baked on some lanes and not others (e.g. `vLLM` is not baked on Apple-Metal) — so a
-family-not-available-on-the-serving-lane is a **grade-(2)** decode-time rejection (the
+family-not-available-on-the-serving-lane is a **decode-foreclosed** decode-time rejection (the
 topology/relation-over-collection technique,
 [illegal_state_catalog.md §4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection)),
 never a runtime `Unschedulable`. The relation keys on an engine-**family** tag the model must carry; that tag is a
@@ -239,7 +239,7 @@ never a runtime `Unschedulable`. The relation keys on an engine-**family** tag t
 [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)
 (referenced, not restated). content_addressing owns the `ModelArtifact` side; this doctrine owns the
 engine-as-capability side — the family-availability-on-serving-substrate check — a model must match. A
-**grade-(3)** residue survives the grade-(2) check: a family-matched but substrate-specific-weight-layout model
+**runtime-checked** residue survives the decode-foreclosed check: a family-matched but substrate-specific-weight-layout model
 may still fail to **load** on the serving lane (bytes are portable, not guaranteed cross-lane loadable), a residue
 owned by [content_addressing_doctrine.md §6.1](./content_addressing_doctrine.md#61-proven--tested--assumed-spelled-out),
 not foreclosed here.
@@ -255,17 +255,17 @@ whether accelerator memory is a separate pool (`linux-cuda`/`windows`, discrete)
 the `Σ served-model VRAM ≤ node vram` fold arithmetic is owned by
 [resource_capacity_doctrine.md §3](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget),
 which **consumes** this footprint. That the declared footprint actually fits at runtime under real batch/context
-(dynamic KV-cache/fragmentation) is **grade-(3)** residue, not foreclosed by the grade-(2) Σ.
+(dynamic KV-cache/fragmentation) is **runtime-checked** residue, not foreclosed by the decode-foreclosed Σ.
 
 **Two mistakes become unrepresentable**, lifted at
 [illegal_state_catalog.md §3.25](./illegal_state_catalog.md#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model):
 
-- **An engine fetched or built at pod startup is grade-(1) unrepresentable** — the `EngineRuntime` union is
+- **An engine fetched or built at pod startup is type-foreclosed unrepresentable** — the `EngineRuntime` union is
   closed with no `Url`/`Download`/`Build` arm, so "fetch the engine at boot" has no syntax and fails Gate 1
   (the Dhall typechecker) before any binary runs. (A `ModelArtifact` with no completed `.ready` **and no
-  provenance witness** is likewise grade-(1), owned with the content store in content_addressing
+  provenance witness** is likewise type-foreclosed, owned with the content store in content_addressing
   [§4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd).)
-- **A model whose engine family is not available on the serving substrate lane is grade-(2) rejected** at decode,
+- **A model whose engine family is not available on the serving substrate lane is decode-foreclosed rejected** at decode,
   by the partial family×lane relation above — not a runtime `Unschedulable`.
 
 ```dhall

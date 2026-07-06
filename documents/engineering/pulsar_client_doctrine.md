@@ -134,8 +134,8 @@ is **unrepresentable** ([illegal_state_catalog.md §3.23](./illegal_state_catalo
 - **One codec, one body format.** A payload is produced only through a typed codec — `produce` takes a
   `Serialise`-constrained value (equivalently, a `CborPayload` newtype whose sole constructor is
   `encodeCbor :: Serialise a => a -> CborPayload`). There is **no** `produceRaw :: ByteString -> …` and no
-  JSON/protobuf/base64 path, so a non-CBOR payload has no inhabitant — grade-(1) uninhabitable
-  ([illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-grades-of-foreclosure-and-the-honesty-they-force)).
+  JSON/protobuf/base64 path, so a non-CBOR payload has no inhabitant — type-foreclosed uninhabitable
+  ([illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)).
   Consume is the mirror: `Serialise a => … -> Either DecodeError a`, a **total, fail-fast** decode — a
   corrupt or mistyped body is a structured error, never a silent misread, exactly the posture the mandatory
   CRC32C ([§3](#3-the-native-binary-protocol)) already takes on the frame.
@@ -178,7 +178,7 @@ flowchart TD
 
 > **Honesty.** The CBOR-payload rule is Phase-4 design intent, not a tested amoebius result. Canonical CBOR
 > is *proven in the sibling jitML content store* (`encodeManifestCbor`) — that is sibling evidence, not
-> amoebius proof ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)). The grade-(1) claim is the
+> amoebius proof ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)). The type-foreclosed claim is the
 > *produce* surface having no non-CBOR constructor; that a *received* body decodes is the same total-check /
 > runtime residue the CRC32C guarantee already carries, not a stronger claim.
 
@@ -343,7 +343,7 @@ owned by [dsl_doctrine.md](./dsl_doctrine.md), and the two-ceiling *arithmetic* 
 Every topic carries three mandatory, non-optional fields and folds against **two** ceilings:
 
 - **A mandatory `RetentionPolicy`.** There is no "keep forever" arm and no optional retention — a topic
-  without a bounded retention (by time and/or size, on acknowledged messages) has no inhabitant (grade-1
+  without a bounded retention (by time and/or size, on acknowledged messages) has no inhabitant (type-foreclosed
   shape). Backlog (unacknowledged) is bounded separately by the backlog quota below.
 - **A mandatory *size-triggered* S3 offload.** The offload trigger is a **size high-water mark on the primary
   (BookKeeper) tier** — an optional time threshold may offload *sooner* for cost, but is **never** the sole
@@ -351,7 +351,7 @@ Every topic carries three mandatory, non-optional fields and folds against **two
   what bounds the hot tier.
 - **The hot-tier fit (availability-critical).** The per-topic hot-tier cap **plus headroom** — the open
   ledger, in-flight ingest during offload, and the deletion lag — folds against the BookKeeper
-  `StorageBacking`: `Σ(hot caps + headroom) ≤ bookie disk`. A hot-tier overflow is a grade-2 decode-time
+  `StorageBacking`: `Σ(hot caps + headroom) ≤ bookie disk`. A hot-tier overflow is a decode-foreclosed decode-time
   rejection ([resource_capacity_doctrine.md §7](./resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total)).
 - **The durable-total fit.** The total retained bytes fold against the selected offload target's ceiling — a
   provider-S3 quota ([pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md)) for cloud clusters, or the MinIO
@@ -361,8 +361,8 @@ Every topic carries three mandatory, non-optional fields and folds against **two
 - **A mandatory backlog quota (runtime fail-safe).** A burst, or a stalled/S3-unreachable offload, can still
   race the cap at runtime — no spec-layer check prevents that. So the policy carries a mandatory backlog
   quota (`producer_request_hold` / back-pressure at the high-water mark), so overflow degrades to **per-topic
-  producer throttling, never a disk-full broker outage**. The decode-time two-ceiling fit is grade-2; the
-  back-pressure actually holding is grade-3, owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md).
+  producer throttling, never a disk-full broker outage**. The decode-time two-ceiling fit is decode-foreclosed; the
+  back-pressure actually holding is runtime-checked, owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md).
 
 The retention/offload/backlog policy is enabled on the namespace as a reconcile step, the same shape as the
 broker-side dedup namespace policy ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)) — a pure typed value the coordinator reconciles, not a hand-set knob.
@@ -372,9 +372,9 @@ flowchart TD
   produce[Producer writes to a topic] -->|hot tier| bk[BookKeeper closed ledgers, bounded by size high-water mark]
   bk -->|size trigger, optionally sooner by time| offload[Offload closed ledgers to S3 target]
   offload -->|retention deletes after deletion lag| free[BookKeeper space reclaimed]
-  bk -->|hot cap plus headroom at most bookie disk, decode fold| avail[Hot tier never overflows, grade 2]
-  offload -->|total retained at most offload target ceiling, decode fold| durable[Durable total bounded, grade 2]
-  bk -->|high-water mark reached before offload catches up| hold[Backlog quota holds producer, grade 3 fail-safe]
+  bk -->|hot cap plus headroom at most bookie disk, decode fold| avail[Hot tier never overflows, decode-foreclosed]
+  offload -->|total retained at most offload target ceiling, decode fold| durable[Durable total bounded, decode-foreclosed]
+  bk -->|high-water mark reached before offload catches up| hold[Backlog quota holds producer, runtime-checked fail-safe]
 ```
 
 ### 6.2 A topic as a cursor-anchored replayable training feed

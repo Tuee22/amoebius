@@ -160,7 +160,7 @@ machine-visible by emitting a ledger.
   **Prod requires the Runtime/chaos layer proven**, not merely a green Decision layer. It follows directly
   from the UNVERIFIED rule above that a **skipped-but-applicable layer BLOCKS prod promotion** — a layer
   recorded UNVERIFIED gives the advance constructor no evidence witness to consume, so promote-unverified→prod
-  is **grade-(1) unrepresentable** (mirroring the sibling infernix `.ready`-gated `ArtifactRef` idiom —
+  is **type-foreclosed unrepresentable** (mirroring the sibling infernix `.ready`-gated `ArtifactRef` idiom —
   sibling evidence, not an amoebius result). The `PromotionGate` type, the `Environment` promotion pointer,
   and the required-evidence-strength-per-environment mapping are **owned by**
   [release_lifecycle_doctrine.md §4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable); this doc owns only the ledger the gate

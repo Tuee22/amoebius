@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the distinction between *one data plane reached from many compute
@@ -117,10 +117,10 @@ resolveBucket :: FabricMember c -> DataPlane c t -> LogicalBucket t -> BoundBuck
 
 Two illegal states die here:
 
-- **Cross-store reach** (grade-1, uninhabitable): the cluster index `c` on `FabricMember`, `DataPlane`, and
+- **Cross-store reach** (type-foreclosed, uninhabitable): the cluster index `c` on `FabricMember`, `DataPlane`, and
   `BoundTopic` must all unify. A worker holding `FabricMember home` can bind only `DataPlane home`; it cannot
   name another cluster's plane.
-- **Cross-tenant reach** (grade-1): the tenant tag `t` must unify; there is no `Ref t1 -> Ref t2` coercion
+- **Cross-tenant reach** (type-foreclosed): the tenant tag `t` must unify; there is no `Ref t1 -> Ref t2` coercion
   ([illegal_state_catalog.md §4.2](./illegal_state_catalog.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)).
 
 The vision's "single logical store irrespective of how many nodes or where" then becomes **a theorem of the
@@ -170,7 +170,7 @@ workload as Pulsar/MinIO clients. It is a **deployment rule**, not app logic
   **no `StorageBacking` and no StatefulSet** — its local disk is scratch. There is *nothing durable on a spot
   node to lose on teardown.*
 - **"Delete everything except storage" is the only expressible teardown.** The reusable deprovision type has
-  **no storage arm at all**, so "auto-delete durable storage on teardown" is grade-1 uninhabitable on the
+  **no storage arm at all**, so "auto-delete durable storage on teardown" is type-foreclosed uninhabitable on the
   normal path; the sole deleter of durable data remains the elevated test harness, on test-flagged resources
   only ([storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md),
   [testing_doctrine.md](./testing_doctrine.md)). The credential/`Retain` mechanics are owned there and by
@@ -196,7 +196,7 @@ data Deprovision = Deprovision { releaseCompute :: ComputeSet }  -- NO deleteSto
 - **Elastic growth stays capacity-checked.** When the price trigger fires and the `Growable` policy adds
   nodes, the `place` fold re-runs against the enlarged topology capacity
   ([resource_capacity_doctrine.md §4, §6](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)), so "the pool grew but the job
-  still does not fit" is caught at the same grade-2 check. "Job too big for the hardware" is never
+  still does not fit" is caught at the same decode-foreclosed check. "Job too big for the hardware" is never
   representable, elastic or not.
 - **The wire is owned elsewhere.** *How* a remote node reaches the home Pulsar/MinIO — the WireGuard fabric,
   the `wg0`-bound listeners, the Vault-minted peer keys — is owned by
@@ -290,6 +290,7 @@ host-compute-daemon peer model it generalizes (Phase 7), and cloud spot provisio
 - [Host ↔ Cluster Communication](./host_cluster_comms_doctrine.md) — the Pulsar/MinIO peer model this generalizes
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md) — the second-cluster / geo-replication world this is *not*
 - [Illegal State Catalog](./illegal_state_catalog.md) — the capability/phantom-tag + ownership-index techniques
+- [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§3 reachability is a type, not a runtime probe](#3-the-binding-reachability-is-a-type-not-a-runtime-probe) is the static-reach instance of readiness-as-an-edge ([§7](./readiness_ordering_doctrine.md#7-one-discipline-many-instances))
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the `ScalingPolicy` / capacity fold the pool binds
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — a worker pool is a deployment rule
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the closed `ComputeEngine` union the pool is *not* an arm of; the stretched full-node (member) kind

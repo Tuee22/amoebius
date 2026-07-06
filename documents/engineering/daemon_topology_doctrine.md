@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the one amoebius binary's three runtime contexts (CLI / sudo host-daemon / in-cluster pod) and its daemon role taxonomy — exactly one elected control-plane singleton with total authority over the cluster and its secrets, plus N unelected worker daemons — and the shape (not the proof) of the leadership election that picks the singleton.
@@ -91,7 +91,7 @@ the other two:
   (kube-apiserver + the etcd quorum) versus which are pure workload nodes. This is the `Rke2Servers` closed
   union — `Single` / `Ha3` / `Ha5`, the only legal odd etcd quorums {1,3,5} — plus an `agents` list, owned by
   [cluster_topology_doctrine.md §2, §4](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm). An even- or zero-server (no-quorum /
-  split-brain) control plane has no constructor: **grade-(1) unrepresentable**.
+  split-brain) control plane has no constructor: **type-foreclosed unrepresentable**.
 
 (Two further declared axes exist system-wide — environment dev/staging/prod, and the engine/model/kernel asset
 tier — but they are owned by the release-lifecycle and content-addressing doctrines, not here; this document
@@ -287,16 +287,16 @@ per accelerator node — distinct from the N-replica *unelected* Deployment shap
 ([§4](#4-worker-daemons--n-unelected)). It is still **many across the cluster** (one per accelerator node), so "many of each kind"
 holds; the type merely forbids **two on one node**. Because it admits **at most one owner per node**, "two
 accelerator owners contending for one node's devices" and "a fractional / straddled accelerator claim" have
-**no constructor: grade-1 unrepresentable**. The one owner **multiplexes training, serving, and Tier-3 JIT
+**no constructor: type-foreclosed unrepresentable**. The one owner **multiplexes training, serving, and Tier-3 JIT
 compilation** on its node — which is what lets a node continuously train a model while serving it (the
 continuous-training mode owned by content_addressing / dsl, [§4.3](#43-the-feed-sourced-continuous-trainer-an-existing-coordinator-single-writer-delegated)).
 
 Wholesale per-node accelerator ownership and the per-node-singleton invariant are the **SSoT of this
 doctrine**; [resource_capacity_doctrine.md §4.1](./resource_capacity_doctrine.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope) / [§3](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget) and the illegal-state catalog **consume** it.
 
-> **Grade / honesty.** The at-most-one-owner-per-node foreclosure is **grade-1** — a per-node-singleton type
+> **Layer / honesty.** The at-most-one-owner-per-node foreclosure is **type-foreclosed** — a per-node-singleton type
 > has no two-owner inhabitant; that the daemon **actually holds the node's devices at runtime** is
-> **grade-3** runtime residue. The typed accelerator-owner worker kind is **forward design intent** — no
+> **runtime-checked** runtime residue. The typed accelerator-owner worker kind is **forward design intent** — no
 > sibling system stands up a DaemonSet-like accelerator owner today; status and gates live only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
@@ -598,6 +598,7 @@ shape and links back for status.
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [Platform Services Doctrine](./platform_services_doctrine.md)
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — owns the node-lifecycle enactment the singleton drives for child rke2 server/agent rollout ([§2.1](#21-a-third-orthogonal-axis-rke2-serveragent-declared))
+- [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — the [§6](#6-the-shared-daemon-spine) daemon-spine `/readyz` + no-`threadDelay`/`sd_notify`/marker rule is the daemon-tier instance of readiness-as-an-edge
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — [§2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)/[§4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction) the `Rke2Servers` closed union and the topology fold (the declared server/agent axis of [§2.1](#21-a-third-orthogonal-axis-rke2-serveragent-declared))
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — [§0](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision) the checkpoint-free tag-discovery host reconciler (tier (b)) that enacts child rke2 rollout over SSH
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/release_lifecycle_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/release_lifecycle_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for how amoebius turns a typed cluster spec into running Kubernetes objects — a pure `render(spec)` that emits the full per-service object set from Haskell ADTs, and amoebius's own idempotent server-side-apply reconciler that applies, prunes, and waits — with **no Helm, no templating layer, and no third-party charts**.
@@ -131,8 +131,8 @@ rules feed it):
 - **Every container declares CPU and RAM.** The workload record *requires* a `Resources` field with refined
   non-zero requests and limits, so an "unlimited pod" has no inhabitant. The rule itself is owned by
   [platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram);
-  whether it is a type-inhabitance or a decode-time check is graded by
-  [illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-grades-of-foreclosure-and-the-honesty-they-force).
+  whether it is a type-inhabitance or a decode-time check is classified by
+  [illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force).
 - **Every pod gets a hardened `securityContext`.** `render` attaches a non-root, no-privilege-escalation,
   read-only-root-filesystem-by-default, dropped-capabilities security context to every workload it emits;
   there is no code path that renders a bare pod spec. A chart you do not own cannot make this promise ([§1](#1-why-this-doctrine-exists-types-render-manifests-helm-does-not)).
@@ -282,12 +282,12 @@ data RolloutPhase = RolloutPhase
 - **Where the plan is owned.** The typed `RolloutPlan` / `RolloutPhase`, the `Environment` promotion pointer,
   and the `Release` a rollout advances are owned by [release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)
   (and [§2](#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects) for the ledger it advances); **this doc owns only their *enactment* on the tier-(c) reconciler.**
-- **DB-schema migration is a `RolloutPhase` (grade-(3) runtime residue; deferred).** A schema change is a
+- **DB-schema migration is a `RolloutPhase` (runtime-checked residue; deferred).** A schema change is a
   phase sequence obeying **create-new → verified-migrate → retire-old** — the exact anti-in-place-destruction
   ordering owned by [storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction):
   stand up the new schema/table, run the migration and *verify it behind a readiness gate*, and only then
   retire the old — never an in-place mutation. The ordering is enforced by the reconciler's readiness gate at
-  runtime, **grade-(3)**: the list is data, and the "no retire-old before verified-migrate" property holds
+  runtime, **runtime-checked**: the list is data, and the "no retire-old before verified-migrate" property holds
   because the engine will not apply phase *n+1* until phase *n* is live-ready — it is not a type-level
   impossibility.
 - **Canary and cutover.** A canary phase is a **Gateway-API `HTTPRoute` `backendRefs` weight shift** on the
@@ -478,6 +478,7 @@ for status.
 - [DSL Doctrine](./dsl_doctrine.md) — the spec surface the renderer consumes and the two typed gates
 - [Illegal State Catalog](./illegal_state_catalog.md) — the unrepresentability of the unsafe manifests [§3](./illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent) forecloses
 - [Platform Services Doctrine](./platform_services_doctrine.md) — the standard set, the derived-NetworkPolicy rule ([§9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), the cpu/ram rule ([§10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)), substrate-equivalence ([§12](./platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant))
+- [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§6](./readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps) the [§5](#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait) wait-for-ready is the runtime enactor of a readiness edge (observed from the live object, never a `threadDelay`)
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — `render` consumes the capacity-checked IR; overcommit is rejected before render
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the compute-engine/topology the rendered node set realizes
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — secrets-by-name; a rendered manifest never carries plaintext secret bytes

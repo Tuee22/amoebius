@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define the fixed set of standard services every amoebius cluster runs (the concrete providers
@@ -254,7 +254,7 @@ taints owned by the node inventory ([substrate_doctrine.md §8](./substrate_doct
 unless **there exists** a node satisfying its affinity **and** tolerating all its taints: a schedulability
 *existence fold* over the single node inventory, never a `Pending` pod. This subsection is the SSoT for the
 derivation rule that [illegal_state_catalog.md §3.5](./illegal_state_catalog.md#35-undeployable-pods-taints-tolerations--affinity) / [§3.22](./illegal_state_catalog.md#322-a-hand-authored-un-derived-toleration) turns into a
-compile/decode-time impossibility (grade-1 for the derived-toleration shape, grade-2 for the existence fold).
+compile/decode-time impossibility (type-foreclosed for the derived-toleration shape, decode-foreclosed for the existence fold).
 
 ---
 
@@ -274,7 +274,7 @@ the `Resources = { requests, limits }` pair whose shape is owned by
 [resource_capacity_doctrine.md §3](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget).
 The two are read at *different* layers: **`requests`** is the scheduling number — it is what the placement fold
 sums against allocatable capacity, because it is what the scheduler reserves — while **`limits`** is the runtime
-cgroup ceiling (throttle/OOM), a grade-3 enforcement fact, never summed by the fold. Both are mandatory, with
+cgroup ceiling (throttle/OOM), a runtime-checked enforcement fact, never summed by the fold. Both are mandatory, with
 `requests ≤ limits` per axis (and `requests == limits` for gpu, which cannot be overcommitted). Whether this
 requirement is lifted into the Dhall type layer (so an under-declared workload is *unrepresentable*, not merely
 rejected at render time) is catalogued by
@@ -305,7 +305,12 @@ these per-container declarations. There is no second capacity fold here: this do
 
 The services cannot all come up at once; a few **hard edges** constrain the order. This doc owns only those
 platform-service ordering edges — full cluster lifecycle, teardown ordering, and amoebic spawn are owned by
-[cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md).
+[cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md). These edges are the **derived readiness DAG**
+of [readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md): each is a *condition* (the dependency is
+observed ready), never an elapsed duration, and the order is derived from the declared dependency graph — not a
+prose sequence an installer is trusted to honour. The catalog turns a duration-gated or hand-ordered bring-up
+into a foreclosed illegal state at
+[illegal_state_catalog.md §3.41](./illegal_state_catalog.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race).
 
 - **LoadBalancer before the Envoy/Gateway edge** — the Gateway needs an LB address to publish a listener.
 - **The registry up before later app-image pulls** — the `distribution` registry is a baked binary with no

@@ -83,16 +83,16 @@ and `legal_managed_eks` fixtures **decode**. All three halves run before the nex
   this phase builds the GADT-indexed Haskell types, smart constructors, phantom tenant tags, and ownership
   indices that make the catalog's entries uninhabitable or decode-rejected — honoring the load-bearing limit
   ([§2](../documents/engineering/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it))
-  and the three foreclosure grades
-  ([§6](../documents/engineering/illegal_state_catalog.md#6-three-grades-of-foreclosure-and-the-honesty-they-force))
+  and the three foreclosure layers
+  ([§6](../documents/engineering/illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force))
   that a type-check proves the *spec composes*, not that the *running cluster enforces it*.
 - [`resource_capacity_doctrine.md` — the capacity model + §4.6 total fold](../documents/engineering/resource_capacity_doctrine.md)
   and [`cluster_topology_doctrine.md` — the compute-engine/topology relation + §4.7](../documents/engineering/cluster_topology_doctrine.md):
   this phase (Sprint 3.6) builds the `Capacity`/`Demand`/`Budget` fold (`fits`/`carve`/`place`), the
   `ComputeEngine`/`LinuxHost`-witness/`Topology` types and the elementwise compatible-pair fold, the closed
   `StorageBacking`/`Growable` unions, and the mandatory `RetentionPolicy` + two-ceiling Pulsar fold — honoring
-  the honest grade split ([`illegal_state_catalog.md` §6](../documents/engineering/illegal_state_catalog.md#6-three-grades-of-foreclosure-and-the-honesty-they-force))
-  that every capacity **sum** is grade-(2), never grade-(1).
+  the honest layer split ([`illegal_state_catalog.md` §6](../documents/engineering/illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force))
+  that every capacity **sum** is decode-foreclosed, never type-foreclosed.
 - [`illegal_state_catalog.md` §3.13–§3.22 — the capacity / topology / bounded-storage block](../documents/engineering/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent)
   and its two techniques [`§4.6` (capacity fold)](../documents/engineering/illegal_state_catalog.md#4-the-typing-techniques)
   and [`§4.7` (topology relation)](../documents/engineering/illegal_state_catalog.md#4-the-typing-techniques):
@@ -198,17 +198,17 @@ fixtures) — target paths, not yet built.
 **Blocked by**: Sprint 3.1, Sprint 3.2
 **Independent Validation**: a negative-test suite holds one fixture per catalogued illegal state and asserts
 each is a compile-time / decode-time rejection; a coverage check maps every asserted fixture back to a
-catalog entry and its foreclosure grade.
+catalog entry and its foreclosure layer.
 **Docs to update**: `documents/engineering/illegal_state_catalog.md` (Phase-3 status backlink, per-entry
-grade reconciliation), `documents/engineering/dsl_doctrine.md` (contract honesty note)
+layer reconciliation), `documents/engineering/dsl_doctrine.md` (contract honesty note)
 
 ### Objective
 Adopt [`illegal_state_catalog.md` §1 — The promise: illegal states fail to type-check](../documents/engineering/illegal_state_catalog.md#1-the-promise-illegal-states-fail-to-type-check),
 [§2 — The load-bearing limit](../documents/engineering/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it),
-and [§6 — Three grades of foreclosure](../documents/engineering/illegal_state_catalog.md#6-three-grades-of-foreclosure-and-the-honesty-they-force):
+and [§6 — Three layers of foreclosure](../documents/engineering/illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force):
 build the smart constructors, phantom tenant tags, GADT-indexed state machines, and ownership indices that
 make the catalog's entries uninhabitable or total-decode-rejected, and label each foreclosure with its
-honest grade.
+honest layer.
 
 ### Deliverables
 - A single `BoundVolume` smart constructor that emits the matched StatefulSet claim **and** its exact
@@ -220,14 +220,14 @@ honest grade.
   capability union from Sprint 3.2 that makes "an app names a product" (catalog §3.12) a Gate-1 failure.
 - A negative-test suite asserting each of the gate's three cases — bad PVC↔PV pairing
   ([catalog §3.2](../documents/engineering/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent)),
-  open ingress (§3.7), product-in-app-logic (§3.12) — fails to type-check / decode, each tagged grade-(1)
-  uninhabitable or grade-(2) decode-rejected.
+  open ingress (§3.7), product-in-app-logic (§3.12) — fails to type-check / decode, each tagged type-foreclosed
+  uninhabitable or decode-foreclosed decode-rejected.
 
 ### Validation
 1. Every negative fixture is rejected at the spec/code layer (Gate 1 or Gate 2); the suite is red if any
    illegal fixture decodes.
-2. Each assertion is annotated with its catalog entry and foreclosure grade (1/2), and the suite makes **no**
-   grade-(3) runtime claim — runtime enforcement is explicitly deferred to the chaos/failover and testing
+2. Each assertion is annotated with its catalog entry and foreclosure layer (type- or decode-foreclosed), and the suite makes **no**
+   runtime-checked claim — runtime enforcement is explicitly deferred to the chaos/failover and testing
    phases.
 
 ### Remaining Work
@@ -328,11 +328,11 @@ constructors); `src/Amoebius/Dsl/Topology.hs` (`ComputeEngine` / `LinuxHost` wit
 **Blocked by**: Sprint 3.1, Sprint 3.2, Sprint 3.3
 **Independent Validation**: a unit suite decodes each new fixture through `Dhall.inputFile auto`; the negative
 fixtures return a structured `Left` (Gate 2) or fail `dhall type` (Gate 1), each annotated with its catalog
-entry (§3.13–§3.22) and honest grade (1/2); the positive multi-substrate and managed-EKS fixtures decode; no
-grade-(3) runtime claim is made.
+entry (§3.13–§3.22) and honest layer (type- or decode-foreclosed); the positive multi-substrate and managed-EKS fixtures decode; no
+runtime-checked claim is made.
 **Docs to update**: `documents/engineering/resource_capacity_doctrine.md`,
 `documents/engineering/cluster_topology_doctrine.md`, `documents/engineering/illegal_state_catalog.md`
-(per-entry grade reconciliation), `documents/engineering/storage_lifecycle_doctrine.md` (§5.2),
+(per-entry layer reconciliation), `documents/engineering/storage_lifecycle_doctrine.md` (§5.2),
 `documents/engineering/pulsar_client_doctrine.md` (§6.1), `documents/engineering/platform_services_doctrine.md`
 (§9 derived toleration, §10 aggregate deferral), `documents/engineering/substrate_doctrine.md` (§8 node
 inventory), `DEVELOPMENT_PLAN/system_components.md`
@@ -344,8 +344,8 @@ and [`§4.7` — compatibility/topology relations over a collection](../document
 grounded in [`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) and
 [`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md): make an
 over-committed, substrate-incompatible, badly-topologized, unbounded-storage, un-tiered-topic, or
-policy-less-growth spec fail to type-check or decode, at the honest grade the catalog records (every capacity
-**sum** is grade-(2), never grade-(1)).
+policy-less-growth spec fail to type-check or decode, at the honest layer the catalog records (every capacity
+**sum** is decode-foreclosed, never type-foreclosed).
 
 ### Deliverables
 - A `ComputeEngine` union (`Kind { host, replicas }` / `Rke2 (NonEmpty LinuxHost)` / `Managed Eks`) with a
@@ -369,8 +369,8 @@ policy-less-growth spec fail to type-check or decode, at the honest grade the ca
 1. Every new negative fixture is rejected at the spec/code layer (Gate 1 or Gate 2); the suite is red if any
    illegal fixture decodes; the positive `legal_multisubstrate_cluster` and `legal_managed_eks` fixtures
    decode.
-2. Each assertion is annotated with its catalog entry (§3.13–§3.22) and grade (1/2), and the suite makes
-   **no** grade-(3) runtime claim — VM boot, pod schedule, S3 offload, and autoscaler growth are deferred to
+2. Each assertion is annotated with its catalog entry (§3.13–§3.22) and type- or decode-foreclosed, and the suite makes
+   **no** runtime-checked claim — VM boot, pod schedule, S3 offload, and autoscaler growth are deferred to
    Phases 4/7/9/10.
 
 ### Remaining Work
@@ -415,7 +415,7 @@ type-check or decode, and the positive multi-substrate / managed-EKS fixtures de
   `illegal_handauthored_toleration` (§3.5/§3.22), `illegal_unbounded_storage` (§3.18),
   `illegal_store_over_backing` (§3.19), `illegal_topic_no_retention` + `illegal_topic_time_only_offload` +
   `illegal_hot_tier_over_bookie` (§3.20), `illegal_unbounded_without_policy` (§3.21) — each asserted to fail
-  at Gate 1 or Gate 2, annotated with its grade.
+  at Gate 1 or Gate 2, annotated with its layer.
 - Positive gate fixtures — `legal_multisubstrate_cluster` (a heterogeneous multi-substrate cluster decodes,
   the §3.13 carve-out) and `legal_managed_eks` (EKS is first-class, I13) — each asserted to decode.
 - A proven/tested/assumed ledger artifact emitted by the run, recording the Decision-layer (type-check)
@@ -427,7 +427,7 @@ type-check or decode, and the positive multi-substrate / managed-EKS fixtures de
    `ObjectStore` + `Sql` resources are reachable, and teardown leaves no leaked resources.
 2. Every illegal `.dhall` fixture (the original three plus the §3.13–§3.22 set) is rejected before any binary
    acts, and the positive multi-substrate / managed-EKS fixtures decode; the ledger artifact is present and
-   honestly grades each foreclosure (no grade-(3) runtime claim is reported as proven).
+   honestly classifies each foreclosure (no runtime-checked claim is reported as proven).
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -441,9 +441,9 @@ The whole sprint (📋 Planned).
 - `documents/engineering/service_capability_doctrine.md` — backlink the §1/§4/§5 binding to the implemented
   `CapabilityBinding`; confirm the alternate-admitting provider union stayed one-arm.
 - `documents/engineering/illegal_state_catalog.md` — annotate each catalog entry exercised by Sprint 3.3 and
-  Sprint 3.6 (§3.13–§3.22) with its realized foreclosure grade (1/2), keeping grade-(3) runtime claims deferred.
+  Sprint 3.6 (§3.13–§3.22) with its realized foreclosure layer (type- or decode-foreclosed), keeping runtime-checked claims deferred.
 - `documents/engineering/resource_capacity_doctrine.md` — backlink the §4.6 fold + `StorageBudget`/`Growable`
-  types to the implemented `Amoebius.Capacity.*`; confirm every capacity sum stayed grade-(2).
+  types to the implemented `Amoebius.Capacity.*`; confirm every capacity sum stayed decode-foreclosed.
 - `documents/engineering/cluster_topology_doctrine.md` — backlink `ComputeEngine`/`LinuxHost`/`Topology` and
   the §4.7 compatible-pair fold to the implemented `Amoebius.Dsl.Topology`.
 - `documents/engineering/storage_lifecycle_doctrine.md` (§5.2), `documents/engineering/pulsar_client_doctrine.md`

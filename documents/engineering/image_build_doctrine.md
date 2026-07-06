@@ -255,7 +255,7 @@ fall into two classes, and the third-party services are **baked**, not mirrored.
   libraries (bullet above), the engine exists the moment the pod does; **none is fetched at pod startup** —
   not `curl`-tar'd, not `pip`/venv-installed. This explicitly **replaces infernix's per-engine Poetry-venv +
   `curl`-tar-at-build** shape. The *type-level* guarantee that an engine can never be fetched — `EngineRuntime`
-  is a closed, substrate-selected union with **no `Url`/`Download`/`Fetch` arm (grade-(1))** — and the full
+  is a closed, substrate-selected union with **no `Url`/`Download`/`Fetch` arm (type-foreclosed)** — and the full
   three-tier engine/model/kernel asset lifecycle are owned by
   [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) and
   [service_capability_doctrine.md §4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding); this doc owns only the build-side

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for what the amoebius Dhall DSL is — a typed orchestration surface
@@ -257,11 +257,11 @@ must hold apart — and, per [§1](#1-why-this-doctrine-exists), *carries but do
 - **`ModelArtifact`** — a by-name / content-address **reference** into the content store. Its `ArtifactRef`
   is obtainable **only once the `.ready` sentinel exists *and* the artifact carries a provenance witness** —
   a committed producing checkpoint or a pinned content-addressed import — so there is no constructor for an
-  unready *or* unwitnessed reference (grade-(1) for the witness's *presence*; whether the witnessed bytes
+  unready *or* unwitnessed reference (type-foreclosed for the witness's *presence*; whether the witnessed bytes
   were truly trained is runtime residue, owned downstream, not a decode-time claim).
 
 The relation between them is itself typed: **a `ModelArtifact` must be servable by an `EngineRuntime` present
-on the deployment's substrate** — an unmatched model has no landing engine (a grade-(2) total relation over
+on the deployment's substrate** — an unmatched model has no landing engine (a decode-foreclosed total relation over
 the substrate's engine set, the same topology-relation-over-a-collection technique [§5](#5-the-illegal-state-unrepresentable-contract) defers to the catalog).
 The *detail* of all three — the no-`Url` closure, the `.ready`-plus-provenance-witness gate, and the model↔engine match — is owned by
 [illegal_state_catalog.md §3.25](./illegal_state_catalog.md#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model) and

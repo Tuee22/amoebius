@@ -51,18 +51,18 @@ Everything below is **design intent for Phase 3** (the type discipline) with run
 
 ---
 
-## 2. The load-bearing honesty limit: a capacity sum is a grade-2 check, never grade-1
+## 2. The load-bearing honesty limit: a capacity sum is a decode-foreclosed check, never type-foreclosed
 
 This is the most important sentence in the document, so it gets its own section. **A capacity check — whether
 the compute *placement witness* ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)) or the
-storage/retention `Σ demand ≤ capacity` — is a grade-2 foreclosure, a total decode-time check, never a grade-1
+storage/retention `Σ demand ≤ capacity` — is a decode-foreclosed foreclosure, a total decode-time check, never a type-foreclosed
 uninhabitable-by-type proof.** Dhall (and the GADT-indexed Haskell it decodes into) has **no dependent
 arithmetic**: capacity is a *value*, not a type index, so neither "a feasible packing exists" nor "the sum fits"
 can be a statement about type inhabitance. Each is a **total smart constructor / fold** that inspects a
 constructible value and rejects it (`Left Overcommit` / `Left Unschedulable`) at decode. Per the three
-foreclosure grades ([illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-grades-of-foreclosure-and-the-honesty-they-force)),
-this is grade (2): a *spec-layer guarantee* (the spec never reaches the interpreter), but a *checked rejection*,
-not an absence of inhabitants. Any doc that calls a capacity check "uninhabitable" is reporting the wrong grade,
+foreclosure layers ([illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
+this is decode-foreclosed: a *spec-layer guarantee* (the spec never reaches the interpreter), but a *checked rejection*,
+not an absence of inhabitants. Any doc that calls a capacity check "uninhabitable" is reporting the wrong layer,
 and this doc forbids that.
 
 **The compute placement is sound, not complete.** Optimal bin-packing is NP-hard, so `place`
@@ -75,25 +75,25 @@ the model quietly admitting an unplaceable workload. (Storage and retention `Σ`
 packings — volume bytes *are* divisible — so they carry no completeness caveat; the bin-pack is a
 **compute-only** upgrade, [§4](#4-the-total-fold-fits-carve-place-and-the-nesting).)
 
-The grade-1 pieces near capacity live elsewhere and are cited, not claimed here: the `StorageBudget` union
-having **no unbounded arm** ([§5](#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)) and the `Growable` union having **no bare-unbounded arm** ([§6](#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)) are grade-1
+The type-foreclosed pieces near capacity live elsewhere and are cited, not claimed here: the `StorageBudget` union
+having **no unbounded arm** ([§5](#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)) and the `Growable` union having **no bare-unbounded arm** ([§6](#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)) are type-foreclosed
 *union shapes* — a value simply cannot name "unbounded" without a policy. The *arithmetic* over those bounded
-values is always grade-2.
+values is always decode-foreclosed.
 
-The grade-3 residue is equally explicit and **not this doc's to assert**: whether the physical host actually
+The runtime-checked residue is equally explicit and **not this doc's to assert**: whether the physical host actually
 caps bytes/cgroups, whether the scheduler actually places the pods, whether the autoscaler actually grows the
 node set, and whether the cloud actually honors the quota are **runtime** facts owned by
 [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) and the testing doctrine. [§8](#8-where-the-numbers-come-from-declared-at-decode-cross-checked-at-runtime) states the one
-runtime cross-check the model *requires* (declared capacity ≤ real capacity) and honestly grades it (3).
+runtime cross-check the model *requires* (declared capacity ≤ real capacity) and honestly classifies it as runtime-checked.
 
 ```mermaid
 flowchart TD
-  spec[amoebius.dhall: declared capacities plus typed demands] -->|Dhall typecheck, well-formed| typed[Well-typed value with StorageBudget and Growable union shapes, grade 1]
+  spec[amoebius.dhall: declared capacities plus typed demands] -->|Dhall typecheck, well-formed| typed[Well-typed value with StorageBudget and Growable union shapes, type-foreclosed]
   typed -->|Gate 2 decode: placement witness or Sigma fold| fold{Feasible pod placement exists / growth envelope sound / Sigma within capacity?}
-  fold -->|yes| ir[Coherent capacity-checked IR plus placement witness, grade 2 proven at decode]
+  fold -->|yes| ir[Coherent capacity-checked IR plus placement witness, decode-foreclosed proven at decode]
   fold -->|no| reject[Left Overcommit or Left Unschedulable, rejected before any effect]
   ir -->|reconcile| runtime[Live cluster: host caps, scheduler reproduces witness, autoscaler, quota]
-  runtime -->|declared at most real capacity cross-check, and actual enforcement| grade3[Runtime residue owned by chaos_failover and testing, grade 3]
+  runtime -->|declared at most real capacity cross-check, and actual enforcement| runtime-checked[Runtime residue owned by chaos_failover and testing, runtime-checked]
 ```
 
 ---
@@ -112,7 +112,7 @@ subtraction that must not underflow.
   not a per-pod axis at all.** A node's accelerators are owned **wholesale** by that node's one accelerator
   worker ([daemon_topology_doctrine.md §4](./daemon_topology_doctrine.md), reframing §C of the prior round's
   gpu-as-bin-packable narrative), so there is **no `gpu` field on `ResourceVec`** for a pod to name — a per-pod
-  GPU request is **unrepresentable by construction (grade-1)**. `vram` is the accelerator-memory measure that
+  GPU request is **unrepresentable by construction (type-foreclosed)**. `vram` is the accelerator-memory measure that
   wholesale worker carves among the models it serves — a per-owner Σ (the `worker → served-model` arm,
   [§4](#4-the-total-fold-fits-carve-place-and-the-nesting)), *not* a pod→node bin-pack axis; its per-host number
   and unified-vs-discrete Capacity shape are owned by
@@ -131,7 +131,7 @@ subtraction that must not underflow.
   — **`requests`** and **`limits`**, both `ResourceVec` (cpu/mem `Quantity`) — and it
   is the **`requests`** vector that becomes the container's `Demand` and is summed by the fold, because
   `requests` is what the scheduler reserves against allocatable. **`limits`** is carried but *never* summed by
-  `place`; it is the grade-3 cgroup ceiling (throttle/OOM) enforced at runtime, not a scheduling number. A
+  `place`; it is the runtime-checked cgroup ceiling (throttle/OOM) enforced at runtime, not a scheduling number. A
   decode invariant holds per axis — **`requests ≤ limits`** (a limit below its request is itself an illegal
   state, foreclosed here). A StatefulSet's volume claims are a storage `Demand`; a whole workload's `Demand` is the fold
   of its containers' `requests` and volumes; a VM's `Demand` on its host is the fold of everything the VM runs
@@ -159,7 +159,7 @@ pod that fits no individual node (3 nodes × 4 CPU = 12 total admits a 5-CPU pod
 a concrete pod→node assignment (a witness); for an elastic node set, check a growth envelope the autoscaler can
 always satisfy. Only the single-owner *carves* below the cluster (a VM out of a host) stay pure subtractions.
 
-The fold is four total functions (grade-2 checked rejections, [§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-grade-2-check-never-grade-1)):
+The fold is four total functions (decode-foreclosed checked rejections, [§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed)):
 
 - **`fits :: Demand -> Capacity -> Either Overcommit Headroom`** — the leaf check: one demand against one
   capacity, returning the leftover headroom or `Left Overcommit` with the offending axis and magnitudes.
@@ -201,10 +201,10 @@ The nesting is where the illegal states [§3.17](./illegal_state_catalog.md#317-
   ([substrate_doctrine.md §8](./substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints)),
   distinct from the Lima/WSL2 VM's kube-allocatable ([§8](#8-where-the-numbers-come-from-declared-at-decode-cross-checked-at-runtime)).
   The three-way fit — the co-resident VM carve + the worker `Demand` ≤ physical-host allocatable, with the host
-  binary's own footprint already netted into system-reserved (substrate §8) — is a **grade-2 `Left Overcommit`
+  binary's own footprint already netted into system-reserved (substrate §8) — is a **decode-foreclosed `Left Overcommit`
   at decode**, the host-tier analogue of the pod-tier aggregate overcommit
   ([illegal_state_catalog.md §3.17](./illegal_state_catalog.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded));
-  it is **never** "unrepresentable" — a capacity check is grade-2, never grade-1 ([§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-grade-2-check-never-grade-1)).
+  it is **never** "unrepresentable" — a capacity check is decode-foreclosed, never type-foreclosed ([§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed)).
 - **Accelerator worker → served-model (VRAM).** The one wholesale accelerator worker on a node
   ([daemon_topology_doctrine.md §4](./daemon_topology_doctrine.md)) carves the node's accelerator memory among
   the models it serves — a `Σ served-model VRAM ≤ node vram` fold, modelled **like storage** (a per-owner Σ),
@@ -212,18 +212,18 @@ The nesting is where the illegal states [§3.17](./illegal_state_catalog.md#317-
   are owned by [substrate_doctrine.md §8](./substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints)
   (this doc does not restate that topology rule); the per-model VRAM footprint — the left operand of the Σ — is
   owned by [service_capability_doctrine.md §4.1](./service_capability_doctrine.md); this doc owns only the Σ
-  arithmetic. The declared-footprint Σ is **grade-2**; whether the model **actually fits in VRAM at runtime**
-  under real batch/context (dynamic KV-cache/fragmentation) is **grade-3 residue**, exactly like the `mem`
-  cgroup ceiling behind the `mem` Σ ([§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-grade-2-check-never-grade-1))
-  — the grade-2 Σ does **not** foreclose runtime VRAM OOM.
+  arithmetic. The declared-footprint Σ is **decode-foreclosed**; whether the model **actually fits in VRAM at runtime**
+  under real batch/context (dynamic KV-cache/fragmentation) is **runtime-checked residue**, exactly like the `mem`
+  cgroup ceiling behind the `mem` Σ ([§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed))
+  — the decode-foreclosed Σ does **not** foreclose runtime VRAM OOM.
 
 The fold is **total and re-runnable**: after any `Growable` policy grows a capacity ([§6](#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)) the fold re-runs
 against the new bound, so growth never silently invalidates an earlier check.
 
 **`place` folds exactly one `Topology`.** `place :: Topology -> [Workload]` admits a **single** `Topology`, and
 a `Topology` is one cluster ([cluster_topology_doctrine.md §4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction)),
-so a capacity fold spanning two clusters' `Topology`s has **no constructor — grade-1 by arity**
-([§9.1](#91-the-cross-cluster-capacity-fold-is-a-grade-1-non-goal-single-cluster-by-arity),
+so a capacity fold spanning two clusters' `Topology`s has **no constructor — type-foreclosed by arity**
+([§9.1](#91-the-cross-cluster-capacity-fold-is-a-type-foreclosed-non-goal-single-cluster-by-arity),
 [illegal_state_catalog.md §3.31](./illegal_state_catalog.md)). A **stretched cluster** — one whose nodes span
 two network-locality `Site`s across a WAN — is still **one** `Topology`; `place` runs **once** over it. The WAN
 there spans **nodes inside the one fold** (a full stretched member node) or a **host-worker subprocess client
@@ -244,7 +244,7 @@ not a packing. `place` selects on the topology's budget shape ([§6](#6-growable
   honoring each node's allocatable `Capacity`, `podFits` eligibility (affinity/taints), and anti-affinity.
   Success returns a `Placement` — a **witness** that a feasible schedule exists; failure returns
   `Left Unschedulable`. Schedulability is proven **by construction of the witness**, sound-not-complete
-  ([§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-grade-2-check-never-grade-1)).
+  ([§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed)).
 - **Elastic node set** (`Autoscaled` agents, a `Managed Eks` node group up to a `CloudQuota`) → **two-envelope
   check**, no witness (the nodes do not exist at decode):
   1. **per-pod-fits-an-instance** — every pod `podFits` the *largest* instance type in the `ScalingPolicy`
@@ -263,7 +263,7 @@ not a packing. `place` selects on the topology's budget shape ([§6](#6-growable
 *can* reproduce it, but pods are hard-pinned to nodes **only** where storage already pins them (host-backed
 ordinals, the hybrid case above); elsewhere the runtime scheduler is left free to reproduce an equivalent placement, so
 HA rescheduling after a node failure still works. Pinning every pod would defeat failover. That the scheduler
-*actually* reproduces a feasible placement is the grade-3 residue ([§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-grade-2-check-never-grade-1)).
+*actually* reproduces a feasible placement is the runtime-checked residue ([§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed)).
 
 **Accelerators are wholesale-owned, so the pod→node bin-pack ranges over cpu/mem only.** The bin-pack packs the
 `ResourceVec = { cpu, mem }` demands against each node's allocatable; a node's accelerators are **not** a
@@ -286,7 +286,7 @@ arm**, so "unbounded storage" (I9) has no syntax.
 StorageBudget = Fixed Capacity | QuotaCapped Quota | Growable ScalingPolicy
 ```
 
-- **No unbounded constructor** — the union shape is grade-1: a value cannot denote unbounded storage. This is
+- **No unbounded constructor** — the union shape is type-foreclosed: a value cannot denote unbounded storage. This is
   the storage-side reading of the illegal-state contract; the closed `StorageBacking` union it pairs with
   (host-disk-bounded | EBS-bounded | cloud-quota-bounded) is owned by
   [storage_lifecycle_doctrine.md §5.2](./storage_lifecycle_doctrine.md#52-the-storage-backing-is-bounded--the-closed-storagebacking-union), and this doc owns the *aggregate
@@ -315,7 +315,7 @@ truly unbounded.
 Growable = Bounded Capacity | Autoscaled ScalingPolicy
 ```
 
-- **No bare-unbounded arm** (grade-1 union shape): "grow without limit and without a policy" (I12) has no
+- **No bare-unbounded arm** (type-foreclosed union shape): "grow without limit and without a policy" (I12) has no
   constructor. `Autoscaled` *requires* a `ScalingPolicy`.
 - **`ScalingPolicy` is arbitrary-but-total, and amoebius owns it.** It is a typed, side-effect-free value —
   capacity thresholds (grow when utilization crosses a mark, drain when it falls), **instance price-shopping**
@@ -338,13 +338,13 @@ Growable = Bounded Capacity | Autoscaled ScalingPolicy
   is a consensus decision, not an elastic-capacity one. So the elastic axis and the quorum axis stay
   orthogonal: the price-shopping / threshold policy above ranges over agents; the fold re-runs ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting), below)
   against the grown *agent* set only. This is **Phase-10 design intent** (the `ScalingPolicy` enaction lands
-  in Phase 10, [§10](#10-planning-ownership)); the closed-union quorum shape it relies on is grade-1 and owned by cluster topology, not
+  in Phase 10, [§10](#10-planning-ownership)); the closed-union quorum shape it relies on is type-foreclosed and owned by cluster topology, not
   claimed here.
 - **The fold re-runs after growth ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)).** A `Growable` budget the fold checked at decode is re-checked
   against the grown capacity when the policy fires — so "unbounded" MinIO/Pulsar is representable **only**
   through such a policy whose ceiling is a quota, and the storage fold still holds against that ceiling.
-- **Honesty.** The policy *composing* — a legal `ScalingPolicy` that the fold accepts — is grade-1/2. That
-  the autoscaler *actually grows* capacity, and that the cloud *honors* the quota, is grade-3 runtime,
+- **Honesty.** The policy *composing* — a legal `ScalingPolicy` that the fold accepts — is type- or decode-foreclosed. That
+  the autoscaler *actually grows* capacity, and that the cloud *honors* the quota, is runtime-checked,
   deferred to [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) enactment and
   [chaos_failover_doctrine.md](./chaos_failover_doctrine.md).
 
@@ -367,16 +367,16 @@ the *two-ceiling arithmetic*):
   tier, not time (time may offload *sooner* for cost, but is never the sole trigger — a time-only policy is
   uninhabitable, [illegal_state_catalog.md §3.20](./illegal_state_catalog.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)). The per-topic hot cap **plus
   headroom** — the open ledger, in-flight ingest during offload, and the deletion lag — folds against the
-  BookKeeper `StorageBacking`: `Σ(hot caps + headroom) ≤ bookie disk`. A hot-tier overflow is a grade-2
+  BookKeeper `StorageBacking`: `Σ(hot caps + headroom) ≤ bookie disk`. A hot-tier overflow is a decode-foreclosed
   decode rejection.
 - **Durable-total fit.** The total retained bytes fold against the selected offload target's ceiling ([§5](#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)) —
   a provider-S3 quota ([pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md)) for cloud clusters, or the MinIO
   content store ([content_addressing_doctrine.md](./content_addressing_doctrine.md)) for host-bounded ones.
-- **Runtime fail-safe (grade-3).** A burst, or a stalled/S3-unreachable offload, can still race the cap at
+- **Runtime fail-safe (runtime-checked).** A burst, or a stalled/S3-unreachable offload, can still race the cap at
   runtime — no spec-layer check prevents that. So the topic policy carries a **mandatory backlog quota**
   (`producer_request_hold` / back-pressure at the high-water mark) so overflow degrades to per-topic producer
-  throttling, never a disk-full broker outage. The decode-time two-ceiling fit is grade-2; the back-pressure
-  actually holding is grade-3.
+  throttling, never a disk-full broker outage. The decode-time two-ceiling fit is decode-foreclosed; the back-pressure
+  actually holding is runtime-checked.
 - **A continuous/online-training Feed folds against these ceilings too.** A Feed-sourced continuous trainer
   ([content_addressing_doctrine.md](./content_addressing_doctrine.md)) consumes a topic with no terminal step,
   but its "forever" is **bounded per-cluster**: the consumed topic's retention folds against these two ceilings
@@ -392,16 +392,16 @@ the *two-ceiling arithmetic*):
 
 Intuition: for overcommit to be *unrepresentable* rather than a runtime error, the capacity the fold checks
 against must be a **spec input** — you cannot type-check a demand against a number you only learn at runtime.
-So amoebius **declares** capacity in the spec and folds at decode (grade-2), then **cross-checks** the
-declaration against reality at reconcile (grade-3).
+So amoebius **declares** capacity in the spec and folds at decode (decode-foreclosed), then **cross-checks** the
+declaration against reality at reconcile (runtime-checked).
 
-- **Declared (grade-2).** Each host/node advertises an **allocatable** `Capacity` in the substrate node
+- **Declared (decode-foreclosed).** Each host/node advertises an **allocatable** `Capacity` in the substrate node
   inventory ([substrate_doctrine.md §8](./substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints)) —
   the schedulable total with kube/system-reserved and the eviction threshold already netted out, *not* the raw
   hardware figure; each cloud account declares a quota ([pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md));
   each `StorageBacking` declares its size. The [§4](#4-the-total-fold-fits-carve-place-and-the-nesting) fold
   runs over these declared numbers at decode, so an over-committed spec never decodes.
-- **Cross-checked (grade-3).** A reconcile-time check refuses if the *real* probed **allocatable** capacity is
+- **Cross-checked (runtime-checked).** A reconcile-time check refuses if the *real* probed **allocatable** capacity is
   **smaller** than the declared `Capacity` (a host that claims 64 GiB allocatable but has 32, or a node whose
   kubelet reserves more than declared), fail-closed like every other
   `Unreachable → refuse` observation ([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)).
@@ -410,7 +410,7 @@ declaration against reality at reconcile (grade-3).
   The declaration is a *ceiling the fold trusts*, and reality must be at least that generous or the deploy
   refuses. Detection of the real number is owned by
   [substrate_doctrine.md §2](./substrate_doctrine.md#2-detection-a-pure-classification-over-three-reads);
-  this doc owns only the requirement that the cross-check exist and its grade.
+  this doc owns only the requirement that the cross-check exist and its layer.
 - **Physical-host total vs VM allocatable (host workers).** On apple/windows the node inventory's only kube node
   is the Lima/WSL2 VM, whose **allocatable** `Capacity` the cluster bin-pack folds against. A host-level
   accelerator worker is a native subprocess **outside** that VM; its `Demand` folds against the **physical-host**
@@ -422,8 +422,8 @@ declaration against reality at reconcile (grade-3).
   reconcile like every other capacity number. This doc consumes the two numbers; it does not own them.
 
 > **Honesty.** This model is Phase-0 design intent, specified before implementation. The fold is a real
-> grade-2 spec-layer guarantee *when implemented as specified*; that claim is itself about a design not yet
-> built (Phase 3). The grade-3 runtime cross-check and enforcement are deferred by construction. Where the
+> decode-foreclosed spec-layer guarantee *when implemented as specified*; that claim is itself about a design not yet
+> built (Phase 3). The runtime-checked cross-check and enforcement are deferred by construction. Where the
 > capacity arithmetic generalizes the push-back soundness proven in prodbox
 > ([cluster_lifecycle_doctrine.md §6](./cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-global-dhall)),
 > that is sibling evidence, not amoebius proof ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
@@ -447,12 +447,12 @@ To keep SSoT boundaries crisp:
 | Runtime enforcement (host actually caps, scheduler places, autoscaler grows, quota holds) | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), [testing_doctrine.md](./testing_doctrine.md) |
 | Capacity/scaling as a deployment-rules surface, never app logic | [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md) |
 
-### 9.1 The cross-cluster capacity fold is a grade-1 non-goal (single-cluster by arity)
+### 9.1 The cross-cluster capacity fold is a type-foreclosed non-goal (single-cluster by arity)
 
 `place` is **single-cluster by construction**, and that is a deliberate non-goal, not an omission. Its signature
 is `place :: Topology -> [Workload]`, and a `Topology` is exactly one cluster
 ([cluster_topology_doctrine.md §4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction)),
-so a capacity fold spanning two clusters' `Topology`s has **no constructor — grade-1 by arity**: the same
+so a capacity fold spanning two clusters' `Topology`s has **no constructor — type-foreclosed by arity**: the same
 closed-union / no-arm idiom that forecloses the worker pool as a fourth `ComputeEngine` arm
 ([single_logical_data_plane_doctrine.md §2](./single_logical_data_plane_doctrine.md#2-the-two-topologies)). This
 lives in its own subsection rather than a row of the §9 table because a non-goal has no *other* owner to name in
@@ -469,7 +469,7 @@ the category error [single_logical_data_plane_doctrine.md §5](./single_logical_
 forecloses. The **reason** a cluster is the fold boundary — the phantom cluster index `c` on `DataPlane` /
 `FabricMember` — is owned by [single_logical_data_plane_doctrine.md §1](./single_logical_data_plane_doctrine.md#1-why-this-doctrine-exists-two-ways-to-say-run-this-elsewhere)
 and [§3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe); this
-subsection consumes that WHY, it does not restate it. The only grade-3 residue is the deferred geo-replication
+subsection consumes that WHY, it does not restate it. The only runtime-checked residue is the deferred geo-replication
 enaction (Phase 9). A **stretched cluster** does not breach this arity: it is **one** `Topology` whose nodes span
 two `Site`s, folded **once** ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)).
 

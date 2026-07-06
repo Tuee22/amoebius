@@ -2,7 +2,7 @@
 
 **Status**: Reference only
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/testing_doctrine.md, DEVELOPMENT_PLAN/later_phases.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/testing_doctrine.md, DEVELOPMENT_PLAN/later_phases.md
 **Generated sections**: none
 
 > **Purpose**: Define delivery — build, promote, roll out — as **typed composition on primitives amoebius
@@ -102,7 +102,7 @@ data Release = Release
   This is why "no release store to desync" holds: unlike Helm's mutable, gzip-blob release Secret, an
   amoebius `Release` cannot be half-written or edited out from under a pointer.
 
-> **Grade.** The immutability and self-naming are **grade-(3) runtime residue** enforced by the
+> **Layer.** The immutability and self-naming are **runtime-checked residue** enforced by the
 > content-addressed write protocol (a blob at a hash either is the bytes that hash to it, or the write is
 > rejected) — the enforcement actually holds at runtime, it is not a compile-time impossibility.
 
@@ -145,9 +145,9 @@ data Environment = Dev | Staging | Prod          -- closed union; no fourth, unn
   store retains prior pointer values, "what was in prod, when, and which `Release` preceded it" is a first-class
   query — replacing the git-polling controller's changelog with an immutable pointer log.
 
-> **Grade.** Atomicity of promotion is **grade-(3)**: it is the ETag-CAS runtime protocol that forecloses a
+> **Layer.** Atomicity of promotion is **runtime-checked**: it is the ETag-CAS runtime protocol that forecloses a
 > lost-update / split-promotion race, not a type-level impossibility. The *closedness* of `Environment` (no
-> fourth environment) is **grade-(1)** — an un-enumerated environment has no constructor.
+> fourth environment) is **type-foreclosed** — an un-enumerated environment has no constructor.
 
 ### Sibling evidence
 
@@ -181,7 +181,7 @@ advance :: Environment -> Release -> EvidenceWitness -> PointerCas
   [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact))
   yields no witness for that layer — so a `Release` short of prod's required strength has **no** `advance`
   value to hand the CAS.
-- **Promote-unverified→prod is grade-(1) unrepresentable.** Because `advance` demands an `EvidenceWitness` and
+- **Promote-unverified→prod is type-foreclosed unrepresentable.** Because `advance` demands an `EvidenceWitness` and
   that witness exists only once the corresponding evidence edge exists, there is simply **no term** that
   promotes an under-verified `Release` to prod — not a runtime check that fires, but a value that cannot be
   constructed. This is the same idiom as infernix's `.ready`-gated `ArtifactRef` (an artifact handle exists
@@ -195,7 +195,7 @@ advance :: Environment -> Release -> EvidenceWitness -> PointerCas
   the uniform per-environment promotion precondition. That is amoebius design intent (Phase-N), not a built
   gate.
 
-> **Grade.** Promote-unverified→prod is **grade-(1)** (uninhabitable — no `advance` term). The *strength
+> **Layer.** Promote-unverified→prod is **type-foreclosed** (uninhabitable — no `advance` term). The *strength
 > mapping* itself (which layer prod requires) is a policy value the gate enforces at construction time.
 
 ### Sibling evidence
@@ -258,7 +258,7 @@ data RolloutPhase = RolloutPhase
 > so a `RolloutPhase` applies **rendered objects**, never a `helm install`. The pattern is borrowed; the Helm
 > is dropped.
 
-> **Grade / honesty.** The `RolloutPlan` is **Phase-N design intent** enacted by the Phase-2 SSA reconciler,
+> **Layer / honesty.** The `RolloutPlan` is **Phase-N design intent** enacted by the Phase-2 SSA reconciler,
 > which is itself unbuilt. Ordering, readiness-gating, canary weights, and rollback are real, documented
 > Kubernetes / Gateway-API mechanisms; *that amoebius wires them into this plan type* is specified here and
 > unproven until the phase lands.
@@ -312,13 +312,14 @@ extension mechanism remains at Phase-15. This doc states the target shape and li
 - [Engineering Doctrine Index](./README.md)
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) the hash/pointer master registry (`releaseHash`, the `environment` pointer kind), [§4](./content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) determinism; the store the ledger writes into
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — [§5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait) the SSA/ApplySet reconciler `RolloutPlan` enacts, [§6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderdhall-observed-is-etcd-a-diff-is-typed) the applied-log this doctrine promotes to the canonical ledger
+- [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§3](./readiness_ordering_doctrine.md#3-readiness-is-a-condition-never-a-duration) the `ReadinessGate` on a `RolloutPhase` is the tier-(c) instance of the general `Readiness` edge (a condition, never a duration)
 - [Testing Doctrine](./testing_doctrine.md) — [§4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run proven/tested/assumed evidence ledger the `PromotionGate` consumes
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md) — the Extract → Model → Inject grammar behind the evidence-strength the gate requires
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — [§3](./app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)/[§4](./app_vs_deployment_doctrine.md#4-the-dividing-line--a-litmus-test) env differences are deployment rules; app bytes are byte-identical across environments
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — [§8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction) `create-new → verified-migrate → retire-old` for the schema-migration `RolloutPhase`
 - [Network Fabric Doctrine](./network_fabric_doctrine.md) — Gateway-API `HTTPRoute` weights the canary phase shifts; the no-mesh verdict
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — consumer-group / subscription cutover for Pulsar workloads
-- [Illegal State Catalog](./illegal_state_catalog.md) — [§3.26](./illegal_state_catalog.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) promote-unverified→prod is grade-(1) unrepresentable
+- [Illegal State Catalog](./illegal_state_catalog.md) — [§3.26](./illegal_state_catalog.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) promote-unverified→prod is type-foreclosed unrepresentable
 - [Image Build Doctrine](./image_build_doctrine.md) — the build half (multi-arch images, the `distribution` registry)
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§3](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected) the elected singleton that runs promote/rollout; the host daemon that builds
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — reconciler tiers (a) cloud-IaC and (b) the tag-discovery host reconciler, distinct from tier (c)

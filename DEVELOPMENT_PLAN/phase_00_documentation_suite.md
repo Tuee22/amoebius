@@ -60,7 +60,7 @@ the sibling **prodbox** project — that is prior-art evidence, not amoebius pro
 - [`app_vs_deployment_doctrine.md` §1 — Two surfaces, one app written once](../documents/engineering/app_vs_deployment_doctrine.md#1-two-surfaces-one-app-written-once):
   this phase documents the hard split between application logic and deployment rules.
 - [`illegal_state_catalog.md` §1 — The promise: illegal states fail to type-check](../documents/engineering/illegal_state_catalog.md#1-the-promise-illegal-states-fail-to-type-check):
-  this phase catalogs each illegal state and the typing technique that forecloses it, with honest grades of
+  this phase catalogs each illegal state and the typing technique that forecloses it, with honest layers of
   foreclosure.
 - [`service_capability_doctrine.md` §1 — Why capabilities, not products](../documents/engineering/service_capability_doctrine.md#1-why-capabilities-not-products):
   this phase specifies the capability set, the one-canonical-provider rule, and capability→provider→shape
@@ -177,7 +177,7 @@ Adopt [`dsl_doctrine.md` §5 — The illegal-state-unrepresentable contract](../
 [`illegal_state_catalog.md` §1 — The promise: illegal states fail to type-check](../documents/engineering/illegal_state_catalog.md#1-the-promise-illegal-states-fail-to-type-check),
 and [`service_capability_doctrine.md` §1 — Why capabilities, not products](../documents/engineering/service_capability_doctrine.md#1-why-capabilities-not-products):
 write the core of the DSL — the orchestration surface, the two-gate type contract, the app-logic/deployment
-split, the illegal-state catalog with honest foreclosure grades, and the capability abstraction.
+split, the illegal-state catalog with honest foreclosure layers, and the capability abstraction.
 
 ### Deliverables
 
@@ -185,14 +185,14 @@ split, the illegal-state catalog with honest foreclosure grades, and the capabil
   the Dhall-typechecker + Haskell-decoder gates.
 - `app_vs_deployment_doctrine.md`: the application-logic vs deployment-rules split and its litmus test.
 - `illegal_state_catalog.md`: the catalog of illegal states, the typing techniques, the coverage matrix, and
-  the three grades of foreclosure.
+  the three layers of foreclosure.
 - `service_capability_doctrine.md`: the capability set, one-canonical-provider rule, capability→provider→shape
   binding, and the link to the illegal-state contract.
 
 ### Validation
 
 1. Lint resolves every cross-link among the four docs and to the spine.
-2. The catalog's foreclosure grades are stated honestly (proven-by-typecheck vs enforced-at-runtime), with no
+2. The catalog's foreclosure layers are stated honestly (proven-by-typecheck vs enforced-at-runtime), with no
    "it compiles ⇒ the cluster enforces it" overclaim.
 
 ### Remaining Work

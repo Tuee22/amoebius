@@ -66,7 +66,7 @@ gates.
 > declared `Capacity`** (cpu / mem / disk / gpu) — the number the capacity fold
 > ([`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) §4) checks
 > workload/VM/engine demand against, cross-checked at runtime against detection (§2 of the substrate
-> doctrine). The registry records that a `Capacity` is declared per host/node; the fold and its grade are the
+> doctrine). The registry records that a `Capacity` is declared per host/node; the fold and its layer are the
 > capacity doctrine's.
 
 ### apple

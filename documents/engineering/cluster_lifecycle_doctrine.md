@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for amoebius cluster bring-up and teardown across kind / rke2 / provider clusters — bootstrap, recursive **amoebic spawning**, graceful teardown-with-cleanup versus chaos-failover, push-back on an unsatisfiable global `.dhall`, dynamic node provisioning, and ephemeral spin-up/down with deterministic rebind.
@@ -84,6 +84,10 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
   platform-service bring-up ordering edges (LB before edge, the registry before later pulls, Vault before
   secret-dependent startup) are owned by
   [platform_services_doctrine.md §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering).
+  "Follows readiness" is the *event-driven* discipline, never a timer: each init step gates on an **observed
+  condition** — a successful call, a `/readyz`, an unsealed Vault — not an elapsed wait, and the general
+  readiness-edge rule (a condition never a duration; the bootstrap tier's `discover`/`RuntimeWitness` gates)
+  is owned by [readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md).
 - **Bring-up is itself a reconcile.** "Come up" is not a one-shot script; it is the [§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) reconciler driving
   the world toward the `.dhall`. Re-running it is a no-op when already converged — that is the Phase 1
   acceptance shape.
@@ -434,10 +438,10 @@ verbs that stand it up. There is no rke2 state machine, exactly as there is no l
   re-provision, **never** triggered by a `ScalingPolicy`. The `ScalingPolicy` escape valve ([§8](#8-dynamic-node-provisioning);
   [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)) grows the **`agents` list only**; it
   can never mint or drop an etcd voter. A 0- or 2-server (no-quorum / split-brain) control plane has no
-  constructor at all — **grade-(1) unrepresentable** via the closed `Rke2Servers` union
+  constructor at all — **type-foreclosed unrepresentable** via the closed `Rke2Servers` union
   ([cluster_topology_doctrine.md §2/§4](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm);
   [illegal_state_catalog.md §3.24](./illegal_state_catalog.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)). Host distinctness across `servers ∪ agents`
-  is the **grade-(2)** `mkRke2` decode fold, likewise owned by cluster_topology.
+  is the **decode-foreclosed** `mkRke2` decode fold, likewise owned by cluster_topology.
 - **The server/agent axis is orthogonal.** Whether a host is a server or an agent is **DECLARED**, and it is
   independent of the **DETECTED** substrate and the **ELECTED** daemon role — orthogonal typed axes
   ([daemon_topology_doctrine.md](./daemon_topology_doctrine.md)), never fused: an rke2 server can run on any
@@ -468,7 +472,7 @@ verbs that stand it up. There is no rke2 state machine, exactly as there is no l
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md)
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — [§0](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision) is the home of the checkpoint-free tag-discovery host reconciler, tier (b) ([§11](#11-rke2-rollout-as-a-reconcile))
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — [§5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait), the in-cluster SSA/ApplySet reconciler, tier (c), that fills the cluster after the apiserver is up ([§11](#11-rke2-rollout-as-a-reconcile))
-- [Illegal State Catalog](./illegal_state_catalog.md) — [§3.24](./illegal_state_catalog.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain), an even/zero-server rke2 control plane as grade-(1) unrepresentable ([§11](#11-rke2-rollout-as-a-reconcile))
+- [Illegal State Catalog](./illegal_state_catalog.md) — [§3.24](./illegal_state_catalog.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain), an even/zero-server rke2 control plane as type-foreclosed unrepresentable ([§11](#11-rke2-rollout-as-a-reconcile))
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the sudo host daemon and elected in-cluster singleton enactors of the rke2 rollout ([§11](#11-rke2-rollout-as-a-reconcile))
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md)

@@ -50,7 +50,7 @@ This is a large body of work spanning many phases; that is expected.
   taints/tolerations/affinity, NetworkPolicy, and insecure ingress cannot be expressed wrongly.
 - **Resource demand never exceeds capacity.** A workload / VM / compute-engine whose summed cpu/mem/storage
   demand exceeds its host or cluster capacity is decode-rejected — a total fold over per-host/per-node
-  declared `Capacity` (grade-2; the substrate detects the real number and refuses if smaller).
+  declared `Capacity` (decode-foreclosed; the substrate detects the real number and refuses if smaller).
 - **No unbounded storage, anywhere.** Storage is host-bounded or cloud-quota-bounded; an app (MinIO **and**
   Pulsar) cannot consume more than its backing; every Pulsar topic carries a bounded retention + a
   **size-triggered** S3 offload so the hot tier never overflows; "unbounded" is representable only behind a

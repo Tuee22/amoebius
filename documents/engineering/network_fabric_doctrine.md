@@ -82,7 +82,7 @@ WireGuard fits the amoebius disciplines cleanly because it is a *primitive*, not
   full k8s node** (the K2 case), `render()` additionally emits a `ControlPlanePeer` covering that cluster's
   **apiserver VPN-IP** ([§4](#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)) — the
   kubelet↔apiserver span is a rendered peer like any other, so the render fold stays *total* over it (a
-  grade-2 decode fact), never a side channel. The obligation is **stretch-gated**: a co-located node draws no
+  decode-foreclosed decode fact), never a side channel. The obligation is **stretch-gated**: a co-located node draws no
   such peer.
 - **Distribution is a reconcile, not an agent.** The singleton reconciles the interface the same way it
   reconciles everything else ([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)):
@@ -153,8 +153,8 @@ break:
   **defers its constructor** (the K1 `Gateway` cell has no inhabitant yet). The stretched constructors in
   [cluster_topology_doctrine.md §4.1](./cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation)
   and [single_logical_data_plane_doctrine.md §3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe)
-  **consume** this sum; they never re-declare it. The mandatory field is grade-1 (no stretched constructor has
-  an inhabitant that omits it); *which* branch a genuinely-remote entity is routed to is the grade-2 fold over
+  **consume** this sum; they never re-declare it. The mandatory field is type-foreclosed (no stretched constructor has
+  an inhabitant that omits it); *which* branch a genuinely-remote entity is routed to is the decode-foreclosed fold over
   the declared `Site`
   ([substrate_doctrine.md §8](./substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints)).
 - **Two more endpoint indices join the `FabricPeer` family, both barred from `WildIngress`.** `SecureGatewayReach`
@@ -163,7 +163,7 @@ break:
   ([illegal_state_catalog.md §4.3](./illegal_state_catalog.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)),
   each with **no constructor turning it into a `WildIngress`** — so "Keycloak owns all wild ingress"
   ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path))
-  is preserved by construction for the secure-gateway door too (grade-1). A `SecureGatewayReach` mints the
+  is preserved by construction for the secure-gateway door too (type-foreclosed). A `SecureGatewayReach` mints the
   *same* `FabricMember c` the data-plane resolver already gates on
   ([single_logical_data_plane_doctrine.md §3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe)),
   not a second resolver-unknown witness — it differs in *how* you reach, never *that* you can reach.
@@ -177,9 +177,9 @@ break:
   provider-native-only,
   [cluster_topology_doctrine.md §4.1](./cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation)).
   The wire and the render obligation are owned here; *which* nodes are stretched members is owned by
-  cluster_topology. Grade: the endpoint index + the no-`WildIngress` constructor are grade-1; the render fold
-  covering the apiserver VPN-IP is grade-2; the tunnel actually coming up and the distro mTLS handshaking over
-  the WAN are grade-3 residue.
+  cluster_topology. Layer: the endpoint index + the no-`WildIngress` constructor are type-foreclosed; the render fold
+  covering the apiserver VPN-IP is decode-foreclosed; the tunnel actually coming up and the distro mTLS handshaking over
+  the WAN are runtime-checked residue.
 
 ---
 

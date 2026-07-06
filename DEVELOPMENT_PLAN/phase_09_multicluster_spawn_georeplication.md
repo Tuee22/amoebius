@@ -55,7 +55,7 @@ This phase is where the **cluster-topology types** (Phase 3, Sprint 3.6) are exe
 — unrepresentable at decode ([`illegal_state_catalog.md`](../documents/engineering/illegal_state_catalog.md)
 §3.16, [`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md) §4) — is
 realized by actually standing up N nodes on N hosts, and a multi-node `kind` child stays on its single host
-(§3.15). The type layer forbids the illegal topology; this phase proves the legal one converges (grade-(3)).
+(§3.15). The type layer forbids the illegal topology; this phase proves the legal one converges (runtime-checked).
 
 The phase consumes earlier phases and does not re-implement them: Phase 1's bootstrap of a `kind`/`rke2`
 cluster, Phase 2's root Vault/PKI + retained-PV storage + platform services, Phase 3's Dhall DSL +

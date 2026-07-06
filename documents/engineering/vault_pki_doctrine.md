@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for amoebius secrets and trust — Vault as the fail-closed secrets root, the SecretRef-by-name contract, the root cluster's single-node password-encrypted unseal, the two sanctioned parent/child unseal modes, parent-injects-secrets-into-child, and the root-owned PKI trust anchor for the whole forest.
@@ -216,12 +216,12 @@ provenance-carrying constructor (the import arm of a serveable `ModelArtifact`,
 and each app's staging resolves only its **own** app-namespaced upstream `SecretRef` — one app's staging
 cannot pull, and therefore cannot mint an artifact from, another app's model source. This is the
 secrets-by-name face of per-app model isolation (an app serves only models it produced or imported); the
-content-store namespacing and the grade-2 "app B serving/continuing app A's model without a grant" illegal
+content-store namespacing and the decode-foreclosed "app B serving/continuing app A's model without a grant" illegal
 state are owned by [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)
 and [illegal_state_catalog.md](./illegal_state_catalog.md); this section owns only that the pull credential
 is itself a per-app name. Correspondingly, the bytes that credential pulls are **verified against a pinned
 expected content-address, failing closed before `.ready`** — the pin-and-verify import constructor (and its
-grades: pin *presence* grade-1, pin *match* grade-2, "the pin names the intended model" grade-3/assumed)
+layers: pin *presence* type-foreclosed, pin *match* decode-foreclosed, "the pin names the intended model" runtime-checked/assumed)
 is owned by content_addressing §4.5; vault_pki owns only that the credential resolving the pull is a name,
 never a value.
 
@@ -492,7 +492,7 @@ prodbox's proven model (`secret_derivation_doctrine.md [§5](#5-the-root-cluster
 > [§3.1](#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken),
 > [§7](#7-parent-injects-secrets-into-the-childs-vault)) — only the **auth *method*** by which a non-member
 > resolves a named secret is under-specified. This round **names** that gap; it holds for **every** host
-> worker (both VPN- and gateway-reached) and is **grade-3 runtime residue** — an under-specified seam, not a
+> worker (both VPN- and gateway-reached) and is **runtime-checked residue** — an under-specified seam, not a
 > foreclosed illegal state — pending the phase that pins a non-member Vault-auth method. The stretched-node
 > doctrine that surfaces the seam is owned elsewhere ([host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md)
 > and the stretched split in cluster_topology / network_fabric); this section owns only the Vault-auth
@@ -565,6 +565,7 @@ states the target shape and links back for status.
 - [DSL Doctrine](./dsl_doctrine.md) — secrets-are-names-not-values (the DSL-surface rule this doc's mechanism serves)
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — single-node-root bootstrap, amoebic spawning, and the child unseal lifecycle
 - [Platform Services Doctrine](./platform_services_doctrine.md) — Vault as a standard HA platform service and the Vault-ready ordering edge
+- [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers) [§4 init-follows-readiness / fail-closed](#4-init-follows-readiness-fail-closed-vault-init) is the event-driven resolution of the readiness race, not a wait around it
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — the retained Vault PV and init-once / unseal-on-rebuild durability
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — Vault-Transit-envelope encryption of the MinIO Pulumi backend and the public-edge ZeroSSL/route53 path
 - [Content Addressing & Determinism](./content_addressing_doctrine.md) — the content-addressed model store the Tier-2 staging credentials write to ([§4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd))

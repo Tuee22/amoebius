@@ -62,7 +62,7 @@ Rke2Servers            -- CLOSED odd-quorum union: an arm only for a legal etcd 
 - **`Rke2`** carries `{ servers : Rke2Servers, agents : List LinuxHost }` — a **control plane** and a **data
   plane**, not a flat node bag. `Rke2Servers` is a **closed odd-quorum union** (`Single` / `Ha3` / `Ha5`), so
   an **even- or zero-server** control plane (no etcd majority / split-brain) has no constructor and is
-  **grade-1 unrepresentable** ([illegal_state_catalog.md §3.24](./illegal_state_catalog.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)); it caps HA at
+  **type-foreclosed unrepresentable** ([illegal_state_catalog.md §3.24](./illegal_state_catalog.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)); it caps HA at
   five by design (a `Ha7` arm is a deliberate future add). Agents are an ordinary `List LinuxHost`. "More
   nodes than hosts" stays uninhabitable and "the same host reused for two nodes" — now over `servers ∪ agents`
   — is a decode-rejected distinctness violation (I4,
@@ -79,7 +79,7 @@ Rke2Servers            -- CLOSED odd-quorum union: an arm only for a legal etcd 
   by [cluster_lifecycle_doctrine.md §1](./cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape),
   lifted to the type. Symmetrically, a **full stretched *member* node** on this hostless `Managed` arm has
   **no constructor absent a provider-native arm** (EKS Hybrid Nodes) — there is no `LinuxHost` field to hang
-  it off and no channel-1 mTLS — so it is **grade-1 uninhabitable** until such an arm is *surfaced* over the
+  it off and no channel-1 mTLS — so it is **type-foreclosed uninhabitable** until such an arm is *surfaced* over the
   cloud API ([pulumi_iac_doctrine.md §4](./pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog)),
   never an amoebius-built second control-plane fabric (the surface-provider-vs-build discipline,
   [cluster_lifecycle_doctrine.md §1](./cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape),
@@ -112,8 +112,8 @@ the virtualization provider.
   ([apple_metal_headless_builds.md](./apple_metal_headless_builds.md)) is about the on-host Metal *bridge
   build*; an rke2/kind *cluster* on an apple host still needs a Lima Linux VM. The two are different
   concerns and this doc states the cluster one; the build one is unchanged.
-- **Honesty.** The witness demand is grade-1 (no constructor). That the Lima/WSL2 VM *actually boots* and
-  presents a working kernel is grade-3 runtime, owned by
+- **Honesty.** The witness demand is type-foreclosed (no constructor). That the Lima/WSL2 VM *actually boots* and
+  presents a working kernel is runtime-checked, owned by
   [substrate_doctrine.md §4](./substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)
   and exercised in Phase 7.
 
@@ -130,15 +130,15 @@ Topology = { engine : ComputeEngine, nodes : NonEmpty Node }
 Node     = { host : Host, substrate : Substrate }   -- Host is a LinuxHost witness or a hostless Provider slot
 ```
 
-- **Kind: exactly one host (I3, grade-1).** The `Kind` arm's single `host` field *is* the cardinality bound —
+- **Kind: exactly one host (I3, type-foreclosed).** The `Kind` arm's single `host` field *is* the cardinality bound —
   a second host has no field to bind, a Gate-1 type error. Multi-node is `replicas`, which never adds a host.
 - **rke2: one Linux host per node, quorum by construction (I4).** `Rke2` no longer carries a flat
   `NonEmpty LinuxHost`; it splits into `{ servers : Rke2Servers, agents : List LinuxHost }` ([§2](#2-computeengine-a-closed-union-eks-a-first-class-arm)). Every server
-  and every agent still *is* a `LinuxHost` value, so "more nodes than hosts" stays grade-1 uninhabitable — but
+  and every agent still *is* a `LinuxHost` value, so "more nodes than hosts" stays type-foreclosed uninhabitable — but
   the server count is now pinned to a legal odd etcd quorum by the closed `Rke2Servers` union rather than left
   to a runtime check. **Distinctness** ("no host reused for two nodes") now ranges over `servers ∪ agents` and
-  is still the one part Dhall cannot express as a type (no Set-distinctness), so it degrades to a **grade-2
-  total decode fold** (`mkRke2` rejects a duplicate `HostId`), and the catalog grades [§3.16](./illegal_state_catalog.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused) to that weaker
+  is still the one part Dhall cannot express as a type (no Set-distinctness), so it degrades to a **decode-foreclosed
+  total decode fold** (`mkRke2` rejects a duplicate `HostId`), and the catalog classifies [§3.16](./illegal_state_catalog.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused) at that weaker
   floor honestly. Full cardinality treatment is [§4.1](#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation).
 - **Multi-substrate clusters stay legal (I2 carve-out).** A `Topology` may mix nodes of *different*
   substrates — a heterogeneous cluster is explicitly allowed. Compatibility ([§5](#5-the-compatibility-relation-technique-47-only-compatible-pairs-have-a-constructor)) is checked **elementwise**
@@ -149,27 +149,27 @@ Node     = { host : Host, substrate : Substrate }   -- Host is a LinuxHost witne
 
 The flat `Rke2.nodes : NonEmpty LinuxHost` treated every rke2 node alike. The typed model ([§2](#2-computeengine-a-closed-union-eks-a-first-class-arm)) splits the
 cluster into a **control plane** (`servers : Rke2Servers`) and a **data plane** (`agents : List LinuxHost`) and
-pins three properties at three honest grades.
+pins three properties at three honest layers.
 
-- **Quorum by closed union (grade-1).** `Rke2Servers = < Single | Ha3 | Ha5 >` has an arm *only* for the legal
+- **Quorum by closed union (type-foreclosed).** `Rke2Servers = < Single | Ha3 | Ha5 >` has an arm *only* for the legal
   odd etcd quorums {1, 3, 5}. A **0-server** (no control plane) or **2-server** (no majority / split-brain)
-  cluster has **no constructor** — grade-1 unrepresentable, the same "no illegal arm" idiom as `StorageBudget`'s
+  cluster has **no constructor** — type-foreclosed unrepresentable, the same "no illegal arm" idiom as `StorageBudget`'s
   missing unbounded case ([resource_capacity_doctrine.md §5](./resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)). The union
   deliberately caps HA at five; a `Ha7` arm is a future add, not an oversight. This is catalog entry
   [illegal_state_catalog.md §3.24](./illegal_state_catalog.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain) (Owner: this doc; Technique: [§4.2](./illegal_state_catalog.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) closed union).
-- **Distinctness by fold over `servers ∪ agents` (grade-2).** Dhall has no Set-distinctness, so "no host reused
-  for two nodes" cannot be a type. It degrades to the **grade-2 total decode fold** `mkRke2`, which now ranges
+- **Distinctness by fold over `servers ∪ agents` (decode-foreclosed).** Dhall has no Set-distinctness, so "no host reused
+  for two nodes" cannot be a type. It degrades to the **decode-foreclosed total decode fold** `mkRke2`, which now ranges
   over the **union of the server set and the agent list** and rejects a duplicate `HostId`. This *generalizes*
   the old single-node-list fold: distinctness must hold across both planes at once, so a host cannot be both a
-  server and an agent, nor appear twice in either. The catalog grades
+  server and an agent, nor appear twice in either. The catalog classifies
   [illegal_state_catalog.md §3.16](./illegal_state_catalog.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused) to this weaker floor honestly and now scopes it
   to `servers ∪ agents`.
-- **Control-plane taint by derivation (grade-1 structural, grade-3 residue).** The control-plane node taint and
+- **Control-plane taint by derivation (type-foreclosed structural, runtime-checked residue).** The control-plane node taint and
   its matching workload tolerations are **derived from the server set**, never hand-authored — the same
   derive-don't-author discipline the catalog names for tolerations
   ([illegal_state_catalog.md §3.22](./illegal_state_catalog.md#322-a-hand-authored-un-derived-toleration)). Because `servers` is the single source of the
-  taint, there is no seam to author an un-derived one; the derivation is grade-1 at the spec layer, with the
-  actual kube-level taint/toleration application a grade-3 runtime residue on the reconciler.
+  taint, there is no seam to author an un-derived one; the derivation is type-foreclosed at the spec layer, with the
+  actual kube-level taint/toleration application a runtime-checked residue on the reconciler.
 
 **Root cluster.** The zero-secret root is exactly `{ servers = Rke2Servers.Single host, agents = [] }` — one
 server, no agents — the single-node base named by the root-single-node rule in
@@ -215,17 +215,17 @@ This doc owns the classifier and the K2 (full-node) control-plane witness; the K
   needs only data-plane + Vault reach and **no** apiserver reachability. The classifier's K1 arm yields only a
   `DataPlaneOnly (FabricMember c)` — the **one** data-plane witness owned by
   [single_logical_data_plane_doctrine.md §3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe),
-  consumed here and never re-minted — so a host worker has **no path** into control-plane membership (**grade-1**:
+  consumed here and never re-minted — so a host worker has **no path** into control-plane membership (**type-foreclosed**:
   the total `witness` fold has no constructor carrying a K1 host worker into a member `Reach`). It is the
   attach-pool shape ([single_logical_data_plane_doctrine.md §4](./single_logical_data_plane_doctrine.md#4-the-elastic-worker-pool-the-attach-topology)),
   representable on **any** `ComputeEngine`, including a hostless `Managed Eks`.
 - **K2 — a full k8s node** (a kubelet member inside the `Rke2` arm) carries the control-plane witness
   **`ReachesControlPlane c`**, minted **from** the declared `Networking`'s `VpnFabric`
   ([network_fabric_doctrine.md §3](./network_fabric_doctrine.md#3-keys-config-and-distribution--wireguard-as-just-another-reconcile)/[§5](./network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric))
-  by covering the apiserver VPN-IP — there is **no off-fabric constructor**, so witness *presence* is **grade-1**
+  by covering the apiserver VPN-IP — there is **no off-fabric constructor**, so witness *presence* is **type-foreclosed**
   (the phantom cluster index `c` must unify). A declared-remote agent is routed to
   **`mkStretchedAgent :: ReachesControlPlane c -> HostAt s' -> Agent c s'`** by the same total `Site` decode
-  fold that classifies stretchedness — a **grade-2** checked rejection of a constructible value
+  fold that classifies stretchedness — a **decode-foreclosed** checked rejection of a constructible value
   ([§5](#5-the-compatibility-relation-technique-47-only-compatible-pairs-have-a-constructor) elementwise fold);
   `mkStretchedAgent` threads a **single** networking value (the witness already carries its `VpnFabric`, so
   there is no double-count).
@@ -233,12 +233,12 @@ This doc owns the classifier and the K2 (full-node) control-plane witness; the K
 **Quorum stays co-located: `Rke2Servers (s :: Site)`.** The stretch is a **data-plane** move only: the servers
 union gains a phantom `Site` index so every server of one quorum unifies on **one** `Site`, and only
 `mkStretchedAgent` places agents at `Site' ≠ s`. A **split-`Site` etcd quorum** therefore has **no inhabitant** —
-**grade-1 by phantom-`Site` unification**, a *different* mechanism from the odd-count closure that forecloses a
+**type-foreclosed by phantom-`Site` unification**, a *different* mechanism from the odd-count closure that forecloses a
 2/0-server quorum ([illegal_state_catalog.md §3.24](./illegal_state_catalog.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)
-is the count union; this is the locality index). Runtime residue is **grade-3**: the co-located servers keep a
+is the count union; this is the locality index). Runtime residue is **runtime-checked**: the co-located servers keep a
 low-latency majority when the WAN link degrades.
 
-**Full member on the hostless `Managed` arm is grade-1 until a provider-native arm.** Per
+**Full member on the hostless `Managed` arm is type-foreclosed until a provider-native arm.** Per
 [§2](#2-computeengine-a-closed-union-eks-a-first-class-arm), a full stretched member on `Managed Eks` has **no
 constructor absent a provider-native capability** (EKS Hybrid Nodes) the `Managed` arm would *surface* — amoebius
 never builds a second control-plane fabric to fake it (the surface-provider-vs-build discipline,
@@ -247,11 +247,11 @@ never builds a second control-plane fabric to fake it (the surface-provider-vs-b
 This is the same closed-union "no arm = not supported" idiom as the missing `Ha7` quorum.
 
 **Honesty.** All of the above is Phase-0 design intent; **this round introduces** the two-kind classifier and
-the K2 witness rule (no code exists). Witness/field presence is grade-1; the `Site` routing fold and the reach
-relation are grade-2 decode checks; the WAN link actually coming up and the declared `Site` matching reality
+the K2 witness rule (no code exists). Witness/field presence is type-foreclosed; the `Site` routing fold and the reach
+relation are decode-foreclosed decode checks; the WAN link actually coming up and the declared `Site` matching reality
 (`discover = Unreachable → refuse`,
 [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine))
-are grade-3 runtime residue. The `Networking` wire, its endpoint indices, and the apiserver-VPN-IP render
+are runtime-checked residue. The `Networking` wire, its endpoint indices, and the apiserver-VPN-IP render
 obligation are owned by
 [network_fabric_doctrine.md §5](./network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric);
 `Site` by [substrate_doctrine.md §8](./substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints);
@@ -271,10 +271,10 @@ This is the catalog's **[§4.7](./illegal_state_catalog.md#47-compatibility--top
 constructor-gating ([§4.3](./illegal_state_catalog.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)), and ownership-fold ([§4.4](./illegal_state_catalog.md#44-ownership-indices--single-owner-ssot-structurally)) techniques and applies them to a **binary relation over a
 collection**.
 
-- **Element-level (grade-1 where structural).** `Managed Eks` pairs only with a hostless provider slot;
+- **Element-level (type-foreclosed where structural).** `Managed Eks` pairs only with a hostless provider slot;
   `Rke2`/`Kind` pair only with a `LinuxHost` witness ([§3](#3-the-linuxhost-witness-rke2kind-on-a-host-with-no-linux-node-is-uninhabitable)). A pairing outside the relation — e.g. a native
   Apple-Metal engine on a Linux node, or a managed arm carrying a `LinuxHost` — has no constructor.
-- **Collection-level (grade-2 fold).** The cluster-wide compatibility check is a **total elementwise fold**
+- **Collection-level (decode-foreclosed fold).** The cluster-wide compatibility check is a **total elementwise fold**
   over `NonEmpty Node`: every node's `(engine, substrate)` pair must satisfy the relation, and the fold
   returns the full list of incompatible nodes (not just the first), like `validateTopology`
   ([pulsar_client_doctrine.md §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra)). Because it
@@ -332,9 +332,9 @@ This doctrine owns the *shape* of a legal cluster; two siblings own what rides o
   [network_fabric_doctrine.md §5](./network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric)
   `Networking` wire; being stretched is a *networking* fact that never moves the per-host capacity fold.
 
-> **Honesty.** Everything here is Phase-0 design intent. The type demands ([§3](#3-the-linuxhost-witness-rke2kind-on-a-host-with-no-linux-node-is-uninhabitable)-[§5](#5-the-compatibility-relation-technique-47-only-compatible-pairs-have-a-constructor)) are grade-1/grade-2
+> **Honesty.** Everything here is Phase-0 design intent. The type demands ([§3](#3-the-linuxhost-witness-rke2kind-on-a-host-with-no-linux-node-is-uninhabitable)-[§5](#5-the-compatibility-relation-technique-47-only-compatible-pairs-have-a-constructor)) are type-foreclosed/decode-foreclosed
 > spec-layer properties *when implemented as specified* (Phase 3); the runtime residue — the VM actually
-> booting, N rke2 nodes actually joining on N hosts, an EKS cluster actually coming up — is grade-3, owned by
+> booting, N rke2 nodes actually joining on N hosts, an EKS cluster actually coming up — is runtime-checked, owned by
 > the Phase 7/9/10 gates and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Where a mechanism
 > generalizes hostbootstrap's virtualization providers or prodbox's EKS reality, that is sibling evidence,
 > not amoebius proof ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).

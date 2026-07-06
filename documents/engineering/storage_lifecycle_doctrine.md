@@ -173,7 +173,7 @@ cloud (bounded by a quota), encoded as a **closed union with no unbounded arm**:
 StorageBacking = HostDisk Capacity | Ebs Capacity | CloudQuota Quota
 ```
 
-- **No unbounded constructor** (a grade-1 union shape, [illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-grades-of-foreclosure-and-the-honesty-they-force)):
+- **No unbounded constructor** (a type-foreclosed union shape, [illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
   a value cannot denote unbounded storage. A `HostDisk`/`Ebs` backing is bounded by a physical/EBS size; a
   `CloudQuota` backing is bounded by a quota owned by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md); the
   content-addressed MinIO store is a `HostDisk`/`CloudQuota` backing owned by

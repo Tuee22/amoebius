@@ -57,7 +57,7 @@ This phase is where the **`LinuxHost` witness** of the topology type discipline 
 reality: the Lima Ubuntu VM *is* the only `LinuxHost` an apple host can produce, so "an rke2/kind cluster on a
 bare Apple host" — unrepresentable at decode ([`illegal_state_catalog.md`](../documents/engineering/illegal_state_catalog.md)
 §3.14, [`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md) §3) — is
-realized by *actually interposing* the VM here (the grade-(3) "the VM boots" residue). The Lima VM's carved
+realized by *actually interposing* the VM here (the runtime-checked "the VM boots" residue). The Lima VM's carved
 capacity budget is likewise the runtime cross-check for the host/VM capacity fold
 ([`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) §8,
 [`illegal_state_catalog.md`](../documents/engineering/illegal_state_catalog.md) §3.17): a spec whose VM/guest
@@ -70,7 +70,7 @@ worker now declares its own foldable cpu/mem `Demand` and folds against a **phys
 from the Lima/WSL2 VM's kube-allocatable — a new **host→host-worker** arm alongside the host→VM→guest fold
 ([`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) §4/§8; host-worker
 `Demand` owner [`platform_services_doctrine.md`](../documents/engineering/platform_services_doctrine.md) §10) —
-so a VM-carve + host-worker over-commit is a grade-2 `Left Overcommit` at decode (§D). The accelerator worker owns
+so a VM-carve + host-worker over-commit is a decode-foreclosed `Left Overcommit` at decode (§D). The accelerator worker owns
 its node's accelerators **wholesale** ([`daemon_topology_doctrine.md`](../documents/engineering/daemon_topology_doctrine.md)
 §4; `resource_capacity_doctrine.md` §4.1), with accelerator memory modeled as a **VRAM sub-budget** the worker
 carves among served models (a `worker → served-model` Σ; the per-host `vram` and the unified-vs-discrete memory

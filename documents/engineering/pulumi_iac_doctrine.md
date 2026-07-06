@@ -61,7 +61,7 @@ provider capability the `Managed Eks` arm would *surface* (provisioned via the c
 [§4](#4-what-pulumi-provisions-the-resource-catalog)), **never** an amoebius-built continuous second
 control-plane fabric — which would be exactly the "autonomous substrate authority acting on its own reconcile
 loop beside the elected singleton" Crossplane shape rejected here. Absent that provider-native arm, a stretched
-full node on a managed control plane simply has **no constructor** — grade-1 uninhabitable, the closed-union
+full node on a managed control plane simply has **no constructor** — type-foreclosed uninhabitable, the closed-union
 "no arm = not supported" idiom owned by [cluster_topology_doctrine.md §2, §4.1](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm);
 the surface-a-provider-capability-vs-build-a-fabric axis it rests on is
 [cluster_lifecycle_doctrine.md §1](./cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape).

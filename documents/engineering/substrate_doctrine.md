@@ -94,7 +94,7 @@ Either String Substrate` wrapped by `detect :: IO (Either String Substrate)`:
   the per-host accelerator/`vram` `Capacity` the node inventory declares
   ([§8](#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints)), so accelerator **count** and
   **VRAM** are *declared-at-decode and cross-checked-at-runtime* against the real probe, not unchecked
-  grade-3.
+  runtime-checked.
 
 Two classification rules are load-bearing and stated as hard failures, not warnings:
 
@@ -316,7 +316,7 @@ unified memory; CUDA under WSL2) cannot be reached performantly from inside that
 **The Windows in-cluster node is `linux-cpu` only.** To keep the one physical GPU from being claimed twice —
 once as an in-cluster bin-packable node resource and again by the wholesale host worker — a Windows host's
 WSL2-backed in-cluster node advertises **`linux-cpu`** capacity only; a WSL2-backed **`linux-cuda`**
-in-cluster node on Windows has **no constructor** (grade-1). The GPU escapes to the host worker, never to a
+in-cluster node on Windows has **no constructor** (type-foreclosed). The GPU escapes to the host worker, never to a
 WSL2 pod, and is owned wholesale by that one worker.
 
 **A host worker need not hold an in-cluster node.** A `Cuda` (or Apple-Metal) host worker may peer into a
@@ -464,7 +464,7 @@ inventory declares that physical-host total as a distinct per-host figure, and t
 footprint is **netted into system-reserved** on it (exactly as kube/system-reserved is netted out of the VM's
 allocatable), so the physical-host fold stays two-claimant — VM carve + worker `Demand` ≤ physical-host
 allocatable — and the host binary is never a third un-owned claimant. This doc owns the **declaration** of the
-physical-host total and the system-reserved netting; the **fold arithmetic** (a grade-2 `Left Overcommit` at
+physical-host total and the system-reserved netting; the **fold arithmetic** (a decode-foreclosed `Left Overcommit` at
 decode) is [resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)'s,
 and the host-worker `Demand` it consumes is declared by
 [platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram).
@@ -478,7 +478,7 @@ substrate-specific — a fact this inventory declares so the capacity fold downs
   **no separate `vram`**: the accelerator worker's memory demand simply *is* its `mem` demand, netted from the
   single physical-host `mem` ([§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)).
   An `apple` host declaring a separate `vram` Capacity is an **uninhabitable per-host `Capacity` shape —
-  grade-1** (there is no unified-pool `vram` field to fill; the constructor does not exist).
+  type-foreclosed** (there is no unified-pool `vram` field to fill; the constructor does not exist).
 - **linux-cuda / windows (CUDA, discrete memory).** The accelerator carries its own memory, not contended
   with the WSL2/Lima VM, so the per-host `Capacity` declares host `mem` **plus** a separate **`vram`** total.
 
@@ -502,7 +502,7 @@ cross-checked-at-runtime** discipline as the rest of the `Capacity` above: the i
 `Site`, and a host declaring a `Site` its reachability contradicts (a remote host mis-declared local) surfaces
 at reconcile as the three-valued `discover = Unreachable → refuse`
 ([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine))
-— so a declared-vs-real `Site` mismatch is grade-3 runtime residue, the ceiling every §8 declared fact lives
+— so a declared-vs-real `Site` mismatch is runtime-checked residue, the ceiling every §8 declared fact lives
 at. Crucially this inventory carries a `Site` for **both** kinds of host it lists: **in-cluster cluster
 `Node`s** *and* the **host-worker physical hosts** ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained),
 whose per-host `Capacity` is [§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)'s

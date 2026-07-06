@@ -49,7 +49,7 @@ mandatory `RetentionPolicy`, the **size-triggered** S3 offload high-water mark, 
 back-pressure are enabled on the namespace as reconcile steps, per
 [`pulsar_client_doctrine.md`](../documents/engineering/pulsar_client_doctrine.md) §6.1 and the two-ceiling
 fold in [`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) §7. This is
-the **grade-(3) runtime residue** of [`illegal_state_catalog.md`](../documents/engineering/illegal_state_catalog.md)
+the **runtime-checked residue** of [`illegal_state_catalog.md`](../documents/engineering/illegal_state_catalog.md)
 §3.20 — the type-layer guarantee (a time-only or retention-less topic cannot be *written*) is Phase 3's; that
 the broker *actually* offloads to S3 before BookKeeper fills, and that back-pressure holds under a burst, is
 what this phase tests.
@@ -196,7 +196,7 @@ application payload encoded exclusively as CBOR** through a typed codec ([illega
 - `SEEK` repositioning a subscription to an earlier `message_id` or timestamp for replay.
 - A typed **CBOR payload codec** (`Amoebius.Pulsar.Cbor`, on `serialise`/`cborg`): `produce`/`consume` accept
   only a `Serialise` value (equivalently a `CborPayload` whose sole constructor is `encodeCbor`); there is
-  **no** raw/JSON/protobuf payload constructor, so a non-CBOR body is unrepresentable (grade-1). Consume is a
+  **no** raw/JSON/protobuf payload constructor, so a non-CBOR body is unrepresentable (type-foreclosed). Consume is a
   total `Either DecodeError a`. Canonical CBOR (shared with the store's `encodeManifestCbor`, Sprint 4.5) is
   used where the payload is content-addressed; a large-artifact payload carries a manifest SHA reference,
   never the raw blob inline.
@@ -208,8 +208,8 @@ application payload encoded exclusively as CBOR** through a typed codec ([illega
    primary-then-standby ordering; round-robin spread; per-key affinity).
 3. Consume a prefix, `SEEK` back, and assert the earlier messages are redelivered.
 4. A typed command/event round-trips through the CBOR codec byte-for-byte; a fixture attempting a non-CBOR
-   payload fails to type-check (grade-1); a corrupted CBOR body yields a structured `Left` on consume
-   (grade-2, like CRC32C), never a silent misread.
+   payload fails to type-check (type-foreclosed); a corrupted CBOR body yields a structured `Left` on consume
+   (decode-foreclosed, like CRC32C), never a silent misread.
 
 ### Remaining Work
 The whole sprint.
@@ -407,7 +407,7 @@ The whole sprint.
   realized in `amoebius-pulsar`; flip the relevant sibling-evidence honesty notes to live-proof status once the
   gate runs (status itself stays in this plan).
 - `documents/engineering/illegal_state_catalog.md` — annotate §3.23 (non-CBOR payload) with its realized
-  grade: produce-side grade-(1) uninhabitable, consume-side grade-(2) total decode, no grade-(3) claim.
+  layer: produce-side type-foreclosed uninhabitable, consume-side decode-foreclosed total decode, no runtime-checked claim.
 - `documents/engineering/content_addressing_doctrine.md` — record that §2 (the three-tier store + the two
   write protocols) is realized in `amoebius-store`, namespaced under an opaque `experiment-hash` prefix, with
   the §3 `experimentHash` derivation and seed kernel explicitly deferred to Phase 5.

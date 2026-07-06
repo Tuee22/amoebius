@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define amoebius's cross-project content-addressed store (blobs ← manifests ← pointers), the
@@ -89,7 +89,7 @@ and serves **only** the models it produced or imported, never another app's. The
 stays content-addressed and dedup-able within the bucket; only the *mutable pointer* — the object that says "this
 app may serve this" — is app-scoped. Two consequences fall out and are owned elsewhere: there is **no** cross-app
 training-DAG `parent` edge (a `Continue` chain, [§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm), stays within one app's namespace), and "app B serving or
-continuing app A's model without an explicit grant" is a **grade-2** illegal state
+continuing app A's model without an explicit grant" is a **decode-foreclosed** illegal state
 ([`illegal_state_catalog.md`](./illegal_state_catalog.md)). The upstream-pull credential a stage-by-name import
 resolves is likewise scoped per app ([`vault_pki_doctrine.md`](./vault_pki_doctrine.md)).
 
@@ -276,13 +276,13 @@ adds**, never by a check that already existed:
    [`service_capability_doctrine.md` §4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-baked-and-substrate-selected-never-fetched):
    "the model's engine **family** is available on the **serving** substrate lane," decoupled from the producing
    lane. Family×lane availability is a **partial** relation (e.g. vLLM is not baked on Apple-Metal), so an
-   unavailable-family-on-lane is an honest **grade-2** rejection.
+   unavailable-family-on-lane is an honest **decode-foreclosed** rejection.
 
-**Grade.** Producing-substrate provenance + the [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) witnessed constructor is **grade-1**; the engine-family ↔
-serving-substrate serve relation is **grade-2** (a checked rejection of a constructible value, [`illegal_state_catalog.md` §4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection)).
-Two **grade-3 residues** are named, not foreclosed, and ledgered in [§6.1](#61-proven--tested--assumed-spelled-out): (i) **no cross-substrate bit-equality** back to the training
+**Layer.** Producing-substrate provenance + the [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) witnessed constructor is **type-foreclosed**; the engine-family ↔
+serving-substrate serve relation is **decode-foreclosed** (a checked rejection of a constructible value, [`illegal_state_catalog.md` §4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection)).
+Two **runtime-checked residues** are named, not foreclosed, and ledgered in [§6.1](#61-proven--tested--assumed-spelled-out): (i) **no cross-substrate bit-equality** back to the training
 substrate ([§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) ceiling, unchanged); (ii) a **weight-layout load residue** — a family-matched but
-substrate-specific-**weight-layout** model (the manifest carries "weight layout," [§2.1](#21-three-object-classes-two-write-protocols)) passes the grade-2
+substrate-specific-**weight-layout** model (the manifest carries "weight layout," [§2.1](#21-three-object-classes-two-write-protocols)) passes the decode-foreclosed
 relation and may still fail to **load** at runtime. Tier-3 kernel recompilation does **not** close this:
 `kernelKey` folds the compute *kernel*, not the weight bytes.
 
@@ -370,11 +370,11 @@ Two types carry the axis:
   bridge, the CUDA runtime, the linux-cpu runtime, plus per-family adapters — llama.cpp / whisper.cpp / ONNX /
   vLLM / pytorch / diffusers / transformers / Audiveris — enumerated as a closed provider union). It has **no
   `Url`/`Download`/`Fetch` arm**: the `.dhall` *selects* an engine by substrate, it can never *author* a
-  download. An engine fetched or built at pod startup is therefore **grade-(1) unrepresentable**
+  download. An engine fetched or built at pod startup is therefore **type-foreclosed unrepresentable**
   ([`illegal_state_catalog.md` §3.25](./illegal_state_catalog.md#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model)).
 - **`ModelArtifact`** — a by-name / content-address reference into the store of [§2](#2-the-three-tier-store-blobs--manifests--pointers). An `ArtifactRef` is
   obtainable **only** once the `.ready` sentinel exists: a half-staged model has no serveable reference
-  (**grade-(1)**, the existing `.ready`-gate discipline generalized — no constructor without the sentinel).
+  (**type-foreclosed**, the existing `.ready`-gate discipline generalized — no constructor without the sentinel).
 
 **The serve gate is provenance, not just staging completeness (this round).** The `.ready` sentinel proves
 **staging completeness (bytes written)** — it does **not** prove *training provenance*. This round makes a
@@ -394,21 +394,21 @@ The witness is recorded as a **content-addressed manifest field** ([§2.1](#21-t
 [§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely) confluence. "Producing run" is a **misnomer for arm (b)** (external / third-party); name the gate a
 **provenance witness (committed checkpoint OR pinned import)** and reserve "producing run" for arm (a).
 
-**Grade.** Foreclosing the **unwitnessed direct-stage path** and the **checkpoint arm (a)** is honestly
-**grade-(1)** — a committed pointer is a genuine no-inhabitant-without-a-complete-checkpoint constructor.
-**Provenance-witness *presence* on arm (b)** is grade-(1); its **byte truthfulness** is not — arm (b) admits
+**Layer.** Foreclosing the **unwitnessed direct-stage path** and the **checkpoint arm (a)** is honestly
+**type-foreclosed** — a committed pointer is a genuine no-inhabitant-without-a-complete-checkpoint constructor.
+**Provenance-witness *presence* on arm (b)** is type-foreclosed; its **byte truthfulness** is not — arm (b) admits
 arbitrary bytes (including noise) by design. Fork A tightens this: the import constructor **requires a pinned
 expected content-address (or detached signature)**, and staging **verifies pulled bytes against the pin and fails
-closed before `.ready`** — so pin *presence* = grade-(1), pin *match* = grade-(2) (stage-time checked,
-fail-closed), and "the pin names the *intended* model" = grade-(3) / assumed (ledgered in [§6.1](#61-proven--tested--assumed-spelled-out)).
+closed before `.ready`** — so pin *presence* = type-foreclosed, pin *match* = decode-foreclosed (stage-time checked,
+fail-closed), and "the pin names the *intended* model" = runtime-checked / assumed (ledgered in [§6.1](#61-proven--tested--assumed-spelled-out)).
 
 **The engine↔model relation.** A `ModelArtifact` must be servable by an `EngineRuntime` that is available on the
-deployment's substrate — an unmatched model has no landing engine. This is a **grade-(2)** total relation
+deployment's substrate — an unmatched model has no landing engine. This is a **decode-foreclosed** total relation
 (technique [`illegal_state_catalog.md` §4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection)); the substrate `InferenceEngine`
 capability a model must match is owned by [`service_capability_doctrine.md` §4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding). **Cross-substrate serving is
 representable** ([§3.1](#31-producing-substrate-vs-serving-substrate-a-distinct-serving-run-fingerprint)): the `ModelArtifact` / manifest carries an **engine-`family` tag** ([§2.1](#21-three-object-classes-two-write-protocols)), and the landing
 predicate keys on that family being available on the **serving** substrate lane — so a CUDA-produced model may
-serve on Apple-Metal when the family is baked there, subject to the [§3.1](#31-producing-substrate-vs-serving-substrate-a-distinct-serving-run-fingerprint) grade-3 weight-layout load residue.
+serve on Apple-Metal when the family is baked there, subject to the [§3.1](#31-producing-substrate-vs-serving-substrate-a-distinct-serving-run-fingerprint) runtime-checked weight-layout load residue.
 
 The three tiers, three lifecycles:
 
@@ -479,14 +479,14 @@ unrepresentability to this doc + [`illegal_state_catalog.md`](./illegal_state_ca
 
 **No bare-unbounded arm (mirrors `Growable`).** `Continuous` **requires** a `checkpointCadence`; `Feed` **requires**
 a bounded-retention `StorageBudget`. "Train forever with no checkpoints and no retention" has **no constructor** —
-**grade-1 union shape**, exactly the `Growable` / `ScalingPolicy` idiom. Paired with the honest **grade-3 runtime
+**type-foreclosed union shape**, exactly the `Growable` / `ScalingPolicy` idiom. Paired with the honest **runtime-checked
 residue**: that the trainer *actually* checkpoints at cadence and retention *actually* holds is runtime, not typed.
 
-**Determinism = a content-addressed training DAG (graded).** Each checkpoint records its `parent` (base)
+**Determinism = a content-addressed training DAG (qualified).** Each checkpoint records its `parent` (base)
 content-address and its consumed-prefix content-address; **`experimentHash` keeps its 2-input formula** — the base
 and prefix addresses are folded **into `resolved-dhall`** ([§3](#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)), **not** into a wider hash tuple (which would break
-the "existing (sibling)" framing of [§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)). Grade the headline honestly: DAG **identity / bookkeeping**
-(parent + prefix pinned) is **grade-1**; **actual byte-replay** is **grade-2 / tested** per [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) (SL / on-policy /
+the "existing (sibling)" framing of [§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)). Classify the headline honestly: DAG **identity / bookkeeping**
+(parent + prefix pinned) is **type-foreclosed**; **actual byte-replay** is **decode-foreclosed / tested** per [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) (SL / on-policy /
 AlphaZero-per-game tested-in-sibling; off-policy RL only the prefix); **cross-substrate is not asserted** (a
 cross-substrate `Continue` is a **new** run in a **new** `experimentHash` namespace with no reproducibility
 relation back to the base's substrate — the base is a pinned immutable input, not an anchor).
@@ -508,7 +508,7 @@ content-address type** before a cross-import / cross-substrate `Continue` resolv
 tied to [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)'s cross-bucket adoption.
 
 The illegal states this subsection closes — "a Continuous run with no cadence / a Feed with no bounded retention"
-(grade-1 shape + grade-3 tail), "a multi-partition Feed with no defined merge" (grade-1/2 typed witness), "serving
+(type-foreclosed shape + runtime-checked tail), "a multi-partition Feed with no defined merge" (type- or decode-foreclosed typed witness), "serving
 an uncommitted / in-flight checkpoint of a running job," and "two authoritative Continuous trainers on one logical
 model across clusters" — are catalogued in [`illegal_state_catalog.md`](./illegal_state_catalog.md); the retention
 and replay ceilings are ledgered in [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic)/[§6.1](#61-proven--tested--assumed-spelled-out).
@@ -544,10 +544,10 @@ easy case and *why*.
 checkpoint is an **immutable content-addressed artifact** and the store is the confluent join-semilattice above, a
 model trained in **one** cluster (jitML's intra-cluster First-Axis single-writer coordinator, [§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)) **need not**
 be retrained elsewhere — it is reused by confluent replication of the immutable artifact. This is the explicit
-answer to "must each cluster train its own models?" — **no**. The honest grade: "**never** retrained" is **not** a
+answer to "must each cluster train its own models?" — **no**. The honest characterization: "**never** retrained" is **not** a
 typed invariant. Nothing prevents cluster B independently training the same `experimentHash`; confluence makes
 that **safe** (same substrate → same hash → union no-op; different substrate → different namespace → no
-collision), **not impossible** — so a redundant retrain is at most **grade-3** (harmless, not foreclosed). This is
+collision), **not impossible** — so a redundant retrain is at most **runtime-checked** (harmless, not foreclosed). This is
 therefore a **design policy**, and it inherits the [§6.1](#61-proven--tested--assumed-spelled-out) ledger: the confluence-safety is proven-in-types for the
 store **algebra** only, **not** a built amoebius replication run. The **async geo-replication transport / trigger**
 and the First-Axis coordinator fact are owned by [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md)
@@ -607,9 +607,9 @@ that ceiling sits, and amoebius adopts its contract verbatim rather than inventi
   bounds only **re-deriving that blob from the live topic**. Cross-cluster you therefore get
   **resume-from-checkpoint** (the immutable checkpoint replicates by [§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)), **not** re-derive-from-feed, unless the
   consuming cluster independently retains the prefix.
-- **The training-DAG headline is graded, not a blanket "replay reproduces."** DAG **identity / bookkeeping**
-  (a checkpoint's `parent` + consumed-prefix content-addresses pinned, [§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)) is **grade-1**; **actual
-  byte-replay of a DAG node** is **grade-2 / tested** at the same ceiling as any run above (SL / on-policy /
+- **The training-DAG headline is qualified, not a blanket "replay reproduces."** DAG **identity / bookkeeping**
+  (a checkpoint's `parent` + consumed-prefix content-addresses pinned, [§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)) is **type-foreclosed**; **actual
+  byte-replay of a DAG node** is **decode-foreclosed / tested** at the same ceiling as any run above (SL / on-policy /
   AlphaZero-per-game tested-in-sibling; off-policy RL only the segment prefix), and **cross-substrate replay is
   not asserted**.
 
@@ -627,8 +627,8 @@ reaches:
 | Same-substrate same-toolchain checkpoint reproduction is byte-identical | **Tested in the sibling `jitML`**, not proven in amoebius | A runtime comparison on matching hardware |
 | Off-policy RL same-seed full-run bit-equality | **Not asserted**; only the first-N-step prefix (bounded run) / per-checkpoint-segment (Continuous) is tested | A runtime prefix comparison of two fresh runs |
 | Cross-substrate bit-equality (training or inference) | **Explicitly not asserted** | Nothing — out of contract by design |
-| An imported model's pin names the *intended* model (§4.5 arm b) | **Assumed** — pin *presence* is grade-1, stage-time pin *match* is grade-2 (fail-closed), but "the pin denotes the model you meant" is out of type reach | Nothing typed — trust in the pin author (Fork A) |
-| A family-matched, substrate-specific-weight-layout model actually **loads** on the serving substrate (§3.1) | **Not asserted** | Runtime — the grade-2 family relation passes; the weight-layout load is residue, like "the staged bytes actually load" |
+| An imported model's pin names the *intended* model (§4.5 arm b) | **Assumed** — pin *presence* is type-foreclosed, stage-time pin *match* is decode-foreclosed (fail-closed), but "the pin denotes the model you meant" is out of type reach | Nothing typed — trust in the pin author (Fork A) |
+| A family-matched, substrate-specific-weight-layout model actually **loads** on the serving substrate (§3.1) | **Not asserted** | Runtime — the decode-foreclosed family relation passes; the weight-layout load is residue, like "the staged bytes actually load" |
 
 amoebius itself has built none of this; the proven-in-types rows are the design's *intended* totality, and the
 tested rows are evidence from sibling libraries that the design is realizable. Treat this document as a
@@ -677,7 +677,7 @@ design intent.
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the MinIO content store is a `StorageBacking` ceiling for host-bounded clusters ([§3.19](./illegal_state_catalog.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar))
 - [Platform Services Doctrine](./platform_services_doctrine.md)
 - [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — `releaseHash` + the `environment` promotion pointer ([§2](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash)/[§3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer)), registered in the [§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) master table
-- [Service Capability Doctrine](./service_capability_doctrine.md) — the substrate `InferenceEngine` capability a `ModelArtifact` must match ([§4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding)), the engine↔model grade-(2) relation
+- [Service Capability Doctrine](./service_capability_doctrine.md) — the substrate `InferenceEngine` capability a `ModelArtifact` must match ([§4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding)), the engine↔model decode-foreclosed relation
 - [Image Build Doctrine](./image_build_doctrine.md) — baked `EngineRuntime`s ([§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) Tier 1) + the OCI image digest ([§5](./image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest))
 - [DSL Doctrine](./dsl_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)
