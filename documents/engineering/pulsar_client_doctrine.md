@@ -354,6 +354,46 @@ flowchart TD
   bk -->|high-water mark reached before offload catches up| hold[Backlog quota holds producer, grade 3 fail-safe]
 ```
 
+### 6.2 A topic as a cursor-anchored replayable training feed
+
+Intuition: the three primitives this doc already owns — **Seek** (replay, [§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)), the four
+**subscription** types ([§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)), and the **bounded-tiered-retained** storage lifecycle
+([§6.1](#61-topic-storage-lifecycle-bounded-tiered-retained--and-the-hot-tier-never-overflows)) — compose into a second way to read a topic: not as a one-shot command/event stream, but
+as a **cursor-anchored replayable feed** a long-running consumer trains from. The ML half this round
+introduces (training-from-a-feed) rides on that composition; this subsection states only the **client-side**
+feed semantics, and defers the training-run unions, the checkpoint DAG, and the materialized-prefix
+content-address to their owner in [content_addressing_doctrine.md](./content_addressing_doctrine.md). Three client facts make the feed view sound:
+
+- **The durable-retention tier IS the replayable history.** A feed's replay depth is exactly the topic's
+  retained span — closed ledgers on BookKeeper plus the S3-offloaded tail
+  ([§6.1](#61-topic-storage-lifecycle-bounded-tiered-retained--and-the-hot-tier-never-overflows)). Because retention is **mandatory and bounded** (no keep-forever arm, [§6.1](#61-topic-storage-lifecycle-bounded-tiered-retained--and-the-hot-tier-never-overflows)), a
+  feed is replayable **only within its declared retention window**, and **re-deriving a consumed prefix
+  directly from the live topic is bounded by the two-ceiling storage budget**
+  ([resource_capacity_doctrine.md §7](./resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total)). A consumed prefix that must outlive retention is materialized
+  into an immutable content-addressed blob by the content-addressing layer
+  ([content_addressing_doctrine.md](./content_addressing_doctrine.md)) — that blob, not the broker cursor, is the "forever" input; a Pulsar cursor
+  is broker-assigned metadata, **never an input to any content hash**
+  ([content_addressing_doctrine.md §5](./content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)). So the two-ceiling budget bounds only **re-derivation from the topic**,
+  never a checkpoint's already-pinned input.
+- **A single active trainer per feed is a subscription, not a bespoke election.** At-most-one active reader
+  on a feed is the **Exclusive** — or ranked **Failover** — subscription this doc already exposes
+  ([§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)): Pulsar's own single-consumer semantics, with automatic ranked failover on death and resume
+  from the subscription's committed cursor. amoebius **delegates** this single-writer property to the
+  broker's subscription model; it does **not** re-prove it and adds **no** amoebius election — exactly the
+  "consensus is delegated, not re-proven" posture [§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default) takes for HA. *Who* runs the feed-sourced trainer,
+  and the content-store commit that makes each checkpoint's `latest` advance race-free, are owned by
+  [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) / [content_addressing_doctrine.md](./content_addressing_doctrine.md); the client owns only that the feed subscription is
+  Exclusive/Failover.
+- **Replay is Seek.** Resuming a feed from a checkpoint's committed cursor, or rebuilding from the start of
+  the retained span, is the same `SEEK` primitive ([§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)) already provides for rebuild-from-log and the
+  geo-replication catch-up [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) reasons about — no new client capability.
+
+> **Honesty.** The training-feed view is Phase-4-and-later design intent layered on the client, not a built
+> or benchmarked amoebius result. The single-active-trainer property is **delegated** to Pulsar's
+> Exclusive/Failover subscription (jitML/infernix already coordinate this way — *sibling evidence*), not an
+> amoebius election proof; per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read this as the specified composition, not a
+> proven behaviour.
+
 ---
 
 ## 7. Delivery: at-least-once with broker-side dedup (the robust default)

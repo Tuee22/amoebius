@@ -29,6 +29,18 @@ The fabric is what makes [single_logical_data_plane_doctrine.md](./single_logica
 attach topology physically possible: a remote spot node can be a client of the home cluster's one store only
 if it has a route to that store that no one else can use.
 
+**The gap has a second half: the control-plane span.** The wire above carries a *non-member* remote worker to
+the home **store** (the data-plane half). A **stretched cluster** poses the harder half — a full k8s node (a
+kubelet) whose declared network locality differs from the control plane's yet which registers in the *one*
+apiserver/etcd across the WAN. That kubelet↔apiserver span is the **control-plane** half of the same open gap,
+and this round routes it over the same fabric: a stretched full node (the K2 case, owned by
+[cluster_topology_doctrine.md §4.1](./cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation))
+reaches its apiserver over `wg0` on **self-managed rke2 only**. This doctrine adds the endpoint index and the
+`render()` obligation for that span ([§3](#3-keys-config-and-distribution--wireguard-as-just-another-reconcile),
+[§4](#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it),
+[§5](#5-the-security-boundary-generalizes-localhost--authenticated-fabric)); *which* nodes are members stays
+with cluster_topology.
+
 ---
 
 ## 2. Raw WireGuard, not Netmaker
@@ -66,7 +78,12 @@ WireGuard fits the amoebius disciplines cleanly because it is a *primitive*, not
 - **Peer config is rendered, not managed.** `render(nodeInventory) -> [WireGuardPeerConfig]` — the pure
   `render()` discipline of [manifest_generation_doctrine.md §2](./manifest_generation_doctrine.md#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects) lifted to
   `wg` config. Illegal peer configurations — overlapping VPN IPs, a keyless peer, an `AllowedIPs` outside the
-  fabric CIDR — become unrepresentable in the typed inventory rather than caught at runtime.
+  fabric CIDR — become unrepresentable in the typed inventory rather than caught at runtime. For a **stretched
+  full k8s node** (the K2 case), `render()` additionally emits a `ControlPlanePeer` covering that cluster's
+  **apiserver VPN-IP** ([§4](#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)) — the
+  kubelet↔apiserver span is a rendered peer like any other, so the render fold stays *total* over it (a
+  grade-2 decode fact), never a side channel. The obligation is **stretch-gated**: a co-located node draws no
+  such peer.
 - **Distribution is a reconcile, not an agent.** The singleton reconciles the interface the same way it
   reconciles everything else ([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)):
   `discover` (`wg show`) → diff against `render(inventory)` → enact (`wg set`). No Netmaker agent, no side
@@ -94,6 +111,13 @@ flowchart TD
 - **For the attach topology, the home cluster is the hub.** It holds the one store, so remote spot workers
   are spokes that reach the home Pulsar/MinIO through the hub over the fabric
   ([single_logical_data_plane_doctrine.md](./single_logical_data_plane_doctrine.md)).
+- **The apiserver VPN-IP is a distinct fabric address from the data-plane hub VPN-IP, and it moves with the
+  control plane.** A stretched full node (K2) reaches the one apiserver at a **stable apiserver VPN-IP** that
+  is *not* the data-plane hub's VPN-IP — the store-hub and the control plane are separate fabric endpoints. Like
+  the hub, it is a **role-bound** address: on failover it is repointed to wherever the control plane now runs
+  (the same [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) repoint the gateway record uses), so a
+  stretched agent keeps one apiserver VPN-IP view while the endpoint behind it changes. (Self-managed rke2
+  only; the render obligation is [§3](#3-keys-config-and-distribution--wireguard-as-just-another-reconcile).)
 
 ---
 
@@ -121,6 +145,41 @@ break:
   detailed generalization of the channel-2 rule is owned by
   [host_cluster_comms_doctrine.md §5](./host_cluster_comms_doctrine.md#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary); this doc owns the fabric that makes
   it safe.
+- **The required-networking sum `Networking c = Gateway (SecureGatewayReach c) | Vpn (VpnFabric c)` is owned
+  here.** Every *stretched* constructor — the K1 host-worker attach carrier and the K2 full-node agent alike —
+  must consume exactly one `Networking c`, and this doc is its single owner. The `Vpn` arm is the WireGuard
+  fabric above ([§2](#2-raw-wireguard-not-netmaker)–[§4](#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it));
+  the `Gateway` arm is a **new authenticated secure-gateway wire** — this round names its witness type but
+  **defers its constructor** (the K1 `Gateway` cell has no inhabitant yet). The stretched constructors in
+  [cluster_topology_doctrine.md §4.1](./cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation)
+  and [single_logical_data_plane_doctrine.md §3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe)
+  **consume** this sum; they never re-declare it. The mandatory field is grade-1 (no stretched constructor has
+  an inhabitant that omits it); *which* branch a genuinely-remote entity is routed to is the grade-2 fold over
+  the declared `Site`
+  ([substrate_doctrine.md §8](./substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints)).
+- **Two more endpoint indices join the `FabricPeer` family, both barred from `WildIngress`.** `SecureGatewayReach`
+  (the K1 `Gateway` wire) and `ControlPlanePeer` (the K2 kubelet↔apiserver wire) sit alongside `FabricPeer`,
+  `HostLocalPeer`, and `WildIngress`
+  ([illegal_state_catalog.md §4.3](./illegal_state_catalog.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)),
+  each with **no constructor turning it into a `WildIngress`** — so "Keycloak owns all wild ingress"
+  ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path))
+  is preserved by construction for the secure-gateway door too (grade-1). A `SecureGatewayReach` mints the
+  *same* `FabricMember c` the data-plane resolver already gates on
+  ([single_logical_data_plane_doctrine.md §3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe)),
+  not a second resolver-unknown witness — it differs in *how* you reach, never *that* you can reach.
+- **The `ControlPlanePeer` binding is additive and stretch-gated (self-managed rke2 only).** For a stretched
+  full node (K2), this doctrine adds a `wg0`-bound apiserver listener — the additive apiserver-VPN-IP binding of
+  [§4](#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it) — and carries the distro's own
+  kubelet↔apiserver **mTLS over the WireGuard tunnel**: the rke2 control-plane TLS rides *inside* the encrypted
+  fabric (the fabric authenticates the peer, the distro authenticates the kubelet). It is **gated on the
+  stretched K2 case and self-managed rke2**: a co-located node needs no such binding, and a `Managed Eks`
+  control plane has **no such constructor at all** (a full member on the hostless managed arm is
+  provider-native-only,
+  [cluster_topology_doctrine.md §4.1](./cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation)).
+  The wire and the render obligation are owned here; *which* nodes are stretched members is owned by
+  cluster_topology. Grade: the endpoint index + the no-`WildIngress` constructor are grade-1; the render fold
+  covering the apiserver VPN-IP is grade-2; the tunnel actually coming up and the distro mTLS handshaking over
+  the WAN are grade-3 residue.
 
 ---
 
@@ -136,6 +195,14 @@ features have little surface to act on, and each is already covered:
 | Golden metrics | Prometheus/Grafana is already a standard service ([platform_services_doctrine.md](./platform_services_doctrine.md)). |
 | Traffic-split (the *one* relevant feature, for gateway migration) | **Gateway-API `HTTPRoute` `backendRefs` carry weights natively**, on the Envoy edge amoebius already renders and Keycloak-fronts. A planned home→provider migration is a weight shift on the edge already in the stack — no mesh needed. |
 | Multicluster service-mirroring | Introduces the **synchronous cross-cluster RPC the architecture deliberately avoids** ([app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md), [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)) and manufactures new non-confluent invariants + latency. Actively anti-doctrinal. |
+
+**Scope note (the stretched-cluster foil).** That last verdict targets **multicluster** service-mirroring —
+synchronous RPC *across N separate clusters*, each its own etcd. It does **not** touch a single **stretched**
+cluster's *intra-cluster* control-plane span (one apiserver/etcd, one boundary, a kubelet reaching its
+apiserver over `wg0` — [§5](#5-the-security-boundary-generalizes-localhost--authenticated-fabric)): a stretched
+kubelet↔apiserver wire is *one cluster's own* traffic, not cross-cluster RPC, so it manufactures no
+non-confluent cross-cluster invariant. Stretched-cluster spanning is owned by
+[cluster_topology_doctrine.md §4.1](./cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation).
 
 The mode point clinches it: Linkerd's only mode is the per-pod micro-proxy **sidecar** (ambient/sidecarless
 is Istio, not Linkerd), which contradicts the stated "no sidecar fleet" architectural point. The honest

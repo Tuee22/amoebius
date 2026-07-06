@@ -40,6 +40,19 @@ The whole job of this document is to keep those two apart, so the cheap case (at
 expensive case's machinery (geo-replication, the Second-Axis proof obligation, the R9 data-loss budget), and
 the expensive case is never mistaken for the cheap one.
 
+There is a **third** shape this doctrine must keep distinct from both: a **stretched cluster** — *one*
+cluster whose nodes or host workers sit at more than one network locality, reached across a WAN. It is
+emphatically **not** the second-cluster case: it has **one** etcd, **one** consistency boundary, **no** second
+store, and **no** async geo-replication link, so it owes **no** R9 data-loss budget and **no** Second-Axis
+obligation — the [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) machinery it is exempt from. Within
+a stretched cluster the "run this elsewhere" question refines by *kind*: a **stretched host worker** is a
+non-member **client** — the attach shape of §4, holding no store and needing only data-plane + Vault reach —
+while a **stretched full node** is a **member** kubelet carrying a control-plane reachability witness
+(`ReachesControlPlane c`), a different kind owned by
+[cluster_topology_doctrine.md](./cluster_topology_doctrine.md). This round's doctrine introduces that two-kind
+stretched split; the *why* it stays one boundary (a cluster is *the* consistency boundary) is exactly §1's
+opening invariant, unchanged.
+
 ---
 
 ## 2. The two topologies
@@ -58,6 +71,17 @@ The load-bearing decision: **the worker pool is NOT a fourth arm of the closed `
 cluster identity and therefore its own data plane — exactly the second boundary we must avoid. It is a
 *separate deployment-rules type keyed to an existing cluster's data plane*, so the `ComputeEngine` union
 stays closed and the attach topology provably creates no second store.
+
+**A stretched cluster overlays this table rather than adding a column.** A stretched host worker occupies the
+**left** column — a non-member client of the one plane, no store, no geo-replication, R9 never applies — even
+though it sits across a WAN; only its *reach* is remote, not its *boundary*. A stretched full-member node is
+still **one** cluster (one etcd, one boundary), **not** the right column's second cluster — it is a member
+reached over the WAN, carrying a control-plane witness
+([cluster_topology_doctrine.md](./cluster_topology_doctrine.md)). Distance is a **networking** fact, never a
+**boundary** fact; neither stretched kind mints a second store, so neither drags in the second-cluster
+machinery. This round's stretched-cluster doctrine introduces both kinds; §4 owns the host-worker (attach)
+kind, and the member/kubelet kind is owned by
+[cluster_topology_doctrine.md](./cluster_topology_doctrine.md).
 
 ---
 
@@ -78,8 +102,11 @@ data DataPlane (c :: ClusterId) t = DataPlane
   , dpStore  :: ObjectStoreEndpoint c }  -- the ONE MinIO/KV of cluster c
 
 -- Capability: "I am an authenticated peer on cluster c's fabric."
--- Its only constructors are (i) an in-cluster workload of c and (ii) a node that has joined
--- c's WireGuard fabric (network_fabric_doctrine.md). There is NO off-fabric constructor.
+-- Its constructors are (i) an in-cluster workload of c and (ii) a node that has joined c's
+-- WireGuard fabric (network_fabric_doctrine.md) -- the sole off-host constructor today. This
+-- round's stretched-cluster doctrine introduces a SECOND off-host constructor, gateway-
+-- authenticated; every off-host path is gated on a declared `Networking c`, so there is NO
+-- off-networking constructor.
 data FabricMember (c :: ClusterId)
 
 -- Resolution REQUIRES fabric membership (reachability) AND tenant agreement.
@@ -109,6 +136,21 @@ flowchart LR
   spotN[Remote spot node N over the fabric] -->|FabricMember home| plane
 ```
 
+**One data-plane witness, two off-host minting paths (this round's stretched-cluster refinement).**
+`FabricMember c` remains the *single* data-plane witness the resolvers consume —
+`resolveTopic`/`resolveBucket` have no inhabitant without it. The stretched-cluster doctrine this
+round introduces does **not** mint a distinct, resolver-unknown witness for a gateway-reached node;
+it adds a **second off-host constructor** for the *same* `FabricMember c`, authenticated through a
+secure gateway rather than by WireGuard fabric-join. What differs between the two off-host paths is
+*how* a node reaches the plane — the [network_fabric_doctrine.md](./network_fabric_doctrine.md)
+endpoint index, fabric-peer vs secure-gateway-reach — never *that* it can reach it, so the one
+witness the resolvers gate on is unchanged. Both paths are gated on a declared **networking
+capability** (`Networking c`, a `Gateway | Vpn` sum owned by
+[network_fabric_doctrine.md](./network_fabric_doctrine.md)); the invariant generalizes from "no
+off-host `FabricMember` without a declared fabric" to "…without a declared networking capability."
+The gateway constructor's witness *type* is named this round; its constructor is design intent,
+deferred to the secure-gateway service-reach work — no inhabitant yet.
+
 ---
 
 ## 4. The elastic worker pool (the attach topology)
@@ -136,11 +178,17 @@ workload as Pulsar/MinIO clients. It is a **deployment rule**, not app logic
 
 ```haskell
 data ElasticWorkerPool c t = ElasticWorkerPool
-  { ewpForApp  :: AppName t
-  , ewpPlane   :: DataPlane c t   -- the ONE home plane the pool joins as a client
-  , ewpFabric  :: VpnFabric c     -- joining this fabric MINTS FabricMember c per node
-  , ewpScaling :: ScalingPolicy   -- spot-price trigger lives here (existing type)
-  , ewpDeprov  :: Deprovision }   -- no storage arm
+  { ewpForApp     :: AppName t
+  , ewpPlane      :: DataPlane c t   -- the ONE home plane the pool joins as a client
+  , ewpNetworking :: Networking c    -- REQUIRED networking capability; joining it MINTS FabricMember c per node
+  , ewpScaling    :: ScalingPolicy   -- spot-price trigger lives here (existing type)
+  , ewpDeprov     :: Deprovision }   -- no storage arm
+--  ^ NO control-plane field: a worker-pool node is a NON-member client. Any control plane, incl. Managed EKS.
+
+-- Networking is owned by network_fabric_doctrine.md; the pool CARRIES it, does not define it.
+-- Gateway|Vpn generalizes the prior VPN-only ewpFabric :: VpnFabric c (this round's refine-by-role):
+--   Vpn     -> the existing WireGuard fabric-join path
+--   Gateway -> a secure-gateway path (constructor design intent, deferred)
 
 data Deprovision = Deprovision { releaseCompute :: ComputeSet }  -- NO deleteStorage constructor
 ```
@@ -155,6 +203,30 @@ data Deprovision = Deprovision { releaseCompute :: ComputeSet }  -- NO deleteSto
   [network_fabric_doctrine.md](./network_fabric_doctrine.md), which itself generalizes the host-compute-daemon
   peer model of [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md) from a localhost NodePort
   to an authenticated fabric. This doc owns only that the remote node is a *client of the one store*.
+- **The join wire is one `Networking` capability, generalized this round.** This round's
+  stretched-cluster doctrine generalizes the pool's single VPN field `ewpFabric :: VpnFabric c`
+  into `ewpNetworking :: Networking c`, a `Gateway | Vpn` sum owned by
+  [network_fabric_doctrine.md](./network_fabric_doctrine.md). The pool *carries* the capability
+  and never defines it; the change is a **refine-by-role** — cross-references that spoke of the
+  pool's "VPN fabric" now read "networking capability," with no heading retitled. The `Vpn` arm is
+  the existing WireGuard fabric-join; the `Gateway` arm is a secure-gateway path whose constructor
+  is design intent, deferred. Either arm mints the *same* `FabricMember c` (§3), so the pool's
+  client-of-the-one-store theorem is unchanged. The networking field is **mandatory**: an attach
+  pool with no declared networking capability has no constructor (the generalization of the
+  already-mandatory `ewpFabric`).
+- **A stretched host worker is this same attach shape.** A native host-compute worker
+  (Apple-Metal or Windows-CUDA subprocess, [substrate_doctrine.md](./substrate_doctrine.md)) sitting
+  at a different network locality (`Site`) from the control plane — a *stretched host worker* — is
+  **not** a new topology: it is precisely this pool's shape, a non-member data-plane/Vault **client**
+  of the home cluster's one store, holding no store of its own and carrying **no** control-plane
+  reachability. Because it needs no control plane, this round's doctrine makes it representable on
+  **any** `ComputeEngine`, including `Managed Eks`. Which path a host worker takes is a decode fold
+  over its declared `Site` (a per-host inventory fact owned by
+  [substrate_doctrine.md](./substrate_doctrine.md)): a co-located worker (`Site` matching the control
+  plane) uses the host-local channel; an off-locality worker is routed onto **this** attach path,
+  demanding a `Networking c`. The full-node (member/kubelet) stretched case — which *does* carry a
+  control-plane reachability witness (`ReachesControlPlane c`) — is a **different kind**, owned by
+  [cluster_topology_doctrine.md](./cluster_topology_doctrine.md), not this attach shape (§§1–2).
 
 ---
 
@@ -220,7 +292,8 @@ host-compute-daemon peer model it generalizes (Phase 7), and cloud spot provisio
 - [Illegal State Catalog](./illegal_state_catalog.md) — the capability/phantom-tag + ownership-index techniques
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the `ScalingPolicy` / capacity fold the pool binds
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — a worker pool is a deployment rule
-- [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the closed `ComputeEngine` union the pool is *not* an arm of
+- [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the closed `ComputeEngine` union the pool is *not* an arm of; the stretched full-node (member) kind
+- [Substrate Doctrine](./substrate_doctrine.md) — the per-host `Site` locality axis that classifies a stretched host worker
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — stateless ⇒ no claim; durable storage is user-deleted only
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — the native-protocol client a remote node speaks
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

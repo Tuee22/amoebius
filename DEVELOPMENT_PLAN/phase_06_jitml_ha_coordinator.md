@@ -96,6 +96,20 @@ and the run continues from the last adopted `latest` pointer with no torn checkp
   services rather than re-proved. The coordinator is explicitly **not** the
   [`chaos_failover_doctrine.md` §16 — the Second Axis: when one cluster becomes a forest](../documents/engineering/chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
   async cross-cluster boundary, whose TLA+/io-sim proof obligation is Phase 9, not here.
+- **Producer→precondition and the training-run topology — jitML checkpoints are the witnessed producer
+  (doctrine this round introduces; forward design intent).** This round's doctrine makes a serveable infernix
+  `ModelArtifact` require a **provenance witness**
+  ([`content_addressing_doctrine.md` §4.5 — The three-tier ML-asset lifecycle: engine baked, model staged, kernel JIT'd](../documents/engineering/content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)):
+  a **committed jitML checkpoint** produced in this phase (Sprint 6.1's `latest`/`best` pointer CAS) is exactly
+  the **producer** that satisfies the infernix serve gate consumed in
+  [Phase 5](phase_05_determinism_infernix.md) / Phase 8 (a `producer→precondition` edge across the
+  `jitml-checkpoints/` → `infernix-models/` buckets, adopted by manifest SHA). The round also introduces the
+  **training-run topology** — fine-tune chains (`Continue` from a witnessed `ModelArtifact`) and continuous/online
+  feeds ([§4.6 — The training-run topology: fine-tune chains and continuous feeds without an unbounded arm](../documents/engineering/content_addressing_doctrine.md#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)):
+  a `Continuous` feed trainer is the **existing jitML HA coordinator** (Sprint 6.5) parameterized with a `Feed`
+  source, its single-writer role **delegated** to a Pulsar exclusive/failover subscription + the content-store
+  CAS/`AdvancePredicate`, not a new elected worker kind. This is doctrine this round introduces, tracked here as a
+  forward cross-reference, not a tested result of the Phase-6 gate.
 
 ## Sprints
 

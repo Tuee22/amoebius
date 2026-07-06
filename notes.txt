@@ -35,3 +35,5 @@ why not have the host daemon have it's own rest unseal endpoint, reachable by no
 - are we fully leveraging pulsar to avoid race conditions and cluster-level leadership elections more robustly handled by pulsar ?
 
 - would it make sense to build and validate / simulate the entire dsl before implementing anything else ?
+
+- monitoring story : how do we make it impossible to represent unmonitored workflow ? what is the monitoring / admin dashboard / parent monitoring upload story ? how do we fit it within resource limits ?

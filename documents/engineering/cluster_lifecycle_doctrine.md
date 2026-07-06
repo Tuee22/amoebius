@@ -34,6 +34,23 @@ the `Kind` / `Rke2` / `Managed Eks` types and their node topology (one host for 
 node, hostless for EKS) — is owned by [cluster_topology_doctrine.md](./cluster_topology_doctrine.md). This doc
 owns the **lifecycle verbs** that ride on top.
 
+**Self-managed clusters amoebius *builds*; provider-managed clusters amoebius *surfaces*.** The split in the
+table above is precisely a *build-vs-surface* axis, and it is the axis the stretched-cluster question — can a
+full member node hang off a provider-managed control plane? — rests on. A self-managed `kind`/`rke2` cluster
+is one amoebius **builds** end to end: the host binary owns bring-up from `bootstrap.sh` through `bootstrap`
+([§2](#2-bring-up-and-bootstrap)) and every node beneath it. A provider-managed cluster is one amoebius
+**surfaces** over the cloud provider's API — provisioned via Pulumi from inside an existing cluster, never
+touching a host amoebius does not have; amoebius wires up only what the provider itself exposes and **builds
+no capability the provider does not**, the same *surface, don't build* discipline owned by
+[pulumi_iac_doctrine.md §0/§4](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision).
+One consequence rides on this axis: because a provider-managed control plane is **hostless** (no `LinuxHost`,
+and no host-level worker daemons — the table above), a **full member node stretched onto a provider-managed
+control plane** is representable only through a provider-native capability the `Managed` arm *surfaces* (e.g.
+EKS Hybrid Nodes, over the cloud API), never through an amoebius-built second control-plane fabric — which is
+why [cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)/[§4.1](./cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation)
+forecloses that node absent such an arm. A host-level *worker* is the other case entirely: a non-member on its
+own physical host (the host-worker row above), unaffected by the control plane's hostlessness.
+
 ---
 
 ## 2. Bring-up and bootstrap
@@ -70,6 +87,17 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
 - **Bring-up is itself a reconcile.** "Come up" is not a one-shot script; it is the [§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) reconciler driving
   the world toward the `.dhall`. Re-running it is a no-op when already converged — that is the Phase 1
   acceptance shape.
+- **A stretched rke2 agent joins only once it is reachable.** Growing a cluster with a **stretched** agent —
+  a full member node whose declared network-locality `Site` differs from the control-plane servers' `Site`
+  ([substrate_doctrine.md §8.3](./substrate_doctrine.md#83-site-the-declared-network-locality-axis-cluster-nodes-and-host-worker-hosts)) —
+  adds a **reachability precondition** to the agent-join reconcile ([§11](#11-rke2-rollout-as-a-reconcile)):
+  the remote node may present its `Rke2NodeToken` only across an established control-plane fabric reach (the
+  `ReachesControlPlane` witness owned by
+  [cluster_topology_doctrine.md §4.1](./cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation)),
+  and a node declared remote but observed `Unreachable` is refused by the same
+  [§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) `Unreachable → refuse`
+  gate. A **co-located** agent (same `Site` as the servers) keeps the plain
+  [§11](#11-rke2-rollout-as-a-reconcile) `server:` URL + token join with no added precondition.
 
 > **Open question.** The shape of the bootstrap config and first-manifest delivery: one candidate is a
 > transient `bootstrap.dhall` the binary consumes and then deletes once bring-up completes; and whether the
@@ -308,6 +336,17 @@ sibling's** reconciler-with-predicates doctrine
   to *"it is gone."* A teardown that cannot confirm a resource is absent refuses rather than charging ahead
   and stranding live state — the same soundness rule as the [§6](#6-push-back-when-teardown-would-break-the-global-dhall) push-back and as the prodbox sibling's
   Sprint-4.19 gate.
+- **A stretched `Site` cross-checks through this same three-valued gate.** A cluster node or host worker
+  carries a declared network-locality `Site`
+  ([substrate_doctrine.md §8.3](./substrate_doctrine.md#83-site-the-declared-network-locality-axis-cluster-nodes-and-host-worker-hosts))
+  on a *declared-at-decode / cross-checked-at-runtime* discipline: a host declared at a remote `Site` that
+  `discover` cannot actually reach over the fabric surfaces as **Unreachable**, so **`Unreachable → refuse`
+  applies unchanged** — a remote entity mis-declared local, or a stretched host whose WAN link is down, is
+  caught here, never silently admitted. This is the runtime residue behind the stretched-node reach witness
+  ([cluster_topology_doctrine.md §4.1](./cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation));
+  the declared `Site` and the fabric wiring are owned by
+  [substrate §8.3](./substrate_doctrine.md#83-site-the-declared-network-locality-axis-cluster-nodes-and-host-worker-hosts)
+  and the network-fabric doctrine, while this reconcile loop only classifies reachability.
 - **A managed-resource registry, not ad-hoc cleanup.** The set of things the system can create — clusters,
   children, dynamic nodes, Pulumi stacks, retained PVs — is a **single pure list of typed managed
   resources**, each carrying its own `discover` and `destroy`. *Totality:* no code path may create a

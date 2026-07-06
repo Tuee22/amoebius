@@ -67,7 +67,7 @@ reproduction was *tested*, not that cross-substrate equality was claimed.
 - [`content_addressing_doctrine.md` §4 — Determinism by construction: pinned inputs + pure stages + derived seed](../documents/engineering/content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed),
   with [§3 — `experimentHash`: identity is *what you asked for* ‖ *where it ran*](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-you-asked-for--where-it-ran),
   [§2 — The three-tier store](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers),
-  [§4.5 — Infernix inference is made deterministic too](../documents/engineering/content_addressing_doctrine.md#45-infernix-inference-is-made-deterministic-too),
+  [§4.5 — The three-tier ML-asset lifecycle: engine baked, model staged, kernel JIT'd](../documents/engineering/content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd),
   and the honest ceiling in [§6 — types make the bookkeeping total, not the physics deterministic](../documents/engineering/content_addressing_doctrine.md#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic):
   this phase implements the three legs (pinned content-addressed inputs, pure stages, derived seed)
   as kernel primitives and instantiates them for infernix decoding, while keeping the contract at
@@ -77,6 +77,17 @@ reproduction was *tested*, not that cross-substrate equality was claimed.
   this phase realizes infernix as a shared library unified under the DSL (the call graph is app
   logic; *where* inference runs is a deployment rule), migrating it onto the amoebius runtime behind
   reversible adapter seams rather than as a parallel system.
+- **Producer→precondition and the training-run topology (doctrine this round introduces; forward design
+  intent, not a Phase-5 gate claim).** This round's doctrine adds a **provenance-witness gate** to a serveable
+  `ModelArtifact` ([`content_addressing_doctrine.md` §4.5 — The three-tier ML-asset lifecycle: engine baked, model staged, kernel JIT'd](../documents/engineering/content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)):
+  infernix may serve a model only once it witnesses a **committed producing checkpoint** — the jitML checkpoint
+  produced in [Phase 6](phase_06_jitml_ha_coordinator.md) — or a pinned content-addressed import, so a Phase-6
+  jitML checkpoint is a **producer→precondition** for the infernix serve path, not merely a shared store entry.
+  The same round introduces the **training-run topology** — fine-tune chains and continuous/online feeds
+  ([§4.6 — The training-run topology: fine-tune chains and continuous feeds without an unbounded arm](../documents/engineering/content_addressing_doctrine.md#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm));
+  infernix consumes the serve gate here (its CPU-inference determinism is unchanged), never the trainer. This is
+  doctrine this round introduces, tracked here as a forward cross-reference, not a tested amoebius result of the
+  Phase-5 gate.
 
 ## Sprints
 
@@ -232,7 +243,7 @@ The whole sprint.
 
 ### Objective
 
-Adopt [`content_addressing_doctrine.md` §4.5 — Infernix inference is made deterministic too](../documents/engineering/content_addressing_doctrine.md#45-infernix-inference-is-made-deterministic-too)
+Adopt [`content_addressing_doctrine.md` §4.5 — The three-tier ML-asset lifecycle: engine baked, model staged, kernel JIT'd](../documents/engineering/content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)
 and the honest ceiling in [§6 — types make the bookkeeping total, not the physics deterministic](../documents/engineering/content_addressing_doctrine.md#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic):
 wire the three determinism legs through an infernix CPU decode — a pinned content-addressed model, a
 pure decode stage, and a request-carried seed (greedy or seeded sampling, never ambient entropy) —

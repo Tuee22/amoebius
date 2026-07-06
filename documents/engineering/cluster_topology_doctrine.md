@@ -67,6 +67,9 @@ Rke2Servers            -- CLOSED odd-quorum union: an arm only for a legal etcd 
   nodes than hosts" stays uninhabitable and "the same host reused for two nodes" — now over `servers ∪ agents`
   — is a decode-rejected distinctness violation (I4,
   [illegal_state_catalog.md §3.16](./illegal_state_catalog.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused)); the cardinality detail is [§4.1](#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation).
+  This same `{ servers, agents }` split, given a **`Site`-indexed quorum**, expresses a **self-managed
+  stretched cluster** — data-plane agents at a network `Site` distinct from the co-located control plane —
+  **without a new `ComputeEngine` arm**; that stretched refinement is [§4.1](#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation).
 - **`Managed Eks`** is the **first-class** provider arm (I13): a provider-managed cluster with **no host** and
   no `LinuxHost` field at all. Its nodes' capacity comes from the declared instance types, not physical hosts
   ([resource_capacity_doctrine.md §3](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)), and it is provisioned over the cloud
@@ -74,7 +77,14 @@ Rke2Servers            -- CLOSED odd-quorum union: an arm only for a legal etcd 
   Because the `Managed` arm carries no `LinuxHost` / host-worker index, "a host workload (Apple Metal /
   Windows CUDA) on a hostless provider child" is uninhabitable — the hostless-provider honesty already named
   by [cluster_lifecycle_doctrine.md §1](./cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape),
-  lifted to the type.
+  lifted to the type. Symmetrically, a **full stretched *member* node** on this hostless `Managed` arm has
+  **no constructor absent a provider-native arm** (EKS Hybrid Nodes) — there is no `LinuxHost` field to hang
+  it off and no channel-1 mTLS — so it is **grade-1 uninhabitable** until such an arm is *surfaced* over the
+  cloud API ([pulumi_iac_doctrine.md §4](./pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog)),
+  never an amoebius-built second control-plane fabric (the surface-provider-vs-build discipline,
+  [cluster_lifecycle_doctrine.md §1](./cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape),
+  [pulumi_iac_doctrine.md §0](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision));
+  the stretched treatment is [§4.1](#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation).
 
 The untyped CLI surface — `amoebius bootstrap --distro={kind,rke2} [--replicas=n]`
 ([substrate_doctrine.md §6](./substrate_doctrine.md#6-the-bootstrapsh-contract-ensure-a-toolchain-build-the-binary-hand-off))
@@ -190,6 +200,64 @@ split, the etcd-HA `Ha3`/`Ha5` quorums, and the join-token custody are **net-new
 (hostbootstrap carries zero rke2 code). Sibling evidence, not amoebius proof
 ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
+**Stretched clusters: two node kinds, reachability derived by a total fold (this round introduces).** A
+**stretched node** is one whose declared network-locality `Site` (a per-host inventory axis owned by
+[substrate_doctrine.md §8](./substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints))
+differs from the control plane's, reached across the WAN. Correcting a single-witness model, a stretched entity
+is exactly **one of two kinds**, sorted by a `StretchedNode` classifier, and the two demand **different**
+reachability — both over a **mandatory declared networking capability** `Networking c = Gateway | Vpn` owned by
+[network_fabric_doctrine.md §5](./network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric).
+This doc owns the classifier and the K2 (full-node) control-plane witness; the K1 data-plane witness and the
+`Networking` sum are **consumed, not restated**.
+
+- **K1 — a non-member host worker** (an Apple-Metal / Windows-CUDA native subprocess,
+  [substrate_doctrine.md §5](./substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained))
+  needs only data-plane + Vault reach and **no** apiserver reachability. The classifier's K1 arm yields only a
+  `DataPlaneOnly (FabricMember c)` — the **one** data-plane witness owned by
+  [single_logical_data_plane_doctrine.md §3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe),
+  consumed here and never re-minted — so a host worker has **no path** into control-plane membership (**grade-1**:
+  the total `witness` fold has no constructor carrying a K1 host worker into a member `Reach`). It is the
+  attach-pool shape ([single_logical_data_plane_doctrine.md §4](./single_logical_data_plane_doctrine.md#4-the-elastic-worker-pool-the-attach-topology)),
+  representable on **any** `ComputeEngine`, including a hostless `Managed Eks`.
+- **K2 — a full k8s node** (a kubelet member inside the `Rke2` arm) carries the control-plane witness
+  **`ReachesControlPlane c`**, minted **from** the declared `Networking`'s `VpnFabric`
+  ([network_fabric_doctrine.md §3](./network_fabric_doctrine.md#3-keys-config-and-distribution--wireguard-as-just-another-reconcile)/[§5](./network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric))
+  by covering the apiserver VPN-IP — there is **no off-fabric constructor**, so witness *presence* is **grade-1**
+  (the phantom cluster index `c` must unify). A declared-remote agent is routed to
+  **`mkStretchedAgent :: ReachesControlPlane c -> HostAt s' -> Agent c s'`** by the same total `Site` decode
+  fold that classifies stretchedness — a **grade-2** checked rejection of a constructible value
+  ([§5](#5-the-compatibility-relation-technique-47-only-compatible-pairs-have-a-constructor) elementwise fold);
+  `mkStretchedAgent` threads a **single** networking value (the witness already carries its `VpnFabric`, so
+  there is no double-count).
+
+**Quorum stays co-located: `Rke2Servers (s :: Site)`.** The stretch is a **data-plane** move only: the servers
+union gains a phantom `Site` index so every server of one quorum unifies on **one** `Site`, and only
+`mkStretchedAgent` places agents at `Site' ≠ s`. A **split-`Site` etcd quorum** therefore has **no inhabitant** —
+**grade-1 by phantom-`Site` unification**, a *different* mechanism from the odd-count closure that forecloses a
+2/0-server quorum ([illegal_state_catalog.md §3.24](./illegal_state_catalog.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)
+is the count union; this is the locality index). Runtime residue is **grade-3**: the co-located servers keep a
+low-latency majority when the WAN link degrades.
+
+**Full member on the hostless `Managed` arm is grade-1 until a provider-native arm.** Per
+[§2](#2-computeengine-a-closed-union-eks-a-first-class-arm), a full stretched member on `Managed Eks` has **no
+constructor absent a provider-native capability** (EKS Hybrid Nodes) the `Managed` arm would *surface* — amoebius
+never builds a second control-plane fabric to fake it (the surface-provider-vs-build discipline,
+[cluster_lifecycle_doctrine.md §1](./cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape),
+[pulumi_iac_doctrine.md §0](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision)).
+This is the same closed-union "no arm = not supported" idiom as the missing `Ha7` quorum.
+
+**Honesty.** All of the above is Phase-0 design intent; **this round introduces** the two-kind classifier and
+the K2 witness rule (no code exists). Witness/field presence is grade-1; the `Site` routing fold and the reach
+relation are grade-2 decode checks; the WAN link actually coming up and the declared `Site` matching reality
+(`discover = Unreachable → refuse`,
+[cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine))
+are grade-3 runtime residue. The `Networking` wire, its endpoint indices, and the apiserver-VPN-IP render
+obligation are owned by
+[network_fabric_doctrine.md §5](./network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric);
+`Site` by [substrate_doctrine.md §8](./substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints);
+`FabricMember c` by [single_logical_data_plane_doctrine.md §3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe) —
+this doc mints only the K2 `ReachesControlPlane c` and owns the classifier that dispatches between the kinds.
+
 ---
 
 ## 5. The compatibility relation (technique §4.7): only compatible pairs have a constructor
@@ -251,6 +319,18 @@ This doctrine owns the *shape* of a legal cluster; two siblings own what rides o
   restate the verbs. Dynamic growth of the node set is a `ScalingPolicy`
   ([resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)) enacted as Pulumi node provisioning
   ([pulumi_iac_doctrine.md §4](./pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog)).
+- **Host-worker capacity and stretched reachability (cross-refs only; [§1](#1-two-axes-the-substrate-is-detected-the-engine-is-declared) disclaims capacity ownership).**
+  A host-level accelerator worker's `Demand` folds against its **own physical-host `Capacity`** via
+  `resource_capacity`'s **host→host-worker** nesting arm
+  ([resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)),
+  never this cluster's node bin-pack; this doc re-declares no such tier. A **stretched** node's reachability —
+  the K2 `ReachesControlPlane c` this doc mints in
+  [§4.1](#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation) and the
+  K1 data-plane `FabricMember c` it consumes from
+  [single_logical_data_plane_doctrine.md §3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe) —
+  is fold-derived, never authored, and rides the
+  [network_fabric_doctrine.md §5](./network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric)
+  `Networking` wire; being stretched is a *networking* fact that never moves the per-host capacity fold.
 
 > **Honesty.** Everything here is Phase-0 design intent. The type demands ([§3](#3-the-linuxhost-witness-rke2kind-on-a-host-with-no-linux-node-is-uninhabitable)-[§5](#5-the-compatibility-relation-technique-47-only-compatible-pairs-have-a-constructor)) are grade-1/grade-2
 > spec-layer properties *when implemented as specified* (Phase 3); the runtime residue — the VM actually

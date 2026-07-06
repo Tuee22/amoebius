@@ -83,6 +83,16 @@ fixed prefix schema. The `jitML` key renderers in `jitML/src/JitML/Checkpoint/Fo
       trial/<trial-id>/best/<metric>       -- per-trial best pointer
 ```
 
+**Pointers are namespaced per app (per-app isolation).** The store is one MinIO bucket *per project*, but within
+a project the serveable-model pointer namespace **this round introduces** is keyed **per app** — an app resolves
+and serves **only** the models it produced or imported, never another app's. The immutable blob/manifest layer
+stays content-addressed and dedup-able within the bucket; only the *mutable pointer* — the object that says "this
+app may serve this" — is app-scoped. Two consequences fall out and are owned elsewhere: there is **no** cross-app
+training-DAG `parent` edge (a `Continue` chain, [§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm), stays within one app's namespace), and "app B serving or
+continuing app A's model without an explicit grant" is a **grade-2** illegal state
+([`illegal_state_catalog.md`](./illegal_state_catalog.md)). The upstream-pull credential a stage-by-name import
+resolves is likewise scoped per app ([`vault_pki_doctrine.md`](./vault_pki_doctrine.md)).
+
 ### 2.1 Three object classes, two write protocols
 
 - **`blobs/<sha256>` — write-once content-addressed payloads.** The key *is* `sha256(bytes)`. One logical
@@ -107,6 +117,18 @@ fixed prefix schema. The `jitML` key renderers in `jitML/src/JitML/Checkpoint/Fo
   on failure, but a manifest becomes HEAD only when its pointer CAS succeeds. The pure CAS decision is
   `applyPointerWrite` (`PointerWritten` vs `PointerConflict`); the `jitML` checkpoint format owns the retry
   harness and the typed `AdvancePredicate` that resolves a lost CAS.
+
+**Two manifest metadata fields this round adds — both content-addressed, so both replicate.** Because the
+manifest is content-addressed, any datum recorded *in* it travels with the bytes under [§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely) confluence. This round
+introduces two such fields, so the serve gate and the serve-landing relation are satisfiable in a cluster that
+merely *received* the artifact: (i) the **provenance witness** — the committed-checkpoint pointer or the
+pinned import that makes a `ModelArtifact` serveable ([§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)); making it a manifest field (not a side table) is what lets
+the serve gate cross a cluster boundary alongside the weight bytes ([§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)/[§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)) — the doctrine adds this as the
+J∘H composition fix. (ii) the **engine-family tag** — the `EngineRuntime` family the weights target
+([§3.1](#31-producing-substrate-vs-serving-substrate-a-distinct-serving-run-fingerprint)/[§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)), which the cross-substrate serve-landing predicate keys on. Confirm alongside these that the
+manifest's existing `parent` field is a **namespace-independent manifest SHA** (`sha256(canonical-cbor)`, above)
+— it names a checkpoint by content, not by an `experimentHash`-scoped path, so a `parent` / adopted checkpoint
+resolves **cross-bucket and cross-substrate-namespace** ([§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd), [§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)).
 
 ```mermaid
 flowchart TD
@@ -156,7 +178,7 @@ differ), and **a pointer is the only mutable object, advanced only by ETag-CAS, 
 | kind | points at | owner |
 |------|-----------|-------|
 | `trial` (`latest` / `best/<metric>`) | a manifest SHA | this doc, [§2](#2-the-three-tier-store-blobs--manifests--pointers) |
-| `model` | a `ModelArtifact` manifest; the `.ready` sentinel is the commit | [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) (Q8) |
+| `model` | a provenance-witnessed `ModelArtifact` manifest; `.ready` **and** a committed provenance witness are the commit | [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) (Q8) |
 | `environment` (`dev` / `staging` / `prod`) | a `Release` (keyed by `releaseHash`) | [`release_lifecycle_doctrine.md` §3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer) |
 
 Ownership and honesty for the registry:
@@ -196,10 +218,17 @@ experimentHash = sha256(resolved-dhall ‖ substrate-fingerprint)
 
 - **`resolved-dhall`** is the fully-evaluated experiment program — the normal form of the `.dhall` value after
   all imports and functions are applied. It carries the model architecture, the master seed, the metric set
-  *and each metric's direction*, the optimizer, the dataset split, and the budget. Two consequences fall out of
-  this being part of the identity: flipping a metric's `direction` (maximise ↔ minimise) defines a **different
-  experiment**, and any application-logic change to the model defines a different experiment. The DSL surface
-  that produces this normal form is owned by [`dsl_doctrine.md`](./dsl_doctrine.md); this doc only consumes it.
+  *and each metric's direction*, the optimizer, and — as of this round's training-run topology
+  ([§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)) — the **`TrainInit`**, **`TrainData`**, and **`TrainBudget`** unions, replacing the earlier flat
+  "dataset split, and the budget" pair. Concretely `TrainData` contributes a fixed dataset content-address **or**
+  a materialized feed-prefix content-address; `TrainBudget` a bounded **or** continuous budget; and, for a
+  fine-tune / warm-start chain, `TrainInit`'s `Continue` contributes the **base model's content-address**. Folding
+  the base-model and consumed-prefix content-addresses **into `resolved-dhall`** is what keeps `experimentHash` a
+  **2-input** digest (`sha256(resolved-dhall ‖ substrate-fingerprint)`) rather than a wider tuple ([§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)). Two
+  consequences fall out of this being part of the identity: flipping a metric's `direction` (maximise ↔ minimise)
+  defines a **different experiment**, and any application-logic change to the model defines a different experiment.
+  The DSL surface that produces this normal form is owned by [`dsl_doctrine.md`](./dsl_doctrine.md); this doc only
+  consumes it.
 - **`substrate-fingerprint`** is the identity of *where the math runs* — `apple-silicon` / `linux-cpu` /
   `linux-cuda` plus the toolchain witnesses that fix float semantics (the GHC 9.12.4 baseline, the
   kernel-compiler/runtime versions, ISA, ABI). It is gathered by full-path subprocess probes, never from
@@ -221,6 +250,41 @@ substrate-fingerprint folds the latter into the identity — the split itself is
 [`app_vs_deployment_doctrine.md`](./app_vs_deployment_doctrine.md). `experimentHash` gives **identity**, not a
 guarantee that two runs sharing it produce equal bits; that stronger claim is [§4](#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) (when it holds) and [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) (where
 it stops).
+
+### 3.1 Producing substrate vs serving substrate: a distinct serving-run fingerprint
+
+`experimentHash` above folds the substrate **monolithically** — "where it ran," one fingerprint. That is exactly
+right for a *training* run, but it conflates two roles an ML artifact actually has, and **this round introduces**
+the split (it is not a distinction the existing digest already draws):
+
+- **Producing substrate** — the accelerator whose reduction order made the weight bytes. It is folded into the
+  checkpoint's `experimentHash` namespace ([§3](#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)) exactly as above. It is **provenance, not a serving constraint**.
+- **Serving substrate** — the accelerator an *inference* run uses. Because `experimentHash` names *where it
+  ran*, this round introduces a **distinct serving-run fingerprint** for the serving pod; the Tier-3
+  `kernelKey` ([§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds), design intent) folds that serving substrate per serving pod. This is **design intent**, not an
+  existing `experimentHash` field.
+
+**The serving substrate need not equal the producing substrate.** A `ModelArtifact`'s weight bytes are
+**substrate-portable (movable, content-addressed), not substrate-identical** — [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) is explicit that "the same
+program on a different accelerator produces different bytes," so the bytes move but are not guaranteed bit-equal
+or even loadable on a different lane. Cross-substrate serving is made representable by **new work this round
+adds**, never by a check that already existed:
+
+1. An **engine-`family` tag** on `ModelArtifact` / manifest ([§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) / [§2.1](#21-three-object-classes-two-write-protocols)) — the model side carries no family
+   field today.
+2. A **redefined landing predicate** owned by
+   [`service_capability_doctrine.md` §4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-baked-and-substrate-selected-never-fetched):
+   "the model's engine **family** is available on the **serving** substrate lane," decoupled from the producing
+   lane. Family×lane availability is a **partial** relation (e.g. vLLM is not baked on Apple-Metal), so an
+   unavailable-family-on-lane is an honest **grade-2** rejection.
+
+**Grade.** Producing-substrate provenance + the [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) witnessed constructor is **grade-1**; the engine-family ↔
+serving-substrate serve relation is **grade-2** (a checked rejection of a constructible value, [`illegal_state_catalog.md` §4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection)).
+Two **grade-3 residues** are named, not foreclosed, and ledgered in [§6.1](#61-proven--tested--assumed-spelled-out): (i) **no cross-substrate bit-equality** back to the training
+substrate ([§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) ceiling, unchanged); (ii) a **weight-layout load residue** — a family-matched but
+substrate-specific-**weight-layout** model (the manifest carries "weight layout," [§2.1](#21-three-object-classes-two-write-protocols)) passes the grade-2
+relation and may still fail to **load** at runtime. Tier-3 kernel recompilation does **not** close this:
+`kernelKey` folds the compute *kernel*, not the weight bytes.
 
 ---
 
@@ -312,10 +376,39 @@ Two types carry the axis:
   obtainable **only** once the `.ready` sentinel exists: a half-staged model has no serveable reference
   (**grade-(1)**, the existing `.ready`-gate discipline generalized — no constructor without the sentinel).
 
+**The serve gate is provenance, not just staging completeness (this round).** The `.ready` sentinel proves
+**staging completeness (bytes written)** — it does **not** prove *training provenance*. This round makes a
+serveable `ModelArtifact`'s constructor additionally require a **provenance witness**, one of exactly two arms
+(this is the single-owner constructor; [`service_capability_doctrine.md` §4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-baked-and-substrate-selected-never-fetched) and [`dsl_doctrine.md`](./dsl_doctrine.md) **reference** it, never restate the precondition):
+
+- **(a) a committed producing checkpoint** — a committed `latest` / `best` pointer (the single atomic pointer CAS,
+  [§2](#2-the-three-tier-store-blobs--manifests--pointers)) that **always names a complete checkpoint** — never "a finished *run*," so it composes with [§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)'s
+  serving of a still-running Continuous job. Because jitML checkpoints live under `jitml-checkpoints/` and infernix
+  models under `infernix-models/` ([§2](#2-the-three-tier-store-blobs--manifests--pointers)) with no producer→consumer edge today, arm (a) adopts the jitML
+  checkpoint's **manifest SHA directly** (`sha256(canonical-cbor)`, **namespace-independent**, [§2.1](#21-three-object-classes-two-write-protocols)) — so it
+  resolves **cross-bucket and cross-substrate-namespace**, not a within-namespace pointer.
+- **(b) a pinned, content-addressed external import** carrying provenance — see the rewritten Tier 2 below. Naming
+  a model in `infernix.dhall` **is** this arm; there is no bare stage-by-name-without-provenance constructor.
+
+The witness is recorded as a **content-addressed manifest field** ([§2.1](#21-three-object-classes-two-write-protocols)) so it replicates with the bytes under
+[§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely) confluence. "Producing run" is a **misnomer for arm (b)** (external / third-party); name the gate a
+**provenance witness (committed checkpoint OR pinned import)** and reserve "producing run" for arm (a).
+
+**Grade.** Foreclosing the **unwitnessed direct-stage path** and the **checkpoint arm (a)** is honestly
+**grade-(1)** — a committed pointer is a genuine no-inhabitant-without-a-complete-checkpoint constructor.
+**Provenance-witness *presence* on arm (b)** is grade-(1); its **byte truthfulness** is not — arm (b) admits
+arbitrary bytes (including noise) by design. Fork A tightens this: the import constructor **requires a pinned
+expected content-address (or detached signature)**, and staging **verifies pulled bytes against the pin and fails
+closed before `.ready`** — so pin *presence* = grade-(1), pin *match* = grade-(2) (stage-time checked,
+fail-closed), and "the pin names the *intended* model" = grade-(3) / assumed (ledgered in [§6.1](#61-proven--tested--assumed-spelled-out)).
+
 **The engine↔model relation.** A `ModelArtifact` must be servable by an `EngineRuntime` that is available on the
 deployment's substrate — an unmatched model has no landing engine. This is a **grade-(2)** total relation
 (technique [`illegal_state_catalog.md` §4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection)); the substrate `InferenceEngine`
-capability a model must match is owned by [`service_capability_doctrine.md` §4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding).
+capability a model must match is owned by [`service_capability_doctrine.md` §4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding). **Cross-substrate serving is
+representable** ([§3.1](#31-producing-substrate-vs-serving-substrate-a-distinct-serving-run-fingerprint)): the `ModelArtifact` / manifest carries an **engine-`family` tag** ([§2.1](#21-three-object-classes-two-write-protocols)), and the landing
+predicate keys on that family being available on the **serving** substrate lane — so a CUDA-produced model may
+serve on Apple-Metal when the family is baked there, subject to the [§3.1](#31-producing-substrate-vs-serving-substrate-a-distinct-serving-run-fingerprint) grade-3 weight-layout load residue.
 
 The three tiers, three lifecycles:
 
@@ -324,14 +417,19 @@ The three tiers, three lifecycles:
   sidecars — the engine exists the moment the pod does. The `.dhall` only selects by substrate; it can never
   author a download. Baked engines are owned by [`image_build_doctrine.md`](./image_build_doctrine.md); this
   replaces `infernix`'s per-engine Poetry-venv + curl-tar-at-image-build.
-- **Tier 2 — `ModelArtifact` = eager STAGE-THEN-SERVE.** The parent-minted nested `infernix.dhall` names the
-  model *set*; the elected in-cluster singleton stages each model, and the `.ready` sentinel is written **last**
-  so the `model` pointer ([§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)) commits only a complete artifact. Staging **re-keys** the model off `infernix`'s
-  name-addressed `infernix-models/<modelId>/…` layout onto the content-addressed **blob ← manifest ← pointer**
-  store of [§2](#2-the-three-tier-store-blobs--manifests--pointers) — the same three-tier shape training already uses. **Staging credentials — object-store and
-  upstream — resolve from Vault BY NAME** (a `SecretRef`, never a value in `.dhall`); this **kills** `infernix`'s
-  second k8s-Secret store and its hardcoded `minioadmin/minioadmin123` fallback. Vault custody is the one
-  amoebius secret contract, not a per-project store.
+- **Tier 2 — `ModelArtifact` = eager STAGE-THEN-SERVE, and *staging by name IS a provenance-carrying import*.**
+  The parent-minted nested `infernix.dhall` names the model *set*; the elected in-cluster singleton stages each
+  model, and the `.ready` sentinel is written **last** so the `model` pointer ([§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)) commits only a complete
+  artifact. This round **closes the unwitnessed hole** the bare stage-by-name path left open: **naming a model in
+  `infernix.dhall` is an explicit content-addressed import (arm b above)** that carries a **pinned expected
+  content-address (or detached signature)**; staging **verifies the pulled bytes against the pin and fails closed
+  before `.ready`** (Fork A) — there is no constructor that stages bytes without a pin. Staging **re-keys** the
+  model off `infernix`'s name-addressed `infernix-models/<modelId>/…` layout onto the content-addressed
+  **blob ← manifest ← pointer** store of [§2](#2-the-three-tier-store-blobs--manifests--pointers) — the same three-tier shape training already uses.
+  **Staging credentials — object-store and upstream — resolve from Vault BY NAME** (a `SecretRef`, never a value
+  in `.dhall`, scoped **per app** per [§2](#2-the-three-tier-store-blobs--manifests--pointers)); this **kills** `infernix`'s second k8s-Secret store and its
+  hardcoded `minioadmin/minioadmin123` fallback. Vault custody is the one amoebius secret contract, not a
+  per-project store.
 - **Tier 3 — Kernel = LAZY content-addressed JIT.** A compiled kernel is materialized on the *first cache miss*
   (the sibling `jitML` `ensureKernelArtifact`: cache HIT returns a handle, MISS compiles then stores), keyed by
   `kernelKey` ([§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)). It is **not** a startup build — a cold pod serves as soon as its baked engine and staged
@@ -352,6 +450,68 @@ last — while `model_cache.py`'s `minioadmin` fallback is exactly the Vault vio
 `jitML`'s `Engines/Loader.hs` is the lazy per-kernel JIT (HIT→handle, MISS→compile). These are working sibling
 behaviors this doctrine *generalizes*; amoebius has built none of the three-tier asset lifecycle itself. The
 illegal states it closes are catalogued at [`illegal_state_catalog.md` §3.25](./illegal_state_catalog.md#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model).
+
+### 4.6 The training-run topology: fine-tune chains and continuous feeds without an unbounded arm
+
+The training surface today models only a fixed dataset split + a finite budget with implicit from-scratch init
+([§3](#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)). This round **introduces** two new capabilities — fine-tune-from-an-arbitrary-model and
+train-forever-from-a-feed — unified by one idea: **online training is an unbounded fine-tune chain over successive
+topic prefixes.** They are carried by three **closed** unions, **owned here** (matching the `EngineRuntime` /
+`ModelArtifact` precedent, [`dsl_doctrine.md`](./dsl_doctrine.md) **carries the field only**, deferring
+unrepresentability to this doc + [`illegal_state_catalog.md`](./illegal_state_catalog.md)):
+
+- **`TrainInit = FromScratch Seed | Continue ModelArtifactRef`** — `Continue` takes any **provenance-witnessed**
+  `ModelArtifact` ([§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)): a prior committed checkpoint **or** a pinned import. Fine-tuning / warm-starting
+  compose recursively with the [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) witness. Per the per-app isolation of [§2](#2-the-three-tier-store-blobs--manifests--pointers), a `Continue` chain's `parent`
+  edge stays **within one app's namespace** — no cross-app DAG edge.
+- **`TrainData = Dataset ContentAddressedRef | Feed { topic : PulsarTopicRef, from : Cursor }`** — `Feed` consumes
+  a topic from a cursor. The consumed prefix `[from, to)` is **materialized at consume time into an immutable
+  dataset blob** keyed by the SHA(s) of the message **bodies** (bodies are already CBOR content-addressed, [§2.1](#21-three-object-classes-two-write-protocols)),
+  and **that blob content-address is the pinned input**. The cursor is an un-hashed convenience locator only — a
+  Pulsar cursor (`<ledgerId>:<entryId>:…`) is broker-assigned metadata, **never an input to any content hash**
+  ([§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)). Materializing the prefix makes the input genuinely immutable ("a SHA is forever," [§4.1](#41-leg-one--pinned-content-addressed-inputs)) and decouples
+  reproducibility from topic retention. A multi-partition feed has no total consume order, so `Feed` carries a
+  **typed single-partition-or-explicit-merge-function witness** — a non-deterministically-ordered feed has **no
+  constructor**.
+- **`TrainBudget = Bounded { steps | epochs } | Continuous { checkpointCadence }`** — `Continuous` commits a
+  **checkpoint** every cadence; each is a committed pointer ([§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) arm a) and thus **serveable** — serve-from-any-
+  committed-checkpoint of a still-running job (composes with [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) "committed checkpoint," **not** "finished run").
+
+**No bare-unbounded arm (mirrors `Growable`).** `Continuous` **requires** a `checkpointCadence`; `Feed` **requires**
+a bounded-retention `StorageBudget`. "Train forever with no checkpoints and no retention" has **no constructor** —
+**grade-1 union shape**, exactly the `Growable` / `ScalingPolicy` idiom. Paired with the honest **grade-3 runtime
+residue**: that the trainer *actually* checkpoints at cadence and retention *actually* holds is runtime, not typed.
+
+**Determinism = a content-addressed training DAG (graded).** Each checkpoint records its `parent` (base)
+content-address and its consumed-prefix content-address; **`experimentHash` keeps its 2-input formula** — the base
+and prefix addresses are folded **into `resolved-dhall`** ([§3](#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)), **not** into a wider hash tuple (which would break
+the "existing (sibling)" framing of [§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)). Grade the headline honestly: DAG **identity / bookkeeping**
+(parent + prefix pinned) is **grade-1**; **actual byte-replay** is **grade-2 / tested** per [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) (SL / on-policy /
+AlphaZero-per-game tested-in-sibling; off-policy RL only the prefix); **cross-substrate is not asserted** (a
+cross-substrate `Continue` is a **new** run in a **new** `experimentHash` namespace with no reproducibility
+relation back to the base's substrate — the base is a pinned immutable input, not an anchor).
+
+**The continuous trainer reuses existing machinery (Fork C — no new election).** It is **not** a new elected
+worker kind and does **not** fold through the control-plane singleton; it is the existing
+jitML / infernix training-coordinator worker ([`daemon_topology_doctrine.md` §4](./daemon_topology_doctrine.md#4-worker-daemons--n-unelected)) parameterized with a `Feed` data
+source. Single-writer is **delegated, not re-proved**: liveness (at most one active trainer per feed) is a Pulsar
+**Exclusive/Failover subscription** on the feed topic; safety (race-free `latest`) is the content-store
+**ETag-CAS single atomic commit point** + the typed **`AdvancePredicate`** ([§2](#2-the-three-tier-store-blobs--manifests--pointers), [§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)) — a monotone / idempotent join, so
+even a bounded failover-overlap of two trainers cannot regress HEAD. Each committed checkpoint advances `latest`
+by CAS. Cross-cluster there is **no** second trainer on the same feed: a Continuous Feed trainer is
+**single-cluster** (the intra-cluster First-Axis single-writer coordinator); cross-cluster is **serve-by-
+replication** ([§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)), never a second authoritative trainer.
+
+**Type coherence to confirm (not asserted).** The DAG `parent` field stores a **namespace-independent manifest
+SHA** (`sha256(canonical-cbor)`, [§2.1](#21-three-object-classes-two-write-protocols)), and `ModelArtifactRef` and a checkpoint-manifest-SHA must **unify as one
+content-address type** before a cross-import / cross-substrate `Continue` resolves — carried as a confirm-item,
+tied to [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)'s cross-bucket adoption.
+
+The illegal states this subsection closes — "a Continuous run with no cadence / a Feed with no bounded retention"
+(grade-1 shape + grade-3 tail), "a multi-partition Feed with no defined merge" (grade-1/2 typed witness), "serving
+an uncommitted / in-flight checkpoint of a running job," and "two authoritative Continuous trainers on one logical
+model across clusters" — are catalogued in [`illegal_state_catalog.md`](./illegal_state_catalog.md); the retention
+and replay ceilings are ledgered in [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic)/[§6.1](#61-proven--tested--assumed-spelled-out).
 
 ---
 
@@ -379,6 +539,22 @@ hard proof obligations concentrate on the systems that are *not* content-address
 multi-writer mutable state), and that "Second Axis" of async cross-cluster geo-replication is owned by
 [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md). This doc owns only the claim that the store is the
 easy case and *why*.
+
+**Cross-cluster model reuse: need not retrain — reuse is safe by confluence (a design policy).** Because a
+checkpoint is an **immutable content-addressed artifact** and the store is the confluent join-semilattice above, a
+model trained in **one** cluster (jitML's intra-cluster First-Axis single-writer coordinator, [§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)) **need not**
+be retrained elsewhere — it is reused by confluent replication of the immutable artifact. This is the explicit
+answer to "must each cluster train its own models?" — **no**. The honest grade: "**never** retrained" is **not** a
+typed invariant. Nothing prevents cluster B independently training the same `experimentHash`; confluence makes
+that **safe** (same substrate → same hash → union no-op; different substrate → different namespace → no
+collision), **not impossible** — so a redundant retrain is at most **grade-3** (harmless, not foreclosed). This is
+therefore a **design policy**, and it inherits the [§6.1](#61-proven--tested--assumed-spelled-out) ledger: the confluence-safety is proven-in-types for the
+store **algebra** only, **not** a built amoebius replication run. The **async geo-replication transport / trigger**
+and the First-Axis coordinator fact are owned by [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md)
+(this doc states them as cross-refs, not assertions). One composition obligation makes the policy sound: §H's
+**provenance witness must be a content-addressed manifest field** ([§2.1](#21-three-object-classes-two-write-protocols)) so it crosses under this confluence
+**alongside** the bytes — otherwise cluster B receives the weights but not the witness and the [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) serve gate
+rejects them.
 
 **Transport.** Cross-cluster movement of bodies and events rides the native-protocol Pulsar client — the TCP
 binary protocol, **never** WebSockets — owned by [`pulsar_client_doctrine.md`](./pulsar_client_doctrine.md). A
@@ -417,9 +593,25 @@ that ceiling sits, and amoebius adopts its contract verbatim rather than inventi
   `rl_steps / 10`), and — critically — it is asserted by comparing **two fresh runs against each other**, never
   against a stored trajectory fixture. That is *tested evidence in the sibling*, not a proof, and this doctrine
   reports it as such. On-policy algorithms (PPO, A2C, TRPO, MaskablePPO, RecurrentPPO) and SL training hold
-  full-run bit-equality; AlphaZero self-play holds per-game bit-equality.
+  full-run bit-equality; AlphaZero self-play holds per-game bit-equality. **For a `Continuous` run
+  ([§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)) this prefix anchor is undefined** — a Continuous run has no terminal step to take a fraction of. Scope
+  it **per committed checkpoint-segment** (between two committed pointers), or state plainly "no reproducibility
+  anchor beyond resume-from-checkpoint"; do **not** import the bounded-run `rl_steps / 10` prefix unchanged.
 - **Infernix inference inherits the same ceiling.** Same-substrate, seeded/greedy decoding is the reproducible
   contract; cross-substrate inference bits are not asserted equal.
+- **Feed reproducibility is bounded by durable retention — but the checkpoint's input is not.** Because the
+  consumed prefix is materialized to an **immutable dataset blob** ([§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)), the checkpoint's *input* is forever;
+  the retention `StorageBudget` (the two-ceiling durable total,
+  [`resource_capacity_doctrine.md` §7](./resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total) /
+  [`pulsar_client_doctrine.md` §6.1](./pulsar_client_doctrine.md#61-topic-storage-lifecycle-bounded-tiered-retained--and-the-hot-tier-never-overflows))
+  bounds only **re-deriving that blob from the live topic**. Cross-cluster you therefore get
+  **resume-from-checkpoint** (the immutable checkpoint replicates by [§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)), **not** re-derive-from-feed, unless the
+  consuming cluster independently retains the prefix.
+- **The training-DAG headline is graded, not a blanket "replay reproduces."** DAG **identity / bookkeeping**
+  (a checkpoint's `parent` + consumed-prefix content-addresses pinned, [§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)) is **grade-1**; **actual
+  byte-replay of a DAG node** is **grade-2 / tested** at the same ceiling as any run above (SL / on-policy /
+  AlphaZero-per-game tested-in-sibling; off-policy RL only the segment prefix), and **cross-substrate replay is
+  not asserted**.
 
 ### 6.1 Proven / tested / assumed, spelled out
 
@@ -433,8 +625,10 @@ reaches:
 | A stream's seed is independent of worker count, scheduling, and assignment | **Proven-in-types** | `deriveSplitMixSeed` is pure over `(masterSeed, index)` |
 | Blob/manifest merge is conflict-free; pointer convergence is a lattice join | **Proven-in-types** (argued from immutability + commutative/associative/idempotent join) | The store algebra; *not* a built amoebius replication run |
 | Same-substrate same-toolchain checkpoint reproduction is byte-identical | **Tested in the sibling `jitML`**, not proven in amoebius | A runtime comparison on matching hardware |
-| Off-policy RL same-seed full-run bit-equality | **Not asserted**; only the first-N-step prefix is tested | A runtime prefix comparison of two fresh runs |
+| Off-policy RL same-seed full-run bit-equality | **Not asserted**; only the first-N-step prefix (bounded run) / per-checkpoint-segment (Continuous) is tested | A runtime prefix comparison of two fresh runs |
 | Cross-substrate bit-equality (training or inference) | **Explicitly not asserted** | Nothing — out of contract by design |
+| An imported model's pin names the *intended* model (§4.5 arm b) | **Assumed** — pin *presence* is grade-1, stage-time pin *match* is grade-2 (fail-closed), but "the pin denotes the model you meant" is out of type reach | Nothing typed — trust in the pin author (Fork A) |
+| A family-matched, substrate-specific-weight-layout model actually **loads** on the serving substrate (§3.1) | **Not asserted** | Runtime — the grade-2 family relation passes; the weight-layout load is residue, like "the staged bytes actually load" |
 
 amoebius itself has built none of this; the proven-in-types rows are the design's *intended* totality, and the
 tested rows are evidence from sibling libraries that the design is realizable. Treat this document as a

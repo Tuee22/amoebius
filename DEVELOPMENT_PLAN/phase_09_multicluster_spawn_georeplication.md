@@ -82,6 +82,17 @@ clusters are Phase 10). Partition tolerance is a capability the cross-cluster mo
 multi-cluster substrate**, exercised here by killing a sibling on the same host — not a property a single
 root cluster exercises.
 
+**A stretched cluster is not geo-replication (boundary distinction; §L cross-ref).** This phase's Second Axis is
+*N* separate clusters, each its own etcd, related only by an **asynchronous** Pulsar/MinIO/Postgres link — that is
+what owes the R9 data-loss budget and the cross-cluster failover proof. A **stretched cluster** (the §L design
+this round introduces) is by contrast **one** cluster — one etcd, one boundary, one `Topology` whose nodes merely
+span network `Site`s over a WAN fabric — so it owes **no** R9 budget and **no** Second-Axis obligation, and is
+explicitly **out of scope for this phase**
+([`single_logical_data_plane_doctrine.md`](../documents/engineering/single_logical_data_plane_doctrine.md) §1/§5,
+[`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md) §4.1,
+[`substrate_doctrine.md`](../documents/engineering/substrate_doctrine.md) §8). Do not conflate a stretched single
+cluster with the geo-replicated forest this phase proves.
+
 **Gate:** two children geo-replicate a workflow; killing the lead cluster mid-workflow triggers gateway
 failover and a route53 repoint to the surviving sibling; the measured data loss is **≤ the declared
 data-loss budget**; the TLA+ safety/liveness checks pass at scope 2 clusters and the io-sim drills pass; and

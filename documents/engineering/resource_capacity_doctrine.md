@@ -105,13 +105,21 @@ advertises a **`Capacity`**, and every consumer declares a **`Demand`** in the s
 subtraction that must not underflow.
 
 - **`Quantity`** — a refined non-zero measure with a unit (`cpu` millicores, `mem` bytes, `storage` bytes,
-  `gpu` count). A zero or negative quantity is not constructible (the same refined-non-zero discipline the
+  `vram` bytes). A zero or negative quantity is not constructible (the same refined-non-zero discipline the
   storage doctrine uses for PV sizes, [storage_lifecycle_doctrine.md §5](./storage_lifecycle_doctrine.md#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim),
   and platform services for cpu/ram, [platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)).
-  cpu and mem are **divisible** (fractional millicores/bytes, overcommittable at the limit); **`gpu` is an
-  indivisible `Count`** — a 2-GPU pod needs a single node with ≥2 *free* GPUs, no fractional or straddled
-  allocation. That indivisibility is exactly why the cluster fold is an integer bin-pack, not a sum
-  ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)).
+  cpu and mem are **divisible** (fractional millicores/bytes, overcommittable at the limit). **Accelerators are
+  not a per-pod axis at all.** A node's accelerators are owned **wholesale** by that node's one accelerator
+  worker ([daemon_topology_doctrine.md §4](./daemon_topology_doctrine.md), reframing §C of the prior round's
+  gpu-as-bin-packable narrative), so there is **no `gpu` field on `ResourceVec`** for a pod to name — a per-pod
+  GPU request is **unrepresentable by construction (grade-1)**. `vram` is the accelerator-memory measure that
+  wholesale worker carves among the models it serves — a per-owner Σ (the `worker → served-model` arm,
+  [§4](#4-the-total-fold-fits-carve-place-and-the-nesting)), *not* a pod→node bin-pack axis; its per-host number
+  and unified-vs-discrete Capacity shape are owned by
+  [substrate_doctrine.md §8](./substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints)
+  and this doc does not restate them. The cluster compute fold is still an integer bin-pack — **not** because of
+  accelerator indivisibility, but because **pods are atomic and cannot straddle nodes** (a workload can fit in
+  aggregate yet have one pod that fits no single node, [§4](#4-the-total-fold-fits-carve-place-and-the-nesting)).
 - **`Capacity`** — what a *provider* offers: a record of `Quantity` per axis, and it is the **allocatable**
   (schedulable) capacity, **not** the raw hardware total — kube/system-reserved and the eviction threshold are
   already netted out, so the fold never trusts a number larger than the scheduler can hand out ([§8](#8-where-the-numbers-come-from-declared-at-decode-cross-checked-at-runtime)). A
@@ -120,13 +128,12 @@ subtraction that must not underflow.
   carves a sub-`Capacity` out of its host; a managed provider's node advertises the `Capacity` of its instance
   type; a `StorageBacking` advertises a storage `Capacity` ([§5](#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)).
 - **`Demand`** — what a *consumer* needs: the same record shape. Each container declares a **`Resources`** pair
-  — **`requests`** and **`limits`**, both `ResourceVec` (cpu/mem `Quantity`, optional `gpu` `Count`) — and it
+  — **`requests`** and **`limits`**, both `ResourceVec` (cpu/mem `Quantity`) — and it
   is the **`requests`** vector that becomes the container's `Demand` and is summed by the fold, because
   `requests` is what the scheduler reserves against allocatable. **`limits`** is carried but *never* summed by
   `place`; it is the grade-3 cgroup ceiling (throttle/OOM) enforced at runtime, not a scheduling number. A
   decode invariant holds per axis — **`requests ≤ limits`** (a limit below its request is itself an illegal
-  state, foreclosed here), and **`gpu` requires `requests == limits`** since an extended resource cannot be
-  overcommitted. A StatefulSet's volume claims are a storage `Demand`; a whole workload's `Demand` is the fold
+  state, foreclosed here). A StatefulSet's volume claims are a storage `Demand`; a whole workload's `Demand` is the fold
   of its containers' `requests` and volumes; a VM's `Demand` on its host is the fold of everything the VM runs
   plus its own overhead.
 - **`Budget`** — a `Capacity` an owner is *allowed to consume against*, which may be a fixed cap or a
@@ -134,8 +141,8 @@ subtraction that must not underflow.
   number, `Budget` is the *policy-wrapped* number the fold checks against.
 
 ```
-Resources   = { requests : ResourceVec, limits : ResourceVec }   -- requests ≤ limits; gpu requests == limits
-ResourceVec = { cpu : Quantity, mem : Quantity, gpu : Optional Count }   -- storage is per-volume, not here
+Resources   = { requests : ResourceVec, limits : ResourceVec }   -- requests ≤ limits
+ResourceVec = { cpu : Quantity, mem : Quantity }   -- storage is per-volume; accelerators are wholesale per-node (no gpu/vram axis)
 ```
 
 `Demand` and `Capacity` share one record shape (a `ResourceVec` per axis) so the fold is defined once and
@@ -185,9 +192,45 @@ The nesting is where the illegal states [§3.17](./illegal_state_catalog.md#317-
   the per-pod inputs are exact, not a guess — so the packing is over known integers, the same soundness the
   cluster-lifecycle push-back relies on
   ([cluster_lifecycle_doctrine.md §6](./cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-global-dhall)).
+- **Host → host-worker.** A host-level accelerator worker (Apple-Metal or Windows-CUDA) is a native subprocess,
+  **not** a pod ([daemon_topology_doctrine.md §4](./daemon_topology_doctrine.md),
+  [substrate_doctrine.md](./substrate_doctrine.md)), so its cpu/mem `Demand` is declared by
+  [platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)
+  (every container **and every host-level worker subprocess**) and folds against its **physical-host
+  `Capacity`** — the physical total the per-host inventory declares
+  ([substrate_doctrine.md §8](./substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints)),
+  distinct from the Lima/WSL2 VM's kube-allocatable ([§8](#8-where-the-numbers-come-from-declared-at-decode-cross-checked-at-runtime)).
+  The three-way fit — the co-resident VM carve + the worker `Demand` ≤ physical-host allocatable, with the host
+  binary's own footprint already netted into system-reserved (substrate §8) — is a **grade-2 `Left Overcommit`
+  at decode**, the host-tier analogue of the pod-tier aggregate overcommit
+  ([illegal_state_catalog.md §3.17](./illegal_state_catalog.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded));
+  it is **never** "unrepresentable" — a capacity check is grade-2, never grade-1 ([§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-grade-2-check-never-grade-1)).
+- **Accelerator worker → served-model (VRAM).** The one wholesale accelerator worker on a node
+  ([daemon_topology_doctrine.md §4](./daemon_topology_doctrine.md)) carves the node's accelerator memory among
+  the models it serves — a `Σ served-model VRAM ≤ node vram` fold, modelled **like storage** (a per-owner Σ),
+  **not** a pod→node `ResourceVec` axis. The per-host `vram` number and its unified-vs-discrete Capacity shape
+  are owned by [substrate_doctrine.md §8](./substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints)
+  (this doc does not restate that topology rule); the per-model VRAM footprint — the left operand of the Σ — is
+  owned by [service_capability_doctrine.md §4.1](./service_capability_doctrine.md); this doc owns only the Σ
+  arithmetic. The declared-footprint Σ is **grade-2**; whether the model **actually fits in VRAM at runtime**
+  under real batch/context (dynamic KV-cache/fragmentation) is **grade-3 residue**, exactly like the `mem`
+  cgroup ceiling behind the `mem` Σ ([§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-grade-2-check-never-grade-1))
+  — the grade-2 Σ does **not** foreclose runtime VRAM OOM.
 
 The fold is **total and re-runnable**: after any `Growable` policy grows a capacity ([§6](#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)) the fold re-runs
 against the new bound, so growth never silently invalidates an earlier check.
+
+**`place` folds exactly one `Topology`.** `place :: Topology -> [Workload]` admits a **single** `Topology`, and
+a `Topology` is one cluster ([cluster_topology_doctrine.md §4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction)),
+so a capacity fold spanning two clusters' `Topology`s has **no constructor — grade-1 by arity**
+([§9.1](#91-the-cross-cluster-capacity-fold-is-a-grade-1-non-goal-single-cluster-by-arity),
+[illegal_state_catalog.md §3.31](./illegal_state_catalog.md)). A **stretched cluster** — one whose nodes span
+two network-locality `Site`s across a WAN — is still **one** `Topology`; `place` runs **once** over it. The WAN
+there spans **nodes inside the one fold** (a full stretched member node) or a **host-worker subprocess client
+outside the cluster** (a stretched host worker), never two clusters. A stretched host worker is **not** a pod in
+this `place`: its `Demand` folds against its **own physical-host `Capacity`** (the host → host-worker arm above),
+**not** the home cluster's node bin-pack — being *stretched* is a **networking** fact that does not move the
+per-host capacity fold.
 
 ### 4.1 `place` branches: static proves a placement, dynamic proves a growth envelope
 
@@ -221,6 +264,15 @@ not a packing. `place` selects on the topology's budget shape ([§6](#6-growable
 ordinals, the hybrid case above); elsewhere the runtime scheduler is left free to reproduce an equivalent placement, so
 HA rescheduling after a node failure still works. Pinning every pod would defeat failover. That the scheduler
 *actually* reproduces a feasible placement is the grade-3 residue ([§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-grade-2-check-never-grade-1)).
+
+**Accelerators are wholesale-owned, so the pod→node bin-pack ranges over cpu/mem only.** The bin-pack packs the
+`ResourceVec = { cpu, mem }` demands against each node's allocatable; a node's accelerators are **not** a
+bin-pack axis. Each node's accelerators are owned **wholesale** by that node's one accelerator worker — the
+typed per-node-singleton owner this round's compute half introduces, owned by
+[daemon_topology_doctrine.md §4](./daemon_topology_doctrine.md) — and other pods use only the node's leftover
+cpu/mem, never its accelerators. This reframes the prior round's "a `gpu` `Count` bin-packs onto a node with ≥N
+free GPUs": accelerator sizing is the `worker → served-model` VRAM Σ below ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)),
+not a per-pod placement axis. This doc consumes the wholesale-ownership rule; it does not own it.
 
 ---
 
@@ -325,6 +377,14 @@ the *two-ceiling arithmetic*):
   (`producer_request_hold` / back-pressure at the high-water mark) so overflow degrades to per-topic producer
   throttling, never a disk-full broker outage. The decode-time two-ceiling fit is grade-2; the back-pressure
   actually holding is grade-3.
+- **A continuous/online-training Feed folds against these ceilings too.** A Feed-sourced continuous trainer
+  ([content_addressing_doctrine.md](./content_addressing_doctrine.md)) consumes a topic with no terminal step,
+  but its "forever" is **bounded per-cluster**: the consumed topic's retention folds against these two ceilings
+  exactly as any topic's does, and the online worker's compute folds into [§4](#4-the-total-fold-fits-carve-place-and-the-nesting)
+  (the host → host-worker / cluster → workload arms). Declared retention + declared compute are what bound the
+  run; retention limits only re-derivation of the consumed prefix from the live topic, never a committed
+  checkpoint (whose materialized-prefix input is immutable, owned by content_addressing). Cross-cluster this is
+  serve-by-replication, never a second trainer on the same feed.
 
 ---
 
@@ -351,6 +411,15 @@ declaration against reality at reconcile (grade-3).
   refuses. Detection of the real number is owned by
   [substrate_doctrine.md §2](./substrate_doctrine.md#2-detection-a-pure-classification-over-three-reads);
   this doc owns only the requirement that the cross-check exist and its grade.
+- **Physical-host total vs VM allocatable (host workers).** On apple/windows the node inventory's only kube node
+  is the Lima/WSL2 VM, whose **allocatable** `Capacity` the cluster bin-pack folds against. A host-level
+  accelerator worker is a native subprocess **outside** that VM; its `Demand` folds against the **physical-host**
+  total the inventory *also* declares
+  ([substrate_doctrine.md §8](./substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints),
+  the sole owner of both numbers plus the host-binary system-reserved netting). So two distinct capacities coexist
+  per such host — the VM's allocatable (the cluster bin-pack) and the physical-host total (the host → host-worker
+  arm, [§4](#4-the-total-fold-fits-carve-place-and-the-nesting)) — each declared at decode and cross-checked at
+  reconcile like every other capacity number. This doc consumes the two numbers; it does not own them.
 
 > **Honesty.** This model is Phase-0 design intent, specified before implementation. The fold is a real
 > grade-2 spec-layer guarantee *when implemented as specified*; that claim is itself about a design not yet
@@ -377,6 +446,32 @@ To keep SSoT boundaries crisp:
 | Which capacity states are illegal and the [§4.6](./illegal_state_catalog.md#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) technique that forecloses them | [illegal_state_catalog.md](./illegal_state_catalog.md) |
 | Runtime enforcement (host actually caps, scheduler places, autoscaler grows, quota holds) | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), [testing_doctrine.md](./testing_doctrine.md) |
 | Capacity/scaling as a deployment-rules surface, never app logic | [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md) |
+
+### 9.1 The cross-cluster capacity fold is a grade-1 non-goal (single-cluster by arity)
+
+`place` is **single-cluster by construction**, and that is a deliberate non-goal, not an omission. Its signature
+is `place :: Topology -> [Workload]`, and a `Topology` is exactly one cluster
+([cluster_topology_doctrine.md §4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction)),
+so a capacity fold spanning two clusters' `Topology`s has **no constructor — grade-1 by arity**: the same
+closed-union / no-arm idiom that forecloses the worker pool as a fourth `ComputeEngine` arm
+([single_logical_data_plane_doctrine.md §2](./single_logical_data_plane_doctrine.md#2-the-two-topologies)). This
+lives in its own subsection rather than a row of the §9 table because a non-goal has no *other* owner to name in
+the "Owned by" column; it is stated once, here, and cross-referenced from [§4](#4-the-total-fold-fits-carve-place-and-the-nesting)
+and [illegal_state_catalog.md §3.31](./illegal_state_catalog.md).
+
+Distributing a workload across clusters is **geo-replication** — *N* independent clusters, each running its own
+`place` over its own `Topology`, related only by async transport (Phase-9 design intent,
+[app_vs_deployment_doctrine.md §9](./app_vs_deployment_doctrine.md#9-composition-one-cluster--n-geo-replicated-clusters-zero-app-change)).
+It is emphatically **not** the stateless attach pool, which is **single-cluster** and lives **inside** `place`'s
+elastic branch: [single_logical_data_plane_doctrine.md §4](./single_logical_data_plane_doctrine.md#4-the-elastic-worker-pool-the-attach-topology)
+re-runs the *same* `place` fold on the enlarged topology, and modelling that pool as cross-cluster machinery is
+the category error [single_logical_data_plane_doctrine.md §5](./single_logical_data_plane_doctrine.md#5-the-category-error-this-doctrine-forecloses)
+forecloses. The **reason** a cluster is the fold boundary — the phantom cluster index `c` on `DataPlane` /
+`FabricMember` — is owned by [single_logical_data_plane_doctrine.md §1](./single_logical_data_plane_doctrine.md#1-why-this-doctrine-exists-two-ways-to-say-run-this-elsewhere)
+and [§3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe); this
+subsection consumes that WHY, it does not restate it. The only grade-3 residue is the deferred geo-replication
+enaction (Phase 9). A **stretched cluster** does not breach this arity: it is **one** `Topology` whose nodes span
+two `Site`s, folded **once** ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)).
 
 ---
 

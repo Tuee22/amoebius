@@ -255,16 +255,46 @@ must hold apart — and, per [§1](#1-why-this-doctrine-exists), *carries but do
   `Url`/`Download`/`Fetch` arm**: an engine is *selected by substrate*, never fetched, and exists the moment
   the pod does (because the extension links as a library, not a build-time download).
 - **`ModelArtifact`** — a by-name / content-address **reference** into the content store. Its `ArtifactRef`
-  is obtainable **only once the `.ready` sentinel exists** — there is no constructor for an unready reference
-  (grade-(1)).
+  is obtainable **only once the `.ready` sentinel exists *and* the artifact carries a provenance witness** —
+  a committed producing checkpoint or a pinned content-addressed import — so there is no constructor for an
+  unready *or* unwitnessed reference (grade-(1) for the witness's *presence*; whether the witnessed bytes
+  were truly trained is runtime residue, owned downstream, not a decode-time claim).
 
 The relation between them is itself typed: **a `ModelArtifact` must be servable by an `EngineRuntime` present
 on the deployment's substrate** — an unmatched model has no landing engine (a grade-(2) total relation over
 the substrate's engine set, the same topology-relation-over-a-collection technique [§5](#5-the-illegal-state-unrepresentable-contract) defers to the catalog).
-The *detail* of all three — the no-`Url` closure, the `.ready` gate, and the model↔engine match — is owned by
+The *detail* of all three — the no-`Url` closure, the `.ready`-plus-provenance-witness gate, and the model↔engine match — is owned by
 [illegal_state_catalog.md §3.25](./illegal_state_catalog.md#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model) and
 [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd); this doc records only that the
 extension seam *carries* these typed fields and defers their unrepresentability there.
+
+The same extension seam carries jitML's **training-run** shape as three further *carried, not defined* typed
+fields — how a run is initialized, fed, and bounded:
+
+- **`TrainInit`** — from-scratch, or **continue** from a provenance-witnessed `ModelArtifact` (fine-tune /
+  warm-start), composing recursively with the witness gate on `ModelArtifact` above.
+- **`TrainData`** — a content-addressed dataset, or a Pulsar **`Feed`** consumed from a cursor.
+- **`TrainBudget`** — a bounded step/epoch count, or a **`Continuous`** run committing a checkpoint every cadence.
+
+As with `EngineRuntime`/`ModelArtifact`, the DSL *carries* these fields on an extension's `extDhall`; what
+makes an unbounded, un-checkpointed, or non-deterministically-ordered run **unrepresentable** — the closed
+union shapes, the no-bare-unbounded-`Continuous` foreclosure, and the fold that keeps a `Feed`'s consumed
+prefix content-addressed rather than cursor-keyed — is owned by
+[content_addressing_doctrine.md §4.6](./content_addressing_doctrine.md#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)
+and [illegal_state_catalog.md](./illegal_state_catalog.md), not defined here.
+
+### The stretched-node reachability field the surface carries: `Networking`
+
+[§4](#4-total-composability)'s child-cluster and attach-pool composition carries one further *carried, not
+defined* typed field: a mandatory **`Networking c`** capability on any **stretched-node / attach** spec — a
+node or host worker whose declared network-locality `Site` differs from the control plane's, reached across
+the WAN — declaring *how* it reaches the cluster. Like the ML-asset types above, the DSL only *carries* the
+field; what makes it total — that `Networking c = Gateway … | Vpn …` has **no arm** collapsing a
+secure-gateway reach into wild ingress, and that a stretched shape has **no reachability witness** without a
+declared `Networking c` — is owned by
+[network_fabric_doctrine.md §5](./network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric)
+and [illegal_state_catalog.md §4.3](./illegal_state_catalog.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed),
+never here.
 
 ---
 
@@ -453,6 +483,7 @@ states the target shape and links back for status.
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [Platform Services Doctrine](./platform_services_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)
+- [Network Fabric Doctrine](./network_fabric_doctrine.md) — [§5](./network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric) the `Networking c` reachability capability the stretched-node surface carries
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the capacity/budget/scaling types the surface carries
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the compute-engine/topology types the surface carries
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — [§3.1](./pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor) runtime message payloads are CBOR, not Dhall

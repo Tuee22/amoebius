@@ -64,6 +64,34 @@ capacity budget is likewise the runtime cross-check for the host/VM capacity fol
 `Demand` exceeds the host is decode-rejected in Phase 3, and this phase refuses if the real Apple host is
 smaller than its declared `Capacity`.
 
+**Compute-half delivery cross-ref (doctrine this round introduces; delivery this phase carries).** This round
+closes the gap that host-worker compute was entirely absent from the capacity fold. A host-level accelerator
+worker now declares its own foldable cpu/mem `Demand` and folds against a **physical-host `Capacity`** distinct
+from the Lima/WSL2 VM's kube-allocatable — a new **host→host-worker** arm alongside the host→VM→guest fold
+([`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) §4/§8; host-worker
+`Demand` owner [`platform_services_doctrine.md`](../documents/engineering/platform_services_doctrine.md) §10) —
+so a VM-carve + host-worker over-commit is a grade-2 `Left Overcommit` at decode (§D). The accelerator worker owns
+its node's accelerators **wholesale** ([`daemon_topology_doctrine.md`](../documents/engineering/daemon_topology_doctrine.md)
+§4; `resource_capacity_doctrine.md` §4.1), with accelerator memory modeled as a **VRAM sub-budget** the worker
+carves among served models (a `worker → served-model` Σ; the per-host `vram` and the unified-vs-discrete memory
+shape declared by [`substrate_doctrine.md`](../documents/engineering/substrate_doctrine.md) §8), not a per-pod
+request axis (§C/§E). And **Windows-CUDA is elevated to a first-class host worker alongside Apple-Metal** — role
+parity, not evidence parity (`substrate_doctrine.md` §5, `daemon_topology_doctrine.md` §4): the same host-worker
+shell and wire this phase builds, on a different substrate (§B). All of this is doctrine this round introduces and
+delivery this phase carries; the single-substrate gate stays `apple`, and none of it is a tested amoebius result
+yet.
+
+The same host-worker peering this phase builds is also the fabric substrate the stretched-cluster doctrine (§L)
+rides. A **K1 stretched host worker** is exactly this phase's Apple-Metal / Windows-CUDA peer reaching its home
+cluster's MinIO/Pulsar + Vault over a declared `Gateway | Vpn` networking capability instead of host-only loopback
+— a non-member data-plane client on **any** control plane, including `Managed Eks`
+([`single_logical_data_plane_doctrine.md`](../documents/engineering/single_logical_data_plane_doctrine.md) §3/§4,
+[`network_fabric_doctrine.md`](../documents/engineering/network_fabric_doctrine.md) §5) — and the **K2 full-node
+control-plane-over-fabric listener** (self-managed rke2's kubelet↔apiserver span) rides the same Phase-7 fabric
+work ([`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md) §4.1). A stretched
+cluster stays one boundary — this is a networking generalization of the host-worker wire, not a new cross-cluster
+obligation, and (like the compute half above) is delivery this phase carries, not a Phase-7 gate claim.
+
 This phase consumes earlier phases rather than re-implementing them: Phase 1's substrate detection, the
 `bootstrap` contract, and the lazy-tool-ensure kernel; Phase 2's MinIO and Pulsar standard services; and
 Phase 4's native Pulsar client, content-addressed store, topology algebra, and worker-daemon scaffolding. The

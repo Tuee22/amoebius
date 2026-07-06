@@ -691,6 +691,18 @@ is committing *state-conflation*. The typed-unknown remedy ([§8](#8-move-i--ext
 it, therefore it holds." The next three sections give that world its vocabulary ([§17](#17-the-boundary-and-its-classifier)), scale the rules to
 it ([§18](#18-the-rules-scale-to-the-boundary)), and extend the honest ledger ([§19](#19-the-cross-boundary-ledger-and-conformance-rows)).
 
+**What does *not* cross this line (a boundary-scope cross-ref).** A *stretched* cluster — **one** etcd,
+**one** consistency boundary ([§17](#17-the-boundary-and-its-classifier)), whose nodes merely span two network `Site`s reached across
+the WAN — is **not** a forest. When such a cluster grows cloud agents because a metal `Site` fell
+`Unreachable`, that is a **within-one-boundary elastic shift**, not geo-replication: there is no second
+store and no asynchronous link, so it owes **no** R9 data-loss budget ([§18](#18-the-rules-scale-to-the-boundary)) and **no** Second-Axis
+obligation — this axis engages only once data is geo-replicated across *N* separate clusters. That
+single-boundary elastic story, and the boundary classification that exempts it from this doctrine's
+machinery, is owned by [single_logical_data_plane_doctrine.md §1](./single_logical_data_plane_doctrine.md#1-why-this-doctrine-exists-two-ways-to-say-run-this-elsewhere),
+[§2](./single_logical_data_plane_doctrine.md#2-the-two-topologies), and
+[§4](./single_logical_data_plane_doctrine.md#4-the-elastic-worker-pool-the-attach-topology); this doctrine
+only records the exemption.
+
 ---
 
 ## 17. The boundary and its classifier

@@ -173,7 +173,7 @@ one arm per substrate lane and per baked engine family, and — the load-bearing
 
 | Provider dimension | Arms (closed union) |
 |---|---|
-| Substrate lane | `Apple-Metal` · `CUDA` · `linux-cpu` |
+| Engine lane | `Apple-Metal` · `CUDA` · `linux-cpu` |
 | Baked engine family | `llama.cpp` · `whisper.cpp` · `ONNX` · `vLLM` · `pytorch` · `diffusers` · `transformers` · `Audiveris` |
 
 Every arm is a runtime already **baked into the amoebius base container**
@@ -183,31 +183,90 @@ arm by the *detected* substrate (the substrate is DETECTED, [substrate_doctrine.
 it has no syntax with which to *author* a download or a build. This is the [§1](#1-why-capabilities-not-products) object-storage lesson taken to
 its limit: an app can no more write "curl this engine tarball at boot" than it can write "deploy `minio`."
 
+**The engine offering is a quotient of the detected substrate — a surjection, not an orthogonal axis — and this
+doctrine owns that mapping.** `EngineRuntime` is a *coarsening* of the four-member substrate catalog
+([substrate_doctrine.md §1](./substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob),
+[cluster_topology_doctrine.md §1](./cluster_topology_doctrine.md#1-two-axes-the-substrate-is-detected-the-engine-is-declared)):
+`apple → AppleMetal`, `linux-cpu → LinuxCpu`, and — the one place two substrates collapse onto one arm —
+`{ linux-cuda, windows } → Cuda`. `Cuda` is therefore **OS-agnostic**: there is no Linux-vs-Windows split inside
+the union (that distinction has **no constructor** — grade-(1)), and a node's engine is *projected from* its
+detected substrate, never declared free of it. The only freedom the quotient grants is that two substrates share
+one engine arm; it never lets a spec author an engine its substrate cannot provide — that would reopen the
+"selected by the detected substrate, full stop" foreclosure above, which the quotient **preserves** rather than
+loosens. The lane in the table above is named the **Engine lane** precisely because `Cuda` now spans two
+substrates: keying that row on "substrate" would be a misnomer, since "substrate" names exactly the 4-member
+catalog owned by [substrate_doctrine.md §1](./substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob).
+
+**How the offering is realized is a daemon-context fact this doctrine cross-references, never restates.** The
+*same* `Cuda` arm is stood up **in-cluster** on `linux-cuda` (a GPU pod under the NVIDIA container runtime) and
+**host-level** on `windows` (a native subprocess reaching the cluster only over a host-only NodePort) — one engine
+arm, two bootstraps; the pod-vs-subprocess realization and the `(substrate, bootstrap)` wiring are owned by
+[daemon_topology_doctrine.md §4](./daemon_topology_doctrine.md#4-worker-daemons--n-unelected) and
+[substrate_doctrine.md §5](./substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained),
+referenced here (this doctrine is scoped to the engine as a baked capability, not to where its process runs).
+**Windows honesty note.** Unlike the Apple-Metal host worker — which has a build-shape sibling doc,
+[apple_metal_headless_builds.md](./apple_metal_headless_builds.md) — the on-host Windows-`Cuda` build/run path is
+**design intent with no sibling evidence** this round *introduces*; read it as intent, not a tested or
+sibling-proven result.
+
 `InferenceEngine` is **Tier 1** of the three-tier ML-asset lifecycle
 ([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)); the model and kernel tiers live
 there, not here:
 
 - **Tier 1 — the engine (this capability)** is baked and substrate-selected, as above.
 - **Tier 2 — `ModelArtifact`** is an eager stage-then-serve into the content-addressed store, its `ArtifactRef`
-  obtainable **only** once a `.ready` sentinel exists. Owned by content_addressing [§4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd).
+  obtainable **only** once a `.ready` sentinel **and a provenance witness** exist — the witnessed serve gate (a
+  committed producing checkpoint or a pinned content-addressed import) is owned by content_addressing
+  [§4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd),
+  referenced here, not restated.
 - **Tier 3 — the JIT kernel** is lazily materialized behind a content address on first cache miss, never a
   startup build. Owned by content_addressing [§4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd).
 
-**The engine↔model invariant this doctrine co-owns.** A served `ModelArtifact` must be servable by an
-`EngineRuntime` *available on the deployment's substrate* — an unmatched model has **no landing engine**. This
-is a **grade-(2)** total decode-time relation (the topology/relation-over-collection technique,
-[illegal_state_catalog.md §4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection)): content_addressing owns the `ModelArtifact`
-side; this doctrine owns the engine-as-capability side a model must match.
+**The engine↔model landing relation this doctrine co-owns.** A served `ModelArtifact` must be servable by an
+`EngineRuntime` whose **engine family** is available on the **serving** substrate lane — the accelerator the
+inference run actually uses — decoupled from the *producing* substrate that made the weight bytes
+([content_addressing_doctrine.md §3.1](./content_addressing_doctrine.md#31-producing-substrate-vs-serving-substrate-a-distinct-serving-run-fingerprint)).
+Serving substrate **need not equal** producing substrate: weight bytes are substrate-portable (movable,
+content-addressed), not substrate-identical, so a model produced on one lane may serve on another. This round
+**introduces** that decoupling — the relation keys on the serving lane, not on where the model was produced (there
+is no "already checks the deployment's substrate" here). Availability is a **partial** family×lane relation — a
+family may be baked on some lanes and not others (e.g. `vLLM` is not baked on Apple-Metal) — so a
+family-not-available-on-the-serving-lane is a **grade-(2)** decode-time rejection (the
+topology/relation-over-collection technique,
+[illegal_state_catalog.md §4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection)),
+never a runtime `Unschedulable`. The relation keys on an engine-**family** tag the model must carry; that tag is a
+`ModelArtifact`/manifest field owned by
+[content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)
+(referenced, not restated). content_addressing owns the `ModelArtifact` side; this doctrine owns the
+engine-as-capability side — the family-availability-on-serving-substrate check — a model must match. A
+**grade-(3)** residue survives the grade-(2) check: a family-matched but substrate-specific-weight-layout model
+may still fail to **load** on the serving lane (bytes are portable, not guaranteed cross-lane loadable), a residue
+owned by [content_addressing_doctrine.md §6.1](./content_addressing_doctrine.md#61-proven--tested--assumed-spelled-out),
+not foreclosed here.
+
+**The per-model VRAM footprint (this doctrine owns it, single-owner).** The *left operand* of the
+accelerator-memory fold — how much accelerator memory a served model needs (weights + KV-cache,
+quantization-dependent) — is owned **here**, as a field the `InferenceBinding` declares per served model. It is a
+**serving-side** quantity recomputed on landing against the serving node's memory topology: a producing-node
+footprint does **not** transfer as the serving-node demand. The *right operand* — the per-host `vram` number, and
+whether accelerator memory is a separate pool (`linux-cuda`/`windows`, discrete) or shares the host `mem` pool
+(`apple`, unified) — is owned by
+[substrate_doctrine.md §8](./substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints);
+the `Σ served-model VRAM ≤ node vram` fold arithmetic is owned by
+[resource_capacity_doctrine.md §3](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget),
+which **consumes** this footprint. That the declared footprint actually fits at runtime under real batch/context
+(dynamic KV-cache/fragmentation) is **grade-(3)** residue, not foreclosed by the grade-(2) Σ.
 
 **Two mistakes become unrepresentable**, lifted at
 [illegal_state_catalog.md §3.25](./illegal_state_catalog.md#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model):
 
 - **An engine fetched or built at pod startup is grade-(1) unrepresentable** — the `EngineRuntime` union is
   closed with no `Url`/`Download`/`Build` arm, so "fetch the engine at boot" has no syntax and fails Gate 1
-  (the Dhall typechecker) before any binary runs. (A `ModelArtifact` with no completed `.ready` is likewise
-  grade-(1), owned with the content store in content_addressing.)
-- **A model with no matching substrate engine is grade-(2) rejected** at decode, by the total relation above —
-  not a runtime `Unschedulable`.
+  (the Dhall typechecker) before any binary runs. (A `ModelArtifact` with no completed `.ready` **and no
+  provenance witness** is likewise grade-(1), owned with the content store in content_addressing
+  [§4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd).)
+- **A model whose engine family is not available on the serving substrate lane is grade-(2) rejected** at decode,
+  by the partial family×lane relation above — not a runtime `Unschedulable`.
 
 ```dhall
 -- Illustrative only; the real grammar is owned by dsl_doctrine.md and the asset tiers by
@@ -218,10 +277,11 @@ let InferenceNeed = { serves : List ModelArtifact }    -- "I serve these models"
 
 -- DEPLOYMENT RULES bind a BAKED engine, SELECTED by the DETECTED substrate — no Url/Download/Build arm exists:
 let EngineRuntime =
-      < AppleMetal | Cuda | LinuxCpu >                  -- substrate lane; CLOSED, never fetched
+      < AppleMetal | Cuda | LinuxCpu >                  -- engine lane; CLOSED, never fetched
 let InferenceBinding =
-      { engine : EngineRuntime                           -- selected by detected substrate, never authored
-      , family : < LlamaCpp | WhisperCpp | Onnx | Vllm | Pytorch | Diffusers | Transformers | Audiveris >
+      { engine        : EngineRuntime                    -- selected by detected substrate, never authored
+      , family        : < LlamaCpp | WhisperCpp | Onnx | Vllm | Pytorch | Diffusers | Transformers | Audiveris >
+      , vramFootprint : Quantity                         -- per-served-model accelerator memory (owned HERE); declared for every accelerator family, recomputed on the SERVING substrate; consumed by resource_capacity §3 Σ
       }                                                  -- every arm baked into the base container (image_build §7)
 ```
 

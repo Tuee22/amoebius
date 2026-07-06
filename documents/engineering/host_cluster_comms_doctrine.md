@@ -202,6 +202,39 @@ The rest of [§6](#6-the-host-only-restriction-in-practice-and-its-sibling-prece
 "authenticated-fabric-origin" for "host-origin" as the network restriction, with WireGuard providing the
 authentication a shared loopback did not need.
 
+**Stretched-cluster addenda (this round's stretched-cluster work).** When a cluster is *stretched* across the
+WAN — a node whose declared locality differs from the control plane's — two further reach-shapes surface. Neither
+disturbs the two-channel picture of [§1](#1-the-whole-surface-two-channels-both-localhost-only); this doc records
+only where each attaches and defers the wire itself to
+[network_fabric_doctrine.md](./network_fabric_doctrine.md).
+
+- **A full-node member's kubelet↔apiserver span is *neither* channel 1 nor channel 2.** A stretched *full k8s
+  node* — a kubelet registered in the one apiserver/etcd — reaches its control plane over a **separately-owned**
+  wire: an additive, stretch-gated `wg0` binding carrying the distro's own mTLS over the tunnel, owned by
+  [network_fabric_doctrine.md §5](./network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric)
+  and [§4](./network_fabric_doctrine.md#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it). It
+  is **not** channel 1 — that stays the host binary's localhost apiserver path
+  ([§1](#1-the-whole-surface-two-channels-both-localhost-only) table row 1, unaffected) — and **not** channel 2,
+  which is data-plane Pulsar/MinIO peering. The control-plane span is a third, network_fabric-owned reach this doc
+  names but does not own. (Design intent for the stretched-cluster round; on `Managed Eks` control planes this
+  span is representable only as a provider-native capability, per network_fabric / cluster_topology, never an
+  amoebius-built second fabric.)
+- **Channel 2 for a host worker generalizes once more: localhost, authenticated fabric, *or* authenticated secure
+  gateway.** A *host worker* — a non-member Apple-Metal/Windows-CUDA subprocess
+  ([§3](#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)) — that is stretched off-host is the
+  attach-pool shape ([single_logical_data_plane_doctrine.md §4](./single_logical_data_plane_doctrine.md#4-the-elastic-worker-pool-the-attach-topology)):
+  it needs only channel 2's data-plane + Vault reach, never the apiserver. So this section's rule "localhost **or**
+  the authenticated WireGuard fabric" widens to *"localhost **or** the authenticated WireGuard fabric (VPN) **or**
+  an authenticated secure gateway"* — the **`Gateway` arm** is the seam this generalization attaches to: a distinct
+  network_fabric endpoint index with **no constructor into `WildIngress`**
+  ([illegal_state_catalog.md §4.3](./illegal_state_catalog.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)),
+  so "Keycloak owns all wild ingress"
+  ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path))
+  still holds. The gateway *wire* — including the authentication/encryption a shared loopback did not need — is
+  owned by [network_fabric_doctrine.md §5](./network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric);
+  this doc owns only that channel 2 may ride it. The `Gateway`-arm reach constructor is a **named seam this round
+  introduces, not a built path** — its host-worker-through-a-gateway inhabitant is deferred.
+
 ---
 
 ## 6. The host-only restriction in practice (and its sibling precedent)
@@ -248,6 +281,16 @@ and Vault holds the value (parents inject into a child's Vault). That model is o
 [vault_pki_doctrine.md](./vault_pki_doctrine.md) and is not restated here — this doc only notes that
 channel-2 client auth resolves through it, not through any host environment variable or `PATH` lookup
 (the no-env/no-`PATH` lazy-tool-ensure contract is owned by [substrate_doctrine.md](./substrate_doctrine.md)).
+
+A **stretched, non-member host worker** — a host subprocess reaching this cluster from off-host over the
+authenticated fabric or secure gateway ([§5.1](#51-the-generalization-localhost-or-the-authenticated-wireguard-fabric)) —
+presents the **same secrets-by-name** channel-2/Vault credential; the custody family (parent-minted,
+parent-injected `SecretRef`) is unchanged. What is *not* settled is the Vault **authentication *method*** it uses:
+a non-member worker holds no in-cluster service-account / kubelet identity, so the in-cluster Kubernetes-auth path
+([vault_pki_doctrine.md §9](./vault_pki_doctrine.md#9-in-cluster-consumers-authenticate-to-vault-directly))
+does not apply to it. That auth-method seam is a named open gap owned by
+[vault_pki_doctrine.md](./vault_pki_doctrine.md); this doc still owns only that the *credential* is
+secrets-by-name, never the method.
 
 ---
 

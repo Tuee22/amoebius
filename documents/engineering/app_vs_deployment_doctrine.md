@@ -106,7 +106,8 @@ The deployment-rules surface declares:
   owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), and the test-as-a-`.dhall`-topology
   model by [testing_doctrine.md](./testing_doctrine.md).
 - **Inference substrate.** Whether an ML workload runs on Apple Metal on the host, CUDA on the cluster, or
-  linux-cpu is a deployment decision, not app logic — see [§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule).
+  linux-cpu is a deployment decision, not app logic — this is the *serving* substrate (the *producing*
+  substrate that made a model's weight bytes is provenance, not a deployment dial — see [§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)).
 - **Dynamic node provisioning policy.** Scaling nodes by arbitrary logic — load, spot-instance cost, or
   workflow completion — is a deployment rule, owned operationally by
   [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md), and typed as a `ScalingPolicy` owned by
@@ -230,6 +231,15 @@ This is the subtlest application of the litmus test, so make the distinction exp
   workload is placed — a host compute daemon using Apple Silicon's unified memory, a CUDA pod on the
   cluster, or a CPU pod — is a substrate/placement choice, configured in the deployment-rules layer with no
   change to the app.
+- **Serving substrate vs producing substrate.** The substrate an inference workload is *placed on to serve*
+  is this deployment-rule dial — and it **need not equal** the **producing substrate**, the accelerator whose
+  reduction order actually made a model's weight bytes. The producing substrate is **provenance, not a
+  placement choice**: this round's doctrine folds it into the checkpoint's `experimentHash` namespace so it
+  travels *with* the artifact, owned by [content_addressing_doctrine.md](./content_addressing_doctrine.md);
+  the engine-family-on-serving-substrate landing check is owned by
+  [service_capability_doctrine.md](./service_capability_doctrine.md). This section classifies only the
+  **serving/placement** axis: a model produced on one accelerator may be served on another (cross-substrate
+  serving), with reproducibility scoped to the serving substrate — never a change to what the app *is*.
 
 infernix is "an amoebius extension: a single Haskell binary that can be deployed as a distributed system
 either at node-system level (in an Apple cluster) or cluster level (as a stateless deployment)". That *dual* placement is precisely a deployment decision — the same infernix logic,

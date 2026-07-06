@@ -59,7 +59,7 @@ pod" is not a role, and "the control-plane singleton" is not a context.
 |                         | **Control-plane singleton role** | **Worker role** |
 |-------------------------|----------------------------------|-----------------|
 | **CLI context**         | — (a CLI run is not a daemon)     | — |
-| **Sudo host daemon**    | Pre-cluster bootstrap *acts on behalf of* the future singleton, then hands off | Supervises host-level workers (e.g. Apple-Metal inference, [§4](#4-worker-daemons--n-unelected)) |
+| **Sudo host daemon**    | Pre-cluster bootstrap *acts on behalf of* the future singleton, then hands off | Supervises host-level workers (e.g. Apple-Metal and Windows-CUDA inference, [§4](#4-worker-daemons--n-unelected)) |
 | **In-cluster pod**      | **Exactly one active**, elected ([§3](#3-the-control-plane-singleton--exactly-one-elected)) | **N**, unelected ([§4](#4-worker-daemons--n-unelected)) |
 
 Two facts fall out of the grid:
@@ -69,7 +69,8 @@ Two facts fall out of the grid:
   first singleton into being (this is the prodbox root single-node story), then defers to it — the host
   daemon is the *midwife*, not the brain.
 - **Worker daemons run in both daemon contexts.** Most workers are in-cluster pods; a few must be
-  host-level subprocesses because their hardware cannot be containerized (Apple-Metal GPU work). A host-level worker is the **same binary in the worker role under the
+  host-level subprocesses because their hardware cannot be containerized (Apple-Metal GPU work, and
+  native Windows-CUDA inference — CUDA does not run performantly under WSL2). A host-level worker is the **same binary in the worker role under the
   host-daemon context**, supervised as a subprocess.
 
 Which roles run, how many replicas each gets, and which workers are host-level versus in-cluster are all
@@ -196,7 +197,7 @@ each kind. The canonical worker kinds:
 | **Web-service host** | Hosts an amoebius app's services behind the cluster edge | **mattandjames** (application logic) |
 | **Pulsar topic-lifecycle coordinator** | Drives an app's declared topic lifecycles (create / retention / teardown) | the DSL + [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) |
 | **ML batch coordinator** | Schedules and tracks batch ML workflows | **infernix** / **jitML** |
-| **Inference engine** | Serves model inference — **in-cluster on CUDA, host-level on Apple Metal** | **infernix** / **jitML** |
+| **Inference engine** | Serves model inference — **in-cluster on linux-CUDA; host-level on Apple-Metal and Windows-CUDA** | **infernix** / **jitML** |
 
 Properties shared by all workers:
 
@@ -210,19 +211,108 @@ Properties shared by all workers:
 - **HA like everything else.** A worker Deployment runs the HA chart at a configurable replica count, even
   at `replicas=1` ([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1)). Every worker
   container declares explicit CPU and RAM ([platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)).
-- **Host-level workers are subprocesses, not pods.** When hardware forbids containerization (Apple-Metal
-  unified-memory inference, CUDA stacks that do not run performantly under WSL2), the worker runs as a
+- **Host-level workers are subprocesses, not pods.** When hardware forbids containerization — **Apple-Metal
+  unified-memory inference and native Windows-CUDA inference** (CUDA does not run performantly under WSL2,
+  [substrate_doctrine.md](./substrate_doctrine.md)) — the worker runs as a
   **host subprocess supervised by the sudo host daemon** ([§1](#1-one-binary-three-contexts)). It reaches in-cluster MinIO and Pulsar as a
   **peer over a host-only NodePort with no mTLS** — localhost only, no WAN or LAN — owned by
   [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md). It discovers its host tooling lazily
   through the substrate's package manager and invokes it by full path, never through `PATH`
-  ([substrate_doctrine.md](./substrate_doctrine.md)).
+  ([substrate_doctrine.md](./substrate_doctrine.md)). Apple-Metal and Windows-CUDA are the **same host-worker
+  shape** — a native subprocess reaching the cluster only over the host-only NodePort — differing only in
+  engine offering and bootstrap ([§4.1](#41-the-engine-offering-vs-the-node-hardware-in-cluster-pod-or-host-subprocess)); their parity is **role parity, not evidence parity**. The on-host
+  Windows-CUDA build/run path is **forward design intent with no sibling evidence and no build-shape doc**
+  (unlike Apple-Metal's `apple_metal_headless_builds.md`), inheriting the honesty framing below.
 
 > **Honesty.** The Pulsar / ML / inference worker roles are **new relative to prodbox** — prodbox had no
 > Pulsar and no ML workers. Everything in this section is forward design intent for the relevant phase, not
 > an inherited-proven behaviour; status and gates live only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
+
+### 4.1 The engine offering vs the node hardware: in-cluster pod or host subprocess
+
+A worker's **engine offering** — the cluster-facing `EngineRuntime` it presents (`AppleMetal | Cuda |
+LinuxCpu`) — is a **quotient of the detected substrate**, not a free choice: which offering a node makes is
+**projected from** its substrate, and that quotient and its bootstrap/wire mapping are owned in full by
+[service_capability_doctrine.md §4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-baked-and-substrate-selected-never-fetched).
+This doctrine does **not** restate that mapping; it records the one **daemon-context consequence** the
+quotient forces on the worker taxonomy.
+
+The consequence: one engine offering is realized in **different daemon contexts** ([§1](#1-one-binary-three-contexts)) according to the
+**node hardware / bootstrap** — *how* the offering is stood up and wired:
+
+- A **`Cuda`** offering is an **in-cluster pod** when the node hardware is `linux-cuda` (NVIDIA container
+  runtime, reached over in-cluster mTLS), and a **host subprocess** when the node hardware is `windows`
+  (native — CUDA does not run under WSL2 — reached only over the host-only NodePort). One offering, two
+  bootstraps.
+- An **`AppleMetal`** offering is always a **host subprocess** (`apple` node hardware; unified-memory GPU
+  work cannot be containerized).
+- A **`LinuxCpu`** offering is always an **in-cluster pod**.
+
+So the same engine offering can span both daemon contexts, decided by node hardware, and is **never authored
+free of the substrate**. These two facts — **engine offering** and **node hardware** — are a finer split of
+*which worker realization the substrate projects*; they are **not** the context / role / rke2 axes of
+[§2.1](#21-a-third-orthogonal-axis-rke2-serveragent-declared) ("the three axes never fuse") and must not be
+conflated with `role` or `substrate`.
+
+### 4.2 The accelerator-owner worker: wholesale per-node ownership, a typed per-node singleton
+
+The inference and training worker kinds above run on nodes carrying accelerators (CUDA GPUs / Apple-Metal).
+This round introduces the rule for how those accelerators are **owned**: a node's accelerators are owned
+**wholesale** by a single **accelerator-owner worker** on that node — substrate-independent, whether the
+owner is an in-cluster pod (`linux-cuda`) or a host subprocess (`windows` / `apple`, [§4.1](#41-the-engine-offering-vs-the-node-hardware-in-cluster-pod-or-host-subprocess)). Other pods may
+use the node's leftover CPU and RAM but **never** its accelerators. This revises the earlier narrative in
+which a GPU was a per-pod, indivisible bin-packable `Count`: accelerators are reached **only** through the
+wholesale owner (the per-pod GPU request axis is removed — [resource_capacity_doctrine.md §3](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)).
+
+To make wholesale ownership a **typed** fact rather than a convention, this round introduces a **typed
+per-node-singleton accelerator-owner worker kind** — a **DaemonSet-like node-affinity** worker, exactly one
+per accelerator node — distinct from the N-replica *unelected* Deployment shape the other worker kinds use
+([§4](#4-worker-daemons--n-unelected)). It is still **many across the cluster** (one per accelerator node), so "many of each kind"
+holds; the type merely forbids **two on one node**. Because it admits **at most one owner per node**, "two
+accelerator owners contending for one node's devices" and "a fractional / straddled accelerator claim" have
+**no constructor: grade-1 unrepresentable**. The one owner **multiplexes training, serving, and Tier-3 JIT
+compilation** on its node — which is what lets a node continuously train a model while serving it (the
+continuous-training mode owned by content_addressing / dsl, [§4.3](#43-the-feed-sourced-continuous-trainer-an-existing-coordinator-single-writer-delegated)).
+
+Wholesale per-node accelerator ownership and the per-node-singleton invariant are the **SSoT of this
+doctrine**; [resource_capacity_doctrine.md §4.1](./resource_capacity_doctrine.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope) / [§3](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget) and the illegal-state catalog **consume** it.
+
+> **Grade / honesty.** The at-most-one-owner-per-node foreclosure is **grade-1** — a per-node-singleton type
+> has no two-owner inhabitant; that the daemon **actually holds the node's devices at runtime** is
+> **grade-3** runtime residue. The typed accelerator-owner worker kind is **forward design intent** — no
+> sibling system stands up a DaemonSet-like accelerator owner today; status and gates live only in
+> [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
+> ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
+
+### 4.3 The Feed-sourced continuous trainer: an existing coordinator, single-writer delegated
+
+Continuous / online training — training forever from a live Pulsar feed (the training-run topology owned by
+content_addressing / dsl) — needs a **single authoritative writer** per feed so the model's committed pointer
+never regresses. This round places that role with **no new machinery**: the continuous trainer is the
+**existing ML batch coordinator worker** ([§4](#4-worker-daemons--n-unelected) — infernix / jitML), parameterized with a `Feed` data
+source. It is **not** a new elected worker kind and is **not** folded into the control-plane singleton
+([§3](#3-the-control-plane-singleton--exactly-one-elected)) — routing every feed through the one cluster authority would bottleneck it, and single-writer
+here is a per-feed concern, not cluster authority.
+
+Single-writer is **delegated, not re-proved** — the same discipline the other workers use for single-consumer
+semantics (["from Pulsar's subscription model … not a bespoke amoebius election"](#4-worker-daemons--n-unelected)):
+
+- **Liveness — at most one active trainer per feed** is a **Pulsar Exclusive / Failover subscription** on the
+  feed topic ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)): automatic ranked failover on death,
+  resume-from-`latest`.
+- **Safety — a race-free `latest` pointer** is the content store's **ETag-CAS single atomic commit point**
+  plus the typed **`AdvancePredicate`** ([content_addressing_doctrine.md §2](./content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers), [§5](./content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)) — a
+  monotone, idempotent join, so even a bounded failover overlap of two trainers cannot corrupt or regress
+  HEAD (the loser's CAS is resolved by `AdvancePredicate`). This is the [§5.3](#53-ownership-transitions-and-the-single-writer-gate) single-writer gate
+  (claim-precedes-write) applied to the pointer.
+
+So the Feed-sourced trainer is a **reuse**, not a new election: an existing coordinator role + a per-feed
+Pulsar Exclusive / Failover subscription + the CAS / `AdvancePredicate` commit point. The cross-cluster case
+is **not** a second trainer on the same feed — a Continuous run is single-cluster (the intra-cluster
+First-Axis coordinator); other clusters **serve by replication** of the immutable checkpoints, never train a
+second authority on the feed.
 
 ---
 
@@ -356,7 +446,7 @@ flowchart TD
   pod[In-cluster pod context] -->|same binary| binary
   pod -->|elected role| cp[Control-plane singleton: exactly one active]
   pod -->|unelected role| workers[Worker daemons: web hosts, Pulsar coordinators, ML batch, inference]
-  hostd -->|supervises subprocess| hostwork[Host-level worker: Apple-Metal inference]
+  hostd -->|supervises subprocess| hostwork[Host-level worker: Apple-Metal and Windows-CUDA inference]
   hostd -->|distro mTLS| api[kube-apiserver]
   cp -->|reconcile and secret authority| world[Cluster state and Vault]
   cp -->|claim, yield, heartbeat| plane[Coordination plane: Pulsar plus MinIO plus commit log]
@@ -393,7 +483,9 @@ shape and links back for status.
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — [§0](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision) the checkpoint-free tag-discovery host reconciler (tier (b)) that enacts child rke2 rollout over SSH
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md)
-- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the control-plane singleton runs the capacity fold at decode
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the control-plane singleton runs the capacity fold at decode; **consumes** the wholesale per-node accelerator ownership of [§4.2](#42-the-accelerator-owner-worker-wholesale-per-node-ownership-a-typed-per-node-singleton)
+- [Service Capability Doctrine](./service_capability_doctrine.md) — [§4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-baked-and-substrate-selected-never-fetched) owns the substrate→`EngineRuntime` quotient whose pod-vs-host-subprocess consequence [§4.1](#41-the-engine-offering-vs-the-node-hardware-in-cluster-pod-or-host-subprocess) records
+- [Content Addressing Doctrine](./content_addressing_doctrine.md) — the ETag-CAS commit point + `AdvancePredicate` ([§2](./content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers)/[§5](./content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)) the Feed-sourced trainer of [§4.3](#43-the-feed-sourced-continuous-trainer-an-existing-coordinator-single-writer-delegated) delegates single-writer to
 - [DSL Doctrine](./dsl_doctrine.md) — [§3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness) how each context's `.dhall` is delivered (sibling / stdin / ConfigMap)
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — the rendered `ConfigMap` that delivers an in-cluster pod's config
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

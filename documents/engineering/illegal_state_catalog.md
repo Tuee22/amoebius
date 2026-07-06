@@ -96,6 +96,13 @@ in raw k8s), the **owning doctrine** (the SSoT for the rule), and the **techniqu
 The [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](#322-a-hand-authored-un-derived-toleration) block is foreclosed by the two techniques added for it — [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) (the capacity-accounting total
 fold) and [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) (compatibility/topology relations over a collection) — and is where the honest grade split
 matters most: every capacity/storage/retention **sum** is grade-(2), never grade-(1) ([§2](#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it), [§6](#6-three-grades-of-foreclosure-and-the-honesty-they-force)).
+This round **extends** the catalog with the substrate-heterogeneous-compute and ML-artifact-substrate states
+([§3.28](#328-two-accelerator-owners-on-one-node-or-a-fractional-accelerator-claim)–[§3.34](#334-an-app-serving-or-continuing-another-apps-model-without-a-grant))
+and the stretched-cluster states ([§3.35](#335-a-stretched-host-worker-with-no-declared-networking-capability)–[§3.40](#340-a-secure-gateway-reach-collapsing-into-wild-ingress)),
+each graded honestly against the same discipline — a per-node accelerator-ownership index and the stretched-node
+**witness-field presence** are grade-(1) no-constructor shapes, while the **`Site`-classification folds** (which
+*route* a declared-remote entity to a demanding constructor), the VRAM, and the host-worker capacity checks stay
+grade-(2) with grade-(3) runtime residue.
 
 ### 3.1 Bad / illegal durable storage
 
@@ -148,8 +155,12 @@ NetworkPolicy, [§3.6](#36-blocking-networkpolicy-services-cant-reach-each-other
 workload tolerates" leaves the existence fold with no landable node. This strengthens the original
 affinity-only entry to cover taints and tolerations. This entry checks placement *constraints*
 (affinity/taints); the complementary *resource-fit* existence check — that a matching node also has enough
-allocatable room once every other pod is placed — is [§3.27](#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing),
-and the two compose in `place`'s `podFits`. **Owner:**
+allocatable room once every other pod is placed, **and** that any accelerator demand is met by the node's
+**wholesale accelerator owner** rather than a per-pod GPU claim — is [§3.27](#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing),
+and the two compose in `place`'s `podFits`: **substrate/affinity-capability existence** (this entry) ∘
+**resource-fit existence** ([§3.27](#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing)),
+the latter now reading accelerator fit through the wholesale-per-node owner ([§3.28](#328-two-accelerator-owners-on-one-node-or-a-fractional-accelerator-claim)),
+never a per-pod `gpu` axis. **Owner:**
 [`substrate_doctrine.md`](./substrate_doctrine.md) (substrate/arch capabilities, the closed node-taint set +
 node inventory) and [`platform_services_doctrine.md` §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) (the
 derived-toleration rule, parallel to derived NetworkPolicy). **Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (capability tags) + [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a
@@ -415,9 +426,18 @@ runtimes curl-tar native payloads and install venvs at image *build* and then re
 makes the compute engine an `EngineRuntime`, a **closed union of substrate-tagged, baked engine identities with
 no `Url`/`Download`/`Fetch` arm**: the engine is *selected* by the detected substrate, never fetched, and since
 the numeric libraries LINK in, the engine exists the moment the pod does. A startup download has no syntax.
-**(b) A `ModelArtifact` without a completed `.ready`.** A `ModelArtifact` yields an `ArtifactRef` **only** once
-its `.ready` sentinel exists — staging writes `.ready` LAST — so a reference to a half-staged model has no
-constructor (the same `.ready`-gating the release `PromotionGate` mirrors, [§3.26](#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence)). **(c) A model with no landing
+**(b) A `ModelArtifact` without a completed `.ready` *and a provenance witness*.** A `ModelArtifact` yields an
+`ArtifactRef` **only** once its `.ready` sentinel exists (staging writes `.ready` LAST) **and** it carries a
+**provenance witness** — one of a **committed producing checkpoint** (a committed `latest`/`best` pointer that
+always names a *complete* checkpoint, never a "finished run", so it composes with serving a still-running
+continuous job) **or** a **pinned, content-addressed external import** carrying provenance — so a reference to a
+half-staged *or provenance-less* model has no constructor (the same `.ready`-gating the release `PromotionGate`
+mirrors, [§3.26](#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence)). A green
+`.ready` proves staging *completeness* (bytes written), **not** training *provenance*; the witness closes that
+gap, and naming a model for import IS an explicit content-addressed import-with-provenance (there is no bare
+stage-by-name-without-provenance constructor). The provenance-gated constructor is owned by
+[`content_addressing_doctrine.md`](./content_addressing_doctrine.md) §4.5; this refines the serve gate — it does
+**not** add a second catalog entry. **(c) A model with no landing
 engine.** A `ModelArtifact` must be servable by an `EngineRuntime` present on the deployment's substrate; an
 unmatched model has no landing engine — a **grade-(2) total relation** ([§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection)), the same relation-over-a-
 collection shape as the engine↔substrate fold ([§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)). **Owner:**
@@ -425,9 +445,11 @@ collection shape as the engine↔substrate fold ([§3.13](#313-a-compute-engine-
 tiers + the content-addressed store) + [`service_capability_doctrine.md`](./service_capability_doctrine.md) (the
 engine as a substrate-selected capability). **Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `EngineRuntime` union — no `Url` arm) +
 [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (an `ArtifactRef` handle exists only once its `.ready` edge does) + [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) (the model↔engine relation).
-**Grade:** (1) for the no-fetch engine and the `.ready`-gated `ArtifactRef`; (2) for the model↔engine relation
-(a checked total fold, not an absence of inhabitants); grade-(3) residue — that the staged bytes actually load
-on the substrate.
+**Grade:** (1) for the no-fetch engine and the `.ready`-**and-provenance-witness**-gated `ArtifactRef` (the
+committed-checkpoint arm and the *presence* of a provenance witness are genuine no-inhabitant constructors); (2)
+for the model↔engine relation (a checked total fold, not an absence of inhabitants); grade-(3) residue — that the
+staged bytes actually load on the substrate, and that an imported model's pin/tag is **truthful** (owned by
+[`content_addressing_doctrine.md`](./content_addressing_doctrine.md) §6.1).
 
 ### 3.26 An unverified environment promotion (promote → prod without the required evidence)
 
@@ -448,8 +470,11 @@ doctrine.
 
 Raw k8s admits a workload whose demand fits a cluster *in aggregate* but whose individual pods cannot be packed
 onto individual nodes — a 5-CPU pod on a cluster of 4-CPU nodes (aggregate CPU sufficient, no single node big
-enough), or a 2-GPU pod where every node has one GPU. Each is well-formed and admits, then hangs `Pending`
-forever, because **pods are atomic and cannot straddle nodes** and GPU is indivisible. This is the resource-fit
+enough). It is well-formed and admits, then hangs `Pending`
+forever, because **pods are atomic and cannot straddle nodes**. (This round **retires** the companion
+2-GPU-pod example: accelerators are no longer a per-pod bin-pack axis at all — a node's accelerators are owned
+**wholesale** by that node's single accelerator worker ([§3.28](#328-two-accelerator-owners-on-one-node-or-a-fractional-accelerator-claim)),
+reached only through that owner, so there is no per-pod `gpu` request that could fail to pack.) This is the resource-fit
 generalization of [§3.5](#35-undeployable-pods-taints-tolerations--affinity): §3.5 asks whether *a node
 matching affinity + tolerating taints exists*; this entry adds *with enough allocatable room, given everything
 else placed*. amoebius makes the cluster check a **placement**, not a sum: for a **fixed** node set the decode
@@ -458,13 +483,266 @@ an **elastic** (autoscaled / `Managed Eks`) set it checks a growth envelope — 
 candidate instance and Σ-at-max-scale ≤ quota — that the autoscaler can always satisfy. The old aggregate-sum
 ([§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)) does not catch this;
 the placement does. **Owner:** [`resource_capacity_doctrine.md` §4.1](./resource_capacity_doctrine.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope)
-(the `place` witness/envelope; `Capacity` is *allocatable*, cpu/mem divisible but `gpu` an indivisible `Count`)
+(the `place` witness/envelope; `Capacity` is *allocatable*, cpu/mem divisible; there is **no** per-pod `gpu` axis
+— `ResourceVec = { cpu, mem }` and accelerators are reached only through the node's wholesale accelerator owner,
+[§3.28](#328-two-accelerator-owners-on-one-node-or-a-fractional-accelerator-claim))
 + [`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md) (the fixed-vs-elastic `Topology` shape that
 selects the branch). **Technique:** [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked)
 (the placement upgrade of the capacity fold). **Grade:** (2) — a checked construction of a placement witness /
 envelope proof, **sound-not-complete** (may reject a packable spec, never admits an unplaceable one); grade-(3)
 residue — that the scheduler actually reproduces a feasible placement and the autoscaler actually grows, owned
 by [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md).
+
+### 3.28 Two accelerator owners on one node, or a fractional accelerator claim
+
+Raw k8s device-plugin scheduling lets two pods each claim a share of a node's accelerators, or a pod claim a
+fraction, so ownership of a node's GPUs is diffuse and contended. This round **reframes** a node's accelerators
+as owned **wholesale** by that node's **single accelerator worker** (`Cuda` or `AppleMetal`) — every other pod
+uses the node's leftover cpu/mem but never its accelerators — and **introduces** a typed **per-node-singleton
+accelerator-owner worker kind** (a DaemonSet-like node-affinity worker) in the daemon taxonomy, the witness type
+the earlier N-replica unelected Deployment model lacked. So "two accelerator owners on one node" and "a per-pod
+fractional accelerator claim" have **no constructor**. The one owner *multiplexes* train + serve + Tier-3 JIT on
+the node, which is what lets a continuous job train while it serves ([§3.32](#332-a-continuous-training-run-with-no-checkpoint-cadence-or-a-feed-with-no-bounded-retention)).
+**Owner:** [`daemon_topology_doctrine.md`](./daemon_topology_doctrine.md) (the worker taxonomy + the per-node
+singleton kind), consumed by [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) (which this round
+drops the per-pod `gpu` axis from — `ResourceVec = { cpu, mem }`). **Technique:** [§4.4](#44-ownership-indices--single-owner-ssot-structurally)
+(a per-node ownership index — one owner per node's accelerators) + [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
+(the closed accelerator-owner worker-kind union — no fractional-claim arm). **Grade:** (1) — the typed per-node
+singleton gives the two-owner / fractional-claim state no inhabitant; grade-(3) residue — that the one owner
+actually holds the devices at runtime.
+
+### 3.29 A host worker whose Demand overflows its physical host
+
+A host-level accelerator worker (an Apple-Metal or Windows-CUDA native subprocess,
+[`substrate_doctrine.md`](./substrate_doctrine.md) §5) runs beside the Lima/WSL2 VM that backs the in-cluster
+node, both drawing on the same **physical host**; raw tooling accounts neither, so a host binary that
+over-subscribes surfaces at runtime as thrash or OOM. This round adds a **host → host-worker** arm to the
+capacity nesting: a host worker's cpu/mem `Demand` folds against its **physical-host `Capacity`** (distinct from
+the VM's kube-allocatable) alongside the VM carve, with the host binary's own footprint **netted into
+system-reserved** so the fold stays two-claimant. VM-carve + host-worker Demand exceeding the physical host is a
+**grade-(2) `Left Overcommit`** at decode — the host-tier analogue of the pod-tier aggregate overcommit
+([§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)); a host running a host
+worker with **no** declared physical-host `Capacity` leaves the Demand unfoldable and is likewise a grade-(2)
+decode rejection. **Owner:** [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) (the
+host→host-worker fold arithmetic), consuming the host-worker `Demand` owned by
+[`platform_services_doctrine.md` §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)
+(extended to "every container **and every host-level worker subprocess**") and the physical-host `Capacity` +
+system-reserved netting owned by [`substrate_doctrine.md`](./substrate_doctrine.md) §8. **Technique:**
+[§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked)
+(the capacity-accounting total fold, host→host-worker arm). **Grade:** (2) — a checked rejection of a
+constructible value, never "unrepresentable" (a capacity check is grade-(2), [§2](#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it));
+grade-(3) residue — that the host kernel actually caps the subprocess.
+
+### 3.30 A served model whose VRAM footprint exceeds node VRAM
+
+Accelerator memory is finite and a served model's weights + KV-cache must fit in it, but raw serving lets you
+point an oversized model at a GPU and discover the shortfall as a runtime OOM. Because the one accelerator worker
+owns the node's accelerators wholesale ([§3.28](#328-two-accelerator-owners-on-one-node-or-a-fractional-accelerator-claim)),
+VRAM is modeled **like storage, not like a `ResourceVec` request axis** — a per-node accelerator sub-capacity the
+worker carves among the models it serves, a new **accelerator-worker → served-model** nesting arm folding
+`Σ served-model VRAM ≤ node vram`. Memory topology is substrate-aware and pushed into **how the per-host
+`Capacity` is declared** so the fold stays branch-free: `apple` (Metal, unified memory) declares **no** separate
+`vram` (accelerator demand IS `mem` demand); `linux-cuda`/`windows` (CUDA, discrete) declare a separate `vram`
+not contended with the VM. A served model whose declared footprint overflows node `vram` is a **grade-(2)** Σ
+rejection; an accelerator model with an **undeclared** footprint passing the Σ vacuously is foreclosed
+(accelerator models must declare a footprint, grade-(2)); an `apple` node declaring a separate `vram` violates
+the unified pool and is an uninhabitable per-host `Capacity` shape (**grade-(1)**). A model's producing-node
+footprint does **not** transfer as the serving-node demand — the serve landing recomputes fit in the **serving
+node's** memory topology. **Owner:** [`substrate_doctrine.md`](./substrate_doctrine.md) §8 (the per-host `vram`
+number + unified-vs-discrete `Capacity` shape, sole owner) + [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md)
+(the Σ arithmetic) + [`service_capability_doctrine.md`](./service_capability_doctrine.md) /
+[`content_addressing_doctrine.md`](./content_addressing_doctrine.md) (the per-model VRAM footprint field, the Σ's
+left operand). **Technique:** [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked)
+(the accelerator-worker → served-model Σ sub-budget) + [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
+(the unified-vs-discrete `Capacity` shape closed by substrate). **Grade:** (2) for the declared-footprint Σ;
+**grade-(3)** residue — that the model **actually fits in VRAM at runtime** under real batch/context (dynamic
+KV-cache / fragmentation), mirroring the `mem` cgroup ceiling behind the `mem` Σ; the unified-pool shape sub-part
+is grade-(1).
+
+### 3.31 A capacity or workload fold spanning two clusters
+
+Distributing one workload across clusters looks like "just fold capacity over both," but
+`place :: Topology -> [Workload]` admits exactly **one** `Topology`, and a `Topology` is one cluster
+([`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md) §4). A multi-cluster / fleet capacity fold
+therefore has **no constructor** — the same grade-(1) "no arm" idiom that forecloses the worker pool as a fourth
+`ComputeEngine`. Distributing across clusters is **geo-replication** (N independent clusters, each its own
+`place`, related only by async Pulsar replication — a deliberate Phase-9 non-goal); it is **not** the stateless
+attach pool, which is single-cluster and already **inside** `place`'s elastic branch
+([`single_logical_data_plane_doctrine.md`](./single_logical_data_plane_doctrine.md) §4 re-runs the same `place`
+fold on the enlarged topology) — modeling the attach pool as cross-cluster machinery is the category error §5 of
+that doctrine forecloses. A single **stretched** cluster ([§3.35](#335-a-stretched-host-worker-with-no-declared-networking-capability)–[§3.39](#339-a-split-site-etcd-quorum))
+is the canonical *legal* foil: it is **one** `Topology` whose nodes span two `Site`s and `place` runs **once**;
+folding its capacity as *two* `Topology`s is precisely this uninhabitable cross-cluster fold. **Owner:**
+[`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) (owns `place` and states the
+single-cluster-by-arity non-goal in its own subsection), cross-referencing
+[`single_logical_data_plane_doctrine.md`](./single_logical_data_plane_doctrine.md) for the *why* (a cluster is
+the consistency boundary). **Technique:** [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection)
+(the relation/collection is over one cluster's `NonEmpty Node`; a second `Topology` has no place in the fold's
+arity). **Grade:** (1) uninhabitable-by-arity; grade-(3) residue lives only in the deferred geo-replication
+enaction (Phase 9).
+
+### 3.32 A continuous training run with no checkpoint cadence, or a feed with no bounded retention
+
+"Train forever from a live feed" is how a bounded training budget quietly becomes unbounded — no checkpoints
+means nothing serveable and no resume point, and unbounded topic retention means BookKeeper fills. This round
+adds a **`TrainBudget = Bounded { steps | epochs } | Continuous { checkpointCadence }`** union: `Continuous`
+**requires** a `checkpointCadence` (each cadence commits a checkpoint — a committed pointer, hence serveable per
+[§3.25](#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model)(b): serve-from-any-committed-checkpoint
+of a still-running job) and its `TrainData.Feed` **requires** a bounded-retention `StorageBudget`. "Train forever
+with no checkpoints and no retention" has **no constructor** — a **grade-(1) union shape**, exactly the
+`Growable`/`ScalingPolicy` no-unbounded-arm idiom ([§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy)).
+The authoritative Continuous trainer is **single-cluster** (the existing jitML First-Axis coordinator, its
+single-writer *delegated* to a Pulsar Exclusive/Failover subscription + content-store CAS/`AdvancePredicate`, not
+a bespoke election); cross-cluster is serve-by-replication, never a second trainer on the same feed. **Owner:**
+[`content_addressing_doctrine.md`](./content_addressing_doctrine.md) (owns the `TrainInit`/`TrainData`/`TrainBudget`
+unions + the foreclosure; `dsl_doctrine.md` carries the field only), with retention bounded by the two-ceiling
+storage fold ([`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) +
+[`pulsar_client_doctrine.md` §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra)). **Technique:**
+[§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `TrainBudget`/`Feed`
+unions with no unbounded arm) + [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked)
+(the retention room-fit). **Grade:** (1) for the mandatory-cadence / bounded-retention union shape; **grade-(3)**
+residue — that the trainer actually checkpoints at cadence and retention actually holds (mirroring §3.21's
+grade-(3) tail).
+
+### 3.33 A multi-partition training feed with no defined merge order
+
+A Pulsar topic with multiple partitions has no total consume order, so "train from this feed" is
+non-deterministic unless the merge is pinned — a prose "must consume in order" degrades to an untyped runtime
+hope. This round makes `TrainData.Feed` carry a **typed single-partition-or-explicit-merge-function witness**, so
+a non-deterministically-ordered feed has **no constructor**. The consumed prefix `[from, to)` is materialized at
+consume time into an **immutable dataset blob keyed by the SHA(s) of the message bodies** (bodies are already
+CBOR content-addressed), and *that* content-address is the pinned training input — the Pulsar cursor is
+broker-assigned metadata, never an input to any content hash. **Owner:**
+[`content_addressing_doctrine.md`](./content_addressing_doctrine.md) (the `TrainData.Feed` merge witness + the
+materialized-prefix content-address) + [`pulsar_client_doctrine.md` §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra)
+(the topic as a cursor-anchored replayable feed). **Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
+(the closed merge-witness on `Feed`) + [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
+(a `Feed` handle exists only once its single-partition-or-merge witness does). **Grade:** (1)/(2) — the merge
+witness makes the non-deterministic feed unrepresentable (grade-(1) where the witness is a closed union arm;
+grade-(2) where the explicit merge function is a decode-checked total order); grade-(3) residue — that the broker
+actually replays the pinned prefix within retention.
+
+### 3.34 An app serving or continuing another app's model without a grant
+
+With model artifacts content-addressed in shared project buckets, any app in a cluster could dedup-and-serve
+another app's model, leaking a private model or its provenance across the app-isolation boundary. This round
+scopes model artifacts **per app/namespace**: an app may serve **only** models it produced or imported, the
+content-store pointers are per-app-namespaced, the upstream-pull Vault credential is scoped per app, and a
+fine-tune-chain `parent` edge may **not** cross app boundaries. "App B serving or continuing app A's model
+without an explicit grant" is a **grade-(2)** decode rejection (an explicit grant, if modeled, is the only
+constructor that crosses). **Owner:** [`content_addressing_doctrine.md`](./content_addressing_doctrine.md)
+(per-app pointer namespacing + the no-cross-app `parent` edge) + [`vault_pki_doctrine.md`](./vault_pki_doctrine.md)
+(the per-app upstream-pull credential). **Technique:** [§4.4](#44-ownership-indices--single-owner-ssot-structurally)
+(a per-app ownership index — the fold rejects a cross-app model reference absent a grant) +
+[§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (app-scoped tags, the same
+shape as the cross-tenant refs of [§3.8](#38-cross-tenant-references-and-literal-secrets)). **Grade:** (2) — a
+total decode-time rejection; grade-(3) residue — that the running serve path honors the namespace.
+
+### 3.35 A stretched host worker with no declared networking capability
+
+A host worker whose declared network-locality `Site` differs from the control plane's is reached across the WAN,
+and reaching the data plane (MinIO/Pulsar) + Vault over an untrusted network with no declared secure transport
+is exactly the silent-exposure footgun. This round makes a **networking capability mandatory**: the host-worker
+attach carrier requires `ewpNetworking :: Networking c = Gateway (SecureGatewayReach c) | Vpn (VpnFabric c)`
+(generalizing the already-mandatory `ewpFabric :: VpnFabric c`), so a stretched host worker with **no** declared
+`Networking` has **no constructor**. Which path a host worker takes is **fold-derived from its declared `Site`**,
+read off the host-worker inventory — `Site = s` → the co-located localhost channel-2 path; `Site ≠ s` → the
+stretched attach constructor demanding `Networking c` and minting `FabricMember c` through it — so a caller
+**cannot** smuggle a remote worker onto the localhost path. A K1 host worker is control-plane-free and therefore
+representable on **any** `ComputeEngine`, including `Managed Eks`. **Owner:**
+[`single_logical_data_plane_doctrine.md`](./single_logical_data_plane_doctrine.md) §4 (the attach carrier +
+`ewpNetworking`); the `Networking` sum owned by [`network_fabric_doctrine.md`](./network_fabric_doctrine.md); the
+`Site` axis by [`substrate_doctrine.md`](./substrate_doctrine.md) §8. **Technique:**
+[§4.1](#41-pvcpv-binding-by-construction) (the mandatory `ewpNetworking` field — a carrier without it has no
+inhabitant) + [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) (the
+host-worker-inventory `Site` fold routing an off-localhost worker onto the attach path). **Grade:** (1)
+networking-field presence; (2) the `Site` fold; grade-(3) residue — the physical link up and the declared `Site`
+matching reality (`discover = Unreachable → refuse`).
+
+### 3.36 A declared-remote full agent with no control-plane witness
+
+A full k8s node (a kubelet member) whose `Site` differs from the control plane's must reach the one
+apiserver/etcd across the WAN; raw tooling lets you register such an agent with no secure control-plane path and
+discover the split at reconcile. This round's node fold routes a declared-remote (`Site ≠ s_cp`) self-managed-rke2
+agent to `mkStretchedAgent`, which **demands** a `ReachesControlPlane c` witness minted **from** the declared
+`Networking`'s `VpnFabric` (a rendered `ControlPlanePeer` covering the apiserver VPN-IP + distro-mTLS over the
+tunnel). A stretched agent with no control-plane witness has **no constructor**. **Owner:**
+[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md) §4.1 (the node fold + `mkStretchedAgent`),
+reading the witness minted by [`network_fabric_doctrine.md`](./network_fabric_doctrine.md). **Technique:**
+[§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) (the `NonEmpty Node` `Site` fold)
++ [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) (the
+`render()` that must cover the apiserver VPN-IP) + [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
+(the `ReachesControlPlane c` witness gating). **Grade:** demand grade-(2) (the `Site` fold + `render()`); witness
+presence grade-(1) (no off-networking constructor); grade-(3) residue — the kubelet session actually established
+over the WAN. This is the prior stretched-cluster witness, now scoped to the **full-node** kind.
+
+### 3.37 A full stretched node on a managed EKS control plane without a provider-native hybrid arm
+
+A managed control plane (EKS) is deliberately **hostless** — no `LinuxHost` field to hang a node off, no
+channel-1 mTLS — so a full **member** node stretched onto a `Managed Eks` control plane is representable **only**
+if the provider natively supports it (**EKS Hybrid Nodes**). Absent that provider-native arm it has **no
+constructor** — **grade-(1) uninhabitable**, the identical closed-union "no arm = not supported" idiom as a
+2/0-server quorum ([§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)), a `Ha7` arm,
+and `StorageBacking`'s missing unbounded case ([§3.18](#318-unbounded-storage-anywhere)). amoebius must **not**
+build a second WireGuard + distro-mTLS control-plane fabric to fake it — that is the "autonomous substrate
+authority beside the elected singleton" shape the doctrine rejects; when/if EKS Hybrid Nodes lands it enters as a
+**new provider-native arm the `Managed` arm surfaces** (provisioned over the cloud API), never amoebius-built
+machinery. A stretched **host worker** on EKS needs no such arm — it is control-plane-free
+([§3.35](#335-a-stretched-host-worker-with-no-declared-networking-capability)). **Owner:**
+[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md) §2/§4.1 (the hostless `Managed` arm), on the
+surface-provider-vs-build discipline owned by [`cluster_lifecycle_doctrine.md`](./cluster_lifecycle_doctrine.md)
+§1 + [`pulumi_iac_doctrine.md`](./pulumi_iac_doctrine.md). **Technique:**
+[§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed provider-arm union —
+the hybrid arm is absent, so the state has no inhabitant). **Grade:** (1) uninhabitable until a provider-native
+arm is surfaced; grade-(3) residue — that the provider's hybrid mechanism actually joins the node.
+
+### 3.38 A host worker granted a control-plane witness or treated as a member
+
+The two stretched kinds must not blur — a host worker is a non-member data-plane/Vault client and must never be
+handed control-plane reach or counted as a kubelet member. This round's total `witness` fold yields, on its
+host-worker arms, **only** `DataPlaneOnly (FabricMember c)`; the `Reach` sum has **no** path taking a
+`K1_HostWorker` into `ControlPlaneToo (ReachesControlPlane c)` — no constructor crosses the kinds. **Owner:**
+[`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md) §4.1 (the `witness` fold) /
+[`single_logical_data_plane_doctrine.md`](./single_logical_data_plane_doctrine.md) §4 (the host worker as
+attach-pool client, never a member). **Technique:** [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
+(the `Reach` sum's kind-indexed constructors do not interconvert — the host-worker → `ControlPlaneToo` transition
+has no constructor) + [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) (the
+per-kind `witness` dispatch). **Grade:** (1) uninhabitable.
+
+### 3.39 A split-Site etcd quorum
+
+An etcd quorum split across network-localities loses its low-latency majority and risks partition on the WAN
+link. This round keeps all rke2 servers **`Site`-co-located** by indexing the server set on one `Site`:
+`Rke2Servers (s :: Site) = Single (HostAt s) | Ha3 … | Ha5 …` forces every server onto **one** `Site s`, so a
+split-`Site` quorum has **no inhabitant** — a **grade-(1) phantom-`Site` unification**, **explicitly not** the
+odd-quorum count union of [§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain) (that
+entry forecloses even/zero *cardinalities*; this forecloses a *split locality* at a legal cardinality).
+Control-plane machinery (the co-located quorum, `mkStretchedAgent`) is full-node-only; host workers carry no
+quorum. **Owner:** [`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md) §4.1 (the `Site`-indexed
+`Rke2Servers`); the `Site` axis owned by [`substrate_doctrine.md`](./substrate_doctrine.md) §8. **Technique:**
+[§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a phantom `Site` index the server arms
+must unify on) + [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) (the
+servers/agents collection shape). **Grade:** (1) uninhabitable; grade-(3) residue — that the co-located members
+actually keep a low-latency majority.
+
+### 3.40 A secure-gateway reach collapsing into wild ingress
+
+The new `Gateway` networking arm (`SecureGatewayReach c`, the authenticated secure-gateway wire a non-member host
+worker uses to reach the data plane + Vault) must not become a back-door into the wild — "Keycloak owns all wild
+ingress" ([§3.7](#37-accidental-insecure--backdoor-ingress)) must survive it. `SecureGatewayReach` is a **distinct
+`network_fabric` endpoint index** alongside `FabricPeer`/`ControlPlanePeer`/`HostLocalPeer`/`WildIngress`, with
+**no constructor into `WildIngress`**, so a gateway reach cannot collapse into a wild endpoint — the same
+endpoint-kinds-do-not-interconvert shape as the host-local-peer carve-out ([§3.7](#37-accidental-insecure--backdoor-ingress)).
+The wild-ingress gateway (Keycloak/Envoy) stays wild-only. **Owner:**
+[`network_fabric_doctrine.md`](./network_fabric_doctrine.md) (the endpoint indices) +
+[`host_cluster_comms_doctrine.md`](./host_cluster_comms_doctrine.md) (channel 2 generalized to localhost /
+authenticated fabric / authenticated secure gateway). **Technique:**
+[§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (only the wild edge holds the
+`ExposeToWild` capability — a `SecureGatewayReach` value cannot produce a wild endpoint) +
+[§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (endpoint kinds are distinct indices
+that do not interconvert). **Grade:** (1) uninhabitable. *(The K1 `Gateway`-arm authentication constructor itself
+is design intent this round names but defers — the witness type `FabricMember c` via `fabricMemberViaGateway` is
+named, the constructor not yet inhabited.)*
 
 ---
 
@@ -516,7 +794,11 @@ and its postcondition phase. An operation that requires a `Bound` volume cannot 
 one; a wild route can only be built *from* a constructed service handle, so [§3.3](#33-misconfigured-gateway)'s "route to a non-existent
 backend" and [§3.6](#36-blocking-networkpolicy-services-cant-reach-each-other)'s "consumer with no provider" cannot be written; endpoint kinds (`WildIngress` vs
 `HostLocalPeer`, [§3.7](#37-accidental-insecure--backdoor-ingress)) are distinct indices that do not interconvert. The illegal transition is not rejected
-at runtime — it was never a value.
+at runtime — it was never a value. The same distinct-index discipline carries the stretched-cluster wires added
+this round: a `SecureGatewayReach` (the authenticated secure-gateway arm of `Networking = Gateway | Vpn`) is a
+distinct endpoint index with **no** constructor into `WildIngress` ([§3.40](#340-a-secure-gateway-reach-collapsing-into-wild-ingress)),
+and a stretched node's `Reach` sum is kind-indexed so a host worker has no constructor into the control-plane
+witness ([§3.38](#338-a-host-worker-granted-a-control-plane-witness-or-treated-as-a-member)).
 
 ### 4.4 Ownership indices — single-owner SSoT, structurally
 
@@ -553,7 +835,10 @@ a **fixed** node set → a first-fit-decreasing **witness bin-pack** honoring pe
 (`podFits`), and anti-affinity, returning a concrete `Placement` or `Left Unschedulable`; an **elastic** node
 set → a **two-envelope** check (each pod fits the largest candidate instance; Σ at max scale ≤ quota) the
 autoscaler can always satisfy. Single-owner *carves* below the cluster (VM out of host) stay pure subtractions;
-storage is `Σ(sizes) ≤ backing`. It nests — host → VM → guest, cluster → workload — and **re-runs** after any
+storage is `Σ(sizes) ≤ backing`. It nests — host → VM → guest, **host → host-worker** (a native accelerator
+subprocess folded against its physical-host `Capacity`, [§3.29](#329-a-host-worker-whose-demand-overflows-its-physical-host)),
+cluster → workload, and **accelerator-worker → served-model** (a `Σ served-model VRAM ≤ node vram` sub-budget the
+wholesale accelerator owner carves, [§3.30](#330-a-served-model-whose-vram-footprint-exceeds-node-vram)) — and **re-runs** after any
 [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) `Growable` policy grows the
 bound. Distinct from [§4.4](#44-ownership-indices--single-owner-ssot-structurally) (which checks
 single-ownership, not arithmetic). **Honesty:** this technique is **irreducibly grade-(2)** — Dhall has no
@@ -564,7 +849,7 @@ that may false-reject a packable spec but never admits an unplaceable one); the 
 caveat. The model (`Capacity`/`Demand`/`Budget`, `podFits`/`place`, the static-vs-elastic branch, the
 `StorageBudget` and `Growable` unions, the two-ceiling Pulsar fold, and the declared-vs-probed *allocatable*
 cross-check) is owned by [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md); this doc owns only
-the *technique*. Forecloses [§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)–[§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy) and [§3.27](#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing).
+the *technique*. Forecloses [§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)–[§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy), [§3.27](#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing), and this round's [§3.29](#329-a-host-worker-whose-demand-overflows-its-physical-host)–[§3.30](#330-a-served-model-whose-vram-footprint-exceeds-node-vram) (the host→host-worker and accelerator-worker→served-model arms).
 
 ### 4.7 Compatibility / topology relations by construction over a collection
 
@@ -586,6 +871,21 @@ landing engine — a grade-(2) total fold exactly like the engine↔substrate ch
 [`service_capability_doctrine.md`](./service_capability_doctrine.md). And the rke2 **server/agent** inventory
 ([§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain), [§3.16](#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused)) is this same collection shape with a *closed-cardinality* server set (`Rke2Servers`, grade-(1))
 plus a variable `agents` list whose host-distinctness runs over `servers ∪ agents` (a grade-(2) fold).
+This round extends the same **relation-over-a-collection** shape to two further collections. **(i)** The
+**wholesale accelerator owner** is a per-node ownership index ([§4.4](#44-ownership-indices--single-owner-ssot-structurally))
+over the node's accelerators, so two owners on one node or a per-pod fractional claim has no inhabitant
+([§3.28](#328-two-accelerator-owners-on-one-node-or-a-fractional-accelerator-claim)). **(ii)** A **stretched
+cluster** is one `Topology` whose `NonEmpty Node` (and a parallel host-worker inventory) span two `Site`s: a
+**total `Site` fold over each collection** classifies stretchedness and routes a declared-remote entity to a
+demanding constructor — the node fold to `mkStretchedAgent` (minting `ReachesControlPlane c`,
+[§3.36](#336-a-declared-remote-full-agent-with-no-control-plane-witness)) and the host-worker-inventory fold to
+the attach carrier (minting `FabricMember c`, [§3.35](#335-a-stretched-host-worker-with-no-declared-networking-capability))
+— with a per-kind `witness` dispatch whose uninhabited cells (a host worker as a member
+[§3.38](#338-a-host-worker-granted-a-control-plane-witness-or-treated-as-a-member), a full node on a managed EKS
+control plane [§3.37](#337-a-full-stretched-node-on-a-managed-eks-control-plane-without-a-provider-native-hybrid-arm))
+are the closed-union no-arm idiom, and a `Site`-indexed `Rke2Servers (s)` forcing a co-located etcd quorum
+([§3.39](#339-a-split-site-etcd-quorum)). Folding such a cluster's capacity as *two* `Topology`s is the
+[§3.31](#331-a-capacity-or-workload-fold-spanning-two-clusters) cross-cluster fold that has no constructor.
 Forecloses [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.16](#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused), [§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain), and the model↔engine relation of [§3.25](#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model).
 
 ---
@@ -620,7 +920,20 @@ Forecloses [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-manag
 | 3.24 Even/zero-server rke2 control plane (no etcd quorum) | 4.2 closed `Rke2Servers` union (no even/zero arm) | [cluster_topology](./cluster_topology_doctrine.md) |
 | 3.25 ML asset fetched/built at startup; unready or unlanded model | 4.2 closed `EngineRuntime` (no `Url` arm) + 4.3 `.ready`-gated `ArtifactRef` + 4.7 model↔engine relation | [content_addressing](./content_addressing_doctrine.md), [service_capability](./service_capability_doctrine.md) |
 | 3.26 Unverified environment promotion (promote→prod) | 4.3 evidence-gated `PromotionGate` handle | [release_lifecycle](./release_lifecycle_doctrine.md) |
-| 3.27 Schedulable-in-aggregate but unplaceable pod (atomic / GPU bin-packing) | 4.6 placement fold (witness bin-pack / growth envelope) | [resource_capacity §4.1](./resource_capacity_doctrine.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope), [cluster_topology](./cluster_topology_doctrine.md) |
+| 3.27 Schedulable-in-aggregate but unplaceable pod (atomic-pod placement; wholesale-per-node accelerators) | 4.6 placement fold (witness bin-pack / growth envelope) | [resource_capacity §4.1](./resource_capacity_doctrine.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope), [cluster_topology](./cluster_topology_doctrine.md) |
+| 3.28 Two accelerator owners on one node / fractional accelerator claim | 4.4 per-node ownership index + 4.2 closed worker-kind union | [daemon_topology](./daemon_topology_doctrine.md), [resource_capacity](./resource_capacity_doctrine.md) |
+| 3.29 Host worker Demand overflowing its physical host | 4.6 host→host-worker capacity fold | [resource_capacity](./resource_capacity_doctrine.md), [substrate](./substrate_doctrine.md), [platform_services §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram) |
+| 3.30 Served model VRAM footprint exceeding node VRAM | 4.6 accelerator-worker→served-model Σ + 4.2 unified-vs-discrete Capacity | [substrate](./substrate_doctrine.md), [resource_capacity](./resource_capacity_doctrine.md), [service_capability](./service_capability_doctrine.md) |
+| 3.31 Capacity/workload fold spanning two clusters | 4.7 single-`Topology` arity (no cross-cluster fold) | [resource_capacity](./resource_capacity_doctrine.md), [single_logical_data_plane](./single_logical_data_plane_doctrine.md) |
+| 3.32 Continuous run w/o cadence / feed w/o bounded retention | 4.2 closed `TrainBudget`/`Feed` unions + 4.6 retention room-fit | [content_addressing](./content_addressing_doctrine.md), [resource_capacity](./resource_capacity_doctrine.md), [pulsar_client §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra) |
+| 3.33 Non-deterministic multi-partition training feed | 4.2 merge-witness union + 4.3 `Feed` handle gating | [content_addressing](./content_addressing_doctrine.md), [pulsar_client §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra) |
+| 3.34 App serving/continuing another app's model w/o a grant | 4.4 per-app ownership index + 4.2 app-scoped tags | [content_addressing](./content_addressing_doctrine.md), [vault_pki](./vault_pki_doctrine.md) |
+| 3.35 Stretched host worker w/o declared networking | 4.1 mandatory `Networking` field + 4.7 host-worker `Site` fold | [single_logical_data_plane](./single_logical_data_plane_doctrine.md), [network_fabric](./network_fabric_doctrine.md), [substrate](./substrate_doctrine.md) |
+| 3.36 Declared-remote full agent w/o control-plane witness | 4.7 node `Site` fold + 4.6 `render()` + 4.3 witness gating | [cluster_topology](./cluster_topology_doctrine.md), [network_fabric](./network_fabric_doctrine.md) |
+| 3.37 Full stretched node on Managed EKS w/o provider-native hybrid arm | 4.2 closed provider-arm union (absent hybrid arm) | [cluster_topology](./cluster_topology_doctrine.md), [cluster_lifecycle](./cluster_lifecycle_doctrine.md), [pulumi_iac](./pulumi_iac_doctrine.md) |
+| 3.38 Host worker granted control-plane / treated as member | 4.3 kind-indexed `Reach` + 4.7 `witness` dispatch | [cluster_topology](./cluster_topology_doctrine.md), [single_logical_data_plane](./single_logical_data_plane_doctrine.md) |
+| 3.39 Split-`Site` etcd quorum | 4.3 phantom-`Site` unification + 4.7 servers collection | [cluster_topology](./cluster_topology_doctrine.md), [substrate](./substrate_doctrine.md) |
+| 3.40 Secure-gateway reach collapsing into wild ingress | 4.2 `ExposeToWild` capability + 4.3 distinct endpoint indices | [network_fabric](./network_fabric_doctrine.md), [host_cluster_comms](./host_cluster_comms_doctrine.md) |
 
 ---
 

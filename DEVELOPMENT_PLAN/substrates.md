@@ -117,7 +117,7 @@ gates.
 | GPU axis | CUDA present ⇒ **on-host worker node** — CUDA does not run performantly inside WSL2 ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)) |
 | Virtualization | WSL2 (Ubuntu-24.04 Linux distro) for the Linux-host role — see §3 |
 | LoadBalancer | MetalLB (when acting as a Linux cluster host) |
-| What it validates | No phase gate in 0–12 keys its single substrate to `windows`: Windows participates either as a Linux host (via WSL2) or as the Windows-CUDA host-worker case, which shares the Phase 7 host-compute doctrine whose gate substrate is `apple`. The standalone `windows` gate is a later-phase concern (README later phases) |
+| What it validates | No phase gate in 0–12 keys its single substrate to `windows`: Windows participates either as a Linux host (via WSL2) or as the Windows-CUDA host-worker case, which shares the Phase 7 host-compute doctrine whose gate substrate is `apple`. This round elevates the Windows-CUDA host worker to a **first-class** case alongside Apple-Metal — role parity, not evidence parity ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained), `daemon_topology_doctrine.md` §4). The standalone `windows` gate is a later-phase concern (README later phases) |
 | Gate phase(s) | none in 0–12 (host-worker doctrine shared with Phase 7) |
 | Status | 📋 Planned |
 
@@ -125,6 +125,17 @@ gates.
 > `SubstrateName` enum with finer `apple-silicon` / `linux-cpu` / `linux-gpu` / `windows-cpu` / `windows-gpu`
 > granularity that the four-name DSL catalog collapses). That seed is **evidence from a sibling**, not an
 > amoebius-built behaviour; amoebius has not built Phase 1
+> ([`substrate_doctrine.md` §1](../documents/engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob)).
+
+> **Why `windows` is not split into `windows-cuda` (§F, this round's addition — normative in the doctrine).**
+> The amoebius four-name catalog keys each member on the **OS / VM-provider + wire strategy**, not on accelerator
+> presence: a Windows host's CUDA reaches the cluster as a **host worker** regardless (CUDA does not run
+> performantly under WSL2), so the deployment-shape-changing axis is captured by the Phase-7 host-worker
+> elevation (§B), not by a new substrate name. The seed's finer `windows-gpu` member therefore collapses to
+> `windows`, while the seed-attributed `linux-gpu` keeps its `linux-gpu` ⇔ amoebius `linux-cuda` mapping — the
+> seed strings above are quotations and are kept verbatim. `cuda` names the **NVIDIA accelerator family**; a
+> future non-NVIDIA accelerator (e.g. ROCm) would be its own substrate, which is why the amoebius name is
+> `linux-cuda`, not the too-generic `gpu`
 > ([`substrate_doctrine.md` §1](../documents/engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob)).
 
 ### eks (managed provider — a *declared engine*, not a detected substrate)

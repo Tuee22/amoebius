@@ -312,6 +312,20 @@ living on the deployment-rules surface and never inside an app's logic.
 > amoebius node-provisioner has been built or measured. The reconcile-not-state-machine shape is *proven in
 > prodbox* for AWS resources, which is sibling evidence, not an amoebius result.
 
+> **Stretched-node cross-ref (§L, this round; delivery-tracked, not built here).** The dynamic node
+> provisioning this sprint enacts is also how a **K2 full stretched node** on a **self-managed rke2** control
+> plane grows: its cloud (or metal) agents are ordinary `agents : List LinuxHost` provisioned via Pulumi under
+> the singleton, each carrying a `ReachesControlPlane` witness over the WireGuard fabric
+> ([`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md) §4.1,
+> [`network_fabric_doctrine.md`](../documents/engineering/network_fabric_doctrine.md) §5). A full stretched
+> **member** node on a **`Managed Eks`** control plane is a different matter: it is representable **only** as a
+> provider-native capability — **EKS Hybrid Nodes** — which the hostless `Managed` arm would *surface* over the
+> cloud API, never an amoebius-built second control-plane fabric; **absent that provider-native arm it is
+> grade-1 uninhabitable, and is DEFERRED** (`cluster_topology_doctrine.md` §2,
+> [`pulumi_iac_doctrine.md`](../documents/engineering/pulumi_iac_doctrine.md) §0/§4,
+> [`cluster_lifecycle_doctrine.md`](../documents/engineering/cluster_lifecycle_doctrine.md) §1). This phase
+> provisions provider **clusters** and self-managed rke2 agents; it does **not** introduce EKS Hybrid Nodes.
+
 ### Remaining Work
 
 The whole sprint.

@@ -49,6 +49,29 @@ WSL2) or as the on-host CUDA worker case ([§5](#5-host-worker-nodes-substrate-s
 > substrate name where it changes the deployment shape; this doc names both so the mapping is not a
 > surprise.
 
+> **`cuda` names an accelerator *family*, not "a GPU."** The amoebius DSL name `linux-cuda` keys the
+> GPU-present Linux substrate specifically on the **NVIDIA-container-runtime bootstrap**; `cuda` is the
+> **NVIDIA accelerator family**, and a future non-NVIDIA accelerator (a ROCm/AMD device, a TPU-class part)
+> would be its **own** substrate — a new closed catalog member with its own package-manager bootstrap and
+> device linkage — never a re-use of this one. This is why the generic word `gpu` is deliberately avoided in
+> the substrate surface: accelerator families differ in exactly the axis the substrate exists to carry (which
+> runtime bootstraps them, how they link), so collapsing them under `gpu` would erase the distinction the
+> catalog is for. Adding a family is **not** substrate-only extensibility: it costs a new closed substrate, a
+> new detector (an `hasNvidiaGpu`-analog, [§2](#2-detection-a-pure-classification-over-three-reads)), and —
+> downstream — a new closed `EngineRuntime` arm and a new landing-relation entry
+> ([service_capability_doctrine.md](./service_capability_doctrine.md)). This note is **forward-looking**;
+> only `cuda` is modelled today.
+
+> **Why `windows` is not split into `windows-cuda` the way `linux` splits into `linux-cuda`.** The amoebius
+> substrate name keys the **OS / VM-provider + wire strategy**, not accelerator presence. A Windows host
+> reaches the cluster's GPU compute as an on-host worker *regardless* of how its in-cluster node is wired
+> ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)), so the
+> deployment-shape-changing axis is already captured by the host-worker case, not by a second substrate name
+> — the amoebius DSL collapses the seed's `windows-gpu` into `windows`. On Linux, by contrast, GPU presence
+> *does* change the **in-cluster** deployment shape (the NVIDIA container runtime becomes a reconciler
+> precondition), so there the GPU axis earns its own substrate name. The seed keeps `windows-gpu` distinct;
+> amoebius does not.
+
 ---
 
 ## 2. Detection: a pure classification over three reads
@@ -64,7 +87,14 @@ Either String Substrate` wrapped by `detect :: IO (Either String Substrate)`:
 - **Architecture** comes from `System.Info.arch`, normalized by `parseDockerArch` to `amd64` / `arm64`;
   anything else is a hard `Left` (unsupported architecture), not a guess.
 - **GPU presence** is an NVIDIA probe (`hasNvidiaGpu`): the kernel markers `/proc/driver/nvidia/version`
-  and `/dev/nvidiactl` first, then `nvidia-smi -L` as the fallback.
+  and `/dev/nvidiactl` first, then `nvidia-smi -L` as the fallback. On a positive probe the detector reads
+  two further quantities off the same accelerator — the **device count** and the **per-device VRAM** — by
+  invoking `nvidia-smi` (`--query-gpu=count,memory.total`) **by absolute path** per the no-env / no-`PATH`
+  contract ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)), never a bare name. These feed
+  the per-host accelerator/`vram` `Capacity` the node inventory declares
+  ([§8](#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints)), so accelerator **count** and
+  **VRAM** are *declared-at-decode and cross-checked-at-runtime* against the real probe, not unchecked
+  grade-3.
 
 Two classification rules are load-bearing and stated as hard failures, not warnings:
 
@@ -73,6 +103,15 @@ Two classification rules are load-bearing and stated as hard failures, not warni
   ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)), and that is an `arm64` fact.
 - **GPU presence promotes the substrate.** A Linux host with an NVIDIA GPU classifies as `linux-cuda`
   (seed: `linux-gpu`), not `linux-cpu`; the CUDA container runtime is then a reconciler precondition ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)).
+
+> **A non-NVIDIA accelerator is silently *dropped*, not rejected — a named gap.** The probe is NVIDIA-only
+> (`hasNvidiaGpu`), so a Linux host carrying a non-NVIDIA accelerator (AMD/ROCm, a TPU-class part) classifies
+> as plain `linux-cpu` and the accelerator is simply not seen: there is **no `Left unsupported-accelerator`**
+> — detection does not reject the host, it forgets the device. This is an **un-foreclosed gap**, consistent
+> with `cuda` being one accelerator family among possible others
+> ([§1](#1-the-substrate-is-a-fact-about-the-host-not-a-knob)); this doc **names** the drop rather than
+> implying it is handled. Closing it is not substrate-only work — it needs a new closed substrate + detector
+> and, downstream, a new `EngineRuntime` arm and landing-relation entry.
 
 > **Honesty.** This is the `hostbootstrap` seed, ported from a prior Python detector. It is *evidence from
 > a sibling library*, not a tested amoebius result — amoebius has not built Phase 1. Read every mechanism
@@ -230,7 +269,7 @@ host subprocess of the host binary:
 | Hardware | Substrate | Why not a container / VM | What runs on the host |
 |----------|-----------|--------------------------|-----------------------|
 | **Apple Metal GPU** | apple | Metal needs Apple Silicon **unified memory**; it cannot run in a Linux container or a Linux VM | An on-host inference/ML worker, built natively **headless on the host — no VM** ([§4.3](#43-no-macos-build-vm-apple-builds-are-headless-on-host), [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)) |
-| **NVIDIA CUDA on Windows** | windows | The CUDA stack does **not** run performantly from inside WSL2 | An on-host CUDA worker, built natively on Windows |
+| **NVIDIA CUDA on Windows** | windows | The CUDA stack does **not** run performantly from inside WSL2 | An on-host CUDA worker, built natively **headless on the host — no VM**, on Windows (symmetric to the Apple-Metal worker, [§5.1](#51-windows-cuda-and-apple-metal-are-the-same-host-worker-shape)) |
 
 The defining properties of a host worker node:
 
@@ -253,6 +292,38 @@ The defining properties of a host worker node:
   path (the `linux-cuda` container runtime, `HostBootstrap.Ensure.Cuda`: NVIDIA container toolkit +
   `nvidia` Docker runtime registration) is the **contrast** case — CUDA in a Linux container is fine; CUDA
   on Windows and GPU on Apple are the ones that escape to the host.
+
+### 5.1 Windows-CUDA and Apple-Metal are the same host-worker shape
+
+The two host-worker rows are **symmetric**. The Windows-CUDA worker is the same shape as the Apple-Metal
+worker — a native, **on-host, headless, no-VM** subprocess of the host binary reaching the cluster only over
+host-only NodePorts. The single `Cuda` engine offering is realized **in-cluster** on `linux-cuda` (the NVIDIA
+container runtime, above) and **host-level** on Windows, exactly as Apple's engine is realized host-level:
+one engine, two bootstraps (the substrate→engine quotient is owned by
+[service_capability_doctrine.md](./service_capability_doctrine.md); the worker-role taxonomy by
+[daemon_topology_doctrine.md](./daemon_topology_doctrine.md)). This is **role parity, not evidence parity**:
+the Apple path has a build-shape doc ([apple_metal_headless_builds.md](./apple_metal_headless_builds.md)) and
+sibling evidence, whereas the on-host Windows-CUDA build/run path is **forward design intent with no sibling
+evidence** and no build-shape doc — read it that way.
+
+**Co-resident *on* the host, not *in* the VM.** On Windows the CUDA worker runs on the **same physical host
+as** — never *inside* — the WSL2 distro that backs the in-cluster Linux node; on Apple it runs on the same
+host as the Lima VM. The worker keeps its "no VM, on-host, headless" property
+([§4.3](#43-no-macos-build-vm-apple-builds-are-headless-on-host)): the VM synthesizes the *in-cluster* Linux
+node, while the accelerator worker lives beside it on the bare host, precisely because the accelerator (Metal
+unified memory; CUDA under WSL2) cannot be reached performantly from inside that VM.
+
+**The Windows in-cluster node is `linux-cpu` only.** To keep the one physical GPU from being claimed twice —
+once as an in-cluster bin-packable node resource and again by the wholesale host worker — a Windows host's
+WSL2-backed in-cluster node advertises **`linux-cpu`** capacity only; a WSL2-backed **`linux-cuda`**
+in-cluster node on Windows has **no constructor** (grade-1). The GPU escapes to the host worker, never to a
+WSL2 pod, and is owned wholesale by that one worker.
+
+**A host worker need not hold an in-cluster node.** A `Cuda` (or Apple-Metal) host worker may peer into a
+cluster in which it holds **no** in-cluster node at all — it reaches MinIO/Pulsar as a host-only-NodePort
+peer regardless. Co-residence with a WSL2/Lima-backed node is therefore the common case, **not** a
+requirement: "co-resident on the same host" describes where the worker sits when there *is* a local
+in-cluster node, and is not a precondition for peering.
 
 ```mermaid
 flowchart TD
@@ -347,7 +418,10 @@ that the rest of amoebius reads. It is the **single owner** (an ownership index,
 *which hosts/substrates exist*, *how much each host advertises*, and *which taints a node carries*. Three
 consumers read it, and each is a foreclosure that depends on there being exactly one such list.
 
-- **Per-host `Capacity` (allocatable).** Each host entry advertises a declared `Capacity` (cpu/mem/storage/gpu),
+- **Per-host `Capacity` (allocatable).** Each host entry advertises a declared `Capacity` (cpu/mem/storage/gpu,
+  and — on a discrete-accelerator host — a separate `vram`; the accelerator-memory shape is
+  [§8.2](#82-accelerator-memory-vram-unified-on-apple-discrete-on-cudawindows) and the physical-host total
+  behind a host worker is [§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)),
   and it is the **allocatable** (schedulable) capacity — the raw hardware total with kube/system-reserved and
   the eviction threshold already netted out — **not** the raw figure, so the fold never trusts more than the
   scheduler can hand out. This is the number the capacity fold ([resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting))
@@ -371,10 +445,71 @@ consumers read it, and each is a foreclosure that depends on there being exactly
   cluster on those hosts must interpose a Lima/WSL2 Linux VM.
 
 This document owns the inventory *record*, the closed `NodeTaintKind` set, and the per-host `Capacity`
-*declaration*; it does **not** own the capacity arithmetic ([resource_capacity_doctrine.md](./resource_capacity_doctrine.md)),
+*declaration* — including the **physical-host total** behind a host worker ([§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)),
+the unified-vs-discrete **`vram`** shape ([§8.2](#82-accelerator-memory-vram-unified-on-apple-discrete-on-cudawindows)),
+and the declared **`Site`** ([§8.3](#83-site-the-declared-network-locality-axis-cluster-nodes-and-host-worker-hosts));
+it does **not** own the capacity arithmetic ([resource_capacity_doctrine.md](./resource_capacity_doctrine.md)),
 the compute-engine relation ([cluster_topology_doctrine.md](./cluster_topology_doctrine.md)), or the
 toleration-derivation rule ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)). It is the
 single list they all read.
+
+### 8.1 The physical-host total vs the VM's allocatable (the host-worker fold operand)
+
+The per-host `Capacity` above is the number the **in-cluster** bin-pack trusts, and on apple/windows the only
+`LinuxHost` it describes is the Lima/WSL2 **VM's** kube-allocatable ([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)).
+A host that *also* runs a **host worker** ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained))
+needs a second, larger declaration: the **physical-host total** — the whole bare machine's allocatable
+cpu/mem — against which the host-tier fold packs *both* the VM's carve *and* the host worker's `Demand`. This
+inventory declares that physical-host total as a distinct per-host figure, and the host binary's **own**
+footprint is **netted into system-reserved** on it (exactly as kube/system-reserved is netted out of the VM's
+allocatable), so the physical-host fold stays two-claimant — VM carve + worker `Demand` ≤ physical-host
+allocatable — and the host binary is never a third un-owned claimant. This doc owns the **declaration** of the
+physical-host total and the system-reserved netting; the **fold arithmetic** (a grade-2 `Left Overcommit` at
+decode) is [resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)'s,
+and the host-worker `Demand` it consumes is declared by
+[platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram).
+
+### 8.2 Accelerator memory (`vram`): unified on apple, discrete on cuda/windows
+
+A worker that serves models needs an **accelerator-memory** figure, and the **shape** of that figure is
+substrate-specific — a fact this inventory declares so the capacity fold downstream stays branch-free:
+
+- **apple (Metal, unified memory).** GPU and CPU share **one** pool, so the per-host `Capacity` declares
+  **no separate `vram`**: the accelerator worker's memory demand simply *is* its `mem` demand, netted from the
+  single physical-host `mem` ([§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)).
+  An `apple` host declaring a separate `vram` Capacity is an **uninhabitable per-host `Capacity` shape —
+  grade-1** (there is no unified-pool `vram` field to fill; the constructor does not exist).
+- **linux-cuda / windows (CUDA, discrete memory).** The accelerator carries its own memory, not contended
+  with the WSL2/Lima VM, so the per-host `Capacity` declares host `mem` **plus** a separate **`vram`** total.
+
+This inventory is the **sole owner** of the per-host `vram` **number** and of the unified-vs-discrete
+`Capacity` **shape**. It does **not** own the fold that spends `vram`: the accelerator worker carves its node
+`vram` among the models it serves as a `Σ served-model VRAM ≤ node vram` sub-budget, and *that* arithmetic —
+with the per-served-model VRAM footprint that is its left operand — is owned downstream
+([resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)),
+reading this declared number, never restating it. Like the base allocatable, the declared accelerator
+**count** and **`vram`** are **cross-checked at runtime** against the [§2](#2-detection-a-pure-classification-over-three-reads)
+`nvidia-smi` probe: a host over-declaring accelerators or VRAM beyond what the probe reports **refuses**
+(`discover = Mismatch → refuse`, [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)),
+keeping these axes declared-at-decode / cross-checked-at-runtime.
+
+### 8.3 `Site`: the declared network-locality axis (cluster nodes and host-worker hosts)
+
+`Site` is a declared per-host inventory field — an opaque network-locality label answering *where the host
+sits on the network* — and it is **orthogonal to the detected substrate** ([§1](#1-the-substrate-is-a-fact-about-the-host-not-a-knob)):
+a machine's `Site` is *where it is*, not *what it is*. It follows the same **declared-at-decode /
+cross-checked-at-runtime** discipline as the rest of the `Capacity` above: the inventory declares each host's
+`Site`, and a host declaring a `Site` its reachability contradicts (a remote host mis-declared local) surfaces
+at reconcile as the three-valued `discover = Unreachable → refuse`
+([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine))
+— so a declared-vs-real `Site` mismatch is grade-3 runtime residue, the ceiling every §8 declared fact lives
+at. Crucially this inventory carries a `Site` for **both** kinds of host it lists: **in-cluster cluster
+`Node`s** *and* the **host-worker physical hosts** ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained),
+whose per-host `Capacity` is [§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)'s
+operand). The fold that **classifies stretchedness** from these declared `Site`s — which node or host worker
+is remote, and what reachability witness that demands — runs over **both** inventories and is owned by
+[cluster_topology_doctrine.md §4.1](./cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation);
+this doc owns only the declared `Site` **fact**, not the classification.
 
 ---
 

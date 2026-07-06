@@ -260,7 +260,8 @@ compile/decode-time impossibility (grade-1 for the derived-toleration shape, gra
 
 ## 10. Every container declares CPU and RAM
 
-No pod is a freeloader: **every container — platform service and app alike — declares explicit CPU and RAM**
+No pod is a freeloader — and neither is any host-level worker: **every container — platform service and
+app alike — and every host-level worker subprocess declares explicit CPU and RAM**
 (DEVELOPMENT_PLAN cross-cutting invariants). Cashing that out:
 
 - The scheduler can place HA replicas across nodes deterministically.
@@ -280,7 +281,18 @@ rejected at render time) is catalogued by
 [illegal_state_catalog.md](./illegal_state_catalog.md), which is the SSoT for which platform invariants are
 type-enforced.
 
-This doc owns only the **per-container declaration** — the atom. The **aggregate** — that a cluster's workloads
+**Host-level worker subprocesses declare cpu/mem too — the host-worker `Demand` source.** This round extends
+the per-declaration rule past the container boundary. A host-level accelerator worker — the Apple-Metal or
+Windows-CUDA native subprocess that reaches the cluster only over a host-only NodePort, owned by
+[daemon_topology_doctrine.md](./daemon_topology_doctrine.md) and [substrate_doctrine.md](./substrate_doctrine.md)
+— is **not** a pod and never enters the cluster's allocatable bin-pack, yet it too declares explicit cpu/mem. That
+declaration is the single host-worker `Demand` source (there was none before): it is the operand the host →
+host-worker capacity fold in [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) consumes, checking the
+worker's `Demand` — alongside the co-resident WSL2/Lima VM carve — against its declared physical-host `Capacity`.
+Accelerator (VRAM) demand is handled separately and is not part of this cpu/mem atom. As with containers, this doc
+supplies only the declaration; the host-tier fold that packs it is owned there.
+
+This doc owns only the **per-container and per-host-worker declaration** — the atom. The **aggregate** — that a cluster's workloads
 admit a feasible placement of their `requests` against the cluster's allocatable `Capacity` (and, nested, that
 an engine/VM does not exceed its host) — is owned by [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) (the
 [§4.6](./illegal_state_catalog.md#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) capacity-accounting fold, [illegal_state_catalog.md §3.17](./illegal_state_catalog.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)/[§3.27](./illegal_state_catalog.md#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing)), which *reads*

@@ -180,6 +180,15 @@ node-token is a *Vault-owned, rotatable KV secret*, whereas rke2's self-signed c
 > a multi-node server/agent rollout that mints and injects a *shared join token* is net-new across the
 > whole family — sibling evidence, not an amoebius result.
 
+A **stretched (non-member) host worker** reuses this custody family **wholesale**. When a native
+host-level worker (Apple-Metal or Windows-CUDA) reaches a home cluster's data plane from off-box — the
+stretched "K1" host-worker shape — its channel-2 data-plane credential *and* its own Curve25519 WireGuard
+peer key are both parent-minted, parent-injected, name-referenced KV `SecretRef`s of exactly this shape
+([§7](#7-parent-injects-secrets-into-the-childs-vault)). The stretched-node doctrine adds **no new secret
+custody** — only new *reach*; it names only the mint/inject/name-reference family this section already owns.
+What such a worker lacks is an in-cluster identity to *authenticate* the by-name read with, and that seam —
+distinct from custody — is flagged at [§9](#9-in-cluster-consumers-authenticate-to-vault-directly).
+
 ### 3.2 ML asset-staging credentials resolve from Vault by name — no second store
 
 The three-tier ML-asset lifecycle stages **Tier-2** model artifacts *eagerly*: an elected singleton pulls
@@ -200,6 +209,21 @@ both credentials are `SecretRef.Vault` names, parent-injected ([§7](#7-parent-i
 Kubernetes auth ([§9](#9-in-cluster-consumers-authenticate-to-vault-directly)); a missing credential **fails closed** rather than silently defaulting to a well-known
 account. This is **sibling evidence of the anti-pattern, not an amoebius result** — amoebius has not built
 the staging path; it specifies that the path carry no second store and no default.
+
+The **upstream-pull** credential is, further, **scoped per app**. Naming a model to import is a first-class,
+provenance-carrying constructor (the import arm of a serveable `ModelArtifact`,
+[content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)),
+and each app's staging resolves only its **own** app-namespaced upstream `SecretRef` — one app's staging
+cannot pull, and therefore cannot mint an artifact from, another app's model source. This is the
+secrets-by-name face of per-app model isolation (an app serves only models it produced or imported); the
+content-store namespacing and the grade-2 "app B serving/continuing app A's model without a grant" illegal
+state are owned by [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)
+and [illegal_state_catalog.md](./illegal_state_catalog.md); this section owns only that the pull credential
+is itself a per-app name. Correspondingly, the bytes that credential pulls are **verified against a pinned
+expected content-address, failing closed before `.ready`** — the pin-and-verify import constructor (and its
+grades: pin *presence* grade-1, pin *match* grade-2, "the pin names the intended model" grade-3/assumed)
+is owned by content_addressing §4.5; vault_pki owns only that the credential resolving the pull is a name,
+never a value.
 
 ---
 
@@ -457,6 +481,22 @@ prodbox's proven model (`secret_derivation_doctrine.md [§5](#5-the-root-cluster
 - **Generated once, never derived.** A secret a chart needs is minted once into Vault (KV) or issued
   by Vault (PKI) at install and persisted on the durable PV ([§2](#2-vault-is-the-fail-closed-secrets-root), [§4](#4-init-follows-readiness-fail-closed-vault-init)); no chart template generates or
   stores a secret value, and there is no seed to derive from.
+
+> **Non-member auth-method seam (named this round, not yet closed).** The Vault Kubernetes auth above
+> **assumes the consumer is a cluster member** — a pod with a Kubernetes service account whose JWT Vault
+> can verify. A **host-level worker is not a member**: an Apple-Metal or Windows-CUDA host worker — and,
+> stretched, a non-member "K1" host worker reaching a remote home cluster over the host-only NodePort, the
+> WireGuard fabric, **or** a secure gateway — runs as a native subprocess with **no service account and no
+> kubelet identity**, so the k8s-auth path does not apply to it. Its secrets are the *same* secrets-by-name,
+> parent-injected custody family ([§3](#3-the-secretref-contract-a-name-never-a-value),
+> [§3.1](#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken),
+> [§7](#7-parent-injects-secrets-into-the-childs-vault)) — only the **auth *method*** by which a non-member
+> resolves a named secret is under-specified. This round **names** that gap; it holds for **every** host
+> worker (both VPN- and gateway-reached) and is **grade-3 runtime residue** — an under-specified seam, not a
+> foreclosed illegal state — pending the phase that pins a non-member Vault-auth method. The stretched-node
+> doctrine that surfaces the seam is owned elsewhere ([host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md)
+> and the stretched split in cluster_topology / network_fabric); this section owns only the Vault-auth
+> consequence.
 
 ---
 

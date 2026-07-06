@@ -49,6 +49,24 @@ formally prove** than Pulumi's batch invocation under the singleton plus amoebiu
 closes the open `notes.txt` question *"do we actually need pulumi? can our state be the dhall just as it was
 with helm?"*: **yes — Pulumi stays for v1, Crossplane is out.**
 
+**The same "surface a provider capability, do not build a second control plane" line governs stretched full
+nodes.** The Crossplane rejection above generalizes into a discipline this round leans on elsewhere: where a
+*provider-managed* control plane would otherwise force amoebius to stand up an autonomous continuous fabric
+beside the elected singleton, amoebius declines to build it and instead surfaces the provider's own capability
+if one exists. The concrete case is a **stretched full k8s member node** (a kubelet whose declared
+network-locality differs from its control plane's): on a self-managed rke2 control plane it is representable
+over amoebius's own WireGuard fabric + distro-mTLS, but on a **`Managed Eks`** control plane it is
+representable **only** if the provider natively supports it — **EKS Hybrid Nodes**. That, if ever added, is a
+provider capability the `Managed Eks` arm would *surface* (provisioned via the cloud API,
+[§4](#4-what-pulumi-provisions-the-resource-catalog)), **never** an amoebius-built continuous second
+control-plane fabric — which would be exactly the "autonomous substrate authority acting on its own reconcile
+loop beside the elected singleton" Crossplane shape rejected here. Absent that provider-native arm, a stretched
+full node on a managed control plane simply has **no constructor** — grade-1 uninhabitable, the closed-union
+"no arm = not supported" idiom owned by [cluster_topology_doctrine.md §2, §4.1](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm);
+the surface-a-provider-capability-vs-build-a-fabric axis it rests on is
+[cluster_lifecycle_doctrine.md §1](./cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape).
+This is design intent recorded before any provisioning code exists, exactly like the Crossplane decision above.
+
 **But the checkpoint wart is contained, not tolerated everywhere.** Where a resource class is high-churn,
 self-describing, and holds **no durable state** — the elastic spot worker pool that
 [single_logical_data_plane_doctrine.md](./single_logical_data_plane_doctrine.md) attaches to the home data
@@ -219,6 +237,15 @@ Two boundaries worth stating loudly, because they are easy to blur:
   failover **repoint** of those DNS records when a lead's gateway dies is owned by
   [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Provisioning, routing, and failover are three
   different concerns with three different owners.
+- **A provider-native node capability is *surfaced* into this catalog, never re-built.** Should a provider
+  offer off-cloud full-member nodes on its own managed control plane — **EKS Hybrid Nodes** — that capability,
+  if ever added, would enter this catalog as one more Pulumi-provisioned resource the `Managed Eks` arm
+  *surfaces* over the cloud API, on the same "surface, don't build" rationale
+  [§0](#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision) records for the Crossplane
+  rejection. It would be provisioned exactly as the managed cluster itself is (the first catalog row), **not**
+  stood up as an amoebius-built continuous second control-plane fabric; absent the provider-native arm, a
+  stretched full member node on a managed control plane is unrepresentable
+  ([cluster_topology_doctrine.md §2, §4.1](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)).
 
 ---
 
