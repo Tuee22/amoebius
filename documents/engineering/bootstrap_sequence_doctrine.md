@@ -34,7 +34,7 @@ It resolves `notes.txt` lines 27/31/33.
 
 ## 2. Two régimes: host-driven bootstrap, then singleton-driven steady state
 
-The load-bearing idea is that a cluster's life has **two régimes with a single, one-way handoff between
+A cluster's life has **two régimes with a single, one-way handoff between
 them**, and *who may touch the cluster's control surface* differs across them:
 
 - **Bootstrap régime — the host binary drives.** Before an in-cluster brain exists, the sudo host daemon is
@@ -49,7 +49,7 @@ them**, and *who may touch the cluster's control surface* differs across them:
   REST service → the singleton. **Channel 1 is bootstrap-only**; the host binary does not resume direct
   kube-apiserver control after handoff.
 
-This is the exact shape the vision asked for: *"the host binary only directly interacts with the cluster and
+This is the shape the vision specified: *"the host binary only directly interacts with the cluster and
 k8s control plane during initial bootstrap … once all services are up (even before vault init) all further
 interactions occur through the [amoebius] NodePort."* The one-way handoff is [§4](#4-the-host-daemon--singleton-handoff).
 
@@ -89,8 +89,8 @@ The ordered steps, each gated on the prior step's readiness:
    the operator password; init-once / unseal-on-rebuild ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init),
    [§5](./vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal)). No secret consumer ran before this — Vault fails closed until unsealed.
 6. **The operator delivers the in-force spec** — `dhall update` (requires an **unsealed Vault + root token**,
-   [§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)) — "give it its `.dhall`"
-   ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init)). The singleton decrypts it in-process and reconciles the cluster toward it.
+   [§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)) — the spec delivery of
+   [`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init). The singleton decrypts it in-process and reconciles the cluster toward it.
 
 This is the **root** bootstrap; a *child* cluster is spawned by a parent (the Pulumi handoff,
 [`cluster_lifecycle_doctrine.md` §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)),

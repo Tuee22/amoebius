@@ -313,7 +313,7 @@ The whole sprint.
 ### Objective
 
 Adopt [`platform_services_doctrine.md` §9 — the LoadBalancer and the single wild-ingress path](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path):
-make Keycloak the sole bouncer in front of all wild traffic via Envoy + the Gateway API, and close the
+make Keycloak the sole authenticated ingress point for all wild traffic via Envoy + the Gateway API, and close the
 phase by proving the [`storage_lifecycle_doctrine.md` §6 lossless-teardown guarantee](../documents/engineering/storage_lifecycle_doctrine.md#6-the-lossless-teardown-guarantee-deterministic-rebind).
 
 ### Deliverables

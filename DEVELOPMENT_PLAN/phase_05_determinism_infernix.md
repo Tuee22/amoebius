@@ -65,7 +65,7 @@ reproduction was *tested*, not that cross-substrate equality was claimed.
 ## Doctrine adopted
 
 - [`content_addressing_doctrine.md` §4 — Determinism by construction: pinned inputs + pure stages + derived seed](../documents/engineering/content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed),
-  with [§3 — `experimentHash`: identity is *what you asked for* ‖ *where it ran*](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-you-asked-for--where-it-ran),
+  with [§3 — `experimentHash`: identity is *what was requested* ‖ *where it ran*](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran),
   [§2 — The three-tier store](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers),
   [§4.5 — The three-tier ML-asset lifecycle: engine baked, model staged, kernel JIT'd](../documents/engineering/content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd),
   and the honest ceiling in [§6 — types make the bookkeeping total, not the physics deterministic](../documents/engineering/content_addressing_doctrine.md#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic):
@@ -104,7 +104,7 @@ reproduction was *tested*, not that cross-substrate equality was claimed.
 Adopt [`content_addressing_doctrine.md` §2 — The three-tier store](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers)
 and its totality argument in [§4 — Determinism by construction](../documents/engineering/content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed):
 lift Phase 4's concrete blob/manifest key renderers into a kernel-level `ContentAddress` typeclass so
-that the rule "a name you cannot lie about" is a single reusable primitive shared by both infernix
+that the rule that a content-derived name cannot be forged is a single reusable primitive shared by both infernix
 and (later) jitML, not a per-store copy.
 
 ### Deliverables
@@ -136,7 +136,7 @@ The whole sprint.
 
 ### Objective
 
-Adopt [`content_addressing_doctrine.md` §3 — `experimentHash`: identity is *what you asked for* ‖ *where it ran*](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)
+Adopt [`content_addressing_doctrine.md` §3 — `experimentHash`: identity is *what was requested* ‖ *where it ran*](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran)
 and the derived-seed leg of [§4 — Determinism by construction](../documents/engineering/content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed):
 implement the two remaining determinism legs as kernel primitives — the run identity that folds the
 resolved program and the substrate fingerprint into one digest, and the SplitMix seed derivation that

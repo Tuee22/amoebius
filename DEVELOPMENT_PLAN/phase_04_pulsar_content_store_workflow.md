@@ -87,7 +87,7 @@ flowchart LR
   [native binary protocol (§3)](../documents/engineering/pulsar_client_doctrine.md#3-the-native-binary-protocol)
   — length-prefixed `proto-lens`-generated `BaseCommand` frames, the `0x0e01` magic + CRC32C payload tail,
   one persistent TCP session per broker — starting from the
-  [supernova fork (§4)](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-we-inherit-and-what-we-build);
+  [supernova fork (§4)](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-inherits-and-what-it-builds);
   the
   [lookup / produce / consume / subscribe / seek capability surface (§5)](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek);
   the
@@ -102,7 +102,7 @@ flowchart LR
   `blobs/<sha256>` and `manifests/<sha256>` under `If-None-Match: *` (with `412 Precondition Failed` treated
   as success), and the only mutable objects, `pointers/*`, advanced by `If-Match` compare-and-swap as the
   single atomic commit point. The store is namespaced under
-  [`experimentHash` (§3)](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-you-asked-for--where-it-ran),
+  [`experimentHash` (§3)](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran),
   which this phase consumes as an opaque pinned prefix; the `experimentHash` derivation, the `ContentAddress`
   typeclass, and SplitMix seed derivation are Phase 5 kernel work, not this phase. The
   [confluence property (§5)](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)
@@ -131,7 +131,7 @@ conform to)
 
 ### Objective
 Adopt [`pulsar_client_doctrine.md` §3 — The native binary protocol](../documents/engineering/pulsar_client_doctrine.md#3-the-native-binary-protocol)
-and [§4 — Forked from supernova](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-we-inherit-and-what-we-build):
+and [§4 — Forked from supernova](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-inherits-and-what-it-builds):
 fork `cr-org/supernova` into the `amoebius-pulsar` package on the repo-wide GHC 9.12.4 pin, and stand up the
 framing layer, the CONNECT/CONNECTED handshake, and LOOKUP-based service discovery over one persistent TCP
 session per broker.
@@ -311,7 +311,7 @@ naming an immutable manifest, never torn state
 
 ### Objective
 Adopt [`content_addressing_doctrine.md` §2 — The three-tier store](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers),
-namespaced under [`experimentHash` (§3)](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)
+namespaced under [`experimentHash` (§3)](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran)
 as an opaque pinned prefix: build the three object classes and two write protocols so the only race in the
 system is a single one-object atomic pointer flip.
 

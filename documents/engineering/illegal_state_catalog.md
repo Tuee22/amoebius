@@ -11,22 +11,22 @@
 
 ---
 
-## 1. The promise: illegal states fail to type-check
+## 1. Illegal states fail to type-check
 
-In raw Kubernetes you can author, with a straight face, a Deployment that mounts a PVC no PV will ever
-bind, a NetworkPolicy that strands a service from the database it needs, or an Ingress that quietly routes
-around your identity provider. Nothing stops you. The YAML is well-formed; the apiserver admits it; the
-defect surfaces at 3 a.m. as a pod stuck in `Pending`, a 502, or a backdoor.
+In raw Kubernetes a Deployment can mount a PVC no PV will ever
+bind, a NetworkPolicy can strand a service from the database it needs, or an Ingress can quietly route
+around the identity provider. The YAML is well-formed; the apiserver admits it; the
+defect surfaces at runtime as a pod stuck in `Pending`, a 502, or a backdoor.
 
 amoebius lifts that whole class of failure from *runtime surprise* to *does not type-check*. The DSL is
 Dhall — a **total** configuration language (no general recursion, no arbitrary I/O, every expression fully
 evaluates), so a spec the type-checker accepts is a finite value amoebius has already inspected end to end.
-The contract, stated by [`dsl_doctrine.md`](./dsl_doctrine.md), is blunt: **a valid `amoebius.dhall`
+The contract, stated by [`dsl_doctrine.md`](./dsl_doctrine.md): **a valid `amoebius.dhall`
 cannot represent illegal state**. This document is the companion to that
 contract — the *enumerated* list of what "illegal state" means, and the *typing techniques* that make each
 entry uninhabitable.
 
-**SSoT split (read this before you cite the wrong doc).**
+**SSoT split (which doctrine to cite for what).**
 
 - [`dsl_doctrine.md`](./dsl_doctrine.md) owns the **DSL surface and the contract** ("a valid spec cannot
   represent illegal state") as a property of the language.
@@ -46,11 +46,11 @@ back for status.
 
 ## 2. The load-bearing limit: a type-check proves the spec composes, not that the cluster enforces it
 
-This is the most important sentence in the document, so it gets its own section. **The types prove that the
+**The types prove that the
 *specification* composes into something internally coherent. They do not prove that the *running
-deployment* enforces it.** Conflate the two and you will ship a beautiful proof of the wrong theorem.
+deployment* enforces it.** Conflating the two proves the wrong theorem.
 
-Cash that out against the three correctness layers from the chaos/failover doctrine
+Applied to the three correctness layers from the chaos/failover doctrine
 ([`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md), generalized from prodbox's
 `chaos_hardening_doctrine.md`):
 
@@ -66,10 +66,10 @@ Cash that out against the three correctness layers from the chaos/failover doctr
   proof is structurally blind to them.
 
 So the catalog's promise is exact: *a PVC that cannot bind a PV is unrepresentable in the spec* — meaning
-you cannot write that spec and have it type-check. It is **not** the claim that *the running cluster's PVC
+no such spec can be written and type-check. It is **not** the claim that *the running cluster's PVC
 is bound*; that is a reconcile-time fact whose verification is owned by
-[`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) and the testing doctrine. We **defer the
-runtime-enforcement proof there on purpose**, and never report it here.
+[`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) and the testing doctrine. Amoebius **defers the
+runtime-enforcement proof there on purpose**, and never reports it here.
 
 ```mermaid
 flowchart TD
@@ -91,7 +91,7 @@ flowchart TD
 The entries below enumerate the original illegal-state list ([§3.1](#31-bad--illegal-durable-storage)–[§3.8](#38-cross-tenant-references-and-literal-secrets)), the isolation invariants
 ([§3.9](#39-a-plaintext-spec-at-rest)–[§3.10](#310-a-child-spec-that-reaches-beyond-its-own-subtree)), the best-practice-by-construction states ([§3.11](#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)–[§3.12](#312-an-app-that-names-a-product-instead-of-a-capability)), the **capacity / topology / bounded-
 storage** states ([§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](#322-a-hand-authored-un-derived-toleration)), the **CBOR-payload** rule ([§3.23](#323-a-non-cbor-pulsar-payload)), and the **rke2-quorum / ML-asset-lifecycle /
-release-promotion** states ([§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)–[§3.26](#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence)), and the **schedulability / bin-packing** refinement ([§3.27](#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing)) the techniques in [§4](#4-the-typing-techniques) demand. Each entry: the **intuition** (how it goes wrong
+release-promotion** states ([§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)–[§3.26](#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence)), and the **schedulability / bin-packing** refinement ([§3.27](#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing)) the techniques in [§4](#4-the-typing-techniques) demand. Each entry: the **failure** (how it goes wrong
 in raw k8s), the **owning doctrine** (the SSoT for the rule), and the **technique** ([§4](#4-the-typing-techniques)) that forecloses it.
 The [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](#322-a-hand-authored-un-derived-toleration) block is foreclosed by the two techniques added for it — [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) (the capacity-accounting total
 fold) and [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) (compatibility/topology relations over a collection) — and is where the honest layer split
@@ -106,16 +106,16 @@ decode-foreclosed with runtime-checked residue.
 
 ### 3.1 Bad / illegal durable storage
 
-Raw k8s lets you mix arbitrary storage classes, dynamic provisioners, and unsized claims, so "durable"
+Raw k8s permits mixing arbitrary storage classes, dynamic provisioners, and unsized claims, so "durable"
 data can quietly live on an ephemeral, auto-provisioned volume that vanishes with the node. amoebius admits
 **only** `no-provisioner`, explicitly-sized, retained PVs — the dynamic-provisioner
-path, the unsized claim, and the "default storage class we didn't choose" are simply not constructible.
+path, the unsized claim, and the un-selected default storage class are simply not constructible.
 **Owner:** [`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md). **Technique:** [§4.1](#41-pvcpv-binding-by-construction)
 (PVC↔PV binding by construction) + refined non-zero sizes.
 
 ### 3.2 PVCs that don't bind PVs
 
-The canonical k8s footgun: a StatefulSet's `volumeClaimTemplate` and the cluster's PVs are two independent
+The canonical k8s silent-failure hazard: a StatefulSet's `volumeClaimTemplate` and the cluster's PVs are two independent
 objects that bind only if their sizes, access modes, and selectors happen to match — and a typo means a pod
 hangs in `Pending` forever. amoebius removes the independence: there is no way to declare a claim *without*
 its exactly-matching PV ([§4.1](#41-pvcpv-binding-by-construction)). The mismatched pair has no inhabitant. **Owner:**
@@ -133,9 +133,9 @@ wild-ingress path). **Technique:** [§4.3](#43-gadt-indexed-state-machines--only
 
 ### 3.4 DNS that binds to the wrong IP
 
-Route53 (or any DNS) records are strings; nothing stops you pointing `app.example.com` at an address the
+Route53 (or any DNS) records are strings; nothing prevents pointing `app.example.com` at an address the
 cluster never owned. amoebius never lets the operator *type* the target IP: a DNS binding is a **total
-function of the allocated LoadBalancer address** — you bind a name to a *service handle*, and the address is
+function of the allocated LoadBalancer address** — a name binds to a *service handle*, and the address is
 computed from the realized LB, not supplied. A record pointing at an unowned address therefore has no
 representation. **Owner:** [`pulumi_iac_doctrine.md`](./pulumi_iac_doctrine.md) (route53 + zerossl) and
 [`platform_services_doctrine.md` §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path). **Technique:** [§4.5](#45-content-address-totality--names-are-total-functions-of-content) (content-address
@@ -143,7 +143,7 @@ totality, applied to the name→address map).
 
 ### 3.5 Undeployable pods (taints, tolerations & affinity)
 
-In raw k8s you can write a nodeSelector / affinity that matches **no** node, *or* a taint no workload
+In raw k8s a nodeSelector / affinity can match **no** node, *or* a taint no workload
 tolerates, *or* a toleration for a taint no node declares — the pod is admitted and then never schedules.
 amoebius constrains placement so that a workload's substrate/affinity requirement **and** its taint
 tolerations are checked against the *declared* node inventory of the cluster spec: the decode rejects a
@@ -170,10 +170,10 @@ decode-foreclosed for the existence fold; the derived-toleration shape is type-f
 
 ### 3.6 Blocking NetworkPolicy (services can't reach each other)
 
-NetworkPolicies are deny-by-omission: forget an egress rule and you have silently severed a service from
+NetworkPolicies are deny-by-omission: a forgotten egress rule silently severs a service from
 its database, with no error anywhere. amoebius does not let operators hand-author allow/deny rules at all.
 Connectivity is **derived** from the declared dependency graph — if service A declares it consumes service
-B, the policy permitting A→B is generated, and a dependency you declared can never be a connection the
+B, the policy permitting A→B is generated, and a declared dependency can never be a connection the
 policy blocks. The "service stranded from a dependency it declared" state is not expressible because the
 human never writes the policy. **Owner:**
 [`platform_services_doctrine.md`](./platform_services_doctrine.md). **Technique:** [§4.4](#44-ownership-indices--single-owner-ssot-structurally) (the dependency
@@ -182,7 +182,7 @@ does).
 
 ### 3.7 Accidental insecure / backdoor ingress
 
-The nightmare entry: a chart that opens its own NodePort to the wild, or an Ingress that skips Keycloak, so
+The highest-severity entry: a chart that opens its own NodePort to the wild, or an Ingress that skips Keycloak, so
 an unauthenticated path exists that nobody meant to ship. amoebius enforces **Keycloak owns all wild
 ingress** structurally: an app cannot publish its own wild ingress, because the
 only constructor that yields a wild-reachable endpoint routes through the Keycloak-owned edge. The sole
@@ -258,7 +258,7 @@ capability abstraction; one canonical provider, the type admitting alternates). 
 
 ### 3.13 A compute engine incompatible with its substrates (managed providers first-class)
 
-Raw tooling lets you point kind, rke2, or a managed cluster at a substrate that cannot run it, and lets a
+Raw tooling permits pointing kind, rke2, or a managed cluster at a substrate that cannot run it, and lets a
 managed provider (EKS) be a bolt-on afterthought rather than a first-class citizen. amoebius makes the
 compute engine a **declared axis** distinct from the *detected* substrate, and a `Node` is built by a
 compatible-pair smart constructor: only an `(engine, substrate-indexed host | hostless provider)` pair the
@@ -294,8 +294,8 @@ that one host, and a second host has no field to bind. **Owner:**
 
 ### 3.16 A multi-node rke2 cluster with fewer Linux hosts than nodes (or a host reused)
 
-A multi-node rke2 cluster needs one distinct Linux host per node; raw tooling lets you ask for five nodes with
-three machines, or reuse one machine for two nodes. amoebius's `Rke2` arm carries
+A multi-node rke2 cluster needs one distinct Linux host per node; raw tooling permits asking for five nodes with
+three machines, or reusing one machine for two nodes. amoebius's `Rke2` arm carries
 `{ servers : Rke2Servers, agents : List LinuxHost }`: the server arm fixes the server count structurally
 (`Single`/`Ha3`/`Ha5`, [§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)) and the `agents` list binds one `LinuxHost` per worker, so every node names its
 own host field and "more nodes than hosts" cannot be built. **Distinctness** ("no host reused") is the one part
@@ -404,7 +404,7 @@ runtime-checked claim that a received body is valid.
 
 ### 3.24 An even/zero-server rke2 control plane (no etcd quorum / split-brain)
 
-Raw rke2 HA lets you stand up a **two**-server control plane — two etcd voters can never form a majority, so
+Raw rke2 HA permits standing up a **two**-server control plane — two etcd voters can never form a majority, so
 the first partition is a split-brain — or a **zero**-server "cluster" of agents with nowhere to join. amoebius
 makes the server set a **closed union** `Rke2Servers = < Single : LinuxHost | Ha3 : {…} | Ha5 : {…} >` whose
 only arms are the legal **odd etcd quorums {1, 3, 5}**: a 0- or 2-server control plane has no constructor. This
@@ -453,7 +453,7 @@ staged bytes actually load on the substrate, and that an imported model's pin/ta
 
 ### 3.26 An unverified environment promotion (promote → prod without the required evidence)
 
-Raw delivery lets you point prod at any build — tested, untested, or actively red. amoebius makes
+Raw delivery permits pointing prod at any build — tested, untested, or actively red. amoebius makes
 `Environment = < Dev | Staging | Prod >` advance through a typed `PromotionGate`: advancing an environment's
 ETag-CAS pointer to a `Release` **requires** that the `Release`'s test-topology ledger
 ([`testing_doctrine.md`](./testing_doctrine.md) proven/tested/assumed) meet that environment's required evidence
@@ -535,8 +535,8 @@ runtime-checked residue — that the host kernel actually caps the subprocess.
 
 ### 3.30 A served model whose VRAM footprint exceeds node VRAM
 
-Accelerator memory is finite and a served model's weights + KV-cache must fit in it, but raw serving lets you
-point an oversized model at a GPU and discover the shortfall as a runtime OOM. Because the one accelerator worker
+Accelerator memory is finite and a served model's weights + KV-cache must fit in it, but raw serving permits
+pointing an oversized model at a GPU, and the shortfall surfaces as a runtime OOM. Because the one accelerator worker
 owns the node's accelerators wholesale ([§3.28](#328-two-accelerator-owners-on-one-node-or-a-fractional-accelerator-claim)),
 VRAM is modeled **like storage, not like a `ResourceVec` request axis** — a per-node accelerator sub-capacity the
 worker carves among the models it serves, a new **accelerator-worker → served-model** nesting arm folding
@@ -642,7 +642,7 @@ total decode-time rejection; runtime-checked residue — that the running serve 
 
 A host worker whose declared network-locality `Site` differs from the control plane's is reached across the WAN,
 and reaching the data plane (MinIO/Pulsar) + Vault over an untrusted network with no declared secure transport
-is exactly the silent-exposure footgun. This round makes a **networking capability mandatory**: the host-worker
+is the silent-exposure hazard. This round makes a **networking capability mandatory**: the host-worker
 attach carrier requires `ewpNetworking :: Networking c = Gateway (SecureGatewayReach c) | Vpn (VpnFabric c)`
 (generalizing the already-mandatory `ewpFabric :: VpnFabric c`), so a stretched host worker with **no** declared
 `Networking` has **no constructor**. Which path a host worker takes is **fold-derived from its declared `Site`**,
@@ -662,8 +662,8 @@ matching reality (`discover = Unreachable → refuse`).
 ### 3.36 A declared-remote full agent with no control-plane witness
 
 A full k8s node (a kubelet member) whose `Site` differs from the control plane's must reach the one
-apiserver/etcd across the WAN; raw tooling lets you register such an agent with no secure control-plane path and
-discover the split at reconcile. This round's node fold routes a declared-remote (`Site ≠ s_cp`) self-managed-rke2
+apiserver/etcd across the WAN; raw tooling permits registering such an agent with no secure control-plane path,
+surfacing the split at reconcile. This round's node fold routes a declared-remote (`Site ≠ s_cp`) self-managed-rke2
 agent to `mkStretchedAgent`, which **demands** a `ReachesControlPlane c` witness minted **from** the declared
 `Networking`'s `VpnFabric` (a rendered `ControlPlanePeer` covering the apiserver VPN-IP + distro-mTLS over the
 tunnel). A stretched agent with no control-plane witness has **no constructor**. **Owner:**
@@ -818,13 +818,13 @@ The catalog is foreclosed by seven reusable techniques operating across **two ty
   **GADT-indexed** types carrying phantom tags and ownership indices, so the in-memory IR the interpreter
   walks has the same illegal-states-absent property as the spec it came from.
 
-The seven techniques follow. Each leads with the intuition, then the mechanism. Techniques [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) and [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) were
+The seven techniques follow. Each leads with the principle, then the mechanism. Techniques [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) and [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) were
 added for the capacity / topology / bounded-storage block ([§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](#322-a-hand-authored-un-derived-toleration)); [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) is the one technique that is
 **irreducibly decode-foreclosed** ([§2](#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it), [§6](#6-three-layers-of-foreclosure-and-the-honesty-they-force)).
 
 ### 4.1 PVC↔PV binding by construction
 
-*Intuition:* don't declare two things and hope they match — declare **one** thing that emits the matched
+*Principle:* don't declare two things and hope they match — declare **one** thing that emits the matched
 pair. *Mechanism:* a single `BoundVolume` smart constructor takes one size (a refined non-zero quantity)
 and emits *both* the StatefulSet claim request *and* the exactly-matching `no-provisioner` PV, sharing size
 and access mode, named `<namespace>/<statefulset>/pv_<integer>`. There is no constructor for a bare PVC and
@@ -835,7 +835,7 @@ sizing, and deterministic-rebind rules are owned by
 
 ### 4.2 Capability and phantom tenant tags — cross-tenant refs are uninhabitable
 
-*Intuition:* the right to do or reference a thing is a *token you must hold*, and the tenant a reference
+*Principle:* the right to do or reference a thing is a *token that must be held*, and the tenant a reference
 belongs to is *baked into its type* — so the dangerous operation is not "discouraged," it is *unconstructable*
 by anyone without the token. *Mechanism:* a reference is `Ref tenant a`, phantom-tagged by a tenant index;
 the only constructors that produce a `Ref t a` demand a capability scoped to `t`, and crucially **there is
@@ -847,7 +847,7 @@ ingress."
 
 ### 4.3 GADT-indexed state machines — only legal transitions are typed
 
-*Intuition:* a thing that moves through phases (a volume that is `Unbound` then `Bound`; an endpoint that is
+*Principle:* a thing that moves through phases (a volume that is `Unbound` then `Bound`; an endpoint that is
 host-local vs wild; a route that needs a live backend) should make the *illegal* transition simply have no
 constructor. *Mechanism:* a GADT indexed by phase, where each operation's type names its precondition phase
 and its postcondition phase. An operation that requires a `Bound` volume cannot be applied to an `Unbound`
@@ -862,19 +862,19 @@ witness ([§3.38](#338-a-host-worker-granted-a-control-plane-witness-or-treated-
 
 ### 4.4 Ownership indices — single-owner SSoT, structurally
 
-*Intuition:* every resource has **exactly one** owner; "two owners" and "no owner" should both be impossible,
+*Principle:* every resource has **exactly one** owner; "two owners" and "no owner" should both be impossible,
 because shared ownership is how SSoT rots. *Mechanism:* resources are aggregated through an *ownership index*
 — building the cluster IR is a total fold from resource to its single owner. A node-inventory owns "which
 substrates exist" (so [§3.5](#35-undeployable-pods-taints-tolerations--affinity)'s unmatchable affinity is caught against one authoritative list), and the declared
 dependency graph owns connectivity (so [§3.6](#36-blocking-networkpolicy-services-cant-reach-each-other)'s NetworkPolicies are *derived*, never hand-authored). Where the
 index is type-level (distinct owner keys), a double-claim fails to type-check; where it is value-level, the
 fold is a **total decode-time check** that rejects a duplicate or missing owner. (That distinction is exactly
-the [§6](#6-three-layers-of-foreclosure-and-the-honesty-they-force) honesty layer — we do not pretend a decode-time check is a type-inhabitance proof.) This is the
+the [§6](#6-three-layers-of-foreclosure-and-the-honesty-they-force) honesty layer — amoebius does not pretend a decode-time check is a type-inhabitance proof.) This is the
 amoebius generalization of the prodbox single-owner SSoT discipline, lifted into the type/decode layer.
 
 ### 4.5 Content-address totality — names are total functions of content
 
-*Intuition:* a name that doesn't correspond to a real thing is the root of dangling pointers, wrong-IP DNS,
+*Principle:* a name that doesn't correspond to a real thing is the root of dangling pointers, wrong-IP DNS,
 and stale image refs — so make the name a *computed function of the content*, never a free string an operator
 types. *Mechanism:* `contentAddress :: Manifest -> Digest` is a total pure function; the only way to obtain a
 reference is to hash an actual artifact, so a dangling reference has no inhabitant. Applied to DNS ([§3.4](#34-dns-that-binds-to-the-wrong-ip)): a
@@ -886,7 +886,7 @@ technique* — names are derived, never asserted.
 
 ### 4.6 Capacity accounting — placement witness (compute) and Σ demand ≤ capacity (storage), checked
 
-*Intuition:* an aggregate `Σ demand ≤ Σ capacity` is **necessary but not sufficient** for compute — pods are
+*Principle:* an aggregate `Σ demand ≤ Σ capacity` is **necessary but not sufficient** for compute — pods are
 **atomic and cannot straddle nodes**, so a set can fit in aggregate yet leave a single pod that fits no node
 (3×4-CPU nodes admit a 5-CPU pod by the sum; it is `Pending` forever). So the compute check is a **placement**,
 not a sum, while genuinely divisible storage/retention stays a `Σ`. *Mechanism:* two shapes selected by
@@ -913,7 +913,7 @@ the *technique*. Forecloses [§3.17](#317-an-over-committed-deploy-or-workload-h
 
 ### 4.7 Compatibility / topology relations by construction over a collection
 
-*Intuition:* a cluster is not a bag of settings — it is a *collection of nodes*, and "which engine may sit on
+*Principle:* a cluster is not a bag of settings — it is a *collection of nodes*, and "which engine may sit on
 which substrate" is a *relation* that should have no illegal pair. *Mechanism:* a `Topology` is a fold over a
 `NonEmpty Node`; only a compatible `(engine, substrate-indexed LinuxHost | hostless Provider)` pair has a
 constructor ([§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) gating + [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) phantom index), and the cluster-wide check is a **total elementwise fold**
@@ -1012,8 +1012,8 @@ are three layers, and a conformant claim names which one it is reaching:
    constructor or fold rejects it during decode (e.g. a value-level ownership double-claim, [§4.4](#44-ownership-indices--single-owner-ssot-structurally); a size
    that fails its refinement). This is still a *spec-layer* guarantee — the spec never reaches the
    interpreter — but it is a *checked rejection*, not an absence of inhabitants. Call it that.
-3. **`runtime-checked` — enforced only at reconcile/runtime.** Some invariants (does the LB actually come up? did the pod
-   actually schedule? did two clusters converge after a partition?) cannot be settled by inspecting the
+3. **`runtime-checked` — enforced only at reconcile/runtime.** Some invariants (whether the LB actually comes up, whether the pod
+   actually schedules, whether two clusters converge after a partition) cannot be settled by inspecting the
    spec at all. These are **not** in this catalog's promise; their verification is owned by
    [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) and the testing doctrine ([§2](#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)).
 
@@ -1021,9 +1021,9 @@ Worked example of the discipline: **every container declares cpu/ram**
 ([`platform_services_doctrine.md` §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)). As specified, a workload value
 *requires* a `Resources` field whose cpu and ram are refined non-zero quantities — type- or decode-foreclosed: a
 container with no resources is unrepresentable / rejected at decode. What the catalog does **not** claim is
-that the *running* pod's cgroup limits are honored by the kernel — that is runtime-checked, and it is not ours to
-assert. Stating the layer is the whole point: it is the difference between "illegal state is impossible" as
-a slogan and as a defensible boundary.
+that the *running* pod's cgroup limits are honored by the kernel — that is runtime-checked, and amoebius does not
+assert it here. Stating the layer is what separates "illegal state is impossible" as an unqualified claim from
+a defensible boundary.
 
 Second worked example, the one the [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](#322-a-hand-authored-un-derived-toleration) block turns on: **capacity sums are the canonical decode-foreclosed
 case, and saying otherwise is dishonest.** `Σ demand ≤ capacity` ([§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)), `Σ(PV caps) ≤ backing` ([§3.18](#318-unbounded-storage-anywhere)),

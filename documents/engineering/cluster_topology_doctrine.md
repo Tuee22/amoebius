@@ -94,7 +94,7 @@ The untyped CLI surface — `amoebius bootstrap --distro={kind,rke2} [--replicas
 
 ## 3. The `LinuxHost` witness: rke2/kind on a host with no Linux node is uninhabitable
 
-Intuition: kind and rke2 need a **Linux kernel**. On a Linux substrate that is the host itself; on apple or
+kind and rke2 need a **Linux kernel**. On a Linux substrate that is the host itself; on apple or
 windows there is no Linux kernel until one is *synthesized* in a VM. So a `LinuxHost` is not a free value — it
 is a **witness** that a Linux kernel exists, and on a non-Linux substrate the **only** constructor for it is
 the virtualization provider.
@@ -107,7 +107,7 @@ the virtualization provider.
 - **So "rke2 on a bare Apple host" (I1) has no inhabitant.** `Rke2`/`Kind` demand a `LinuxHost`; on apple the
   only way to produce one is `limaHost`, so the VM interposition the substrate doctrine describes as reconcile
   behaviour ([substrate_doctrine.md §4](./substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux))
-  becomes a *type demand* — you cannot even write the bare-host spec.
+  becomes a *type demand* — the bare-host spec cannot even be written.
 - **This is distinct from the Apple-Metal build carve-out.** "No VM for Apple-Metal *builds*"
   ([apple_metal_headless_builds.md](./apple_metal_headless_builds.md)) is about the on-host Metal *bridge
   build*; an rke2/kind *cluster* on an apple host still needs a Lima Linux VM. The two are different
@@ -121,7 +121,7 @@ the virtualization provider.
 
 ## 4. `Topology`: a cluster is a fold over its nodes, and cardinality is by construction
 
-Intuition: a cluster is not a loose bag of settings — it is a **`NonEmpty Node`**, and the engine dictates how
+A cluster is not a loose bag of settings — it is a **`NonEmpty Node`**, and the engine dictates how
 node count relates to host count. Making the count a *structural* property forecloses the topology illegal
 states without arithmetic where possible.
 
@@ -155,7 +155,11 @@ pins three properties at three honest layers.
   odd etcd quorums {1, 3, 5}. A **0-server** (no control plane) or **2-server** (no majority / split-brain)
   cluster has **no constructor** — type-foreclosed unrepresentable, the same "no illegal arm" idiom as `StorageBudget`'s
   missing unbounded case ([resource_capacity_doctrine.md §5](./resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)). The union
-  deliberately caps HA at five; a `Ha7` arm is a future add, not an oversight. This is catalog entry
+  deliberately caps HA at five: a five-member etcd quorum already tolerates two simultaneous member losses —
+  beyond any realistic single-cluster control-plane fault budget — while each additional member raises the
+  synchronous write-quorum cost, so a seventh member buys tolerance for a third concurrent failure this topology
+  never needs at a steady-state write-latency price. A `Ha7` arm is therefore a deliberate deferral, not an
+  oversight — a future add. This is catalog entry
   [illegal_state_catalog.md §3.24](./illegal_state_catalog.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain) (Owner: this doc; Technique: [§4.2](./illegal_state_catalog.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) closed union).
 - **Distinctness by fold over `servers ∪ agents` (decode-foreclosed).** Dhall has no Set-distinctness, so "no host reused
   for two nodes" cannot be a type. It degrades to the **decode-foreclosed total decode fold** `mkRke2`, which now ranges
@@ -262,7 +266,7 @@ this doc mints only the K2 `ReachesControlPlane c` and owns the classifier that 
 
 ## 5. The compatibility relation (technique §4.7): only compatible pairs have a constructor
 
-Intuition: "a compute engine not compatible with the available substrates" (I2) should have no way to be
+"a compute engine not compatible with the available substrates" (I2) should have no way to be
 written — so a `Node` is built by a **compatible-pair smart constructor** that only accepts an
 `(engine, substrate-indexed host)` pair the relation permits.
 

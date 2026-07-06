@@ -12,7 +12,9 @@
 This document governs *how the plan is written and maintained*. It is the plan-suite analogue of
 [`documents/documentation_standards.md`](../documents/documentation_standards.md), which it inherits and
 specializes; where the two could conflict, the documentation standards win on header/link mechanics and this
-document wins on plan-suite structure.
+document wins on plan-suite structure. Tone and the design-choice motivation structure follow
+[`documents/documentation_standards.md` §8–§9](../documents/documentation_standards.md#8-tone-and-voice); this
+document adds no plan-specific register rules.
 
 ---
 

@@ -70,7 +70,7 @@ and the run continues from the last adopted `latest` pointer with no torn checkp
   [`content_addressing_doctrine.md` §2 — the three-tier store: blobs ← manifests ← pointers](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers)
   (the `jitML` checkpoint blob/manifest/pointer keys become entries in the amoebius store, with write-once
   content-addressed blobs/manifests and a single CAS `latest` commit point),
-  [`content_addressing_doctrine.md` §3 — `experimentHash`: identity is what you asked for ‖ where it ran](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)
+  [`content_addressing_doctrine.md` §3 — `experimentHash`: identity is what was requested ‖ where it ran](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran)
   (a training run's identity folds the resolved `.dhall` with the **`linux-cuda`** substrate fingerprint, so a
   GPU run never collides with a CPU run) and
   [`content_addressing_doctrine.md` §4 — determinism by construction: pinned inputs + pure stages + derived seed](../documents/engineering/content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed)
@@ -212,7 +212,7 @@ seed is a pure function of `(masterSeed, streamIndex)` independent of worker cou
 
 ### Objective
 
-Adopt [`content_addressing_doctrine.md` §3 — `experimentHash`: identity is what you asked for ‖ where it ran](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)
+Adopt [`content_addressing_doctrine.md` §3 — `experimentHash`: identity is what was requested ‖ where it ran](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran)
 and [`content_addressing_doctrine.md` §4 — determinism by construction: pinned inputs + pure stages + derived seed](../documents/engineering/content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed):
 make a `jitML` training run deterministic-by-construction on `linux-cuda` by folding the resolved `.dhall` with
 the `linux-cuda` substrate fingerprint into `experimentHash`, pinning every stage input as a content address,

@@ -151,7 +151,7 @@ result as proven.
 
 Adopt [`cluster_lifecycle_doctrine.md` §3 — Amoebic spawning: the recursive forest](../documents/engineering/cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest):
 implement the spawn as a Pulumi deploy run from inside an existing cluster (one rule:
-[`pulumi_iac_doctrine.md` §1 — Pulumi runs only from inside an existing amoebius cluster](../documents/engineering/pulumi_iac_doctrine.md#1-the-one-rule-pulumi-runs-only-from-inside-an-existing-amoebius-cluster)),
+[`pulumi_iac_doctrine.md` §1 — Pulumi runs only from inside an existing amoebius cluster](../documents/engineering/pulumi_iac_doctrine.md#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster)),
 tracked in a MinIO backend encrypted via Vault Transit, and deliver the structural `project(subtree)`
 projection so a child receives exactly its own subtree spec — including its own children's — and nothing
 about siblings or any wider part of the forest.

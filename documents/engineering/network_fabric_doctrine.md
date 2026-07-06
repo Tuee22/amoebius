@@ -48,7 +48,7 @@ with cluster_topology.
 **Adopt raw kernel WireGuard, configured directly by amoebius. Reject Netmaker.** Netmaker is not
 "WireGuard" — it is a WireGuard *control-plane product*, and every subsystem it brings duplicates one
 amoebius already owns, in a weaker, unreviewed form carrying its own desync-able state store. It is the
-Harbor/Helm of networking: exactly the pattern the project exists to abolish
+Harbor/Helm of networking: the duplicated-control-plane pattern amoebius rejects
 ([manifest_generation_doctrine.md §1](./manifest_generation_doctrine.md#1-why-this-doctrine-exists-types-render-manifests-helm-does-not),
 [image_build_doctrine.md](./image_build_doctrine.md)).
 
@@ -60,7 +60,7 @@ Harbor/Helm of networking: exactly the pattern the project exists to abolish
 | Its own PKI / mTLS | The Vault forest CA + secrets model ([vault_pki_doctrine.md](./vault_pki_doctrine.md)) |
 | Its own node/peer inventory | The typed node inventory ([substrate_doctrine.md](./substrate_doctrine.md)) + the Dhall spec |
 
-Five duplicated control planes, five second state stores. The verdict writes itself: amoebius configures the
+Five duplicated control planes, five second state stores. Amoebius configures the
 raw WireGuard *primitive* it owns end to end, and runs none of Netmaker's machinery.
 
 ---
@@ -72,7 +72,7 @@ WireGuard fits the amoebius disciplines cleanly because it is a *primitive*, not
 - **Keys are Vault-custodied, but they are not PKI certs.** WireGuard authenticates peers with raw
   Curve25519 static keypairs, not X.509. So peer keys are a **Vault KV secret class** under the
   secrets-by-name + parent-injection model ([vault_pki_doctrine.md](./vault_pki_doctrine.md)) — Vault mints
-  and holds the keypair, the Dhall names it, the parent injects it into a child's Vault. Be precise: the
+  and holds the keypair, the Dhall names it, the parent injects it into a child's Vault. The
   forest CA hierarchy's "any mesh" clause ([vault_pki_doctrine.md §8](./vault_pki_doctrine.md#8-the-root-cluster-owns-the-pki-trust-anchor)) is reserved
   for a *later* TLS/mesh layer ([§6](#6-the-service-mesh-verdict-no-linkerd-for-v1)), **not** consumed by WireGuard.
 - **Peer config is rendered, not managed.** `render(nodeInventory) -> [WireGuardPeerConfig]` — the pure
@@ -103,8 +103,8 @@ flowchart TD
 - **The hub is bound to the gateway role, not to a fixed cluster.** The WireGuard hub is addressed by a
   stable VPN IP + stable endpoint, reassigned on failover exactly as the route53 gateway record is repointed
   ([chaos_failover_doctrine.md](./chaos_failover_doctrine.md)). When the gateway migrates or fails over, **the
-  hub role moves with it**; peers keep the same hub VPN-IP view and only the endpoint behind it changes. This
-  is the precise form of the "flattened mesh moves with the gateway" intuition.
+  hub role moves with it**; peers keep the same hub VPN-IP view and only the endpoint behind it changes. (Shorthand: the flattened mesh
+  moves with the gateway.)
 - **VPN-IP allocation is by disjoint per-cluster ranges.** Each cluster draws VPN IPs from its own
   sub-range of the fabric CIDR — which is *also* the failover doctrine's disjoint-namespace allocation, so IP
   assignment is **confluent by construction** (two clusters can never mint the same VPN IP).
@@ -131,9 +131,9 @@ break:
 - **Bind those listeners to the WireGuard interface (`wg0`), never to `0.0.0.0`/LAN/WAN.** The security
   property moves from *"reachable only from localhost"* to *"reachable only over the authenticated WireGuard
   fabric."* Only a peer holding a Vault-minted WireGuard key can open a socket on `wg0`.
-- **No amoebius principle is actually traded.** The one thing localhost gave that the WAN cannot — that no
+- **No amoebius principle is traded.** The one thing localhost gave that the WAN cannot — that no
   attacker can reach the wire — WireGuard supplies with Curve25519 peer authentication + ChaCha20-Poly1305
-  encryption. Crucially, the [host_cluster_comms_doctrine.md §2](./host_cluster_comms_doctrine.md#2-the-decision-that-was-open-and-is-now-resolved) **option-(b)
+  encryption. The [host_cluster_comms_doctrine.md §2](./host_cluster_comms_doctrine.md#2-the-decision-that-was-open-and-is-now-resolved) **option-(b)
   mTLS rejection still holds**: WireGuard has already authenticated and encrypted the peer, so the Pulsar/MinIO
   wire itself stays mTLS-free and the high-bandwidth-bulk argument survives even over the WAN. The boundary
   moved; the tax did not return.
@@ -148,9 +148,11 @@ break:
 - **The required-networking sum `Networking c = Gateway (SecureGatewayReach c) | Vpn (VpnFabric c)` is owned
   here.** Every *stretched* constructor — the K1 host-worker attach carrier and the K2 full-node agent alike —
   must consume exactly one `Networking c`, and this doc is its single owner. The `Vpn` arm is the WireGuard
-  fabric above ([§2](#2-raw-wireguard-not-netmaker)–[§4](#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it));
-  the `Gateway` arm is a **new authenticated secure-gateway wire** — this round names its witness type but
-  **defers its constructor** (the K1 `Gateway` cell has no inhabitant yet). The stretched constructors in
+  fabric above ([§2](#2-raw-wireguard-not-netmaker)–[§4](#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)). OPEN (constructor deferred; witness type present).
+  `Networking c = Vpn (VpnFabric c) | Gateway (SecureGatewayReach c)` — the `Gateway` arm has a witness type but
+  no inhabitant yet. Current position: `Vpn` (WireGuard) is the only shipping arm; `Gateway` lands with the
+  non-VPN remote-attach phase. Safe deferral: no stretched constructor can omit `Networking`. The stretched
+  constructors in
   [cluster_topology_doctrine.md §4.1](./cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation)
   and [single_logical_data_plane_doctrine.md §3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe)
   **consume** this sum; they never re-declare it. The mandatory field is type-foreclosed (no stretched constructor has
@@ -166,7 +168,7 @@ break:
   is preserved by construction for the secure-gateway door too (type-foreclosed). A `SecureGatewayReach` mints the
   *same* `FabricMember c` the data-plane resolver already gates on
   ([single_logical_data_plane_doctrine.md §3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe)),
-  not a second resolver-unknown witness — it differs in *how* you reach, never *that* you can reach.
+  not a second resolver-unknown witness — it differs in *how* reach is achieved, never *that* reach is possible.
 - **The `ControlPlanePeer` binding is additive and stretch-gated (self-managed rke2 only).** For a stretched
   full node (K2), this doctrine adds a `wg0`-bound apiserver listener — the additive apiserver-VPN-IP binding of
   [§4](#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it) — and carries the distro's own
@@ -196,7 +198,7 @@ features have little surface to act on, and each is already covered:
 | Traffic-split (the *one* relevant feature, for gateway migration) | **Gateway-API `HTTPRoute` `backendRefs` carry weights natively**, on the Envoy edge amoebius already renders and Keycloak-fronts. A planned home→provider migration is a weight shift on the edge already in the stack — no mesh needed. |
 | Multicluster service-mirroring | Introduces the **synchronous cross-cluster RPC the architecture deliberately avoids** ([app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md), [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)) and manufactures new non-confluent invariants + latency. Actively anti-doctrinal. |
 
-**Scope note (the stretched-cluster foil).** That last verdict targets **multicluster** service-mirroring —
+**Scope note (the stretched-cluster contrast case).** That last verdict targets **multicluster** service-mirroring —
 synchronous RPC *across N separate clusters*, each its own etcd. It does **not** touch a single **stretched**
 cluster's *intra-cluster* control-plane span (one apiserver/etcd, one boundary, a kubelet reaching its
 apiserver over `wg0` — [§5](#5-the-security-boundary-generalizes-localhost--authenticated-fabric)): a stretched
@@ -204,7 +206,7 @@ kubelet↔apiserver wire is *one cluster's own* traffic, not cross-cluster RPC, 
 non-confluent cross-cluster invariant. Stretched-cluster spanning is owned by
 [cluster_topology_doctrine.md §4.1](./cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation).
 
-The mode point clinches it: Linkerd's only mode is the per-pod micro-proxy **sidecar** (ambient/sidecarless
+The delivery mode is a further disqualifier: Linkerd's only mode is the per-pod micro-proxy **sidecar** (ambient/sidecarless
 is Istio, not Linkerd), which contradicts the stated "no sidecar fleet" architectural point. The honest
 residual is that declining Linkerd means accepting **unencrypted in-cluster east-west traffic** (authorized,
 not encrypted) — consistent with the existing no-in-cluster-mTLS posture. **The reconsideration trigger:** if

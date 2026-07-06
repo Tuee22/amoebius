@@ -75,7 +75,7 @@ flowchart LR
 **Substrate:** linux-cpu → provider (§L). Per [development_plan_standards.md §L](development_plan_standards.md),
 the acceptance gate runs on **exactly one hardware substrate — `linux-cpu`** — the parent amoebius cluster
 (a kind cluster on `linux-cpu`) from inside which the Pulumi engine issues the deploy, per the one-rule
-([pulumi_iac_doctrine.md §1](../documents/engineering/pulumi_iac_doctrine.md#1-the-one-rule-pulumi-runs-only-from-inside-an-existing-amoebius-cluster)).
+([pulumi_iac_doctrine.md §1](../documents/engineering/pulumi_iac_doctrine.md#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster)).
 "`→ provider`" names the *deploy target class* — a cloud-managed Kubernetes cluster (EKS) reached over the
 cloud API — not a fifth hardware substrate: the provider child has no host and no Apple/CUDA substrate of
 its own ([cluster_lifecycle_doctrine.md §1](../documents/engineering/cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape)).
@@ -93,7 +93,7 @@ below — never depended on here.)
 
 ## Doctrine adopted
 
-- **[`pulumi_iac_doctrine.md` §1 — The one rule: Pulumi runs only from inside an existing amoebius cluster](../documents/engineering/pulumi_iac_doctrine.md#1-the-one-rule-pulumi-runs-only-from-inside-an-existing-amoebius-cluster),
+- **[`pulumi_iac_doctrine.md` §1 — Pulumi runs only from inside an existing amoebius cluster](../documents/engineering/pulumi_iac_doctrine.md#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster),
   with [§4 — What Pulumi provisions (the resource catalog)](../documents/engineering/pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog),
   [§6 — The EBS create-vs-delete credential model](../documents/engineering/pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model),
   [§3 — State lifetime matches resource lifetime, per class](../documents/engineering/pulumi_iac_doctrine.md#3-state-lifetime-matches-resource-lifetime-per-class),
@@ -129,7 +129,7 @@ below — never depended on here.)
 
 ### Objective
 
-Adopt [`pulumi_iac_doctrine.md` §1 — The one rule: Pulumi runs only from inside an existing amoebius cluster](../documents/engineering/pulumi_iac_doctrine.md#1-the-one-rule-pulumi-runs-only-from-inside-an-existing-amoebius-cluster)
+Adopt [`pulumi_iac_doctrine.md` §1 — Pulumi runs only from inside an existing amoebius cluster](../documents/engineering/pulumi_iac_doctrine.md#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster)
 and the provider-cluster catalog entry in [§4 — What Pulumi provisions](../documents/engineering/pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog):
 make "spin up a provider-managed cluster" something the *cluster does* under its elected singleton — never
 something a laptop shell does behind the cluster's back — with state held as a Vault-enveloped MinIO object,

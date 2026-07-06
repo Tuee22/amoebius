@@ -12,7 +12,7 @@
 ## 0. Decision record: why Pulumi stays — and why that is not the Helm decision
 
 amoebius dropped Helm ([manifest_generation_doctrine.md §1](./manifest_generation_doctrine.md#1-why-this-doctrine-exists-types-render-manifests-helm-does-not)) but keeps
-Pulumi, and the two decisions can look inconsistent until you see the asymmetry that separates them.
+Pulumi, and the two decisions can look inconsistent until the asymmetry that separates them is made explicit.
 
 **Helm sat on a substrate that already reconciles; Pulumi sits on one that does not.** Kubernetes *is* a
 reconciler — the apiserver, its controllers, and server-side apply already drive observed state toward a
@@ -28,15 +28,15 @@ its encrypted-MinIO-backend + Vault-Transit envelope shape ([§2](#2-the-backend
 Reimplementing that surface is a far larger and riskier undertaking than the Helm removal was, for no
 present gain.
 
-**The tension, stated honestly.** Pulumi's checkpoint is a *stored* second state store — exactly the shape
-amoebius convicts Helm's release Secret of, whose "the stored state and the world disagree" desync mode the
+**The tension.** Pulumi's checkpoint is a *stored* second state store — exactly the shape
+amoebius rejects in Helm's release Secret, whose "the stored state and the world disagree" desync mode the
 manifest doctrine calls out ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderdhall-observed-is-etcd-a-diff-is-typed)). And
 [§8](#8-how-deploys-are-enacted-the-reconciler-referenced-not-restated) of this very doc argues *against* a global stored state machine ("data in, data out — each `discover`
 queries the right authority at the moment of use"), which points toward tag-based discovery of live cloud
 state rather than toward a checkpoint. So keeping Pulumi is the pragmatic v1 choice, not a perfect fit for
 the thesis.
 
-**Crossplane is rejected.** The tempting alternative — modelling cloud resources as typed CRs reconciled
+**Crossplane is rejected.** The obvious alternative — modelling cloud resources as typed CRs reconciled
 *in-cluster*, collapsing this engine into the server-side-apply manifest reconciler and removing the external
 checkpoint — is **declined** for a provability-first system. Crossplane requires parent/management clusters to
 run its provider controllers **continuously** (a standing footprint on even the laptop root, *and* an
@@ -67,7 +67,7 @@ the surface-a-provider-capability-vs-build-a-fabric axis it rests on is
 [cluster_lifecycle_doctrine.md §1](./cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape).
 This is design intent recorded before any provisioning code exists, exactly like the Crossplane decision above.
 
-**But the checkpoint wart is contained, not tolerated everywhere.** Where a resource class is high-churn,
+**But the checkpoint drawback is contained, not tolerated everywhere.** Where a resource class is high-churn,
 self-describing, and holds **no durable state** — the elastic spot worker pool that
 [single_logical_data_plane_doctrine.md](./single_logical_data_plane_doctrine.md) attaches to the home data
 plane — the checkpoint is pure liability and [§8](#8-how-deploys-are-enacted-the-reconciler-referenced-not-restated)'s "data in, data out, discover each time" is strictly better.
@@ -83,9 +83,9 @@ route53, zerossl, self-managed children) where a checkpoint earns its keep, and 
 
 ---
 
-## 1. The one rule: Pulumi runs only from inside an existing amoebius cluster
+## 1. Pulumi runs only from inside an existing amoebius cluster
 
-The intuition first. A laptop shell that can `pulumi up` is a laptop that holds long-lived cloud
+A laptop shell that can `pulumi up` is a laptop that holds long-lived cloud
 credentials, a plaintext state file, and the unilateral power to mutate live infrastructure — exactly the
 ad-hoc, env-var-driven, secret-on-disk shape amoebius exists to abolish. So amoebius makes Pulumi a
 *cluster capability*, not a host tool: **"via pulumi, amoebius may spawn other k8s clusters … in all cases
@@ -119,8 +119,8 @@ This single rule is what the rest of the document elaborates: where the state li
 
 ## 2. The backend: every byte of state is a Vault-enveloped object in MinIO
 
-The intuition: Pulumi's checkpoint *is* the keys to the kingdom — it records resource IDs, outputs, and
-often secret material. If it sits in a plaintext local file or a cloud-vendor state service, then a
+Pulumi's checkpoint holds the credentials and state that grant full control of the managed cloud
+resources — it records resource IDs, outputs, and often secret material. If it sits in a plaintext local file or a cloud-vendor state service, then a
 `.data/` snapshot or an S3 read leaks the whole infrastructure. amoebius refuses both: state lives in the
 cluster's own object substrate, **encrypted with a key the cluster's Vault holds**, so a stolen snapshot is
 opaque ciphertext.
@@ -170,7 +170,7 @@ flowchart TD
 
 ## 3. State lifetime matches resource lifetime, per class
 
-The intuition: a leak is almost always a *lifetime mismatch* — state that outlived its resources (a stale
+A leak is almost always a *lifetime mismatch* — state that outlived its resources (a stale
 checkpoint pointing at nothing) or resources that outlived their state (orphans Pulumi can no longer see).
 amoebius forecloses both by classifying every deploy and pinning **state lifetime to resource lifetime,
 per class.** This generalizes the prodbox **State-Lifetime Rule**
@@ -194,7 +194,7 @@ credential class.* In prodbox this is machine-enforced — every stack is one `S
 - **Durable and long-lived state is never auto-destroyed.** A cluster teardown reconciles only the
   *ephemeral* class to absent; it must not touch durable EBS or long-lived shared infra. This is the
   Pulumi-side reading of the storage cardinal rule
-  ([storage_lifecycle_doctrine.md §7](./storage_lifecycle_doctrine.md#7-the-cardinal-rule-deleting-durable-data-is-forbidden-under-normal-operation)): durable storage exists until a
+  ([storage_lifecycle_doctrine.md §7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation)): durable storage exists until a
   deliberate, privileged deletion, never "until the next teardown."
 - **The class assignment is the single source of truth for both backend and credential.** A resource's
   class selects *which* checkpoint object it lives in and *which* credential may mutate it, so the two can
@@ -207,8 +207,8 @@ credential class.* In prodbox this is machine-enforced — every stack is one `S
 
 ## 4. What Pulumi provisions (the resource catalog)
 
-Pulumi is amoebius's hands for everything that is *not* a typed-manifest-reconciled in-cluster object. The
-intuition: in-cluster workloads are reconciled through the kube API by amoebius's own typed reconciler
+Pulumi is amoebius's provisioning mechanism for everything that is *not* a typed-manifest-reconciled
+in-cluster object. In-cluster workloads are reconciled through the kube API by amoebius's own typed reconciler
 ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)); the **substrate beneath and around** a
 cluster — the cloud account, the other clusters, the DNS, the certs — is reconciled through Pulumi. This
 table is the catalog; the **owner** column names where each resource's *meaning* lives, so this doc never
@@ -224,7 +224,7 @@ duplicates it.
 | **DNS — route53** | Provision/maintain hosted zones and records | This doctrine, [§5](#5-dns-route53-and-tls-zerossl-the-provider-integrations-this-doctrine-owns) |
 | **TLS — zerossl** | ACME (DNS-01) certificate issuance and retention | This doctrine, [§5](#5-dns-route53-and-tls-zerossl-the-provider-integrations-this-doctrine-owns) |
 
-Two boundaries worth stating loudly, because they are easy to blur:
+Two boundaries worth stating, because they are easy to blur:
 
 - **Pulumi provisions the cluster; the typed reconciler fills it.** Pulumi stops at the substrate boundary —
   it stands up the managed/self-managed cluster and its node set. The standard services *inside* the cluster
@@ -251,13 +251,19 @@ Two boundaries worth stating loudly, because they are easy to blur:
 
 ## 5. DNS (route53) and TLS (zerossl): the provider integrations this doctrine owns
 
-The intuition: a cluster that terminates public TLS and answers on a public name needs two external facts
+A cluster that terminates public TLS and answers on a public name needs two external facts
 to be *true in the world* — a DNS record that points at its load balancer, and a certificate a browser will
 trust. Both are external mutations, so both are Pulumi/IaC concerns, and **amoebius models them so the wrong
 binding is unrepresentable**.
 
 ### 5.1 DNS — route53
 
+- **A programmatic DNS API is required; route53 is the canonical default.** Two amoebius-driven categories
+  both need a programmable DNS provider API that Pulumi mutates: ACME DNS-01 challenge records
+  ([§5.2](#52-tls--zerossl)) and geo-failover repoints of a cluster's records when a lead's gateway dies. That
+  category is what fixes the requirement; route53 is the prodbox-proven default, not a hard-wired constant.
+  The DNS provider is operator-selectable wherever a programmable API exists, with route53 as the canonical
+  default.
 - **Zones and records are declarative, provisioned via Pulumi.** A cluster's public name(s) and the
   records that resolve them are `.dhall`-declared and realized through the route53 provider, tracked in the
   encrypted MinIO backend ([§2](#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio)) under the lifetime class ([§3](#3-state-lifetime-matches-resource-lifetime-per-class)) matching the zone: a per-cluster subzone is
@@ -273,9 +279,11 @@ binding is unrepresentable**.
 
 ### 5.2 TLS — zerossl
 
-- **ZeroSSL is the ACME provider, via DNS-01.** Certificate issuance is ACME against the ZeroSSL directory,
-  solved over a route53 DNS-01 challenge (the prodbox-proven shape: a single ZeroSSL `ClusterIssuer` with a
-  Route 53 DNS-01 solver, requiring the ZeroSSL EAB credential). The challenge records are themselves DNS
+- **ZeroSSL is the canonical ACME default, via DNS-01.** Certificate issuance is ACME against the ZeroSSL
+  directory, solved over a route53 DNS-01 challenge (the prodbox-proven shape: a single ZeroSSL `ClusterIssuer`
+  with a Route 53 DNS-01 solver, requiring the ZeroSSL EAB credential). The ACME directory is a
+  deployment-rules choice, not a hard-wired constant: ZeroSSL is the prodbox-proven default, and the
+  certificate-issuer type should admit a LetsEncrypt arm. The challenge records are themselves DNS
   mutations ([§5.1](#51-dns--route53)).
 - **Certificate material is durable and retained, never casually deleted.** Issued material is retained
   across cluster rebuilds (its retention store is a long-lived class, [§3](#3-state-lifetime-matches-resource-lifetime-per-class)) so a rebuild *restores* rather
@@ -303,7 +311,7 @@ elevated permissions?) … does it make sense for pulumi to create with one set 
 with another? or is the harness manually deleting these resources then destroying the pulumi backend
 (after a final resource sweep)?"* This doctrine takes a **design position** and resolves it.
 
-**The danger, stated plainly.** Durable storage must survive every ordinary teardown, or "ephemeral cluster,
+**The risk.** Durable storage must survive every ordinary teardown, or "ephemeral cluster,
 durable data" collapses. But a Pulumi stack that *creates* a volume can, by
 default, *destroy* it on `pulumi destroy`. If the ephemeral cluster stack owned its EBS volumes, tearing
 the cluster down would delete the data. So the EBS volumes must be **structurally** outside the ephemeral
@@ -323,7 +331,7 @@ destroy set, and the authority to delete them must be **structurally** withheld 
    the cluster-stack create/delete it needs) but **denied `ec2:DeleteVolume`** on durable, retained
    volumes. "Accidentally delete durable storage" is therefore *unauthorized at the cloud API*, not merely
    discouraged by policy (the requirement is set by
-   [storage_lifecycle_doctrine.md §7](./storage_lifecycle_doctrine.md#7-the-cardinal-rule-deleting-durable-data-is-forbidden-under-normal-operation), the credential mechanics are owned
+   [storage_lifecycle_doctrine.md §7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation), the credential mechanics are owned
    here).
 3. **Only the elevated test harness may delete durable EBS, and only test-flagged volumes.** Leak-free test
    cycles *must* reclaim what they create. The elevated test credential — held in
@@ -365,7 +373,7 @@ flowchart TD
 
 ## 7. Applicative parallelism for independent deploys
 
-The intuition: if a parent must spin up three unrelated child clusters, running them strictly one after
+If a parent must spin up three unrelated child clusters, running them strictly one after
 another is slow for no reason — they share no data, so their *independence is a fact about the program* that
 the type structure should make visible and the runtime should exploit. amoebius does exactly that:
 **"we want to use sound FP principles, including applicatives wherever possible to parallelize work (eg
@@ -383,7 +391,7 @@ multiple independent pulumi deploys)"**.
   `Step`s — independent Pulumi deploys among them — are composed applicatively so the interpreter may fan
   them out; dependent `Step`s remain a sequence. This doc owns the *Pulumi-deploy application* of that
   algebra; the algebra itself is owned by [dsl_doctrine.md](./dsl_doctrine.md).
-- **Parallelism never weakens the safety rules.** Concurrent deploys still each run under [§1](#1-the-one-rule-pulumi-runs-only-from-inside-an-existing-amoebius-cluster) (inside the
+- **Parallelism never weakens the safety rules.** Concurrent deploys still each run under [§1](#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster) (inside the
   cluster, under the singleton, no env vars), [§2](#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio) (enveloped MinIO state), and [§3](#3-state-lifetime-matches-resource-lifetime-per-class) (lifetime/credential
   class). Two deploys writing the *same* checkpoint object would be a data dependency and therefore are
   **not** independent — they would compose monadically, not applicatively — so applicative fan-out cannot

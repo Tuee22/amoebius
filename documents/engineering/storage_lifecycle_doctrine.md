@@ -7,24 +7,23 @@
 
 > **Purpose**: Define amoebius's durable-storage contract — the single `no-provisioner` retained PV model,
 > the deterministic `<namespace>/<statefulset>/pv_<integer>` bind, explicit hard-capped sizes, host- and
-> EBS-backed volumes that outlive their node and their cluster — and the cardinal rule that deletion of
+> EBS-backed volumes that outlive their node and their cluster — and the rule that deletion of
 > durable data is forbidden under normal operation.
 
 ---
 
-## 1. The one idea: clusters are cattle, storage is land
+## 1. Cluster and storage have independent lifetimes
 
-An amoebius cluster is **ephemeral**. You tear it down to free compute, you spin it back up on a different
-substrate, you let a chaos move kill it — and none of that is supposed to lose a byte. The way amoebius
-earns that promise is to make storage a *different kind of thing* from the cluster that mounts it: the
-cluster is cattle, the storage underneath it is land. You replace the herd; the land, and everything
-recorded on it, stays.
+An amoebius cluster is **ephemeral**: it can be torn down to free compute, brought back up on a different
+substrate, or killed by a chaos move, and none of that loses committed data. Amoebius guarantees this by
+giving storage a lifetime independent of the cluster that mounts it. (Shorthand: clusters are cattle;
+storage is not.)
 
 Concretely: clusters are ephemeral but their storage is not, and need to
 be explicitly deleted… they don't get deleted automatically with the rest of the cluster, so that they
 automatically rebind. A cluster destroy releases the claims; it never reclaims the volumes. The next
 bring-up re-creates the exact same claims, which re-bind to the exact same volumes, which still hold the
-exact same data. That round-trip — *delete the cluster, recreate it, find your data unchanged* — is the
+exact same data. That round-trip — *delete the cluster, recreate it, find the data unchanged* — is the
 **lossless-teardown guarantee**, and [§6](#6-the-lossless-teardown-guarantee-deterministic-rebind) cashes out exactly when it holds.
 
 This doctrine is the SSoT for *how durable bytes live and rebind*. It does **not** own which services
@@ -45,7 +44,7 @@ built the storage layer. Status and gates live only in
 
 ## 2. One storage class, and it provisions nothing
 
-The intuition: dynamic provisioning is exactly the machinery that would let a cluster *create and destroy*
+Dynamic provisioning is the machinery that would let a cluster *create and destroy*
 volumes on its own initiative. amoebius wants the opposite — volumes that a human or the elevated harness
 created on purpose and that nothing in the normal cluster lifecycle can reclaim — so amoebius **deletes the
 dynamic machinery outright**.
@@ -70,8 +69,9 @@ the class must have.
 
 ## 3. PVCs are born only from StatefulSets
 
-The intuition: if any Deployment, Job, or hand-written manifest could mint a PVC, the set of durable claims
-would be open-ended and unauditable, and "we know every byte we keep" would be a lie. amoebius closes the
+If any Deployment, Job, or hand-written manifest could mint a PVC, the set of durable claims
+would be open-ended and unauditable, and the guarantee that every retained byte is accounted for would be
+unverifiable. amoebius closes the
 creation path to exactly one shape.
 
 **A PVC is only ever created by a StatefulSet's `volumeClaimTemplate`**. There are no bare PVCs, no Deployment-mounted
@@ -97,7 +97,7 @@ from "run three replicas of me" is owned by [app_vs_deployment_doctrine.md](./ap
 
 ## 4. Deterministic PV naming and the explicit bind
 
-The intuition: rebinding can only be deterministic if both ends of the bind are computed from stable
+Rebinding can only be deterministic if both ends of the bind are computed from stable
 identity, never assigned by a race. So amoebius names every PV from `(namespace, statefulset, ordinal)` and
 pins each PV to its claim *before the claim exists*.
 
@@ -130,17 +130,16 @@ flowchart TD
 
 ## 5. Sizes are explicit, hard-capped, and one-volume-per-claim
 
-The intuition: a size that is only advisory is a size that lies. If a "10Gi" volume can quietly grow to
+An advisory-only size is not enforceable. If a "10Gi" volume can quietly grow to
 fill the host disk, then capacity planning, dynamic node provisioning, and "this volume fits on that node"
 all become guesswork. amoebius makes the declared size a **hard ceiling**, not a hint.
 
 - **Every PVC declares a minimum size; every PV declares a capacity**. A sizeless durable claim is not representable.
 - **Hard allocation, not advisory accounting**. The declared capacity is the real
-  ceiling; a workload cannot spill past it onto shared host disk. For provider volumes the EBS size *is*
-  the ceiling. For host-backed volumes, enforcing a true hard cap requires a quota- or image-backed volume
-  rather than a raw shared-filesystem subdirectory; **the exact host-side enforcement mechanism is design
-  intent, not a built or tested amoebius capability**, and its delivery is tracked in
-  [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
+  ceiling; a workload cannot spill past it onto shared host disk. OPEN (mechanism only); position fixed.
+  Provider volumes hard-cap via EBS size today; host-backed volumes will be hard-capped by a quota- or
+  image-backed volume, never a raw shared-filesystem subdirectory. Until it lands, host caps are advisory.
+  Delivery tracked in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 - **One EBS drive per PV on provider substrates**. amoebius never carves many claims
   out of one shared cloud volume; the PV ↔ PVC ↔ EBS-volume mapping is 1:1:1, each EBS sized to exactly the
   paired PVC. The provider plumbing that materializes those EBS volumes — and the credential model that
@@ -191,7 +190,7 @@ StorageBacking = HostDisk Capacity | Ebs Capacity | CloudQuota Quota
 
 ## 6. The lossless-teardown guarantee: deterministic rebind
 
-The intuition: because the PV name and `claimRef` are pure functions of identity ([§4](#4-deterministic-pv-naming-and-the-explicit-bind)), and because Retain
+Because the PV name and `claimRef` are pure functions of identity ([§4](#4-deterministic-pv-naming-and-the-explicit-bind)), and because Retain
 keeps the volume alive after the claim is gone ([§2](#2-one-storage-class-and-it-provisions-nothing)), a destroyed-then-recreated cluster recomputes the
 *same* claims, which match the *same* still-living volumes. Nothing is restored from a backup; the original
 bytes were never released. That is the lossless-teardown guarantee: clusters can be torn down and spun
@@ -228,9 +227,9 @@ owned by [vault_pki_doctrine.md](./vault_pki_doctrine.md) and
 
 ---
 
-## 7. The cardinal rule: deleting durable data is forbidden under normal operation
+## 7. Deleting durable data is forbidden under normal operation
 
-The intuition stated bluntly in the vision: if teardown is the safe everyday way to
+The vision states the reasoning: if teardown is the safe everyday way to
 "turn off" a cluster, then "it's critical that its durable storage remains or spin-up will fail… we need to
 ensure amoebius doesn't accidentally delete durable storage, which could mean outright forbidding it under
 normal circumstances." amoebius takes the strong reading: **forbid it.**
@@ -251,10 +250,11 @@ normal circumstances." amoebius takes the strong reading: **forbid it.**
 - **Credential-level enforcement, not just policy.** On provider substrates the intended backstop is that
   normal-operation credentials can *create* EBS but not *delete* it, so "accidentally delete durable
   storage" is unauthorized at the cloud API, not merely discouraged. The exact create-vs-delete credential
-  model (and whether Pulumi creates under one credential set and the harness destroys under another) is an
-  open question and is **owned by**
-  [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md); this doc records only the requirement that the
-  destroy capability be withheld from normal operation.
+  model (and whether Pulumi creates under one credential set and the harness destroys under another) is
+  resolved by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) §6 (three locked decisions: durable-class
+  EBS carried outside the ephemeral cluster stack; normal-operation credentials create-but-not-delete; only
+  the elevated in-memory test credential deletes test-flagged volumes); this doc records only the
+  requirement that the destroy capability be withheld from normal operation.
 
 ### 7.1 The single exception: the elevated test harness
 
@@ -276,8 +276,8 @@ path:
 The hardest case the vision flags: "this requires more thought for things like
 elastic storage requirements (how can we ever shrink them?). We need to enable storage shrinking while still
 making it impossible to represent destruction of data." Growth is easy — a larger size strictly contains the
-old bytes. Shrinking is the trap, because the naïve "delete the volume, make a smaller one" is exactly the
-forbidden op of [§7](#7-the-cardinal-rule-deleting-durable-data-is-forbidden-under-normal-operation) wearing a different hat.
+old bytes. Shrinking is the hard case: the naïve "delete the volume, make a smaller one" is the
+forbidden operation of [§7](#7-deleting-durable-data-is-forbidden-under-normal-operation) in another form.
 
 amoebius's design position: **a shrink is never an in-place truncation; it is a verified migration.**
 
@@ -288,7 +288,7 @@ amoebius's design position: **a shrink is never an in-place truncation; it is a 
   reconciler realizes it by provisioning a new, correctly-sized retained volume, copying the live bytes,
   **verifying the copy**, and only then retiring the old volume. No `.dhall` value ever denotes "discard
   these bytes," so destruction stays unrepresentable even while the effective size goes down.
-- **The retire-old step is itself a durable-data deletion** and therefore inherits [§7](#7-the-cardinal-rule-deleting-durable-data-is-forbidden-under-normal-operation): under normal
+- **The retire-old step is itself a durable-data deletion** and therefore inherits [§7](#7-deleting-durable-data-is-forbidden-under-normal-operation): under normal
   operation it is forbidden, and the actual reclaim of the now-orphaned old volume is gated to the same
   elevated path that the test harness uses (or to a deliberate, privileged operator action). A shrink that
   cannot verify its copy leaves *both* volumes intact and fails loud — it never trades the old bytes for an

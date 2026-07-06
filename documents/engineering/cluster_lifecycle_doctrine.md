@@ -11,9 +11,8 @@
 
 ## 1. Two cluster kinds, one lifecycle shape
 
-There are exactly **two** kinds of cluster amoebius drives, and the whole point of this doctrine is that
-they share **one** lifecycle vocabulary — *bring-up → init → reconcile → teardown* — even though the
-bring-up mechanics differ underneath.
+There are exactly **two** kinds of cluster amoebius drives, and they share **one** lifecycle vocabulary
+— *bring-up → init → reconcile → teardown* — even though the bring-up mechanics differ underneath.
 
 | | **Self-managed** (`kind` / `rke2`) | **Provider-managed** (EKS — prodbox's reality) |
 |---|---|---|
@@ -22,7 +21,7 @@ bring-up mechanics differ underneath.
 | Host-level worker daemons | Supported (e.g. Apple-Metal inference) | **Not** supported — no host, no Apple substrate; only the in-cluster singleton daemon |
 | Typical role | Any tier, including the **root** (an admin's laptop kind, or a single-node rke2) | A **child** spawned by a parent; never the root |
 
-The shared shape is what lets the rest of this document treat "a cluster" uniformly: a child you spawn on
+The shared shape is what lets the rest of this document treat "a cluster" uniformly: a child spawned on
 EKS and a kind cluster on a laptop converge to the **same fungible shape** — the same nine standard
 services, wired the same way — owned by
 [platform_services_doctrine.md §1](./platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster). The *substrate-specific* mechanics —
@@ -61,7 +60,7 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
 
 - **`bootstrap.sh` is a thin igniter, not the orchestrator.** Its only job is to ensure the package
   manager, ensure `ghcup`, install the pinned toolchain (GHC **9.12.4**, Cabal 3.16.1.0 — the
-  [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) toolchain pin, not the originally-specified, now-deferred 9.14.1),
+  [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) toolchain pin; 9.14.1 is a deferred, later-phase bump per the plan's Toolchain section),
   build the binary, and call `bootstrap`. From that call onward the **binary** owns everything. The script
   itself and substrate detection are owned by [substrate_doctrine.md](./substrate_doctrine.md);
   this doc owns the lifecycle ordering the binary then drives. Bootstrap also establishes the
@@ -151,8 +150,8 @@ Two encapsulation rules make the forest safe to reason about:
   child's subtree under its **own per-child Vault Transit key**, so a child cannot decrypt a sibling's
   subtree even under an unsealed parent
   ([vault_pki_doctrine.md §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes)). It knows
-  nothing about its siblings or any wider part of the forest: a child you have
-  never inspected is the same machine as any other cluster, and it cannot reach into state it was never
+  nothing about its siblings or any wider part of the forest: a child that has never been
+  inspected is the same machine as any other cluster, and it cannot reach into state it was never
   given.
 - **Trust flows down from the root, never sideways.** The root cluster — typically a kind cluster on the
   admin's laptop — owns the **self-signed PKI trust anchor** for everything below it. Children derive trust from above; they do not mint independent anchors. The trust tree, the
@@ -195,8 +194,7 @@ surface, never inside an app's logic ([app_vs_deployment_doctrine.md](./app_vs_d
 ## 5. Teardown-with-cleanup vs chaos-failover (the central distinction)
 
 There are two completely different ways a cluster can stop being the lead — one **polite**, one **violent**
-— and conflating them is the exact bug this section exists to prevent. The
-one-line rule:
+— and conflating them is the bug this section exists to prevent:
 
 > **Graceful teardown cleans up first; chaos-failover does not.**
 
@@ -221,12 +219,12 @@ released, the cluster (driven by its control-plane singleton, [§9](#9-how-bring
 4. **Releases compute — and only compute.** Durable storage is **preserved, never deleted** ([§7](#7-ephemeral-spin-updown-with-deterministic-rebind);
    [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md)).
 
-**Chaos-failover, concretely.** A chaos-failover is what happens when the lead simply *vanishes* — no
+**Chaos-failover, concretely.** A chaos-failover is what happens when the lead *vanishes* — no
 drain, no flush, no handoff. Surviving siblings with the same parent **detect the dead gateway and fail
 over on their own, repointing DNS (e.g. route53 migrations)**. Because there was
 no synchronization event, the outcome is **not** lossless-by-construction: it is bounded by the declared
-data-loss budget, and proving that the behaviour is always well-defined — especially *"what happens if a
-cluster goes down mid geo-sync and we try to fail the gateway over to it?"* — is the one place a
+data-loss budget, and proving that the behaviour is always well-defined — especially the case where a
+cluster goes down mid geo-sync and the gateway is failed over to it — is the one place a
 per-system proof obligation concentrates. That entire **async cross-cluster boundary** (the invariant-
 confluence "Second Axis", with its proven/tested/assumed ledger) is owned by
 [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Intra-cluster synchronous HA is *delegated* to
@@ -235,7 +233,7 @@ MinIO / Pulsar / Postgres-Patroni, which do their own consensus
 
 The distinction matters because it tells the operator and the code which guarantee is in force: a graceful
 teardown that *skips* the cleanup steps is silently downgrading itself to a chaos event and forfeiting the
-lossless guarantee — exactly the kind of "tested/assumed reported as proven" confusion the honesty rule
+lossless guarantee — the kind of "tested/assumed reported as proven" confusion the honesty rule
 ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)) forbids.
 
 ---
@@ -276,9 +274,9 @@ flowchart TD
 
 ## 7. Ephemeral spin-up/down with deterministic rebind
 
-The slogan is **clusters are cattle; their storage is not.** A cluster can be torn down and spun back up
-*ephemerally with zero data loss*, because the only durable state lives on retained PVs that rebind
-identically.
+A cluster can be torn down and spun back up *ephemerally with zero data loss*, because the only durable
+state lives on retained PVs that rebind identically. (Shorthand: clusters are cattle; their storage is
+not.)
 
 - **Deterministic rebind is owned elsewhere — referenced, not restated.** The mechanism that guarantees a
   rebuilt cluster reattaches the *same* data is the `no-provisioner` retained-PV policy
@@ -292,8 +290,8 @@ identically.
   cycles — that storage-deletion safety model is owned by
   [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) and
   [testing_doctrine.md](./testing_doctrine.md).
-- **This is what makes [§3](#3-amoebic-spawning--the-recursive-forest) and [§5](#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction) compose.** A child you destroyed last night rebinds to the same shape and
-  the same data this morning; a cluster torn down to free compute returns lossless. Fungibility
+- **This is what makes [§3](#3-amoebic-spawning--the-recursive-forest) and [§5](#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction) compose.** A child destroyed and later spun back up rebinds to the same shape and
+  the same data; a cluster torn down to free compute returns lossless. Fungibility
   ([platform_services_doctrine.md §1](./platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster)) plus durable rebind is the
   precondition for ephemeral teardown being *safe*, not just *possible*.
 
@@ -338,7 +336,7 @@ sibling's** reconciler-with-predicates doctrine
   recovery is just "run the reconciler again." This is the same idempotent-reconcile shape `bootstrap`
   re-runs as a no-op ([§2](#2-bring-up-and-bootstrap)).
 - **Three-valued observation, fail-closed.** Each resource's `discover` returns **Present**, **Absent**, or
-  **Unreachable**, and **`Unreachable → refuse`**: *"I could not observe this"* is never silently collapsed
+  **Unreachable**, and **`Unreachable → refuse`**: *"this could not be observed"* is never silently collapsed
   to *"it is gone."* A teardown that cannot confirm a resource is absent refuses rather than charging ahead
   and stranding live state — the same soundness rule as the [§6](#6-push-back-when-teardown-would-break-the-global-dhall) push-back and as the prodbox sibling's
   Sprint-4.19 gate.

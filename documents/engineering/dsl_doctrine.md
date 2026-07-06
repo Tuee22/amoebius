@@ -13,11 +13,11 @@
 
 ## 1. Why this doctrine exists
 
-Kubernetes lets you represent nonsense. You can write a PVC that binds to no PV, a Gateway that points at
-the wrong address, a NetworkPolicy that quietly severs two services that must talk, a backdoor NodePort
-that exposes an admin surface to the wild — and the YAML is *valid*. The cluster discovers the mistake at
-runtime, in production, at 3am. Amoebius's central bet is the inversion of that: a **typed orchestration
-surface where the nonsense is unspellable**.
+Kubernetes admits specifications that cannot work: a PVC that binds to no PV, a Gateway that points at
+the wrong address, a NetworkPolicy that severs two services that must communicate, a NodePort that
+exposes an admin surface publicly — each is valid YAML, accepted by the apiserver, so the contradiction
+surfaces only at runtime. Amoebius inverts this: a **typed orchestration surface on which such
+specifications do not type-check**.
 
 This document owns four things about that surface:
 
@@ -43,11 +43,11 @@ Phase order and status live only in [../../DEVELOPMENT_PLAN/README.md](../../DEV
 
 ## 2. Two languages, one system: Dhall carries params, Haskell carries logic
 
-The single most important thing to understand about the amoebius DSL is what it is **not**: it is not a
-scripting language, and it does not contain the deployment logic. The instinct from a decade of bash and
-Helm templating is to put the *how* in the config — loops, conditionals, string-built commands. Amoebius
-refuses that outright: *"in general we do not want to use env vars or bash logic, we want everything to be
-dhall"*. The way it gets there is a hard split between two languages:
+The amoebius DSL is not a scripting language, and it does not contain the deployment logic. Templating
+puts the *how* in the config — loops, conditionals, string-built commands — placing untyped control flow
+in configuration that the type-checker cannot inspect. Amoebius excludes that, per the recorded operator
+decision: *"in general we do not want to use env vars or bash logic, we want everything to be
+dhall"*. It gets there by a hard split between two languages:
 
 - **Dhall is the data.** A `.dhall` file is typed, total, side-effect-free *data* — a description of the
   desired world. It carries no control flow that the binary executes, no subprocess strings, no
@@ -59,11 +59,11 @@ dhall"*. The way it gets there is a hard split between two languages:
   a label, the frame it runs in, a `StepKind`, and a `stepRun :: HostConfig -> IO ()` action
   (`Step.hs`). The chain is the system; the Dhall only supplies the `cfg`.
 
-This is the load-bearing idea, so cash it out:
+That split is load-bearing in three ways:
 
 - **The plan is the data.** Because `[Step]` is a pure value, `amoebius … --dry-run` can render the exact
   plan it would execute — `renderChainPlan` / `renderChain` (`Step.hs`, `Chain.hs`) — *without running a
-  single action*. What you preview is byte-for-byte what runs. There is no hidden imperative layer between
+  single action*. The preview is byte-for-byte what runs. There is no hidden imperative layer between
   the rendered plan and the effects.
 - **Only the binary acts.** The recursive interpreter (`runChainFromFrame`, `Chain.hs`) runs a step's
   action only when the binary is *in that step's frame*; the descent logic itself is pure and unit-tested,
@@ -88,7 +88,7 @@ flowchart TD
 
 ## 3. The orchestration surface: parameters, context, witness
 
-If Dhall is "the data," what data, exactly? Amoebius inherits hostbootstrap's **binary-context contract**:
+The data Dhall carries has a fixed shape. Amoebius inherits hostbootstrap's **binary-context contract**:
 every binary reads one project-local `.dhall` carrying three kinds of typed value
 (`/home/matthewnowak/hostbootstrap/core/hostbootstrap-core/src/HostBootstrap/Context.hs`; this is exactly
 the shape the sibling prodbox project proved as its Tier-0 `parameters + context + witness` surface in its
@@ -147,7 +147,7 @@ delivery is **proven in hostbootstrap and inherited as evidence** — not an amo
 
 ## 4. Total composability
 
-The phrase to cash out is from the original vision: *"the key to making amoebius really work well is a great
+Total composability is stated in the original vision: *"the key to making amoebius really work well is a great
 .dhall DSL that ties everything together. total composability."* An amoebius `.dhall` is never one
 monolith — it is a composition built from smaller typed pieces via Dhall's native import system. Because
 every piece is typed, total, side-effect-free data ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)), the pieces nest *without limit and without
@@ -300,7 +300,7 @@ never here.
 
 ## 5. The illegal-state-unrepresentable contract
 
-This is the heart of the doctrine, and the claim is exact: **a valid amoebius `.dhall` cannot represent
+The claim is exact: **a valid amoebius `.dhall` cannot represent
 illegal, non-working, or insecure cluster state**. Not "is rejected by a
 linter," not "is caught in CI" — *cannot be written down in the first place*. The contract has a one-line
 form an operator can hold onto:
@@ -375,9 +375,9 @@ owns only the `ChildSpec` type and its projection.
 ## 6. Secrets are names, never values
 
 A locked invariant: **secrets never live in Dhall — only names** (DEVELOPMENT_PLAN
-cross-cutting invariants). The intuition is a direct consequence of [§4](#4-total-composability) and [§5](#5-the-illegal-state-unrepresentable-contract): a `.dhall` is composed,
+cross-cutting invariants). This rule is a direct consequence of [§4](#4-total-composability) and [§5](#5-the-illegal-state-unrepresentable-contract): a `.dhall` is composed,
 diffed, rolled out from the root across an entire tree of clusters, and stored — so it must be **safe to
-read**. A surface you can safely hand to a child cluster, paste into a review, or keep in an object store
+read**. A surface that can safely be handed to a child cluster, pasted into a review, or kept in an object store
 is a surface that holds no secret bytes.
 
 So the DSL carries a typed **reference** to each secret — a *name/coordinate*, not the value:
@@ -409,7 +409,7 @@ typed reconciler with no Helm and no third-party charts
 canonical providers behind the **capabilities** owned by
 [service_capability_doctrine.md](./service_capability_doctrine.md), over the fixed standard service set owned
 by [platform_services_doctrine.md](./platform_services_doctrine.md). The DSL *parameterizes a fixed shape*;
-it does not let you redesign it.
+it does not permit that shape to be redesigned.
 
 This is why [§5](#5-the-illegal-state-unrepresentable-contract)'s contract is even tractable. The set of legal worlds is small and opinionated, so the
 types that exclude the illegal ones are *writable*. A DSL that tried to express every possible Kubernetes
@@ -452,8 +452,8 @@ and the in-memory value is the Haskell record produced by `Dhall.inputFile auto`
 Dhall is the **config** surface, not the **data plane**: runtime *message payloads* are never Dhall. They are
 dense binary **CBOR** on the wire, owned by
 [pulsar_client_doctrine.md §3.1](./pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor) — Dhall carries typed
-*params*, a payload carries runtime *bytes*, and the two never mix (the `notes.txt` "does dhall make sense
-for a payload? probably not" answer).
+*params*, a payload carries runtime *bytes*, and the two never mix (the `notes.txt` design note that Dhall
+does not serve as a message-payload format).
 
 ---
 

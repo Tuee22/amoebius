@@ -12,10 +12,10 @@
 ## 1. Why this doctrine exists
 
 The DSL holds no secrets — only *names* for them
-([dsl_doctrine.md §6](./dsl_doctrine.md#6-secrets-are-names-never-values)). That single rule forces a
-question this document answers: if the `.dhall` that is composed, diffed, rolled out across an entire
-forest of clusters, and stored in an object store carries no secret bytes, then **where do the bytes
-live, who puts them there, and what happens when they cannot be reached?** The answer is one subsystem:
+([dsl_doctrine.md §6](./dsl_doctrine.md#6-secrets-are-names-never-values)). That single rule determines what this
+document specifies: for a `.dhall` that is composed, diffed, rolled out across an entire
+forest of clusters, and stored in an object store yet carries no secret bytes, **where the bytes
+live, who puts them there, and what happens when they cannot be reached.** The answer is one subsystem:
 an in-cluster Vault per cluster, a tree of trust between those Vaults, and a single human-memorized
 password at the root that the whole forest's liveness depends on.
 
@@ -491,13 +491,14 @@ prodbox's proven model (`secret_derivation_doctrine.md [§5](#5-the-root-cluster
 > can verify. A **host-level worker is not a member**: an Apple-Metal or Windows-CUDA host worker — and,
 > stretched, a non-member "K1" host worker reaching a remote home cluster over the host-only NodePort, the
 > WireGuard fabric, **or** a secure gateway — runs as a native subprocess with **no service account and no
-> kubelet identity**, so the k8s-auth path does not apply to it. Its secrets are the *same* secrets-by-name,
-> parent-injected custody family ([§3](#3-the-secretref-contract-a-name-never-a-value),
-> [§3.1](#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken),
-> [§7](#7-parent-injects-secrets-into-the-childs-vault)) — only the **auth *method*** by which a non-member
-> resolves a named secret is under-specified. This round **names** that gap; it holds for **every** host
-> worker (both VPN- and gateway-reached) and is **runtime-checked residue** — an under-specified seam, not a
-> foreclosed illegal state — pending the phase that pins a non-member Vault-auth method. The stretched-node
+> kubelet identity**, so the k8s-auth path does not apply to it. **OPEN (auth method only; custody
+> family closed).** A non-member host worker resolves its named, parent-injected secrets via the same
+> SecretRef/parent-custody family
+> ([§3](#3-the-secretref-contract-a-name-never-a-value)/[§3.1](#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken)/[§7](#7-parent-injects-secrets-into-the-childs-vault));
+> only the auth **method** (not k8s-JWT) is unpinned. Current position: the candidate is a parent-issued
+> AppRole/wrapped-token or a WireGuard-identity-bound method, minted at attach, to be pinned in the
+> host-compute/stretched phase. This holds for **every** host worker (both VPN- and gateway-reached) and is
+> **runtime-checked residue**, not a foreclosed illegal state. The stretched-node
 > doctrine that surfaces the seam is owned elsewhere ([host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md)
 > and the stretched split in cluster_topology / network_fabric); this section owns only the Vault-auth
 > consequence.

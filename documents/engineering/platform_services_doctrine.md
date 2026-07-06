@@ -25,9 +25,9 @@ cluster stands up the same *set*" while deliberately relaxing "the same *shape*.
 of the set-invariant is [§12](#12-substrate-equivalence-as-a-structural-invariant).
 
 Why this matters: it is what makes amoebic spawning, ephemeral teardown/rebuild, and geo-replicated
-failover even *expressible*. A child cluster you have never seen is the same machine as the parent; a
-cluster you destroyed last night rebinds to the same shape this morning. Fungibility is not a slogan — it
-is the precondition for every cross-cluster move in [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md)
+failover even *expressible*. A never-before-seen child cluster is the same machine as the parent; a
+cluster destroyed and rebuilt rebinds to the same shape. Fungibility is
+the precondition for every cross-cluster move in [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md)
 and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md).
 
 The standard service set (DEVELOPMENT_PLAN "Standard platform services"):
@@ -57,7 +57,7 @@ linked siblings and only referenced here.
 
 There is no separate "dev topology." A kind cluster on an admin's laptop at `replicas=1` runs the
 byte-identical HA charts a production cluster runs — only the replica count changes. This kills the entire
-class of *works-in-dev, breaks-in-prod-because-the-topology-differs* bugs: the chart you debugged at one
+class of *works-in-dev, breaks-in-prod-because-the-topology-differs* bugs: the chart debugged at one
 replica is the chart that runs at five.
 
 Concretely (DEVELOPMENT_PLAN cross-cutting invariants):
@@ -85,8 +85,8 @@ Concretely (DEVELOPMENT_PLAN cross-cutting invariants):
 
 The in-cluster registry is the **single-binary `distribution` (`registry:2`) OCI registry**, which
 **replaces Harbor**. Once it is up, **nothing in the cluster pulls from a public registry**: every image is
-either baked into the base container or built by amoebius and served from here. The payoff is reproducibility
-(you own the bytes), air-gap capability, and zero exposure to upstream rate-limits or flakes.
+either baked into the base container or built by amoebius and served from here. The result is reproducibility
+(amoebius owns the bytes), air-gap capability, and zero exposure to upstream rate-limits or flakes.
 
 - **No bootstrap chicken-and-egg.** Because the registry is a baked binary — not a multi-process stack that
   must pull its own prerequisites — it comes up like any other baked service; there is no pre-registry
@@ -169,7 +169,7 @@ configured against a SQL backend, that database follows the per-service Patroni 
 ## 8. Postgres — Patroni-via-Percona, one cluster per consumer, with pgAdmin
 
 amoebius **never** runs a "just one Postgres Pod." Every relational database is a Patroni cluster managed
-by the Percona operator, and — crucially — **each consuming service gets its own cluster**, never a shared
+by the Percona operator, and **each consuming service gets its own cluster**, never a shared
 mega-database, each paired with **its own pgAdmin**.
 
 Why separate-per-service: blast-radius isolation (one service's DB incident can't take down another's),
@@ -196,11 +196,11 @@ independent version and lifecycle, and clean per-namespace teardown.
 
 ## 9. The LoadBalancer and the single wild-ingress path
 
-There is exactly **one door** from the outside world, and **Keycloak is the bouncer**. All wild traffic —
+The Keycloak-owned identity edge is the **single sanctioned ingress point** for all external traffic. All wild traffic —
 WAN, LAN, and even a localhost *browser* connection — enters through the LoadBalancer, is routed by Envoy
 through the Gateway API, and is authenticated by Keycloak before it reaches any workload. No app publishes
-its own ingress; no chart opens a backdoor NodePort to the wild. "Keycloak owns all wild ingress" is not a
-guideline — it is the only sanctioned ingress shape, and the DSL makes the alternatives unrepresentable
+its own ingress; no chart opens a backdoor NodePort to the wild. Keycloak owning all wild ingress is
+the only sanctioned ingress shape, and the DSL makes the alternatives unrepresentable
 (see [dsl_doctrine.md](./dsl_doctrine.md) and [illegal_state_catalog.md](./illegal_state_catalog.md)).
 
 - **The LoadBalancer is the one substrate-driven difference.** MetalLB on bare-metal / kind; a cloud LB
@@ -260,7 +260,7 @@ compile/decode-time impossibility (type-foreclosed for the derived-toleration sh
 
 ## 10. Every container declares CPU and RAM
 
-No pod is a freeloader — and neither is any host-level worker: **every container — platform service and
+No pod is exempt — and neither is any host-level worker: **every container — platform service and
 app alike — and every host-level worker subprocess declares explicit CPU and RAM**
 (DEVELOPMENT_PLAN cross-cutting invariants). Cashing that out:
 

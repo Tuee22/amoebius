@@ -27,7 +27,7 @@ both on the host:
 - **Runtime (per kernel):** generated **Metal Shading Language (MSL)** is compiled *in-process* through the
   OS Metal runtime — `MTLDevice.makeLibrary(source:options:)` — and dispatched on the host GPU.
 
-> **The one-line rule:** *A cache miss never starts a VM, invokes SwiftPM, compiles a generated Swift
+> **Rule:** *A cache miss never starts a VM, invokes SwiftPM, compiles a generated Swift
 > package, asks for an Xcode license, or depends on a user login keychain.*
 
 ```mermaid

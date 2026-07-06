@@ -13,8 +13,8 @@
 
 ## 1. The whole surface: two channels, both localhost-only
 
-Start from the picture. Everything that reaches an amoebius cluster from the *wild* — WAN, LAN, even a
-browser on the same machine — goes through one door, and Keycloak is the bouncer
+Everything that reaches an amoebius cluster from the *wild* — WAN, LAN, even a
+browser on the same machine — traverses a single authenticated ingress edge that Keycloak owns
 ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)). This document owns the **one
 carve-out** from that rule: the traffic that originates *on the host itself* and never touches a network
 anyone else can see.
@@ -31,6 +31,8 @@ Anything that is neither of these is *wild*, and wild traffic has no host-specia
 LoadBalancer → Envoy → Keycloak like everyone else. The carve-out is acceptable **precisely because** it is
 unreachable off the host; the moment such an access point were exposed to LAN or WAN it would become a
 backdoor around Keycloak, which the DSL makes unrepresentable ([§7](#7-what-the-dsl-makes-unrepresentable-here)).
+
+These two channels and the "coordination *is* Pulsar + MinIO" rule ([§3](#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)) govern the **workload plane** only; the operator admin control plane (Vault init/unseal, delivering a new `.dhall`) rides a distinct privileged REST channel owned by [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api).
 
 Channel 2's "localhost-only" is the *steady-state, single-host* form of a more general boundary. When remote
 elastic compute must reach the home cluster's one Pulsar/MinIO across an untrusted network, the same channel
@@ -57,16 +59,16 @@ The amoebius vision posed host↔cluster comms as an **open question**, twice:
 
 - The original vision sketched the carve-out (host binary → kubeapi via distro mTLS; host services →
   cluster services via NodePort, localhost only).
-- The original design left this choice open — it lays out the options without picking: how should the host
-  daemon and its subprocesses talk to the in-cluster daemon? It names three options and the trade no one had
-  resolved.
+- The original design left this choice open — it lays out the options without picking how the host
+  daemon and its subprocesses should talk to the in-cluster daemon. It names three options and an unresolved
+  trade-off.
 
 This document **resolves it.** The three options as posed, and the verdict:
 
 | Option | What it buys | Why rejected |
 |---------------------------------|--------------|--------------|
-| **(a)** Same Keycloak / Envoy / Gateway-API path as wild traffic | One uniform ingress story | Defeats the point: host daemons exist for *performance* (e.g. Apple unified memory), and forcing bulk model/blob/event I/O through OIDC + L7 routing + edge TLS adds auth and proxy overhead to the one path that most needs to be cheap. A host daemon is also not "wild" — treating it as such conflates trust boundaries. |
-| **(b)** Separate NodePort with **mTLS issued by root** | Network-level confidentiality + authenticity | The mTLS handshake and per-record encryption are real overhead on high-bandwidth bulk transfer (model weights, content-addressed blobs, Pulsar streams). You pay a tax on every channel-2 byte to defend against an attacker who, by the network restriction ([§5](#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary)), cannot reach the socket in the first place. |
+| **(a)** Same Keycloak / Envoy / Gateway-API path as wild traffic | One uniform ingress story | Host daemons exist for *performance* (e.g. Apple unified memory), and forcing bulk model/blob/event I/O through OIDC + L7 routing + edge TLS adds auth and proxy overhead to the one path that most needs to be cheap. A host daemon is also not "wild" — treating it as such conflates trust boundaries. |
+| **(b)** Separate NodePort with **mTLS issued by root** | Network-level confidentiality + authenticity | The mTLS handshake and per-record encryption are real overhead on high-bandwidth bulk transfer (model weights, content-addressed blobs, Pulsar streams). Every channel-2 byte pays a tax to defend against an attacker who, by the network restriction ([§5](#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary)), cannot reach the socket in the first place. |
 | **(c)** A **Unix domain socket** | A *hard* guarantee of no network traffic — attractive | One socket becomes the single pipe through which **all** MinIO and Pulsar I/O is funnelled and bottlenecked. It is also not cross-substrate-uniform: the loopback-NodePort shape generalizes cleanly across kind/rke2/Lima/WSL2, a single named socket does not. |
 
 **Resolution — chosen design: a host compute daemon is a plain Pulsar + MinIO *client/peer* over
@@ -86,7 +88,7 @@ keeping option (b)'s bandwidth headroom (a real socket per stream) without payin
 ## 3. There is no bespoke control channel — coordination *is* Pulsar + MinIO
 
 The cleanest part of the resolution is what it **removes**: there is no custom RPC, no side-channel
-protocol, and no "amoebius proxy" that a host daemon dials into. **All coordination flows through Pulsar
+protocol, and no "amoebius proxy" that a host daemon dials into. **All workload coordination flows through Pulsar
 and MinIO** — the same nervous system every in-cluster worker already uses.
 
 Concretely:
@@ -116,13 +118,10 @@ No WebSockets anywhere: the daemon speaks the native Pulsar TCP binary protocol 
 `amoebius-pulsar` client, which is a locked invariant of
 [pulsar_client_doctrine.md](./pulsar_client_doctrine.md).
 
-**This is a workload-plane rule, not an admin-plane one.** [§1](#1-the-whole-surface-two-channels-both-localhost-only)'s
-two channels and this section's "coordination *is* Pulsar + MinIO, no bespoke RPC" govern the
-**worker/workload** plane — host compute daemons, and the host binary when it *coordinates* with workers.
-They do **not** govern the **operator admin control plane**: administering the cluster's own configuration
-(Vault init/unseal, delivering a new `.dhall`) is a *control* concern, not worker coordination, and rides a
-distinct authenticated REST channel — the operator CLI → the amoebius NodePort service → the elected
-singleton — owned by [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api).
+**This is a workload-plane rule, not an admin-plane one** — [§1](#1-the-whole-surface-two-channels-both-localhost-only) draws that split up front. The operator admin control plane it excludes — administering the cluster's own configuration
+(Vault init/unseal, delivering a new `.dhall`), a *control* concern rather than worker coordination — rides the
+distinct privileged REST channel (the operator CLI → the amoebius NodePort service → the elected
+singleton), owned by [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api).
 That channel is privileged, not wild (so it is not a Keycloak bypass, [§1](#1-the-whole-surface-two-channels-both-localhost-only)),
 and channel 1 ([§4](#4-channel-1--the-host-binary--kube-apiserver-via-distro-mtls)) is retired to
 bootstrap-only once it takes over. The "no bespoke channel" verdict here is about the *bulk worker wire*, which
@@ -152,7 +151,7 @@ identity; it consumes the distro's kubeconfig and talks to the apiserver like an
 
 ## 5. Why no mTLS is safe here: the network restriction *is* the security boundary
 
-The intuition: **you do not need to encrypt a wire that no attacker can reach.** Channel 2's security comes
+**A wire no attacker can reach does not require encryption.** Channel 2's security comes
 from *who can open the socket*, not from what flows over it.
 
 The threat model, made explicit:
@@ -166,11 +165,11 @@ The threat model, made explicit:
   read the binary's credentials and drive channel 1. Transport mTLS on channel 2 would defend a boundary
   that the host's own process model has already drawn — adding cost without moving the line.
 - **"Absolutely certain only localhost can reach these"** is the load-bearing
-  property, and it is enforced by the network restriction, *not* by going through Envoy/Keycloak. The
-  whole reason channel 2 exists is to be the path that does **not** pass through the wild gateway; routing
+  property, and it is enforced by the network restriction, *not* by going through Envoy/Keycloak. Channel
+  2 exists to be the path that does **not** pass through the wild gateway; routing
   it back through Envoy would re-introduce exactly the overhead [§2](#2-the-decision-that-was-open-and-is-now-resolved) rejected.
 
-The bandwidth half of the argument (why we don't add crypto "just in case"):
+The bandwidth half of the argument (why amoebius does not add crypto just in case):
 
 - **Host compute daemons exist for performance.** Apple-Metal inference wants the host's unified memory;
   the daemon is on the host precisely to avoid a containerization/VM tax. Bulk traffic — model weights,
@@ -264,7 +263,7 @@ the comms-relevant requirement each substrate must satisfy:
 - **This generalizes a pattern proven in the sibling prodbox project**, where in-cluster Harbor is reached
   by host-origin clients at `127.0.0.1:30080` over a NodePort bound to loopback (prodbox CLAUDE.md,
   "Substrate Equivalence"). That is **evidence from another system, not proof in amoebius** — amoebius has
-  not yet built Phase 7. Read it as precedent for *feasibility*, not as a tested amoebius guarantee.
+  not yet built Phase 7. It is precedent for *feasibility*, not a tested amoebius guarantee.
 - **The DSL never lets a substrate "fix" a missing piece by widening exposure.** If a substrate's node
   networking makes the loopback binding awkward, the resolution is to extend that substrate's installer to
   honor the host-only contract — not to publish the port wider. Substrate equivalence is structural

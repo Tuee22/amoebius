@@ -20,12 +20,12 @@ many nodes are running or where they are running." Taken naively, that collides 
 invariant: **a cluster is *the* consistency boundary.** Within one cluster, Pulsar/MinIO/Postgres are
 strongly consistent (delegated); *across* clusters, the only relationship is **asynchronous geo-replication**,
 and "a single global view across clusters is a cross-cluster split-brain in waiting"
-([chaos_failover_doctrine.md](./chaos_failover_doctrine.md)). You cannot have one strongly-consistent logical
-store spanning two clusters without either unbounded latency or divergence — that is physics, not a design
+([chaos_failover_doctrine.md](./chaos_failover_doctrine.md)). One strongly-consistent logical store cannot
+span two clusters without either unbounded latency or divergence — that is physics, not a design
 choice.
 
 This doctrine resolves the collision by observing that **"run this elsewhere" names two structurally
-different things**, and making the difference a matter of *which type you reach for*:
+different things**, and making the difference a matter of *which type is reached for*:
 
 - **One data plane, many compute locations.** The remote compute is *not a cluster*. It is stateless
   compute that joins the home cluster's **one** Pulsar/MinIO as a client over the fabric. There is exactly
@@ -36,13 +36,13 @@ different things**, and making the difference a matter of *which type you reach 
   authority. This is the existing multi-cluster world owned by
   [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) and Phase 9.
 
-The whole job of this document is to keep those two apart, so the cheap case (attach) never drags on the
+This document keeps those two apart, so the cheap case (attach) never drags on the
 expensive case's machinery (geo-replication, the Second-Axis proof obligation, the R9 data-loss budget), and
 the expensive case is never mistaken for the cheap one.
 
 There is a **third** shape this doctrine must keep distinct from both: a **stretched cluster** — *one*
 cluster whose nodes or host workers sit at more than one network locality, reached across a WAN. It is
-emphatically **not** the second-cluster case: it has **one** etcd, **one** consistency boundary, **no** second
+**not** the second-cluster case: it has **one** etcd, **one** consistency boundary, **no** second
 store, and **no** async geo-replication link, so it owes **no** R9 data-loss budget and **no** Second-Axis
 obligation — the [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) machinery it is exempt from. Within
 a stretched cluster the "run this elsewhere" question refines by *kind*: a **stretched host worker** is a
@@ -68,7 +68,7 @@ opening invariant, unchanged.
 
 The load-bearing decision: **the worker pool is NOT a fourth arm of the closed `ComputeEngine` union**
 ([cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)). Making it an engine arm would give it a
-cluster identity and therefore its own data plane — exactly the second boundary we must avoid. It is a
+cluster identity and therefore its own data plane — exactly the second boundary this doctrine forbids. It is a
 *separate deployment-rules type keyed to an existing cluster's data plane*, so the `ComputeEngine` union
 stays closed and the attach topology provably creates no second store.
 
@@ -91,7 +91,7 @@ A `DataPlane` is a typed handle to **one cluster's one Pulsar + one object/KV st
 value (an ownership index, [illegal_state_catalog.md §4.4](./illegal_state_catalog.md#44-ownership-indices--single-owner-ssot-structurally)) *projected* from the
 platform-service set, never authored — so "two logical stores for one cluster" has no constructor.
 
-The crux — "a workload bound to a store it cannot reach" — is foreclosed by making **fabric membership a
+The core illegal state — "a workload bound to a store it cannot reach" — is foreclosed by making **fabric membership a
 capability** ([illegal_state_catalog.md §4.2](./illegal_state_catalog.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)) phantom-indexed by the owning
 cluster. A logical binding resolves to a physical handle *only* on presentation of that capability:
 
@@ -233,7 +233,7 @@ data Deprovision = Deprovision { releaseCompute :: ComputeSet }  -- NO deleteSto
 ## 5. The category error this doctrine forecloses
 
 Because the two topologies look superficially alike ("deploy AWS on a condition, tear down except storage"),
-the tempting mistake is to reach for the cross-cluster machinery when the attach topology applies. That is a
+the error to avoid is to reach for the cross-cluster machinery when the attach topology applies. That is a
 correctness bug, not a style choice:
 
 - **Do not geo-replicate a worker pool.** A pool owns no store, so there is nothing to replicate; wiring

@@ -13,7 +13,7 @@
 
 ## 1. Two surfaces, one app written once
 
-The single most leverage-bearing idea in amoebius is that **an app does not know how many of it exist.**
+In amoebius, **an app does not know how many of it exist.**
 A developer describes *what their app is* — its UI, its users, the data it keeps, the libraries it leans on
 — and **never** writes down how many replicas run, in how many regions, behind what failover policy, under
 what chaos schedule. Those are someone else's decision, made later, in a separate place, and the app is none
@@ -28,7 +28,7 @@ Concretely, amoebius splits the Dhall DSL into two **orthogonal surfaces**:
 
 These are not two halves of one file that happen to be near each other — they are **separable inputs**. The
 app spec joins with *a* deployment-rules layer to produce *a* deployment; swap the deployment-rules layer
-and you get a different deployment from byte-identical app logic. The grammar of these two surfaces — the
+and a different deployment results from byte-identical app logic. The grammar of these two surfaces — the
 Dhall record/union types, total composability, and the illegal-state-unrepresentable contract — is owned by
 [dsl_doctrine.md](./dsl_doctrine.md). This document owns only the **dividing line**: which concerns live on
 which surface, and why the line must never be crossed (DEVELOPMENT_PLAN
@@ -44,9 +44,8 @@ cross-cutting invariant "Application logic and deployment rules are separate DSL
 
 ## 2. The application-logic surface — what an app *is*
 
-Lead with the intuition: **everything on this surface survives a move.** If you tore the app off its cluster
-and stood it up somewhere else, on a different substrate, at a different scale, these are the things that
-would have to come *with* it because they *are* the app. An amoebius app is exactly two artifacts: one or
+**Everything on this surface survives a move.** An app torn off its cluster and stood up somewhere else — on a
+different substrate, at a different scale — carries these things *with* it because they *are* the app. An amoebius app is exactly two artifacts: one or
 more container images that build for both `amd64` and `arm64`, and an **app-spec `.dhall`**. The image-build pipeline is owned by [image_build_doctrine.md](./image_build_doctrine.md);
 this surface owns the spec.
 
@@ -84,7 +83,7 @@ because the type does not have those fields.
 
 ## 3. The deployment-rules surface — how the same app *runs*
 
-The intuition is the mirror image of [§2](#2-the-application-logic-surface--what-an-app-is): **everything on this surface is about robustness, scale, and
+The deployment-rules surface is the mirror image of [§2](#2-the-application-logic-surface--what-an-app-is): **everything on this surface is about robustness, scale, and
 placement — and none of it changes what the app is.** Turn every one of these dials and a user sees the
 identical app; they just see it survive more, scale wider, or run on different hardware.
 
@@ -167,7 +166,7 @@ this doc states the policy; those docs own the enforcement.
 
 ## 5. Why the split matters — cashing it out
 
-Three concrete payoffs, each a direct consequence of keeping the line clean:
+Three concrete properties, each a direct consequence of keeping the line clean:
 
 - **Write once.** An app is authored a single time, deployment-agnostic. There is no "dev version" and
   "prod version" of the app spec; there is one app spec and many deployment-rules layers. This kills the
@@ -181,9 +180,9 @@ Three concrete payoffs, each a direct consequence of keeping the line clean:
   deployment-rules layer (total composability). The proof case is [§6](#6-the-proof-case-mattandjames-boiled-to-application-logic-only) and the
   extreme case is [§9](#9-composition-one-cluster--n-geo-replicated-clusters-zero-app-change).
 
-The deepest payoff is that the split makes a whole category of mistakes **unrepresentable**: the app surface
+The most fundamental consequence is that the split makes a whole category of mistakes **unrepresentable**: the app surface
 literally has no field in which to name a replica count or a region, and the deployment surface has no field
-in which to name a UI route or a bucket. You cannot accidentally hard-code "3 replicas" into application
+in which to name a UI route or a bucket. A "3 replicas" value cannot be accidentally hard-coded into application
 logic because there is nowhere to type it. That structural guarantee is owned by
 [dsl_doctrine.md](./dsl_doctrine.md) / [illegal_state_catalog.md](./illegal_state_catalog.md); this doc owns
 the *reason* it is worth enforcing.
@@ -309,8 +308,8 @@ Cashing out "zero app change":
 
 > **Honesty.** Geo-replication and cross-cluster failover are **Phase 9** and **not started**. Synchronous
 > intra-cluster HA is delegated to the systems that do their own consensus (MinIO / Pulsar / Postgres /
-> Patroni); the **asynchronous** cross-cluster boundary — what happens if a cluster dies mid-geo-sync and we
-> fail over to it — is an open correctness obligation owned by
+> Patroni); the **asynchronous** cross-cluster boundary — what happens if a cluster dies mid-geo-sync and amoebius
+> fails over to it — is an open correctness obligation owned by
 > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), not a proven result. This doc claims only that
 > the *app surface is unchanged* across the two topologies — it makes no claim that the failover is correct.
 

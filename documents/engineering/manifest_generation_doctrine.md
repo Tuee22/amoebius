@@ -16,24 +16,23 @@ configs"*, with *"a generic & reusable helm chart for amoebius apps"*.
 **This doctrine records the operator's locked decision to drop that framing.** amoebius does not template
 YAML and does not ship or consume a Helm chart — its own or anyone else's. It **generates the complete
 per-service Kubernetes object set from pure typed Haskell**, serializes it with Aeson, and applies it with
-its own reconciler ([§5](#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)). This is the same anti-templating instinct [dsl_doctrine.md §2](./dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)
-already states for the config surface — *"the instinct from a decade of bash and Helm templating is to put
-the how in the config … amoebius refuses that outright"* — carried all the way down to the manifests.
+its own reconciler ([§5](#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)). This is the same anti-templating rule [dsl_doctrine.md §2](./dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)
+already states for the config surface — grounded in the recorded operator vision that *"we want everything to be dhall"*, which keeps the *how* out of templated config — carried all the way down to the manifests.
 
-Two indictments motivate the decision, and they are different:
+Two reasons motivate the decision, and they are different:
 
 - **A Go-templated chart is stringly-typed and unverified.** A Helm template is text that *becomes* YAML
   only after string interpolation; nothing checks that the result is a well-formed object, that a referenced
   Secret exists, or that an `image:` resolves, until the apiserver rejects it (or worse, accepts something
   subtly wrong) at deploy time. The template language has no type system, so `{{ .Values.replicas }}`
   landing in a field that wants an int, or a missing `with` guard emitting `null`, is a runtime surprise.
-  This is exactly the *"valid YAML, wrong cluster"* failure class [illegal_state_catalog.md §1](./illegal_state_catalog.md#1-the-promise-illegal-states-fail-to-type-check)
+  This is exactly the *"valid YAML, wrong cluster"* failure class [illegal_state_catalog.md §1](./illegal_state_catalog.md#1-illegal-states-fail-to-type-check)
   exists to abolish — and a string template re-opens it underneath an otherwise-typed system.
-- **A third-party chart is unreviewed YAML you do not own.** Pulling `bitnami/postgresql` or an operator's
+- **A third-party chart is unreviewed YAML amoebius does not own.** Pulling `bitnami/postgresql` or an operator's
   upstream chart means running hundreds of lines of someone else's templated manifests — with their RBAC,
   their securityContext defaults, their image refs, their `hostPath` mounts — that no amoebius type ever
-  inspected. You cannot make *"every container declares cpu/ram"* or *"secrets are Vault-only"* true by
-  construction over manifests you did not generate. amoebius therefore renders **every** object it applies,
+  inspected. Neither *"every container declares cpu/ram"* nor *"secrets are Vault-only"* can be made true by
+  construction over manifests amoebius did not generate. amoebius therefore renders **every** object it applies,
   including the install manifests of the operators it runs ([§4](#4-no-third-party-charts--no-third-party-software-operators-are-generated)).
 
 amoebius needs semantics around cluster manifest changes, and proofs of correctness / that there won't be a
@@ -77,7 +76,7 @@ and *how* those objects are applied and reconciled ([§5](#5-the-applyreconcile-
 The core object is one pure function:
 
 ```haskell
--- Conceptual shape — the renderer is the value the whole doctrine is about.
+-- Conceptual shape — the renderer is the value this doctrine specifies.
 render :: ServiceSpec -> [K8sObject]
 ```
 
@@ -99,7 +98,7 @@ Three properties make this the right shape:
 - **Pure and total.** `render` performs no I/O, reaches no cluster, and (being a total function over a
   decoded, total Dhall value — [dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract))
   always produces a value. The plan **is data**: `amoebius … --dry-run` can print the exact object set it
-  would apply without contacting the apiserver, the same "what you preview is what runs" guarantee the
+  would apply without contacting the apiserver, the same "what is previewed is what runs" guarantee the
   chain/Step algebra gives the lifecycle ([dsl_doctrine.md §2](./dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)).
 - **Unit-testable without a cluster.** Because `render` is pure, a test asserts properties of the *emitted
   objects* — "every container has resource requests and limits," "no Service is type `LoadBalancer` outside
@@ -135,11 +134,11 @@ rules feed it):
   [illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force).
 - **Every pod gets a hardened `securityContext`.** `render` attaches a non-root, no-privilege-escalation,
   read-only-root-filesystem-by-default, dropped-capabilities security context to every workload it emits;
-  there is no code path that renders a bare pod spec. A chart you do not own cannot make this promise ([§1](#1-why-this-doctrine-exists-types-render-manifests-helm-does-not)).
+  there is no code path that renders a bare pod spec. A chart amoebius does not own cannot make this promise ([§1](#1-why-this-doctrine-exists-types-render-manifests-helm-does-not)).
 - **RBAC is least-privilege per workload.** A workload's `ServiceAccount` / `Role` / `RoleBinding` are
   rendered *from the same value that declares the workload*, scoped to exactly the verbs and resources that
   workload needs — the technique prodbox already uses in `Rke2.hs` (it renders `ServiceAccount` + `Role` +
-  `RoleBinding` triples as typed objects). There is no shared god-role to over-grant.
+  `RoleBinding` triples as typed objects). There is no shared over-privileged role to over-grant.
 - **NetworkPolicy is default-deny plus derived-allow.** Operators never hand-author allow/deny rules;
   `render` emits a default-deny baseline and then exactly the edges the declared dependency graph permits.
   The connectivity rule is owned by
@@ -163,7 +162,7 @@ because there was never a value to lint.
 
 prodbox today still consumes five upstream operator/platform charts — Harbor, MetalLB, Envoy Gateway,
 cert-manager, and the Percona PostgreSQL operator. amoebius eliminates all five **as charts** without
-eliminating the software. The distinction is the whole section:
+eliminating the software. The distinction has three parts:
 
 - **The operator *binary* is baked, not pulled.** Every third-party service binary — including each
   operator's controller — is baked into the multi-arch amoebius base container per the supply-chain rule;
@@ -201,14 +200,14 @@ than installing a Harbor chart.
 
 ## 5. The apply/reconcile engine: server-side apply, owned field manager, prune, wait
 
-Dropping Helm means amoebius must supply, in its own code, the one genuinely useful thing Helm did: take a
+Dropping Helm means amoebius must supply, in its own code, the one useful thing Helm did: take a
 desired object set and *make the cluster match it, idempotently*. amoebius's engine is the
 `discover → diff → enact → re-observe` reconciler of
 [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine),
 specialized from "any resource the forest can create" down to "Kubernetes objects in this cluster." It is
 **run by the elected control-plane singleton** — the in-cluster role with total cluster authority owned by
 [daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected) —
-never by a CLI poke racing another writer.
+never by a CLI invocation racing another writer.
 
 The mechanism, four parts:
 
@@ -359,7 +358,7 @@ release as an opaque gzipped Secret holding the rendered manifests, and the clus
   ledger keyed by `releaseHash`** — a durable record of *what was applied*, never a second desired-state
   store.
 
-The contrast is the point. Helm's release store has well-known desync failure modes — the stored release and
+The contrast is direct. Helm's release store has well-known desync failure modes — the stored release and
 the live cluster disagree after a manual `kubectl edit`, a `helm rollback` to a release whose manifests no
 longer match the chart, or a half-applied upgrade that leaves the release marked `deployed` over a broken
 object set. amoebius has **no release store to desync**: desired state is always exactly `render(spec)`, and
@@ -397,7 +396,7 @@ the reconciler converges *toward*.
   drift detection (diff live objects against a recorded `Release`), typed revision history, and cross-cluster
   confluence *always* available rather than best-effort — and it is the auditability substrate that lets
   amoebius refuse an external CI/CD control plane (no Argo/Flux/Tekton), owned by
-  [release_lifecycle_doctrine.md §1](./release_lifecycle_doctrine.md#1-the-one-idea-no-external-cicd-control-plane--delivery-is-typed-composition-on-primitives-amoebius-owns). Leaving it optional would reintroduce a
+  [release_lifecycle_doctrine.md §1](./release_lifecycle_doctrine.md#1-no-external-cicd-control-plane--delivery-is-typed-composition-on-primitives-amoebius-owns). Leaving it optional would reintroduce a
   "sometimes there is no history" mode; promoting it closes that.
 - **Still not a Helm release store.** The ledger is immutable and content-addressed — a *new* `releaseHash`
   per generation, never an in-place-mutated blob — so it has none of the desync modes of Helm's gzipped

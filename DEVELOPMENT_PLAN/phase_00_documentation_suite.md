@@ -59,7 +59,7 @@ the sibling **prodbox** project — that is prior-art evidence, not amoebius pro
   decoder) contract that makes illegal cluster state fail to type-check.
 - [`app_vs_deployment_doctrine.md` §1 — Two surfaces, one app written once](../documents/engineering/app_vs_deployment_doctrine.md#1-two-surfaces-one-app-written-once):
   this phase documents the hard split between application logic and deployment rules.
-- [`illegal_state_catalog.md` §1 — The promise: illegal states fail to type-check](../documents/engineering/illegal_state_catalog.md#1-the-promise-illegal-states-fail-to-type-check):
+- [`illegal_state_catalog.md` §1 — Illegal states fail to type-check](../documents/engineering/illegal_state_catalog.md#1-illegal-states-fail-to-type-check):
   this phase catalogs each illegal state and the typing technique that forecloses it, with honest layers of
   foreclosure.
 - [`service_capability_doctrine.md` §1 — Why capabilities, not products](../documents/engineering/service_capability_doctrine.md#1-why-capabilities-not-products):
@@ -67,7 +67,7 @@ the sibling **prodbox** project — that is prior-art evidence, not amoebius pro
   binding.
 - [`platform_services_doctrine.md` §1 — The Invariant: every cluster is the same cluster](../documents/engineering/platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster):
   this phase enumerates the standard services and the HA-always / Keycloak-owns-all-ingress invariants.
-- [`storage_lifecycle_doctrine.md` §1 — The one idea: clusters are cattle, storage is land](../documents/engineering/storage_lifecycle_doctrine.md#1-the-one-idea-clusters-are-cattle-storage-is-land):
+- [`storage_lifecycle_doctrine.md` §1 — Cluster and storage have independent lifetimes](../documents/engineering/storage_lifecycle_doctrine.md#1-cluster-and-storage-have-independent-lifetimes):
   this phase specifies `no-provisioner` retained PVs, deterministic rebind, and the deletion-forbidden rule.
 - [`cluster_lifecycle_doctrine.md` §1 — Two cluster kinds, one lifecycle shape](../documents/engineering/cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape):
   this phase documents bootstrap, amoebic spawning, teardown-with-cleanup vs chaos-failover, and push-back on
@@ -88,7 +88,7 @@ the sibling **prodbox** project — that is prior-art evidence, not amoebius pro
 - [`vault_pki_doctrine.md` §2 — Vault is the fail-closed secrets root](../documents/engineering/vault_pki_doctrine.md#2-vault-is-the-fail-closed-secrets-root):
   this phase documents the fail-closed Vault root, root password-encrypted unseal, parent/child injection,
   the PKI trust anchor, and the SecretRef-by-name contract.
-- [`pulumi_iac_doctrine.md` §1 — The one rule: Pulumi runs only from inside an existing amoebius cluster](../documents/engineering/pulumi_iac_doctrine.md#1-the-one-rule-pulumi-runs-only-from-inside-an-existing-amoebius-cluster):
+- [`pulumi_iac_doctrine.md` §1 — Pulumi runs only from inside an existing amoebius cluster](../documents/engineering/pulumi_iac_doctrine.md#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster):
   this phase specifies the MinIO+Vault-envelope backend, DNS (route53)/TLS (zerossl), and the EBS
   create-vs-delete credential model.
 - [`daemon_topology_doctrine.md` §1 — One binary, three contexts](../documents/engineering/daemon_topology_doctrine.md#1-one-binary-three-contexts):
@@ -100,13 +100,13 @@ the sibling **prodbox** project — that is prior-art evidence, not amoebius pro
 - [`pulsar_client_doctrine.md` §1 — One client, one wire, no WebSockets](../documents/engineering/pulsar_client_doctrine.md#1-one-client-one-wire-no-websockets):
   this phase documents the native-protocol `amoebius-pulsar` client, the declarative topology algebra, and
   at-least-once + broker-side dedup.
-- [`content_addressing_doctrine.md` §1 — The one idea: a name you cannot lie about](../documents/engineering/content_addressing_doctrine.md#1-the-one-idea-a-name-you-cannot-lie-about):
+- [`content_addressing_doctrine.md` §1 — A content-derived name that cannot be forged](../documents/engineering/content_addressing_doctrine.md#1-a-content-derived-name-that-cannot-be-forged):
   this phase specifies the three-tier content-addressed store, `experimentHash`, and seed-derivation
   determinism for both infernix and jitML.
 - [`chaos_failover_doctrine.md` §12 — The moral core — proven, tested, assumed](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed):
   this phase writes the Extract→Model→Inject methodology and the proven/tested/assumed ledger, including the
   honesty rule the documentation standard inherits.
-- [`testing_doctrine.md` §1 — The one idea: a test is an amoebius spec](../documents/engineering/testing_doctrine.md#1-the-one-idea-a-test-is-an-amoebius-spec):
+- [`testing_doctrine.md` §1 — A test is an amoebius spec](../documents/engineering/testing_doctrine.md#1-a-test-is-an-amoebius-spec):
   this phase documents test-as-`.dhall` (spin up → run → always tear down), `suggest-test`, flagged
   credentials, and the per-run ledger artifact.
 - [`tla_modelling_assumptions.md` §0 — Scheduled stub — read this first](../documents/engineering/tla_modelling_assumptions.md#0-scheduled-stub--read-this-first):
@@ -178,7 +178,7 @@ exactly one doc.
 
 Adopt [`dsl_doctrine.md` §5 — The illegal-state-unrepresentable contract](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract),
 [`app_vs_deployment_doctrine.md` §1 — Two surfaces, one app written once](../documents/engineering/app_vs_deployment_doctrine.md#1-two-surfaces-one-app-written-once),
-[`illegal_state_catalog.md` §1 — The promise: illegal states fail to type-check](../documents/engineering/illegal_state_catalog.md#1-the-promise-illegal-states-fail-to-type-check),
+[`illegal_state_catalog.md` §1 — Illegal states fail to type-check](../documents/engineering/illegal_state_catalog.md#1-illegal-states-fail-to-type-check),
 and [`service_capability_doctrine.md` §1 — Why capabilities, not products](../documents/engineering/service_capability_doctrine.md#1-why-capabilities-not-products):
 write the core of the DSL — the orchestration surface, the two-gate type contract, the app-logic/deployment
 split, the illegal-state catalog with honest foreclosure layers, and the capability abstraction.
@@ -228,7 +228,7 @@ normative content.
 
 Adopt [`platform_services_doctrine.md` §1 — The Invariant: every cluster is the same cluster](../documents/engineering/platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster),
 [`manifest_generation_doctrine.md` §1 — Why this doctrine exists: types render manifests, Helm does not](../documents/engineering/manifest_generation_doctrine.md#1-why-this-doctrine-exists-types-render-manifests-helm-does-not),
-[`storage_lifecycle_doctrine.md` §1 — The one idea: clusters are cattle, storage is land](../documents/engineering/storage_lifecycle_doctrine.md#1-the-one-idea-clusters-are-cattle-storage-is-land),
+[`storage_lifecycle_doctrine.md` §1 — Cluster and storage have independent lifetimes](../documents/engineering/storage_lifecycle_doctrine.md#1-cluster-and-storage-have-independent-lifetimes),
 [`cluster_lifecycle_doctrine.md` §1 — Two cluster kinds, one lifecycle shape](../documents/engineering/cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape),
 [`substrate_doctrine.md` §1 — The substrate is a fact about the host, not a knob](../documents/engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob),
 and [`image_build_doctrine.md` §2 — The single distribution rule](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster):
@@ -278,11 +278,11 @@ surfaces from earlier sprints.
 ### Objective
 
 Adopt [`vault_pki_doctrine.md` §2 — Vault is the fail-closed secrets root](../documents/engineering/vault_pki_doctrine.md#2-vault-is-the-fail-closed-secrets-root),
-[`pulumi_iac_doctrine.md` §1 — The one rule: Pulumi runs only from inside an existing amoebius cluster](../documents/engineering/pulumi_iac_doctrine.md#1-the-one-rule-pulumi-runs-only-from-inside-an-existing-amoebius-cluster),
+[`pulumi_iac_doctrine.md` §1 — Pulumi runs only from inside an existing amoebius cluster](../documents/engineering/pulumi_iac_doctrine.md#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster),
 [`daemon_topology_doctrine.md` §1 — One binary, three contexts](../documents/engineering/daemon_topology_doctrine.md#1-one-binary-three-contexts),
 [`host_cluster_comms_doctrine.md` §1 — The whole surface: two channels, both localhost-only](../documents/engineering/host_cluster_comms_doctrine.md#1-the-whole-surface-two-channels-both-localhost-only),
 [`pulsar_client_doctrine.md` §1 — One client, one wire, no WebSockets](../documents/engineering/pulsar_client_doctrine.md#1-one-client-one-wire-no-websockets),
-and [`content_addressing_doctrine.md` §1 — The one idea: a name you cannot lie about](../documents/engineering/content_addressing_doctrine.md#1-the-one-idea-a-name-you-cannot-lie-about):
+and [`content_addressing_doctrine.md` §1 — A content-derived name that cannot be forged](../documents/engineering/content_addressing_doctrine.md#1-a-content-derived-name-that-cannot-be-forged):
 write the secrets/IaC and runtime/transport/determinism layers — Vault/PKI, Pulumi-from-inside, the
 daemon-topology grid, host↔cluster comms, the native Pulsar client, and content-addressed determinism.
 
@@ -326,7 +326,7 @@ scheduled stub that names its Phase 9 fill-in.
 ### Objective
 
 Adopt [`chaos_failover_doctrine.md` §12 — The moral core — proven, tested, assumed](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed),
-[`testing_doctrine.md` §1 — The one idea: a test is an amoebius spec](../documents/engineering/testing_doctrine.md#1-the-one-idea-a-test-is-an-amoebius-spec),
+[`testing_doctrine.md` §1 — A test is an amoebius spec](../documents/engineering/testing_doctrine.md#1-a-test-is-an-amoebius-spec),
 and [`tla_modelling_assumptions.md` §0 — Scheduled stub — read this first](../documents/engineering/tla_modelling_assumptions.md#0-scheduled-stub--read-this-first):
 write the verification layer — the Extract→Model→Inject methodology, the proven/tested/assumed ledger that
 the whole plan's honesty rule descends from, the test-topology contract, and the honest scheduled-stub for

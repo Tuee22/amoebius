@@ -14,7 +14,7 @@
 
 ## 1. Why capabilities, not products
 
-The intuition is a single sentence: **an app should be able to say "I need an ObjectStore," not "I need
+**An app should be able to say "I need an ObjectStore," not "I need
 MinIO."** Whether that object storage is served by MinIO, by a cloud S3, or by something amoebius has not
 written yet is an implementation detail of the *platform* — and the moment an app spec writes the word
 `minio`, it has welded itself to one realization and lost the right to run anywhere the platform decides to
@@ -38,7 +38,7 @@ The app-surface inventory those resources belong to is owned by
 [app_vs_deployment_doctrine.md §2](./app_vs_deployment_doctrine.md#2-the-application-logic-surface--what-an-app-is); this doctrine owns the *interface* behind
 it.
 
-The payoff is the fungibility goal stated from the app's side: an app that names capabilities is portable
+Fungibility follows from this, stated from the app's side: an app that names capabilities is portable
 across every cluster amoebius can build, because every cluster offers the same capabilities ([§6](#6-fungibility-reconciled-app-surface-invariant-shape-deployment-ruled)). An app that
 named products would be portable only across clusters that ran the same products in the same shapes — which is
 exactly the coupling amoebius exists to dissolve.
@@ -81,11 +81,11 @@ operator choice:
 | ObjectStore | **MinIO** | distributed/erasure-coded at steady state; single-node shape on small clusters ([§5](#5-per-cluster-structural-shapes--beyond-values)) |
 | SecretStore | **Vault** | the fail-closed secrets root; owned in full by [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | MessageBus | **Pulsar** (with ZooKeeper + BookKeeper) | native binary protocol, no WebSockets |
-| Sql | **Patroni**, via the Percona operator | one Patroni cluster *per consuming capability instance*, never a shared mega-DB |
-| Identity | **Keycloak** | owns all wild ingress through the Edge ([§7](#7-expressing-a-capability-in-the-dsl)) |
-| Observability | **Prometheus / Grafana** | reachable only through the Identity-owned edge |
+| Sql | **Patroni**, via the Percona operator | one Patroni cluster *per consuming capability instance*, never a shared mega-DB. Patroni is the fixed failover engine amoebius depends on; the operator that stands it up is a swappable deployment-rules default — a Zalando/CloudNativePG substitution renders the same `render :: CapabilitySpec -> [K8sObject]` shape and is not app-visible |
+| Identity | **Keycloak** | owns all wild ingress through the Edge ([§7](#7-expressing-a-capability-in-the-dsl)); the single baked, offline-capable OSS identity provider that both **issues and validates** the OIDC/JWT tokens the Envoy ext-authz path enforces on every wild route, and performs realm/user-federation/RBAC administration in one binary — lighter proxies (Dex/oauth2-proxy) validate but do not manage identities, forcing a second identity store |
+| Observability | **Prometheus / Grafana** | reachable only through the Identity-owned edge; its pull/scrape model matches the no-wild-ingress posture (targets sit behind the Identity edge, nothing is pushed outward), and amoebius must run identically on an offline laptop kind cluster, which rules out any SaaS/push-agent stack |
 | Registry | **`distribution`** (the `registry:2` single-binary OCI registry) | **replaces Harbor** — see below |
-| Edge | **Envoy + Gateway API** | the L4 LoadBalancer beneath it (MetalLB or cloud LB) is the one substrate-driven choice |
+| Edge | **Envoy + Gateway API** | the L4 LoadBalancer beneath it (MetalLB or cloud LB) is the one substrate-driven choice — MetalLB is the one mature OSS implementation of LoadBalancer-type Services on bare metal (L2/BGP), filling the exact gap cloud substrates get from their provider LB |
 
 The concrete provider/service **set** — what each provider is and how it is deployed at the platform level —
 is owned by [platform_services_doctrine.md](./platform_services_doctrine.md), not duplicated here. This
@@ -105,8 +105,8 @@ doctrine owns only the *capability → provider* indirection over that set, plus
   [image_build_doctrine.md](./image_build_doctrine.md). The capability model is indifferent to the runtime; it
   is named here only so "Identity is a JVM service" is not mistaken for a capability fact.
 
-**The type leaves room for alternates; amoebius builds none it does not need.** The point of the indirection
-is that a capability's provider is a typed *union with one arm today* — `ObjectStore` could later admit an `S3`
+**The type leaves room for alternates; amoebius builds none it does not need.** The indirection makes a
+capability's provider a typed *union with one arm today* — `ObjectStore` could later admit an `S3`
 arm, `Sql` could admit a managed cloud Postgres — without any app spec changing, because the app never named
 the provider. But a union arm is not an adapter. amoebius **does not build a provider adapter it does not yet
 need**: the alternates are headroom in the type, not shipped code. Claiming MinIO is swappable for S3 *today*
@@ -165,7 +165,7 @@ ML serving adds a **ninth capability, `InferenceEngine`** — the abstract inter
 says *"I serve inference,"* exactly as an app names `ObjectStore` when it says "I keep durable objects." It
 exercises the [§4](#4-capability--provider--shape-the-binding) binding at its strictest: where a generic capability's provider *defaults* to the [§3](#3-one-canonical-provider-the-type-admits-alternates)
 canonical (part 2 above) and could later admit an alternate, an `InferenceEngine`'s provider is a union with
-**no arm to fetch and nothing to author** — it is **selected by the detected substrate**, full stop.
+**no arm to fetch and nothing to author** — it is **selected by the detected substrate**.
 
 **The canonical provider is a closed union of substrate-tagged, baked `EngineRuntime`s.** `EngineRuntime` has
 one arm per substrate lane and per baked engine family, and — the load-bearing rule — **no
@@ -178,7 +178,10 @@ one arm per substrate lane and per baked engine family, and — the load-bearing
 
 Every arm is a runtime already **baked into the amoebius base container**
 ([image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)); because the ML siblings **link as libraries** rather
-than run as fetched sidecars, the engine exists the moment the pod does. The deployment `.dhall` **selects** an
+than run as fetched sidecars, the engine exists the moment the pod does. The union is closed **here** because every
+arm must be baked into the base container: adding an engine family is a base-image build plus a new
+`EngineRuntime` arm, never something an app `.dhall` can author, and the families in the table above map to the
+inference modalities the base container serves. The deployment `.dhall` **selects** an
 arm by the *detected* substrate (the substrate is DETECTED, [substrate_doctrine.md](./substrate_doctrine.md));
 it has no syntax with which to *author* a download or a build. This is the [§1](#1-why-capabilities-not-products) object-storage lesson taken to
 its limit: an app can no more write "curl this engine tarball at boot" than it can write "deploy `minio`."
@@ -192,7 +195,7 @@ doctrine owns that mapping.** `EngineRuntime` is a *coarsening* of the four-memb
 the union (that distinction has **no constructor** — type-foreclosed), and a node's engine is *projected from* its
 detected substrate, never declared free of it. The only freedom the quotient grants is that two substrates share
 one engine arm; it never lets a spec author an engine its substrate cannot provide — that would reopen the
-"selected by the detected substrate, full stop" foreclosure above, which the quotient **preserves** rather than
+"selected by the detected substrate" foreclosure above, which the quotient **preserves** rather than
 loosens. The lane in the table above is named the **Engine lane** precisely because `Cuda` now spans two
 substrates: keying that row on "substrate" would be a misnomer, since "substrate" names exactly the 4-member
 catalog owned by [substrate_doctrine.md §1](./substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob).
@@ -350,7 +353,7 @@ not get bypassed.
 
 ## 6. Fungibility, reconciled: app surface invariant, shape deployment-ruled
 
-This section resolves the one real tension in the doctrine, head-on.
+This section resolves the one real tension in the doctrine.
 
 **prodbox enforces substrate-equivalence with a lint** — the two substrates (`home`, `AWS`) must stand up the
 *identical* set of services in the *identical* shape, and a code path that re-pins a chart or image
@@ -367,14 +370,14 @@ longer "every cluster runs the identical manifest graph"; it is:
   invariant that actually matters, and it is owned as a classification by
   [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md).
 - **The capability set is cluster-invariant.** Every amoebius cluster offers all eight capabilities with their
-  canonical providers ([§2](#2-the-capability-set), [§3](#3-one-canonical-provider-the-type-admits-alternates)). A child cluster you have never seen still has an ObjectStore, a Sql, an
+  canonical providers ([§2](#2-the-capability-set), [§3](#3-one-canonical-provider-the-type-admits-alternates)). A never-before-seen child cluster still has an ObjectStore, a Sql, an
   Identity. This is the residue of [platform_services_doctrine.md §1](./platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster)
   fungibility, refined from "same shape" to "same *capability set*."
 - **The platform realization varies.** The capability → provider → **shape** binding is a deployment-rules
   concern that legitimately differs per cluster. The shape is *supposed* to vary; that is what lets one app
   spec run on a laptop and across a production forest unchanged.
 
-Stated as plainly as the locked decision deserves: **the substrate-equivalence lint is replaced by "app
+**The substrate-equivalence lint is replaced by "app
 surface invariant; shape deployment-ruled."** The lint that forbade per-substrate divergence is retired *for
 shape*; what remains enforced is that the *capability set* and the *app surface* do not vary. amoebius still
 refuses a different *capability set* per cluster (no "no-Registry" cluster); it now embraces a different

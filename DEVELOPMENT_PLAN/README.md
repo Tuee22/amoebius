@@ -44,8 +44,11 @@ This is a large body of work spanning many phases; that is expected.
 
 ## Cross-cutting invariants (documented in Phase 0; upheld by every phase)
 
-- **No environment variables, ever — including `PATH`.** Host tools are discovered lazily via the
-  substrate's package manager and invoked by full path.
+- **Amoebius never resolves a tool against the host's `PATH`.** Host tools are discovered lazily via the
+  substrate's package manager and invoked by absolute path; only the outermost host tool is absolute-path-resolved,
+  while a nested amoebius subcommand running inside a VM or container uses that guest's own `PATH`. (The rule is
+  "never resolve against the host's `PATH`," not "no `PATH` exists anywhere" — see
+  [`substrate_doctrine.md`](../documents/engineering/substrate_doctrine.md).)
 - **Illegal/unsafe cluster state is unrepresentable in Dhall** — PVC↔PV binding, gateway, DNS, certs,
   taints/tolerations/affinity, NetworkPolicy, and insecure ingress cannot be expressed wrongly.
 - **Resource demand never exceeds capacity.** A workload / VM / compute-engine whose summed cpu/mem/storage

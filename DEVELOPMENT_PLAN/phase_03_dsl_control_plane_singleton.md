@@ -79,7 +79,7 @@ and `legal_managed_eks` fixtures **decode**. All three halves run before the nex
   and deployment rules bind the canonical **provider** (default) plus a per-cluster **shape**
   ([§5 — Per-cluster structural shapes](../documents/engineering/service_capability_doctrine.md#5-per-cluster-structural-shapes--beyond-values)),
   so one app spec is byte-identical across clusters while the realization varies.
-- [`illegal_state_catalog.md` §1 — The promise: illegal states fail to type-check](../documents/engineering/illegal_state_catalog.md#1-the-promise-illegal-states-fail-to-type-check):
+- [`illegal_state_catalog.md` §1 — Illegal states fail to type-check](../documents/engineering/illegal_state_catalog.md#1-illegal-states-fail-to-type-check):
   this phase builds the GADT-indexed Haskell types, smart constructors, phantom tenant tags, and ownership
   indices that make the catalog's entries uninhabitable or decode-rejected — honoring the load-bearing limit
   ([§2](../documents/engineering/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it))
@@ -203,7 +203,7 @@ catalog entry and its foreclosure layer.
 layer reconciliation), `documents/engineering/dsl_doctrine.md` (contract honesty note)
 
 ### Objective
-Adopt [`illegal_state_catalog.md` §1 — The promise: illegal states fail to type-check](../documents/engineering/illegal_state_catalog.md#1-the-promise-illegal-states-fail-to-type-check),
+Adopt [`illegal_state_catalog.md` §1 — Illegal states fail to type-check](../documents/engineering/illegal_state_catalog.md#1-illegal-states-fail-to-type-check),
 [§2 — The load-bearing limit](../documents/engineering/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it),
 and [§6 — Three layers of foreclosure](../documents/engineering/illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force):
 build the smart constructors, phantom tenant tags, GADT-indexed state machines, and ownership indices that

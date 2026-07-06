@@ -22,7 +22,7 @@ package"; there is one Haskell binary that *runs* in three different ways:
 
 The **same-binary policy** is generalized directly from the prodbox sibling
 (`/home/matthewnowak/prodbox/documents/engineering/distributed_gateway_architecture.md` → "Same-binary
-policy"). The payoff is not stylistic — it is structural:
+policy"). This is structural, not stylistic:
 
 - **One distribution artifact, one dependency closure**, built once from the substrate `bootstrap.sh`
   against the pinned toolchain (GHC **9.12.4**, Cabal 3.16.1.0 — the
@@ -52,7 +52,7 @@ no-environment-variables / no-`PATH` lazy-tool-ensure contract — are owned by
 
 ## 2. Context × role: an orthogonal grid
 
-The single most useful mental model in this doctrine: **"where the binary runs" (context) and "what job it
+**"where the binary runs" (context) and "what job it
 is doing" (role) are independent axes.** Confusing them is the bug this section prevents — "the in-cluster
 pod" is not a role, and "the control-plane singleton" is not a context.
 
@@ -148,8 +148,8 @@ cluster" ([README](../../README.md): *prodbox = the root single-node control-pla
 
 The in-cluster daemon is a singleton service daemon (**exactly one pod**), yet
 the platform invariant is **HA always — including `replicas=1`**
-([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1)). These are not in tension once you
-read "exactly one pod" as **exactly one *active* (elected) singleton**, not "the chart only ever schedules
+([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1)). These are not in tension once "exactly one pod" is
+read as **exactly one *active* (elected) singleton**, not "the chart only ever schedules
 one replica":
 
 - The control-plane daemon is deployed by an **HA chart at a configurable replica count** — N candidate
@@ -460,7 +460,7 @@ auditable ([§5.5](#55-pulsar-primitives-evaluated-for-the-election--and-why-the
 
 ### 5.4 The safety boundary, stated honestly
 
-In a fully asynchronous system with partitions and no consensus primitive, you **cannot** have both
+A fully asynchronous system with partitions and no consensus primitive **cannot** provide both
 absolute no-two-leaders safety *and* always-available autonomous failover — a fundamental distributed-systems
 limit. amoebius inherits prodbox's explicit choice: under severe partition uncertainty the design is
 **availability-first** — an isolated candidate self-elects and keeps serving, accepting a *bounded,

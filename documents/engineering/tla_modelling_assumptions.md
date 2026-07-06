@@ -62,7 +62,7 @@ duplicates them.
 
 ## 2. The single proof obligation this model discharges
 
-Most distributed-consensus problems in amoebius are **not ours to prove**. Intra-cluster
+Most distributed-consensus problems in amoebius are **not amoebius's to prove**. Intra-cluster
 consensus — replicated object storage, the message log, the SQL primary — is delegated to
 systems that run their own consensus and georeplication and have been hardened far beyond
 anything a from-scratch model could claim:
@@ -94,10 +94,10 @@ flowchart TD
 
 ## 3. The question the model must answer
 
-Lead with the worst case in plain words: a sibling cluster is **mid geo-sync** — it has
-accepted some replicated state but not all — and at that instant it goes down, and we try to
-fail the gateway over *to that very cluster*. What happens? The honest answer today is *we have
-not proven one*, and that is exactly why the model is scheduled.
+The worst case, in plain words: a sibling cluster is **mid geo-sync** — it has
+accepted some replicated state but not all — and at that instant it goes down, and a gateway
+failover *to that very cluster* is attempted. The honest answer today is that amoebius has not
+proven a well-defined behaviour for that state, and that is why the model is scheduled.
 
 This is the motivating problem stated in the project vision: *"what exactly happens if a cluster goes down
 mid geo-sync and we try to failover the gateway to that cluster? We need to prove we always have

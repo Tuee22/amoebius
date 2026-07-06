@@ -53,9 +53,9 @@ inherited from prodbox, that is *evidence from a sibling system*, not proof in a
 
 Every byte the cluster runs is either **baked into the amoebius base image** (every third-party service
 binary) or **built by amoebius** (its own runtime image), then published once into the cluster's own
-in-cluster registry. **No workload ever pulls from a public registry.** The payoff is the strongest form of
-the supply-chain guarantee: you own every byte, you are immune to upstream rate-limits and disappearances,
-and a warm cluster is air-gapped by construction.
+in-cluster registry. **No workload ever pulls from a public registry.** This is the strongest form of
+the supply-chain guarantee: amoebius controls every byte, does not depend on upstream availability or
+rate limits, and a warm cluster is air-gapped by construction.
 
 - **Third-party service binaries are baked, not mirrored.** amoebius does not pull or mirror public *images*
   for the platform services. Each service's binary is installed into the multi-arch base image at build time
@@ -104,8 +104,8 @@ Concretely:
   compiles the `amd64` and `arm64` layers.
 
 This is the principal generalization over prodbox, which published **native-host-architecture images only**
-(`local_registry_pipeline.md` [§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1) step 4, [§3](#3-buildx-multi-arch--amd64-and-arm64-one-manifest-list)). amoebius lifts "build the arch you're on" to "always build
-both arches as one manifest list."
+(`local_registry_pipeline.md` [§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1) step 4, [§3](#3-buildx-multi-arch--amd64-and-arm64-one-manifest-list)). amoebius lifts native-host-architecture-only builds to always building
+both arches as one manifest list.
 
 ```mermaid
 flowchart TD
@@ -123,9 +123,9 @@ flowchart TD
 An open design question asks directly whether a multi-arch publish should fail on both arches if only one
 upload fails. amoebius's doctrine answer is **yes — fail closed, atomically.**
 
-The intuition: a multi-arch tag that resolves on `amd64` but 404s on `arm64` is *worse* than no tag at all,
-because the cluster looks healthy until an `arm64` node tries to schedule the pod. A half-published tag is a
-landmine. So amoebius treats a multi-arch image as one indivisible artifact:
+A multi-arch tag that resolves on `amd64` but 404s on `arm64` breaks reproducibility on that arch: the
+cluster looks healthy until an `arm64` node tries to schedule the pod. A half-published tag fails at schedule
+time on the missing arch, not at publish time. So amoebius treats a multi-arch image as one indivisible artifact:
 
 - **Both arches publish under one `buildx ... --push` of the manifest list, or the publication fails.**
   amoebius does not push per-arch tags separately and stitch a manifest afterward. The single push either
@@ -159,8 +159,8 @@ This is an explicitly open design question: whether to implement a versioned tag
 [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) decision (Phase 2); this section records the **trade and
 the recommended default**, not a frozen mechanism.
 
-The intuition: amoebius's whole identity is fungibility + reproducibility — a cluster you destroyed last
-night must rebind to *byte-identical* shape this morning, and a child you spawned must run the *same* bytes
+amoebius's core properties are fungibility and reproducibility — a cluster that was destroyed must rebind to
+*byte-identical* shape when rebuilt, and a spawned child must run the *same* bytes
 as its parent ([platform_services_doctrine.md §1](./platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster)). A floating `:latest`
 tag is mutable by definition: two pulls of `:latest` at different times can return different bytes. That
 directly contradicts fungibility.
@@ -195,9 +195,9 @@ The second open design question: whether the amoebius pod itself eventually take
 that continues to be a host-daemon responsibility. Flagged as a
 [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) decision; recommended default below.
 
-The intuition: a builder needs a Docker/buildx engine *somewhere*. Two homes are possible — the host's
+A builder needs a Docker/buildx engine *somewhere*. Two homes are possible — the host's
 build daemon (the prodbox model: `docker build` on the host, `local_registry_pipeline.md` [§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)) or an in-pod
-builder running inside the cluster. The vision states the strongest argument for host directly: a host
+builder running inside the cluster. The vision states the argument for host directly: a host
 builder is "guaranteed to keep all builds in the same place" — including Apple-Silicon native `arm64`
 builds, which happen headless on the host (no VM; see
 [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)).
@@ -314,7 +314,7 @@ which forces a concrete divergence from prodbox's mechanics:
   credential — **not a literal in Dhall** — resolved as a `SecretRef` from Vault at build time
   (secrets-never-live-in-Dhall, [vault_pki_doctrine.md](./vault_pki_doctrine.md);
   [dsl_doctrine.md](./dsl_doctrine.md)). This is the amoebius generalization of prodbox's inline-registry-auth
-  trick, which used a literal credential; amoebius keeps the *ephemeral-config-no-login* shape but sources
+  mechanism, which used a literal credential; amoebius keeps the *ephemeral-config-no-login* shape but sources
   the credential from Vault by name. (Public-registry auth for in-cluster pulls is moot — there are none.)
 - **In-cluster pulls never consult a Docker config.** Nodes reach the in-cluster registry credential-free
   through the substrate's registry wiring ([substrate_doctrine.md](./substrate_doctrine.md)); the ephemeral

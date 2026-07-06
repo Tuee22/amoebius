@@ -20,9 +20,9 @@ The vision names the anti-pattern directly:
 > sequences."*
 
 Raw tooling makes the race the *default*. A Helm chart assumes its database is up; an initContainer polls a
-port in a `sleep`-loop; a bootstrap script runs `sleep 30 && kubectl apply` and hopes the apiserver answered.
-Each is a **duration standing in for a condition** — it passes on a fast machine and flakes on a slow one, and
-the failure surfaces at 3 a.m. as a half-applied cluster.
+port in a `sleep`-loop; a bootstrap script runs `sleep 30 && kubectl apply` on the assumption that the
+apiserver answered within the delay. Each is a **duration standing in for a condition** — it passes on a fast
+machine and flakes on a slow one, and the failure surfaces at runtime as a half-applied cluster.
 
 amoebius refuses the substitution. **A bring-up sequence is a DAG of readiness edges, never a schedule of
 durations.** A dependent is constructed *from* its dependency's readiness — so "start B after 30 seconds" has
@@ -35,13 +35,13 @@ each owned by its own doctrine.
 The **"particularly in the initial cluster bootstrap"** qualifier is load-bearing and gets its own section
 ([§5](#5-the-bootstrap-tier-local-observed-witnesses-never-timers)): before the cluster's own event
 machinery (the SSA reconciler, Pulsar) exists, there is nothing to observe *with* except the host — which is
-exactly where a `sleep` is most tempting and this doctrine most necessary.
+where a `sleep` is most likely to be reached for and this doctrine most necessary.
 
 ---
 
 ## 2. The load-bearing limit: the spec forecloses the sequence *shape*, not the port's *liveness*
 
-This is the most important sentence in the document, so it gets its own section, and it is the readiness face
+This section is the readiness face
 of the catalog's [§2 load-bearing limit](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it):
 **a type-check cannot prove a port is responsive.** Whether Vault is unsealed, whether the apiserver answers,
 whether the LB has an address — these are eventually-consistent facts about a running world, settled only by
@@ -60,8 +60,8 @@ two weaker, honest, and sufficient claims, graded on the catalog's
 
 The residue — *that the observed condition actually becomes true, and in bounded time* — is `runtime-checked`,
 owned by the reconciler ([§6](#6-the-runtime-enactor-the-reconciler-observes-never-sleeps)) and
-[`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md), never asserted here. Stating the layer is the
-whole point: amoebius forecloses the *shape that races*, and honestly delegates the *observation that
+[`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md), never asserted here. The layering is stated
+explicitly: amoebius forecloses the *shape that races*, and honestly delegates the *observation that
 resolves it*.
 
 ```mermaid
@@ -111,7 +111,7 @@ host-level bootstrap tier ([§5](#5-the-bootstrap-tier-local-observed-witnesses-
 > raw `threadDelay` masquerading as a readiness gate is caught one layer out, by the daemon-spine rule that
 > **forbids `threadDelay`/`sd_notify`/filesystem-marker "wait long enough" probes**
 > ([`daemon_topology_doctrine.md` §6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine)) — a
-> `runtime-checked` discipline + review gate, not a type. We do not pretend otherwise.
+> `runtime-checked` discipline + review gate, not a type. The doctrine does not pretend otherwise.
 
 ---
 
@@ -124,7 +124,7 @@ and a toleration is *projected* from a node taint, never typed
 ([§3.22](./illegal_state_catalog.md#322-a-hand-authored-un-derived-toleration)). Bring-up ordering rides the
 **same declared dependency graph**:
 
-- **A start-handle exists only once its dependency's `Ready` edge does.** A dependent's "you may start"
+- **A start-handle exists only once its dependency's `Ready` edge does.** A dependent's "may-start"
   handle is constructed *from* the upstream's `Readiness`, exactly the
   [catalog §4.3](./illegal_state_catalog.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
   "a handle exists only once its edge does" discipline that already gates a `.ready`-sentinel `ArtifactRef`
@@ -150,15 +150,15 @@ readiness machinery — the SSA reconciler's wait-for-ready, Pulsar Failover sub
 during first bring-up: the host daemon is standing the cluster *up*
 ([`cluster_lifecycle_doctrine.md` §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap),
 [`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected)).
-The temptation to `sleep` is maximal precisely because nothing fancy is up to observe with. The rule holds
-anyway, using the two primitives the host tier *does* have:
+A `sleep` is most likely to be reached for here, precisely because no readiness signal is yet available to
+observe. The rule holds anyway, using the two primitives the host tier *does* have:
 
 - **The three-valued observation.** The reconciler's `discover` returns **Present / Absent / Unreachable**,
   with **`Unreachable → refuse`**
   ([`cluster_lifecycle_doctrine.md` §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)).
   "kube-apiserver is up" is `discover = Present` — a **successful mTLS API call that returned**, the
   `Reachable`/`Serving` arm of [§3](#3-readiness-is-a-condition-never-a-duration) — *not* `sleep 30 && curl`.
-  This is the honest form of "the port is responsive": you learn it by a call that succeeded, and an
+  This is the honest form of "the port is responsive": it is learned by a call that succeeded, and an
   ambiguous timeout is *not* silently read as ready (the `timeout-coerces-unknown` rule of
   [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md)).
 - **The runtime witness.** The `RuntimeWitness` file/socket-existence facts of
@@ -191,7 +191,7 @@ Its ordered form, the `RolloutPlan` whose phase *n+1* gates on phase *n*'s live 
 [`release_lifecycle_doctrine.md` §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply).
 
 Every wait here is honest under the chaos discipline: **bound everything** (every probe, retry, and wait
-carries an explicit finite bound) and **timeout-coerces-unknown** (a timeout is a *shrug*, never a definite
+carries an explicit finite bound) and **timeout-coerces-unknown** (a timeout is an *unknown*, never a definite
 "ready") — both owned by [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md). This layer is
 `runtime-checked` and never claimed stronger: the type foreclosed the *duration-gated shape*; the reconciler
 supplies the *observation*, and the honesty is in keeping those two claims apart.

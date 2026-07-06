@@ -12,9 +12,9 @@
 
 ---
 
-## 1. The one idea: a test is an amoebius spec
+## 1. A test is an amoebius spec
 
-Lead with the intuition: **amoebius does not have a test framework bolted on the side — a test *is* an
+**amoebius has no separate test framework — a test *is* an
 amoebius deployment.** Everything amoebius already knows how to do — stand up a cluster, render typed
 manifests from Dhall, place workloads, inject secrets, fail a leader over — is exactly the machinery a test
 needs. So a test is not written in some second language with its own runner; it is written in the *same*
@@ -55,7 +55,7 @@ Three consequences fall straight out of "a test is a spec":
 
 ## 2. Three registers of amoebius testing
 
-The intuition: a defect can hide at three depths, and each depth needs a *different* kind of test, because
+A defect can hide at three depths, and each depth needs a *different* kind of test, because
 a test pitched at one depth is structurally blind to the others. amoebius keeps three registers, cheapest
 first, and never confuses one for another.
 
@@ -75,7 +75,7 @@ toolchain owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/REA
 doc does not restate the version pins.
 
 The third register is the amoebius novelty and the subject of the rest of this document. It is where "a
-test is a spec" ([§1](#1-the-one-idea-a-test-is-an-amoebius-spec)) cashes out, and it is the only register that can prove the deployed system survives a
+test is a spec" ([§1](#1-a-test-is-an-amoebius-spec)) cashes out, and it is the only register that can prove the deployed system survives a
 fault — at the cost of needing a live substrate and an honest teardown.
 
 The blindness between registers is load-bearing, not incidental: a green pure suite says nothing about
@@ -89,10 +89,10 @@ the Runtime-layer (Inject) move — the topology that injects faults against a l
 
 ## 3. The test-topology contract: spin up → run → always tear down
 
-The intuition that makes the whole register safe: **a test that can leak a resource is a test you cannot
+**A test that can leak a resource cannot be
 run twice.** If a failed run could strand an EBS volume, a hosted zone, or a live cluster, then every test
 would silt up the substrate and the next run would start from a dirtier world than the last. amoebius
-forecloses that by making teardown **structural**, not a final step you hope reaches.
+forecloses that by making teardown **structural**, not a final step whose execution is merely hoped for.
 
 The contract has four clauses (generalized from prodbox's Pulumi-orchestrated infrastructure-test rules:
 isolated ephemeral stacks, unique names per run, aggressive tagging, *always* teardown via
@@ -133,8 +133,8 @@ clause. The teardown is a property of the topology *type*, so every value of it 
 
 ## 4. No skips, fail fast, and the per-run ledger artifact
 
-The intuition: **a test that quietly skips is worse than a test that fails, because it reports green while
-proving nothing.** amoebius adopts the prodbox skip policy verbatim in spirit — *skip/xfail is prohibited
+**A skipped test that reports success misrepresents coverage — it is worse than a failing test, because it
+passes while proving nothing.** amoebius adopts the prodbox skip policy verbatim in spirit — *skip/xfail is prohibited
 by default; a missing prerequisite fails fast with an actionable error* — and then makes the honesty
 machine-visible by emitting a ledger.
 
@@ -145,8 +145,8 @@ machine-visible by emitting a ledger.
   is absolute ([../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md),
   "Honest ledger"): *every validation emits a proven/tested/assumed ledger artifact*. This doc owns the
   *artifact* — that a topology run produces, as a first-class output beside its pass/fail, a record of which
-  correctness layers it actually reached and at what strength. The artifact is the deliverable, not a
-  trophy: it is the run's confession of *what is known and how it is known*.
+  correctness layers it actually reached and at what strength. The artifact is the deliverable: it is the
+  run's record of *what is known and how it is known*.
 - **Skipping an applicable move marks that layer UNVERIFIED — never green.** This is the cardinal honesty
   rule, stated by the plan and inherited from the chaos doctrine: if a test move *applies* to a layer and
   the run does not perform it, the ledger records that layer as **UNVERIFIED**, not as silently passing. A
@@ -154,7 +154,7 @@ machine-visible by emitting a ledger.
   adversarial fault that targets it at the Runtime layer must say so — the Runtime layer is unverified, and
   the ledger says exactly that.
 - **This ledger is the typed evidence a `PromotionGate` consumes.** The per-run proven/tested/assumed
-  artifact is not only a confession for the operator — it is the *input* a release `PromotionGate` reads to
+  artifact is not only a record for the operator — it is the *input* a release `PromotionGate` reads to
   decide whether an environment pointer may advance. Advancing an `Environment` pointer (dev/staging → prod)
   **requires** the `Release`'s test-topology ledger to reach that environment's required evidence strength:
   **Prod requires the Runtime/chaos layer proven**, not merely a green Decision layer. It follows directly
@@ -171,14 +171,14 @@ The **methodology and grammar** of the ledger — the Extract → Model → Inje
 proven/tested/assumed strengths, and what each move can and cannot establish — are **owned by**
 [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) and must not be restated here. This doc owns only
 the *per-run artifact contract*: that a topology run emits one, that it states the layer it reached, and
-that a skipped-but-applicable move is recorded UNVERIFIED. The cardinal sin both docs forbid is the same —
+that a skipped-but-applicable move is recorded UNVERIFIED. The failure both docs forbid is the same —
 **never report a tested or assumed result as proven.**
 
 ---
 
 ## 5. `suggest-test`: detect the world, emit a representative test `.dhall`
 
-The intuition: an operator should not have to hand-write a representative test from scratch for a machine
+An operator should not have to hand-write a representative test from scratch for a machine
 amoebius can simply *look at*. amoebius already detects what a host is and what credentials can do — so
 `suggest-test` turns that introspection into a starting-point test topology the operator then reviews.
 
@@ -188,8 +188,8 @@ Per the original vision, `suggest-test`:
    pure substrate classification owned by [substrate_doctrine.md](./substrate_doctrine.md) (detection is a
    fact about the host, never a knob).
 2. **Takes SSH and AWS credentials and inspects what they can do** — the machine resources and the
-   *permissions and quotas* associated with those credentials. It probes capability (can these credentials
-   create EBS? a hosted zone? how much?) so the emitted test is *sized to what is actually reachable*, not a
+   *permissions and quotas* associated with those credentials. It probes capability (whether these credentials
+   can create EBS or a hosted zone, and how much) so the emitted test is *sized to what is actually reachable*, not a
    guess.
 3. **Writes a test `.dhall`** that (a) spins up a **representative set of resources** scaled to the detected
    compute/memory/storage and the credential's authority, and (b) **simulates HA failovers and host-daemon
@@ -227,10 +227,10 @@ Three boundaries keep `suggest-test` honest and within doctrine:
 
 ## 6. Flagged test credentials
 
-The intuition straight from the vision: the credentials used for testing (e.g. AWS deployments) need to be
+Per the original vision, the credentials used for testing (e.g. AWS deployments) need to be
 specifically flagged, as is done in `~/prodbox`. A test must be able to do things
 production must not — most sharply, *delete durable storage* ([§7](#7-the-elevated-harness-is-the-sole-deleter-of-durable-storage-leak-free-cycles)) — so the authority to do them must be a
-**separate, marked** credential, never the everyday one wearing a different hat.
+**separate, marked** credential, never the everyday one acting in a test role.
 
 amoebius adopts the prodbox `aws_admin_for_test_simulation` pattern, generalized:
 
@@ -257,7 +257,7 @@ from normal operation and granted only to the flagged elevated harness.
 
 ## 7. The elevated harness is the sole deleter of durable storage; leak-free cycles
 
-The intuition is the resolution of a real tension. On one side, amoebius **forbids deleting durable data
+The elevated-harness exception resolves a real tension. On one side, amoebius **forbids deleting durable data
 under normal operation** — clusters are ephemeral, their storage is not, and an accidental delete loses
 data the next bring-up needs. On the other side, **leak-free test cycles must
 delete the storage they create**, or every run silts up the substrate forever. amoebius
@@ -265,7 +265,7 @@ reconciles the two by making harness deletion the **one** sanctioned exception.
 
 The cardinal "no normal-operation deletion of durable data" rule, the retained `no-provisioner` PV model,
 and the deterministic rebind it protects are **owned by**
-[storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) ([§7](./storage_lifecycle_doctrine.md#7-the-cardinal-rule-deleting-durable-data-is-forbidden-under-normal-operation) and [§7.1](./storage_lifecycle_doctrine.md#71-the-single-exception-the-elevated-test-harness), which explicitly delegate the
+[storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) ([§7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation) and [§7.1](./storage_lifecycle_doctrine.md#71-the-single-exception-the-elevated-test-harness), which explicitly delegate the
 exception to this doc). This doc owns the **exception mechanism**:
 
 - **One deleter, one credential.** Only the **elevated test harness**, holding the flagged delete-capable
@@ -299,8 +299,8 @@ exception to this doc). This doc owns the **exception mechanism**:
 
 ## 8. One substrate per validation
 
-The intuition: a test that silently falls back from one substrate to another proves nothing in particular —
-you no longer know *which* world it validated. amoebius forbids the fallback: **a validation targets exactly
+A test that silently falls back from one substrate to another proves nothing in particular —
+which world it validated is no longer known. amoebius forbids the fallback: **a validation targets exactly
 one substrate, named up front, and fails fast if that substrate's inputs are missing.**
 
 The canonical rule — *at most one substrate (`apple` | `linux-cuda` | `linux-cpu` | `windows`) per

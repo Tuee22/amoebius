@@ -13,26 +13,26 @@
 
 ---
 
-## 1. The one idea: a name you cannot lie about
+## 1. A content-derived name that cannot be forged
 
-The intuition: most data corruption starts with a *name that does not match its bytes* — a pointer to a blob
+Most data corruption starts with a *name that does not match its bytes* — a pointer to a blob
 that was overwritten, an image tag that moved, a "checkpoint v3" that two machines disagree about. amoebius
-closes that whole class by refusing to let anyone *assign* a name. The name of an artifact **is** the SHA-256
+closes that whole class by not permitting a name to be assigned; the name is derived from content. The name of an artifact **is** the SHA-256
 of its bytes. There is exactly one way to obtain a reference — hash a real artifact — so a reference that
 points at the wrong thing, or at nothing, has no inhabitant.
 
-That single move buys three properties that this doctrine is the SSoT for, applied uniformly to **both**
+That single move provides three properties that this doctrine is the SSoT for, applied uniformly to **both**
 `infernix` (LLM inference) and `jitML` (training + JIT codegen):
 
 1. **A three-tier store** ([§2](#2-the-three-tier-store-blobs--manifests--pointers)) where the only mutable objects are tiny pointers, and everything heavy is
    write-once and self-naming.
-2. **A run identity** ([§3](#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)) — `experimentHash` — that folds *what you asked for* and *where it ran* into one
+2. **A run identity** ([§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)) — `experimentHash` — that folds *the resolved experiment program* and *the substrate it ran on* into one
    digest, so two runs share a namespace only when they are genuinely the same experiment on the same
    substrate.
 3. **Reproducibility by construction** ([§4](#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed)) — pinned content-addressed inputs + pure stages + a derived RNG
    seed — where the type system makes the bookkeeping *total*.
 
-It also buys a fourth property that pays off elsewhere: content-addressed data is **confluent**, so it crosses
+It also provides a fourth property that applies elsewhere: content-addressed data is **confluent**, so it crosses
 cluster boundaries without a divergence proof ([§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)).
 
 **The extension-library set is closed.** `infernix` and `jitML` are the two ML members of the v1
@@ -62,7 +62,7 @@ here is a proven amoebius result, and [§6](#6-the-honest-ceiling-types-make-the
 
 ## 2. The three-tier store: blobs ← manifests ← pointers
 
-The intuition: split every persisted run into (a) the heavy opaque bytes, (b) a small typed description that
+Split every persisted run into (a) the heavy opaque bytes, (b) a small typed description that
 *names* those bytes, and (c) a single movable label that says "this description is current." Make (a) and (b)
 immutable and self-naming so they can never be overwritten or torn; let only (c) move, and let it move only by
 compare-and-swap. Then the only race in the whole system is a one-object atomic pointer flip.
@@ -168,7 +168,7 @@ differ), and **a pointer is the only mutable object, advanced only by ETag-CAS, 
 
 | class | formula / source | identifies | status |
 |-------|------------------|-----------|--------|
-| `experimentHash` | `sha256(resolved-dhall ‖ substrate-fingerprint)` | an ML run / artifact ([§3](#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)) | existing (sibling `jitML`/`infernix`) |
+| `experimentHash` | `sha256(resolved-dhall ‖ substrate-fingerprint)` | an ML run / artifact ([§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)) | existing (sibling `jitML`/`infernix`) |
 | `kernelKey` | `sha256(kernel-source ‖ substrate-fingerprint)` | a Tier-3 JIT kernel ([§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)) | Phase-N design intent (Q8) |
 | `releaseHash` | `sha256(resolved-deployment-dhall ‖ image-digests ‖ substrate-fingerprint)` | a deployment generation | Phase-N design intent (Q13) |
 | OCI image digest | registry-owned (not amoebius-computed) | a container image | existing ([`image_build_doctrine.md` §5](./image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)) |
@@ -183,7 +183,7 @@ differ), and **a pointer is the only mutable object, advanced only by ETag-CAS, 
 
 Ownership and honesty for the registry:
 
-- `experimentHash` ([§3](#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)) and the `trial` pointer ([§2](#2-the-three-tier-store-blobs--manifests--pointers)) are the **existing** pair — the only members with a working
+- `experimentHash` ([§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)) and the `trial` pointer ([§2](#2-the-three-tier-store-blobs--manifests--pointers)) are the **existing** pair — the only members with a working
   sibling implementation. Everything else here is amoebius **design intent**, not a built result.
 - `kernelKey` folds *kernel source* and the substrate fingerprint the same way `experimentHash` folds the
   resolved `.dhall`; the finer JIT cache-key composition is owned by the sibling
@@ -197,9 +197,9 @@ Ownership and honesty for the registry:
 
 ---
 
-## 3. `experimentHash`: identity is *what you asked for* ‖ *where it ran*
+## 3. `experimentHash`: identity is *what was requested* ‖ *where it ran*
 
-The intuition: a run's identity must change whenever anything that could change its output bytes changes —
+A run's identity must change whenever anything that could change its output bytes changes —
 otherwise two genuinely different runs would collide in the same namespace and one would silently shadow the
 other. amoebius derives that identity from two pinned inputs and nothing else:
 
@@ -237,12 +237,11 @@ experimentHash = sha256(resolved-dhall ‖ substrate-fingerprint)
   finer-grained JIT cache key) is owned by `jitML/documents/engineering/determinism_contract.md`; this doc
   treats it as an opaque pinned string.
 
-**Why fold the substrate into identity at all?** Because cross-substrate bit-equality is *not* guaranteed ([§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic)).
+**The substrate is folded into identity because cross-substrate bit-equality is *not* guaranteed** ([§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic)).
 The same program on a different accelerator produces different bytes, so it must occupy a different namespace —
 otherwise an `apple-silicon` checkpoint and a `linux-cuda` checkpoint would fight over the same `latest`
-pointer and the `best/<metric>` comparison would be comparing apples to ULP-shifted apples. Making the
-substrate part of the *name* turns "ran on a different accelerator" into "different experiment," which is
-exactly true.
+pointer and the `best/<metric>` comparison would rank metric values that differ at the ULP level between substrates. Making the
+substrate part of the *name* turns "ran on a different accelerator" into "different experiment."
 
 This is where the two DSL surfaces meet without colliding: the **application-logic** surface determines
 `resolved-dhall`'s model and config, the **deployment-rules** surface chooses the substrate, and the
@@ -258,7 +257,7 @@ right for a *training* run, but it conflates two roles an ML artifact actually h
 the split (it is not a distinction the existing digest already draws):
 
 - **Producing substrate** — the accelerator whose reduction order made the weight bytes. It is folded into the
-  checkpoint's `experimentHash` namespace ([§3](#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)) exactly as above. It is **provenance, not a serving constraint**.
+  checkpoint's `experimentHash` namespace ([§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)) exactly as above. It is **provenance, not a serving constraint**.
 - **Serving substrate** — the accelerator an *inference* run uses. Because `experimentHash` names *where it
   ran*, this round introduces a **distinct serving-run fingerprint** for the serving pod; the Tier-3
   `kernelKey` ([§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds), design intent) folds that serving substrate per serving pod. This is **design intent**, not an
@@ -290,8 +289,8 @@ relation and may still fail to **load** at runtime. Tier-3 kernel recompilation 
 
 ## 4. Determinism by construction: pinned inputs + pure stages + derived seed
 
-The intuition: reproducibility is not a debugging aid you bolt on; it is what you get *for free at the input
-boundary* when every input is pinned, every stage is declared a pure function of its declared inputs, and the
+Reproducibility is not a debugging aid added afterward; it is a property established at the input
+boundary when every input is pinned, every stage is declared a pure function of its declared inputs, and the
 only randomness is derived from a declared seed. amoebius builds this from three legs the type system makes
 **total** — content-addressed input pinning, the `experimentHash` identity, and SplitMix seed derivation.
 That closes the *inputs*; it does **not**, by itself, make the producing *computation* deterministic — a GPU
@@ -347,12 +346,12 @@ RNG split details (which substrate holds the stream — host daemon vs clustered
 
 ### 4.4 What "the types make these total" cashes out to
 
-The rallying phrase is concrete: there is **no inhabitant** of the type "a stream with no seed" or "a seed read
+Concretely, there is **no inhabitant** of the type "a stream with no seed" or "a seed read
 from ambient entropy." A stream's seed is reachable only through `deriveSplitMixSeed`, whose arguments are a
 typed `SplitMixSeed` and a `Word64` index — both pinned. An artifact's name is reachable only by hashing real
 bytes (`deriveExperimentHash`, `blobKey`, `manifestContentSha`); there is no constructor that takes a free
 string. So "use whatever entropy the worker had" and "point at a checkpoint that was never written" are not
-states you can *fix at runtime* — they are states you cannot *write down*. This is the totality technique [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)
+states that can be *fixed at runtime* — they are states that cannot be *written down*. This is the totality technique [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)
 in [`illegal_state_catalog.md`](./illegal_state_catalog.md), applied to seeds and store keys; this doc owns the
 content-addressing/determinism *use* of it, the catalog owns the typing discipline.
 
@@ -427,7 +426,7 @@ The three tiers, three lifecycles:
   model off `infernix`'s name-addressed `infernix-models/<modelId>/…` layout onto the content-addressed
   **blob ← manifest ← pointer** store of [§2](#2-the-three-tier-store-blobs--manifests--pointers) — the same three-tier shape training already uses.
   **Staging credentials — object-store and upstream — resolve from Vault BY NAME** (a `SecretRef`, never a value
-  in `.dhall`, scoped **per app** per [§2](#2-the-three-tier-store-blobs--manifests--pointers)); this **kills** `infernix`'s second k8s-Secret store and its
+  in `.dhall`, scoped **per app** per [§2](#2-the-three-tier-store-blobs--manifests--pointers)); this **removes** `infernix`'s second k8s-Secret store and its
   hardcoded `minioadmin/minioadmin123` fallback. Vault custody is the one amoebius secret contract, not a
   per-project store.
 - **Tier 3 — Kernel = LAZY content-addressed JIT.** A compiled kernel is materialized on the *first cache miss*
@@ -454,8 +453,8 @@ illegal states it closes are catalogued at [`illegal_state_catalog.md` §3.25](.
 ### 4.6 The training-run topology: fine-tune chains and continuous feeds without an unbounded arm
 
 The training surface today models only a fixed dataset split + a finite budget with implicit from-scratch init
-([§3](#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)). This round **introduces** two new capabilities — fine-tune-from-an-arbitrary-model and
-train-forever-from-a-feed — unified by one idea: **online training is an unbounded fine-tune chain over successive
+([§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)). This round **introduces** two new capabilities — fine-tune-from-an-arbitrary-model and
+train-forever-from-a-feed — unified by a single principle: **online training is an unbounded fine-tune chain over successive
 topic prefixes.** They are carried by three **closed** unions, **owned here** (matching the `EngineRuntime` /
 `ModelArtifact` precedent, [`dsl_doctrine.md`](./dsl_doctrine.md) **carries the field only**, deferring
 unrepresentability to this doc + [`illegal_state_catalog.md`](./illegal_state_catalog.md)):
@@ -484,7 +483,7 @@ residue**: that the trainer *actually* checkpoints at cadence and retention *act
 
 **Determinism = a content-addressed training DAG (qualified).** Each checkpoint records its `parent` (base)
 content-address and its consumed-prefix content-address; **`experimentHash` keeps its 2-input formula** — the base
-and prefix addresses are folded **into `resolved-dhall`** ([§3](#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)), **not** into a wider hash tuple (which would break
+and prefix addresses are folded **into `resolved-dhall`** ([§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)), **not** into a wider hash tuple (which would break
 the "existing (sibling)" framing of [§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)). Classify the headline honestly: DAG **identity / bookkeeping**
 (parent + prefix pinned) is **type-foreclosed**; **actual byte-replay** is **decode-foreclosed / tested** per [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) (SL / on-policy /
 AlphaZero-per-game tested-in-sibling; off-policy RL only the prefix); **cross-substrate is not asserted** (a
@@ -517,8 +516,8 @@ and replay ceilings are ledgered in [§6](#6-the-honest-ceiling-types-make-the-b
 
 ## 5. Confluence: content-addressed data crosses cluster boundaries safely
 
-The intuition: when you replicate data between two clusters asynchronously, the nightmare is *divergence* — two
-sides that accept conflicting writes and can never be cleanly merged. Content addressing makes that nightmare
+When two clusters replicate data asynchronously, the failure mode is *divergence* — two
+sides that accept conflicting writes and can never be cleanly merged. Content addressing makes divergence
 unrepresentable for the heavy data, because the store is a **join-semilattice**: merging two replicas is set
 union, and union over content-addressed objects is commutative, associative, and idempotent.
 
@@ -543,8 +542,8 @@ easy case and *why*.
 **Cross-cluster model reuse: need not retrain — reuse is safe by confluence (a design policy).** Because a
 checkpoint is an **immutable content-addressed artifact** and the store is the confluent join-semilattice above, a
 model trained in **one** cluster (jitML's intra-cluster First-Axis single-writer coordinator, [§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)) **need not**
-be retrained elsewhere — it is reused by confluent replication of the immutable artifact. This is the explicit
-answer to "must each cluster train its own models?" — **no**. The honest characterization: "**never** retrained" is **not** a
+be retrained elsewhere — it is reused by confluent replication of the immutable artifact. Stated explicitly,
+each cluster **need not** train its own models. The honest characterization: "**never** retrained" is **not** a
 typed invariant. Nothing prevents cluster B independently training the same `experimentHash`; confluence makes
 that **safe** (same substrate → same hash → union no-op; different substrate → different namespace → no
 collision), **not impossible** — so a redundant retrain is at most **runtime-checked** (harmless, not foreclosed). This is
@@ -585,7 +584,7 @@ that ceiling sits, and amoebius adopts its contract verbatim rather than inventi
 
 - **Same-substrate bit-equality is the contract; cross-substrate bit-equality is *not guaranteed* and *not
   asserted*.** There is no numeric-parity check and no tolerance band across substrates — RNG draws and float
-  reduction order differ. The substrate is folded into `experimentHash` ([§3](#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)) precisely so this is honest by
+  reduction order differ. The substrate is folded into `experimentHash` ([§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)) precisely so this is honest by
   construction rather than papered over.
 - **Off-policy RL is downgraded to a *tested* first-N-step prefix.** For DQN, DDPG, TD3, SAC, CrossQ, and TQC,
   the replay-buffer write discipline is async, so two same-substrate same-seed runs may differ in which step
@@ -604,7 +603,7 @@ that ceiling sits, and amoebius adopts its contract verbatim rather than inventi
   the retention `StorageBudget` (the two-ceiling durable total,
   [`resource_capacity_doctrine.md` §7](./resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total) /
   [`pulsar_client_doctrine.md` §6.1](./pulsar_client_doctrine.md#61-topic-storage-lifecycle-bounded-tiered-retained--and-the-hot-tier-never-overflows))
-  bounds only **re-deriving that blob from the live topic**. Cross-cluster you therefore get
+  bounds only **re-deriving that blob from the live topic**. Cross-cluster the result is therefore
   **resume-from-checkpoint** (the immutable checkpoint replicates by [§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)), **not** re-derive-from-feed, unless the
   consuming cluster independently retains the prefix.
 - **The training-DAG headline is qualified, not a blanket "replay reproduces."** DAG **identity / bookkeeping**
@@ -627,7 +626,7 @@ reaches:
 | Same-substrate same-toolchain checkpoint reproduction is byte-identical | **Tested in the sibling `jitML`**, not proven in amoebius | A runtime comparison on matching hardware |
 | Off-policy RL same-seed full-run bit-equality | **Not asserted**; only the first-N-step prefix (bounded run) / per-checkpoint-segment (Continuous) is tested | A runtime prefix comparison of two fresh runs |
 | Cross-substrate bit-equality (training or inference) | **Explicitly not asserted** | Nothing — out of contract by design |
-| An imported model's pin names the *intended* model (§4.5 arm b) | **Assumed** — pin *presence* is type-foreclosed, stage-time pin *match* is decode-foreclosed (fail-closed), but "the pin denotes the model you meant" is out of type reach | Nothing typed — trust in the pin author (Fork A) |
+| An imported model's pin names the *intended* model (§4.5 arm b) | **Assumed** — pin *presence* is type-foreclosed, stage-time pin *match* is decode-foreclosed (fail-closed), but "the pin denotes the intended model" is out of type reach | Nothing typed — trust in the pin author (Fork A) |
 | A family-matched, substrate-specific-weight-layout model actually **loads** on the serving substrate (§3.1) | **Not asserted** | Runtime — the decode-foreclosed family relation passes; the weight-layout load is residue, like "the staged bytes actually load" |
 
 amoebius itself has built none of this; the proven-in-types rows are the design's *intended* totality, and the
@@ -646,7 +645,7 @@ specification to validate, never as a proven amoebius result. Status and gates: 
 | MinIO/Pulsar as HA-always standard services | [`platform_services_doctrine.md`](./platform_services_doctrine.md) |
 | The resolved-`.dhall` identity input and the purity boundary | [`dsl_doctrine.md`](./dsl_doctrine.md) |
 | The substrate-fingerprint composition, no-env/no-PATH probing, the four-substrate catalog | [`substrate_doctrine.md`](./substrate_doctrine.md) |
-| The application-logic ÷ deployment-rules split that feeds [§3](#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)'s two inputs | [`app_vs_deployment_doctrine.md`](./app_vs_deployment_doctrine.md) |
+| The application-logic ÷ deployment-rules split that feeds [§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)'s two inputs | [`app_vs_deployment_doctrine.md`](./app_vs_deployment_doctrine.md) |
 | The async cross-cluster confluence "Second Axis" proof obligation | [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) |
 | The native-protocol Pulsar transport (no WebSockets), at-least-once + dedup | [`pulsar_client_doctrine.md`](./pulsar_client_doctrine.md) |
 | Host↔cluster comms: the daemon as MinIO/Pulsar peer over host-only NodePorts (no mTLS) | [`host_cluster_comms_doctrine.md`](./host_cluster_comms_doctrine.md) |

@@ -40,8 +40,8 @@ adoption sequencing live only in [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_
 
 ## 1. Prologue — the bug that only happens to other people
 
-Two control-plane candidate pods in the same cluster wake a microsecond apart and ask the same question:
-*am I the one brain?* Each reads the commit log; each sees no fresher claim than its own; each concludes it
+Two control-plane candidate pods in the same cluster wake a microsecond apart and each asks whether it is
+the singleton. Each reads the commit log; each sees no fresher claim than its own; each concludes it
 may reconcile the cluster and mint its secrets. In the space of that microsecond, two daemons both believe
 they are the singleton.
 
@@ -52,15 +52,15 @@ writes that never crossed the replication boundary. Two clusters now disagree ab
 disagreement is durable.
 
 Both decisions were correct — for the world each actor read. Both were wrong for the world they acted in.
-This is the bug that survives ten thousand green test runs and pages you at three in the morning: not a
-typo, not an off-by-one, but **a decision made on a premise that was true when you read it and false by the
-time you acted on it.** It has exactly one shape, and once you can see the shape you can see it everywhere —
+This is the bug that survives ten thousand green test runs and surfaces only at runtime, in the deployed
+forest: not a typo, not an off-by-one, but **a decision made on a premise that was true when it was read and
+false by the time it was acted on.** It has exactly one shape, and that shape recurs everywhere —
 inside one cluster's election, and across the asynchronous gap between two clusters.
 
-Everything that follows is a campaign against trusting a premise you cannot prove is still current. The
-campaign has three moves — **Extract**, **Model**, **Inject** — and the rest of this document argues why it
+Everything that follows is a discipline against trusting a premise that cannot be proven still current. The
+discipline has three moves — **Extract**, **Model**, **Inject** — and the rest of this document argues why it
 takes all three, because each is blind to the failures the other two were built to catch. The
-amoebius-specific twist ([§6](#6-the-concentration-principle--where-the-obligation-lives)) is *where* the campaign must be waged: because the standard platform services
+amoebius-specific twist ([§6](#6-the-concentration-principle--where-the-obligation-lives)) is *where* the discipline applies: because the standard platform services
 run their own consensus, the obligation does not spread across every app — it **concentrates** at two
 boundaries.
 
@@ -81,7 +81,7 @@ This discipline earns its cost only when **all three** of these hold:
    *exactly-once effect under redelivery*, *no split-brain gateway across clusters* — belongs to a
    protocol spanning several actors plus the substrate, not to any one process.
 
-If your subsystem meets all three, the [§3](#3-the-defect-class--one-shape-two-disguises) defect is **present whether or not you have ever observed it**.
+If a subsystem meets all three, the [§3](#3-the-defect-class--one-shape-two-disguises) defect is **present whether or not it has ever been observed**.
 If it fails the gate — a single process, or no cross-actor invariant — most of what follows is
 over-engineering, and the honest thing is to stop.
 
@@ -106,7 +106,7 @@ asynchronous across.
 
 ## 3. The defect class — one shape, two disguises
 
-Name the enemy once and it stops hiding. Every defect this doctrine targets has the same shape: **a
+Every defect this doctrine targets has the same shape: **a
 decision taken across a sequence of non-atomic effects, on a premise that was true at snapshot time but is
 trusted after it could have changed.** In its barest form:
 
@@ -126,36 +126,36 @@ The shape wears two recurring disguises:
 
 - **Timeout-coerces-unknown.** A probe that times out or errors is read as a *definite negative* — "no
   fresher claim exists," "the peer cluster is dead," "there are no committed effects past offset `X`" —
-  when the truthful value is *unknown*. A timeout is not a "no"; it is a shrug.
+  when the truthful value is *unknown*. A timeout is not a negative acknowledgement; it is the absence of a response.
 - **State-conflation.** Two genuinely distinct conditions — *not-yet-replicated* vs *does-not-exist*,
   *partitioned-from-peer* vs *peer-is-dead*, *outbound-reachable* vs *inbound-fresh* — are collapsed into
   one branch, so the decision cannot even represent the cases that demand different actions.
 
-Why does this bug survive your test suite? Because surfacing it requires a *specific interleaving of two
+This defect survives a test suite because surfacing it requires a *specific interleaving of two
 actors*, and a single-threaded test never runs two actors. It is the canonical "once in N thousand runs"
-defect: real, rare, and never reproducible on demand. **You cannot test your way to confidence here; you
-have to reason and experiment in three different registers** — which [§5](#5-three-layers-and-the-blindness-that-binds-them) makes precise.
+defect: real, rare, and never reproducible on demand. **Testing alone cannot establish confidence here;
+confidence requires reasoning and experiment in three different registers** — which [§5](#5-three-layers-and-the-blindness-that-binds-them) makes precise.
 
 ---
 
 ## 4. Two traditions, and the quiet third
 
-The industry built two celebrated traditions for trusting distributed systems, and most engineers know one
-deeply and the other barely.
+The industry built two established traditions for trusting distributed systems, one far more widely practiced
+than the other.
 
-**Prove the design.** Before you trust a protocol, write it down precisely enough that a machine can
+**Prove the design.** Before a protocol is trusted, write it down precisely enough that a machine can
 explore every interleaving and check the bad thing never happens. This is *formal methods* — Lamport's
 **TLA+** and **TLC** (descended from *Time, Clocks, and the Ordering of Events*, CACM 1978, and *The
 Temporal Logic of Actions*, TOPLAS 1994), Jackson's Alloy. Its industrial case was made by Amazon: in *How
 Amazon Web Services Uses Formal Methods* (Newcombe et al., CACM 2015), model checking a DynamoDB
 replication algorithm found a defect whose **shortest error trace was 35 high-level steps** — one that had
-survived design review, code review, and testing. The lesson that *is the whole reason to model*: **the
+survived design review, code review, and testing. The lesson: **the
 improbability of a 35-step compound event is not its impossibility.** A test never gets that lucky; a model
 checker explores every interleaving in scope, so it gets "lucky" by construction. It guards the
 **Protocol** layer.
 
-**Break the deployment.** You cannot reason your way to confidence about how a large system *fails*, so
-induce failures on purpose while you are watching. This is *chaos engineering* — Jesse Robbins's GameDays
+**Break the deployment.** Confidence about how a large system *fails* cannot be reached by reasoning alone, so
+induce failures on purpose under observation. This is *chaos engineering* — Jesse Robbins's GameDays
 at Amazon (~2003), Google's DiRT, and Netflix's **Simian Army** (Chaos Monkey 2010–11, escalating to Chaos
 Gorilla and Chaos Kong). Its 2015 *Principles of Chaos Engineering* put it plainly: software has *no
 transfer function*, so to learn how it fails "we must use an empirical approach." It guards the **Runtime**
@@ -164,15 +164,15 @@ layer.
 **A necessary honesty on lineage.** The *Byzantine Generals Problem* (Lamport, Shostak & Pease, TOPLAS
 1982) — agreement when nodes lie — is intellectual ancestry here, **not** a claim about amoebius. Tolerating
 arbitrary lying nodes needs `3f + 1` replicas and heavy machinery. amoebius assumes the gentler models:
-*crash-recovery* and *omission/partition*, the world of Paxos/Raft (`2f + 1`). We invoke Byzantium for the
+*crash-recovery* and *omission/partition*, the world of Paxos/Raft (`2f + 1`). amoebius invokes Byzantium for the
 discipline it founded — formalize agreement under faults — not because anything here defends against
 traitors.
 
 And there is a quieter third discipline most teams already practice without naming: **make the decision
 explicit.** Pull the branch out of the tangle of effects into a pure, typed function of its inputs, so it
-becomes a *value* you can examine, exhaust, and reason about — the world of types, pure functions, and
+becomes a *value* that can be examined, exhausted, and reasoned about — the world of types, pure functions, and
 property-based testing (QuickCheck; Claessen & Hughes, ICFP 2000). It guards the **Decision** layer, it is
-the cheapest of the three, and **it is the move you should do first**, because it produces the vocabulary
+the cheapest of the three, and **it is the move to apply first**, because it produces the vocabulary
 the other two need to say anything at all.
 
 Three traditions, three layers, three moves:
@@ -182,7 +182,7 @@ Three traditions, three layers, three moves:
 **And in amoebius, all three are Haskell.** The quiet third move is the native idiom of a typed functional
 language. The constituent **prodbox** behaviour already lives there — pure decision functions over a
 commit log (`canWriteDns`, `nodeDisposition` in `/home/matthewnowak/prodbox/src/Prodbox/Gateway/Types.hs`),
-the Plan / Apply split, the type system as a zero-cost design check. The payoff, and the spine of [§10](#10-simulate--the-pure-program-lifted-io-sim), is
+the Plan / Apply split, the type system as a zero-cost design check. The spine of [§10](#10-simulate--the-pure-program-lifted-io-sim) is
 one ladder: make the **decision** pure (Extract), then the **command** pure (Plan / Apply), then — with
 `io-classes` and `io-sim` — the **whole concurrent program** pure, run as a deterministic model under test
 and as the production daemon from a single source. *Build it pure; lift it whole.*
@@ -191,20 +191,20 @@ and as the production daemon from a single source. *Build it pure; lift it whole
 
 ## 5. Three layers, and the blindness that binds them
 
-A concurrency defect can live in any of three layers, and here is the load-bearing observation: **each
-layer is structurally invisible to the tools that guard the others.** Not because the tools are weak —
-because they are *looking somewhere else*.
+A concurrency defect can live in any of three layers, and **each layer is structurally invisible to the
+tools that guard the others** — not because the tools are weak, but because they are *looking somewhere
+else*.
 
 | Layer | The move that guards it | What that move still cannot see | Strongest claim it yields |
 |---|---|---|---|
 | **Decision** (one process) | **Extract** ([§8](#8-move-i--extract-make-the-decision-a-value)), with the type system as a free head start | whether the *protocol* those decisions compose into is sound | **proven** (purity/totality in code; the property when finite) |
 | **Protocol** (across processes) | **Model** ([§9](#9-move-ii--model-prove-the-protocol-not-the-program)) | whether the *code* refines the model; real-time / clock-skew premises | **proven for the model only** |
-| **Runtime** (the live forest) | **Inject** ([§11](#11-move-iii--inject-break-the-running-thing-on-purpose)) | the interleavings you did not inject; soundness | **tested**, never proven |
+| **Runtime** (the live forest) | **Inject** ([§11](#11-move-iii--inject-break-the-running-thing-on-purpose)) | the interleavings not injected; soundness | **tested**, never proven |
 
 Stated as three flat facts: a perfect Decision-layer proof says **nothing** about whether the protocol is
 sound; a green Protocol model says **nothing** about whether the code refines it or the live timeouts hold;
 a passing Runtime fault test says **nothing** about the interleavings it did not schedule, and can never
-show an invariant is *sound* — only that it survived the faults you chose.
+show an invariant is *sound* — only that it survived the faults chosen.
 
 There is a **fourth blindness**, orthogonal to these three: **every move is blind to a storage consistency
 boundary unless that boundary is explicitly modeled in.** In amoebius that boundary is the cluster
@@ -216,12 +216,12 @@ is deferred on purpose to [§16](#16-the-second-axis--when-one-cluster-becomes-a
 
 ## 6. The concentration principle — where the obligation lives
 
-This is the section that makes amoebius's doctrine *different* from a generic one, and it is the reason this
-document is tractable at all.
+This section distinguishes amoebius's doctrine from a generic one: it is why the proof obligation is
+tractable.
 
-**Intuition first.** A naive reading of [§2](#2-when-this-applies--the-gate) is terrifying: amoebius runs Pulsar, MinIO, Vault, Postgres,
+A naive reading of [§2](#2-when-this-applies--the-gate) suggests an unbounded obligation: amoebius runs Pulsar, MinIO, Vault, Postgres,
 nine standard services, N worker daemons, and an arbitrary app on every cluster in a recursive forest — so
-it sounds as if *every* component carries its own split-brain proof obligation. It does not. The obligation
+it appears as if *every* component carries its own split-brain proof obligation. It does not. The obligation
 **concentrates**, because of two structural facts amoebius commits to.
 
 **Fact one: intra-cluster consensus is delegated, not re-proved.** The standard platform services each run
@@ -271,11 +271,11 @@ flowchart TD
   geo-sync and we try to failover the gateway to that cluster? we need to prove we always have well-defined
   behaviour.* The whole of [§16](#16-the-second-axis--when-one-cluster-becomes-a-forest)–[§19](#19-the-cross-boundary-ledger-and-conformance-rows) and Appendix B exist to answer that question.
 
-**The slogan, cashed out:** *delegate the easy proofs, concentrate the hard one.* Everything intra-cluster
-and synchronous is somebody else's solved problem; amoebius spends its formal-verification budget on the
-two invariants that are uniquely its own, and on nothing else. A proof obligation that appears anywhere
-*other* than these two boundaries is a smell — usually a sign that a deployment-rules concern leaked into
-app logic, or that someone is re-proving what Pulsar/MinIO/Postgres already prove.
+Everything intra-cluster and synchronous is a solved problem owned by another system; amoebius spends its
+formal-verification budget on the two invariants that are uniquely its own, and on nothing else. (Shorthand:
+delegate the easy proofs, concentrate the hard one.) A proof obligation that appears anywhere *other* than
+these two boundaries **indicates a modelling error** — usually a sign that a deployment-rules concern leaked
+into app logic, or that someone is re-proving what Pulsar/MinIO/Postgres already prove.
 
 ---
 
@@ -284,16 +284,16 @@ app logic, or that someone is re-proving what Pulsar/MinIO/Postgres already prov
 Each tradition hands its move both its power and its limits; record the limits now, because [§12](#12-the-moral-core--proven-tested-assumed) turns them
 into ledger rows.
 
-**Model cannot:** check your *code* (only a model — model and code drift); explore beyond a **bounded,
-finite scope** (you check 2–3 actors, not 3,000); reason in **real time** (it runs in logical time, so
-clock skew and lease timing are abstracted away, not verified — R8); or check invariants you forgot to
-state. These are not weaknesses to apologize for — they are exactly where Model hands off to Inject and to
+**Model cannot:** check the *code* (only a model — model and code drift); explore beyond a **bounded,
+finite scope** (the check covers 2–3 actors, not 3,000); reason in **real time** (it runs in logical time, so
+clock skew and lease timing are abstracted away, not verified — R8); or check invariants that were never
+stated. These are not weaknesses to apologize for — they are exactly where Model hands off to Inject and to
 the [§13](#13-the-supporting-rules--the-conditions-the-moves-need) rules.
 
-**Inject cannot:** be exhaustive (it **samples** the faults you inject); prove *soundness* (a green chaos
+**Inject cannot:** be exhaustive (it **samples** the faults injected); prove *soundness* (a green chaos
 run is evidence, not proof); or mean anything without observability, a steady-state signal, and disciplined
 blast-radius control. Done as Netflix did it — scheduled, watched, escalating, bounded — Inject is
-fire-drill engineering; done carelessly it is just an outage you caused yourself.
+fire-drill engineering; done carelessly it is just a self-inflicted outage.
 
 **Extract cannot:** establish the *cross-process* invariant. A pure decision is only ever as sound as the
 observation and fence handed to it; whether the protocol those decisions compose into upholds the
@@ -327,7 +327,7 @@ Three sub-rules make it sound:
   *not-yet-observed* value — never a coerced definite. This is the direct remedy for both disguises of [§3](#3-the-defect-class--one-shape-two-disguises).
   A decision may deliberately coerce an unknown to a definite **only when** the coercion can affect
   **liveness** but **not** the safety invariant — i.e. a separate mechanism (a convergent-log gate, a
-  fail-closed apply step) enforces safety regardless. State which case you are in; an unexamined coercion is
+  fail-closed apply step) enforces safety regardless. State which case applies; an unexamined coercion is
   the [§3](#3-the-defect-class--one-shape-two-disguises) defect by default.
 - **Bound everything.** Every probe, retry, queue, and wait carries an explicit finite bound. An unbounded
   effect reintroduces an instant the decision cannot reason about.
@@ -376,7 +376,7 @@ flaw there is wrong *regardless of how perfectly the code is written*, so no tes
 reveal it; only checking the algorithm can. The DynamoDB 35-step trace ([§4](#4-two-traditions-and-the-quiet-third)) is the canonical proof that
 "astronomically lucky" is not a plan.
 
-**How you know you've done it.** There is a model of the protocol; it encodes crash and reordering, not
+**How to know the move is complete.** There is a model of the protocol; it encodes crash and reordering, not
 just the happy path; it states the safety invariant (e.g. *at most one active singleton*) and at least one
 liveness property (*a cluster with a live candidate eventually has exactly one*); and a checker explores it
 to exhaustion at a scope that **matches the real actor count**. The model's vocabulary — the snapshot and
@@ -432,8 +432,8 @@ exceptions, several loops racing over shared state — run the **real in-process
 
 **The Haskell way: io-sim and io-classes.** [`io-classes`](https://hackage.haskell.org/package/io-classes)
 is a set of typeclasses (`MonadSTM`, `MonadAsync`, `MonadTimer`, `MonadFork`, `MonadThrow`/`MonadCatch`)
-mirroring `base`, `stm`, and `async`. You write a component polymorphic over a monad `m` carrying those
-constraints, then choose an interpreter:
+mirroring `base`, `stm`, and `async`. A component is written polymorphic over a monad `m` carrying those
+constraints, then an interpreter is chosen:
 
 - in production, `m = IO` — the real daemon;
 - under test, `m = IOSim s` — a **pure, discrete-event simulator** with deterministic scheduling, simulated
@@ -469,9 +469,10 @@ reads that the concurrent *schedule* is **unexercised** until it is.
 > Extract the decision · Model the protocol · **Inject** the faults.
 
 **The move.** Subject the live forest to **fault injection that asserts the exact invariants Extract and
-Model established** — and make the injection *adversarial*, not merely benign: not "does it survive a
-reboot?" but "does the singleton invariant hold when we kill the owner mid-claim under load?" and "does the
-forest stay well-defined when we kill a cluster *mid geo-sync* and fail the gateway over to it?"
+Model established** — and make the injection *adversarial*, not merely benign: not asserting survival of a
+reboot, but asserting that the singleton invariant holds when the owner is killed mid-claim under load, and
+that the forest stays well-defined when a cluster is killed *mid geo-sync* and the gateway is failed over to
+it.
 
 **In amoebius, the fault harness is itself a `.dhall` topology.** A test is an `amoebius.dhall` that spins
 up resources, runs a workflow, and — by definition — always tears down, simulating HA failovers and
@@ -503,22 +504,22 @@ loss is bounded by the declared **data-loss budget**, not zero. That distinction
 because a graceful teardown that silently skips its cleanup steps is downgrading itself to a chaos event
 and forfeiting the lossless guarantee.
 
-**What this move cannot see.** It cannot prove soundness, and it cannot see the interleavings you did not
-inject. A green Inject run is the strongest *empirical* confidence you can buy and the weakest *logical*
-guarantee — which is the whole reason the moves are plural.
+**What this move cannot see.** It cannot prove soundness, and it cannot see the interleavings not
+injected. A green Inject run is the strongest *empirical* confidence available and the weakest *logical*
+guarantee — which is why the moves are plural.
 
 ---
 
 ## 12. The moral core — proven, tested, assumed
 
-Here is the conviction at the centre of this document:
+The proven/tested/assumed principle:
 
 > A system is "provably chaos-hardened" only to the degree it can say, for each technique, **what is
 > proven, what is merely tested, and what is assumed.**
 
-Conflating those three is the entire difference between provable hardening and "we ran some chaos tests and
-it seemed fine." The cardinal sin — the thing this doctrine exists to forbid — is to launder a tested or
-assumed result and report it as proven. Keep this ledger explicitly:
+Conflating those three is the entire difference between provable hardening and an unsubstantiated claim of
+safety. The prohibition this doctrine exists to enforce is that a tested or assumed result must never be
+reported as proven. Keep this ledger explicitly:
 
 | Technique | Establishes | Strength | Does **not** establish |
 |---|---|---|---|
@@ -526,25 +527,25 @@ assumed result and report it as proven. Keep this ledger explicitly:
 | **Extract** — pure decision + property test | The branch is a total function of typed inputs; unknowns and distinguished states are explicit; safety-critical freshness is fenced | **Proven** for purity / totality / fence wiring; **tested** (sampled) for the property unless the input space is finite and exhausted | That the protocol composing these decisions is sound; that an unfenced observation is current |
 | **Model** — design model-checking | The *algorithm* upholds the (possibly *conditional*, R7) invariant under modeled crash/reorder, within scope | **Proven for the model**; **assumed** for model↔code refinement and actor counts beyond scope | That the code refines the model; behaviour above scope; real-time / clock-skew premises (R8) |
 | **Simulate** (optional) | The *real code* upholds the invariant under the schedules explored | **Tested** (sampled schedules) | Schedules not explored; anything outside the simulated subsystem |
-| **Inject** — live fault injection | The deployed forest survived the injected faults | **Tested** (the faults you chose), never proven | Faults/interleavings not injected; that the invariant is *sound* |
+| **Inject** — live fault injection | The deployed forest survived the injected faults | **Tested** (the faults chosen), never proven | Faults/interleavings not injected; that the invariant is *sound* |
 | Synchrony / real-time assumption (R8) | The timing premise (clock skew, lease, heartbeat) is named, bounded, monitored | **Assumed** — monitored at runtime, never proven by any move | Behaviour when the bound is exceeded; that it holds in the field |
 
 (Three further rows — the cross-boundary consistency premise, the failover budget, and the
 invariant-confluence classification — belong to the Second Axis and are recorded in [§19](#19-the-cross-boundary-ledger-and-conformance-rows).)
 
-**Applied to amoebius today, the ledger is blunt — and that is the point.** Nothing in Phases 1–11 is
+**Applied to amoebius today, the ledger is blunt — and that is by design.** Nothing in Phases 1–11 is
 built. So **every** layer above is, for amoebius, **UNVERIFIED** pending implementation; the only
 *proven* facts available are sibling prodbox results, which are **evidence, not amoebius proof.** The
 [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) phase-discipline rule makes this binding: *every
 validation emits a proven/tested/assumed ledger artifact, and skipping an applicable test move marks that
 correctness layer UNVERIFIED, never green.* When the First-Axis election is built (Phase 3) and modeled
 (Phase 9), its ledger will read like prodbox's; until then, claiming the singleton is "hardened" because
-prodbox proved a sibling invariant is exactly the laundering this section forbids.
+prodbox proved a sibling invariant is exactly what this section forbids.
 
 The rule, stated once and meant absolutely: **never report a tested, assumed, or merely argued result as
 proven.** Type-checking, decision purity, and finite-and-exhausted decision properties can be *proven* at
-the code layer; everything else is *evidence*. The ledger is the deliverable — not a trophy that says "we
-are safe," but a confession that says "here is exactly what we know, and how we know it." An honestly
+the code layer; everything else is *evidence*. The ledger is the deliverable: not an assertion of safety
+but a precise record of what is known and by what means. An honestly
 *conditional* invariant a system enforces is worth more than an *absolute* one it silently violates under
 partition.
 
@@ -587,7 +588,7 @@ cross-boundary.)
   "absolute safety *and* always-available autonomous progress under partition" unachievable. **PACELC**
   (Abadi, 2010/2012) adds *else, latency*: even fully healthy cross-cluster coordination costs latency on
   every operation, while asynchronous coordination buys that back at the price of lag and divergence. So
-  when the invariant you need is one of these: (a) **state the condition** under which it holds (e.g. *under
+  when the invariant in question is one of these: (a) **state the condition** under which it holds (e.g. *under
   view convergence*); (b) **choose the failure mode explicitly** — *safety-first* (fail closed) or
   *availability-first* (act, accept a **bounded** violation that deterministically heals on reconvergence)
   — and document which; (c) **record** the chosen mode in the ledger. amoebius inherits prodbox's explicit
@@ -623,8 +624,8 @@ flowchart TD
   A -->|"if Simulate is skipped, Inject asserts Extract/Model invariants"| C
 ```
 
-You cannot **Model** a protocol until you have **Extracted** the decision's snapshot and observation; you
-cannot **assert** an invariant in Inject or Simulate until it has been **stated** by Model (or at minimum
+A protocol cannot be **Modeled** until the decision's snapshot and observation have been **Extracted**; an
+invariant cannot be **asserted** in Inject or Simulate until it has been **stated** by Model (or at minimum
 made pure and checkable by Extract); Simulate sits between, checking the real code against schedules before
 the expense of live injection.
 
@@ -633,7 +634,7 @@ the expense of live injection.
 *Which* move to invest in first is a cost/benefit call, not a rule. A typical — not mandatory — judgment is
 **Extract first** (cheapest, removes a real defect now, sharpens Model by forcing the vocabulary), **then
 Model** (a small focused model against a catastrophic blast radius), **then extend Inject**, with
-**Simulate** only if Extract leaves a real schedule question. State your project's actual reasoning;
+**Simulate** only if Extract leaves a real schedule question. State the project's actual reasoning;
 sequencing across amoebius phases is owned by [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 A useful anchor: the **type system is already a zero-cost design check** for the state machines it covers
 (illegal transitions are compile errors), and it also marks exactly where types *stop* reaching — the
@@ -663,7 +664,7 @@ column is where single-threaded suites are empty and cannot, even in principle, 
 **"Model"** and **"Inject"** columns are where benign-only suites stop, leaving the catastrophic invariant
 and its survival under stress simply unverified. Conformance is layered — a project fully conformant at the
 Decision layer can be entirely non-conformant at Protocol and Runtime, and by the blindness property ([§5](#5-three-layers-and-the-blindness-that-binds-them))
-the first tells you nothing about the other two. Audit all three.
+the first says nothing about the other two. Audit all three.
 
 ---
 
@@ -671,8 +672,8 @@ the first tells you nothing about the other two. Audit all three.
 
 > **Gate.** Everything above assumed a single, strongly-consistent domain: one cluster, where a committed
 > write is immediately visible to every reader and the standard services run their own consensus ([§6](#6-the-concentration-principle--where-the-obligation-lives)). If
-> that describes your subsystem, **you can stop here** — Appendix A is your worked example. Read on only if
-> your data is geo-replicated across more than one cluster with *asynchronous* replication between them.
+> that describes the subsystem, **the analysis can stop here** — Appendix A is the worked example. Read on only if
+> the subsystem's data is geo-replicated across more than one cluster with *asynchronous* replication between them.
 
 For amoebius this gate is not a rare edge case — it is **Phase 9**. The moment a parent spawns a child and
 the two geo-replicate, the forest crosses this line, and the [§3](#3-the-defect-class--one-shape-two-disguises) defect returns in a new and more dangerous
@@ -688,7 +689,7 @@ And the defect itself recurs, with **replication lag** now playing the role of t
 `t1`. A read from a cluster that lags the authoritative history is a premise true at that cluster's
 last-applied instant but trusted after the history has moved on — the stale-premise decision of [§3](#3-the-defect-class--one-shape-two-disguises) lifted to
 the storage layer. This is the precise shape of the open cross-cluster failover question: *what happens if a cluster
-goes down mid geo-sync and we try to failover the gateway to that cluster?* A surviving sibling that reads
+goes down mid geo-sync and the gateway is failed over to that cluster?* A surviving sibling that reads
 its lagging replica at offset `X` and treats `X` as the complete history is committing
 *timeout-coerces-unknown* at topology scale; one that reads "partitioned-from-peer" as "peer-cluster-dead"
 is committing *state-conflation*. The typed-unknown remedy ([§8](#8-move-i--extract-make-the-decision-a-value)) applies unchanged — an un-fresh read is
@@ -720,8 +721,8 @@ boundary, possible duplication, and — if both sides accept writes — possible
 independently-advanced histories.** Every coordination guarantee this doctrine otherwise relies on holds
 **only within one boundary** unless stated otherwise.
 
-The boundary forces a question about *every mutable, multi-record invariant* that must cross it: **will it
-survive being merged?** The governing result is **invariant-confluence**.
+The boundary raises the same question of *every mutable, multi-record invariant* that must cross it —
+**whether it survives being merged**. The governing result is **invariant-confluence**.
 
 - **Invariant-confluence (I-confluence)** — a multi-record invariant is *confluent* iff the set of
   invariant-valid states is **closed under merge** of concurrent, independently-applied updates. The theorem
@@ -869,35 +870,35 @@ these rows to its ledger —
 
 The rule is unchanged across the axis: **never report an assumed-and-monitored result as proven.** A
 confluence claim is proof only when its closure argument is shown; the data-loss bound is forever an
-assumption you monitor and a disaster may exceed.
+assumption that is monitored and that a disaster may exceed.
 
 ---
 
 ## 20. Epilogue — the honest system
 
-We began with two candidates that each decided, correctly, that they were the one brain — and with two
-clusters that each decided, correctly, that the other was gone. Both were wrong. The whole of this document
-is the answer to that microsecond and that replication gap: a discipline that is plural because *reality is
-layered*, and three moves that are partial *by design*.
+The two singleton candidates each decided, correctly, that they held sole authority; the two clusters each
+decided, correctly, that the other was gone. Both decisions were wrong for the world they acted in. This
+document answers that microsecond and that replication gap with a discipline that is plural because the
+failure surface is layered, and three moves that are each partial *by design*.
 
-**Extract** the decision into a value, so the branch cannot lie about what it knew. **Model** the protocol
-into a proof, so the algorithm cannot be wrong in a way no test could ever catch. **Inject** the faults into
-the deployment, so the running forest cannot hide a failure that only stress reveals. None of the three is
-sufficient; each is blind exactly where the next one looks. And amoebius's gift to its own engineers is
-**focus**: because the standard services run their own consensus and because chaos/HA/failover are
+**Extract** the decision into a value, so the branch cannot act on a premise it did not hold. **Model** the
+protocol into a proof, so the algorithm cannot be wrong in a way no test could ever catch. **Inject** the
+faults into the deployment, so the running forest cannot hide a failure that only stress reveals. None of
+the three is sufficient; each is blind exactly where the next one looks. The concentration principle
+narrows the scope: because the standard services run their own consensus and because chaos/HA/failover are
 deployment-rules and not app logic, the obligation does not spread across the forest — it concentrates at
 the singleton election and the cross-cluster boundary, and nowhere else.
 
-But the deliverable was never the moves. It is the **ledger** — and for amoebius, today, the ledger is
-almost entirely UNVERIFIED, with prodbox standing in only as *sibling evidence*. That is not a failure to
-hide; it is the truth to write down. A system is "provably chaos-hardened" only to the degree it can say
-what it *proved*, what it merely *tested*, and what it only *assumed*, and the cardinal discipline is to
-never let the first word stand in for the other two.
+The deliverable is the **ledger**, not the moves. For amoebius today the ledger is
+almost entirely UNVERIFIED, with prodbox standing in only as *sibling evidence*. That is a fact to record,
+not a failure to conceal. A system is "provably chaos-hardened" only to the degree it can state
+what it *proved*, what it merely *tested*, and what it only *assumed*, and the governing discipline is that
+the first word never stands in for the other two.
 
 > Extract the decision · Model the protocol · Inject the faults — and keep the ledger honest.
 
-An honestly conditional invariant a system *enforces* will always be worth more than an absolute one it
-silently violates under partition. Build the first kind. Write down which kind you built.
+An honestly conditional invariant a system *enforces* is worth more than an absolute one it
+silently violates under partition. Build the first kind, and record which kind was built.
 
 ---
 
@@ -932,7 +933,7 @@ prove.
 The invariant: **at most one daemon exercises singleton authority — once views have converged.** That
 conditional clause is load-bearing (R7). It meets the [§2](#2-when-this-applies--the-gate) gate.
 
-**The defect ([§3](#3-the-defect-class--one-shape-two-disguises) made concrete).** Each candidate decides "am I the singleton, and may I act?" from its
+**The defect ([§3](#3-the-defect-class--one-shape-two-disguises) made concrete).** Each candidate decides whether it is the singleton and may act, from its
 local view of peer liveness (heartbeat ages) and the log. The naive path reads a *peer heartbeat older than
 the timeout* as "that peer is dead," self-elects, and acts on "I am the sole brain" — a premise that may
 already be false. This is *timeout-coerces-unknown*: a missing heartbeat means *unreachable-or-slow*, not
@@ -961,8 +962,8 @@ flowchart TD
   T4 -->|"refactor into"| L1
 ```
 
-**Impossibility and synchrony (R7, R8).** Under partition you cannot have both *no two singletons* and
-*autonomous failover progress* (FLP/CAP). amoebius makes the R7 choice **explicit and availability-first**
+**Impossibility and synchrony (R7, R8).** Under partition, *no two singletons* and *autonomous failover
+progress* cannot both hold (FLP/CAP). amoebius makes the R7 choice **explicit and availability-first**
 (inherited from prodbox): an isolated candidate may self-elect as a failsafe, so under severe partition the
 absolute single-singleton invariant is not claimed. Because authority stays gated by the local log view, any
 split admitted by that choice is *temporary*, bounded by the partition, and **deterministically heals on
@@ -999,7 +1000,7 @@ analogues are evidence, not amoebius proof. The compacted-topic/TableView read-m
 ([daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#51-the-coordination-plane-pulsar--minio--the-commit-log)) adds **no** new ledger row: it is a
 projection whose authority is the ownership fold, and a bounded-retention *uncompacted* signed audit trail is
 retained beside it, so compaction's per-key discard does not erode the hash-chain tamper-evidence under
-amoebius's crash/omission threat model — the swap is proof-neutral, not a laundered assumption.
+amoebius's crash/omission threat model — the swap is proof-neutral, not an assumption disguised as proof.
 
 **Appendix A rests on doctrine (zero orphans).**
 
@@ -1021,7 +1022,7 @@ amoebius's crash/omission threat model — the swap is proof-neutral, not a laun
 ## Appendix B — Worked example (fenced): cross-cluster geo-replication failover (the open cross-cluster failover question)
 
 > The Second-Axis example, and the one the whole async-replication concern exists for: **what happens if a
-> cluster goes down mid geo-sync and we fail the gateway over to it?** It crosses the cluster boundary
+> cluster goes down mid geo-sync and the gateway is failed over to it?** It crosses the cluster boundary
 > (R1/[§17](#17-the-boundary-and-its-classifier), R9), rests on a bounded-staleness / data-loss premise and an explicit failover budget (R8, R9),
 > and reconciles divergent histories under an availability-first choice (R7). It is **forward-looking**:
 > amoebius runs no cross-cluster geo-replication today, but Phase 9 is exactly this shape, so the doctrine
@@ -1055,8 +1056,8 @@ teardown owned by [cluster_lifecycle_doctrine.md §5](./cluster_lifecycle_doctri
 Pulsar log plus the content-addressed artifacts; because blobs are content-addressed and write-once and the
 log dedup is a pure fold keyed by a **replication-surviving work-id**, **duplication, reordering, and late
 arrival after heal are absorbed structurally for any effect that eventually appears in the merged history**
-(R3). The **typed-unknown scoping** is the crux of "well-defined": "I have not seen entries past `X`, so I
-will serve" decides *which cluster serves* — a **liveness** coercion that authorizes no effect, hence
+(R3). The **typed-unknown scoping** is the crux of "well-defined": "no entries past `X` have been observed,
+therefore serve" decides *which cluster serves* — a **liveness** coercion that authorizes no effect, hence
 licensed; "those effects do not exist / were never durable" is a durability **safety** claim and is the [§3](#3-the-defect-class--one-shape-two-disguises)
 defect — the tail beyond `X` stays a typed *not-yet-observed* value, reconciled when the boundary heals, and
 if the failed cluster is permanently lost, accounted for **only** by the R9 data-loss budget, never silently
@@ -1087,7 +1088,7 @@ lag until the superseding claim propagates ([§9](#9-move-ii--model-prove-the-pr
 self-healing R7 violation. The merge: **content-addressed blobs merge trivially** (the union of immutable,
 self-naming objects is conflict-free); the **CAS pointer is the only divergent point** and needs an explicit
 deterministic, **total**, **timestamp-free** merge (ordered by `(causal-predecessor-set, cluster-rank)`), so
-every node computes the same post-heal pointer without a clock dependence. *If* you instead order by a commit
+every node computes the same post-heal pointer without a clock dependence. *If* the pointer is instead ordered by a commit
 timestamp, that is a **bounded clock-skew premise** and must be named/bounded/monitored (R8). Replication lag
 is the synchrony premise (R8): named, bounded, monitored. The failover budget (R9) is **(data-loss window,
 recovery time)** — the window assumed/monitored, the recovery time **tested by drill**. PACELC: even absent a

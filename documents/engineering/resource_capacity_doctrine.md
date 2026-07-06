@@ -14,9 +14,9 @@
 
 ---
 
-## 1. The one idea: capacity is a budget you fold against, and overcommit is a checked rejection
+## 1. Capacity is a budget the fold consumes, and overcommit is a checked rejection
 
-Raw Kubernetes lets you admit a Deployment that requests more memory than any node has, a StatefulSet whose
+Raw Kubernetes admits a Deployment that requests more memory than any node has, a StatefulSet whose
 volumes sum past the disk, or a cluster whose workloads out-total its nodes. Each is well-formed YAML; each
 surfaces at runtime as a `Pending` pod, an evicted workload, or a full disk. amoebius lifts that whole class
 to *does-not-decode*: a deploy must produce a **feasible placement** of its typed demands against a
@@ -53,7 +53,7 @@ Everything below is **design intent for Phase 3** (the type discipline) with run
 
 ## 2. The load-bearing honesty limit: a capacity sum is a decode-foreclosed check, never type-foreclosed
 
-This is the most important sentence in the document, so it gets its own section. **A capacity check — whether
+**A capacity check — whether
 the compute *placement witness* ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)) or the
 storage/retention `Σ demand ≤ capacity` — is a decode-foreclosed foreclosure, a total decode-time check, never a type-foreclosed
 uninhabitable-by-type proof.** Dhall (and the GADT-indexed Haskell it decodes into) has **no dependent
@@ -69,7 +69,7 @@ and this doc forbids that.
 ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)) searches for a feasible pod→node assignment by a
 total heuristic (first-fit-decreasing) rather than an exhaustive optimum. The honesty this buys is
 one-directional: `place` may *reject* a spec that is in principle packable (a false `Left Unschedulable`), but
-it never *admits* one that is not — **soundness over completeness**, the correct trade when the whole point is
+it never *admits* one that is not — **soundness over completeness**, the correct trade when the objective is
 "no runtime `Pending`." A rejected-but-packable spec is fixed by the operator declaring more headroom, never by
 the model quietly admitting an unplaceable workload. (Storage and retention `Σ` folds are genuine sums, not
 packings — volume bytes *are* divisible — so they carry no completeness caveat; the bin-pack is a
@@ -100,7 +100,7 @@ flowchart TD
 
 ## 3. The types: `Quantity`, `Capacity`, `Demand`, `Budget`
 
-Intuition: every number that can be summed is a **refined non-zero quantity**, every provider of resources
+Every number that can be summed is a **refined non-zero quantity**, every provider of resources
 advertises a **`Capacity`**, and every consumer declares a **`Demand`** in the same units, so the fold is a
 subtraction that must not underflow.
 
@@ -152,7 +152,7 @@ reused at every layer; the compute fold ranges over container `requests`, the st
 
 ## 4. The total fold: `fits`, `carve`, `place`, and the nesting
 
-Intuition: an aggregate `Σ demand ≤ Σ capacity` is **necessary but not sufficient** for schedulability —
+An aggregate `Σ demand ≤ Σ capacity` is **necessary but not sufficient** for schedulability —
 because pods are **atomic and cannot straddle nodes**, a workload set can fit in aggregate yet have a single
 pod that fits no individual node (3 nodes × 4 CPU = 12 total admits a 5-CPU pod by the sum, but the pod is
 `Pending` forever). So the cluster-level check is not a sum but a **placement**: for a fixed node set, compute
@@ -234,7 +234,7 @@ per-host capacity fold.
 
 ### 4.1 `place` branches: static proves a placement, dynamic proves a growth envelope
 
-Intuition: a **fixed** node set is fully known at decode, so you can compute an actual packing and reject if
+A **fixed** node set is fully known at decode, so an actual packing can be computed and the spec rejected if
 none exists; an **elastic** node set has no nodes yet at decode, but the autoscaler removes the straddle
 problem — it can always add a right-sized node for a pending pod — so the sound check is a *growth envelope*,
 not a packing. `place` selects on the topology's budget shape ([§6](#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)):
@@ -278,7 +278,7 @@ not a per-pod placement axis. This doc consumes the wholesale-ownership rule; it
 
 ## 5. `StorageBudget`: bounded by construction, single-owner ceiling per arm
 
-Intuition: there is no such thing as "unbounded storage" — storage is *either* host-level (bounded by a
+There is no such thing as "unbounded storage" — storage is *either* host-level (bounded by a
 physical disk) *or* cloud (bounded by a quota). amoebius encodes that as a **closed union with no unbounded
 arm**, so "unbounded storage" (I9) has no syntax.
 
@@ -306,7 +306,7 @@ StorageBudget = Fixed Capacity | QuotaCapped Quota | Growable ScalingPolicy
 
 ## 6. `Growable` / `ScalingPolicy`: the escape valve amoebius owns
 
-Intuition: bounded capacity would be a straitjacket if it could never grow — but growth must be *amoebius's
+Bounded capacity would be overly restrictive if it could never grow — but growth must be *amoebius's
 decision under a typed policy*, never a blank "unbounded." So the **only** way a `Budget` exceeds a fixed cap
 is a `Growable` arm carrying a `ScalingPolicy`, and the policy's own outer bound is a cloud quota — never
 truly unbounded.
@@ -352,7 +352,7 @@ Growable = Bounded Capacity | Autoscaled ScalingPolicy
 
 ## 7. Pulsar has two ceilings: the hot tier and the durable total
 
-Intuition: a message bus is the one storage consumer where a *single* budget is not enough. Pulsar's hot tier
+A message bus is the one storage consumer where a *single* budget is not enough. Pulsar's hot tier
 is BookKeeper (bookies on retained PVs); tiered storage offloads only **closed** ledgers to S3 and does not
 free BookKeeper until retention deletes them (there is a deletion lag), and the currently-open ledger can
 never be offloaded. So a **time-only** offload trigger does not bound the hot tier: if ingest × offload-lag
@@ -390,8 +390,8 @@ the *two-ceiling arithmetic*):
 
 ## 8. Where the numbers come from: declared at decode, cross-checked at runtime
 
-Intuition: for overcommit to be *unrepresentable* rather than a runtime error, the capacity the fold checks
-against must be a **spec input** — you cannot type-check a demand against a number you only learn at runtime.
+For overcommit to be *unrepresentable* rather than a runtime error, the capacity the fold checks
+against must be a **spec input** — a demand cannot be type-checked against a number learned only at runtime.
 So amoebius **declares** capacity in the spec and folds at decode (decode-foreclosed), then **cross-checks** the
 declaration against reality at reconcile (runtime-checked).
 

@@ -76,7 +76,7 @@ WSL2) or as the on-host CUDA worker case ([§5](#5-host-worker-nodes-substrate-s
 
 ## 2. Detection: a pure classification over three reads
 
-Detection separates cleanly into **what we observed** (impure: read the platform, probe for a GPU) and
+Detection separates cleanly into **what was observed** (impure: read the platform, probe for a GPU) and
 **what that means** (pure: classify). The classification is a total function so it is unit-testable
 without touching a host, and the only `IO` is the three reads that feed it.
 
@@ -99,19 +99,22 @@ Either String Substrate` wrapped by `detect :: IO (Either String Substrate)`:
 Two classification rules are load-bearing and stated as hard failures, not warnings:
 
 - **Apple is always `arm64`.** macOS on a non-`arm64` architecture is rejected outright — there is no
-  Intel-Mac substrate. Apple Silicon's unified memory is the whole reason the Apple substrate is special
+  Intel-Mac substrate. Apple Silicon's unified memory is why the Apple substrate is treated distinctly
   ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)), and that is an `arm64` fact.
 - **GPU presence promotes the substrate.** A Linux host with an NVIDIA GPU classifies as `linux-cuda`
   (seed: `linux-gpu`), not `linux-cpu`; the CUDA container runtime is then a reconciler precondition ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)).
 
-> **A non-NVIDIA accelerator is silently *dropped*, not rejected — a named gap.** The probe is NVIDIA-only
+> **A non-NVIDIA accelerator classifies as `linux-cpu` — a named detection gap.** The probe is NVIDIA-only
 > (`hasNvidiaGpu`), so a Linux host carrying a non-NVIDIA accelerator (AMD/ROCm, a TPU-class part) classifies
-> as plain `linux-cpu` and the accelerator is simply not seen: there is **no `Left unsupported-accelerator`**
-> — detection does not reject the host, it forgets the device. This is an **un-foreclosed gap**, consistent
-> with `cuda` being one accelerator family among possible others
-> ([§1](#1-the-substrate-is-a-fact-about-the-host-not-a-knob)); this doc **names** the drop rather than
-> implying it is handled. Closing it is not substrate-only work — it needs a new closed substrate + detector
-> and, downstream, a new `EngineRuntime` arm and landing-relation entry.
+> as plain `linux-cpu` and the accelerator is not seen: there is **no `Left unsupported-accelerator`** —
+> detection does not reject the host, it forgets the device. This is consistent with `cuda` being one
+> accelerator family among possible others ([§1](#1-the-substrate-is-a-fact-about-the-host-not-a-knob)).
+>
+> **Status: OPEN (detection gap, intentionally un-foreclosed for v1).** A non-NVIDIA accelerator classifies as
+> `linux-cpu` — the device is forgotten, not rejected. Current position: accepted for v1 (NVIDIA is the only
+> targeted accelerator family); the detector SHOULD emit a warning so the drop is observable. Closing it is
+> coordinated multi-doc work: a new closed substrate + detector and, downstream, a new `EngineRuntime` arm and
+> landing-relation entry.
 
 > **Honesty.** This is the `hostbootstrap` seed, ported from a prior Python detector. It is *evidence from
 > a sibling library*, not a tested amoebius result — amoebius has not built Phase 1. Read every mechanism
@@ -341,7 +344,7 @@ flowchart TD
 job is to get a built amoebius binary onto the host and then get out of the way — because the no-`PATH` /
 no-env, lazy-tool-ensure discipline ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)) cannot start until there is a Haskell binary to enforce it.
 Everything after the binary exists is the binary's responsibility, in Haskell, under this doctrine: the
-script does not install brew packages, it just ensures brew is installed, builds the project Haskell binary,
+script does not install brew packages, it ensures brew is installed, builds the project Haskell binary,
 then calls `bootstrap`, which takes over from there.
 
 The contract, on the canonical Apple lane:

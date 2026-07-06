@@ -158,7 +158,7 @@ protocol — no WebSockets, no fallback — owned by
 [`pulsar_client_doctrine.md` §1 — One client, one wire, no WebSockets](../documents/engineering/pulsar_client_doctrine.md#1-one-client-one-wire-no-websockets).
 It starts as a fork of `cr-org/supernova`, inheriting the handshake / LOOKUP / produce / consume foundation
 and adding the production concerns, per
-[`pulsar_client_doctrine.md` §4 — Forked from supernova — what we inherit and what we build](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-we-inherit-and-what-we-build).
+[`pulsar_client_doctrine.md` §4 — Forked from supernova — what amoebius inherits and what it builds](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-inherits-and-what-it-builds).
 Its capability surface — lookup, produce, consume, subscribe, seek — is owned by
 [`pulsar_client_doctrine.md` §5 — The capability surface: lookup · produce · consume · subscribe · seek](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek).
 This is the `amoebius-pulsar` package, distinct from the §5 `Platform/Pulsar.hs` *spec builder* that renders
@@ -166,8 +166,8 @@ the broker into the cluster.
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
 |---|---|---|---|
-| Wire framing / binary protocol (forked `proto-lens` `PulsarApi`) | [pulsar_client §3 / §4](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-we-inherit-and-what-we-build) | `amoebius-pulsar/src/Amoebius/Pulsar/Frame.hs`, `amoebius-pulsar/src/Amoebius/Pulsar/Proto/PulsarApi.hs` (PLANNED) | [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md) |
-| Connection / CONNECT handshake / LOOKUP discovery | [pulsar_client §4](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-we-inherit-and-what-we-build) | `amoebius-pulsar/src/Amoebius/Pulsar/Connection.hs` (PLANNED) | [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md) |
+| Wire framing / binary protocol (forked `proto-lens` `PulsarApi`) | [pulsar_client §3 / §4](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-inherits-and-what-it-builds) | `amoebius-pulsar/src/Amoebius/Pulsar/Frame.hs`, `amoebius-pulsar/src/Amoebius/Pulsar/Proto/PulsarApi.hs` (PLANNED) | [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md) |
+| Connection / CONNECT handshake / LOOKUP discovery | [pulsar_client §4](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-inherits-and-what-it-builds) | `amoebius-pulsar/src/Amoebius/Pulsar/Connection.hs` (PLANNED) | [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md) |
 | Producer / Consumer / Subscription / Seek | [pulsar_client §5](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek) | `amoebius-pulsar/src/Amoebius/Pulsar/{Producer,Consumer,Subscription,Seek}.hs` (PLANNED) | [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md) |
 | CBOR payload codec (exclusively CBOR bodies; `serialise`/`cborg`; canonical where content-addressed) | [pulsar_client §3.1](../documents/engineering/pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor), [illegal_state_catalog §3.23](../documents/engineering/illegal_state_catalog.md) | `amoebius-pulsar/src/Amoebius/Pulsar/Cbor.hs` (PLANNED; `serialise`/`cborg` dep in the `amoebius-pulsar` cabal package) | [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md) |
 | Broker-side dedup wiring + declarative topology algebra | [pulsar_client §6 — The declarative topology algebra](../documents/engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra) | `amoebius-pulsar/src/Amoebius/Pulsar/{Dedup,Topology,Namespace}.hs` (PLANNED) | [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md) |
@@ -182,7 +182,7 @@ and a single ETag-CAS pointer flip, owned by
 [`content_addressing_doctrine.md` §2 — The three-tier store: blobs ← manifests ← pointers](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers).
 Identity is `experimentHash = sha256(resolved-dhall ‖ substrate-fingerprint)` and determinism is built from
 pinned inputs + pure stages + a derived seed, owned by
-[`content_addressing_doctrine.md` §3 — `experimentHash`: identity is *what you asked for* ‖ *where it ran*](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)
+[`content_addressing_doctrine.md` §3 — `experimentHash`: identity is *what was requested* ‖ *where it ran*](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran)
 and
 [`content_addressing_doctrine.md` §4 — Determinism by construction: pinned inputs + pure stages + derived seed](../documents/engineering/content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed).
 The store object lands in Phase 4 (the `amoebius-store` package); the determinism kernel primitives land in
@@ -193,7 +193,7 @@ Phase 5 (in the main `amoebius` package's `Kernel/`).
 | Content-addressed blob/manifest writer (write-once, self-naming) | [content_addressing §2](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers) | `amoebius-store/src/Amoebius/Store/ContentAddress.hs`, `amoebius-store/src/Amoebius/Store/Manifest.hs` (PLANNED) | [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md) |
 | Pointer tier (ETag-CAS `latest`/`best`/`trial` flip) | [content_addressing §2](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers) | `amoebius-store/src/Amoebius/Store/Pointer.hs` (PLANNED) | [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md) |
 | `ContentAddress` typeclass (determinism kernel primitive) | [content_addressing §4](../documents/engineering/content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) | `src/Amoebius/Kernel/ContentAddress.hs` (PLANNED) | [phase_05_determinism_infernix.md](phase_05_determinism_infernix.md) |
-| `experimentHash` + SplitMix seed derivation | [content_addressing §3](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-you-asked-for--where-it-ran) | `src/Amoebius/Kernel/ExperimentHash.hs`, `src/Amoebius/Kernel/Rng.hs` (PLANNED) | [phase_05_determinism_infernix.md](phase_05_determinism_infernix.md) |
+| `experimentHash` + SplitMix seed derivation | [content_addressing §3](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran) | `src/Amoebius/Kernel/ExperimentHash.hs`, `src/Amoebius/Kernel/Rng.hs` (PLANNED) | [phase_05_determinism_infernix.md](phase_05_determinism_infernix.md) |
 
 ---
 
@@ -241,7 +241,7 @@ Temurin JRE for the JVM services) is owned by
 ## 10. Pulumi backend (IaC)
 
 Pulumi runs only from inside an existing amoebius cluster, owned by
-[`pulumi_iac_doctrine.md` §1 — The one rule: Pulumi runs only from inside an existing amoebius cluster](../documents/engineering/pulumi_iac_doctrine.md#1-the-one-rule-pulumi-runs-only-from-inside-an-existing-amoebius-cluster).
+[`pulumi_iac_doctrine.md` §1 — Pulumi runs only from inside an existing amoebius cluster](../documents/engineering/pulumi_iac_doctrine.md#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster).
 Every byte of its checkpoint is a Vault-Transit-enveloped object in MinIO, owned by
 [`pulumi_iac_doctrine.md` §2 — The backend: every byte of state is a Vault-enveloped object in MinIO](../documents/engineering/pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio).
 What it provisions — provider clusters, node groups, per-PV EBS sized to its PVC — is owned by
@@ -251,7 +251,7 @@ The engine and EBS programs land with provider clusters in Phase 10; multi-clust
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
 |---|---|---|---|
-| In-cluster Pulumi engine seam (under the singleton) | [pulumi_iac §1](../documents/engineering/pulumi_iac_doctrine.md#1-the-one-rule-pulumi-runs-only-from-inside-an-existing-amoebius-cluster) | `amoebius-pulumi/src/Amoebius/Pulumi/Engine.hs` (PLANNED) | [phase_10_provider_clusters_provisioning.md](phase_10_provider_clusters_provisioning.md) |
+| In-cluster Pulumi engine seam (under the singleton) | [pulumi_iac §1](../documents/engineering/pulumi_iac_doctrine.md#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster) | `amoebius-pulumi/src/Amoebius/Pulumi/Engine.hs` (PLANNED) | [phase_10_provider_clusters_provisioning.md](phase_10_provider_clusters_provisioning.md) |
 | Vault-enveloped MinIO state backend | [pulumi_iac §2](../documents/engineering/pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio) | `src/Amoebius/Pulumi/Backend/EncryptedMinio.hs` (PLANNED) | [phase_10_provider_clusters_provisioning.md](phase_10_provider_clusters_provisioning.md) |
 | Resource provisioning (provider cluster, node groups, EBS, teardown) | [pulumi_iac §4](../documents/engineering/pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog) | `amoebius-pulumi/src/Amoebius/Pulumi/{Ebs,NodeGroup,Teardown}.hs`, `src/Amoebius/Pulumi/Provider/Eks.hs` (PLANNED) | [phase_10_provider_clusters_provisioning.md](phase_10_provider_clusters_provisioning.md) |
 | EBS create-vs-delete credential model | [pulumi_iac §6 — The EBS create-vs-delete credential model](../documents/engineering/pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model) | `src/Amoebius/Pulumi/Credential.hs` (PLANNED) | [phase_10_provider_clusters_provisioning.md](phase_10_provider_clusters_provisioning.md) |

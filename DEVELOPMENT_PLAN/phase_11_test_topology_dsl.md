@@ -85,7 +85,7 @@ move UNVERIFIED.
 
 ## Doctrine adopted
 
-- [`testing_doctrine.md` §1 — The one idea: a test is an amoebius spec](../documents/engineering/testing_doctrine.md#1-the-one-idea-a-test-is-an-amoebius-spec):
+- [`testing_doctrine.md` §1 — A test is an amoebius spec](../documents/engineering/testing_doctrine.md#1-a-test-is-an-amoebius-spec):
   this phase realizes "a test *is* an amoebius deployment" — a test is written in the same Dhall DSL,
   inherits the same illegal-state-unrepresentable contract, and runs the real platform, differing from a
   production deployment only by a chaos schedule and the always-teardown contract.
@@ -139,7 +139,7 @@ type-check before it runs.
 
 ### Objective
 Adopt [`testing_doctrine.md` §3 — The test-topology contract: spin up → run → always tear down](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down)
-and the framing of [`testing_doctrine.md` §1 — a test is an amoebius spec](../documents/engineering/testing_doctrine.md#1-the-one-idea-a-test-is-an-amoebius-spec):
+and the framing of [`testing_doctrine.md` §1 — a test is an amoebius spec](../documents/engineering/testing_doctrine.md#1-a-test-is-an-amoebius-spec):
 define a `TestTopology` Dhall type that is an ordinary deployment-rules layer over a production app/platform
 spec, adding exactly two things production omits — a chaos/failover schedule and a mandatory teardown — and
 a Haskell runner whose structured `bracket`/`finally` cleanup makes "always tears down" a property of the

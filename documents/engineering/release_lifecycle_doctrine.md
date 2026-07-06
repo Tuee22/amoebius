@@ -1,6 +1,6 @@
 # Release Lifecycle
 
-**Status**: Reference only
+**Status**: Authoritative source
 **Supersedes**: N/A
 **Referenced by**: documents/engineering/README.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/testing_doctrine.md, DEVELOPMENT_PLAN/later_phases.md
 **Generated sections**: none
@@ -10,19 +10,23 @@
 > delivery). The four values: the immutable `Release` ledger keyed by `releaseHash`; the per-`Environment`
 > (`Dev`/`Staging`/`Prod`) ETag-CAS promotion pointer; the `PromotionGate` that makes promote-unverified→prod
 > **unrepresentable**; and the readiness-gated `RolloutPlan` / `RolloutPhase` apply (schema-migration as a
-> phase, canary, rollback) on the in-cluster SSA reconciler. This document **owns none of those primitives** —
-> it composes them, and points at their authoritative homes.
+> phase, canary, rollback) on the in-cluster SSA reconciler. This document **owns** the `environment`
+> promotion-pointer kind, the `PromotionGate` and its environment→required-evidence mapping, and the
+> `RolloutPlan`/`RolloutPhase` apply model. It **composes** — not re-owns — the immutable `Release` ledger
+> ([manifest_generation_doctrine.md §6.1](./manifest_generation_doctrine.md#61-the-release-ledger-the-applied-log-is-canonical-not-optional)),
+> the ETag-CAS protocol ([content_addressing_doctrine.md §2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)),
+> and the test-evidence ledger ([testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)), and points at their authoritative homes.
 
 ---
 
-## 1. The one idea: no external CI/CD control plane — delivery is typed composition on primitives amoebius owns
+## 1. No external CI/CD control plane — delivery is typed composition on primitives amoebius owns
 
 A conventional platform bolts a **second control plane** onto the cluster to do delivery: Argo CD polls a git
 repo and reconciles the diff, Flux does the same with its own CRDs, Tekton runs pipeline pods, and each one is
-its own operator, its own RBAC surface, its own upgrade treadmill, its own store of "what should be deployed."
+its own operator, its own RBAC surface, its own upgrade cycle, its own store of "what should be deployed."
 That second plane is, to delivery, exactly what Helm is to manifests and Harbor is to the registry: an
 unowned, unreviewed intermediary that re-introduces the *"valid YAML, wrong cluster"* failure class
-([illegal_state_catalog.md §1](./illegal_state_catalog.md#1-the-promise-illegal-states-fail-to-type-check)) at the delivery layer — a git-polling controller
+([illegal_state_catalog.md §1](./illegal_state_catalog.md#1-illegal-states-fail-to-type-check)) at the delivery layer — a git-polling controller
 can apply a manifest set no amoebius type ever inspected.
 
 **amoebius refuses the second control plane, exactly as it refuses Helm and Harbor.** Delivery is not a
@@ -86,7 +90,7 @@ data Release = Release
   formula's authority. `releaseHash = sha256(resolved-deployment-dhall ‖ image-digests ‖ substrate-fp)` folds
   in exactly the three things that can change what a generation *does*: the resolved deployment spec, the
   image bytes it runs, and the substrate it targets. Change any one and the identity changes; change none and
-  you get the same `Release` back — content-addressed, self-naming, deduplicated.
+  the same `Release` is returned — content-addressed, self-naming, deduplicated.
 - **The ledger is the applied-log, promoted to canonical.**
   [manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderdhall-observed-is-etcd-a-diff-is-typed)
   leaves an **optional** content-addressed applied-log — "amoebius *may* write each rendered generation into
@@ -110,8 +114,8 @@ data Release = Release
 
 No sibling keeps a content-addressed *release* ledger; the closest evidence is that jitML and infernix already
 key ML *artifacts* by a `sha256(resolved-dhall ‖ substrate-fingerprint)` `experimentHash`
-([content_addressing_doctrine.md §3](./content_addressing_doctrine.md#3-experimenthash-identity-is-what-you-asked-for--where-it-ran)),
-so the "identity = what you asked for ‖ where it ran" fold is proven for runs and **generalized** here to
+([content_addressing_doctrine.md §3](./content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran)),
+so the "identity = what was requested ‖ where it ran" fold is proven for runs and **generalized** here to
 deployment generations. That is sibling evidence, not an amoebius result.
 
 ---
@@ -289,7 +293,7 @@ elsewhere:
 | The proven/tested/assumed evidence ledger the `PromotionGate` reads, and the no-skip / UNVERIFIED rule | [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) |
 | The Extract → Model → Inject chaos methodology and the layer-strength grammar | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
 | That environment differences are deployment rules and app bytes are identical across environments | [app_vs_deployment_doctrine.md §3 / §4](./app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs) |
-| `create-new → verified-migrate → retire-old` and the durable-data-deletion prohibition the schema phase inherits | [storage_lifecycle_doctrine.md §7 / §8](./storage_lifecycle_doctrine.md#7-the-cardinal-rule-deleting-durable-data-is-forbidden-under-normal-operation) |
+| `create-new → verified-migrate → retire-old` and the durable-data-deletion prohibition the schema phase inherits | [storage_lifecycle_doctrine.md §7 / §8](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation) |
 | Gateway-API `HTTPRoute` weights the canary shifts, and the no-mesh verdict | [network_fabric_doctrine.md](./network_fabric_doctrine.md) |
 | Pulsar subscription / consumer-group cutover mechanics | [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) |
 | The build half of the pipeline (multi-arch images, the `distribution` registry) | [image_build_doctrine.md](./image_build_doctrine.md) |

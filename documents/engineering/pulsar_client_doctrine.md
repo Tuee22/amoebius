@@ -16,7 +16,7 @@
 
 amoebius has **exactly one** way to talk to Pulsar: a native-protocol Haskell library, `amoebius-pulsar`,
 that speaks Pulsar's TCP binary protocol directly. There is no second transport, no fallback, no
-HTTP-upgrade side-door. This is the amoebius generalization of a hard lesson from the two extension
+HTTP-upgrade side-door. This is the amoebius generalization of a lesson from the two extension
 libraries it absorbs:
 
 - **infernix** talked to Pulsar over the **WebSocket gateway** in-process (`Network.WebSockets`), opening a
@@ -25,7 +25,7 @@ libraries it absorbs:
 - **jitML** talked to Pulsar by shelling out to a **Node.js subprocess** that owned the WebSocket client —
   a second language runtime and a process boundary on the hot path.
 
-Both transports are deleted. One native client replaces both. The payoff is concrete, not cosmetic:
+Both transports are deleted. One native client replaces both, with four concrete consequences:
 
 - **No per-publish connection churn.** A native producer is a long-lived session that sends framed binary
   messages; infernix's "one WebSocket per message" pattern (with its repeated HTTP upgrade and handshake)
@@ -35,7 +35,7 @@ Both transports are deleted. One native client replaces both. The payoff is conc
 - **No second runtime.** jitML's Node subprocess and its IPC are gone; the client is plain Haskell on the
   pinned toolchain.
 - **`sequence_id` is a first-class protocol field**, not a smuggled URL parameter — which makes the dedup
-  contract in [§6](#6-the-declarative-topology-algebra) clean rather than a hack.
+  contract in [§6](#6-the-declarative-topology-algebra) clean rather than a workaround.
 
 > **Honesty (per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).** "Performance via the
 > native protocol" is the **design rationale** — base64 elimination, persistent producers, no process hop —
@@ -52,7 +52,7 @@ and seek all ride the native protocol or they do not happen.
 
 This doc is the SSoT for **the client and its delivery contract**. It owns:
 
-1. The `amoebius-pulsar` library: the native binary-protocol implementation and the supernova fork ([§3](#3-the-native-binary-protocol)–[§4](#4-forked-from-supernova--what-we-inherit-and-what-we-build)).
+1. The `amoebius-pulsar` library: the native binary-protocol implementation and the supernova fork ([§3](#3-the-native-binary-protocol)–[§4](#4-forked-from-supernova--what-amoebius-inherits-and-what-it-builds)).
 2. The capability surface: lookup / produce / consume / subscribe / seek ([§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)).
 3. The **declarative topology algebra**: how topic names are *derived*, never written, and the
    one-sided-link validation that rejects an unroutable graph ([§6](#6-the-declarative-topology-algebra)).
@@ -80,7 +80,7 @@ Phase order and status are owned only by [../../DEVELOPMENT_PLAN/README.md](../.
 
 ## 3. The native binary protocol
 
-Intuition: a Pulsar frame is a length-prefixed protobuf command, optionally followed by a checksummed
+A Pulsar frame is a length-prefixed protobuf command, optionally followed by a checksummed
 metadata-and-payload tail. The client's job is to encode/decode those frames correctly and keep one TCP
 session per broker connection alive.
 
@@ -103,7 +103,7 @@ Implementation rules for `amoebius-pulsar`:
 - **CRC32C is mandatory on payload frames** and checked on receive; a checksum mismatch is a structured
   decode error, never a silent drop.
 - **One persistent TCP session per broker**, multiplexing producers and consumers by `producer_id` /
-  `consumer_id` / `request_id`, exactly as the protocol intends. This is the structural reason the
+  `consumer_id` / `request_id`, as the protocol intends. This is the structural reason the
   per-publish-connection cost of the old WebSocket path vanishes ([§1](#1-one-client-one-wire-no-websockets)).
 - **Toolchain & discovery.** The fork builds on **GHC 9.12.4** (the repo-wide pin). Any code-generation
   tool it needs (e.g. `protoc` for `proto-lens`) is discovered **lazily through the substrate's package
@@ -124,7 +124,7 @@ flowchart TD
 
 ### 3.1 Payloads are exclusively CBOR
 
-Intuition: the frame ([§3](#3-the-native-binary-protocol)) has two independent layers, and this section is the SSoT for the *inner* one.
+The frame ([§3](#3-the-native-binary-protocol)) has two independent layers, and this section is the SSoT for the *inner* one.
 The **command/metadata layer** is protobuf — that is Pulsar's own wire format (`BaseCommand`, message
 metadata, via `proto-lens`), and it is not amoebius's to change. The **application payload** — the raw
 `payload` tail after the metadata — is amoebius's, and it is **exclusively CBOR**. There is no JSON, no
@@ -137,7 +137,7 @@ is **unrepresentable** ([illegal_state_catalog.md §3.23](./illegal_state_catalo
   JSON/protobuf/base64 path, so a non-CBOR payload has no inhabitant — type-foreclosed uninhabitable
   ([illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)).
   Consume is the mirror: `Serialise a => … -> Either DecodeError a`, a **total, fail-fast** decode — a
-  corrupt or mistyped body is a structured error, never a silent misread, exactly the posture the mandatory
+  corrupt or mistyped body is a structured error, never a silent misread, the posture the mandatory
   CRC32C ([§3](#3-the-native-binary-protocol)) already takes on the frame.
 - **Canonical where content-addressed; fast elsewhere.** amoebius reuses — it does **not** restate — the
   canonical-CBOR discipline the content store already owns: the `encodeManifestCbor` canonical encoder
@@ -165,7 +165,7 @@ is **unrepresentable** ([illegal_state_catalog.md §3.23](./illegal_state_catalo
   `Codec.CBOR.Write` sorted-map writer gives canonical encoding), on the repo-wide GHC 9.12.4 pin; the
   dependency is carried in the `amoebius-pulsar` cabal package and registered in the dependency-management
   surface tracked by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Any codegen tool
-  is discovered lazily by full path (no env, no `PATH`), exactly as `protoc` is ([§3](#3-the-native-binary-protocol)).
+  is discovered lazily by full path (no env, no `PATH`), as `protoc` is ([§3](#3-the-native-binary-protocol)).
 
 ```mermaid
 flowchart TD
@@ -184,7 +184,7 @@ flowchart TD
 
 ---
 
-## 4. Forked from supernova — what we inherit and what we build
+## 4. Forked from supernova — what amoebius inherits and what it builds
 
 amoebius-pulsar starts as a fork of [`cr-org/supernova`](https://github.com/cr-org/supernova) (Apache-2.0,
 on [Hackage](https://hackage.haskell.org/package/supernova)). Supernova already implements the binary
@@ -250,7 +250,7 @@ exposed for v1; two Pulsar features are deliberately **not** exposed. This subse
 choice so the omissions are auditable, not silent.
 
 - **Exposed (derived): topic compaction + TableView.** *Compaction* is a namespace/topic policy the
-  coordinator reconciles exactly like retention and dedup ([§6.1](#61-topic-storage-lifecycle-bounded-tiered-retained--and-the-hot-tier-never-overflows), [§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default));
+  coordinator reconciles like retention and dedup ([§6.1](#61-topic-storage-lifecycle-bounded-tiered-retained--and-the-hot-tier-never-overflows), [§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default));
   a *TableView* is a client-side `key → latest-value` materialization over a compacted `consume`. Together
   they give the control-plane its current-state **read-model** and resolved-singleton dissemination — adopted,
   and owned, by [daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#51-the-coordination-plane-pulsar--minio--the-commit-log) / [§5.5](./daemon_topology_doctrine.md#55-pulsar-primitives-evaluated-for-the-election--and-why-the-custom-election-stays).
@@ -268,7 +268,7 @@ choice so the omissions are auditable, not silent.
 
 ## 6. The declarative topology algebra
 
-Intuition: **nobody writes a topic string by hand.** A topic name is a *derived* function of a typed
+**Nobody writes a topic string by hand.** A topic name is a *derived* function of a typed
 descriptor, and a routing graph that fails validation cannot be reconciled. This is the
 illegal-state-unrepresentable principle ([illegal_state_catalog.md](./illegal_state_catalog.md)) applied to
 the message bus: a malformed topology is a compile/validate error, not a runtime mystery.
@@ -311,8 +311,8 @@ A routing graph is **unroutable** — and validation rejects it — when it cont
    - a **report with no producing input** on that lane — a result nobody can cause — *except* an
      explicitly **emit-only** workflow (jitML's garbage-collector `gc` is the exemplar exemption).
 
-Cashing out *why one-sidedness is illegal*: an unanswered command is a silent black hole, and an
-unsourced event is a ghost. Both are exactly the kind of "compiles, deploys, then mysteriously hangs"
+Why one-sidedness is illegal: an unanswered command is work that can never report back, and an
+unsourced event is a result nothing can produce. Both are the "compiles, deploys, then hangs at runtime"
 failure the DSL exists to prevent. `validateTopology` returns the **full list** of violations (not just the
 first), so a topology author fixes the whole graph in one pass.
 
@@ -329,8 +329,8 @@ flowchart TD
 
 ### 6.1 Topic storage lifecycle: bounded, tiered, retained — and the hot tier never overflows
 
-Intuition: a topic that keeps bytes forever, or offloads on a **time-only** trigger, is an outage waiting to
-happen. Pulsar's hot tier is BookKeeper (bookies on retained PVs); tiered storage offloads only **closed**
+A topic that keeps bytes forever, or offloads on a **time-only** trigger, can drive the hot tier to a
+disk-full outage. Pulsar's hot tier is BookKeeper (bookies on retained PVs); tiered storage offloads only **closed**
 ledgers to S3 and does **not** free BookKeeper until retention deletes them (there is a deletion lag), and the
 currently-open ledger can never be offloaded. So a time-only offload does not bound occupancy: if ingest ×
 offload-lag exceeds the bookie disk, BookKeeper fills, bookies go read-only, and the topic — often the
@@ -379,7 +379,7 @@ flowchart TD
 
 ### 6.2 A topic as a cursor-anchored replayable training feed
 
-Intuition: the three primitives this doc already owns — **Seek** (replay, [§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)), the four
+The three primitives this doc already owns — **Seek** (replay, [§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)), the four
 **subscription** types ([§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)), and the **bounded-tiered-retained** storage lifecycle
 ([§6.1](#61-topic-storage-lifecycle-bounded-tiered-retained--and-the-hot-tier-never-overflows)) — compose into a second way to read a topic: not as a one-shot command/event stream, but
 as a **cursor-anchored replayable feed** a long-running consumer trains from. The ML half this round
@@ -402,7 +402,7 @@ content-address to their owner in [content_addressing_doctrine.md](./content_add
   on a feed is the **Exclusive** — or ranked **Failover** — subscription this doc already exposes
   ([§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)): Pulsar's own single-consumer semantics, with automatic ranked failover on death and resume
   from the subscription's committed cursor. amoebius **delegates** this single-writer property to the
-  broker's subscription model; it does **not** re-prove it and adds **no** amoebius election — exactly the
+  broker's subscription model; it does **not** re-prove it and adds **no** amoebius election — the
   "consensus is delegated, not re-proven" posture [§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default) takes for HA. *Who* runs the feed-sourced trainer,
   and the content-store commit that makes each checkpoint's `latest` advance race-free, are owned by
   [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) / [content_addressing_doctrine.md](./content_addressing_doctrine.md); the client owns only that the feed subscription is
@@ -421,7 +421,7 @@ content-address to their owner in [content_addressing_doctrine.md](./content_add
 
 ## 7. Delivery: at-least-once with broker-side dedup (the robust default)
 
-Intuition: amoebius defaults to **at-least-once delivery, made effectively-once by broker-side
+amoebius defaults to **at-least-once delivery, made effectively-once by broker-side
 deduplication** — and it puts the dedup in the *broker*, not the client, on purpose. A producer may retry; a
 consumer may be redelivered a message after a crash; the broker collapses the duplicates so idempotent
 state stays correct.
@@ -441,7 +441,7 @@ pairs and **rejects duplicates** at ingest. The contract has two halves:
 1. **Broker half** — deduplication is turned on for the namespace (the reconcile step).
 2. **Producer half** — every publish carries a **stable `producer_name`** and a **monotonic `sequence_id`**
    within that producer scope. Pulsar stores the *highest* sequence per producer, so the producer-name
-   scoping must be chosen so unrelated keys don't share one dedup cursor — exactly the
+   scoping must be chosen so unrelated keys don't share one dedup cursor — the
    `inferenceRequestProducerNameForFields` lesson from infernix (a stable causal id keeps the
    context-scoped producer; a one-off key gets a per-message producer name so its hash can't collapse a
    later legitimate message).
@@ -454,9 +454,9 @@ consumer rebuild from seek ([§5](#5-the-capability-surface-lookup--produce--con
 
 On the native protocol `sequence_id` is a **first-class field of `CommandSend`** and the broker refers to
 the message by it in `SEND_RECEIPT`. Contrast infernix's WebSocket path, which had to smuggle the baseline
-through an `initialSequenceId` URL query parameter and encode "I want sequence N" as
+through an `initialSequenceId` URL query parameter and encode the target sequence N as
 `initialSequenceId = N - 1` because it opened one producer per publish. amoebius keeps a persistent producer
-and sets `sequence_id` directly — the hack is retired.
+and sets `sequence_id` directly — the workaround is retired.
 
 A recurring derivation amoebius adopts from infernix: when a message has a causal upstream Pulsar
 `MessageId` (serialized `<ledgerId>:<entryId>:<partition>:<batchIdx>`), pack `ledgerId`/`entryId` into a
@@ -483,7 +483,7 @@ itself is not this doc's claim.
 
 ## 8. What this client replaces
 
-The whole point of `amoebius-pulsar` is collapse: two transports, two runtimes, one client.
+`amoebius-pulsar` collapses two transports and two runtimes into one client.
 
 | Was | Mechanism (sibling source) | Becomes |
 |-----|----------------------------|---------|
@@ -491,7 +491,7 @@ The whole point of `amoebius-pulsar` is collapse: two transports, two runtimes, 
 | jitML Pulsar I/O | **Node.js subprocess** owning the WebSocket client | `amoebius-pulsar` native protocol |
 | **message payload encoding** | **base64-in-JSON** envelope (infernix), ~33% inflation | **exclusively CBOR** — a dense binary body via a typed codec, canonical where content-addressed ([§3.1](#31-payloads-are-exclusively-cbor)) |
 | jitML topic strings | typed `RouteEntry` + `validateTopology` (`JitML.Coordinator.Topology`) | the topology algebra ([§6](#6-the-declarative-topology-algebra)), promoted into the client doctrine |
-| infernix dedup wiring | namespace dedup policy + `(producer_name, sequence_id)` + `initialSequenceId` URL hack | broker-side dedup with `sequence_id` as a native field ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)) |
+| infernix dedup wiring | namespace dedup policy + `(producer_name, sequence_id)` + `initialSequenceId` URL workaround | broker-side dedup with `sequence_id` as a native field ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)) |
 
 infernix and jitML remain **ML extension libraries**; they stop shipping their own transports and consume
 `amoebius-pulsar` instead — one subsystem at a time, per the Phase 5 migration in
