@@ -36,7 +36,7 @@ What this doctrine deliberately does **not** own:
 | Concern | Owned by |
 |---------|----------|
 | The in-cluster registry (`distribution`) as a standard service and the sole pull source | [platform_services_doctrine.md](./platform_services_doctrine.md), [service_capability_doctrine.md](./service_capability_doctrine.md) |
-| The registry's retained-PV storage backend | [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md), [platform_services_doctrine.md](./platform_services_doctrine.md) |
+| The registry's MinIO-backed (S3 driver) blob storage — no PV of its own | [platform_services_doctrine.md §3](./platform_services_doctrine.md#3-the-registry--the-single-image-source), [§4](./platform_services_doctrine.md#4-minio--the-object-substrate) |
 | The substrate catalog (apple / linux-cpu / linux-cuda / windows), Lima/WSL2, host worker nodes, and the lazy-tool-ensure contract | [substrate_doctrine.md](./substrate_doctrine.md) |
 | The Apple-Metal host worker's headless, on-host, **no-VM** build/run shape (fixed Metal bridge + runtime MSL compilation) | [apple_metal_headless_builds.md](./apple_metal_headless_builds.md) |
 | Pulumi-managed cloud registries/infra, the MinIO Pulumi backend, DNS (route53) + TLS (zerossl) | [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) |
@@ -328,8 +328,10 @@ prodbox had a real chicken-and-egg: it could not publish into a Harbor that was 
 not come up if its own prerequisite images could only be pulled from a Harbor that did not yet exist.
 **Baking dissolves most of this.** The registry is the single-binary `distribution`, baked into the base
 image, so it comes up like any other baked service — there is no pre-registry public-pull window to bootstrap
-it, and there are no third-party *images* to mirror at all. The thin ordering edge that remains is owned
-elsewhere; this doc records only the build-side consequence:
+it, and there are no third-party *images* to mirror at all. The thin ordering edge that remains — the
+registry stores its blobs in MinIO via the S3 driver, so MinIO must be serving before the registry
+([platform_services_doctrine.md §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering)); MinIO is itself preloaded and PV-backed, so this is a plain edge, not
+a cycle — is owned elsewhere; this doc records only the build-side consequence:
 
 - **The base image is built and loaded before the cluster comes up.** The only upstream contact is the
   base-image *build* (apt/binary/source downloads on the builder, [§2](#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)/[§7](#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)); once that image exists, every

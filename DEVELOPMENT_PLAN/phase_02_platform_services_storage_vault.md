@@ -50,11 +50,11 @@ the same bytes back.
 
 ```text
 phase 1 empty kind cluster (external prereq)
-  -> 2.1 base container + distribution registry  (image source exists)
+  -> 2.1 base container side-loaded on the node   (on-node image source; registry staged)
   -> 2.2 typed renderer + SSA reconciler          (apply engine exists)
   -> 2.3 no-provisioner retained storage          (durable land exists)
   -> 2.4 root Vault + PKI anchor                  (secrets root + trust anchor)
-  -> 2.5 standard service stack (MinIO/Pulsar/Postgres/observability/MetalLB)
+  -> 2.5 MinIO/Pulsar/Postgres/observability/MetalLB  (MinIO backs the registry's blob-serving)
   -> 2.6 Keycloak-owned ingress + lossless-rebind gate
 ```
 
@@ -104,7 +104,7 @@ individual sprints cite the same sections where they adopt them.
 **Status**: Planned
 **Implementation**: `docker/base/Dockerfile`, `src/Amoebius/Image/Build.hs`, `src/Amoebius/Image/Registry.hs` (target paths; not yet built)
 **Blocked by**: Phase 1 gate (external prereq — an empty single-node `kind` cluster brought up idempotently)
-**Independent Validation**: the published tag resolves as one OCI manifest list covering `amd64` and `arm64`; a node-side pull of every platform image succeeds against the in-cluster registry with **zero** requests leaving for a public registry (verified by a deny-all egress test to `docker.io`/`quay.io`).
+**Independent Validation**: the published tag resolves as one OCI manifest list covering `amd64` and `arm64`; the base image is side-loaded onto the node and every platform pod resolves its image locally with **zero** requests leaving for a public registry (verified by a deny-all egress test to `docker.io`/`quay.io`). The registry's MinIO-backed blob serving is exercised once MinIO is up (Sprint 2.5).
 **Docs to update**: `documents/engineering/image_build_doctrine.md`, `documents/engineering/platform_services_doctrine.md`
 
 ### Objective
@@ -124,17 +124,20 @@ registry, the single image source](../documents/engineering/platform_services_do
 - A `docker buildx --platform linux/amd64,linux/arm64` build that publishes **one** OCI manifest list per
   tag, with **atomic publication** — a partial multi-arch push is recorded as a failed, un-advertised tag
   ([§4 — atomic publication](../documents/engineering/image_build_doctrine.md#4-atomic-publication--a-partial-multi-arch-upload-is-a-failed-upload)).
-- The `distribution` registry rendered as a standard service (no Patroni DB; blobs on a retained PV) and
-  reachable at the host-only registry endpoint, with the per-distro plumbing that makes that endpoint
-  resolve on the kind node.
+- The `distribution` registry rendered as a standard service (no Patroni DB; **blobs in MinIO via the S3
+  driver, no PV of its own**) and reachable at the host-only registry endpoint, with the per-distro plumbing
+  that makes that endpoint resolve on the kind node. Because the registry's blob store is MinIO, its
+  blob-serving standup is gated on MinIO (Sprint 2.5); at bootstrap every platform image is the preloaded
+  base image on the node, not a registry pull.
 - Immutable, content-pinned image refs (never `:latest`) shared identically across both arches.
 
 ### Validation
 
 1. Build the base image; assert `docker buildx imagetools inspect <tag>` lists both `linux/amd64` and
    `linux/arm64` under one manifest list.
-2. Bring the registry up on the kind node; pull each platform image from it; assert every pull resolves
-   in-cluster and a network policy denying egress to public registries does not break any pull.
+2. Assert the base image is side-loaded on the node and every platform pod resolves its image locally, with
+   a network policy denying egress to public registries breaking no startup; once MinIO is up (Sprint 2.5),
+   assert the registry serves an amoebius-built image in-cluster from its MinIO-backed blob storage.
 3. Re-run the build against a fully-published tag and assert a no-op (idempotent publication).
 
 ### Remaining Work

@@ -130,7 +130,7 @@ and a toleration is *projected* from a node taint, never typed
   "a handle exists only once its edge does" discipline that already gates a `.ready`-sentinel `ArtifactRef`
   and an evidence-gated `PromotionGate`. A "start B before A is ready" edge has no constructor.
 - **The DAG is total and acyclic by decode.** The platform's hard ordering edges — LoadBalancer → edge,
-  registry → image pulls, Percona operator → Postgres consumers, Vault-unsealed → secret-dependent startup,
+  MinIO → registry, registry → app-image pulls, Percona operator → Postgres consumers, Vault-unsealed → secret-dependent startup,
   Keycloak → wild traffic — are the *derived* readiness DAG owned by
   [`platform_services_doctrine.md` §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering),
   not a prose ordering an installer is trusted to honour. A total `mkBringUpOrder` fold rejects a **cycle** or

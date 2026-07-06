@@ -88,13 +88,16 @@ The in-cluster registry is the **single-binary `distribution` (`registry:2`) OCI
 either baked into the base container or built by amoebius and served from here. The result is reproducibility
 (amoebius owns the bytes), air-gap capability, and zero exposure to upstream rate-limits or flakes.
 
-- **No bootstrap chicken-and-egg.** Because the registry is a baked binary — not a multi-process stack that
-  must pull its own prerequisites — it comes up like any other baked service; there is no pre-registry
-  public-pull window (the prodbox Harbor bootstrap problem dissolves). The ordering edge is in [§11](#11-bring-up-and-dependency-ordering).
-- **It needs no relational database.** Unlike Harbor, `distribution` stores blobs on a retained PV (or
-  MinIO) and runs no Postgres/Redis of its own — it does **not** take a Patroni cluster under the [§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin) rule.
-  amoebius drops Harbor's scanning, web UI, robot RBAC, and replication as separate concerns, revisited only
-  if ever needed.
+- **No bootstrap chicken-and-egg.** The registry binary is baked into the base image, which is loaded onto
+  the node before bring-up ([image_build_doctrine.md §9](./image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves)), so the registry runs from the preloaded
+  image rather than pulling itself from a public registry (the prodbox Harbor bootstrap problem dissolves).
+  Its one runtime dependency is MinIO, which holds the registry's blobs and is itself a preloaded, PV-backed
+  service — so the dependency is a plain ordering edge (MinIO before the registry, [§11](#11-bring-up-and-dependency-ordering)), never a pull cycle.
+- **It needs no relational database, and no PV of its own.** Unlike Harbor, `distribution` stores its blobs
+  in **MinIO via the S3 storage driver** ([§4](#4-minio--the-object-substrate)) — it holds no PersistentVolume and runs no Postgres/Redis of
+  its own, so it takes neither a Patroni cluster under the [§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin) rule nor a retained PV under the storage
+  model. amoebius drops Harbor's scanning, web UI, robot RBAC, and replication as separate concerns,
+  revisited only if ever needed.
 - **The build side is not owned here.** Baking binaries, buildx multi-arch (`amd64`/`arm64`),
   versioning-vs-`:latest`, and host-vs-in-pod builds are owned by
   [image_build_doctrine.md](./image_build_doctrine.md); *which* provider backs the Registry capability is
@@ -313,8 +316,12 @@ into a foreclosed illegal state at
 [illegal_state_catalog.md §3.41](./illegal_state_catalog.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race).
 
 - **LoadBalancer before the Envoy/Gateway edge** — the Gateway needs an LB address to publish a listener.
-- **The registry up before later app-image pulls** — the `distribution` registry is a baked binary with no
-  upstream prerequisites; it simply must be serving before amoebius publishes or pulls app images ([§3](#3-the-registry--the-single-image-source)).
+- **MinIO before the registry** — the `distribution` registry stores its blobs via MinIO's S3 API
+  ([§3](#3-the-registry--the-single-image-source), [§4](#4-minio--the-object-substrate)), so MinIO must be serving before the registry is ready. MinIO runs from
+  the preloaded base image on retained PVs, so this is a plain ordering edge, not a pull cycle.
+- **The registry before later app-image pulls** — once MinIO backs it, the registry must be serving before
+  amoebius publishes or pulls amoebius-built app/workload images ([§3](#3-the-registry--the-single-image-source)). Platform services do not
+  wait on the registry: they run from the preloaded base image ([image_build_doctrine.md §9](./image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves)).
 - **The Percona operator before any Postgres consumer** — a `PerconaPGCluster` has nothing to reconcile it
   otherwise ([§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin)).
 - **Vault initialized and unsealed before secret-dependent startup** — a sealed Vault fails secret-dependent
@@ -325,7 +332,8 @@ into a foreclosed illegal state at
 ```mermaid
 flowchart TD
   lb[LoadBalancer] -->|provides listener address| edge[Envoy and Gateway API]
-  reg[Registry up and responsive] -->|all later image pulls resolve here| services[MinIO, Vault, Pulsar, Prometheus and Grafana, Postgres consumers]
+  minio[MinIO up: S3 on retained PVs] -->|registry stores its blobs via MinIO S3| reg[Registry up and responsive]
+  reg -->|amoebius-built app and workload image pulls resolve here| apppulls[Later app-image pulls]
   operator[Percona operator] -->|reconciles| pg[Per-service Patroni clusters]
   vault[Vault initialized and unsealed] -->|secrets resolve, else fail closed| secretdeps[Secret-dependent workloads]
   edge -->|authenticated by| keycloak[Keycloak admits wild traffic]
