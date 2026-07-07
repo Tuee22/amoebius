@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define the hard separation between an app's **application logic** (what it *is* to a user)
@@ -66,6 +66,12 @@ The app-spec surface declares:
   native-protocol client and topology algebra are owned by
   [pulsar_client_doctrine.md](./pulsar_client_doctrine.md); the app surface owns *which topics exist for
   this app*.
+- **Monitoring obligations** — that each workflow carries an SLO and each topic a liveness bound, that an
+  extension stands up its surfaces (jitML → TensorBoard), and the `AccessScope` each surface publishes under
+  (admin-global vs a per-user Keycloak-backed filter). The app declares *that it is monitored and to whom its
+  surfaces are visible*; there is no arm for "unmonitored" and none for "public." The obligation types, the
+  derived dashboards, and the no-`Public`-arm rule are owned by
+  [monitoring_doctrine.md](./monitoring_doctrine.md).
 - **Use of shared libraries** — that the app builds on infernix, jitML, or (later) a Haskell extension
   module is part of what the app *is* (see [§8](#8-shared-library-use-is-application-logic)).
 
@@ -102,8 +108,12 @@ The deployment-rules surface declares:
   obligation concentrates — is owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md).
 - **Chaos-test injection.** The app **does not know it is being chaos-tested.** A chaos schedule is attached
   here, never in the app spec; the Extract→Model→Inject methodology and the proven/tested/assumed ledger are
-  owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), and the test-as-a-`.dhall`-topology
+  owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), and the test-as-an-`InForceSpec`-topology
   model by [testing_doctrine.md](./testing_doctrine.md).
+- **Monitoring dials.** The SLO budget *numbers* (freshness, error-budget), the alert severities, and the
+  per-user `AuthRule` that scopes a `UserScoped` surface are deployment dials — a robustness/visibility
+  setting, never app logic — carrying **no** "off" arm and **no** "public" arm. Owned by
+  [monitoring_doctrine.md](./monitoring_doctrine.md).
 - **Inference substrate.** Whether an ML workload runs on Apple Metal on the host, CUDA on the cluster, or
   linux-cpu is a deployment decision, not app logic — this is the *serving* substrate (the *producing*
   substrate that made a model's weight bytes is provenance, not a deployment dial — see [§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)).
@@ -201,7 +211,7 @@ standing up *multiple kind clusters*. Scale, substrate, and HA strategy are all 
 rewrite.
 
 **Target**: mattandjames is **boiled down to application logic only** — the UI,
-the user lifecycles, the durable data, the auth rules. Then a *single* amoebius `.dhall` deployment-rules
+the user lifecycles, the durable data, the auth rules. Then a *single* `InForceSpec` deployment-rules
 layer configures, **with zero extra effort from the application itself**:
 
 - the k8s cluster distro (kind / rke2 / provider),
@@ -242,7 +252,7 @@ This is the subtlest application of the litmus test, so make the distinction exp
 
 infernix is "an amoebius extension: a single Haskell binary that can be deployed as a distributed system
 either at node-system level (in an Apple cluster) or cluster level (as a stateless deployment)". That *dual* placement is precisely a deployment decision — the same infernix logic,
-two placements. Consequently **the infernix `.dhall` nests inside the amoebius `.dhall`**: infernix's own configuration is composed into the larger deployment spec rather than living as a
+two placements. Consequently **the infernix `.dhall` nests inside the `InForceSpec`**: infernix's own configuration is composed into the larger deployment spec rather than living as a
 parallel system. The host-vs-cluster placement mechanics (host compute daemons as Pulsar/MinIO peers over
 host-only NodePorts, no mTLS) are owned by [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)
 and the host↔cluster comms doctrine; the determinism and content-addressing that make an infernix run
@@ -265,7 +275,7 @@ on the application-logic surface. The clean way to hold this with [§7](#7-infer
 The typed shape of that dependency is the **`ExtensionSpec`** contract. Each in-tree extension in the v1
 closed set — **{infernix, jitML, mattandjames}** — plugs in by contributing one
 `ExtensionSpec { extDhall, extChain, extCapabilities }`: a typed Dhall sub-catalog **nested inside the
-amoebius `.dhall`** ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)), a `cfg -> [Step]` chain, and the `List Capability` it declares. These specs are
+`InForceSpec`** ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)), a `cfg -> [Step]` chain, and the `List Capability` it declares. These specs are
 merged at **compile/link time into the single binary** — there is no per-extension image and no `dlopen`.
 That the app *contributes* an `ExtensionSpec` is application logic (it travels with the app); the
 *placement* of the linked workload stays a deployment rule ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)). The `ExtensionSpec` grammar and its
@@ -332,7 +342,7 @@ mechanics it points at:
 | Image build (buildx multi-arch, baked binaries + the `distribution` registry, versioning) | [image_build_doctrine.md](./image_build_doctrine.md) |
 | Geo-replication / failover mechanics, dynamic node provisioning, teardown | [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md) |
 | The async cross-cluster proof obligation + chaos methodology | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
-| Test-as-a-`.dhall`-topology, `suggest-test`, the ledger | [testing_doctrine.md](./testing_doctrine.md) |
+| Test-as-an-`InForceSpec`-topology, `suggest-test`, the ledger | [testing_doctrine.md](./testing_doctrine.md) |
 | The `Environment` promotion pointer, the immutable `Release` ledger, `RolloutPlan` | [release_lifecycle_doctrine.md](./release_lifecycle_doctrine.md) |
 
 ---

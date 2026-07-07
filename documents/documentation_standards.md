@@ -133,7 +133,7 @@ named subsystem, or a named artifact:
 
 - **Amoebius forbids _X_.**
 - **The DSL carries only names, never values.**
-- **A valid `amoebius.dhall` cannot represent illegal cluster state.**
+- **A valid `InForceSpec` cannot represent illegal cluster state.**
 
 Lead with the rule or the problem. Do not build tension, address the reader, or narrate the
 reasoning process; the argument is the surrounding sentences, not a rhetorical frame.

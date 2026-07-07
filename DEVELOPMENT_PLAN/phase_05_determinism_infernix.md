@@ -88,6 +88,9 @@ reproduction was *tested*, not that cross-substrate equality was claimed.
   infernix consumes the serve gate here (its CPU-inference determinism is unchanged), never the trainer. This is
   doctrine this round introduces, tracked here as a forward cross-reference, not a tested amoebius result of the
   Phase-5 gate.
+- [`monitoring_doctrine.md` §2.3 — Per-extension surfaces](../documents/engineering/monitoring_doctrine.md#23-per-extension-surfaces--extensionspecextmonitoring):
+  infernix's `ExtensionSpec` declares its mandatory `extMonitoring` — at least the generic `Slo` surface for
+  inference metrics — so an infernix extension that declares no monitoring is unrepresentable.
 
 ## Sprints
 
@@ -175,7 +178,7 @@ The whole sprint.
 
 Adopt [`app_vs_deployment_doctrine.md` §7 — infernix is a shared library; the inference substrate is a deployment rule](../documents/engineering/app_vs_deployment_doctrine.md#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule):
 package infernix as a shared Haskell library unified under the DSL (its `.dhall` nests inside the
-amoebius `.dhall`), and cut its model store over to the amoebius content-addressed store behind a
+`InForceSpec`), and cut its model store over to the amoebius content-addressed store behind a
 **reversible adapter seam** — the first of the one-subsystem-at-a-time migration moves.
 
 ### Deliverables

@@ -2,12 +2,13 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for what the amoebius Dhall DSL is — a typed orchestration surface
-> that carries parameters, not logic — how it composes totally, how it names secrets without holding them,
-> and the contract by which a valid `.dhall` cannot represent illegal cluster state.
+> that carries parameters, not logic — the difference between the uploaded `InForceSpec` and the local
+> `amoebius.dhall` `FrameConfig`, how specs compose totally, how they name secrets without holding them,
+> and the contract by which a valid `InForceSpec` cannot represent illegal cluster state.
 
 ---
 
@@ -21,9 +22,10 @@ specifications do not type-check**.
 
 This document owns four things about that surface:
 
-1. **What the DSL is** — a typed Dhall *data* surface, distinct from the Haskell logic that acts on it.
-2. **Total composability** — how one `.dhall` is built by nesting others (app-in-cluster,
-   extension-in-app, child-cluster-in-parent, test-in-`.dhall`).
+1. **What the DSL is** — a typed Dhall *data* surface, distinct from the Haskell logic that acts on it,
+   with two different authority surfaces: the uploaded `InForceSpec` and the local `amoebius.dhall`.
+2. **Total composability** — how one `InForceSpec` is built by nesting Dhall fragments (app-in-cluster,
+   extension-in-app, child-cluster-in-parent, test-topology-in-Dhall).
 3. **Secrets-by-name** — the DSL holds only a *name* for each secret, never a value.
 4. **The illegal-state-unrepresentable contract** — the principle, and the mechanism (two typed gates)
    that enforces it.
@@ -49,9 +51,10 @@ in configuration that the type-checker cannot inspect. Amoebius excludes that, p
 decision: *"in general we do not want to use env vars or bash logic, we want everything to be
 dhall"*. It gets there by a hard split between two languages:
 
-- **Dhall is the data.** A `.dhall` file is typed, total, side-effect-free *data* — a description of the
-  desired world. It carries no control flow that the binary executes, no subprocess strings, no
-  environment lookups. It is read, type-checked, and decoded; it never "runs."
+- **Dhall is the data.** A Dhall expression is typed, total, side-effect-free *data*. The uploaded
+  `InForceSpec` describes the desired world; the local `amoebius.dhall` describes the authority and
+  witnesses of this binary frame. Neither carries control flow that the binary executes, subprocess strings,
+  or environment lookups. Each is read, type-checked, and decoded; neither ever "runs."
 - **Haskell is the logic.** The actual reconcile logic is a pure Haskell value. Amoebius adopts
   hostbootstrap's **chain/Step algebra**: a project's deploy is a pure function `chain :: cfg -> [Step]`
   (`/home/matthewnowak/hostbootstrap/core/hostbootstrap-core/src/HostBootstrap/Step.hs`,
@@ -67,18 +70,18 @@ That split is load-bearing in three ways:
   the rendered plan and the effects.
 - **Only the binary acts.** The recursive interpreter (`runChainFromFrame`, `Chain.hs`) runs a step's
   action only when the binary is *in that step's frame*; the descent logic itself is pure and unit-tested,
-  and `runChainFromFrame` is *"the thin effectful seam."* The `.dhall` chose *what*; the Haskell decides
-  *how and when*.
+  and `runChainFromFrame` is *"the thin effectful seam."* The decoded Dhall value chose *what*; the
+  Haskell decides *how and when*.
 - **No bash, anywhere.** Tool discovery is lazy and full-path (no `PATH`, no env vars); that contract is
   owned by [substrate_doctrine.md](./substrate_doctrine.md). The relevance here is that it is the *chain
   steps*, written in Haskell, that invoke tools by absolute path — never a Dhall-embedded shell string.
 
 ```mermaid
 flowchart TD
-  author[Operator authors typed amoebius.dhall] -->|imports and composition| expr[One Dhall expression]
+  author[Operator authors typed InForceSpec Dhall] -->|imports and composition| expr[One Dhall expression]
   expr -->|Dhall typechecker total and pure| typed[Well-typed Dhall value]
   expr -->|schema mismatch| reject1[Rejected before any effect]
-  typed -->|inputFile auto decode into Haskell ADTs| decoded[Typed Haskell config value]
+  typed -->|decode into Haskell ADTs| decoded[Typed Haskell config value]
   typed -->|out-of-domain or unspellable combination| reject2[Decode failure fail fast]
   decoded -->|pure chain cfg to Steps| chain[chain produces a list of Steps]
   chain -->|recursive interpreter runs each Step in its frame| effects[Cluster reconcile actions]
@@ -88,41 +91,56 @@ flowchart TD
 
 ## 3. The orchestration surface: parameters, context, witness
 
-The data Dhall carries has a fixed shape. Amoebius inherits hostbootstrap's **binary-context contract**:
-every binary reads one project-local `.dhall` carrying three kinds of typed value
-(`/home/matthewnowak/hostbootstrap/core/hostbootstrap-core/src/HostBootstrap/Context.hs`; this is exactly
-the shape the sibling prodbox project proved as its Tier-0 `parameters + context + witness` surface in its
-`config_doctrine.md` §0).
+Amoebius has **two Dhall authority surfaces**, and their names are intentionally different:
 
-- **Parameters** — the operator's typed knobs: the compute engine and its node topology
+- **`InForceSpec`** — the dynamic, scope-relative desired-state value. The operator authors Dhall locally
+  and uploads it through the singleton's `dhall update` admin endpoint; after acceptance it is not a flat
+  file named `in-force.dhall`. Its home is the Vault-Transit-enveloped MinIO object/ref owned by the
+  in-cluster singleton. A root `InForceSpec` describes the full forest. A child `InForceSpec` is the
+  parent-minted subtree rooted at that child: the child itself plus descendants, never siblings or
+  ancestor-only authority.
+- **`amoebius.dhall` / `FrameConfig`** — the static local sibling config for this running copy of the
+  `amoebius` binary. It tells the binary which frame it inhabits, which authority it has, and which local
+  runtime witnesses must hold. It may include bootstrap-local facts, but it is not the cluster/tree desired
+  state. This is the amoebius form of hostbootstrap's **binary-context contract**: every binary frame reads
+  one local Dhall value carrying the context and witness material it needs
+  (`/home/matthewnowak/hostbootstrap/core/hostbootstrap-core/src/HostBootstrap/Context.hs`; this is exactly
+  the shape the sibling prodbox project proved as its Tier-0 `parameters + context + witness` surface in its
+  `config_doctrine.md` §0).
+
+The split keeps the surfaces honest:
+
+- **Parameters** — the `InForceSpec`'s typed knobs: the compute engine and its node topology
   ([cluster_topology_doctrine.md](./cluster_topology_doctrine.md)), replica counts, the per-host capacities,
   storage backings and budgets, topic retention/offload policies, and scaling policies
   ([resource_capacity_doctrine.md](./resource_capacity_doctrine.md)), the app specs, the deployment rules.
   This is the bulk of what an operator authors and the part most people mean when they say "the DSL." The DSL
   *carries* these typed fields; the types that make an over-committed, unbounded, or incompatible value
   unrepresentable live in those owning docs, not here ([§5](#5-the-illegal-state-unrepresentable-contract)).
-- **Context** — *where this binary sits* in the composed topology: its `contextKind`, its place in the
-  `topologyFrames` chain, its `currentFrame`, the `capabilities` it claims, the `allowedCommandClasses`
-  it may run, the `resourceEnvelope` it lives inside, and the `childContextKinds` it may spawn
-  (`Context.hs`, `BinaryContext`). The same `.dhall` that an operator writes for the root is *minted
+- **Context** — the `FrameConfig`'s statement of *where this binary sits* in the composed topology: its
+  `contextKind`, its place in the `topologyFrames` chain, its `currentFrame`, the `capabilities` it claims,
+  the `allowedCommandClasses` it may run, the `resourceEnvelope` it lives inside, and the `childContextKinds` it may spawn
+  (`Context.hs`, `BinaryContext`). The local `amoebius.dhall` is *minted
   forward* into each child frame (`contextForKind`, `childContext`, the `context-init` step), which is
   what makes the recursive descent of [§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) self-describing.
-- **Witness** — locally-checkable runtime facts (`RuntimeWitness`, `Context.hs`): e.g. *a required file or
-  unix socket exists*. A command is gated on its witnesses passing (`validateRuntimeContext`,
+- **Witness** — the `FrameConfig`'s locally-checkable runtime facts (`RuntimeWitness`, `Context.hs`):
+  e.g. *a required file or unix socket exists*. A command is gated on its witnesses passing (`validateRuntimeContext`,
   `commandAllowed`), so a binary refuses to act in a context it does not actually inhabit. Amoebius
   **adapts** this vocabulary to its no-environment-variables invariant: it relies on file/socket-existence
   witnesses, not on `PATH`/env-equality kinds — the substrate tool-discovery contract that replaces those
   is owned by [substrate_doctrine.md](./substrate_doctrine.md).
 
 The point of separating these three is that the orchestration surface is **self-validating before it
-acts**: parameters say what to build, context says who is allowed to build it here, and witnesses confirm
-the binary is actually standing where the context claims. All three are typed Dhall, none is a secret
+acts**: the `InForceSpec` says what to build, context says who is allowed to build it here, and witnesses
+confirm the binary is actually standing where the context claims. All three are typed Dhall, none is a secret
 ([§6](#6-secrets-are-names-never-values)), and none is logic ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)).
 
-**How the minted context reaches each frame.** The child `.dhall` of the Context bullet is not written to a
-host file and bind-mounted in; it is **delivered in place, on the lift's `stdin` channel**. At each frame
+**How the minted context reaches each frame.** The child `amoebius.dhall`/`FrameConfig` of the Context
+bullet is not written to a host file and bind-mounted in; it is **delivered in place, on the lift's `stdin`
+channel**. At each frame
 handoff the parent streams the *narrowed child projection* into the descending self-invocation, whose
-entrypoint writes it to that frame's own sibling `.dhall` and then `exec`s the binary — hostbootstrap's
+entrypoint writes it to that frame's own sibling `amoebius.dhall` and then `exec`s the binary —
+hostbootstrap's
 `ConfigDelivery` (`{ cdWritePath, cdExecPath, cdPayload }`) carried by `liftStdin` through the recursive
 `runChainFromFrame`
 (`/home/matthewnowak/hostbootstrap/core/hostbootstrap-core/src/HostBootstrap/Lift.hs`,
@@ -131,10 +149,11 @@ entrypoint writes it to that frame's own sibling `.dhall` and then `exec`s the b
 
 - **Only the projection crosses.** The narrowed child config travels on `stdin` alone — never in `argv`,
   never as a bind-mount, and never as a host-side file at rest. The parent's *full* config never crosses the
-  boundary, only the child's own subtree.
-- **The parent mints; the child never rewrites.** A frame receives its `.dhall` read-only at entry and has
+  boundary, only the child's own frame projection.
+- **The parent mints; the child never rewrites.** A frame receives its `amoebius.dhall` read-only at entry
+  and has
   no verb that edits its own config — minting is exclusively a parent act (the `context-init` step, one frame
-  up). This is the doctrine answer to the standing question *"can a host binary's `.dhall` ever change? only
+  up). This is the doctrine answer to the standing question *"can a host binary's `amoebius.dhall` ever change? only
   the parent should do that"*: a frame cannot rewrite its own config; only its parent mints it.
 
 The one exception is the terminal **in-cluster pod** frame, whose config is delivered as a rendered
@@ -148,7 +167,7 @@ delivery is **proven in hostbootstrap and inherited as evidence** — not an amo
 ## 4. Total composability
 
 Total composability is stated in the original vision: *"the key to making amoebius really work well is a great
-.dhall DSL that ties everything together. total composability."* An amoebius `.dhall` is never one
+.dhall DSL that ties everything together. total composability."* An `InForceSpec` is never one
 monolith — it is a composition built from smaller typed pieces via Dhall's native import system. Because
 every piece is typed, total, side-effect-free data ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)), the pieces nest *without limit and without
 leakage*: importing a fragment can never smuggle in an effect or a partial value.
@@ -166,31 +185,31 @@ Total composability runs along four concrete axes, each owned in detail by a sib
   deployment-rules surface that composes over it. That split is owned by
   [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md); this doc owns only the fact that the
   DSL *has* two composable surfaces.
-- **Extension-lib-in-app.** ML extension libraries nest the same way: *"the infernix .dhall can be
-  contained inside an amoebius.dhall"*. infernix and jitML are libraries unified
+- **Extension-lib-in-app.** ML extension libraries nest the same way: an extension Dhall fragment is nested
+  inside the `InForceSpec`. infernix and jitML are libraries unified
   under the DSL, not separate products (DEVELOPMENT_PLAN), so an inference workload is a nested typed
   fragment, not a bolt-on. The precise seam by which such a library registers — the typed **`ExtensionSpec`**,
   merged at link time into the one binary — is spelled out below; this axis's closed v1 set is
   `{infernix, jitML, mattandjames}`.
 - **Child-cluster-in-parent.** The name *amoebius* is the recursion: a cluster spawns children, which
-  spawn their own. A child receives *only its own* `.dhall` — *"including
+  spawn their own. A child receives only its own scoped `InForceSpec` — *"including
   their childrens'"* but nothing about siblings — and the whole tree is rolled out from the root. The
   parent/child trust, secret-injection, and spawning lifecycle are owned by
   [vault_pki_doctrine.md](./vault_pki_doctrine.md) and the cluster-lifecycle doctrine; here the point is
   that an entire child cluster spec is itself a composable fragment of the parent's.
 
-A fifth axis is the **test topology**: a test is *"an amoebius.dhall that spins up resources, runs [a]
-workflow, and tears down resources"* — the same composition, with a teardown
+A fifth axis is the **test topology**: a test is a Dhall-authored `InForceSpec` that spins up resources,
+runs a workflow, and tears down resources — the same composition, with a teardown
 obligation. The testing surface is owned by the testing doctrine; it is named here only as proof that even
 *testing* is expressed in the one composable DSL rather than a parallel harness language.
 
 ```mermaid
 flowchart TD
-  root[Root cluster amoebius.dhall] -->|imports| deploy[Deployment-rules surface replicas chaos geo failover]
+  root[Root InForceSpec] -->|imports| deploy[Deployment-rules surface replicas chaos geo failover]
   root -->|imports| apps[App specs]
   apps -->|imports| ext[Extension-lib specs infernix and jitML]
-  root -->|nests| child[Child cluster amoebius.dhall]
-  child -->|nests| grandchild[Grandchild cluster amoebius.dhall]
+  root -->|projects| child[Child InForceSpec subtree]
+  child -->|projects| grandchild[Grandchild InForceSpec subtree]
 ```
 
 ### The v1 extension seam: `ExtensionSpec` (linked, not loaded)
@@ -200,16 +219,24 @@ foreign product; what it nests is an **`ExtensionSpec`** — the one typed handl
 plugs into the surface:
 
     ExtensionSpec :
-      { extDhall        : <a typed Dhall sub-catalog nested inside amoebius.dhall>
+      { extDhall        : <a typed Dhall sub-catalog nested inside the InForceSpec>
       , extChain        : cfg -> [Step]
       , extCapabilities : List Capability
+      , extMonitoring   : NonEmpty MonitoringSurface
       }
+
+    MonitoringSurface =
+      < Slo : WorkflowMonitor | TensorBoard : { backing : ObjectStoreRef, access : AccessScope } >
 
 Three parts, each already load-bearing above: `extDhall` is a nested typed Dhall sub-catalog ([§4](#4-total-composability)'s
 composition); `extChain :: cfg -> [Step]` is the extension's slice of the chain/Step algebra ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) — an
-extension carries *no* logic the DSL does not already carry as `[Step]`); and `extCapabilities` are the
+extension carries *no* logic the DSL does not already carry as `[Step]`); `extCapabilities` are the
 capability declarations it exports into the capability surface
-([service_capability_doctrine.md](./service_capability_doctrine.md)).
+([service_capability_doctrine.md](./service_capability_doctrine.md)); and `extMonitoring` is the **mandatory,
+non-optional** `NonEmpty` list of monitoring surfaces the extension stands up — a closed union of the generic
+`Slo` (Prometheus/Grafana) and jitML's `TensorBoard` (backed by MinIO), with no open "other service" arm, so
+an extension that declares no monitoring has no inhabitant
+([monitoring_doctrine.md](./monitoring_doctrine.md)).
 
 **Linked, not loaded.** The v1 set is **closed at `{infernix, jitML, mattandjames}`**; each contributes one
 `ExtensionSpec`, and the specs are merged at **compile/link time into the one binary** — no dlopen, no
@@ -300,7 +327,7 @@ never here.
 
 ## 5. The illegal-state-unrepresentable contract
 
-The claim is exact: **a valid amoebius `.dhall` cannot represent
+The claim is exact: **a valid `InForceSpec` cannot represent
 illegal, non-working, or insecure cluster state**. Not "is rejected by a
 linter," not "is caught in CI" — *cannot be written down in the first place*. The contract has a one-line
 form an operator can hold onto:
@@ -327,9 +354,11 @@ every PVC gives no way to omit it. The schema is the boundary, and the boundary 
 
 ### Gate 2 — the Haskell typed decoder
 
-A well-typed Dhall value still has to become a Haskell value before the chain ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)) can use it. Every
-amoebius binary decodes its Dhall **in-process** through the native `dhall` library —
-`Dhall.inputFile auto` (the exact call hostbootstrap uses: `decodeContextFile = inputFile auto`,
+A well-typed Dhall value still has to become a Haskell value before the chain ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)) can use it. The
+local `amoebius.dhall` `FrameConfig` is decoded from the sibling file; the uploaded `InForceSpec` is
+decoded from the singleton's decrypted in-memory payload. Both use the native `dhall` library in-process —
+`Dhall.inputFile auto` for file-backed values, and the corresponding in-memory decode for uploaded values
+(the exact file-backed call hostbootstrap uses is `decodeContextFile = inputFile auto`,
 `Context.hs`; the same pattern the sibling prodbox project documents in its `config_doctrine.md` [§4](#4-total-composability)). Two
 things happen here:
 
@@ -349,11 +378,11 @@ description — which is exactly *"if it decodes, it is deployable."*
 ### Recursion: a child's spec is a typed subtree projection
 
 The contract extends through the recursive forest. When a cluster spawns a child,
-the value the child receives is a **`ChildSpec`** — by construction the projection of *exactly that child's
-subtree* (its own config including its children's). The type has no field in which a sibling or
+the value the child receives is a **`ChildInForceSpec`** — by construction the projection of *exactly that
+child's subtree* (its own config including its children's). The type has no field in which a sibling or
 ancestor-only branch can appear, so over-sharing the tree is as unrepresentable as a cross-tenant secret:
-`project : ForestSpec → ChildId → ChildSpec` can only ever yield a node's own subtree. That subtree is handed
-to the child by the **spawn** handoff (a Pulumi deploy) owned by
+`project : RootInForceSpec → ChildId → ChildInForceSpec` can only ever yield a node's own subtree. That
+subtree is handed to the child by the **spawn** handoff (a Pulumi deploy) owned by
 [cluster_lifecycle_doctrine.md §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest),
 which shares its *projection-only, parent-mints* discipline with the intra-host **frame descent** of [§3](#3-the-orchestration-surface-parameters-context-witness) — the
 same rule one level down, delivering each frame's minted context on the lift's `stdin` — the two differing
@@ -361,7 +390,7 @@ only in **transport**;
 the at-rest encryption under a per-child Transit key (so a child cannot even decrypt a sibling's subtree) is
 owned by [vault_pki_doctrine.md §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes); the
 unrepresentability is catalogued at [illegal_state_catalog.md §3.10](./illegal_state_catalog.md#310-a-child-spec-that-reaches-beyond-its-own-subtree). This doc
-owns only the `ChildSpec` type and its projection.
+owns only the `ChildInForceSpec` type and its projection.
 
 > **Honesty.** The *strength* of this contract is a property of the type designs catalogued in
 > [illegal_state_catalog.md](./illegal_state_catalog.md). This doc states the contract and the decode
@@ -375,7 +404,7 @@ owns only the `ChildSpec` type and its projection.
 ## 6. Secrets are names, never values
 
 A locked invariant: **secrets never live in Dhall — only names** (DEVELOPMENT_PLAN
-cross-cutting invariants). This rule is a direct consequence of [§4](#4-total-composability) and [§5](#5-the-illegal-state-unrepresentable-contract): a `.dhall` is composed,
+cross-cutting invariants). This rule is a direct consequence of [§4](#4-total-composability) and [§5](#5-the-illegal-state-unrepresentable-contract): an `InForceSpec` is composed,
 diffed, rolled out from the root across an entire tree of clusters, and stored — so it must be **safe to
 read**. A surface that can safely be handed to a child cluster, pasted into a review, or kept in an object store
 is a surface that holds no secret bytes.
@@ -446,8 +475,9 @@ Amoebius decodes Dhall in-process under **GHC 9.12.4** (DEVELOPMENT_PLAN "Toolch
 dependencies require `allow-newer` to build on the pinned GHC — the precise toolchain pins and `allow-newer`
 set are owned by the dependency-management surface tracked in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), not restated here. There is **no**
-intermediate JSON projection on the supported path: the on-disk artifact is the typed Dhall expression,
-and the in-memory value is the Haskell record produced by `Dhall.inputFile auto` ([§5](#5-the-illegal-state-unrepresentable-contract)).
+intermediate JSON projection on the supported path: file-backed frame config is the typed `amoebius.dhall`
+expression, and uploaded desired state is the decrypted `InForceSpec` Dhall expression decoded in-process
+([§5](#5-the-illegal-state-unrepresentable-contract)).
 
 Dhall is the **config** surface, not the **data plane**: runtime *message payloads* are never Dhall. They are
 dense binary **CBOR** on the wire, owned by

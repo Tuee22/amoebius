@@ -81,7 +81,7 @@ cloud API — not a fifth hardware substrate: the provider child has no host and
 its own ([cluster_lifecycle_doctrine.md §1](../documents/engineering/cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape)).
 The gate therefore stays single-substrate (`linux-cpu`) while exercising a provider target.
 
-**Gate:** an `amoebius.dhall` that, from a `linux-cpu` parent, **spins up a provider-managed cluster**
+**Gate:** an `InForceSpec` that, from a `linux-cpu` parent, **spins up a provider-managed cluster**
 (EKS, via the encrypted-MinIO-backed Pulumi deploy under the singleton), brings up its stateless
 in-cluster daemon, **dynamically provisions an extra node** by a declared rule and observes it join, then
 **tears the per-run cluster stack down leak-free** — VPC, control plane, node group, and the dynamically
@@ -281,7 +281,7 @@ The whole sprint.
 Adopt [`cluster_lifecycle_doctrine.md` §8 — Dynamic node provisioning](../documents/engineering/cluster_lifecycle_doctrine.md#8-dynamic-node-provisioning)
 and the dynamic-node catalog entry in [`pulumi_iac_doctrine.md` §4 — What Pulumi provisions](../documents/engineering/pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog):
 make the cluster's node set **declarative and reactive** — grown and shrunk by logic, not by hand — so
-provisioning a node is *just another reconcile* (§9) over the desired node set in the global `.dhall`,
+provisioning a node is *just another reconcile* (§9) over the desired node set in the root `InForceSpec`,
 living on the deployment-rules surface and never inside an app's logic.
 
 ### Deliverables
@@ -336,7 +336,7 @@ The whole sprint.
 **Implementation**: `test/dhall/phase_10_provider_provision.dhall` (the gate topology),
 `amoebius-pulumi/src/Amoebius/Pulumi/Teardown.hs` (per-run `reconcileAbsent` over the ephemeral cluster + node subset) (target paths; not yet built)
 **Blocked by**: Sprint 10.1, Sprint 10.2, Sprint 10.3, Sprint 10.4
-**Independent Validation**: the gate `amoebius.dhall` spins up a provider (EKS) cluster from a `linux-cpu` parent, brings up its stateless in-cluster daemon, dynamically provisions an extra node and observes it join, then tears the per-run cluster stack down leak-free (VPC + control plane + node group + provisioned node all destroyed, no orphans), idempotently on re-run, with any durable per-PV EBS correctly retained; each run emits a proven/tested/assumed ledger artifact
+**Independent Validation**: the gate `InForceSpec` spins up a provider (EKS) cluster from a `linux-cpu` parent, brings up its stateless in-cluster daemon, dynamically provisions an extra node and observes it join, then tears the per-run cluster stack down leak-free (VPC + control plane + node group + provisioned node all destroyed, no orphans), idempotently on re-run, with any durable per-PV EBS correctly retained; each run emits a proven/tested/assumed ledger artifact
 **Docs to update**: `documents/engineering/pulumi_iac_doctrine.md` (§3, §8), `documents/engineering/cluster_lifecycle_doctrine.md` (§9), `documents/engineering/testing_doctrine.md` (the per-run ledger; durable-EBS reclamation deferred to Phase 11)
 
 ### Objective

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the abstraction by which amoebius application logic names abstract
@@ -58,7 +58,7 @@ to name. They are not a new service set; they are the abstraction *over* the sta
 | **MessageBus** | The pub/sub event and workflow backbone — declared topic lifecycles, at-least-once delivery. |
 | **Sql** | A relational database the app keeps in its own namespace. |
 | **Identity** | OIDC identity and the authorization rules that gate the app's surfaces, plus the wild-ingress door. |
-| **Observability** | Cluster-local metrics and dashboards for platform and app workloads. |
+| **Observability** | Cluster-local metrics and dashboards for platform and app workloads; each workflow additionally carries a mandatory derived per-workflow SLO surface, and each extension its declared surfaces (jitML → TensorBoard) ([monitoring_doctrine.md](./monitoring_doctrine.md)). |
 | **Registry** | The OCI image registry every workload pulls from. |
 | **Edge** | L7 routing and edge TLS termination — *which* of the app's services are reachable from the edge. |
 

@@ -27,7 +27,7 @@ These rules are absolute and govern all work:
 1. **Numeric order.** Phases are completed strictly in order. No work on phase *N+1* begins until phase
    *N* is validated.
 2. **Independently validatable.** Each phase ends with a concrete acceptance gate (ideally an
-   `amoebius.dhall` that spins up resources, runs a workflow, and tears down) that passes before the next
+   `InForceSpec` topology that spins up resources, runs a workflow, and tears down) that passes before the next
    phase opens.
 3. **At most one substrate per validation.** A phase's acceptance gate requires **at most one** substrate
    (`apple` | `linux-cuda` | `linux-cpu` | `windows`). This prevents cross-substrate flip-flopping during

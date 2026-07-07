@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the one amoebius binary's three runtime contexts (CLI / sudo host-daemon / in-cluster pod) and its daemon role taxonomy — exactly one elected control-plane singleton with total authority over the cluster and its secrets, plus N unelected worker daemons — and the shape (not the proof) of the leadership election that picks the singleton.
@@ -393,6 +393,13 @@ simplification, not a change of authority, held safe by three guards:
   load-bearing under the threat model — crash/omission today; a future Byzantine assumption would simply make
   that audit trail, not the compacted view, the authority.
 
+The same compacted-topic + TableView pattern carries a second, **operator-facing** read-model: the
+`workflow-health` projection (`WorkflowName → SLOStatus`) the elected singleton produces inside its existing
+reconcile loop — no new container — read by the operator through the `pb workflow health` admin verb. Like the
+election read-model it is a *projection*, never a decision primitive; the SLO obligation that feeds it, the
+derived dashboards, and the lag-tailed `NotYetObserved` state are owned by
+[monitoring_doctrine.md](./monitoring_doctrine.md).
+
 > **Honesty.** Carrying the commit log over Pulsar + MinIO is **forward design, new vs prodbox** — prodbox
 > deliberately did *not* use a durable queue for its gateway log. The signed/hash-chained/idempotent
 > discipline is proven *in prodbox over its HTTP gossip transport*; that is evidence from a sibling system,
@@ -540,16 +547,19 @@ Lifecycle"); this doc records only the contract amoebius daemons share:
 - **Readiness and observability:** every daemon exposes `/healthz`, `/readyz`, and `/metrics`. Filesystem
   readiness markers, `sd_notify`, and `threadDelay` "wait long enough" probes are forbidden. Logging is
   structured JSON to stderr.
-- **Boot vs live config:** configuration is a single Dhall file; live fields hot-reload via atomic STM swap
-  on a file-watch, boot fields trigger a drain-and-restart so the supervisor relaunches against the new
-  file. No `PATH`, no `PRODBOX_*`-style environment-variable precedence on supported paths
-  ([substrate_doctrine.md](./substrate_doctrine.md) for the no-env/no-`PATH` contract). **That single file
-  arrives differently per context ([§1](#1-one-binary-three-contexts)):** a **CLI / host** binary reads the sibling `.dhall` written by
+- **Boot vs live frame config:** each daemon frame has one local `amoebius.dhall` `FrameConfig`. Live
+  frame-local fields hot-reload via atomic STM swap on a file-watch; boot fields trigger a
+  drain-and-restart so the supervisor relaunches against the new file. No `PATH`, no
+  `PRODBOX_*`-style environment-variable precedence on supported paths
+  ([substrate_doctrine.md](./substrate_doctrine.md) for the no-env/no-`PATH` contract). **That frame config
+  arrives differently per context ([§1](#1-one-binary-three-contexts)):** a **CLI / host** binary reads the sibling `amoebius.dhall` written by
   `init`; a binary **descending a bootstrap-lift frame** (VM/container) has it **streamed on `stdin` and
   written once before `exec`** — the parent's `context-init` mint
   ([dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness)); an **in-cluster pod** receives it as a rendered `ConfigMap`
   mount ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)). In every case a frame
-  receives its config from its parent and never rewrites its own.
+  receives its frame config from its parent and never rewrites its own. The dynamic `InForceSpec` is a
+  separate desired-state value updated through the singleton admin API and stored as a Vault-Transit-enveloped
+  MinIO object/ref, not by this file-watch path.
 
 > **Honesty.** This spine is **proven in prodbox**; for amoebius it is design intent inherited from a
 > sibling, not a tested amoebius result.

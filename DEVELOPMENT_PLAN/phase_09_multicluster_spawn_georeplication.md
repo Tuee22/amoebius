@@ -31,7 +31,7 @@ becomes a forest with an **asynchronous** boundary between its clusters. It does
 1. **Amoebic spawn** — a parent provisions a child cluster (`kind`/`rke2` via SSH-key Pulumi, run from
    inside the parent with a MinIO backend Vault-enveloped per the Pulumi IaC doctrine) and hands the child
    exactly its own subtree: the value the child receives is, by construction, `project(subtree)` — a typed
-   `ChildSpec` in which no sibling or ancestor-only branch can appear.
+   `ChildInForceSpec` in which no sibling or ancestor-only branch can appear.
 2. **Per-child unseal + secret injection** — the child Vault comes up in one of exactly two sanctioned
    modes (self-unseal from a k8s secret, or parent-held unlock), its subtree spec is enveloped under a
    **per-child Vault Transit key** so it cannot decrypt a sibling's subtree even under an unsealed parent,
@@ -122,11 +122,11 @@ result as proven.
   path (Dhall names only; the parent materializes the bytes).
 - [`cluster_lifecycle_doctrine.md` §3 — Amoebic spawning: the recursive forest](../documents/engineering/cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest),
   with [§5 — Teardown-with-cleanup vs chaos-failover](../documents/engineering/cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction),
-  [§6 — Push-back when teardown would break the global `.dhall`](../documents/engineering/cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-global-dhall),
+  [§6 — Push-back when teardown would break the root `InForceSpec`](../documents/engineering/cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-root-inforcespec),
   and [§9 — the reconciler, not a state machine](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine):
   this phase implements the `project(subtree)` handoff (a child gets only its own subtree, structurally and
   cryptographically), the central distinction between a polite lossless teardown and a violent bounded-loss
-  chaos-failover, and the declarative push-back that refuses a teardown which would make the global `.dhall`
+  chaos-failover, and the declarative push-back that refuses a teardown which would make the root `InForceSpec`
   unsatisfiable — all enacted as `discover → diff → enact → re-observe` reconciles over a managed-resource
   registry, never a bespoke lifecycle state machine.
 - [`tla_modelling_assumptions.md` §2 — The single proof obligation this model discharges](../documents/engineering/tla_modelling_assumptions.md#2-the-single-proof-obligation-this-model-discharges),
@@ -136,13 +136,18 @@ result as proven.
   variable-to-implementation correspondence, the modelling bounds, the invariant catalog, and the honest
   verification status — defining *and then proving* "well-defined behaviour" for a failover into a
   partially-synced cluster, tying the gate to the measurement *loss ≤ declared budget, proofs green*.
+- [`monitoring_doctrine.md` §6 — The parent-monitoring posture](../documents/engineering/monitoring_doctrine.md#6-the-parent-monitoring-posture):
+  peer-cluster monitoring rides the existing async geo-replication (Sprint 9.3) plus the exported R8 live-lag
+  monitor and `DataLossBudget` this phase already ships; in-cluster parent→child telemetry is **foreclosed** by
+  the `ChildInForceSpec` no-ancestor isolation (Sprint 9.1) rather than deferred, with a one-way out-of-forest
+  sealed attestation channel left as an explicitly-open later question.
 
 ## Sprints
 
 ## Sprint 9.1: Amoebic spawn — parent provisions a child + `project(subtree)` handoff 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Multicluster/Spawn.hs`, `src/Amoebius/Dsl/ChildSpec.hs`, `pulumi/child-cluster/Pulumi.yaml` (target paths; not yet built)
+**Implementation**: `src/Amoebius/Multicluster/Spawn.hs`, `src/Amoebius/Dsl/ChildInForceSpec.hs`, `pulumi/child-cluster/Pulumi.yaml` (target paths; not yet built)
 **Blocked by**: Phase 1 (bootstrap a `kind`/`rke2` cluster idempotently); Phase 2 (root Vault/PKI trust anchor + retained-PV storage); Phase 3 (the Dhall DSL + control-plane singleton); Phase 4 (Pulumi-from-inside-the-cluster with a Vault-enveloped MinIO backend)
 **Independent Validation**: a parent spawns one child `kind` cluster from inside itself; the child comes up empty and reconciles toward the spec; the child's received value is shown — at the type level — to be `project(subtree)` with no field carrying a sibling or ancestor-only branch, so handing a child anything beyond its own subtree fails to type-check.
 **Docs to update**: `documents/engineering/cluster_lifecycle_doctrine.md`, `documents/engineering/pulumi_iac_doctrine.md`, `documents/engineering/dsl_doctrine.md`
@@ -158,7 +163,7 @@ about siblings or any wider part of the forest.
 
 ### Deliverables
 
-- A `ChildSpec` Dhall/Haskell type that is, by construction, the projection of a parent spec onto one
+- A `ChildInForceSpec` Dhall/Haskell type that is, by construction, the projection of a parent spec onto one
   subtree — no field admits a sibling or ancestor-only branch, so a cross-subtree handoff is
   unrepresentable (the illegal-state discipline applied to the forest).
 - A `spawnChild` action: SSH-key (`kind`/`rke2`) Pulumi deploy from inside the parent, tracked in a
@@ -171,7 +176,7 @@ about siblings or any wider part of the forest.
 
 1. End-to-end: `amoebius` on the parent brings up an empty child `kind` cluster on linux-cpu; re-running
    the spawn is a no-op (idempotent reconcile).
-2. Type-level: there is no total function producing a `ChildSpec` that contains a sibling's branch; the
+2. Type-level: there is no total function producing a `ChildInForceSpec` that contains a sibling's branch; the
    only constructor is the subtree projection.
 
 ### Remaining Work
@@ -313,12 +318,12 @@ The whole sprint.
 **Status**: Planned
 **Implementation**: `src/Amoebius/Multicluster/Teardown.hs`, `src/Amoebius/Multicluster/Pushback.hs` (target paths; not yet built)
 **Blocked by**: Sprint 9.1; Sprint 9.4 (clean gateway handoff is part of a graceful teardown)
-**Independent Validation**: a graceful teardown of a child drains workloads, flushes Pulsar/MinIO/Postgres replication to a synchronization event, hands off the gateway, and releases compute while preserving retained PVs — losing nothing; a teardown that would make the global `.dhall` unsatisfiable pushes back, names what stops working and the declared failback, and proceeds only under an explicit override.
+**Independent Validation**: a graceful teardown of a child drains workloads, flushes Pulsar/MinIO/Postgres replication to a synchronization event, hands off the gateway, and releases compute while preserving retained PVs — losing nothing; a teardown that would make the root `InForceSpec` unsatisfiable pushes back, names what stops working and the declared failback, and proceeds only under an explicit override.
 **Docs to update**: `documents/engineering/cluster_lifecycle_doctrine.md`, `documents/engineering/storage_lifecycle_doctrine.md`
 
 ### Objective
 
-Adopt [`cluster_lifecycle_doctrine.md` §6 — Push-back when teardown would break the global `.dhall`](../documents/engineering/cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-global-dhall)
+Adopt [`cluster_lifecycle_doctrine.md` §6 — Push-back when teardown would break the root `InForceSpec`](../documents/engineering/cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-root-inforcespec)
 and the central distinction of
 [§5 — Teardown-with-cleanup vs chaos-failover](../documents/engineering/cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction),
 enacted as the reconciler of
@@ -333,7 +338,7 @@ the declarative push-back that refuses — by default — a teardown which would
 - A `gracefulTeardown` reconcile: idempotent drain/flush/handoff ordering timed to a Pulsar/MinIO/Postgres
   synchronization event, releasing compute and preserving retained `no-provisioner` PVs (so a later spin-up
   rebinds the same bytes).
-- A `satisfiability` check over the global `.dhall`: using each container's declared CPU/RAM, decide whether
+- A `satisfiability` check over the root `InForceSpec`: using each container's declared CPU/RAM, decide whether
   the surviving forest can still satisfy the spec without cluster C; if not, push back naming the loss and
   the `.dhall` failback, and require an explicit override (same fail-closed `Unreachable → refuse` posture as
   the reconciler).
@@ -428,7 +433,7 @@ The whole sprint.
 **Cross-references to add:**
 - README.md — link the Phase 9 row to this document and mark the gate status as it progresses.
 - system_components.md — add the `src/Amoebius/Multicluster/*` modules, `src/Amoebius/Vault/TransitChildKey.hs`,
-  `src/Amoebius/Dsl/ChildSpec.hs`, and the `spec/tla/CrossClusterFailover.tla` artifact to the component
+  `src/Amoebius/Dsl/ChildInForceSpec.hs`, and the `spec/tla/CrossClusterFailover.tla` artifact to the component
   inventory.
 - substrates.md — add the Phase 9 → linux-cpu row to the per-phase substrate map.
 

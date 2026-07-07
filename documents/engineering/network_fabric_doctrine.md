@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for amoebius's inter-node / inter-cluster network fabric — **raw kernel
@@ -55,7 +55,7 @@ Harbor/Helm of networking: the duplicated-control-plane pattern amoebius rejects
 | Netmaker brings | amoebius already owns |
 |---|---|
 | Its own control server | The elected control-plane singleton ([daemon_topology_doctrine.md](./daemon_topology_doctrine.md)) |
-| Its own DB (a desired-state store) | `render(dhall)` — **no external release store** ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderdhall-observed-is-etcd-a-diff-is-typed)) |
+| Its own DB (a desired-state store) | `render(InForceSpec)` — **no external release store** ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)) |
 | Its own MQTT broker to push peer changes | Pulsar — the one coordination plane ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)) |
 | Its own PKI / mTLS | The Vault forest CA + secrets model ([vault_pki_doctrine.md](./vault_pki_doctrine.md)) |
 | Its own node/peer inventory | The typed node inventory ([substrate_doctrine.md](./substrate_doctrine.md)) + the Dhall spec |
@@ -91,7 +91,7 @@ WireGuard fits the amoebius disciplines cleanly because it is a *primitive*, not
 
 ```mermaid
 flowchart TD
-  inv[Typed node inventory in the in-force dhall] -->|render, pure| cfg[WireGuard peer configs]
+  inv[Typed node inventory in the InForceSpec] -->|render, pure| cfg[WireGuard peer configs]
   cfg -->|singleton reconcile: wg show, diff, wg set| iface[wg0 interface on each node]
   vault[Vault KV: Curve25519 peer keypairs] -->|secrets-by-name, parent-injected| iface
 ```

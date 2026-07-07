@@ -104,7 +104,7 @@ Every `phase_NN_<slug>.md` follows this skeleton:
 ```
 
 `Phase Summary` is declarative present tense ("this phase stands up …"), not a promise log. The **Gate** is a
-single, checkable acceptance condition — ideally an `amoebius.dhall` that spins resources up, runs a
+single, checkable acceptance condition — ideally an `InForceSpec` topology that spins resources up, runs a
 workflow, and tears them down.
 
 ## E. One canonical phase model

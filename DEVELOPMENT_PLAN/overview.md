@@ -123,7 +123,7 @@ are 📋 Planned (greenfield).
 - **Phases 13+ — Later phases** (`varies`) → [later_phases.md](later_phases.md): each high-numbered in-scope phase (GHC 9.14.1 bump, schema-migration automation, the Haskell extension DSL + AST checker + native JIT, niche substrates) gets its own gate when reached.
 
 The substrate per gate is registered authoritatively in [substrates.md](substrates.md); the per-phase gate
-ideally *is* an `amoebius.dhall` that spins resources up, runs a workflow, and tears them down — the
+ideally *is* an `InForceSpec` topology that spins resources up, runs a workflow, and tears them down — the
 self-tearing-down test topology of [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md).
 
 ## 5. Current baseline — GREENFIELD

@@ -43,7 +43,7 @@ elsewhere. There is nothing to install, nothing to poll, and nothing to reconcil
   the ETag-CAS pointer history ([§3](#3-environment-and-the-etag-cas-promotion-pointer)): a content-addressed, append-only record of every generation ever built
   and every promotion ever made. There is no polling loop to trust — the desired state is
   `render(release)`, recomputed from a value, exactly as the manifest reconciler recomputes desired from
-  `render(.dhall)` ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderdhall-observed-is-etcd-a-diff-is-typed)).
+  `render(InForceSpec)` ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)).
 - **The environment axis is orthogonal, not a new machine.** Dev/staging/prod is one of amoebius's four
   independent typed dimensions (substrate detected; daemon-role elected; rke2 server/agent declared;
   environment declared) — it rides the same reconciler, never a bespoke delivery engine.
@@ -92,7 +92,7 @@ data Release = Release
   image bytes it runs, and the substrate it targets. Change any one and the identity changes; change none and
   the same `Release` is returned — content-addressed, self-naming, deduplicated.
 - **The ledger is the applied-log, promoted to canonical.**
-  [manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderdhall-observed-is-etcd-a-diff-is-typed)
+  [manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)
   leaves an **optional** content-addressed applied-log — "amoebius *may* write each rendered generation into
   the content-addressed store." **This doctrine promotes that optional log to THE canonical, immutable release
   ledger**: every built generation is an append-only `Release` entry in the content-addressed store (pointers
@@ -240,7 +240,7 @@ data RolloutPhase = RolloutPhase
   **Phase-14** candidate ("DB schema-migration automation + manifest-change correctness semantics",
   [DEVELOPMENT_PLAN/later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md)): the schema-migration engine is a
   `RolloutPhase`, and the manifest-change-correctness half hardens the typed diff of
-  [manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderdhall-observed-is-etcd-a-diff-is-typed).
+  [manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed).
 - **Canary is a Gateway-API weight shift, not a mesh.** A canary phase shifts traffic by adjusting
   Gateway-API `HTTPRoute` `backendRefs` **weights** on the Envoy edge amoebius already renders and
   Keycloak-fronts — the *one* traffic-split feature amoebius needs, and precisely the mechanism
@@ -315,7 +315,7 @@ extension mechanism remains at Phase-15. This doc states the target shape and li
 
 - [Engineering Doctrine Index](./README.md)
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) the hash/pointer master registry (`releaseHash`, the `environment` pointer kind), [§4](./content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) determinism; the store the ledger writes into
-- [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — [§5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait) the SSA/ApplySet reconciler `RolloutPlan` enacts, [§6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderdhall-observed-is-etcd-a-diff-is-typed) the applied-log this doctrine promotes to the canonical ledger
+- [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — [§5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait) the SSA/ApplySet reconciler `RolloutPlan` enacts, [§6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed) the applied-log this doctrine promotes to the canonical ledger
 - [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§3](./readiness_ordering_doctrine.md#3-readiness-is-a-condition-never-a-duration) the `ReadinessGate` on a `RolloutPhase` is the tier-(c) instance of the general `Readiness` edge (a condition, never a duration)
 - [Testing Doctrine](./testing_doctrine.md) — [§4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run proven/tested/assumed evidence ledger the `PromotionGate` consumes
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md) — the Extract → Model → Inject grammar behind the evidence-strength the gate requires

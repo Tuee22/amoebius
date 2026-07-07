@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define amoebius's cross-project content-addressed store (blobs ← manifests ← pointers), the
@@ -81,6 +81,7 @@ fixed prefix schema. The `jitML` key renderers in `jitML/src/JitML/Checkpoint/Fo
       best/<metric>                        -- mutable, ETag-CAS; body = the 32-byte manifest sha
       trial/<trial-id>/latest              -- per-trial latest pointer (HPO sweeps)
       trial/<trial-id>/best/<metric>       -- per-trial best pointer
+    tb/                                    -- jitML TensorBoard event files (tfevents); the surface's MinIO backing
 ```
 
 **Pointers are namespaced per app (per-app isolation).** The store is one MinIO bucket *per project*, but within
@@ -92,6 +93,14 @@ training-DAG `parent` edge (a `Continue` chain, [§4.6](#46-the-training-run-top
 continuing app A's model without an explicit grant" is a **decode-foreclosed** illegal state
 ([`illegal_state_catalog.md`](./illegal_state_catalog.md)). The upstream-pull credential a stage-by-name import
 resolves is likewise scoped per app ([`vault_pki_doctrine.md`](./vault_pki_doctrine.md)).
+
+The `tb/` prefix under an experiment holds the jitML **TensorBoard event files** (`tfevents`) that the
+extension's mandatory `TensorBoard` monitoring surface reads over MinIO's S3 API — the format bridge between the
+canonical-CBOR `metrics` manifest field and TensorBoard's on-disk format. Those objects are ordinary store
+bytes, bounded by the store's budget ([resource_capacity_doctrine.md](./resource_capacity_doctrine.md)); the
+surface, its `AccessScope`, and the emission obligation are owned by
+[monitoring_doctrine.md](./monitoring_doctrine.md), and their retention/GC follows the same sibling `jitML`
+checkpoint-format deferral this doctrine records for checkpoints ([§7](#7-what-this-doctrine-deliberately-does-not-own)).
 
 ### 2.1 Three object classes, two write protocols
 

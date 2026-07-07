@@ -29,7 +29,7 @@ This phase takes `jitML` — the sibling training + JIT-codegen ML library — a
 its training runs are made deterministic-by-construction using the Phase-5 determinism kernel (`experimentHash`
 + SplitMix seed derivation), its CUDA backend is confined behind a cabal flag that is **off by default** (so
 the ordinary build stays CPU-only and portable), it composes as a shared library whose own `.dhall` nests
-inside the amoebius `.dhall`, and — the genuinely new distributed piece — a `jitML` **training coordinator**
+inside the `InForceSpec`, and — the genuinely new distributed piece — a `jitML` **training coordinator**
 gains HA failover from the kernel election. The coordinator's HA is the *First Axis* (one cluster's
 single-writer election); the heavy synchronous consensus underneath it (object-store CAS, single-consumer
 subscriptions, relational replication) is **delegated** to the standard services and never re-proved here.
@@ -42,7 +42,7 @@ reduction order differs.
 Scope **in**: mapping the `jitML` blob/manifest/pointer checkpoint format onto the amoebius three-tier
 content-addressed store (Phase 4); binding `experimentHash` to the `linux-cuda` substrate fingerprint and
 deriving per-stream SplitMix seeds for `jitML` training; the default-off `cuda` cabal flag and the
-CPU/CUDA engine split; `jitML` as a shared library whose `.dhall` nests under the amoebius `.dhall`; the
+CPU/CUDA engine split; `jitML` as a shared library whose `.dhall` nests under the `InForceSpec`; the
 elected, single-writer HA training coordinator and its ranked failover; the bit-determinism + failover gate.
 Scope **out**: building the `ContentAddress` typeclass / `experimentHash` / SplitMix primitives themselves
 (Phase 5, `linux-cpu`); the content-addressed store + native Pulsar client themselves (Phase 4); Apple Metal /
@@ -110,6 +110,13 @@ and the run continues from the last adopted `latest` pointer with no torn checkp
   source, its single-writer role **delegated** to a Pulsar exclusive/failover subscription + the content-store
   CAS/`AdvancePredicate`, not a new elected worker kind. This is doctrine this round introduces, tracked here as a
   forward cross-reference, not a tested result of the Phase-6 gate.
+- **[`monitoring_doctrine.md` §5 — Extensible surfaces: TensorBoard](../documents/engineering/monitoring_doctrine.md#5-extensible-surfaces-tensorboard):**
+  jitML's `ExtensionSpec` declares a **mandatory** `TensorBoard` monitoring surface backed by MinIO
+  ([§2.3 — Per-extension surfaces](../documents/engineering/monitoring_doctrine.md#23-per-extension-surfaces--extensionspecextmonitoring)),
+  so an unmonitored jitML run is unrepresentable; jitML emits `tfevents` to the per-experiment `tb/` prefix, the
+  one shared TensorBoard pod declares CPU/RAM and folds via `place`, and a per-user view is a `UserScoped`
+  claim-filter over that shared instance
+  ([§4 — Access](../documents/engineering/monitoring_doctrine.md#4-access-one-admin-delegated-per-user-scope-no-public-arm)).
 
 ## Sprints
 
@@ -246,7 +253,7 @@ and deriving every RNG stream (per-experiment, per-game RL self-play, per-HPO-tr
 
 The whole sprint (📋 Planned).
 
-## Sprint 6.4: jitML as a shared library nested under the amoebius .dhall 📋
+## Sprint 6.4: jitML as a shared library nested under the InForceSpec 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/JitML/Library.hs`, `dhall/jitml/package.dhall` (target: the `jitML` library
@@ -262,7 +269,7 @@ selector (those fields do not exist on its surface).
 Adopt [`app_vs_deployment_doctrine.md` §8 — shared-library use is application logic](../documents/engineering/app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic):
 treat *that an app uses `jitML`* as application logic — the library call graph travels with the app — while the
 *placement* of the workload (CUDA vs CPU, replica count) stays a deployment rule, so the `jitML` `.dhall`
-**nests inside** the amoebius `.dhall` rather than living as a parallel product, unifying `jitML` as a library
+**nests inside** the `InForceSpec` rather than living as a parallel product, unifying `jitML` as a library
 under the DSL.
 
 ### Deliverables
@@ -385,7 +392,7 @@ The whole sprint (📋 Planned).
   shape and its sibling-evidence framing).
 - `documents/engineering/app_vs_deployment_doctrine.md` — record that the §7 substrate-as-deployment-rule and
   §8 shared-library-is-app-logic classifications are demonstrated for `jitML` (the `jitML` `.dhall` nests under
-  the amoebius `.dhall`; CUDA is a default-off build flag).
+  the `InForceSpec`; CUDA is a default-off build flag).
 - `documents/engineering/chaos_failover_doctrine.md` — confirm the §6 First-Axis intra-cluster coordinator
   election (delegated synchronous consensus) is exercised, and that this phase makes **no** §16 Second-Axis
   cross-cluster claim; add the Phase-6 failover row to the conformance matrix when the gate runs.

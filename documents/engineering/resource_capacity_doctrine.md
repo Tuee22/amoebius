@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the amoebius capacity model — the `Capacity` / `Demand` / `Budget`
@@ -88,7 +88,7 @@ runtime cross-check the model *requires* (declared capacity ≤ real capacity) a
 
 ```mermaid
 flowchart TD
-  spec[amoebius.dhall: declared capacities plus typed demands] -->|Dhall typecheck, well-formed| typed[Well-typed value with StorageBudget and Growable union shapes, type-foreclosed]
+  spec[InForceSpec: declared capacities plus typed demands] -->|Dhall typecheck, well-formed| typed[Well-typed value with StorageBudget and Growable union shapes, type-foreclosed]
   typed -->|Gate 2 decode: placement witness or Sigma fold| fold{Feasible pod placement exists / growth envelope sound / Sigma within capacity?}
   fold -->|yes| ir[Coherent capacity-checked IR plus placement witness, decode-foreclosed proven at decode]
   fold -->|no| reject[Left Overcommit or Left Unschedulable, rejected before any effect]
@@ -191,7 +191,7 @@ The nesting is where the illegal states [§3.17](./illegal_state_catalog.md#317-
   and every durable volume declares a hard-capped size ([storage_lifecycle_doctrine.md §5](./storage_lifecycle_doctrine.md#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim)),
   the per-pod inputs are exact, not a guess — so the packing is over known integers, the same soundness the
   cluster-lifecycle push-back relies on
-  ([cluster_lifecycle_doctrine.md §6](./cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-global-dhall)).
+  ([cluster_lifecycle_doctrine.md §6](./cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-root-inforcespec)).
 - **Host → host-worker.** A host-level accelerator worker (Apple-Metal or Windows-CUDA) is a native subprocess,
   **not** a pod ([daemon_topology_doctrine.md §4](./daemon_topology_doctrine.md),
   [substrate_doctrine.md](./substrate_doctrine.md)), so its cpu/mem `Demand` is declared by
@@ -425,7 +425,7 @@ declaration against reality at reconcile (runtime-checked).
 > decode-foreclosed spec-layer guarantee *when implemented as specified*; that claim is itself about a design not yet
 > built (Phase 3). The runtime-checked cross-check and enforcement are deferred by construction. Where the
 > capacity arithmetic generalizes the push-back soundness proven in prodbox
-> ([cluster_lifecycle_doctrine.md §6](./cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-global-dhall)),
+> ([cluster_lifecycle_doctrine.md §6](./cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-root-inforcespec)),
 > that is sibling evidence, not amoebius proof ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---
@@ -446,6 +446,7 @@ To keep SSoT boundaries crisp:
 | Which capacity states are illegal and the [§4.6](./illegal_state_catalog.md#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) technique that forecloses them | [illegal_state_catalog.md](./illegal_state_catalog.md) |
 | Runtime enforcement (host actually caps, scheduler places, autoscaler grows, quota holds) | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), [testing_doctrine.md](./testing_doctrine.md) |
 | Capacity/scaling as a deployment-rules surface, never app logic | [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md) |
+| The monitoring obligation types, derived surfaces, and access model (this doc owns only how their cost folds — [§9.2](#92-monitoring-cost-folds-through-the-standard-machinery-and-the-forest-has-no-parent-rollup-budget)) | [monitoring_doctrine.md](./monitoring_doctrine.md) |
 
 ### 9.1 The cross-cluster capacity fold is a type-foreclosed non-goal (single-cluster by arity)
 
@@ -472,6 +473,30 @@ and [§3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-
 subsection consumes that WHY, it does not restate it. The only runtime-checked residue is the deferred geo-replication
 enaction (Phase 9). A **stretched cluster** does not breach this arity: it is **one** `Topology` whose nodes span
 two `Site`s, folded **once** ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)).
+
+### 9.2 Monitoring cost folds through the standard machinery, and the forest has no parent-rollup budget
+
+Monitoring adds no capacity machinery of its own. The generic path is pull/scrape of the `/metrics` endpoints
+every daemon already exposes ([daemon_topology_doctrine.md](./daemon_topology_doctrine.md)) — no per-workflow
+sidecar, so it adds zero per-workflow `Demand` and honours the no-sidecar-fleet stance
+([network_fabric_doctrine.md](./network_fabric_doctrine.md)). The monitoring pods — the **one shared**
+TensorBoard per extension/app and the optional single local Thanos companion beside Prometheus — declare
+refined non-zero cpu/ram and fold through `place`/`podFits`
+([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)) exactly like any workload; a per-user monitoring view
+is an access filter over that shared instance ([monitoring_doctrine.md](./monitoring_doctrine.md)), never a pod
+per user, so it does not multiply `Demand`. Recording-rule evaluation folds into the `Observability` Prometheus
+workload's `Demand` **as a function of N workflows** (N × rules), not a flat add. The `workflow-health`
+compacted topic and the jitML `tfevents` prefix fold through the two-ceiling Pulsar fold
+([§7](#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total)) and the closed `StorageBudget`
+([§5](#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)) — no new budget type. And because
+in-cluster parent→child telemetry is foreclosed ([monitoring_doctrine.md](./monitoring_doctrine.md), the same
+cross-cluster arity as [§9.1](#91-the-cross-cluster-capacity-fold-is-a-type-foreclosed-non-goal-single-cluster-by-arity)),
+there is **no** parent-rollup storage to budget — a vacuous parent-side `StorageBudget` would have no flow to
+account. One residue is named honestly: recording-rule series-count and evaluation CPU grow with descriptor
+size while the Prometheus workload carries fixed `requests`, so a large descriptor can outrun provisioned
+Prometheus at runtime; `StorageBudget` bounds bytes, not query performance. An optional decode-foreclosed
+rule-cardinality budget (`Σ derived rules ≤ declared rule-capacity`) closes this and is recorded as an optional
+improvement.
 
 ---
 

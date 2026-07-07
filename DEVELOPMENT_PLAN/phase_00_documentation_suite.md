@@ -25,7 +25,7 @@ service-capabilities; manifest-generation (typed manifests + the typed reconcile
 platform-services; image-build (baked binaries + the `distribution` registry); storage-lifecycle; Vault/PKI
 trust-tree + secret-injection; Pulumi IaC; the chaos/failover (async geo-replication) doctrine;
 daemon-topology (control-plane singleton + worker roles); substrate; host↔cluster comms; the native Pulsar
-client; content-addressing/determinism; and the testing doctrine (test-as-`.dhall`, `suggest-test`, the
+client; content-addressing/determinism; and the testing doctrine (test-as-`InForceSpec`, `suggest-test`, the
 proven/tested/assumed ledger). It also authors the plan-suite spine — the rulebook, the live tracker, and the
 target architecture/inventory/substrate documents — so that every later phase cites doctrine by name when it
 schedules adoption work.
@@ -71,7 +71,7 @@ the sibling **prodbox** project — that is prior-art evidence, not amoebius pro
   this phase specifies `no-provisioner` retained PVs, deterministic rebind, and the deletion-forbidden rule.
 - [`cluster_lifecycle_doctrine.md` §1 — Two cluster kinds, one lifecycle shape](../documents/engineering/cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape):
   this phase documents bootstrap, amoebic spawning, teardown-with-cleanup vs chaos-failover, and push-back on
-  unsatisfiable `.dhall`.
+  unsatisfiable root `InForceSpec`.
 - [`readiness_ordering_doctrine.md` §1 — Why this doctrine exists](../documents/engineering/readiness_ordering_doctrine.md#1-why-this-doctrine-exists):
   this phase documents event-driven bring-up sequencing — a dependent starts on a dependency's observed
   readiness edge, never an elapsed duration — with the honest limit that the spec forecloses the sequence
@@ -107,7 +107,7 @@ the sibling **prodbox** project — that is prior-art evidence, not amoebius pro
   this phase writes the Extract→Model→Inject methodology and the proven/tested/assumed ledger, including the
   honesty rule the documentation standard inherits.
 - [`testing_doctrine.md` §1 — A test is an amoebius spec](../documents/engineering/testing_doctrine.md#1-a-test-is-an-amoebius-spec):
-  this phase documents test-as-`.dhall` (spin up → run → always tear down), `suggest-test`, flagged
+  this phase documents test-as-`InForceSpec` (spin up → run → always tear down), `suggest-test`, flagged
   credentials, and the per-run ledger artifact.
 - [`tla_modelling_assumptions.md` §0 — Scheduled stub — read this first](../documents/engineering/tla_modelling_assumptions.md#0-scheduled-stub--read-this-first):
   this phase writes the honest scheduled-stub framing (the formal-model assumptions doc is filled in at
@@ -317,7 +317,7 @@ The whole sprint.
 `documents/engineering/tla_modelling_assumptions.md` (target documentation files; not yet complete)
 **Blocked by**: Sprint 0.1
 **Independent Validation**: lint the three verification docs together — the chaos/failover doctrine owns the
-proven/tested/assumed rule, the testing doctrine owns test-as-`.dhall`, and the TLA+ doc is an honest
+proven/tested/assumed rule, the testing doctrine owns test-as-`InForceSpec`, and the TLA+ doc is an honest
 scheduled stub that names its Phase 9 fill-in.
 **Docs to update**: `documents/engineering/chaos_failover_doctrine.md`,
 `documents/engineering/testing_doctrine.md`, `documents/engineering/tla_modelling_assumptions.md`,
@@ -337,7 +337,7 @@ the Phase 9 formal model.
 - `chaos_failover_doctrine.md`: the defect class, the three correctness layers, the Extract→Model→Inject
   moves, the moral core (proven/tested/assumed), the Second Axis (async cross-cluster failover), and the
   worked examples.
-- `testing_doctrine.md`: test-as-`.dhall` (spin up → run → always tear down), `suggest-test`, flagged
+- `testing_doctrine.md`: test-as-`InForceSpec` (spin up → run → always tear down), `suggest-test`, flagged
   credentials, the elevated-harness-only deletion rule, the per-run ledger artifact.
 - `tla_modelling_assumptions.md`: the scheduled-stub marker, SSoT scope, and the single proof obligation the
   Phase 9 model discharges.

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define `amoebius-pulsar` — the one native-protocol Haskell Pulsar client (forked from
@@ -254,6 +254,8 @@ choice so the omissions are auditable, not silent.
   a *TableView* is a client-side `key → latest-value` materialization over a compacted `consume`. Together
   they give the control-plane its current-state **read-model** and resolved-singleton dissemination — adopted,
   and owned, by [daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#51-the-coordination-plane-pulsar--minio--the-commit-log) / [§5.5](./daemon_topology_doctrine.md#55-pulsar-primitives-evaluated-for-the-election--and-why-the-custom-election-stays).
+  The operator-facing `workflow-health` projection (`WorkflowName → SLOStatus`) is a second application of the
+  same primitive, owned by [monitoring_doctrine.md](./monitoring_doctrine.md).
   They are a *projection*, never a decision primitive: no ownership or election logic lives in a TableView.
 - **Not exposed: exclusive-producer access mode** (`Exclusive` / `WaitForExclusive` / `ExclusiveWithFencing`).
   Pulsar's purpose-built single-writer-with-fencing primitive is deliberately absent from the client surface —
@@ -293,9 +295,13 @@ persistent://<tenant>/<namespace>/<workflow>.<phase>.<substrate>
   so the same workflow's traffic is partitioned per substrate. The substrate catalog is owned by
   [substrate_doctrine.md](./substrate_doctrine.md).
 
-The single source of truth is a **typed descriptor** — a list of `RouteEntry { workflow, phase, lanes }` —
-not a list of strings. Adding a workflow or a lane edits the descriptor; the topic set is *derived* from
-it. The exact reconciled topic set, and a substrate-stripped *logical* topic family for anti-drift checking
+The single source of truth is a **typed descriptor**. A workflow is a
+`Workflow { name, routes : NonEmpty RouteEntry, monitor : WorkflowMonitor }`, where each
+`RouteEntry { workflow, phase, lanes, liveness }` names a routing lane — not a list of strings. The `monitor`
+(a per-workflow SLO) and each entry's `liveness` (a per-topic freshness/backlog obligation) are **mandatory
+and non-optional**, so an unmonitored workflow has no inhabitant; their shapes and the derived dashboards are
+owned by [monitoring_doctrine.md](./monitoring_doctrine.md). Adding a workflow or a lane edits the descriptor;
+the topic set is *derived* from it. The exact reconciled topic set, and a substrate-stripped *logical* topic family for anti-drift checking
 against the durable-state registry, both fall out of the same descriptor — so the per-substrate routing
 cannot silently diverge from the declared logical set.
 
@@ -314,7 +320,12 @@ A routing graph is **unroutable** — and validation rejects it — when it cont
 Why one-sidedness is illegal: an unanswered command is work that can never report back, and an
 unsourced event is a result nothing can produce. Both are the "compiles, deploys, then hangs at runtime"
 failure the DSL exists to prevent. `validateTopology` returns the **full list** of violations (not just the
-first), so a topology author fixes the whole graph in one pass.
+first), so a topology author fixes the whole graph in one pass. The same fold additionally checks each
+workflow's `monitor`, each entry's `liveness`, and every extension's `extMonitoring`, adding
+`MonitoringInfeasible` (a declared freshness below the achievable scrape interval, or a derived rule cost that
+overflows the `Observability` workload) and `UnroutedMonitor` (a `routes[].workflow` with no owning `Workflow`
+record) to the same violation list — the monitoring fold and its dashboards are owned by
+[monitoring_doctrine.md](./monitoring_doctrine.md).
 
 The DSL *surface* that lets an app declare its topic lifecycles is owned by
 [dsl_doctrine.md](./dsl_doctrine.md); the **algebra and its validation** are owned here.

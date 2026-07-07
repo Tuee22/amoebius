@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define the fixed set of standard services every amoebius cluster runs (the concrete providers
@@ -166,6 +166,17 @@ Every cluster ships its own metrics and dashboards; observability is part of the
 optional bolt-on. Prometheus scrapes platform and app workloads; Grafana is reachable **only** through the
 Keycloak-owned edge like every other browser surface ([§9](#9-the-loadbalancer-and-the-single-wild-ingress-path)), never via a private side-door. If Grafana is
 configured against a SQL backend, that database follows the per-service Patroni rule in [§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin).
+
+The metrics are workflow-aware. Each workflow's mandatory SLO and each topic's liveness derive Prometheus
+recording/alert rules and a per-workflow Grafana dashboard — derived, never hand-authored — and each extension
+stands up its declared surfaces (jitML's `TensorBoard`, backed by MinIO). The single Grafana instance, the
+derived surfaces, and any extension surface reach the browser only through the Keycloak edge under a mandatory
+`AccessScope` with no `Public` arm (admin-global, or a per-user Keycloak-backed filter). An optional local
+Thanos companion beside the single Prometheus is the long-term/downsample store — a strictly cluster-local
+role, never a cross-cluster Query/Store/Receive. The pull/scrape posture ("nothing is pushed outward") is the
+scrape-wire stance, not a bar on the intra-forest async geo-replication a peer cluster already consumes. The
+obligation types, the derived surfaces, the access model, the Thanos role, and the parent-monitoring posture
+are owned by [monitoring_doctrine.md](./monitoring_doctrine.md).
 
 ---
 

@@ -2,10 +2,10 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
-> **Purpose**: Single Source of Truth for amoebius cluster bring-up and teardown across kind / rke2 / provider clusters — bootstrap, recursive **amoebic spawning**, graceful teardown-with-cleanup versus chaos-failover, push-back on an unsatisfiable global `.dhall`, dynamic node provisioning, and ephemeral spin-up/down with deterministic rebind.
+> **Purpose**: Single Source of Truth for amoebius cluster bring-up and teardown across kind / rke2 / provider clusters — bootstrap, recursive **amoebic spawning**, graceful teardown-with-cleanup versus chaos-failover, push-back on an unsatisfiable root `InForceSpec`, dynamic node provisioning, and ephemeral spin-up/down with deterministic rebind.
 
 ---
 
@@ -121,9 +121,9 @@ result is a *forest*: a root at the top, an arbitrary tree of descendants below.
 
 ```mermaid
 flowchart TD
-  root[Root cluster: single-node kind or rke2, owns the PKI trust anchor] -->|spawns via Pulumi, injects child .dhall and secrets| childa[Child cluster A: kind or rke2 or provider]
-  root -->|spawns via Pulumi, injects child .dhall and secrets| childb[Child cluster B]
-  childa -->|spawns its own child, injects grandchild .dhall| grand[Grandchild cluster]
+  root[Root cluster: single-node kind or rke2, owns the PKI trust anchor] -->|spawns via Pulumi, injects ChildInForceSpec and secrets| childa[Child cluster A: kind or rke2 or provider]
+  root -->|spawns via Pulumi, injects ChildInForceSpec and secrets| childb[Child cluster B]
+  childa -->|spawns its own child, injects GrandchildInForceSpec| grand[Grandchild cluster]
   root -->|self-signed trust anchor flows down the tree| childa
   root -->|self-signed trust anchor flows down the tree| childb
 ```
@@ -134,16 +134,16 @@ a **MinIO backend, locally encrypted via the Vault transport engine**. The
 spawn mechanism, the backend encryption, and the create-vs-delete credential model are owned by
 [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md); this doc owns only the *lifecycle* meaning of a spawn.
 This cross-cluster spawn is a distinct **transport** from the intra-host **frame descent** that streams a
-child-frame `.dhall` on the lift's `stdin` ([dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness)): both hand a child only
+child-frame `amoebius.dhall` `FrameConfig` on the lift's `stdin` ([dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness)): both hand a child only
 its own projection and both mint strictly from the parent, but the spawn crosses a cluster boundary under a
 per-child Vault Transit envelope where the frame descent crosses a process boundary on `stdin`.
 
 Two encapsulation rules make the forest safe to reason about:
 
-- **A child gets only its own `.dhall` — a structural subtree projection.** Each child is handed exactly
+- **A child gets only its own `ChildInForceSpec` — a structural subtree projection.** Each child is handed exactly
   its own subtree's spec — its own configuration *including its children's* — and **nothing else**. This is
   not a convention the parent is trusted to honour: the value a child receives is, by construction,
-  `project(subtree)` — a typed `ChildSpec` ([dsl_doctrine.md](./dsl_doctrine.md)) with no field in which a
+  `project(subtree)` — a typed `ChildInForceSpec` ([dsl_doctrine.md](./dsl_doctrine.md)) with no field in which a
   sibling or ancestor-only branch can appear, so handing a child anything beyond its own subtree is
   *unrepresentable* ([illegal_state_catalog.md](./illegal_state_catalog.md)), exactly as a cross-tenant
   secret already is. The projection is enforced *cryptographically* as well: the spawn envelopes each
@@ -159,6 +159,14 @@ Two encapsulation rules make the forest safe to reason about:
   the unseal secret and the child requests an unlock), and the **parent-injects-secrets-into-the-child's-Vault**
   contract are all owned by [vault_pki_doctrine.md](./vault_pki_doctrine.md). Dhall carries only *names*
   for secrets; the bytes are injected out-of-band into the child's Vault.
+- **Monitoring does not flow up, either.** The same downward-only projection forecloses in-cluster parent→child
+  telemetry: a `ChildInForceSpec` has no ancestor-referencing field to replicate monitoring to, and a parent
+  reaching across the boundary to pull a child's metrics is the synchronous cross-cluster RPC ruled actively
+  anti-doctrinal ([network_fabric_doctrine.md](./network_fabric_doctrine.md)). Peer/sibling monitoring rides the
+  existing async geo-replication a peer already consumes; the accepted cross-forest viewer is the out-of-forest
+  human operator reaching each cluster's own Grafana and `pb` admin plane through Keycloak — a privileged admin
+  path, not a forest data edge. The full parent-monitoring posture is owned by
+  [monitoring_doctrine.md](./monitoring_doctrine.md).
 
 > **Honesty.** Amoebic spawning, per-child unseal, and geo-replicated children are *specified* here and
 > scheduled for Phase 9; nothing in this section is a tested amoebius result. Status and gates live only in
@@ -168,22 +176,22 @@ Two encapsulation rules make the forest safe to reason about:
 
 ---
 
-## 4. The global `.dhall` is the persistent contract
+## 4. The root `InForceSpec` is the persistent contract
 
-There is **one** desired-state spec — the global `.dhall` — and it **outlives any individual cluster**.
+There is **one root desired-state spec — the root `InForceSpec`** — and it **outlives any individual cluster**.
 This is the load-bearing invariant for everything below: tearing a cluster down does **not** edit the
-global `.dhall`; the spec still applies, and the remaining forest reconciles toward it.
+root `InForceSpec`; the spec still applies, and the remaining forest reconciles toward it.
 
-- **Always rolled out from the root.** A new global `.dhall` is rolled out from the root cluster (the
+- **Always rolled out from the root.** A new root `InForceSpec` is rolled out from the root cluster (the
   laptop kind), never from a leaf. The root is the single point from which the
   forest's desired state changes.
-- **Teardown is a capacity event, not a spec change.** When a cluster goes away ([§5](#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction)), the global `.dhall`
+- **Teardown is a capacity event, not a spec change.** When a cluster goes away ([§5](#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction)), the root `InForceSpec`
   is untouched. The forest's *desired* shape is the same; only its *available* capacity dropped. The
   reconciler ([§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)) then drives the surviving clusters toward the unchanged spec as far as their capacity
   allows.
 - **This is precisely what makes ephemeral teardown safe and push-back well-defined.** Because the
   contract persists, "can the forest still satisfy the spec after this teardown?" is a *decidable*
-  question ([§6](#6-push-back-when-teardown-would-break-the-global-dhall)), and "spin the cluster back up later" reconciles to the *same* target ([§7](#7-ephemeral-spin-updown-with-deterministic-rebind)).
+  question ([§6](#6-push-back-when-teardown-would-break-the-root-inforcespec)), and "spin the cluster back up later" reconciles to the *same* target ([§7](#7-ephemeral-spin-updown-with-deterministic-rebind)).
 
 Application logic and deployment rules are separate DSL surfaces: the spawn topology, teardown policy,
 push-back thresholds, and dynamic-provisioning logic in this doctrine all live on the **deployment-rules**
@@ -238,24 +246,24 @@ lossless guarantee — the kind of "tested/assumed reported as proven" confusion
 
 ---
 
-## 6. Push-back when teardown would break the global `.dhall`
+## 6. Push-back when teardown would break the root `InForceSpec`
 
 Teardown is meant to be a safe way to turn a cluster off **any time** — but some clusters are
 load-bearing. A cluster might hold the *only* nodes of a particular hardware substrate (say, the only
 Apple-Metal inference nodes), which cannot be independently failed over. Tearing that cluster down would
-make the global `.dhall` **unsatisfiable**. amoebius refuses to do that silently.
+make the root `InForceSpec` **unsatisfiable**. amoebius refuses to do that silently.
 
 ```mermaid
 flowchart TD
-  start[Operator requests graceful teardown of cluster C] --> check{Can the remaining forest still satisfy the global .dhall without C?}
+  start[Operator requests graceful teardown of cluster C] --> check{Can the remaining forest still satisfy the root InForceSpec without C?}
   check -->|yes| proceed[Proceed: clean up, hand off, release compute, preserve storage]
   check -->|no| pushback[Push back: warn what stops working and which .dhall failback applies]
   pushback --> override{Operator issues the explicit override?}
-  override -->|no| abort[Abort: cluster stays up, global .dhall stays satisfied]
+  override -->|no| abort[Abort: cluster stays up, root InForceSpec stays satisfied]
   override -->|yes| degrade[Proceed under override: fall back to the declared .dhall failback]
 ```
 
-- **Push-back, not a hard wall.** When a teardown would stop the global `.dhall` from being satisfied, the
+- **Push-back, not a hard wall.** When a teardown would stop the root `InForceSpec` from being satisfied, the
   command **pushes back with a warning**: it names what is going to stop working and the `.dhall`
   *failback* it will fall to. It does not just succeed-and-break.
 - **An explicit override exists.** There is an override command to proceed anyway, accepting the named
@@ -299,7 +307,7 @@ not.)
 
 ## 8. Dynamic node provisioning
 
-A cluster's **node set is itself declarative and reactive** — it grows and shrinks by *logic*, not by hand. The global `.dhall` can express dynamic node provisioning driven by arbitrary
+A cluster's **node set is itself declarative and reactive** — it grows and shrinks by *logic*, not by hand. The root `InForceSpec` can express dynamic node provisioning driven by arbitrary
 conditions:
 
 - **Load** — provision nodes when demand rises, release them when it falls.
@@ -338,7 +346,7 @@ sibling's** reconciler-with-predicates doctrine
 - **Three-valued observation, fail-closed.** Each resource's `discover` returns **Present**, **Absent**, or
   **Unreachable**, and **`Unreachable → refuse`**: *"this could not be observed"* is never silently collapsed
   to *"it is gone."* A teardown that cannot confirm a resource is absent refuses rather than charging ahead
-  and stranding live state — the same soundness rule as the [§6](#6-push-back-when-teardown-would-break-the-global-dhall) push-back and as the prodbox sibling's
+  and stranding live state — the same soundness rule as the [§6](#6-push-back-when-teardown-would-break-the-root-inforcespec) push-back and as the prodbox sibling's
   Sprint-4.19 gate.
 - **A stretched `Site` cross-checks through this same three-valued gate.** A cluster node or host worker
   carries a declared network-locality `Site`

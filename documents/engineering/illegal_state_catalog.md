@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: The single source of truth for the catalog of illegal and unsafe cluster states amoebius
@@ -21,7 +21,7 @@ defect surfaces at runtime as a pod stuck in `Pending`, a 502, or a backdoor.
 amoebius lifts that whole class of failure from *runtime surprise* to *does not type-check*. The DSL is
 Dhall — a **total** configuration language (no general recursion, no arbitrary I/O, every expression fully
 evaluates), so a spec the type-checker accepts is a finite value amoebius has already inspected end to end.
-The contract, stated by [`dsl_doctrine.md`](./dsl_doctrine.md): **a valid `amoebius.dhall`
+The contract, stated by [`dsl_doctrine.md`](./dsl_doctrine.md): **a valid `InForceSpec`
 cannot represent illegal state**. This document is the companion to that
 contract — the *enumerated* list of what "illegal state" means, and the *typing techniques* that make each
 entry uninhabitable.
@@ -73,7 +73,7 @@ runtime-enforcement proof there on purpose**, and never reports it here.
 
 ```mermaid
 flowchart TD
-  spec[amoebius.dhall spec] -->|Dhall type-check: spec composes, PROVEN at spec layer| decode[Decode to GADT-indexed Haskell types]
+  spec[InForceSpec Dhall value] -->|Dhall type-check: spec composes, PROVEN at spec layer| decode[Decode to GADT-indexed Haskell types]
   decode -->|smart constructors and indices reject illegal values, PROVEN at code layer| ir[Coherent in-memory cluster IR]
   ir -->|interpret to typed manifests and cluster config, NOT proven by the type-check| render[Rendered manifests]
   render -->|apply, schedule, reconcile, NOT proven here| live[Running cluster]
@@ -208,7 +208,7 @@ injection, the trust tree). **Technique:** [§4.2](#42-capability-and-phantom-te
 
 ### 3.9 A plaintext spec at rest
 
-The in-force spec is sensitive even when it holds no secret *values* — it is the cluster's whole topology.
+The `InForceSpec` is sensitive even when it holds no secret *values* — it is the cluster's whole topology.
 So the spec has **no plaintext-at-rest representation**: a cluster never holds its own spec as a plaintext
 value, only the means to fetch and decrypt it; at runtime the control-plane singleton decrypts the
 Vault-Transit MinIO envelope **in-process** and never writes it to a plaintext ConfigMap or to etcd. A spec
@@ -222,12 +222,12 @@ limit); the type only removes any plaintext-spec input.
 ### 3.10 A child spec that reaches beyond its own subtree
 
 A child cluster's spec is, by construction, a projection of **exactly its own subtree** (its own config
-including its children's). There is no field in a `ChildSpec` in which a sibling or ancestor-only branch can
+including its children's). There is no field in a `ChildInForceSpec` in which a sibling or ancestor-only branch can
 appear, so a parent cannot hand a child anything wider than its subtree, and a child cannot name a sibling's
 resources — the [§3.8](#38-cross-tenant-references-and-literal-secrets) tenant-isolation invariant lifted to the whole spec tree, reinforced cryptographically
 by per-child Transit keys (a child cannot even *decrypt* a sibling's subtree). **Owner:**
 [`cluster_lifecycle_doctrine.md` §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest) (the `project(subtree)` handoff),
-[`dsl_doctrine.md`](./dsl_doctrine.md) (the `ChildSpec` type), and
+[`dsl_doctrine.md`](./dsl_doctrine.md) (the `ChildInForceSpec` type), and
 [`vault_pki_doctrine.md` §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes) (per-child keys). **Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom
 tenant/subtree tags) + [§4.4](#44-ownership-indices--single-owner-ssot-structurally) (ownership indices).
 
@@ -804,6 +804,32 @@ channel-1 verb; `runtime-checked` residue — that the elected singleton actuall
 (no split-brain admin), owned by [`daemon_topology_doctrine.md` §5](./daemon_topology_doctrine.md#5-leadership-election--the-mechanism-the-proof-lives-elsewhere)
 and [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md).
 
+### 3.43 An unmonitored workflow or extension (or an unauthenticated monitoring surface)
+
+Raw k8s treats monitoring as an optional add-on: a Deployment can run with no scrape target, no alert rule, and
+no dashboard, and a metrics or debug endpoint can be published to the wild with no authentication — so a
+workflow compiles, deploys, and then goes dark, and a monitoring surface can leak. amoebius makes monitoring a
+**mandatory, non-vacuous property of the workflow and extension types**: a `Workflow` requires a
+`WorkflowMonitor`, every `RouteEntry` requires a `Liveness`, and an `ExtensionSpec` requires a `NonEmpty`
+`extMonitoring` (jitML → TensorBoard) — each an absent-arm required field, so an unmonitored workflow or
+extension has no inhabitant. Every renderable surface carries a mandatory `AccessScope` with **no** `Public`
+arm — the same `ExposeToWild`-only-Keycloak discipline as [§3.7](#37-accidental-insecure--backdoor-ingress) —
+so an unauthenticated monitoring surface is uninhabitable (`AccessScope` is `AdminGlobal`, the single admin
+identity, or `UserScoped`, a Keycloak-backed app-logic filter). Coverage of the derived rules/panels across a
+workflow's topics, non-vacuousness of the SLO bounds, and feasibility (freshness ≥ scrape interval, Σ rule cost
+≤ the `Observability` workload's `Capacity`) are total decode-time folds. **Owner:**
+[`monitoring_doctrine.md`](./monitoring_doctrine.md) (the obligation types, derivation, access model, and
+parent-monitoring posture) + [`pulsar_client_doctrine.md` §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra) (the
+`validateTopology` fold that carries it). **Technique:** [§4.1](#41-pvcpv-binding-by-construction) (the mandatory
+`monitor` / `liveness` / `extMonitoring` fields + the absent `Off`/`Public` arms — no forever-unmonitored arm) +
+[§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) (the coverage fold over the
+workflow/topic collection) + [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked)
+(the recording-rule feasibility Σ). **Layer:** `type-foreclosed` for the mandatory-field presence, the absent
+`Off`/`Public` arms, and the `NonEmpty` lists; `decode-foreclosed` for coverage, non-vacuousness, feasibility,
+and the `routes[].workflow`-vs-`name` reconciliation; `runtime-checked` residue — that the SLO is actually met,
+the alert fires, the named `/metrics` series exists, and a `UserScoped` filter actually excludes another user's
+data — owned by [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) and the review tier.
+
 ---
 
 ## 4. The typing techniques
@@ -996,6 +1022,7 @@ Forecloses [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-manag
 | 3.40 Secure-gateway reach collapsing into wild ingress | 4.2 `ExposeToWild` capability + 4.3 distinct endpoint indices | [network_fabric](./network_fabric_doctrine.md), [host_cluster_comms](./host_cluster_comms_doctrine.md) |
 | 3.41 Duration-gated / hand-ordered bring-up (readiness race) | 4.2 no-duration `Readiness` union + 4.3 derived readiness edge + 4.4 dep-graph owner + 4.6 `mkBringUpOrder` fold | [readiness_ordering](./readiness_ordering_doctrine.md), [platform_services §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering) |
 | 3.42 Admin mutation without root-token cap + unsealed-Vault witness | 4.2 `RootToken` capability + 4.3 `Unsealed`-edge-gated `dhall update` handle (channel-1 verb retired at handoff) | [bootstrap_sequence](./bootstrap_sequence_doctrine.md), [vault_pki §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) |
+| 3.43 Unmonitored workflow/extension or unauthenticated monitoring surface | 4.1 mandatory monitor/liveness/extMonitoring + absent Off/Public arms + 4.7 coverage fold + 4.6 rule-feasibility Σ | [monitoring](./monitoring_doctrine.md), [pulsar_client §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra) |
 
 ---
 

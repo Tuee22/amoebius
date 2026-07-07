@@ -120,6 +120,14 @@ and [`storage_lifecycle_doctrine.md` §7.1 — The single exception: the elevate
 which delegate the verified-shrink reclaim and the durable-storage delete capability to the elevated harness
 this phase delivers (Sprints 11.4 and 11.5).
 
+This phase additionally adds monitoring decode-rejection tests
+([`monitoring_doctrine.md` §1 — Monitoring is a property of the workflow, not a bolt-on](../documents/engineering/monitoring_doctrine.md#1-monitoring-is-a-property-of-the-workflow-not-a-bolt-on)):
+mirroring the non-optional-teardown test (Sprint 11.1), the negative suite proves that a `Workflow` omitting
+`monitor`, a `RouteEntry` omitting `liveness`, an `ExtensionSpec` omitting `extMonitoring`, or a surface with a
+`Public` access arm each fails Gate 1 typecheck **and** Gate 2 decode, and that a vacuous SLO bound is rejected
+at **decode**, not type
+([§8](../documents/engineering/monitoring_doctrine.md#8-the-three-foreclosure-layers)).
+
 ## Sprints
 
 ## Sprint 11.1: The test-topology type — a deployment-rules layer that always tears down 📋
@@ -397,7 +405,7 @@ The whole sprint.
 - [overview.md](overview.md) — target architecture and constraints
 - [system_components.md](system_components.md) — target component inventory (the `Amoebius/Test/*` modules)
 - [substrates.md](substrates.md) — substrate registry and per-phase map
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — the test-as-a-`.dhall` topology, `suggest-test`, flagged credentials, the elevated harness, and the ledger this phase implements
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — the test-as-an-`InForceSpec` topology, `suggest-test`, flagged credentials, the elevated harness, and the ledger this phase implements
 - [Storage Lifecycle Doctrine](../documents/engineering/storage_lifecycle_doctrine.md) — the retained PV model, the no-normal-operation-deletion rule, and the verified-shrink exception this phase realizes
 - [Chaos / Failover Doctrine](../documents/engineering/chaos_failover_doctrine.md) — the proven/tested/assumed methodology the per-run ledger records against
 - [Pulumi IaC Doctrine](../documents/engineering/pulumi_iac_doctrine.md) — the create-vs-delete credential model the flagged identity satisfies

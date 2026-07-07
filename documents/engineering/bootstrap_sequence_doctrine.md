@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/illegal_state_catalog.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/monitoring_doctrine.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the ordered path from a bare host to a reconciling cluster — the
@@ -62,7 +62,7 @@ flowchart TD
   singleton -->|exposes| rest[amoebius NodePort REST admin API]
   singleton -.->|HANDOFF: /readyz + election-commit observed| hb
   cli[Operator CLI] -->|vault init/unseal, then dhall update| rest
-  rest --> reconcile[Singleton reconciles the cluster toward its .dhall]
+  rest --> reconcile[Singleton reconciles the cluster toward its InForceSpec]
 ```
 
 ---
@@ -88,16 +88,16 @@ The ordered steps, each gated on the prior step's readiness:
 5. **The operator initialises/unseals Vault through the admin REST** — `vault init/unseal`, authenticated by
    the operator password; init-once / unseal-on-rebuild ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init),
    [§5](./vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal)). No secret consumer ran before this — Vault fails closed until unsealed.
-6. **The operator delivers the in-force spec** — `dhall update` (requires an **unsealed Vault + root token**,
+6. **The operator delivers the `InForceSpec`** — `dhall update` (requires an **unsealed Vault + root token**,
    [§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)) — the spec delivery of
    [`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init). The singleton decrypts it in-process and reconciles the cluster toward it.
 
 This is the **root** bootstrap; a *child* cluster is spawned by a parent (the Pulumi handoff,
 [`cluster_lifecycle_doctrine.md` §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)),
-which injects the child's `.dhall` + secrets rather than prompting a human. This ordered sequence **retires
+which injects the child's scoped `InForceSpec` + secrets rather than prompting a human. This ordered sequence **retires
 the open question** [`cluster_lifecycle_doctrine.md` §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap)
 recorded (bootstrap config / first-manifest delivery): the first manifest is delivered by step 6's `dhall
-update`, and the transient bootstrap config is the binary-sibling `.dhall` `bootstrap.sh` establishes.
+update`, and the transient bootstrap config is the binary-sibling `amoebius.dhall` `bootstrap.sh` establishes.
 
 ---
 
@@ -136,10 +136,10 @@ second binary.
     [`vault_pki_doctrine.md` §5](./vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal));
     this is the concrete channel that fills the *pluggable pre-Vault unseal seam* that doctrine explicitly
     left open. The operator password crosses CLI → NodePort → singleton and is never persisted.
-  - **`dhall update`** — deliver a new in-force spec to a running cluster. It **requires an unsealed Vault
+  - **`dhall update`** — deliver a new `InForceSpec` to a running cluster. It **requires an unsealed Vault
     and a root token**; the singleton decrypts/stores the envelope in-process
     ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init))
-    and reconciles toward it. This is how a new `.dhall` reaches an already-running root — the operator flow
+    and reconciles toward it. This is how a new desired-state Dhall value reaches an already-running root — the operator flow
     the reconcile mechanics ([`daemon_topology_doctrine.md` §6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine) hot-reload) only hinted at.
 - **This is the admin plane, distinct from the workload plane.** [`host_cluster_comms_doctrine.md` §3](./host_cluster_comms_doctrine.md#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)'s
   "no bespoke control channel — coordination *is* Pulsar + MinIO" governs the **worker/workload** plane (host

@@ -117,7 +117,7 @@ windows-CUDA host worker is the structurally identical case on the windows subst
 target shape, but it is **not** part of this phase's single-substrate acceptance test.
 
 **Gate:** an Apple-Silicon host daemon runs a Metal ML workload as a cluster Pulsar/MinIO peer — driven by a
-single `amoebius.dhall` that brings up the apple-substrate cluster, exposes MinIO and Pulsar on a host-only
+single `InForceSpec` that brings up the apple-substrate cluster, exposes MinIO and Pulsar on a host-only
 loopback NodePort, builds the native worker **headless on-host via the fixed Metal bridge (no VM)**, starts the daemon as a managed subprocess, dispatches a
 Metal inference job over Pulsar, lands its output in the content-addressed MinIO store, and tears the worker
 and cluster down. The run emits a proven/tested/assumed ledger artifact recording that host-only reachability

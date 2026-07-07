@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for amoebius secrets and trust — Vault as the fail-closed secrets root, the SecretRef-by-name contract, the root cluster's single-node password-encrypted unseal, the two sanctioned parent/child unseal modes, parent-injects-secrets-into-child, and the root-owned PKI trust anchor for the whole forest.
@@ -13,7 +13,7 @@
 
 The DSL holds no secrets — only *names* for them
 ([dsl_doctrine.md §6](./dsl_doctrine.md#6-secrets-are-names-never-values)). That single rule determines what this
-document specifies: for a `.dhall` that is composed, diffed, rolled out across an entire
+document specifies: for an `InForceSpec` that is composed, diffed, rolled out across an entire
 forest of clusters, and stored in an object store yet carries no secret bytes, **where the bytes
 live, who puts them there, and what happens when they cannot be reached.** The answer is one subsystem:
 an in-cluster Vault per cluster, a tree of trust between those Vaults, and a single human-memorized
@@ -25,7 +25,7 @@ This document owns six things:
    sealed means *bricked*, never *degraded* ([§2](#2-vault-is-the-fail-closed-secrets-root)).
 2. **The SecretRef contract** — the typed *reference* the DSL carries, and the validator that rejects a
    literal secret in a production `.dhall` ([§3](#3-the-secretref-contract-a-name-never-a-value)).
-3. **Fail-closed Vault init that follows readiness** — *init Vault, then give it its `.dhall`*,
+3. **Fail-closed Vault init that follows readiness** — *init Vault, then deliver the `InForceSpec`*,
    init-once / unseal-on-rebuild ([§4](#4-init-follows-readiness-fail-closed-vault-init)).
 4. **The root cluster's single-node, password-encrypted unseal** — *root single-node "prodbox"
    behaviour, init to password-encrypted Vault keys*, human-on-init ([§5](#5-the-root-cluster-single-node-password-encrypted-unseal)).
@@ -125,7 +125,7 @@ in  SecretRef
 | `Prompt` | Allowed (CLI only) | One-off elevated operator material (e.g. the cloud-admin credential that mints a least-privilege identity); supplied at the prompt, used, and discarded — never written to disk. |
 | `TestPlaintext` | **Rejected** | Accepted only by the test harness, only from a flagged test-secrets file. |
 
-The contract is enforced by the same **two typed gates** that guard every amoebius `.dhall`
+The contract is enforced by the same **two typed gates** that guard every `InForceSpec`
 ([dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)): Gate 1 (the
 Dhall typechecker) admits only a well-typed `SecretRef`, and Gate 2 (the in-process Haskell decoder
 under GHC 9.12.4) runs a validator that **rejects any literal secret value and any `TestPlaintext` arm
@@ -230,7 +230,7 @@ never a value.
 ## 4. Init follows readiness: fail-closed Vault init
 
 **Init never precedes readiness.** Only after the cluster is bootstrapped and all the core services are
-up and reachable is it *initialized*: init Vault, then hand it its `.dhall`.
+up and reachable is it *initialized*: init Vault, then deliver its `InForceSpec`.
 The bring-up sequence that arrives at "core services reachable" is owned by
 [cluster_lifecycle_doctrine.md §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap); the
 platform-service ordering edge — **Vault initialized and unsealed before any secret-dependent startup**
@@ -245,15 +245,15 @@ This section owns the Vault-init contract those two point at.
   [cluster_lifecycle_doctrine.md §7](./cluster_lifecycle_doctrine.md#7-ephemeral-spin-updown-with-deterministic-rebind):
   because the retained PV survives teardown and rebinds identically, a Vault KV object is as durable
   across rebuilds as any other retained byte.
-- **"Give it its `.dhall`" is a fail-closed handoff.** Once unsealed, the cluster receives its in-force
-  configuration. The configuration's *at-rest* protection — a Vault-Transit envelope over the MinIO
+- **Delivering the `InForceSpec` is a fail-closed handoff.** Once unsealed, the cluster receives its
+  in-force configuration. The configuration's *at-rest* protection — a Vault-Transit envelope over the MinIO
   backend — is owned by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) and the content store
   ([content_addressing_doctrine.md](./content_addressing_doctrine.md)); the relevant fact here is that
   while Vault is sealed that object is opaque ciphertext, so a sealed cluster reveals nothing about its
   own setup beyond the minimal seal-mode basics it needs to reach and unseal its Vault ([§6](#6-parentchild-unseal-two-sanctioned-modes)).
 - **The decrypted spec never lands in a cluster-legible store.** The control-plane daemon fetches the
   envelope and **decrypts it in-process, on demand** (prodbox's `Settings.loadConfigFile`-via-
-  `Prodbox.Minio.EncryptedObject` pattern); the in-force spec is **never** written to a plaintext
+  `Prodbox.Minio.EncryptedObject` pattern); the `InForceSpec` is **never** written to a plaintext
   Kubernetes ConfigMap or to etcd. Any ConfigMap a workload reads may carry only the [§6](#6-parentchild-unseal-two-sanctioned-modes) unencrypted-basics
   floor — never the spec, secrets, or downstream inventory. As defense-in-depth, etcd is configured with
   an `--encryption-provider-config` so even that floor is encrypted at rest. A plaintext spec at rest is
@@ -323,7 +323,7 @@ this section owns the *sealed-material* model, that doc owns the *delivery chann
 ## 6. Parent/child unseal: two sanctioned modes
 
 Below the root, no human is in the loop — a child must come up on its own. amoebius sanctions **exactly
-two** ways a child Vault may unseal, and the choice is a typed field of the child's `.dhall`:
+two** ways a child Vault may unseal, and the choice is a typed field of the child's scoped `InForceSpec`:
 
 | Mode | How the child unseals | Where the unseal authority lives |
 |---|---|---|
@@ -346,7 +346,7 @@ unsealed Vault.
 
 ```mermaid
 flowchart TD
-  childinit[Child Vault initialized once on an empty durable PV] --> mode{Which unseal mode does the child .dhall declare?}
+  childinit[Child Vault initialized once on an empty durable PV] --> mode{Which unseal mode does the ChildInForceSpec declare?}
   mode -->|mode a| selfsecret[Self-unseal: child reads its own unseal key from a Kubernetes secret]
   mode -->|mode b| requestunlock[Parent-held unlock: child requests an unlock from the parent]
   requestunlock -->|parent sealed or unreachable| brick[Child cannot unseal: fail-closed brick cascades down the tree]
@@ -357,7 +357,7 @@ flowchart TD
 Two encapsulation rules make the forest safe to reason about, and both are owned upstream — recorded
 here only because they are *unseal-trust* facts:
 
-- **Children know nothing about siblings.** A child receives only its own subtree's `.dhall`
+- **Children know nothing about siblings.** A child receives only its own subtree's `ChildInForceSpec`
   (including its own children's) and nothing about siblings or any wider part of the forest
   ([cluster_lifecycle_doctrine.md §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)).
   A child's unseal request reaches *up* to its parent and never *sideways*. A sealed cluster therefore
@@ -392,7 +392,7 @@ materializes *what* it is into the child during spawn/reconcile.
 
 The end-to-end path, in order:
 
-1. **The `.dhall` names the secret** ([§3](#3-the-secretref-contract-a-name-never-a-value)) — a `SecretRef` coordinate, no value, safe to roll out from
+1. **The `InForceSpec` names the secret** ([§3](#3-the-secretref-contract-a-name-never-a-value)) — a `SecretRef` coordinate, no value, safe to roll out from
    the root across the whole tree.
 2. **The parent resolves the value from its own (unsealed) Vault** and **injects it into the child's
    Vault** over a trusted parent→child channel established at spawn time. The spawn itself — a Pulumi
@@ -404,10 +404,10 @@ The end-to-end path, in order:
 
 This is why secrets-by-name is not a loophole: there is no point at which a secret value sits in a
 file an operator hands around. The value lives only in Vault, injected downward by the parent that
-already holds it, and resolved in-cluster by the workload that needs it. A child only ever receives the
-secrets for *its own* subtree — the same children-know-nothing-about-siblings boundary as [§6](#6-parentchild-unseal-two-sanctioned-modes), applied
+  already holds it, and resolved in-cluster by the workload that needs it. A child only ever receives the
+  secrets for *its own* subtree — the same children-know-nothing-about-siblings boundary as [§6](#6-parentchild-unseal-two-sanctioned-modes), applied
 to secret material: injecting a parent's or a sibling's secret into a child is not expressible, because
-a child's `.dhall` names only its own.
+a child's scoped `InForceSpec` names only its own.
 
 > **Honesty.** Parent→child secret injection is *specified* here and scheduled with amoebic spawning;
 > prodbox proves the adjacent custody flow (a parent writing a child's init keys and downstream

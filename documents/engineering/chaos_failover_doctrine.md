@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: The amoebius concurrency-and-failover doctrine — *Extract* the decision into a value, *Model* the protocol into a proof, *Inject* faults into the deployment — plus the proven/tested/assumed ledger and the invariant-confluence **Second Axis** that governs asynchronous cross-cluster geo-replication and gateway failover, the one boundary where a per-system proof obligation concentrates.
@@ -14,7 +14,7 @@ anyone who wants the method, whether or not they have met TLA+, chaos engineerin
 **Scope**: this is **amoebius's** concurrency-hardening doctrine, worked in **Haskell** (GHC **9.12.4**,
 the [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) toolchain pin) and stated in the terms this
 codebase uses: pure functions and ADTs, the type system, QuickCheck, the **Plan / Apply** boundary,
-`io-sim` / `io-classes`, TLA+, and the test-as-`.dhall` fault harness. It is a **migration and
+`io-sim` / `io-classes`, TLA+, and the test-as-`InForceSpec` fault harness. It is a **migration and
 generalization** of the prodbox sibling's chaos-hardening doctrine
 (`/home/matthewnowak/prodbox/documents/engineering/chaos_hardening_doctrine.md`), lifted from
 "the prodbox gateway single-writer" to "the amoebius control-plane singleton," and from prodbox's
@@ -474,10 +474,10 @@ reboot, but asserting that the singleton invariant holds when the owner is kille
 that the forest stays well-defined when a cluster is killed *mid geo-sync* and the gateway is failed over to
 it.
 
-**In amoebius, the fault harness is itself a `.dhall` topology.** A test is an `amoebius.dhall` that spins
+**In amoebius, the fault harness is itself an `InForceSpec` topology.** A test is a Dhall-authored spec that spins
 up resources, runs a workflow, and — by definition — always tears down, simulating HA failovers and
 leadership elections; `suggest-test` detects the substrate and emits a representative one. That entire
-machinery — the test-as-`.dhall` contract, `suggest-test`, the flagged test credentials, and the per-run
+machinery — the test-as-`InForceSpec` contract, `suggest-test`, the flagged test credentials, and the per-run
 ledger artifact — is owned by [testing_doctrine.md](./testing_doctrine.md). This doctrine owns only the
 rule that each concentrated invariant ([§6](#6-the-concentration-principle--where-the-obligation-lives)) must have an adversarial scenario asserting its *declared form*.
 
@@ -843,7 +843,7 @@ Each first-axis rule ([§13](#13-the-supporting-rules--the-conditions-the-moves-
   by **drill, not assertion.** The recovery-time bound is **tested** (drilled); the data-loss bound is
   **assumed** under real disaster. Every other rule's violation is transient and heals; R9's data-loss
   dimension is permanent, accepted, and never heals — which is why no other rule can host it. The
-  declarative **push-back on an unsatisfiable global `.dhall`**, and the data-loss-budget thresholds, are
+  declarative **push-back on an unsatisfiable root `InForceSpec`**, and the data-loss-budget thresholds, are
   configured as deployment-rules ([cluster_lifecycle_doctrine.md §5, §6](./cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction));
   this doctrine owns the *proof obligation* that the declared budget actually holds.
 
@@ -1276,8 +1276,8 @@ exists so the invariant-confluence machinery is in place before any future schem
 - [Engineering Doctrine Index](./README.md)
 - [TLA+ Modelling Assumptions](./tla_modelling_assumptions.md) — SSoT for the concrete formal spec, invariant catalog, and model↔code divergence record this doctrine's Model move requires (Phase 9).
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the control-plane singleton election *shape* this doctrine proves.
-- [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — graceful teardown (lossless) versus chaos-failover (bounded loss), and push-back on an unsatisfiable `.dhall`.
+- [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — graceful teardown (lossless) versus chaos-failover (bounded loss), and push-back on an unsatisfiable root `InForceSpec`.
 - [Platform Services Doctrine](./platform_services_doctrine.md) — the standard services whose intra-cluster consensus is delegated, concentrating the proof obligation.
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — the content-addressed MinIO store that lands cross-cluster artifacts in confluence bucket (i).
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — native-protocol (no-WebSockets) at-least-once + dedup, the R3 substrate.
-- [Testing Doctrine](./testing_doctrine.md) — the test-as-`.dhall` fault harness that the Inject move extends, and the per-run ledger artifact.
+- [Testing Doctrine](./testing_doctrine.md) — the test-as-`InForceSpec` fault harness that the Inject move extends, and the per-run ledger artifact.

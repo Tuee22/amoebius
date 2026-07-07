@@ -96,6 +96,12 @@ individual sprints cite the same sections where they adopt them.
   [§8 PKI trust anchor](../documents/engineering/vault_pki_doctrine.md#8-the-root-cluster-owns-the-pki-trust-anchor),
   with in-cluster consumers authenticating
   [§9 directly via Vault Kubernetes auth](../documents/engineering/vault_pki_doctrine.md#9-in-cluster-consumers-authenticate-to-vault-directly).
+- [`monitoring_doctrine.md` §3 — Derivation and the operator read-model](../documents/engineering/monitoring_doctrine.md#3-derivation-and-the-operator-read-model):
+  Sprint 2.5 provisions the derived per-workflow Prometheus rules and Grafana dashboards, bakes the
+  **TensorBoard** renderer, adds the optional cluster-local **Thanos** companion beside the single Prometheus,
+  and stands up the `workflow-health` TableView projection — every surface behind the Keycloak edge under a
+  mandatory `AccessScope` with no `Public` arm
+  ([§4 — Access: one admin, delegated per-user scope, no public arm](../documents/engineering/monitoring_doctrine.md#4-access-one-admin-delegated-per-user-scope-no-public-arm)).
 
 ## Sprints
 
@@ -172,7 +178,7 @@ whose CRDs, controller Deployments, and CR instances are emitted as typed object
   label on every object, **ApplySet pruning** of prior-owned objects no longer desired, and
   **wait-for-ready** observed from the live object (never a `threadDelay`).
 - Desired state recomputed as `render(spec)` with **no release store** to desync
-  ([§6 — the reconcile state model](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderdhall-observed-is-etcd-a-diff-is-typed)).
+  ([§6 — the reconcile state model](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)).
 
 ### Validation
 

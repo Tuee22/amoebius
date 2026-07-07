@@ -55,7 +55,7 @@ Helm-release target with direct typed-manifest rendering plus an amoebius-owned 
 slice is *evidence the approach works*, not proof amoebius has built the whole renderer ([§8](#8-reusable-prodbox-seeds-vs-what-is-new)).
 
 **What this doc owns vs. what it defers.** This document owns *how* a spec becomes objects (generation, [§2](#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects)–[§4](#4-no-third-party-charts--no-third-party-software-operators-are-generated))
-and *how* those objects are applied and reconciled ([§5](#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)–[§6](#6-the-reconcile-state-model-desired-is-renderdhall-observed-is-etcd-a-diff-is-typed)). It does **not** own:
+and *how* those objects are applied and reconciled ([§5](#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)–[§6](#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)). It does **not** own:
 
 | Concern | Owned by |
 |---------|----------|
@@ -111,7 +111,7 @@ Three properties make this the right shape:
 
 ```mermaid
 flowchart TD
-  spec[Decoded typed cluster spec from the in-force dhall] -->|pure render per service| objs[Typed K8s object records]
+  spec[Decoded typed InForceSpec] -->|pure render per service| objs[Typed K8s object records]
   objs -->|Aeson serialize| json[JSON object set, no template, no values yaml]
   json -->|dry-run prints exactly this| preview[Operator preview]
   json -->|server-side apply| engine[The amoebius reconciler]
@@ -241,7 +241,7 @@ seed; the reconciler around them is new ([§8](#8-reusable-prodbox-seeds-vs-what
 
 ```mermaid
 flowchart TD
-  desired[Desired object set from render of in-force dhall] --> ssa[Server-side apply as field manager amoebius]
+  desired[Desired object set from render of InForceSpec] --> ssa[Server-side apply as field manager amoebius]
   ssa --> own[Apiserver records amoebius-owned fields]
   own --> prune[List prior amoebius-owner objects and prune those absent from desired]
   prune --> wait[Wait for readiness on each applied object]
@@ -326,17 +326,18 @@ flowchart TD
 
 ---
 
-## 6. The reconcile state model: desired is `render(.dhall)`, observed is etcd, a diff is typed
+## 6. The reconcile state model: desired is `render(InForceSpec)`, observed is etcd, a diff is typed
 
 This is the decision that makes "no Helm" coherent: **amoebius keeps no release store.** Helm persists each
 release as an opaque gzipped Secret holding the rendered manifests, and the cluster's "desired state" is
 *that stored blob*. amoebius does not. Its model is:
 
-- **Desired state is a pure function of the in-force spec.** `desired = render(in-force .dhall)`, and the
-  *home* of the in-force `.dhall` is the Vault-Transit-enveloped MinIO object that is the cluster's
+- **Desired state is a pure function of the `InForceSpec`.** `desired = render(InForceSpec)`, and the
+  *home* of that scope's `InForceSpec` is the Vault-Transit-enveloped MinIO object/ref that is the cluster's
   single source of truth — owned by [vault_pki_doctrine.md](./vault_pki_doctrine.md) (decrypt-in-process,
-  never plaintext at rest) and the Pulumi/MinIO backend. There is no second desired-state store to drift out
-  of sync with the spec, because desired state is *recomputed* from the spec, not stored.
+  never plaintext at rest) and the Pulumi/MinIO backend. There is no flat `in-force.dhall` file and no
+  second desired-state store to drift out of sync with the spec, because desired state is *recomputed* from
+  the spec, not stored.
 - **Observed state is etcd, read through SSA.** The cluster's live objects are the only "observed" store.
   The engine reads them (and their `amoebius`-managed fields) directly; etcd holds **only** live state, never
   a copy of the desired spec.
@@ -361,13 +362,14 @@ release as an opaque gzipped Secret holding the rendered manifests, and the clus
 The contrast is direct. Helm's release store has well-known desync failure modes — the stored release and
 the live cluster disagree after a manual `kubectl edit`, a `helm rollback` to a release whose manifests no
 longer match the chart, or a half-applied upgrade that leaves the release marked `deployed` over a broken
-object set. amoebius has **no release store to desync**: desired state is always exactly `render(spec)`, and
+object set. amoebius has **no release store to desync**: desired state is always exactly
+`render(InForceSpec)`, and
 the only persisted history is the immutable, content-addressed release ledger ([§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional)) — a record of *what was
 applied*, not a competing source of desired state.
 
 ```mermaid
 flowchart TD
-  dhall[In-force dhall in Vault-Transit MinIO envelope] -->|render, pure| desired[Desired object set]
+  dhall[InForceSpec in Vault-Transit MinIO envelope] -->|render, pure| desired[Desired object set]
   desired -->|server-side apply, declare owned fields| live[Live objects in etcd]
   live -->|read through SSA: observed state only| diff[Engine compares desired to observed]
   diff -->|enact and prune| live
@@ -376,10 +378,10 @@ flowchart TD
 
 ### 6.1 The release ledger: the applied-log is canonical, not optional
 
-[§6](#6-the-reconcile-state-model-desired-is-renderdhall-observed-is-etcd-a-diff-is-typed)'s applied-log is described as *optional*. **This subsection promotes it: the immutable, content-addressed
+[§6](#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)'s applied-log is described as *optional*. **This subsection promotes it: the immutable, content-addressed
 applied-log is THE canonical release ledger** — the one durable record of what amoebius has deployed. The
-promotion changes *nothing* about desired state: **desired is still `render(in-force .dhall)`, and there is
-still no separate desired-state store** ([§6](#6-the-reconcile-state-model-desired-is-renderdhall-observed-is-etcd-a-diff-is-typed)). The ledger records *what was applied*; it never becomes a thing
+promotion changes *nothing* about desired state: **desired is still `render(InForceSpec)`, and there is
+still no separate desired-state store** ([§6](#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)). The ledger records *what was applied*; it never becomes a thing
 the reconciler converges *toward*.
 
 - **A `Release` is one immutable ledger entry, keyed by `releaseHash`.** Each converged generation is written
@@ -388,7 +390,7 @@ the reconciler converges *toward*.
   registered in the
   [content_addressing_doctrine.md §2.3 master table](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds),
   namespaced away from `experimentHash` / `kernelKey` / the OCI image digest and never shared with them. The
-  ledger reuses the same pointer → manifest → blob store [§6](#6-the-reconcile-state-model-desired-is-renderdhall-observed-is-etcd-a-diff-is-typed) already names; the `Release` type, the ledger, the
+  ledger reuses the same pointer → manifest → blob store [§6](#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed) already names; the `Release` type, the ledger, the
   `Environment` promotion pointer, and the `PromotionGate` are owned by
   [release_lifecycle_doctrine.md §2](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash) (ledger) and [§3](#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)–[§4](#4-no-third-party-charts--no-third-party-software-operators-are-generated) (pointer, gate) —
   **this doc owns only that the reconciler *writes* the entry on convergence.**
@@ -400,7 +402,7 @@ the reconciler converges *toward*.
   "sometimes there is no history" mode; promoting it closes that.
 - **Still not a Helm release store.** The ledger is immutable and content-addressed — a *new* `releaseHash`
   per generation, never an in-place-mutated blob — so it has none of the desync modes of Helm's gzipped
-  release Secret ([§6](#6-the-reconcile-state-model-desired-is-renderdhall-observed-is-etcd-a-diff-is-typed)). The environment pointers that *select* a `Release` (dev / staging / prod, advanced by
+  release Secret ([§6](#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)). The environment pointers that *select* a `Release` (dev / staging / prod, advanced by
   ETag-CAS under a `PromotionGate`) are pointer kinds in the same
   [§2.3 master table](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)
   and are owned by release_lifecycle_doctrine.md [§3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer)–[§4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable), not here.

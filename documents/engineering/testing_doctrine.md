@@ -2,10 +2,10 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
-> **Purpose**: Define amoebius testing as a self-tearing-down `.dhall` topology — spin up resources, run a
+> **Purpose**: Define amoebius testing as a self-tearing-down `InForceSpec` topology — spin up resources, run a
 > workflow, **always** tear down — plus the `suggest-test` generator, flagged test credentials, the
 > elevated harness as the sole deleter of durable storage, and the per-run proven/tested/assumed ledger
 > artifact.
@@ -21,9 +21,9 @@ needs. So a test is not written in some second language with its own runner; it 
 Dhall DSL, and it inherits the *same* illegal-state-unrepresentable guarantee. There is no "test mode" of
 the type system that lets a test express a broken cluster the production DSL would reject. The test suite may itself be driven by an amoebius root cluster — the root stands up the test topology, runs the workflow, and tears it down, exactly as it rolls out any child manifest.
 
-Concretely, the amoebius tests are an amoebius.dhall that spins up
-resources, runs the workflow, and tears down resources — there is no need for an explicit list of tests; what
-is needed is a general test `.dhall` topology (which, by definition, always tears down the resources it creates). The
+Concretely, amoebius tests are Dhall-authored `InForceSpec` topologies that spin up
+resources, run the workflow, and tear down resources — there is no need for an explicit list of tests; what
+is needed is a general test topology (which, by definition, always tears down the resources it creates). The
 vision is emphatic that there is **no enumerated catalog of tests** to maintain — there is a *topology*, and
 specific tests are values of it.
 
@@ -42,7 +42,7 @@ Three consequences fall straight out of "a test is a spec":
   services (or a representative subset) and runs a real workflow against them; the only thing that makes it
   a *test* rather than a deployment is the chaos schedule and the always-teardown contract of [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).
 
-> **Honesty.** Test-as-a-`.dhall`-topology, `suggest-test`, flagged credentials, and the elevated
+> **Honesty.** Test-as-an-`InForceSpec`-topology, `suggest-test`, flagged credentials, and the elevated
 > storage-deleting harness are **Phase 11** in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
 > and are **not started**. This document generalizes patterns *proven in the sibling prodbox project*
 > (`prodbox/documents/engineering/unit_testing_policy.md`,

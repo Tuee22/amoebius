@@ -43,7 +43,7 @@ proven in later phases, never asserted by a type-check here.
 
 ```mermaid
 flowchart LR
-  author[Operator authors amoebius.dhall: cluster, app-spec, deployment-rules] --> gate1[Gate 1: Dhall typechecker]
+  author[Operator authors InForceSpec: cluster, app-spec, deployment-rules] --> gate1[Gate 1: Dhall typechecker]
   gate1 -->|well-typed| gate2[Gate 2: Haskell GADT-indexed decoder]
   gate1 -->|illegal spec has no syntax| reject[Rejected before any binary runs]
   gate2 -->|decodes| ir[Coherent in-memory cluster IR]
@@ -71,7 +71,7 @@ and `legal_managed_eks` fixtures **decode**. All three halves run before the nex
   is not even well-typed Dhall at authoring time, and Gate 2, the in-process Haskell decoder
   (`Dhall.inputFile auto`) that rejects a well-typed Dhall value that is not a legal amoebius world — so that
   "if it decodes, it is deployable" holds for the cluster / app-spec / deployment-rules surfaces, including
-  the recursive `ChildSpec` projection (named here only; its handoff and at-rest encryption are later
+  the recursive `ChildInForceSpec` projection (named here only; its handoff and at-rest encryption are later
   phases).
 - [`service_capability_doctrine.md` §4 — Capability → provider → shape: the binding](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding):
   this phase implements the three-part binding — application logic declares a **capability** need (never a
@@ -106,6 +106,14 @@ and `legal_managed_eks` fixtures **decode**. All three halves run before the nex
   singletons) is *not* claimed here; it is owned by the chaos/failover surface
   ([§5](../documents/engineering/daemon_topology_doctrine.md#5-leadership-election--the-mechanism-the-proof-lives-elsewhere))
   and gated in a later phase.
+- [`monitoring_doctrine.md` §2 — The three mandatory obligations](../documents/engineering/monitoring_doctrine.md#2-the-three-mandatory-obligations):
+  the DSL type families (Sprint 3.1), the illegal-state discipline (Sprint 3.3), and the
+  topology/validation fold (Sprint 3.6) add the mandatory `monitor` / `liveness` / `extMonitoring` fields to the
+  `Workflow` / `RouteEntry` / `ExtensionSpec` types and extend `validateTopology` to fold them
+  (`MonitoringInfeasible`, `UnroutedMonitor`) with the honest type/decode/runtime layer split
+  ([§8](../documents/engineering/monitoring_doctrine.md#8-the-three-foreclosure-layers)); the elected singleton
+  produces the `workflow-health` projection
+  ([§3](../documents/engineering/monitoring_doctrine.md#3-derivation-and-the-operator-read-model)).
 
 ## Sprints
 
@@ -243,7 +251,7 @@ reconciler — target paths, not yet built.
 **Blocked by**: Sprint 3.1, Phase 2 gate (the typed reconciler + root Vault/PKI, external earlier-phase
 prerequisite)
 **Independent Validation**: on the single-node linux-cpu cluster, the sole candidate self-elects (degenerate
-single-rank), decodes the in-force spec in-process, runs one idempotent reconcile pass to convergence, and a
+single-rank), decodes the `InForceSpec` in-process, runs one idempotent reconcile pass to convergence, and a
 re-run is a no-op; `/healthz`, `/readyz`, `/metrics` are served.
 **Docs to update**: `documents/engineering/daemon_topology_doctrine.md` (Phase-3 status backlink),
 `documents/engineering/manifest_generation_doctrine.md` (who runs the reconcile loop),
@@ -259,7 +267,7 @@ the linux-cpu single-node cluster.
 - A control-plane singleton role deployed as a generated typed manifest (no Helm) by the Phase 2 reconciler,
   running the shared daemon spine (`load → prereq → acquire → ready → serve → drain → exit`, no `forkIO`,
   structured JSON logs, no env/`PATH`).
-- The `discover → diff → enact → re-observe` reconcile loop that decodes the in-force spec in-process
+- The `discover → diff → enact → re-observe` reconcile loop that decodes the `InForceSpec` in-process
   (Sprint 3.1 decoder), binds capabilities (Sprint 3.2), and applies the resulting manifests through the
   Phase 2 typed reconciler — idempotently.
 - Secret authority fused to the elected role (operates root Vault; no second writer), with the single-node
@@ -395,7 +403,7 @@ capacity/topology/bounded-storage set) fails to type-check or decode, and each p
 artifact.
 **Docs to update**: `DEVELOPMENT_PLAN/substrates.md` (Phase-3 linux-cpu gate row),
 `documents/engineering/illegal_state_catalog.md` (gate-case backlink),
-`documents/engineering/testing_doctrine.md` (the test-as-`.dhall` gate)
+`documents/engineering/testing_doctrine.md` (the test-as-`InForceSpec` gate)
 
 ### Objective
 Adopt [`dsl_doctrine.md` §5 — The illegal-state-unrepresentable contract](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)

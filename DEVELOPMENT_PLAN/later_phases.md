@@ -62,13 +62,13 @@ re-proven on 9.14.1. This candidate owns that re-pin and its validation, not any
 **Scope** (one line): a typed, ordered, idempotent schema-migration engine for the Patroni-via-Percona
 Postgres clusters, unified with a precise account of what a *manifest change* means when the desired object
 already exists in etcd (patch vs. immutable-field recreate vs. forbidden destructive change).
-**Provisional gate**: an `amoebius.dhall` that evolves an app's declared schema across two revisions migrates
+**Provisional gate**: an `InForceSpec` topology that evolves an app's declared schema across two revisions migrates
 a populated database forward idempotently (re-apply is a no-op), and a manifest change touching an immutable
 field is reconciled by the typed diff with **zero silent data loss**.
 
 The reconcile half of this is a hardening of the typed reconciler's state model:
-[`manifest_generation_doctrine.md` §6 — the reconcile state model (desired is `render(.dhall)`, observed is
-etcd, a diff is typed)](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderdhall-observed-is-etcd-a-diff-is-typed)
+[`manifest_generation_doctrine.md` §6 — the reconcile state model (desired is `render(InForceSpec)`, observed is
+etcd, a diff is typed)](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)
 already frames the diff as a *typed* value; this candidate extends that diff to classify schema-affecting and
 immutable-field changes so a change that would otherwise drop rows cannot be applied as a silent replace. The
 database half adds the migration ordering and idempotence on top of the per-consumer Postgres model. It is a

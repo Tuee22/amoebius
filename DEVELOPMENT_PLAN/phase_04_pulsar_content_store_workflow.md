@@ -59,7 +59,7 @@ requires exactly one substrate). The native protocol, the store CAS protocol, an
 substrate-agnostic in design but are *validated* only on `linux-cpu` here; the `apple` / `linux-cuda` /
 `windows` lanes the topology algebra partitions traffic onto are exercised by later phases.
 
-**Gate:** an `amoebius.dhall` test topology that, on a `linux-cpu` kind cluster with Pulsar + MinIO up
+**Gate:** an `InForceSpec` test topology that, on a `linux-cpu` kind cluster with Pulsar + MinIO up
 (Phase 2), **round-trips a workflow command → event over the native Pulsar protocol** (broker-side dedup
 enabled) — **the command and event are CBOR payloads that round-trip byte-for-byte, and a non-CBOR payload
 fixture fails to type-check** — **stores and fetches a content-addressed artifact** by its manifest SHA, and
@@ -68,7 +68,7 @@ spinning up, running, and tearing down leak-free, idempotently on re-run.
 
 ```mermaid
 flowchart LR
-  dhall[amoebius.dhall test topology] --> up[Bring up Pulsar plus MinIO on linux-cpu kind]
+  dhall[InForceSpec test topology] --> up[Bring up Pulsar plus MinIO on linux-cpu kind]
   up --> produce[Orchestrator produces workflow command over native protocol]
   produce --> worker[Worker consumes via Failover subscription]
   worker --> store[Worker writes content-addressed artifact to MinIO store]
@@ -110,6 +110,11 @@ flowchart LR
   [honest ceiling (§6)](../documents/engineering/content_addressing_doctrine.md#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic)
   bounds what this phase may claim (store *bookkeeping* totality is proven-in-types; producing *compute*
   determinism is not asserted here).
+- **[`monitoring_doctrine.md` §3 — Derivation and the operator read-model](../documents/engineering/monitoring_doctrine.md#3-derivation-and-the-operator-read-model):**
+  Sprint 4.6's orchestrator/worker additionally emits an SLO-status event feeding the `workflow-health`
+  read-model, and an optional phantom `Monitored` tag gates the runtime orchestrator handle so internal Haskell
+  cannot mint an unmonitored workflow
+  ([§8 — The three foreclosure layers](../documents/engineering/monitoring_doctrine.md#8-the-three-foreclosure-layers)).
 
 ## Sprints
 
@@ -353,7 +358,7 @@ The whole sprint.
 `amoebius-runtime/dhall/test/round_trip_failover.dhall` (the gate topology) (not yet built)
 **Blocked by**: Sprint 4.2, Sprint 4.3, Sprint 4.4, Sprint 4.5; Phase 3 — control-plane singleton +
 leadership election (external earlier-phase prerequisite)
-**Independent Validation**: the gate `amoebius.dhall` round-trips a workflow command → event over the native
+**Independent Validation**: the gate `InForceSpec` round-trips a workflow command → event over the native
 protocol with dedup on, stores and fetches a content-addressed artifact by manifest SHA, kills the active
 worker, and observes the Failover standby take over; the topology tears down leak-free and re-runs
 idempotently; each run emits a proven/tested/assumed ledger artifact
