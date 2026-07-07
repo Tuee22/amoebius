@@ -173,9 +173,11 @@ one replica":
   **not** a resource-side fence — [§5.3](#53-ownership-transitions-and-the-single-writer-gate)).
 - **Admin-surface authority.** After the host-daemon→singleton handoff, the singleton is the **sole control
   surface**: the operator CLI drives the cluster only through the singleton's **admin REST API**
-  (`vault init/unseal`, `dhall update`) over the amoebius NodePort, and the host binary's channel-1
-  kube-apiserver access is retired to **bootstrap-only** — the sequence, the handoff, and the admin plane are
-  owned by [bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api).
+  (`vault init/unseal`, `dhall update`) over the amoebius NodePort — the singleton's **node-local/private admin
+  channel**, never the wild edge, so retiring channel 1 does *not* make the admin surface remotely reachable —
+  and the host binary's channel-1 kube-apiserver access is retired to **bootstrap-only** — the sequence, the
+  handoff, and the admin plane (with its reach class) are owned by
+  [bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api).
 - **Secret authority.** The singleton is the in-cluster principal that **operates Vault** — it is the only
   role that holds cluster-wide secret authority. The Vault *model* it operates — fail-closed unseal, the
   root password-encrypted unseal, the parent-injects-secrets-into-the-child's-Vault contract, the root PKI

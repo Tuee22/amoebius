@@ -167,7 +167,11 @@ token, rendered read-only into each node's `config.yaml`) is a host-level reconc
 [cluster_lifecycle_doctrine.md §8](./cluster_lifecycle_doctrine.md#8-dynamic-node-provisioning)); this
 section owns only the token's **custody**. Distinguish it sharply from the rke2 cluster **CA**: the
 node-token is a *Vault-owned, rotatable KV secret*, whereas rke2's self-signed cluster CA is chicken-and-egg
-**floor** Vault cannot own ([§8](#8-the-root-cluster-owns-the-pki-trust-anchor) plane 3, [§10](#10-the-chicken-and-egg-floor-what-stays-outside-vault)).
+**floor** Vault cannot own ([§8](#8-the-root-cluster-owns-the-pki-trust-anchor) plane 3, [§10](#10-the-chicken-and-egg-floor-what-stays-outside-vault)). One carve-out rides on the **Curve25519 WireGuard keys**: they are
+Vault-KV custody like the rest of this family, but they are the *data-plane* fabric's transport **only** —
+never the wire by which a mode-(b) child reaches its unseal authority ([§6](#6-parentchild-unseal-two-sanctioned-modes), [network_fabric_doctrine.md §3](./network_fabric_doctrine.md#3-keys-config-and-distribution--wireguard-as-just-another-reconcile)),
+since a Vault-KV key cannot be the transport that unseals the Vault holding it. That reach is the floor
+`ParentReachChannel` ([bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api)).
 
 ```dhall
 -- The node-provisioning KV secret family — every member a `SecretRef.Vault { mount, path, field }`
@@ -311,7 +315,10 @@ sealed and never plaintext at rest**, not which vault holds the ciphertext. The 
 operator supplies the password at bring-up (and on every reboot) is the admin control plane's
 **`vault init/unseal` endpoint** — the operator CLI → the amoebius NodePort service → the elected singleton —
 owned by [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api);
-this section owns the *sealed-material* model, that doc owns the *delivery channel*.
+this section owns the *sealed-material* model, that doc owns the *delivery channel*. Because a reboot
+re-enters the sealed régime, that reach is the **seal-critical, node-local** arm of that doc's admin-plane
+reach class — Vault-independent, never over the fabric — so a reboot's unseal never depends on the very Vault
+it is unsealing.
 
 > **Honesty.** The password-encrypted root unseal is *implemented and exercised in prodbox*; in
 > amoebius it is design intent for the root-Vault phase. The specific KDF/AEAD primitives and the
@@ -343,6 +350,15 @@ the minimal, non-revealing basics it needs to reach and unseal its own Vault: it
 Vault address, its seal mode, and (for a child in mode (b)) the parent reference it must contact. These
 basics carry nothing about workloads, secrets, or downstream clusters; everything else is behind the
 unsealed Vault.
+
+**A remote mode-(b) child reaches its unseal authority over the floor channel, not the data fabric.** When a
+mode-(b) child sits at a different network locality than its parent, its unlock request crosses the WAN — and
+it rides the **`ParentReachChannel` floor path** ([bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api), the same SSH/cloud-API path the parent
+provisioned the child over), **not** the data-plane WireGuard fabric. This is forced, not stylistic: the
+fabric's own peer key is a Vault-KV secret ([§3.1](#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken)) in the child's *sealed* Vault, so a fabric-carried unseal would be circular
+(wg0 needs a key that only the Vault it is unsealing can serve). The child's bootstrap reference and unseal
+credential — **including the transport** to reach the authority — are therefore floor material provisioned by
+the parent ([§10](#10-the-chicken-and-egg-floor-what-stays-outside-vault) item 4), present before the child's Vault, or any fabric, exists.
 
 ```mermaid
 flowchart TD
@@ -512,15 +528,22 @@ generalization of prodbox's `vault_doctrine.md §17`. The **only** data that may
 
 1. **The distro's self-signed cluster CA + admin kubeconfig** — for an `rke2` cluster, rke2's own
    self-signed cluster CA. Vault runs *inside* this cluster's PKI, so it cannot be the thing that mints
-   it ([§8](#8-the-root-cluster-owns-the-pki-trust-anchor) plane 3). The rke2 *node-join token*, by contrast, is **not** floor material: it is a
+   it ([§8](#8-the-root-cluster-owns-the-pki-trust-anchor) plane 3). This CA is also what issues any **in-cluster serving cert needed before the Vault
+   PKI anchor exists** — e.g. Vault's own bootstrap `:8200` listener — since the sealed Vault cannot mint the
+   cert that fronts it; the admin-REST NodePort's own pre-PKI transport, and the host-comms hops, are instead
+   secured by **network restriction, not a certificate** ([§8](#8-the-root-cluster-owns-the-pki-trust-anchor) last bullet;
+   [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api) the admin-plane reach class), so there is no separate admin-transport
+   cert for this list to enumerate. The rke2 *node-join token*, by contrast, is **not** floor material: it is a
    Vault-owned, rotatable KV `SecretRef` ([§3.1](#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken)).
 2. **The Vault PV binding itself** — owned by [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md).
 3. **Root cluster only:** the operator's memorized unseal password — the sole ephemeral secret ([§5](#5-the-root-cluster-single-node-password-encrypted-unseal)).
    The password-AEAD-sealed unlock material it decrypts is not a Vault-owned object; it is what
    *unseals* Vault, and its body is password-sealed regardless of where the ciphertext rests.
 4. **Child cluster only:** the bootstrap reference and unseal credential the child uses to reach its
-   unseal authority — in mode (b) provisioned and owned by the parent ([§6](#6-parentchild-unseal-two-sanctioned-modes)), in mode (a) the local
-   Kubernetes secret holding its own unseal key.
+   unseal authority — **including the transport** to reach that authority (the `ParentReachChannel` floor path,
+   [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api)), so the reach never depends on the child's own sealed Vault or on
+   the Vault-KV data-plane fabric ([§6](#6-parentchild-unseal-two-sanctioned-modes)). In mode (b) it is provisioned and owned by the parent
+   ([§6](#6-parentchild-unseal-two-sanctioned-modes)); in mode (a) it is the local Kubernetes secret holding the child's own unseal key.
 
 Everything else — all generated secrets, cloud creds, OIDC and SMTP material, internal TLS, the
 in-force config, the Pulumi backend state, and child custody material — is Vault-owned and

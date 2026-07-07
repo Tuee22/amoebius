@@ -196,7 +196,10 @@ and nowhere else.
   only from localhost"* to *"reachable only over the authenticated fabric"* — only a peer holding a
   Vault-minted WireGuard key can open the socket. The fabric itself (raw WireGuard, keys, rendered peer
   config, the hub=gateway-role topology) is owned by
-  [network_fabric_doctrine.md](./network_fabric_doctrine.md); this doc owns only that channel 2 may ride it.
+  [network_fabric_doctrine.md](./network_fabric_doctrine.md); this doc owns only that channel 2 may ride it. The
+  operator **admin** plane's own reach class — node-local for seal-critical operations, and only *optionally*
+  the fabric post-unseal — is owned by [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api), not here; do not read this
+  channel-2 generalization as the owner of the admin NodePort's reach.
 - **The mTLS rejection ([§2](#2-the-decision-that-was-open-and-is-now-resolved), option b) still holds — no tax returns.** The one thing localhost gave that the
   WAN cannot, that an attacker cannot reach the wire, WireGuard now supplies with Curve25519 peer
   authentication + ChaCha20-Poly1305 encryption at the tunnel. Because the peer is already authenticated and

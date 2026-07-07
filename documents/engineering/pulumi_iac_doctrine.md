@@ -222,13 +222,14 @@ duplicates it.
 | **Cloud resource quota** | The outer bound on cloud storage/compute — the `CloudQuota` backing ceiling and the `ScalingPolicy` cap, so "unbounded" cloud storage is never truly unbounded | Backing union: [storage_lifecycle_doctrine.md §5.2](./storage_lifecycle_doctrine.md#52-the-storage-backing-is-bounded--the-closed-storagebacking-union); the fold: [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) |
 | **Per-PV EBS volumes** | One EBS per PV, sized 1:1 to its PVC, decoupled from the EC2/node lifecycle | Sizing/rebind invariant: [storage_lifecycle_doctrine.md §5, §5.1](./storage_lifecycle_doctrine.md#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim); credential model: [§6](#6-the-ebs-create-vs-delete-credential-model) here |
 | **DNS — route53** | Provision/maintain hosted zones and records | This doctrine, [§5](#5-dns-route53-and-tls-zerossl-the-provider-integrations-this-doctrine-owns) |
-| **TLS — zerossl** | ACME (DNS-01) certificate issuance and retention | This doctrine, [§5](#5-dns-route53-and-tls-zerossl-the-provider-integrations-this-doctrine-owns) |
+| **TLS — zerossl** | The ACME **provider integration** only: the ZeroSSL account/directory choice, the EAB credential (a `SecretRef` into Vault), the route53 zone/credential the solver uses, and the **retained** certificate material across rebuilds. **Issuance itself is cert-manager's**, in-cluster — see [§5.2](#52-tls--zerossl) | This doctrine, [§5](#5-dns-route53-and-tls-zerossl-the-provider-integrations-this-doctrine-owns); the in-cluster issuer → [manifest_generation_doctrine.md §4](./manifest_generation_doctrine.md#4-no-third-party-charts--no-third-party-software-operators-are-generated) |
 
 Two boundaries worth stating, because they are easy to blur:
 
 - **Pulumi provisions the cluster; the typed reconciler fills it.** Pulumi stops at the substrate boundary —
   it stands up the managed/self-managed cluster and its node set. The standard services *inside* the cluster
-  (the registry, MinIO, Vault, Pulsar, …, all HA) are reconciled from **typed manifests — no Helm** — and
+  (the registry, MinIO, Vault, Pulsar, **cert-manager and its rendered `ClusterIssuer`/`Certificate` CRs**, …,
+  all HA) are reconciled from **typed manifests — no Helm** — and
   owned by [platform_services_doctrine.md](./platform_services_doctrine.md) and
   [manifest_generation_doctrine.md](./manifest_generation_doctrine.md), not by Pulumi.
 - **Pulumi provisions DNS/TLS; Keycloak owns the ingress that uses them.** This doc owns the route53/zerossl
@@ -258,10 +259,13 @@ binding is unrepresentable**.
 
 ### 5.1 DNS — route53
 
-- **A programmatic DNS API is required; route53 is the canonical default.** Two amoebius-driven categories
-  both need a programmable DNS provider API that Pulumi mutates: ACME DNS-01 challenge records
-  ([§5.2](#52-tls--zerossl)) and geo-failover repoints of a cluster's records when a lead's gateway dies. That
-  category is what fixes the requirement; route53 is the prodbox-proven default, not a hard-wired constant.
+- **A programmatic DNS API is required; route53 is the canonical default.** A programmable DNS provider API is
+  needed for two amoebius-driven categories. The first is the ephemeral **ACME DNS-01 challenge records**:
+  Pulumi provisions the hosted **zone** and the route53 **credential**, but the challenge-record writes at
+  issuance time are performed by **cert-manager's Route 53 solver**, not Pulumi ([§5.2](#52-tls--zerossl)). The
+  second is the durable **geo-failover repoints** of a cluster's records when a lead's gateway dies, which
+  Pulumi itself mutates. That category is what fixes the requirement; route53 is the prodbox-proven default,
+  not a hard-wired constant.
   The DNS provider is operator-selectable wherever a programmable API exists, with route53 as the canonical
   default.
 - **Zones and records are declarative, provisioned via Pulumi.** A cluster's public name(s) and the
@@ -279,7 +283,14 @@ binding is unrepresentable**.
 
 ### 5.2 TLS — zerossl
 
-- **ZeroSSL is the canonical ACME default, via DNS-01.** Certificate issuance is ACME against the ZeroSSL
+- **cert-manager issues; Pulumi owns the provider integration.** Public-edge certificate **issuance** is
+  performed **in-cluster by cert-manager** — a baked operator whose `ClusterIssuer`/`Certificate` CRs are
+  *rendered* by the typed manifest reconciler, never Helm-installed and never Pulumi-provisioned
+  ([manifest_generation_doctrine.md §4](./manifest_generation_doctrine.md#4-no-third-party-charts--no-third-party-software-operators-are-generated); [vault_pki_doctrine.md §8](./vault_pki_doctrine.md#8-the-root-cluster-owns-the-pki-trust-anchor) plane 2). Pulumi's TLS role is the **provider
+  integration** only: the ZeroSSL ACME account/directory choice, the EAB credential injected as a `SecretRef`
+  into Vault, and the route53 zone + credential cert-manager's DNS-01 solver consumes. So "TLS — zerossl" in the
+  [§4](#4-what-pulumi-provisions-the-resource-catalog) catalog is Pulumi's *integration + retention*, never the issuing controller.
+- **ZeroSSL is the canonical ACME default, via DNS-01.** Issuance is ACME against the ZeroSSL
   directory, solved over a route53 DNS-01 challenge (the prodbox-proven shape: a single ZeroSSL `ClusterIssuer`
   with a Route 53 DNS-01 solver, requiring the ZeroSSL EAB credential). The ACME directory is a
   deployment-rules choice, not a hard-wired constant: ZeroSSL is the prodbox-proven default, and the

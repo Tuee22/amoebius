@@ -793,7 +793,9 @@ constructor, the same capability + edge-gated-handle discipline as the `Promotio
 `Readiness` edge ([§3.41](#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race)). Its sibling
 — an admin action **bypassing** the singleton — is foreclosed too: channel 1 (host binary ↔ kube-apiserver) is
 a **bootstrap-only** privilege with no exported control verb after the host-daemon→singleton handoff, so the
-only control-surface constructor is an admin-REST call. **Owner:**
+only control-surface constructor is an admin-REST call — and retiring channel 1 does **not** make that surface
+*remotely* reachable: the admin-REST call still traverses the singleton's **node-local/private admin channel**
+([`bootstrap_sequence_doctrine.md` §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api) admin-plane reach class), never the wild edge. **Owner:**
 [`bootstrap_sequence_doctrine.md`](./bootstrap_sequence_doctrine.md) (the admin control plane) +
 [`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) (the
 unsealed-Vault precondition). **Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)

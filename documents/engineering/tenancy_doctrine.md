@@ -95,6 +95,8 @@ The scoping is the same projection type that bounds a child cluster: a tenant-ad
 
 A browser front end (a tenancy-administration single-page app) is a *client* of this surface, not a separate doctrine: it renders the typed operations above and submits their fragments through the admin REST. It is distinct from the Phase-12 composition of single-page apps *as deployed workloads* ([../../DEVELOPMENT_PLAN/phase_12_spa_composition.md](../../DEVELOPMENT_PLAN/phase_12_spa_composition.md)); the two share the term "SPA" and nothing else.
 
+**Reach, though, is not the operator's private channel.** The operator's admin NodePort is node-local and never wild ([bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api), the admin-plane reach class); a tenant-admin — and its SPA — is a *remote* principal, so it reaches this surface as an **authenticated, Keycloak-fronted client of the wild edge** ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), whose scope-narrowed `dhall update` is mediated to the singleton by an in-cluster tenant-admin service — **never** by exposing the operator's node-local admin NodePort to the wild. "The *same* admin control plane" therefore means the same typed `dhall update` semantics and the same two DSL gates, **not** the same transport: the operator's reach is private/node-local, the tenant-admin's is Keycloak-authenticated wild ingress narrowed to `project(spec, t)`.
+
 ## 7. Two isolation layers, and the honest limit
 
 Cross-tenant isolation holds at two layers, and the strength of each is stated precisely:

@@ -23,7 +23,13 @@ Neither covers the case the elastic single-logical-data-plane design needs: **a 
 cluster's Pulsar/MinIO across an untrusted network.** The cross-cluster geo-replication link
 ([chaos_failover_doctrine.md](./chaos_failover_doctrine.md)) is named "over Pulsar," but the *secure wire* it
 rides — broker↔broker, or a remote worker↔home broker over the WAN — is undescribed. That gap is the open
-`notes.txt` question *"vpn and linkerd service mesh story (certs?)"*, and this doctrine closes it.
+`notes.txt` question *"vpn and linkerd service mesh story (certs?)"*. This doctrine closes it **for the two
+spans it actually renders** — the remote-worker↔home-broker attach wire (K1, [§3](#3-keys-config-and-distribution--wireguard-as-just-another-reconcile)) and the stretched
+full-node kubelet↔apiserver wire (K2, [§3](#3-keys-config-and-distribution--wireguard-as-just-another-reconcile)/[§4](#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)) — and **defers the cross-cluster
+broker↔broker geo-replication wire to Phase 9**: it is design-intent, its `render()` obligation is not yet
+written, and it carries the same *"witness present, constructor deferred"* posture the `Gateway` arm of the
+`Networking` sum carries in [§5](#5-the-security-boundary-generalizes-localhost--authenticated-fabric). The addressing precondition exists (disjoint per-cluster VPN ranges,
+[§4](#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)); the per-peer render does not.
 
 The fabric is what makes [single_logical_data_plane_doctrine.md](./single_logical_data_plane_doctrine.md)'s
 attach topology physically possible: a remote spot node can be a client of the home cluster's one store only
@@ -74,7 +80,11 @@ WireGuard fits the amoebius disciplines cleanly because it is a *primitive*, not
   secrets-by-name + parent-injection model ([vault_pki_doctrine.md](./vault_pki_doctrine.md)) — Vault mints
   and holds the keypair, the Dhall names it, the parent injects it into a child's Vault. The
   forest CA hierarchy's "any mesh" clause ([vault_pki_doctrine.md §8](./vault_pki_doctrine.md#8-the-root-cluster-owns-the-pki-trust-anchor)) is reserved
-  for a *later* TLS/mesh layer ([§6](#6-the-service-mesh-verdict-no-linkerd-for-v1)), **not** consumed by WireGuard.
+  for a *later* TLS/mesh layer ([§6](#6-the-service-mesh-verdict-no-linkerd-for-v1)), **not** consumed by WireGuard. Because these keys are Vault-KV, the
+  fabric they configure is strictly a **post-unseal overlay**: it is stretch-gated (a co-located node draws no
+  peer, below) and is **never** the transport by which a cluster reaches its own unseal authority — that reach
+  is the Vault-independent floor `ParentReachChannel`
+  ([vault_pki_doctrine.md §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes), [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api)), so no fabric key ever gates an unseal.
 - **Peer config is rendered, not managed.** `render(nodeInventory) -> [WireGuardPeerConfig]` — the pure
   `render()` discipline of [manifest_generation_doctrine.md §2](./manifest_generation_doctrine.md#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects) lifted to
   `wg` config. Illegal peer configurations — overlapping VPN IPs, a keyless peer, an `AllowedIPs` outside the
@@ -192,7 +202,7 @@ features have little surface to act on, and each is already covered:
 
 | Mesh feature | Why it is redundant / declined here |
 |---|---|
-| East-west pod-to-pod mTLS | East-west is authorized by NetworkPolicy (default-deny + derived-allow, [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), identity is Vault PKI, and the cross-cluster wire is WireGuard-encrypted ([§5](#5-the-security-boundary-generalizes-localhost--authenticated-fabric)). The in-cluster network is already treated as trusted, and coordination is broker-mediated Pulsar + MinIO, not synchronous pod-to-pod HTTP — little east-west surface to encrypt. |
+| East-west pod-to-pod mTLS | East-west is authorized by NetworkPolicy (default-deny + derived-allow, [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), identity is Vault PKI, and the cross-cluster wires §5 *renders* — the attach (K1) and stretched control-plane (K2) spans — are WireGuard-encrypted ([§5](#5-the-security-boundary-generalizes-localhost--authenticated-fabric); the broker↔broker geo-replication wire is deferred, [§1](#1-why-this-doctrine-exists-the-inter-cluster-wire-is-an-open-gap)). The in-cluster network is already treated as trusted, and coordination is broker-mediated Pulsar + MinIO, not synchronous pod-to-pod HTTP — little east-west surface to encrypt. |
 | Retries / timeouts / circuit-breaking | The bus already gives at-least-once + dedup ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)) at the typed application layer, where amoebius wants it — not hidden in a sidecar. |
 | Golden metrics | Prometheus/Grafana is already a standard service ([platform_services_doctrine.md](./platform_services_doctrine.md)). |
 | Traffic-split (the *one* relevant feature, for gateway migration) | **Gateway-API `HTTPRoute` `backendRefs` carry weights natively**, on the Envoy edge amoebius already renders and Keycloak-fronts. A planned home→provider migration is a weight shift on the edge already in the stack — no mesh needed. |
@@ -226,6 +236,11 @@ workload certs consumed directly** (the reserved "any mesh" CA clause, [§3](#3-
 | The service-mesh (Linkerd) verdict + Gateway-API-weights-for-migration | The Gateway-API / Envoy edge → [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) |
 | That WireGuard peer keys are a Vault KV secret class (not PKI certs) | The Vault secret model + the reserved "any mesh" CA clause → [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | The fabric that makes the localhost→fabric generalization safe | The channel-2 rule generalization itself → [host_cluster_comms_doctrine.md §5](./host_cluster_comms_doctrine.md#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary) |
+
+> **Deferred, not delivered here:** the cross-cluster **broker↔broker** geo-replication render obligation is
+> named in-scope ([§1](#1-why-this-doctrine-exists-the-inter-cluster-wire-is-an-open-gap)) but is Phase-9 design intent — the disjoint-per-cluster addressing exists, the
+> per-peer `render()` does not. The two spans this doc actually delivers are the attach (K1) and
+> stretched-control-plane (K2) obligations.
 
 ---
 

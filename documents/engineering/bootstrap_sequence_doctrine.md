@@ -147,13 +147,40 @@ second binary.
   administration of the cluster's own configuration is a *control* concern, not worker coordination, and rides
   this REST channel. That doc's scope is clarified accordingly; this doc owns the admin channel.
 - **Privileged, not wild — so not a Keycloak bypass.** The admin REST is authenticated (operator password →
-  then root token + unsealed Vault) and **network-restricted to the operator's trusted reach** (host-local
-  during bootstrap; the authenticated WireGuard fabric thereafter,
-  [`host_cluster_comms_doctrine.md` §5.1](./host_cluster_comms_doctrine.md#51-the-generalization-localhost-or-the-authenticated-wireguard-fabric)),
-  never the wild LB→Envoy→Keycloak door ([`platform_services_doctrine.md` §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)).
+  then root token + unsealed Vault) and **network-restricted to the operator's trusted reach**, never the
+  wild LB→Envoy→Keycloak door ([`platform_services_doctrine.md` §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)).
   Like channel 1, it is a privileged operator path, not wild ingress — so "Keycloak owns all *wild* ingress"
-  is untouched. Its transport trust before the root PKI anchor exists rides the chicken-and-egg floor
-  ([`vault_pki_doctrine.md` §10](./vault_pki_doctrine.md#10-the-chicken-and-egg-floor-what-stays-outside-vault)).
+  is untouched.
+- **The admin-plane reach class — this doc owns it.** The admin NodePort's reach is **regime-split**, and the
+  split is load-bearing because the endpoint fronts `vault init/unseal`. This is *not* the channel-2 loopback
+  NodePort ([`host_cluster_comms_doctrine.md` §6](./host_cluster_comms_doctrine.md#6-the-host-only-restriction-in-practice-and-its-sibling-precedent), the host-daemon↔Pulsar/MinIO wire); it is the distinct admin channel this doc owns.
+  - **Seal-critical operations** — `vault init/unseal`, including every reboot's unseal ([`vault_pki_doctrine.md` §5](./vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal)) — are reached
+    **node-local only**: the root operator drives them from the host that *is* the single node, and a parent
+    reaches a child over the floor channel below. This reach is **Vault-independent by construction** — it
+    needs no fabric, no gateway, and no secret from the very Vault it is about to unseal.
+  - **Post-unseal admin** — `dhall update`, KV-CRUD — *may additionally* be reached over the **authenticated
+    WireGuard fabric** once it exists (the same network-restriction pattern channel 2 reuses,
+    [`host_cluster_comms_doctrine.md` §5.1](./host_cluster_comms_doctrine.md#51-the-generalization-localhost-or-the-authenticated-wireguard-fabric); the fabric itself owned by [`network_fabric_doctrine.md`](./network_fabric_doctrine.md)).
+  - **Unseal is never over the fabric.** The fabric's peer keys are Vault-KV
+    ([`vault_pki_doctrine.md` §3.1](./vault_pki_doctrine.md#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken)), so a fabric reach presupposes an *unsealed* Vault; routing unseal over it
+    would be circular. The seal-critical reach therefore stays node-local, whose transport trust before the
+    root PKI anchor exists rides the chicken-and-egg floor
+    ([`vault_pki_doctrine.md` §10](./vault_pki_doctrine.md#10-the-chicken-and-egg-floor-what-stays-outside-vault)).
+- **A parent reaches a child's admin REST over the floor channel — the `ParentReachChannel`.** After a child is
+  spawned, its parent delivers each subsequent `ChildInForceSpec`, and drives the child's own
+  `vault init/unseal`, through the child's admin REST — reached by a typed **`ParentReachChannel` projected from
+  the child's `ComputeEngine`**, never free-authored:
+  `ParentReachChannel = < SelfManagedSsh SshKeyRef | ManagedApi CloudCredRef | Fabric ApiserverVpnIp >`. For a
+  self-managed child the parent gets onto a child node over the SSH key it provisioned it with; for a managed
+  (EKS) child it uses the cloud-cred managed-apiserver access it *created* the cluster with; either way it then
+  hits the child's **node-local** admin NodePort — never the child's public gateway, and **independent of the
+  child's gateway/vpn/mesh state** (those are configured *by* the spec it delivers). The `Fabric` arm (the
+  role-bound apiserver VPN-IP, [`network_fabric_doctrine.md` §4](./network_fabric_doctrine.md#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)) is an **optional optimization once the mesh exists,
+  never the floor**. Because every forest node's `ParentReachChannel` is projected from its provisioning
+  method, **"a child its parent cannot reach" has no inhabitant** (type-foreclosed). A mode-(b) child's
+  unseal-authority reach to its parent rides this same floor channel
+  ([`vault_pki_doctrine.md` §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes)), never the data-plane fabric — the fabric it would need is itself gated on the very
+  unseal it is trying to perform.
 
 ---
 

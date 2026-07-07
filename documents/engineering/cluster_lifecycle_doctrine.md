@@ -138,6 +138,15 @@ child-frame `amoebius.dhall` `FrameConfig` on the lift's `stdin` ([dsl_doctrine.
 its own projection and both mint strictly from the parent, but the spawn crosses a cluster boundary under a
 per-child Vault Transit envelope where the frame descent crosses a process boundary on `stdin`.
 
+**Spawn injection is one-time; subsequent reach is the `ParentReachChannel`.** The Pulumi spawn injects the
+child's *first* `ChildInForceSpec` and secrets. Every *later* update — a new `ChildInForceSpec`, or driving the
+child's own `vault init/unseal` — reaches the child's **admin REST** over the parent's typed
+**`ParentReachChannel`** (projected from the child's `ComputeEngine`: SSH for self-managed, cloud-API for
+managed), hitting the child's **node-local** admin NodePort independent of the child's gateway/vpn/mesh state,
+and **never** the child's public gateway. That channel and its "no unreachable child" foreclosure are owned by
+[bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api); a mode-(b) child's unseal-authority reach rides this same floor channel
+([vault_pki_doctrine.md §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes)), never the data-plane fabric.
+
 Two encapsulation rules make the forest safe to reason about:
 
 - **A child gets only its own `ChildInForceSpec` — a structural subtree projection.** Each child is handed exactly
