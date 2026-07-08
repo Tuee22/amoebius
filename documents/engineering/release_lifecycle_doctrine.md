@@ -185,6 +185,17 @@ advance :: Environment -> Release -> EvidenceWitness -> PointerCas
   [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact))
   yields no witness for that layer — so a `Release` short of prod's required strength has **no** `advance`
   value to hand the CAS.
+- **A Tier-1-only in-process ledger cannot advance the gate to prod.** The front-loaded Phase-1
+  formal-validation track emits its evidence ledger from a purely **in-process** run — Dhall typecheck +
+  decoder + QuickCheck + TLA+/TLC, **no live substrate** — a **Tier-1 (design-time) artifact** that
+  establishes only that the spec composes and the protocol is sound in the abstract, with the Runtime/chaos
+  (Tier-2) correspondence and enforcement left **UNVERIFIED**
+  ([testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) owns
+  this Tier-1-only variant). Because the strength mapping demands the Runtime/chaos layer *proven* for `Prod`,
+  such a ledger supplies **no Runtime `EvidenceWitness`** — there is no `advance` value to hand the CAS, so a
+  `Prod` `PromotionGate` **cannot be advanced on a Tier-1-only (in-process, correspondence/runtime-UNVERIFIED)
+  ledger**. This is the structural fence that keeps "we validated the DSL in-process" from ever meaning "the
+  cluster enforces it."
 - **Promote-unverified→prod is type-foreclosed unrepresentable.** Because `advance` demands an `EvidenceWitness` and
   that witness exists only once the corresponding evidence edge exists, there is simply **no term** that
   promotes an under-verified `Release` to prod — not a runtime check that fires, but a value that cannot be
@@ -262,7 +273,7 @@ data RolloutPhase = RolloutPhase
 > so a `RolloutPhase` applies **rendered objects**, never a `helm install`. The pattern is borrowed; the Helm
 > is dropped.
 
-> **Layer / honesty.** The `RolloutPlan` is **Phase-N design intent** enacted by the Phase-2 SSA reconciler,
+> **Layer / honesty.** The `RolloutPlan` is **Phase-N design intent** enacted by the Phase-3 SSA reconciler,
 > which is itself unbuilt. Ordering, readiness-gating, canary weights, and rollback are real, documented
 > Kubernetes / Gateway-API mechanisms; *that amoebius wires them into this plan type* is specified here and
 > unproven until the phase lands.
@@ -304,7 +315,7 @@ elsewhere:
 completion status, and validation gates are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the environment/promotion values compose with the SSA reconciler landing in
-**Phase 2** and the test-topology / evidence-ledger work in **Phase 11**; the **DB schema-migration
+**Phase 3** and the test-topology / evidence-ledger work in **Phase 11**; the **DB schema-migration
 `RolloutPhase` + manifest-change correctness** is the promoted **Phase-14** candidate
 ([DEVELOPMENT_PLAN/later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md)), and the generic third-party
 extension mechanism remains at Phase-15. This doc states the target shape and links back for status.
@@ -333,7 +344,7 @@ extension mechanism remains at Phase-15. This doc states the target shape and li
 
 > **Honesty.** Everything here is Phase-0 **reference-only design intent**. The `Release` ledger, the
 > `Environment` promotion pointer, the `PromotionGate`, and the `RolloutPlan`/`RolloutPhase` are **unbuilt in
-> amoebius** and compose primitives that are themselves Phase-2-and-later. The shapes are **generalized from
+> amoebius** and compose primitives that are themselves Phase-3-and-later. The shapes are **generalized from
 > siblings** — jitML's phased readiness-gated rollout and its pre/post-grant schema phase, infernix's
 > `.ready`-gated artifact, the content store's ETag-CAS `trial` pointer — each of which is **sibling evidence,
 > not proof in amoebius**. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every

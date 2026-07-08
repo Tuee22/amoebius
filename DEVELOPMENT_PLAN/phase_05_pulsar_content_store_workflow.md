@@ -1,4 +1,4 @@
-# Phase 4: Native Pulsar client + content-addressed store + workflow-runtime
+# Phase 5: Native Pulsar client + content-addressed store + workflow-runtime
 
 **Status**: Authoritative source
 **Supersedes**: N/A
@@ -38,19 +38,19 @@ deliverables, all on a single substrate:
    `pointers/*`, with write-once self-naming blobs and manifests (`If-None-Match: *`, `412` = success) and a
    single atomic pointer commit by `If-Match` compare-and-swap. The store is keyed under an opaque
    `experiment-hash` namespace; the `experimentHash` *derivation* and the SplitMix seed kernel are deferred
-   to Phase 5 (per README — this phase consumes the namespace as a pinned string, it does not build the
+   to Phase 6 (per README — this phase consumes the namespace as a pinned string, it does not build the
    determinism kernel).
 4. **Orchestrator/worker daemon scaffolding** — a workflow runtime in which an elected orchestrator produces
    commands and unelected workers consume them over a **Failover** subscription, so killing the active worker
-   yields hot-standby takeover via the kernel election seeded in Phases 1 and 3.
+   yields hot-standby takeover via the kernel election seeded in Phases 2 and 3.
 
-This phase also **realizes the topic storage lifecycle** whose *type shape* lands in Phase 3 (Sprint 3.6): the
+This phase also **realizes the topic storage lifecycle** whose *type shape* lands in Phase 4 (Sprint 3.6): the
 mandatory `RetentionPolicy`, the **size-triggered** S3 offload high-water mark, and the backlog-quota
 back-pressure are enabled on the namespace as reconcile steps, per
 [`pulsar_client_doctrine.md`](../documents/engineering/pulsar_client_doctrine.md) §6.1 and the two-ceiling
 fold in [`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) §7. This is
 the **runtime-checked residue** of [`illegal_state_catalog.md`](../documents/engineering/illegal_state_catalog.md)
-§3.20 — the type-layer guarantee (a time-only or retention-less topic cannot be *written*) is Phase 3's; that
+§3.20 — the type-layer guarantee (a time-only or retention-less topic cannot be *written*) is Phase 4's; that
 the broker *actually* offloads to S3 before BookKeeper fills, and that back-pressure holds under a burst, is
 what this phase tests.
 
@@ -60,7 +60,7 @@ substrate-agnostic in design but are *validated* only on `linux-cpu` here; the `
 `windows` lanes the topology algebra partitions traffic onto are exercised by later phases.
 
 **Gate:** an `InForceSpec` test topology that, on a `linux-cpu` kind cluster with Pulsar + MinIO up
-(Phase 2), **round-trips a workflow command → event over the native Pulsar protocol** (broker-side dedup
+(Phase 3), **round-trips a workflow command → event over the native Pulsar protocol** (broker-side dedup
 enabled) — **the command and event are CBOR payloads that round-trip byte-for-byte, and a non-CBOR payload
 fixture fails to type-check** — **stores and fetches a content-addressed artifact** by its manifest SHA, and
 then **kills the active worker and observes the Failover-subscription standby take over** — the whole topology
@@ -104,7 +104,7 @@ flowchart LR
   single atomic commit point. The store is namespaced under
   [`experimentHash` (§3)](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran),
   which this phase consumes as an opaque pinned prefix; the `experimentHash` derivation, the `ContentAddress`
-  typeclass, and SplitMix seed derivation are Phase 5 kernel work, not this phase. The
+  typeclass, and SplitMix seed derivation are Phase 6 kernel work, not this phase. The
   [confluence property (§5)](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)
   is what makes the gate's store fetch and the at-least-once redelivery idempotent, and the
   [honest ceiling (§6)](../documents/engineering/content_addressing_doctrine.md#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic)
@@ -125,7 +125,7 @@ flowchart LR
 `amoebius-pulsar/src/Amoebius/Pulsar/Proto/PulsarApi.hs` (proto-lens-generated),
 `amoebius-pulsar/src/Amoebius/Pulsar/Connection.hs` (target layout from
 [system_components.md](system_components.md); not yet built)
-**Blocked by**: Phase 2 — Pulsar reachable as a standard HA service (external earlier-phase prerequisite)
+**Blocked by**: Phase 3 — Pulsar reachable as a standard HA service (external earlier-phase prerequisite)
 **Independent Validation**: golden-frame encode/decode round-trips of `BaseCommand` against fixtures from the
 Pulsar protocol spec; a CONNECT → CONNECTED → LOOKUP_TOPIC exchange against a single-node broker resolving a
 topic owner (following redirects); a deliberately corrupted CRC32C payload frame yields a structured decode
@@ -305,7 +305,7 @@ The whole sprint.
 **Implementation**: `amoebius-store/src/Amoebius/Store/ContentAddress.hs`,
 `amoebius-store/src/Amoebius/Store/Manifest.hs`,
 `amoebius-store/src/Amoebius/Store/Pointer.hs` (not yet built)
-**Blocked by**: Phase 2 — MinIO reachable as a standard HA service (external earlier-phase prerequisite)
+**Blocked by**: Phase 3 — MinIO reachable as a standard HA service (external earlier-phase prerequisite)
 **Independent Validation**: a blob PUT under `If-None-Match: *` returns success on first write and treats the
 second write's `412` as success; a canonical-CBOR manifest encodes byte-identically from two writers with
 equal logical content (same key); a `pointers/latest` `If-Match` CAS commits the winner and returns `412` to
@@ -331,7 +331,7 @@ system is a single one-object atomic pointer flip.
   manifest SHA, updated by `If-Match: <etag>` compare-and-swap as the single atomic commit point; the pure
   CAS decision (`PointerWritten` vs `PointerConflict`) and a typed advance predicate resolve a lost CAS.
 - Store keys taken under a caller-supplied `experiment-hash` namespace string — this phase does **not** build
-  `deriveExperimentHash`, the `ContentAddress` typeclass, or SplitMix seed derivation (Phase 5 kernel work).
+  `deriveExperimentHash`, the `ContentAddress` typeclass, or SplitMix seed derivation (Phase 6 kernel work).
 
 ### Validation
 1. Write the same blob twice and assert first-write success, second-write `412` treated as a no-op success.
@@ -356,7 +356,7 @@ The whole sprint.
 `amoebius-runtime/src/Amoebius/Workflow/Orchestrator.hs`,
 `amoebius-runtime/src/Amoebius/Workflow/Worker.hs`,
 `amoebius-runtime/dhall/test/round_trip_failover.dhall` (the gate topology) (not yet built)
-**Blocked by**: Sprint 4.2, Sprint 4.3, Sprint 4.4, Sprint 4.5; Phase 3 — control-plane singleton +
+**Blocked by**: Sprint 4.2, Sprint 4.3, Sprint 4.4, Sprint 4.5; Phase 4 — control-plane singleton +
 leadership election (external earlier-phase prerequisite)
 **Independent Validation**: the gate `InForceSpec` round-trips a workflow command → event over the native
 protocol with dedup on, stores and fetches a content-addressed artifact by manifest SHA, kills the active
@@ -381,7 +381,7 @@ whose active worker fails over to a hot standby — and assemble the phase gate.
   standbys; the active worker consumes the command, writes a content-addressed artifact to the store (Sprint
   4.5), and produces an `event` carrying the manifest SHA — dedup (Sprint 4.4) makes a retried produce or a
   redelivered consume idempotent.
-- HA failover driven by the kernel election seeded in Phases 1 and 3: killing the active worker yields
+- HA failover driven by the kernel election seeded in Phases 2 and 3: killing the active worker yields
   standby takeover with at-least-once redelivery of the un-acked command; confluence (§5) makes the standby's
   re-fetch of the artifact by manifest SHA safe without a distributed lock.
 - The gate `round_trip_failover.dhall` test topology: spin up Pulsar + MinIO, run the command→event
@@ -415,7 +415,7 @@ The whole sprint.
   layer: produce-side type-foreclosed uninhabitable, consume-side decode-foreclosed total decode, no runtime-checked claim.
 - `documents/engineering/content_addressing_doctrine.md` — record that §2 (the three-tier store + the two
   write protocols) is realized in `amoebius-store`, namespaced under an opaque `experiment-hash` prefix, with
-  the §3 `experimentHash` derivation and seed kernel explicitly deferred to Phase 5.
+  the §3 `experimentHash` derivation and seed kernel explicitly deferred to Phase 6.
 - `documents/engineering/daemon_topology_doctrine.md` — record the orchestrator/worker scaffolding and the
   Failover-based worker failover wired to the kernel election.
 - `documents/engineering/substrate_doctrine.md` — record that the supernova fork's `protoc` codegen conforms
@@ -424,12 +424,12 @@ The whole sprint.
 **Cross-references to add:**
 - From [system_components.md](system_components.md): the `amoebius-pulsar`, `amoebius-store`, and
   `amoebius-runtime` packages and their target module paths, mapped to the owning doctrine.
-- From [substrates.md](substrates.md): Phase 4's single substrate (`linux-cpu`) in the per-phase substrate
+- From [substrates.md](substrates.md): Phase 5's single substrate (`linux-cpu`) in the per-phase substrate
   map, and the topology algebra's per-substrate topic lanes.
-- From [README.md](README.md): mark the Phase 4 row's status from this plan once the gate passes.
+- From [README.md](README.md): mark the Phase 5 row's status from this plan once the gate passes.
 
 ## Related Documents
-- [README.md](README.md) — the live tracker; Phase 4 objective, gate, and substrate
+- [README.md](README.md) — the live tracker; Phase 5 objective, gate, and substrate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this doc obeys (§D skeleton,
   §F sprint format, §H citation rule, §K honesty, §L one-substrate discipline)
 - [system_components.md](system_components.md) — the target component inventory (the Implementation paths

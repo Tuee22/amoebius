@@ -45,7 +45,7 @@ illegal and the technique that forecloses them is
 [illegal_state_catalog.md §3.17-§3.21 / §4.6](./illegal_state_catalog.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded); this doc is the normative home of
 the model that catalog names.
 
-Everything below is **design intent for Phase 3** (the type discipline) with runtime realization in Phases
+Everything below is **design intent for Phase 4** (the type discipline) with runtime realization in Phases
 2/4/7/10. Status and gates live only in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
@@ -423,7 +423,7 @@ declaration against reality at reconcile (runtime-checked).
 
 > **Honesty.** This model is Phase-0 design intent, specified before implementation. The fold is a real
 > decode-foreclosed spec-layer guarantee *when implemented as specified*; that claim is itself about a design not yet
-> built (Phase 3). The runtime-checked cross-check and enforcement are deferred by construction. Where the
+> built (Phase 4). The runtime-checked cross-check and enforcement are deferred by construction. Where the
 > capacity arithmetic generalizes the push-back soundness proven in prodbox
 > ([cluster_lifecycle_doctrine.md §6](./cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-root-inforcespec)),
 > that is sibling evidence, not amoebius proof ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
@@ -504,8 +504,8 @@ improvement.
 
 This document is normative capacity doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the capacity/topology
-type discipline lands in **Phase 3** (the fold and the negative `.dhall` gate), with runtime realization of
-the storage/pulsar folds in **Phase 2/4**, the host/VM cross-check in **Phase 7**, and the `ScalingPolicy`
+type discipline lands in **Phase 4** (the fold and the negative `.dhall` gate), with runtime realization of
+the storage/pulsar folds in **Phase 3/4**, the host/VM cross-check in **Phase 8**, and the `ScalingPolicy`
 enaction in **Phase 10**. This doc never maintains a competing status ledger; it states the target shape and
 links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 

@@ -67,7 +67,7 @@ authoring of this doc is itself complete; 📝 = a Phase 0 deliverable still to 
 |----------|---------|--|
 | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) | The Extract→Model→Inject methodology + the proven/tested/assumed ledger; the invariant-confluence "Second Axis" that governs **async cross-cluster geo-replication & failover** — the one place a per-system proof obligation concentrates (intra-cluster consensus is delegated to MinIO/Pulsar/Postgres/Patroni). Generalized from prodbox's `chaos_hardening_doctrine.md` | ✅ |
 | [testing_doctrine.md](./testing_doctrine.md) | Testing as an `InForceSpec` topology (spin up → run → always tear down); `suggest-test`; flagged test credentials; storage deletion only by the elevated harness; the per-run ledger artifact; leak-free cycles | ✅ |
-| [tla_modelling_assumptions.md](./tla_modelling_assumptions.md) | (Scheduled, Phase 9) The formal-model assumptions, correspondence, and divergences for the cross-cluster failover spec | ✅ |
+| [tla_modelling_assumptions.md](./tla_modelling_assumptions.md) | The two-tier record for the cross-cluster failover spec: the design-model assumptions, invariant catalog, and bounds (authored design-first, Phase 1) + the implementation-correspondence ledger (completed in the failover phase, Phase 9) | ✅ |
 
 ## Cross-references
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

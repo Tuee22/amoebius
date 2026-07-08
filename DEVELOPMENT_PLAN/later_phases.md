@@ -72,7 +72,7 @@ etcd, a diff is typed)](../documents/engineering/manifest_generation_doctrine.md
 already frames the diff as a *typed* value; this candidate extends that diff to classify schema-affecting and
 immutable-field changes so a change that would otherwise drop rows cannot be applied as a silent replace. The
 database half adds the migration ordering and idempotence on top of the per-consumer Postgres model. It is a
-later phase because it presupposes a working app-with-Postgres deployment from Phase 3 and the storage-safety
+later phase because it presupposes a working app-with-Postgres deployment from Phase 4 and the storage-safety
 guarantees from Phase 11 (durable bytes are not destroyed under normal credentials) — a schema migration must
 move data *without* representing destruction.
 
@@ -152,13 +152,13 @@ already renders. That evaluation and its written verdict are owned by
 ## Resolved — *not* a later phase: one base container with everything
 
 The "one base container with everything" packaging question is sometimes mistaken for deferred work. It is
-**not**. It is **resolved and adopted in Phase 2**: every third-party service binary (the registry, MinIO,
+**not**. It is **resolved and adopted in Phase 3**: every third-party service binary (the registry, MinIO,
 Vault, Pulsar, Postgres tooling, a Temurin JRE for the JVM services, …) is baked into the multi-arch base
 container, and clusters pull images only from the in-cluster `distribution` registry — never from a public
 registry. That is the standing doctrine,
 [`image_build_doctrine.md` §2 — the single distribution rule (bake the binaries, build the amoebius image,
 pull only in-cluster)](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster),
-delivered by [phase_02_platform_services_storage_vault.md](phase_02_platform_services_storage_vault.md) and
+delivered by [phase_03_platform_services_storage_vault.md](phase_03_platform_services_storage_vault.md) and
 recorded as resolved in the README "Later phases" note. It is named here only to close the question: do not
 re-open it as a candidate phase.
 
@@ -169,11 +169,11 @@ re-open it as a candidate phase.
 Making dysfunctional deployment states unrepresentable — resource overcommit (host / VM / cluster),
 compute-engine ↔ substrate incompatibility, illegal cluster topology (rke2-on-bare-apple, multi-node kind on
 two hosts, multi-node rke2 with fewer hosts than nodes), unbounded storage, un-tiered Pulsar topics, and
-policy-less capacity growth — is **not** a new phase. It is **folded into Phase 3** as a spec-layer type
+policy-less capacity growth — is **not** a new phase. It is **folded into Phase 4** as a spec-layer type
 discipline (Sprint 3.6, with the acceptance fixtures in the Sprint 3.7 gate), because it is pure
 type-checking with no forward dependency (§E one-canonical-phase). Its **runtime** residues distribute to the
-phases that already own each substrate: the Pulsar two-ceiling offload to Phase 4, the Lima `LinuxHost`
-witness + host/VM capacity cross-check to Phase 7, live multi-node rke2/kind topology to Phase 9, and the
+phases that already own each substrate: the Pulsar two-ceiling offload to Phase 5, the Lima `LinuxHost`
+witness + host/VM capacity cross-check to Phase 8, live multi-node rke2/kind topology to Phase 9, and the
 `Managed EKS` arm + `ScalingPolicy` enaction + cloud quota to Phase 10. So there is **zero phase renumber**:
 the discipline is owned by two new doctrines
 ([`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md),
@@ -193,14 +193,14 @@ phase.
 - [system_components.md](system_components.md) — target component inventory a promoted candidate adds to
 - [substrates.md](substrates.md) — substrate registry; each candidate's provisional substrate is recorded here
   at promotion
-- [phase_02_platform_services_storage_vault.md](phase_02_platform_services_storage_vault.md) — where the "one
+- [phase_03_platform_services_storage_vault.md](phase_03_platform_services_storage_vault.md) — where the "one
   base container with everything" question is resolved (not deferred)
 - [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — §8 the extension-DSL forward pointer, §9 the
   deferred GHC 9.14.1 toolchain bump
 - [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — §6 the typed
   reconcile state model the manifest-change correctness candidate extends
 - [Image Build Doctrine](../documents/engineering/image_build_doctrine.md) — §2 the baked-binary base
-  container (Phase 2, resolved)
+  container (Phase 3, resolved)
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — §1 the substrate-is-a-fact model the
   niche-substrate candidate probes
 - [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — §9 the single

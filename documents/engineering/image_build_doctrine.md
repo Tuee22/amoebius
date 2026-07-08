@@ -145,7 +145,7 @@ time on the missing arch, not at publish time. So amoebius treats a multi-arch i
   inherits prodbox's retry-then-fail-loud publication posture (`local_registry_pipeline.md` [§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)); for its
   multi-arch images the unit of success is the complete manifest list.
 
-> **Honesty.** Fail-closed atomic publication is the *specified* contract for Phase 2, not a tested amoebius
+> **Honesty.** Fail-closed atomic publication is the *specified* contract for Phase 3, not a tested amoebius
 > result. buildx's single-push manifest-list behaviour is a real registry mechanism; that amoebius wires it
 > exactly this way is design intent until validated. See
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
@@ -156,7 +156,7 @@ time on the missing arch, not at publish time. So amoebius treats a multi-arch i
 
 This is an explicitly open design question: whether to implement a versioned tagging system or just use
 `:latest`. It is flagged here as a
-[DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) decision (Phase 2); this section records the **trade and
+[DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) decision (Phase 3); this section records the **trade and
 the recommended default**, not a frozen mechanism.
 
 amoebius's core properties are fungibility and reproducibility — a cluster that was destroyed must rebind to
@@ -353,7 +353,7 @@ a cycle — is owned elsewhere; this doc records only the build-side consequence
 
 ## 10. Honesty and planning ownership
 
-> **Honesty.** Every prescriptive statement here is *design intent for Phase 2*
+> **Honesty.** Every prescriptive statement here is *design intent for Phase 3*
 > (the `distribution` registry + baked service binaries + buildx multi-arch amoebius images,
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)), generalized from a pipeline proven
 > in `prodbox` but **not yet built in amoebius**. Per

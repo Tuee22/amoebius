@@ -77,7 +77,7 @@ This takes option (c)'s security goal — *no malicious network traffic can use 
 achieves it by **network restriction** instead of by crypto or by a single bottlenecking socket, while
 keeping option (b)'s bandwidth headroom (a real socket per stream) without paying (b)'s mTLS tax.
 
-> **Honesty.** This is a *resolved design decision* for Phase 7, argued from the threat model and bandwidth
+> **Honesty.** This is a *resolved design decision* for Phase 8, argued from the threat model and bandwidth
 > economics below — **not** a tested or proven amoebius result. The loopback-NodePort pattern has a sibling
 > precedent in prodbox ([§6](#6-the-host-only-restriction-in-practice-and-its-sibling-precedent)), which is evidence from another system, not proof here. Status and gates live
 > only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
@@ -266,7 +266,7 @@ the comms-relevant requirement each substrate must satisfy:
 - **This generalizes a pattern proven in the sibling prodbox project**, where in-cluster Harbor is reached
   by host-origin clients at `127.0.0.1:30080` over a NodePort bound to loopback (prodbox CLAUDE.md,
   "Substrate Equivalence"). That is **evidence from another system, not proof in amoebius** — amoebius has
-  not yet built Phase 7. It is precedent for *feasibility*, not a tested amoebius guarantee.
+  not yet built Phase 8. It is precedent for *feasibility*, not a tested amoebius guarantee.
 - **The DSL never lets a substrate "fix" a missing piece by widening exposure.** If a substrate's node
   networking makes the loopback binding awkward, the resolution is to extend that substrate's installer to
   honor the host-only contract — not to publish the port wider. Substrate equivalence is structural
@@ -327,7 +327,7 @@ secrets-by-name, never the method.
 
 This document is normative host↔cluster comms doctrine only. Delivery sequencing, completion status, and
 validation gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) — host
-compute daemons (the Apple-Metal / Windows-CUDA Pulsar+MinIO peers) land in **Phase 7**. This doc never
+compute daemons (the Apple-Metal / Windows-CUDA Pulsar+MinIO peers) land in **Phase 8**. This doc never
 maintains a competing status ledger; it states the target shape and links back for status.
 
 ---

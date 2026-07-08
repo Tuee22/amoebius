@@ -88,7 +88,7 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
   readiness-edge rule (a condition never a duration; the bootstrap tier's `discover`/`RuntimeWitness` gates)
   is owned by [readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md).
 - **Bring-up is itself a reconcile.** "Come up" is not a one-shot script; it is the [§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) reconciler driving
-  the world toward the `.dhall`. Re-running it is a no-op when already converged — that is the Phase 1
+  the world toward the `.dhall`. Re-running it is a no-op when already converged — that is the Phase 2
   acceptance shape.
 - **A stretched rke2 agent joins only once it is reachable.** Growing a cluster with a **stretched** agent —
   a full member node whose declared network-locality `Site` differs from the control-plane servers' `Site`
@@ -392,7 +392,7 @@ sibling's** reconciler-with-predicates doctrine
   are owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md).
 
 > **Honesty.** This reconciler model is *proven in prodbox* for AWS teardown; that is **evidence from a
-> sibling system, not proof in amoebius**, which has not built Phases 1–2/9–10. Read every prescriptive
+> sibling system, not proof in amoebius**, which has not built Phases 2–3/9–10. Read every prescriptive
 > statement here as design intent, never as a tested amoebius result
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
@@ -403,8 +403,8 @@ sibling's** reconciler-with-predicates doctrine
 This document is normative cluster-lifecycle doctrine only. Delivery sequencing, completion status,
 validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
-only (the plan is authoritative): bootstrap + a single kind cluster land in **Phase 1**; platform services
-+ retained storage + root Vault/PKI in **Phase 2**; the control-plane singleton in **Phase 3**; **amoebic
+only (the plan is authoritative): bootstrap + a single kind cluster land in **Phase 2**; platform services
++ retained storage + root Vault/PKI in **Phase 3**; the control-plane singleton in **Phase 4**; **amoebic
 spawning, geo-replication, gateway failover + route53 repoint, the teardown-with-cleanup-vs-chaos-failover
 distinction, and push-back-on-unsatisfiable-`.dhall`** in **Phase 9**; provider-managed clusters + dynamic
 node provisioning in **Phase 10**; and the storage-lifecycle safety that makes teardown leak-free in

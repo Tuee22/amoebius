@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, later_phases.md, legacy_tracking_for_deletion.md, overview.md, phase_00_documentation_suite.md, phase_01_bootstrap_kernel_kind.md, phase_02_platform_services_storage_vault.md, phase_03_dsl_control_plane_singleton.md, phase_04_pulsar_content_store_workflow.md, phase_05_determinism_infernix.md, phase_06_jitml_ha_coordinator.md, phase_07_host_compute_daemons.md, phase_08_mattandjames_app_logic.md, phase_09_multicluster_spawn_georeplication.md, phase_10_provider_clusters_provisioning.md, phase_11_test_topology_dsl.md, phase_12_spa_composition.md, substrates.md, system_components.md
+**Referenced by**: README.md, later_phases.md, legacy_tracking_for_deletion.md, overview.md, phase_00_documentation_suite.md, phase_01_formal_first_dsl_integrity.md, phase_02_bootstrap_kernel_kind.md, phase_03_platform_services_storage_vault.md, phase_04_dsl_control_plane_singleton.md, phase_05_pulsar_content_store_workflow.md, phase_06_determinism_infernix.md, phase_07_jitml_ha_coordinator.md, phase_08_host_compute_daemons.md, phase_09_multicluster_spawn_georeplication.md, phase_10_provider_clusters_provisioning.md, phase_11_test_topology_dsl.md, phase_12_spa_composition.md, substrates.md, system_components.md
 **Generated sections**: none
 
 > **Purpose**: The rulebook for the amoebius `DEVELOPMENT_PLAN/` suite — the canonical file layout, the
@@ -57,7 +57,7 @@ ALL-CAPS exception is `README.md`). The canonical set:
 | `phase_NN_<slug>.md` | One document per phase, zero-padded `NN` for sort order (`phase_00_documentation_suite.md` … `phase_12_spa_composition.md`). |
 | `later_phases.md` | The in-scope, high-numbered phases not yet given their own document. |
 
-This deviates from prodbox's hyphenated names (`phase-2-gateway-dns.md`) on purpose: amoebius's
+This deviates from prodbox's hyphenated names (`phase-3-gateway-dns.md`) on purpose: amoebius's
 documentation standard mandates snake_case. The *structure* mirrors prodbox; the *naming* follows amoebius.
 
 ## C. Status vocabulary
@@ -189,7 +189,7 @@ marking it generated is reserved for when the generator does.
 
 ## J. Cross-reference path rules
 
-- Links **within** `DEVELOPMENT_PLAN/` use plain relative paths (`README.md`, `phase_02_…md`).
+- Links **within** `DEVELOPMENT_PLAN/` use plain relative paths (`README.md`, `phase_03_…md`).
 - Links to governed doctrine under `documents/` use the parent-relative path
   (`../documents/engineering/<doc>.md#<anchor>`).
 - A rename updates every inbound link in the same change; the `Referenced by` headers are reconciled from the
@@ -203,6 +203,17 @@ The plan inherits the chaos/failover moral rule (documentation_standards §6,
 🧪 Live-proof-pending, not Done. A phase gate is passed only when its acceptance test actually ran on its
 substrate (§L). Pre-implementation, every phase and sprint is 📋 Planned and every prescriptive statement is
 design intent.
+
+A **design-proof / in-process phase** — one whose substrate is `none` (§L) and whose gate is an in-process
+type/model check rather than a live-substrate run, e.g. [Phase 1](phase_01_formal_first_dsl_integrity.md) —
+emits a ledger whose acceptance token reads **"spec-composition proven"** / **"proven for the model"**, never
+**"runtime proven"**: a green Dhall typecheck, Haskell decoder, or TLC run establishes that the spec composes
+and the protocol is sound in the abstract, not that any cluster enforces it. Front-loading such a design
+proof *ahead of* the later phase that builds the runtime it will correspond to is legitimate — **provided**
+that same ledger marks the model↔code correspondence and the runtime fidelity **UNVERIFIED** until that later
+phase discharges them. This front-loading introduces no forward dependency and does not bend the
+contiguous-numbering / no-fractional-phase-id rule (§E): the design phase keeps its own integer id and its
+own single-substrate (`none`) gate.
 
 ## L. One-substrate discipline
 

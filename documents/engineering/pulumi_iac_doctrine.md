@@ -472,7 +472,7 @@ This document is normative Pulumi-IaC doctrine only. Delivery sequencing, comple
 gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the DNS (route53) + TLS (zerossl) provider integration and root
-Vault/PKI land in **Phase 2**; amoebic spawning via SSH-key Pulumi with the MinIO backend + Vault-envelope
+Vault/PKI land in **Phase 3**; amoebic spawning via SSH-key Pulumi with the MinIO backend + Vault-envelope
 encryption lands in **Phase 9**; provider-managed clusters (EKS) and dynamic node
 provisioning land in **Phase 10**; the elevated-harness storage-deletion safety that makes the [§6](#6-the-ebs-create-vs-delete-credential-model)
 create-vs-delete model leak-free lands in **Phase 11**. Per

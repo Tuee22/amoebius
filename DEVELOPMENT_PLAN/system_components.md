@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, development_plan_standards.md, later_phases.md, legacy_tracking_for_deletion.md, overview.md, phase_00_documentation_suite.md, phase_01_bootstrap_kernel_kind.md, phase_02_platform_services_storage_vault.md, phase_03_dsl_control_plane_singleton.md, phase_04_pulsar_content_store_workflow.md, phase_05_determinism_infernix.md, phase_06_jitml_ha_coordinator.md, phase_07_host_compute_daemons.md, phase_08_mattandjames_app_logic.md, phase_09_multicluster_spawn_georeplication.md, phase_10_provider_clusters_provisioning.md, phase_11_test_topology_dsl.md, phase_12_spa_composition.md
+**Referenced by**: README.md, development_plan_standards.md, later_phases.md, legacy_tracking_for_deletion.md, overview.md, phase_00_documentation_suite.md, phase_01_formal_first_dsl_integrity.md, phase_02_bootstrap_kernel_kind.md, phase_03_platform_services_storage_vault.md, phase_04_dsl_control_plane_singleton.md, phase_05_pulsar_content_store_workflow.md, phase_06_determinism_infernix.md, phase_07_jitml_ha_coordinator.md, phase_08_host_compute_daemons.md, phase_09_multicluster_spawn_georeplication.md, phase_10_provider_clusters_provisioning.md, phase_11_test_topology_dsl.md, phase_12_spa_composition.md
 **Generated sections**: none
 
 > **Purpose**: The target component inventory for amoebius — every surface mapped to its owning doctrine, its
@@ -53,13 +53,13 @@ architecture as *evidence* the shape holds; amoebius proof is each phase's gate.
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
 |---|---|---|---|
-| Executable entrypoint (argv dispatch, exit orchestration) | [daemon_topology §1](../documents/engineering/daemon_topology_doctrine.md#1-one-binary-three-contexts) | `app/amoebius/Main.hs` (PLANNED) | [phase_01_bootstrap_kernel_kind.md](phase_01_bootstrap_kernel_kind.md) |
-| CLI context — `Command` ADT, `--help`, reconcile triggers, status | [daemon_topology §1](../documents/engineering/daemon_topology_doctrine.md#1-one-binary-three-contexts) | `src/Amoebius/Cli.hs` (PLANNED) | [phase_01_bootstrap_kernel_kind.md](phase_01_bootstrap_kernel_kind.md) |
-| Sudo host-daemon context — distro bring-up, host-tool ensure, supervise host subprocesses | [daemon_topology §1](../documents/engineering/daemon_topology_doctrine.md#1-one-binary-three-contexts) | `src/Amoebius/Host/Context.hs` (PLANNED) | [phase_01_bootstrap_kernel_kind.md](phase_01_bootstrap_kernel_kind.md) |
-| Long-running host compute daemon (the sudo-context daemon's worker form) | [daemon_topology §1](../documents/engineering/daemon_topology_doctrine.md#1-one-binary-three-contexts) | `src/Amoebius/HostWorker/Lifecycle.hs`, `src/Amoebius/HostWorker/Supervise.hs` (PLANNED) | [phase_07_host_compute_daemons.md](phase_07_host_compute_daemons.md) |
-| In-cluster singleton — the elected brain (reconcile loop + secret authority) | [daemon_topology §3](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected) | `src/Amoebius/Daemon/InClusterSingleton.hs`, `src/Amoebius/ControlPlane/Singleton.hs`, `src/Amoebius/ControlPlane/Reconcile.hs` (PLANNED) | [phase_03_dsl_control_plane_singleton.md](phase_03_dsl_control_plane_singleton.md) |
-| Bootstrap sequence + host→singleton handoff + admin control-plane REST (`vault init/unseal`, `dhall update`) | [bootstrap_sequence_doctrine](../documents/engineering/bootstrap_sequence_doctrine.md) | `src/Amoebius/Cluster/BringUp.hs`, `src/Amoebius/ControlPlane/AdminApi.hs` (PLANNED; sequence+handoff Phase 1, admin REST Phase 2–3) | [phase_01_bootstrap_kernel_kind.md](phase_01_bootstrap_kernel_kind.md) |
-| In-cluster worker roles — N unelected workflow daemons | [daemon_topology §4](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected) | `amoebius-runtime/src/Amoebius/Workflow/Worker.hs`, `amoebius-runtime/src/Amoebius/Workflow/Orchestrator.hs` (PLANNED) | [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md) |
+| Executable entrypoint (argv dispatch, exit orchestration) | [daemon_topology §1](../documents/engineering/daemon_topology_doctrine.md#1-one-binary-three-contexts) | `app/amoebius/Main.hs` (PLANNED) | [phase_02_bootstrap_kernel_kind.md](phase_02_bootstrap_kernel_kind.md) |
+| CLI context — `Command` ADT, `--help`, reconcile triggers, status | [daemon_topology §1](../documents/engineering/daemon_topology_doctrine.md#1-one-binary-three-contexts) | `src/Amoebius/Cli.hs` (PLANNED) | [phase_02_bootstrap_kernel_kind.md](phase_02_bootstrap_kernel_kind.md) |
+| Sudo host-daemon context — distro bring-up, host-tool ensure, supervise host subprocesses | [daemon_topology §1](../documents/engineering/daemon_topology_doctrine.md#1-one-binary-three-contexts) | `src/Amoebius/Host/Context.hs` (PLANNED) | [phase_02_bootstrap_kernel_kind.md](phase_02_bootstrap_kernel_kind.md) |
+| Long-running host compute daemon (the sudo-context daemon's worker form) | [daemon_topology §1](../documents/engineering/daemon_topology_doctrine.md#1-one-binary-three-contexts) | `src/Amoebius/HostWorker/Lifecycle.hs`, `src/Amoebius/HostWorker/Supervise.hs` (PLANNED) | [phase_08_host_compute_daemons.md](phase_08_host_compute_daemons.md) |
+| In-cluster singleton — the elected brain (reconcile loop + secret authority) | [daemon_topology §3](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected) | `src/Amoebius/Daemon/InClusterSingleton.hs`, `src/Amoebius/ControlPlane/Singleton.hs`, `src/Amoebius/ControlPlane/Reconcile.hs` (PLANNED) | [phase_04_dsl_control_plane_singleton.md](phase_04_dsl_control_plane_singleton.md) |
+| Bootstrap sequence + host→singleton handoff + admin control-plane REST (`vault init/unseal`, `dhall update`) | [bootstrap_sequence_doctrine](../documents/engineering/bootstrap_sequence_doctrine.md) | `src/Amoebius/Cluster/BringUp.hs`, `src/Amoebius/ControlPlane/AdminApi.hs` (PLANNED; sequence+handoff Phase 2, admin REST Phase 3–4) | [phase_02_bootstrap_kernel_kind.md](phase_02_bootstrap_kernel_kind.md) |
+| In-cluster worker roles — N unelected workflow daemons | [daemon_topology §4](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected) | `amoebius-runtime/src/Amoebius/Workflow/Worker.hs`, `amoebius-runtime/src/Amoebius/Workflow/Orchestrator.hs` (PLANNED) | [phase_05_pulsar_content_store_workflow.md](phase_05_pulsar_content_store_workflow.md) |
 
 ---
 
@@ -73,19 +73,19 @@ algebra. The composability guarantee — fragments nest without limit or leakage
 and the second of the two typed gates (the one that turns Dhall into Haskell values) is
 [`dsl_doctrine.md` Gate 2 — the Haskell typed decoder](../documents/engineering/dsl_doctrine.md#gate-2--the-haskell-typed-decoder).
 The kernel itself — the `Step` algebra and `chain :: cfg -> [Step]` — is seeded from hostbootstrap in
-Phase 1 and is the spine every later phase composes onto.
+Phase 2 and is the spine every later phase composes onto.
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
 |---|---|---|---|
-| `Step` algebra (the unit of idempotent work) | [dsl_doctrine §2](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) | `src/Amoebius/Kernel/Step.hs` (PLANNED) | [phase_01_bootstrap_kernel_kind.md](phase_01_bootstrap_kernel_kind.md) |
-| `chain` combinator (`cfg -> [Step]`, total composition) | [dsl_doctrine §4](../documents/engineering/dsl_doctrine.md#4-total-composability) | `src/Amoebius/Kernel/Chain.hs` (PLANNED) | [phase_01_bootstrap_kernel_kind.md](phase_01_bootstrap_kernel_kind.md) |
-| Dhall surface types (cluster / app-spec / deployment-rules) | [dsl_doctrine §2](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) | `dhall/amoebius/{Cluster,App,Deployment,prelude}.dhall` (PLANNED) | [phase_03_dsl_control_plane_singleton.md](phase_03_dsl_control_plane_singleton.md) |
-| Haskell typed decoder (Gate 2) | [dsl_doctrine Gate 2](../documents/engineering/dsl_doctrine.md#gate-2--the-haskell-typed-decoder) | `src/Amoebius/Dsl/Decode.hs`, `src/Amoebius/Dsl/Types.hs` (PLANNED) | [phase_03_dsl_control_plane_singleton.md](phase_03_dsl_control_plane_singleton.md) |
-| Smart constructors (illegal-state-unrepresentable values; incl. compatible-pair `Node`, derived `Toleration`) | [dsl_doctrine §4](../documents/engineering/dsl_doctrine.md#4-total-composability) | `src/Amoebius/Dsl/SmartConstructors.hs` (PLANNED) | [phase_03_dsl_control_plane_singleton.md](phase_03_dsl_control_plane_singleton.md) |
-| `Readiness` gate (condition-not-duration `Step` edge, no `AfterDuration` arm; derived bring-up DAG + `mkBringUpOrder` fold) | [readiness_ordering_doctrine §3](../documents/engineering/readiness_ordering_doctrine.md#3-readiness-is-a-condition-never-a-duration) | `src/Amoebius/Kernel/Readiness.hs`, `src/Amoebius/Cluster/BringUp.hs` (PLANNED; bootstrap-tier `discover`/`RuntimeWitness` gates Phase 1) | [phase_03_dsl_control_plane_singleton.md](phase_03_dsl_control_plane_singleton.md) |
-| Cluster-topology types (`ComputeEngine` / `LinuxHost` witness / `Topology`; §4.7 relation) | [cluster_topology_doctrine](../documents/engineering/cluster_topology_doctrine.md) | `dhall/amoebius/Topology.dhall`, `src/Amoebius/Dsl/Topology.hs` (PLANNED) | [phase_03_dsl_control_plane_singleton.md](phase_03_dsl_control_plane_singleton.md) |
-| Capacity accounting (`Capacity`/`Demand`/`Budget`, §4.6 `fits`/`carve`/`place`, `Growable`/`ScalingPolicy`) | [resource_capacity_doctrine](../documents/engineering/resource_capacity_doctrine.md) | `dhall/amoebius/Capacity.dhall`, `src/Amoebius/Capacity/{Types,Fold,Growable}.hs` (PLANNED; enaction Phase 10) | [phase_03_dsl_control_plane_singleton.md](phase_03_dsl_control_plane_singleton.md) |
-| Bounded-storage surface (`StorageBacking` union, `RetentionPolicy`) | [storage_lifecycle §5.2](../documents/engineering/storage_lifecycle_doctrine.md), [pulsar_client §6.1](../documents/engineering/pulsar_client_doctrine.md) | `dhall/amoebius/{Storage,Retention}.dhall` (PLANNED) | [phase_03_dsl_control_plane_singleton.md](phase_03_dsl_control_plane_singleton.md) |
+| `Step` algebra (the unit of idempotent work) | [dsl_doctrine §2](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) | `src/Amoebius/Kernel/Step.hs` (PLANNED) | [phase_02_bootstrap_kernel_kind.md](phase_02_bootstrap_kernel_kind.md) |
+| `chain` combinator (`cfg -> [Step]`, total composition) | [dsl_doctrine §4](../documents/engineering/dsl_doctrine.md#4-total-composability) | `src/Amoebius/Kernel/Chain.hs` (PLANNED) | [phase_02_bootstrap_kernel_kind.md](phase_02_bootstrap_kernel_kind.md) |
+| Dhall surface types (cluster / app-spec / deployment-rules) | [dsl_doctrine §2](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) | `dhall/amoebius/{Cluster,App,Deployment,prelude}.dhall` (PLANNED) | [phase_04_dsl_control_plane_singleton.md](phase_04_dsl_control_plane_singleton.md) |
+| Haskell typed decoder (Gate 2) | [dsl_doctrine Gate 2](../documents/engineering/dsl_doctrine.md#gate-2--the-haskell-typed-decoder) | `src/Amoebius/Dsl/Decode.hs`, `src/Amoebius/Dsl/Types.hs` (PLANNED) | [phase_04_dsl_control_plane_singleton.md](phase_04_dsl_control_plane_singleton.md) |
+| Smart constructors (illegal-state-unrepresentable values; incl. compatible-pair `Node`, derived `Toleration`) | [dsl_doctrine §4](../documents/engineering/dsl_doctrine.md#4-total-composability) | `src/Amoebius/Dsl/SmartConstructors.hs` (PLANNED) | [phase_04_dsl_control_plane_singleton.md](phase_04_dsl_control_plane_singleton.md) |
+| `Readiness` gate (condition-not-duration `Step` edge, no `AfterDuration` arm; derived bring-up DAG + `mkBringUpOrder` fold) | [readiness_ordering_doctrine §3](../documents/engineering/readiness_ordering_doctrine.md#3-readiness-is-a-condition-never-a-duration) | `src/Amoebius/Kernel/Readiness.hs`, `src/Amoebius/Cluster/BringUp.hs` (PLANNED; bootstrap-tier `discover`/`RuntimeWitness` gates Phase 2) | [phase_04_dsl_control_plane_singleton.md](phase_04_dsl_control_plane_singleton.md) |
+| Cluster-topology types (`ComputeEngine` / `LinuxHost` witness / `Topology`; §4.7 relation) | [cluster_topology_doctrine](../documents/engineering/cluster_topology_doctrine.md) | `dhall/amoebius/Topology.dhall`, `src/Amoebius/Dsl/Topology.hs` (PLANNED) | [phase_04_dsl_control_plane_singleton.md](phase_04_dsl_control_plane_singleton.md) |
+| Capacity accounting (`Capacity`/`Demand`/`Budget`, §4.6 `fits`/`carve`/`place`, `Growable`/`ScalingPolicy`) | [resource_capacity_doctrine](../documents/engineering/resource_capacity_doctrine.md) | `dhall/amoebius/Capacity.dhall`, `src/Amoebius/Capacity/{Types,Fold,Growable}.hs` (PLANNED; enaction Phase 10) | [phase_04_dsl_control_plane_singleton.md](phase_04_dsl_control_plane_singleton.md) |
+| Bounded-storage surface (`StorageBacking` union, `RetentionPolicy`) | [storage_lifecycle §5.2](../documents/engineering/storage_lifecycle_doctrine.md), [pulsar_client §6.1](../documents/engineering/pulsar_client_doctrine.md) | `dhall/amoebius/{Storage,Retention}.dhall` (PLANNED) | [phase_04_dsl_control_plane_singleton.md](phase_04_dsl_control_plane_singleton.md) |
 
 ---
 
@@ -101,9 +101,9 @@ elected singleton (§1), never by a CLI poke racing another writer.
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
 |---|---|---|---|
-| Typed `K8sObject` model (records for Deployment/StatefulSet/Service/RBAC/NetworkPolicy/HTTPRoute/…) | [manifest_generation §2](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects) | `src/Amoebius/Manifest/Types.hs` (PLANNED) | [phase_02_platform_services_storage_vault.md](phase_02_platform_services_storage_vault.md) |
-| `render` — pure, total `ServiceSpec -> [K8sObject]` | [manifest_generation §2](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects) | `src/Amoebius/Manifest/Render.hs` (PLANNED) | [phase_02_platform_services_storage_vault.md](phase_02_platform_services_storage_vault.md) |
-| SSA reconciler (`amoebius` field manager, ApplySet prune, wait) | [manifest_generation §5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait) | `src/Amoebius/Manifest/Reconcile.hs` (PLANNED) | [phase_02_platform_services_storage_vault.md](phase_02_platform_services_storage_vault.md) |
+| Typed `K8sObject` model (records for Deployment/StatefulSet/Service/RBAC/NetworkPolicy/HTTPRoute/…) | [manifest_generation §2](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects) | `src/Amoebius/Manifest/Types.hs` (PLANNED) | [phase_03_platform_services_storage_vault.md](phase_03_platform_services_storage_vault.md) |
+| `render` — pure, total `ServiceSpec -> [K8sObject]` | [manifest_generation §2](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects) | `src/Amoebius/Manifest/Render.hs` (PLANNED) | [phase_03_platform_services_storage_vault.md](phase_03_platform_services_storage_vault.md) |
+| SSA reconciler (`amoebius` field manager, ApplySet prune, wait) | [manifest_generation §5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait) | `src/Amoebius/Manifest/Reconcile.hs` (PLANNED) | [phase_03_platform_services_storage_vault.md](phase_03_platform_services_storage_vault.md) |
 
 ---
 
@@ -119,9 +119,9 @@ consumes.
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
 |---|---|---|---|
-| Capability union + binding records (Dhall surface) | [service_capability §4](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding) | `dhall/amoebius/Capability.dhall` (PLANNED) | [phase_03_dsl_control_plane_singleton.md](phase_03_dsl_control_plane_singleton.md) |
-| Capability→provider→shape binder (capability need ⇒ `ServiceSpec`) | [service_capability §4](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding) | `src/Amoebius/Capability/Binding.hs` (PLANNED) | [phase_03_dsl_control_plane_singleton.md](phase_03_dsl_control_plane_singleton.md) |
-| Per-app tenancy (own namespace, `<app>/<bucket>` ObjectStore, in-namespace Sql) | [service_capability §4](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding) | `src/Amoebius/App/Tenancy.hs` (PLANNED) | [phase_03_dsl_control_plane_singleton.md](phase_03_dsl_control_plane_singleton.md) |
+| Capability union + binding records (Dhall surface) | [service_capability §4](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding) | `dhall/amoebius/Capability.dhall` (PLANNED) | [phase_04_dsl_control_plane_singleton.md](phase_04_dsl_control_plane_singleton.md) |
+| Capability→provider→shape binder (capability need ⇒ `ServiceSpec`) | [service_capability §4](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding) | `src/Amoebius/Capability/Binding.hs` (PLANNED) | [phase_04_dsl_control_plane_singleton.md](phase_04_dsl_control_plane_singleton.md) |
+| Per-app tenancy (own namespace, `<app>/<bucket>` ObjectStore, in-namespace Sql) | [service_capability §4](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding) | `src/Amoebius/App/Tenancy.hs` (PLANNED) | [phase_04_dsl_control_plane_singleton.md](phase_04_dsl_control_plane_singleton.md) |
 
 ---
 
@@ -140,14 +140,14 @@ are the per-service spec builders, not the providers' own binaries (those are ba
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
 |---|---|---|---|
-| Platform-service orchestration (bring-up order, dependency graph) | [platform_services §1](../documents/engineering/platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster) | `src/Amoebius/Platform/Services.hs` (PLANNED) | [phase_02_platform_services_storage_vault.md](phase_02_platform_services_storage_vault.md) |
-| `distribution` registry (the sole image source) | [platform_services §3](../documents/engineering/platform_services_doctrine.md#3-the-registry--the-single-image-source) | `src/Amoebius/Image/Registry.hs` (PLANNED) | [phase_02_platform_services_storage_vault.md](phase_02_platform_services_storage_vault.md) |
-| MinIO — object substrate | [platform_services §1](../documents/engineering/platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster) | `src/Amoebius/Platform/Minio.hs` (PLANNED) | [phase_02_platform_services_storage_vault.md](phase_02_platform_services_storage_vault.md) |
-| Pulsar — event/workflow backbone (server-side render) | [platform_services §1](../documents/engineering/platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster) | `src/Amoebius/Platform/Pulsar.hs` (PLANNED) | [phase_02_platform_services_storage_vault.md](phase_02_platform_services_storage_vault.md) |
-| Postgres — Patroni-via-Percona, per-consumer, pgAdmin | [platform_services §8 — Postgres](../documents/engineering/platform_services_doctrine.md#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin) | `src/Amoebius/Platform/Postgres.hs` (PLANNED) | [phase_02_platform_services_storage_vault.md](phase_02_platform_services_storage_vault.md) |
-| Prometheus / Grafana — observability | [platform_services §1](../documents/engineering/platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster) | `src/Amoebius/Platform/Observability.hs` (PLANNED) | [phase_02_platform_services_storage_vault.md](phase_02_platform_services_storage_vault.md) |
-| LoadBalancer (MetalLB-or-cloud, the one substrate-driven difference) | [platform_services §9 — The LoadBalancer and the single wild-ingress path](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) | `src/Amoebius/Platform/LoadBalancer.hs` (PLANNED) | [phase_02_platform_services_storage_vault.md](phase_02_platform_services_storage_vault.md) |
-| Keycloak owning all wild ingress (via Gateway API / Envoy) | [platform_services §9](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) | `src/Amoebius/Platform/Keycloak.hs`, `src/Amoebius/Platform/Edge.hs` (PLANNED) | [phase_02_platform_services_storage_vault.md](phase_02_platform_services_storage_vault.md) |
+| Platform-service orchestration (bring-up order, dependency graph) | [platform_services §1](../documents/engineering/platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster) | `src/Amoebius/Platform/Services.hs` (PLANNED) | [phase_03_platform_services_storage_vault.md](phase_03_platform_services_storage_vault.md) |
+| `distribution` registry (the sole image source) | [platform_services §3](../documents/engineering/platform_services_doctrine.md#3-the-registry--the-single-image-source) | `src/Amoebius/Image/Registry.hs` (PLANNED) | [phase_03_platform_services_storage_vault.md](phase_03_platform_services_storage_vault.md) |
+| MinIO — object substrate | [platform_services §1](../documents/engineering/platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster) | `src/Amoebius/Platform/Minio.hs` (PLANNED) | [phase_03_platform_services_storage_vault.md](phase_03_platform_services_storage_vault.md) |
+| Pulsar — event/workflow backbone (server-side render) | [platform_services §1](../documents/engineering/platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster) | `src/Amoebius/Platform/Pulsar.hs` (PLANNED) | [phase_03_platform_services_storage_vault.md](phase_03_platform_services_storage_vault.md) |
+| Postgres — Patroni-via-Percona, per-consumer, pgAdmin | [platform_services §8 — Postgres](../documents/engineering/platform_services_doctrine.md#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin) | `src/Amoebius/Platform/Postgres.hs` (PLANNED) | [phase_03_platform_services_storage_vault.md](phase_03_platform_services_storage_vault.md) |
+| Prometheus / Grafana — observability | [platform_services §1](../documents/engineering/platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster) | `src/Amoebius/Platform/Observability.hs` (PLANNED) | [phase_03_platform_services_storage_vault.md](phase_03_platform_services_storage_vault.md) |
+| LoadBalancer (MetalLB-or-cloud, the one substrate-driven difference) | [platform_services §9 — The LoadBalancer and the single wild-ingress path](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) | `src/Amoebius/Platform/LoadBalancer.hs` (PLANNED) | [phase_03_platform_services_storage_vault.md](phase_03_platform_services_storage_vault.md) |
+| Keycloak owning all wild ingress (via Gateway API / Envoy) | [platform_services §9](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) | `src/Amoebius/Platform/Keycloak.hs`, `src/Amoebius/Platform/Edge.hs` (PLANNED) | [phase_03_platform_services_storage_vault.md](phase_03_platform_services_storage_vault.md) |
 
 ---
 
@@ -166,12 +166,12 @@ the broker into the cluster.
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
 |---|---|---|---|
-| Wire framing / binary protocol (forked `proto-lens` `PulsarApi`) | [pulsar_client §3 / §4](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-inherits-and-what-it-builds) | `amoebius-pulsar/src/Amoebius/Pulsar/Frame.hs`, `amoebius-pulsar/src/Amoebius/Pulsar/Proto/PulsarApi.hs` (PLANNED) | [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md) |
-| Connection / CONNECT handshake / LOOKUP discovery | [pulsar_client §4](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-inherits-and-what-it-builds) | `amoebius-pulsar/src/Amoebius/Pulsar/Connection.hs` (PLANNED) | [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md) |
-| Producer / Consumer / Subscription / Seek | [pulsar_client §5](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek) | `amoebius-pulsar/src/Amoebius/Pulsar/{Producer,Consumer,Subscription,Seek}.hs` (PLANNED) | [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md) |
-| CBOR payload codec (exclusively CBOR bodies; `serialise`/`cborg`; canonical where content-addressed) | [pulsar_client §3.1](../documents/engineering/pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor), [illegal_state_catalog §3.23](../documents/engineering/illegal_state_catalog.md) | `amoebius-pulsar/src/Amoebius/Pulsar/Cbor.hs` (PLANNED; `serialise`/`cborg` dep in the `amoebius-pulsar` cabal package) | [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md) |
-| Broker-side dedup wiring + declarative topology algebra | [pulsar_client §6 — The declarative topology algebra](../documents/engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra) | `amoebius-pulsar/src/Amoebius/Pulsar/{Dedup,Topology,Namespace}.hs` (PLANNED) | [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md) |
-| Topic storage lifecycle (retention + size-triggered offload + backlog quota reconcile) | [pulsar_client §6.1](../documents/engineering/pulsar_client_doctrine.md), [resource_capacity §7](../documents/engineering/resource_capacity_doctrine.md) | `amoebius-pulsar/src/Amoebius/Pulsar/Retention.hs` (PLANNED) | [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md) |
+| Wire framing / binary protocol (forked `proto-lens` `PulsarApi`) | [pulsar_client §3 / §4](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-inherits-and-what-it-builds) | `amoebius-pulsar/src/Amoebius/Pulsar/Frame.hs`, `amoebius-pulsar/src/Amoebius/Pulsar/Proto/PulsarApi.hs` (PLANNED) | [phase_05_pulsar_content_store_workflow.md](phase_05_pulsar_content_store_workflow.md) |
+| Connection / CONNECT handshake / LOOKUP discovery | [pulsar_client §4](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-inherits-and-what-it-builds) | `amoebius-pulsar/src/Amoebius/Pulsar/Connection.hs` (PLANNED) | [phase_05_pulsar_content_store_workflow.md](phase_05_pulsar_content_store_workflow.md) |
+| Producer / Consumer / Subscription / Seek | [pulsar_client §5](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek) | `amoebius-pulsar/src/Amoebius/Pulsar/{Producer,Consumer,Subscription,Seek}.hs` (PLANNED) | [phase_05_pulsar_content_store_workflow.md](phase_05_pulsar_content_store_workflow.md) |
+| CBOR payload codec (exclusively CBOR bodies; `serialise`/`cborg`; canonical where content-addressed) | [pulsar_client §3.1](../documents/engineering/pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor), [illegal_state_catalog §3.23](../documents/engineering/illegal_state_catalog.md) | `amoebius-pulsar/src/Amoebius/Pulsar/Cbor.hs` (PLANNED; `serialise`/`cborg` dep in the `amoebius-pulsar` cabal package) | [phase_05_pulsar_content_store_workflow.md](phase_05_pulsar_content_store_workflow.md) |
+| Broker-side dedup wiring + declarative topology algebra | [pulsar_client §6 — The declarative topology algebra](../documents/engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra) | `amoebius-pulsar/src/Amoebius/Pulsar/{Dedup,Topology,Namespace}.hs` (PLANNED) | [phase_05_pulsar_content_store_workflow.md](phase_05_pulsar_content_store_workflow.md) |
+| Topic storage lifecycle (retention + size-triggered offload + backlog quota reconcile) | [pulsar_client §6.1](../documents/engineering/pulsar_client_doctrine.md), [resource_capacity §7](../documents/engineering/resource_capacity_doctrine.md) | `amoebius-pulsar/src/Amoebius/Pulsar/Retention.hs` (PLANNED) | [phase_05_pulsar_content_store_workflow.md](phase_05_pulsar_content_store_workflow.md) |
 
 ---
 
@@ -185,15 +185,15 @@ pinned inputs + pure stages + a derived seed, owned by
 [`content_addressing_doctrine.md` §3 — `experimentHash`: identity is *what was requested* ‖ *where it ran*](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran)
 and
 [`content_addressing_doctrine.md` §4 — Determinism by construction: pinned inputs + pure stages + derived seed](../documents/engineering/content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed).
-The store object lands in Phase 4 (the `amoebius-store` package); the determinism kernel primitives land in
-Phase 5 (in the main `amoebius` package's `Kernel/`).
+The store object lands in Phase 5 (the `amoebius-store` package); the determinism kernel primitives land in
+Phase 6 (in the main `amoebius` package's `Kernel/`).
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
 |---|---|---|---|
-| Content-addressed blob/manifest writer (write-once, self-naming) | [content_addressing §2](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers) | `amoebius-store/src/Amoebius/Store/ContentAddress.hs`, `amoebius-store/src/Amoebius/Store/Manifest.hs` (PLANNED) | [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md) |
-| Pointer tier (ETag-CAS `latest`/`best`/`trial` flip) | [content_addressing §2](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers) | `amoebius-store/src/Amoebius/Store/Pointer.hs` (PLANNED) | [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md) |
-| `ContentAddress` typeclass (determinism kernel primitive) | [content_addressing §4](../documents/engineering/content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) | `src/Amoebius/Kernel/ContentAddress.hs` (PLANNED) | [phase_05_determinism_infernix.md](phase_05_determinism_infernix.md) |
-| `experimentHash` + SplitMix seed derivation | [content_addressing §3](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran) | `src/Amoebius/Kernel/ExperimentHash.hs`, `src/Amoebius/Kernel/Rng.hs` (PLANNED) | [phase_05_determinism_infernix.md](phase_05_determinism_infernix.md) |
+| Content-addressed blob/manifest writer (write-once, self-naming) | [content_addressing §2](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers) | `amoebius-store/src/Amoebius/Store/ContentAddress.hs`, `amoebius-store/src/Amoebius/Store/Manifest.hs` (PLANNED) | [phase_05_pulsar_content_store_workflow.md](phase_05_pulsar_content_store_workflow.md) |
+| Pointer tier (ETag-CAS `latest`/`best`/`trial` flip) | [content_addressing §2](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers) | `amoebius-store/src/Amoebius/Store/Pointer.hs` (PLANNED) | [phase_05_pulsar_content_store_workflow.md](phase_05_pulsar_content_store_workflow.md) |
+| `ContentAddress` typeclass (determinism kernel primitive) | [content_addressing §4](../documents/engineering/content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) | `src/Amoebius/Kernel/ContentAddress.hs` (PLANNED) | [phase_06_determinism_infernix.md](phase_06_determinism_infernix.md) |
+| `experimentHash` + SplitMix seed derivation | [content_addressing §3](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran) | `src/Amoebius/Kernel/ExperimentHash.hs`, `src/Amoebius/Kernel/Rng.hs` (PLANNED) | [phase_06_determinism_infernix.md](phase_06_determinism_infernix.md) |
 
 ---
 
@@ -209,10 +209,10 @@ The forest's one self-signed trust anchor sits at the root and issues down the t
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
 |---|---|---|---|
-| Root Vault init (single-node, password-encrypted, fail-closed) | [vault_pki §5](../documents/engineering/vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal) | `src/Amoebius/Vault/Init.hs` (PLANNED) | [phase_02_platform_services_storage_vault.md](phase_02_platform_services_storage_vault.md) |
-| Unseal (root human-gated; parent/child later) | [vault_pki §5](../documents/engineering/vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal) | `src/Amoebius/Vault/Unseal.hs` (PLANNED) | [phase_02_platform_services_storage_vault.md](phase_02_platform_services_storage_vault.md) |
-| Root PKI trust anchor (root CA + intermediate issuance) | [vault_pki §8](../documents/engineering/vault_pki_doctrine.md#8-the-root-cluster-owns-the-pki-trust-anchor) | `src/Amoebius/Vault/Pki.hs` (PLANNED) | [phase_02_platform_services_storage_vault.md](phase_02_platform_services_storage_vault.md) |
-| `SecretRef` typed surface (names, never values) | [vault_pki §3](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value) | `dhall/amoebius/Capability.dhall` + `src/Amoebius/Dsl/Types.hs` (PLANNED) | [phase_03_dsl_control_plane_singleton.md](phase_03_dsl_control_plane_singleton.md) |
+| Root Vault init (single-node, password-encrypted, fail-closed) | [vault_pki §5](../documents/engineering/vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal) | `src/Amoebius/Vault/Init.hs` (PLANNED) | [phase_03_platform_services_storage_vault.md](phase_03_platform_services_storage_vault.md) |
+| Unseal (root human-gated; parent/child later) | [vault_pki §5](../documents/engineering/vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal) | `src/Amoebius/Vault/Unseal.hs` (PLANNED) | [phase_03_platform_services_storage_vault.md](phase_03_platform_services_storage_vault.md) |
+| Root PKI trust anchor (root CA + intermediate issuance) | [vault_pki §8](../documents/engineering/vault_pki_doctrine.md#8-the-root-cluster-owns-the-pki-trust-anchor) | `src/Amoebius/Vault/Pki.hs` (PLANNED) | [phase_03_platform_services_storage_vault.md](phase_03_platform_services_storage_vault.md) |
+| `SecretRef` typed surface (names, never values) | [vault_pki §3](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value) | `dhall/amoebius/Capability.dhall` + `src/Amoebius/Dsl/Types.hs` (PLANNED) | [phase_04_dsl_control_plane_singleton.md](phase_04_dsl_control_plane_singleton.md) |
 
 ---
 
@@ -229,12 +229,12 @@ Temurin JRE for the JVM services) is owned by
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
 |---|---|---|---|
-| `bootstrap.sh` (ensure toolchain, build binary, hand off) | [substrate §6](../documents/engineering/substrate_doctrine.md#6-the-bootstrapsh-contract-ensure-a-toolchain-build-the-binary-hand-off) | `bootstrap.sh` (PLANNED) | [phase_01_bootstrap_kernel_kind.md](phase_01_bootstrap_kernel_kind.md) |
-| Substrate detection (pure classify over three reads) | [substrate §3](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) | `src/Amoebius/Host/Substrate.hs` (PLANNED) | [phase_01_bootstrap_kernel_kind.md](phase_01_bootstrap_kernel_kind.md) |
-| Lazy tool-ensure (probe → install → resolve abs path → invoke) | [substrate §3](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) | `src/Amoebius/Host/HostTool.hs`, `src/Amoebius/Host/Ensure.hs` (PLANNED) | [phase_01_bootstrap_kernel_kind.md](phase_01_bootstrap_kernel_kind.md) |
-| Virtualized-substrate management (Lima / brew on Apple) | [substrate §3](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) | `src/Amoebius/Substrate/{Apple,Lima,Brew}.hs` (PLANNED) | [phase_07_host_compute_daemons.md](phase_07_host_compute_daemons.md) |
-| Apple-Metal headless build/run (fixed `/usr/bin/clang` Metal bridge + runtime MSL, **no Tart/VM**) | [apple_metal_headless_builds](../documents/engineering/apple_metal_headless_builds.md) | `src/Amoebius/HostWorker/MetalBridge.hs`, `src/Amoebius/HostWorker/AppleMetalBuild.hs` (PLANNED) | [phase_07_host_compute_daemons.md](phase_07_host_compute_daemons.md) |
-| Multi-arch base-image build (bake binaries, buildx `amd64`/`arm64`) | [image_build §7](../documents/engineering/image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain) | `docker/base/Dockerfile`, `src/Amoebius/Image/Build.hs` (PLANNED) | [phase_02_platform_services_storage_vault.md](phase_02_platform_services_storage_vault.md) |
+| `bootstrap.sh` (ensure toolchain, build binary, hand off) | [substrate §6](../documents/engineering/substrate_doctrine.md#6-the-bootstrapsh-contract-ensure-a-toolchain-build-the-binary-hand-off) | `bootstrap.sh` (PLANNED) | [phase_02_bootstrap_kernel_kind.md](phase_02_bootstrap_kernel_kind.md) |
+| Substrate detection (pure classify over three reads) | [substrate §3](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) | `src/Amoebius/Host/Substrate.hs` (PLANNED) | [phase_02_bootstrap_kernel_kind.md](phase_02_bootstrap_kernel_kind.md) |
+| Lazy tool-ensure (probe → install → resolve abs path → invoke) | [substrate §3](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) | `src/Amoebius/Host/HostTool.hs`, `src/Amoebius/Host/Ensure.hs` (PLANNED) | [phase_02_bootstrap_kernel_kind.md](phase_02_bootstrap_kernel_kind.md) |
+| Virtualized-substrate management (Lima / brew on Apple) | [substrate §3](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) | `src/Amoebius/Substrate/{Apple,Lima,Brew}.hs` (PLANNED) | [phase_08_host_compute_daemons.md](phase_08_host_compute_daemons.md) |
+| Apple-Metal headless build/run (fixed `/usr/bin/clang` Metal bridge + runtime MSL, **no Tart/VM**) | [apple_metal_headless_builds](../documents/engineering/apple_metal_headless_builds.md) | `src/Amoebius/HostWorker/MetalBridge.hs`, `src/Amoebius/HostWorker/AppleMetalBuild.hs` (PLANNED) | [phase_08_host_compute_daemons.md](phase_08_host_compute_daemons.md) |
+| Multi-arch base-image build (bake binaries, buildx `amd64`/`arm64`) | [image_build §7](../documents/engineering/image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain) | `docker/base/Dockerfile`, `src/Amoebius/Image/Build.hs` (PLANNED) | [phase_03_platform_services_storage_vault.md](phase_03_platform_services_storage_vault.md) |
 
 ---
 
@@ -255,6 +255,50 @@ The engine and EBS programs land with provider clusters in Phase 10; multi-clust
 | Vault-enveloped MinIO state backend | [pulumi_iac §2](../documents/engineering/pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio) | `src/Amoebius/Pulumi/Backend/EncryptedMinio.hs` (PLANNED) | [phase_10_provider_clusters_provisioning.md](phase_10_provider_clusters_provisioning.md) |
 | Resource provisioning (provider cluster, node groups, EBS, teardown) | [pulumi_iac §4](../documents/engineering/pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog) | `amoebius-pulumi/src/Amoebius/Pulumi/{Ebs,NodeGroup,Teardown}.hs`, `src/Amoebius/Pulumi/Provider/Eks.hs` (PLANNED) | [phase_10_provider_clusters_provisioning.md](phase_10_provider_clusters_provisioning.md) |
 | EBS create-vs-delete credential model | [pulumi_iac §6 — The EBS create-vs-delete credential model](../documents/engineering/pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model) | `src/Amoebius/Pulumi/Credential.hs` (PLANNED) | [phase_10_provider_clusters_provisioning.md](phase_10_provider_clusters_provisioning.md) |
+
+---
+
+## 11. Formal-first design artifacts — the Phase-1 Tier-1 validation surface
+
+Phase 1 front-loads the suite's **design-time / in-process (Tier-1) integrity** — it validates that *the spec
+composes and the protocol is sound in the abstract*, before any real resource exists. It proves the DSL's
+illegal-state-unrepresentable **type discipline** (Dhall Gate 1 `dhall type` + the Haskell `Dhall.inputFile`
+auto-decoder Gate 2 + QuickCheck), the **SPA-composition** representational/type-level validity, and the
+cross-cluster-failover & singleton-election **design invariants** (TLA+/TLC at bounded scope, plus an optional
+io-sim schedule check over the lifted pure decision core). The two-tier split — design-time integrity here vs
+runtime-enforcement integrity at each surface's build phase — is owned by
+[`tla_modelling_assumptions.md`](../documents/engineering/tla_modelling_assumptions.md) and scheduled by the
+[phase_01_formal_first_dsl_integrity.md](phase_01_formal_first_dsl_integrity.md) gate. The per-surface owners
+are the [`dsl_doctrine.md` §2 / Gate 2](../documents/engineering/dsl_doctrine.md#gate-2--the-haskell-typed-decoder)
+DSL gates, the [`chaos_failover_doctrine.md` §4/§10/§12](../documents/engineering/chaos_failover_doctrine.md)
+Model/Simulate rows and the [`daemon_topology_doctrine.md` §3](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected)
+election, the [`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) capacity
+fold, the [`service_capability_doctrine.md` §4](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding)
+binder, and the [`illegal_state_catalog.md` §6](../documents/engineering/illegal_state_catalog.md) foreclosure
+layers 1–2.
+
+Most module paths below **also appear at their build/runtime phase** — the DSL schema and decoder in §2, the
+capability binder in §4, the capacity fold in §2 (enacted at Phase 10), and the multi-cluster **correspondence +
+reconcile** work, which stay at Phase 9. Registering them here at their **design-first validation** phase is
+deliberate two-tier bookkeeping, not a second owner: Phase 1 validates the *design / type discipline* in-process;
+the build phase enforces it against a running cluster.
+
+> **Honesty — Tier 1, never runtime.** A green Dhall typecheck, a green auto-decoder, a green QuickCheck, or a
+> TLC run that reaches every declared invariant at scope is a **design/spec-layer** result — *proven for the
+> model at scope* / type- or decode-foreclosed / tested-and-sampled — and **never** a runtime guarantee: *a
+> type-check proves the spec composes, not that the cluster enforces it.* Correspondence-to-built-code and
+> runtime enforcement stay **UNVERIFIED** until each surface's real-resource phase (Tier 2), and a Tier-1-only
+> in-process ledger is structurally insufficient to advance a production PromotionGate.
+
+| Component / Surface | Owning doctrine | Planned module path | Phase |
+|---|---|---|---|
+| Cross-cluster failover **design model** (TLC invariants `UniqueOwner` / `NoTugOfWar` / `ExactlyOnce` / `MergeConverges` / `NoWriteAfterStaleFailover`; proven-for-the-model at scope 2) | [chaos_failover §4/§12 — Model](../documents/engineering/chaos_failover_doctrine.md) | `spec/tla/CrossClusterFailover.tla` (+ `.cfg`) (PLANNED) | [phase_01_formal_first_dsl_integrity.md](phase_01_formal_first_dsl_integrity.md) |
+| Singleton-election **design model** (First-Axis "no two active singletons" at 3 candidates) | [daemon_topology §3](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected), [chaos_failover §4](../documents/engineering/chaos_failover_doctrine.md) | `spec/tla/SingletonElection.tla` (+ `.cfg`) (PLANNED) | [phase_01_formal_first_dsl_integrity.md](phase_01_formal_first_dsl_integrity.md) |
+| Lifted pure gateway-decision core + io-sim schedule check (TESTED, sampled schedules; **design-first only** — the `Multicluster/*` correspondence + reconcile stay Phase 9) | [chaos_failover §10 — Simulate](../documents/engineering/chaos_failover_doctrine.md) | `src/Amoebius/Multicluster/GatewayDecision.hs`, `test/iosim/CrossClusterFailover.hs` (PLANNED) | [phase_01_formal_first_dsl_integrity.md](phase_01_formal_first_dsl_integrity.md) |
+| Dhall schema **type discipline** (Gate 1 `dhall type`; illegal-state-unrepresentable surface) | [dsl_doctrine §2](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic), [illegal_state_catalog §6](../documents/engineering/illegal_state_catalog.md) | `dhall/amoebius/*.dhall` (PLANNED; deployed at §2 / §4) | [phase_01_formal_first_dsl_integrity.md](phase_01_formal_first_dsl_integrity.md) |
+| DSL decoder + smart-constructor **type discipline** (Gate 2 auto-decode + QuickCheck round-trip; SPA-composition representational check) | [dsl_doctrine Gate 2](../documents/engineering/dsl_doctrine.md#gate-2--the-haskell-typed-decoder) | `src/Amoebius/Dsl/*` (PLANNED; built at §2) | [phase_01_formal_first_dsl_integrity.md](phase_01_formal_first_dsl_integrity.md) |
+| Capacity fold **representational validity** (`fits` / `carve` / `place` QuickCheck properties) | [resource_capacity_doctrine](../documents/engineering/resource_capacity_doctrine.md) | `src/Amoebius/Capacity/*` (PLANNED; enacted at Phase 10) | [phase_01_formal_first_dsl_integrity.md](phase_01_formal_first_dsl_integrity.md) |
+| Capability→binding **representational / type validity** (capability need ⇒ `ServiceSpec`, checked at the type level) | [service_capability §4](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding) | `src/Amoebius/Capability/Binding.hs` (PLANNED; built at §4) | [phase_01_formal_first_dsl_integrity.md](phase_01_formal_first_dsl_integrity.md) |
 
 ---
 

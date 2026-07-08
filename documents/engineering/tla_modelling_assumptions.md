@@ -2,53 +2,66 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/gateway_migration_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/gateway_migration_doctrine.md, DEVELOPMENT_PLAN/phase_01_formal_first_dsl_integrity.md
 **Generated sections**: none
 
-> **Purpose**: Own the formal-model assumptions, implementation correspondence, known divergences, and verification boundaries for amoebius's async cross-cluster gateway-failover specification — authored when Phase 9 is reached.
+> **Purpose**: Own the two-tier record for amoebius's async cross-cluster gateway-failover specification — the **design-model tier** (abstract system model, invariant catalog, modelling bounds, verification status), authored **design-first** and model-checked in Phase 1 independent of any implementation; and the **correspondence tier** (variable-to-implementation mapping, known divergences), completed in Phase 9 once the runtime modules exist.
 
 ---
 
-## 0. Scheduled stub — read this first
+## 0. Two tiers — read this first
 
-**This is a placeholder, not a finished model.** The TLA+ specification it describes does
-not exist yet, and nothing here may be read as a verification result. There is no spec, no
-TLC run, no invariant catalog, and therefore nothing **proven**, nothing **tested**, and not
-even anything **assumed** about a model — because the model has not been written.
+**The single proof obligation splits into two tiers with different verifiability.** The original framing
+deferred the *whole* model until there was a real implementation to correspond to — but that conflated two
+separable obligations, and only one of them needs code:
 
-What *does* exist today is a single, sharp **proof obligation** that amoebius has deliberately
-deferred until there is a real implementation to correspond to. That obligation, and the
-methodology for discharging it, are owned by
-[chaos_failover_doctrine.md](./chaos_failover_doctrine.md). This document is the reserved home
-for the *artifact* that obligation eventually produces: the formal model and its honest
-correspondence ledger.
+- **Tier 1 — the design model (authored and checked now, Phase 1).** A TLA+ model is a *design* artifact;
+  model-checking is a design-first act that needs no runtime — that is its entire value. The abstract system
+  model, the invariant catalog, the modelling bounds, and the TLC verification status are authored and
+  checked **before any real resource is provisioned**. Once TLC runs green at the declared scope, the design
+  invariants are **proven for the model** — a real, available result. The methodology is owned by
+  [chaos_failover_doctrine.md](./chaos_failover_doctrine.md); the design-first phase that discharges this
+  tier is [DEVELOPMENT_PLAN/phase_01_formal_first_dsl_integrity.md](../../DEVELOPMENT_PLAN/phase_01_formal_first_dsl_integrity.md).
+- **Tier 2 — the correspondence (deferred, Phase 9).** Mapping each model variable and action onto a
+  *built* Haskell module, daemon loop, or delegated-subsystem mechanism **with real file paths** genuinely
+  cannot precede the code. The correspondence table, the known-divergences record, and the model↔code
+  refinement stay **UNVERIFIED** until the runtime modules exist.
 
-The model is **Phase 9 work**. Phase order, status, and the acceptance gate are owned by
-[DEVELOPMENT_PLAN/README.md → Phase 9](../../DEVELOPMENT_PLAN/README.md); this document never
-restates phase status. Authoring begins when Phase 9 (multi-cluster: amoebic spawning +
-geo-replication + failover) opens and there is a runtime to model against.
+**Only the correspondence needs code.** The design model is authored and proven-for-the-model in Phase 1;
+only Tier 2 waits for the runtime. The sharp boundary, kept throughout this document: *the abstract model is
+proven; the running cluster is unverified; the two are not the same theorem.*
+
+Phase order, status, and the acceptance gates are owned by
+[DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (Phase 1 for the design tier, Phase 9 for the
+correspondence tier); this document never restates phase status.
 
 ---
 
 ## 1. What this document will own (SSoT scope)
 
-When authored, this is the **single source of truth** for everything *about the formal model*
-of the cross-cluster failover boundary — and only that. Concretely, it will own:
+This is the **single source of truth** for everything *about the formal model* of the cross-cluster failover
+boundary — and only that. Its contents split along the two tiers of [§0](#0-two-tiers--read-this-first):
+
+**Tier 1 — the design model (authored design-first in Phase 1; a green TLC run is a real result now):**
 
 - **Abstract system model** — what the spec includes (clusters, geo-replication lag, the
   gateway-ownership / route53-repoint protocol, partial-sync failure) and what it abstracts
   away.
+- **Invariant catalog** — each safety/liveness property the model asserts, in plain terms,
+  alongside the concrete failure it prevents.
+- **Modelling bounds and limitations** — the bounded constants the model checker is run with,
+  what those bounds *prove*, and (just as important) what they do **not** prove.
+- **Verification status** — the honest record of what the model checker actually reached, and which
+  residue [`io-sim`](./chaos_failover_doctrine.md)/runtime tests still carry (the latter deferred to Tier 2).
+
+**Tier 2 — the correspondence (deferred to Phase 9; cannot be written before the runtime modules exist):**
+
 - **Variable-to-implementation correspondence** — a table mapping each TLA+ variable and
   action to the concrete Haskell module, daemon loop, or Pulsar/MinIO/Postgres mechanism it
   stands for, with file paths.
 - **Known divergences and compression points** — every place the model is more abstract,
   more explicit, or simply different from the runtime, recorded honestly so no reader mistakes
   a modelling convenience for a runtime guarantee.
-- **Modelling bounds and limitations** — the bounded constants the model checker is run with,
-  what those bounds *prove*, and (just as important) what they do **not** prove.
-- **Invariant catalog** — each safety/liveness property the model asserts, in plain terms,
-  alongside the concrete failure it prevents.
-- **Verification status** — the honest record of what the model checker actually reached.
 
 It does **not** own the *methodology* (Extract → Model → Inject, the invariant-confluence
 "Second Axis", the proven/tested/assumed ledger) — that is
@@ -109,8 +122,9 @@ scoping decision, not a verdict about its safety.
 
 The worst case, in plain words: a sibling cluster is **mid geo-sync** — it has
 accepted some replicated state but not all — and at that instant it goes down, and a gateway
-failover *to that very cluster* is attempted. The honest answer today is that amoebius has not
-proven a well-defined behaviour for that state, and that is why the model is scheduled.
+failover *to that very cluster* is attempted. The design model **defines and proves-for-the-model** a
+well-defined behaviour for that state in Phase 1 (Tier 1); that the *running* cluster satisfies it is proven
+against the built modules in Phase 9 (Tier 2), and remains **UNVERIFIED** until then.
 
 This worst case is specific to the **Failover** branch of `GatewayMigration`
 ([gateway_migration_doctrine.md](./gateway_migration_doctrine.md)): a mid-geo-sync failover can arise
@@ -139,33 +153,33 @@ budget, and the proof artifacts are green*
 
 ---
 
-## 4. Planned structure (the skeleton, not the content)
+## 4. Structure
 
-When authored, this document will mirror the rigor of the sibling project's analogue
+This document mirrors the rigor of the sibling project's analogue
 (`prodbox/documents/engineering/tla_modelling_assumptions.md`), adapted from prodbox's
-single-cluster gateway model to amoebius's **cross-cluster** failover model. The sections below
-are the reserved table of contents; each is **empty by design** until Phase 9 produces a spec
-to fill it.
+single-cluster gateway model to amoebius's **cross-cluster** failover model. The table of contents below
+is split by tier: the **design-first** sections are authored and checked in Phase 1; the **correspondence**
+sections stay empty by design until Phase 9 produces a runtime to map onto.
 
-| Planned section | What it will record |
-|---|---|
-| Abstract system model | The cluster set, geo-replication lag/queue, gateway-ownership protocol, DNS-repoint gating, and the explicit list of what is abstracted away. |
-| Communication model | How cross-cluster replication and failover signalling are represented in the spec vs the concrete Pulsar/MinIO/Postgres + control-plane-singleton runtime. |
-| Variable-to-implementation correspondence | TLA+ variables/actions → Haskell modules, daemon loops, and delegated-subsystem mechanisms, with real file paths. |
-| Known divergences & compression points | Every model-vs-runtime gap, recorded honestly (the prodbox analogue keeps a numbered list; this one will too). |
-| Modelling bounds & limitations | Cluster count, lag bound, and message/log-length constants the checker runs with — and what those bounds do **not** prove. |
-| Invariant catalog | Each safety/liveness property in plain terms + the concrete failure it prevents (single-gateway-owner, no-write-after-stale-failover, bounded self-healing divergence, …). |
-| Impossibility acknowledgment | The CAP/FLP boundary for async partitions, and amoebius's chosen branch (act-and-heal vs refuse-to-write) for *this* boundary — framed against, not duplicating, [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Records the planned/forced frame: this async model covers only the **Failover** branch; the **Planned** synchronous switchover is out of async scope and owned by [gateway_migration_doctrine.md](./gateway_migration_doctrine.md). |
-| Verification status | The honest ledger of what the checker actually reached, and where `io-sim`/runtime tests carry the rest. |
+| Section | Tier — authored in | What it records |
+|---|---|---|
+| Abstract system model | **Tier 1 — Phase 1** | The cluster set, geo-replication lag/queue, gateway-ownership protocol, DNS-repoint gating, and the explicit list of what is abstracted away. |
+| Communication model | **Tier 1 — Phase 1** (spec side) | How cross-cluster replication and failover signalling are represented in the spec; the mapping to the concrete Pulsar/MinIO/Postgres + control-plane-singleton runtime is the correspondence-tier row below. |
+| Modelling bounds & limitations | **Tier 1 — Phase 1** | Cluster count, lag bound, and message/log-length constants the checker runs with — and what those bounds do **not** prove. |
+| Invariant catalog | **Tier 1 — Phase 1** | Each safety/liveness property in plain terms + the concrete failure it prevents (single-gateway-owner, no-write-after-stale-failover, bounded self-healing divergence, …). |
+| Impossibility acknowledgment | **Tier 1 — Phase 1** | The CAP/FLP boundary for async partitions, and amoebius's chosen branch (act-and-heal vs refuse-to-write) for *this* boundary — framed against, not duplicating, [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Records the planned/forced frame: this async model covers only the **Failover** branch; the **Planned** synchronous switchover is out of async scope and owned by [gateway_migration_doctrine.md](./gateway_migration_doctrine.md). |
+| Verification status | **Tier 1 — Phase 1** (TLC) + Tier-2 residue | The honest ledger of what the checker actually reached (proven-for-the-model at scope), and where `io-sim`/runtime tests carry the rest (deferred). |
+| Variable-to-implementation correspondence | **Tier 2 — Phase 9** | TLA+ variables/actions → Haskell modules, daemon loops, and delegated-subsystem mechanisms, with real file paths. **Empty and UNVERIFIED until the modules exist** — that empty state *is* the inversion. |
+| Known divergences & compression points | **Tier 2 — Phase 9** | Every model-vs-runtime gap, recorded honestly (the prodbox analogue keeps a numbered list; this one will too). |
 
-Two adaptation notes carried over from the analogue, so the future author does not re-derive
-them:
+Two adaptation notes carried over from the analogue, so the author does not re-derive them:
 
-- **Tooling.** The proof spans **two** instruments, as scheduled by Phase 9: **TLA+/TLC** for
-  bounded-state safety of the failover protocol, and **`io-sim`** for the Haskell runtime's
-  concurrent behaviour under the same fault assumptions. This document owns the TLA+ half's
-  assumptions and correspondence; the `io-sim` half's role in the combined argument is set by
-  [chaos_failover_doctrine.md](./chaos_failover_doctrine.md).
+- **Tooling.** The proof spans **two** instruments, split across the two tiers: **TLA+/TLC** for bounded-state
+  safety of the failover protocol (Tier 1, authored/checked in Phase 1), and **`io-sim`** for the Haskell
+  runtime's concurrent behaviour under the same fault assumptions (a Phase-1 in-process design-schedule check
+  over the lifted *pure decision core* against hand-built peer stubs; io-sim *against the built runtime* is
+  Tier-2, deferred). This document owns the TLA+ half's assumptions and correspondence; the `io-sim` half's
+  role in the combined argument is set by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md).
 - **Topology honesty.** As in prodbox, partition tolerance is a **capability the model reserves
   for the multi-cluster substrate**, not a property a single root cluster exercises. A
   single-node root control plane (prodbox's behaviour) has no sibling to fail over to and trivially
@@ -178,16 +192,28 @@ them:
 ## 5. Honesty marker
 
 Per the [documentation standards](../documentation_standards.md) honesty rule and the
-chaos/failover doctrine's proven/tested/assumed discipline: until Phase 9 authors the spec and
-runs the checker, the cross-cluster failover boundary is an **open proof obligation**, not a
-verified property. This document asserts no result. When content lands, every claim here will
-state the layer it actually reaches — proof, test evidence, or assumption — and will say which.
+chaos/failover doctrine's proven/tested/assumed discipline, this document keeps the two tiers of
+[§0](#0-two-tiers--read-this-first) strictly apart:
+
+- **Tier 1 (design model).** Once Phase 1 authors the spec and TLC runs green at the declared scope, the
+  design invariants are **proven for the model** — a real result, bounded by the modelling constants (what
+  scope *N* does **not** prove is stated in the modelling-bounds section). This is a proof *about the model*,
+  never about the running cluster.
+- **Tier 2 (correspondence + runtime).** The variable-to-implementation correspondence, the model↔code
+  refinement, and the runtime-enforcement fidelity remain an **open proof obligation** — UNVERIFIED — until
+  Phase 9 builds the modules and the live failover gate runs.
+
+The sharp boundary, restated: **the abstract model is proven; the running cluster is unverified; the two are
+not the same theorem.** Every claim in this document states the layer it actually reaches — proof
+(for-the-model), test evidence, or assumption — and says which; a Tier-1 result is never reported as a
+runtime guarantee.
 
 ---
 
 ## Cross-references
 
 - [Chaos & Failover Doctrine](./chaos_failover_doctrine.md) — the Extract→Model→Inject methodology, the proven/tested/assumed ledger, and the invariant-confluence "Second Axis" (owns the *method*; this doc owns the *model artifact*).
+- [Development Plan → Phase 1](../../DEVELOPMENT_PLAN/phase_01_formal_first_dsl_integrity.md) — the design-first phase that authors and model-checks the **Tier 1** design model (before any runtime exists).
 - [Gateway Migration Doctrine](./gateway_migration_doctrine.md) — the `GatewayMigration = <Planned | Failover>` taxonomy and both migration protocols; this model targets only the **Failover** branch (the **Planned** branch is a synchronous switchover with no async divergence to prove).
 - [Development Plan → Phase 9](../../DEVELOPMENT_PLAN/README.md) — phase order, status, and the failover acceptance gate.
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — geo-replication, gateway failover, and teardown-with-cleanup vs chaos-failover mechanics.

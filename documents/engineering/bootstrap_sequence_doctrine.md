@@ -212,9 +212,9 @@ this doc specifies the single-node-root answer the plan adopts and does not sett
 This document is normative bootstrap-sequence + admin-control-plane doctrine only. Delivery sequencing,
 status, and gates are owned by [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md), never
 restated here. For orientation only (the plan is authoritative): the **ordered sequence + host→singleton
-handoff** ride **Phase 1** (bootstrap + kernel + kind); the **`vault init/unseal` admin endpoint** rides
-**Phase 2** (root Vault/PKI); the **`dhall update` endpoint + the elected singleton REST surface** ride
-**Phase 3** (the control-plane singleton). This doc states the target shape and links back for status.
+handoff** ride **Phase 2** (bootstrap + kernel + kind); the **`vault init/unseal` admin endpoint** rides
+**Phase 3** (root Vault/PKI); the **`dhall update` endpoint + the elected singleton REST surface** ride
+**Phase 4** (the control-plane singleton). This doc states the target shape and links back for status.
 
 > **Honesty.** Everything here is Phase 0 design intent, specified before implementation. The "midwife then
 > defers" host-daemon model and the reconcile-driven bring-up are *proven in the prodbox / hostbootstrap

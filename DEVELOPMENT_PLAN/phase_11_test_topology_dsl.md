@@ -48,9 +48,9 @@ them down. It owns six deliverables, building on the runtime, DSL, and storage m
    layers it actually reached; a move that *applies* but is not performed marks its layer **UNVERIFIED**,
    never green.
 
-This phase consumes — and does not re-implement — the DSL and control-plane singleton (Phase 3), the native
-Pulsar client + worker Failover scaffolding (Phase 4), the retained `no-provisioner` PV model (Phase 2),
-substrate detection (Phase 1), and Vault secret-by-name injection (Phase 2). The leadership-election and
+This phase consumes — and does not re-implement — the DSL and control-plane singleton (Phase 4), the native
+Pulsar client + worker Failover scaffolding (Phase 5), the retained `no-provisioner` PV model (Phase 3),
+substrate detection (Phase 2), and Vault secret-by-name injection (Phase 3). The leadership-election and
 HA-failover *mechanics* the topologies exercise are intra-cluster facilities delivered by those earlier
 phases; this phase only *schedules* them into a test topology and tears the result down.
 
@@ -136,8 +136,8 @@ at **decode**, not type
 **Implementation**: `src/Amoebius/Test/Topology.hs`, `dhall/test/Topology.dhall` (the `TestTopology` Dhall
 type + its Haskell decoder), `src/Amoebius/Test/Runner.hs` (the structured-cleanup runner) (target paths
 from [system_components.md](system_components.md); not yet built)
-**Blocked by**: Phase 3 — the orchestration DSL + control-plane singleton (the production types a test
-composes over); Phase 4 — orchestrator/worker daemon scaffolding (the intra-cluster failover the schedule
+**Blocked by**: Phase 4 — the orchestration DSL + control-plane singleton (the production types a test
+composes over); Phase 5 — orchestrator/worker daemon scaffolding (the intra-cluster failover the schedule
 injects)
 **Independent Validation**: a topology whose workflow deliberately fails, and a topology aborted with
 SIGINT mid-run, both still execute teardown and converge the resource set to empty; re-running a teardown
@@ -178,7 +178,7 @@ The whole sprint.
 **Status**: Planned
 **Implementation**: `src/Amoebius/Test/SuggestTest.hs`, `app/Amoebius/Command/SuggestTest.hs` (the
 `amoebius suggest-test` subcommand) (target paths; not yet built)
-**Blocked by**: Sprint 11.1 (the `TestTopology` type it emits values of); Phase 1 — substrate detection (the
+**Blocked by**: Sprint 11.1 (the `TestTopology` type it emits values of); Phase 2 — substrate detection (the
 pure host classification)
 **Independent Validation**: against a fixed fake host classification + a fake credential-probe result,
 `suggest-test` emits a deterministic test `.dhall` that (a) type-checks as a `TestTopology`, (b) is sized to
@@ -218,7 +218,7 @@ The whole sprint.
 **Status**: Planned
 **Implementation**: `src/Amoebius/Test/Credentials.hs`, `dhall/test/TestCredential.dhall` (the flagged
 test-simulation identity type + the test-owned tag) (target paths; not yet built)
-**Blocked by**: Sprint 11.1 (the topology whose allocations get tagged); Phase 2 — root Vault + secret-by-name
+**Blocked by**: Sprint 11.1 (the topology whose allocations get tagged); Phase 3 — root Vault + secret-by-name
 injection
 **Independent Validation**: a topology run under the flagged identity tags every allocated resource
 test-owned at creation; a topology that attempts to run a workload under the everyday (non-flagged)
@@ -259,7 +259,7 @@ The whole sprint.
 **Implementation**: `src/Amoebius/Test/Harness.hs`, `src/Amoebius/Test/Sweep.hs` (the elevated harness +
 the test-flag postflight sweep) (target paths; not yet built)
 **Blocked by**: Sprint 11.1 (the teardown the sweep follows); Sprint 11.3 (the test-owned flag the sweep is
-scoped by); Phase 2 — the retained `no-provisioner` PV model the rule protects
+scoped by); Phase 3 — the retained `no-provisioner` PV model the rule protects
 **Independent Validation**: only the elevated harness, holding the flagged delete-capable credential, can
 destroy durable storage, and only storage flagged test-owned; a no-normal-operation-deletion attempt against
 a retained PV is unauthorized; a postflight sweep that finds a leftover test-flagged resource fails the run
@@ -300,7 +300,7 @@ The whole sprint.
 **Status**: Planned
 **Implementation**: `src/Amoebius/Storage/Shrink.hs` (the verified-migration reconciler) (target path; not
 yet built)
-**Blocked by**: Sprint 11.4 (the elevated reclaim path the retire-old step is gated to); Phase 2 — the
+**Blocked by**: Sprint 11.4 (the elevated reclaim path the retire-old step is gated to); Phase 3 — the
 retained PV model + deterministic rebind
 **Independent Validation**: increasing a PVC's requested size is an in-place, data-preserving change; a
 shrink provisions a new correctly-sized retained volume, copies the live bytes, verifies the copy, and only

@@ -14,19 +14,23 @@
 ## Phase Status
 
 📋 Planned. The SPA-composition surface is specified, not started; every sprint below is design intent and
-every prescriptive statement is a target shape, not a tested amoebius result. The capability abstraction
-(Phase 3), the infernix inference workflow (Phase 5), the jitML migration (Phase 6), and the
-mattandjames app-logic-only reduction (Phase 8) are the earlier work this phase composes — none of them is
-re-implemented here, and where this phase leans on the sibling **prodbox** project it is cited as evidence,
-never as amoebius proof.
+every prescriptive statement is a target shape, not a tested amoebius result. The representational/type-level
+SPA composition already proven in-process in Phase 1 (Tier 1), the capability abstraction (Phase 4), the
+infernix inference workflow and its demo web app (Phase 6), and the jitML migration and its demo web app
+(Phase 7) are the earlier work this phase composes — the infernix/jitML demo web apps being the
+application-logic-only demonstration this phase now deploys live — none of them is re-implemented here, and
+where this phase leans on the sibling **prodbox** project it is cited as evidence, never as amoebius proof.
 
 ## Phase Summary
 
 This phase makes the SPA the **composition apex** of the whole doctrine suite: a single `.dhall` that
-declares a multi-service single-page app *and* folds in one or more ML workflows, all as application logic,
-with the platform realizing each dependency as a capability and the edge gated by Keycloak. It does not add
-a new capability, a new provider, or a new reconciler — it proves that the established surfaces compose end
-to end.
+declares a multi-service single-page app *and* folds in one or more ML-workflow demo web apps, all as
+application logic, with the platform realizing each dependency as a capability and the edge gated by
+Keycloak. The SPA's representational/type-level validity — composing a multi-service app plus an ML-workflow
+demo web app as typed Dhall fragments — was **already proven in-process in Phase 1 (Tier 1)**; this phase is
+the **Tier-2 live deploy**, where the SPA `.dhall` composes the **infernix and jitML demo web apps** into a
+running, reachable SPA on linux-cpu. It does not add a new capability, a new provider, or a new reconciler —
+it proves that the established surfaces compose live, end to end.
 
 The phase delivers, in order:
 
@@ -43,14 +47,14 @@ The phase delivers, in order:
 4. **The deployment-rules layer that runs it.** Replica counts on an unchanged HA chart, the capability
    provider+shape bindings, and the inference substrate (linux-cpu for this gate) — all keyed by the SPA app
    name, none of it touching the SPA app surface.
-5. **The composition gate** on linux-cpu: one SPA `.dhall` composes a multi-service app plus an ML workflow,
-   deploys via the typed reconciler, is reachable through Keycloak/Envoy, exercises the ML workflow, and
-   tears down leak-free.
+5. **The composition gate** on linux-cpu: one SPA `.dhall` composes a multi-service app plus an ML-workflow
+   demo web app (the infernix/jitML demo web apps), deploys via the typed reconciler, is reachable through
+   Keycloak/Envoy, exercises the ML workflow, and tears down leak-free.
 
 ```mermaid
 flowchart LR
   spa[SPA app dhall written once: UI surfaces, ObjectStore Sql MessageBus Identity Edge needs, uses infernix] --> compose[Composition: app surface plus nested infernix workflow]
-  workflow[infernix chatbot workflow from Phase 5] --> compose
+  workflow[infernix chatbot workflow from Phase 6] --> compose
   compose --> rules[Deployment rules: replicas, capability provider plus shape, inference substrate linux-cpu]
   rules --> render[Typed reconciler renders manifests and applies them]
   render --> edge[Keycloak gates the published route over Envoy Gateway API]
@@ -58,14 +62,14 @@ flowchart LR
 ```
 
 **Substrate:** linux-cpu (§L) — the gate composes and deploys the SPA on a single linux-cpu substrate and
-exercises a CPU-bound infernix inference round-trip; the jitML RL-gaming SPA is built and type-checks as a
+exercises a CPU-bound infernix inference round-trip; the jitML RL-gaming demo web app is built and type-checks as a
 second worked composition, but running an ML workflow on a CUDA/Apple-Metal substrate is out of contract
 here, since the inference/training substrate is exactly the deployment dial this phase keeps swappable
 without touching the SPA.
 
-**Gate:** an SPA `.dhall` composes a **multi-service app + an ML workflow**, deployed and reachable.
+**Gate:** an SPA `.dhall` composes a **multi-service app + an ML-workflow demo web app**, deployed and reachable.
 Concretely: a single SPA spec declares a multi-service UI surface against capability needs (`ObjectStore` /
-`Sql` / `MessageBus` / `Identity` / `Edge`) and composes an infernix chatbot ML workflow; composed with a
+`Sql` / `MessageBus` / `Identity` / `Edge`) and composes the infernix chatbot demo web app's ML workflow; composed with a
 linux-cpu deployment-rules layer it deploys on the standard HA stack, the SPA UI is reachable through the
 Keycloak/Envoy edge, an inference request round-trips through the composed infernix workflow, the deployment
 tears down leak-free, and the run emits a proven/tested/assumed ledger artifact recording the composition as
@@ -98,7 +102,7 @@ was made.
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Spa/Spec.hs`, `dhall/amoebius/Spa.dhall`, `dhall/examples/spa_chatbot.dhall` (target paths; not yet built)
-**Blocked by**: Phase 3 (the two DSL surfaces, the app-spec type family, and the capability abstraction); Phase 2 (the HA-always platform services the capabilities bind to)
+**Blocked by**: Phase 4 (the two DSL surfaces, the app-spec type family, and the capability abstraction); Phase 3 (the HA-always platform services the capabilities bind to)
 **Independent Validation**: the example SPA `.dhall` (`dhall/examples/spa_chatbot.dhall`) type-checks against the SPA app-spec type, declaring a multi-service UI surface plus capability needs (`ObjectStore` / `Sql` / `MessageBus` / `Identity` / `Edge`) and **no product literal** — a grep for `minio`, `keycloak`, `pulsar`, `patroni`, or `postgres` on the SPA surface returns nothing, and a variant that names a product fails Gate 1 (the Dhall typechecker) because the app surface has no product arm.
 **Docs to update**: `documents/engineering/service_capability_doctrine.md`, `documents/engineering/app_vs_deployment_doctrine.md`
 
@@ -117,7 +121,7 @@ auth rules against `Identity`, published UI against `Edge` — and never names a
   capability-need records each surface depends on, carrying the SPA's name (unique per cluster, naming its
   own namespace) and **no** deployment vocabulary (no `replicas`, `region`, `failover`, `chaos`, or
   `substrate` field — the type has nowhere to put them).
-- A `dhall/amoebius/Spa.dhall` type the example SPAs decode against, composing the Phase 3 capability-need
+- A `dhall/amoebius/Spa.dhall` type the example SPAs decode against, composing the Phase 4 capability-need
   arms into a single multi-service surface.
 - A worked `dhall/examples/spa_chatbot.dhall` skeleton: a multi-service single-page app declaring an
   `ObjectStore` bucket set (`<app>/<bucket>`), a `Sql` need, `MessageBus` topics, an `Identity` auth rule,
@@ -139,7 +143,7 @@ The whole sprint.
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Spa/Workflow.hs`, `dhall/amoebius/Spa.dhall` (the workflow-composition field), `dhall/examples/spa_chatbot.dhall` (uses infernix), `dhall/examples/spa_rl_gaming.dhall` (uses jitML) (target paths; not yet built)
-**Blocked by**: Sprint 12.1; Phase 5 (infernix migrated onto the runtime + deterministic CPU inference); Phase 6 (jitML migrated onto the runtime); Phase 8 (the mattandjames app-logic-only reduction, the worked pattern this generalizes)
+**Blocked by**: Sprint 12.1; Phase 1 (the representational SPA composition already proven in-process — the typed-Dhall composition this deploys live); Phase 6 (infernix migrated onto the runtime + deterministic CPU inference, shipping the infernix demo web app — the application-logic-only demonstration this generalizes); Phase 7 (jitML migrated onto the runtime, shipping the jitML demo web app)
 **Independent Validation**: the chatbot SPA declares *that* it uses infernix and the RL-gaming SPA declares *that* it uses jitML — a shared-library dependency on the application-logic surface — with the infernix/jitML `.dhall` nested inside the SPA spec; neither SPA names an inference/training substrate on its surface, and toggling the substrate binding in the deployment-rules layer (Sprint 12.4) changes no SPA `.dhall` or `.hs` source.
 **Docs to update**: `documents/engineering/app_vs_deployment_doctrine.md`, `documents/engineering/content_addressing_doctrine.md`
 
@@ -157,10 +161,10 @@ spec rather than living as a parallel system.
 - An `Amoebius.Spa.Workflow` library and a workflow-composition field on the SPA spec type that names a
   shared library (infernix or jitML) and the workflow it composes (the library call graph = application
   logic), with the library's configuration `.dhall` nested into the SPA spec.
-- The worked `dhall/examples/spa_chatbot.dhall` composing an **infernix** inference workflow (the migrated,
-  deterministic library from Phase 5) and a worked `dhall/examples/spa_rl_gaming.dhall` composing a
-  **jitML** workflow (the migrated library from Phase 6) — each naming *that* it uses the library, neither
-  naming a substrate.
+- The worked `dhall/examples/spa_chatbot.dhall` composing the **infernix** demo web app's inference workflow
+  (the migrated, deterministic library from Phase 6) and a worked `dhall/examples/spa_rl_gaming.dhall`
+  composing the **jitML** demo web app's workflow (the migrated library from Phase 7) — each naming *that* it
+  uses the library, neither naming a substrate.
 - No inference/training-substrate vocabulary on either SPA surface: the substrate is bound only later, in
   the deployment-rules layer.
 
@@ -178,8 +182,8 @@ The whole sprint.
 ## Sprint 12.3: The SPA behind Keycloak/Envoy — Edge publishes, Identity gates 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Spa/Edge.hs`, `dhall/examples/spa_chatbot.dhall` (the `Edge` + `Identity` declarations) (target paths; not yet built); consumes `src/Amoebius/Platform/Keycloak.hs` + `src/Amoebius/Platform/Edge.hs` (Phase 2) and `src/Amoebius/Capability/Binding.hs` (Phase 3), re-implementing neither
-**Blocked by**: Sprint 12.1; Phase 2 (Keycloak owns all wild ingress via Envoy/Gateway API); Phase 3 (the `Edge` + `Identity` capability binding and derived east-west connectivity)
+**Implementation**: `src/Amoebius/Spa/Edge.hs`, `dhall/examples/spa_chatbot.dhall` (the `Edge` + `Identity` declarations) (target paths; not yet built); consumes `src/Amoebius/Platform/Keycloak.hs` + `src/Amoebius/Platform/Edge.hs` (Phase 3) and `src/Amoebius/Capability/Binding.hs` (Phase 4), re-implementing neither
+**Blocked by**: Sprint 12.1; Phase 3 (Keycloak owns all wild ingress via Envoy/Gateway API); Phase 4 (the `Edge` + `Identity` capability binding and derived east-west connectivity)
 **Independent Validation**: the SPA's published UI surface renders an Envoy/Gateway-API route gated by Keycloak; an SPA that attempts to publish an unauthenticated edge route fails to type-check (there is no syntax to bypass the Identity-owned door); each capability the SPA consumes appears in the derived east-west connectivity graph, and a surface that consumes a capability it never declared cannot reach it.
 **Docs to update**: `documents/engineering/service_capability_doctrine.md`, `documents/engineering/platform_services_doctrine.md`
 
@@ -194,7 +198,7 @@ wild-ingress door over Envoy/Gateway API — adopting, in supporting prose, the 
 ### Deliverables
 
 - An `Amoebius.Spa.Edge` rendering that turns the SPA's `Edge` publish declaration into an Envoy/Gateway-API
-  route fronted by Keycloak (consuming the Phase 2 `Platform.Keycloak` / `Platform.Edge` plumbing), with the
+  route fronted by Keycloak (consuming the Phase 3 `Platform.Keycloak` / `Platform.Edge` plumbing), with the
   `Identity` auth rule bound to that route — the SPA declares *what to publish*, never *whether* wild traffic
   reaches it.
 - Derivation of the SPA's east-west reachability from its declared capability dependencies, so the SPA can
@@ -217,7 +221,7 @@ The whole sprint.
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Spa/Deploy.hs`, `dhall/examples/spa_chatbot_deploy_linux_cpu.dhall` (target paths; not yet built)
-**Blocked by**: Sprint 12.1; Sprint 12.2; Phase 3 (the deployment-rules surface and the capability provider/shape binding); Phase 2 (the HA-always charts + typed reconciler the bindings render onto)
+**Blocked by**: Sprint 12.1; Sprint 12.2; Phase 4 (the deployment-rules surface and the capability provider/shape binding); Phase 3 (the HA-always charts + typed reconciler the bindings render onto)
 **Independent Validation**: a deployment-rules `.dhall` keyed by the SPA app name binds replica counts, capability provider+shape (canonical providers by default; single-node shapes on a small cluster), and the inference substrate (linux-cpu) — and composes with the byte-identical SPA spec from Sprints 12.1–12.2; a second layer at a different replica count composes with the *same* SPA spec, the diff entirely in the deployment-rules layer.
 **Docs to update**: `documents/engineering/app_vs_deployment_doctrine.md`, `documents/engineering/service_capability_doctrine.md`
 
@@ -257,7 +261,7 @@ The whole sprint.
 **Status**: Planned
 **Implementation**: `test/dhall/phase_12_spa.dhall` (target path; not yet built)
 **Blocked by**: Sprint 12.3; Sprint 12.4
-**Independent Validation**: a gate `.dhall` composes the multi-service chatbot SPA + its infernix ML workflow on linux-cpu, deploys via the typed reconciler, reaches the SPA UI through the Keycloak/Envoy edge, exercises an inference round-trip through the composed infernix workflow, tears the deployment down leak-free, and emits a proven/tested/assumed ledger artifact.
+**Independent Validation**: a gate `.dhall` composes the multi-service SPA + the infernix demo web app's ML workflow on linux-cpu, deploys via the typed reconciler, reaches the SPA UI through the Keycloak/Envoy edge, exercises an inference round-trip through the composed infernix workflow, tears the deployment down leak-free, and emits a proven/tested/assumed ledger artifact.
 **Docs to update**: `documents/engineering/app_vs_deployment_doctrine.md`, `documents/engineering/service_capability_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
 ### Objective
@@ -269,12 +273,13 @@ deployed and reachable behind Keycloak/Envoy, with the ML workflow exercised end
 
 ### Deliverables
 
-- A gate `.dhall` (`test/dhall/phase_12_spa.dhall`) that spins up the chatbot SPA from one app spec composed
-  with the linux-cpu deployment-rules layer, deploys it via the typed reconciler, reaches the SPA UI through
-  the Keycloak/Envoy edge, exercises an infernix inference round-trip, and tears the deployment down.
-- A check that the jitML RL-gaming SPA also composes and type-checks (the "any combination" claim), with an
-  explicit note that *running* its workflow on a GPU/Apple-Metal substrate is out of contract for this
-  single-substrate gate.
+- A gate `.dhall` (`test/dhall/phase_12_spa.dhall`) that spins up the SPA composing the infernix chatbot demo
+  web app from one app spec composed with the linux-cpu deployment-rules layer, deploys it via the typed
+  reconciler, reaches the SPA UI through the Keycloak/Envoy edge, exercises an infernix inference round-trip,
+  and tears the deployment down.
+- A check that the jitML RL-gaming demo web app SPA also composes and type-checks (the "any combination"
+  claim), with an explicit note that *running* its workflow on a GPU/Apple-Metal substrate is out of contract
+  for this single-substrate gate.
 - A proven/tested/assumed ledger artifact recording: the multi-service + ML-workflow composition as
   **tested on linux-cpu**, the SPA app-surface byte-invariance across the deployment-rules variations as
   **tested**, edge reachability behind Keycloak as **tested**, and any GPU/Apple-Metal ML-workflow claim and
@@ -324,7 +329,7 @@ The whole sprint.
 - [Service Capability Doctrine](../documents/engineering/service_capability_doctrine.md) — capabilities the SPA composes, never products, and the Edge-behind-Identity door
 - [Application Logic vs Deployment Rules Doctrine](../documents/engineering/app_vs_deployment_doctrine.md) — the SPA as application logic; ML-workflow composition as shared-library use; the inference substrate as a deployment rule
 - [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — the HA-always charts and the single wild-ingress path the SPA edge rides
-- Earlier phase: Phase 3 — Orchestration Dhall DSL + control-plane singleton (the two DSL surfaces + the capability abstraction this phase composes)
-- Earlier phase: Phase 5 — Determinism kernel + infernix migration (the infernix chatbot workflow this SPA composes)
-- Earlier phase: Phase 6 — jitML migration + HA coordinator (the jitML workflow the RL-gaming SPA composes)
-- Earlier phase: Phase 8 — mattandjames as application-logic-only (the app-logic-only reduction this phase generalizes to spec-driven SPAs)
+- Earlier phase: Phase 1 — Formal-first DSL & protocol integrity (the representational SPA composition proven in-process, front-loaded to Tier 1, that this phase deploys live)
+- Earlier phase: Phase 4 — Orchestration Dhall DSL + control-plane singleton (the two DSL surfaces + the capability abstraction this phase composes)
+- Earlier phase: Phase 6 — Determinism kernel + infernix migration (the infernix demo web app + chatbot workflow this SPA composes — the application-logic-only demonstration this phase generalizes)
+- Earlier phase: Phase 7 — jitML migration + HA coordinator (the jitML demo web app + RL-gaming workflow this SPA composes)

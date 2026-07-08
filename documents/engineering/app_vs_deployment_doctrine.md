@@ -34,9 +34,10 @@ Dhall record/union types, total composability, and the illegal-state-unrepresent
 which surface, and why the line must never be crossed (DEVELOPMENT_PLAN
 cross-cutting invariant "Application logic and deployment rules are separate DSL surfaces").
 
-> **Honesty.** This split is *specified* doctrine for Phase 3 (the DSL type families) and *demonstrated* by
-> the mattandjames reduction in Phase 8 — neither phase has been built. Read every prescriptive statement
-> here as design intent, never as a tested amoebius result. Status and gates live only in
+> **Honesty.** This split is *specified* doctrine for Phase 4 (the DSL type families) — with its in-process
+> design validation front-loaded to Phase 1 — and *demonstrated* live by the infernix demo web app in Phase 6
+> and the jitML demo web app in Phase 7 (composed as an SPA in Phase 12); none of these phases has been built.
+> Read every prescriptive statement here as design intent, never as a tested amoebius result. Status and gates live only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
@@ -187,7 +188,7 @@ Three concrete properties, each a direct consequence of keeping the line clean:
   opening the app's source — and app authors ship features without ever reasoning about topology. The two
   teams change different files.
 - **Composability.** Because the surfaces are separable inputs, the *same* app composes with *any* valid
-  deployment-rules layer (total composability). The proof case is [§6](#6-the-proof-case-mattandjames-boiled-to-application-logic-only) and the
+  deployment-rules layer (total composability). The proof case is [§6](#6-the-proof-case-a-demo-web-app-as-application-logic-only) and the
   extreme case is [§9](#9-composition-one-cluster--n-geo-replicated-clusters-zero-app-change).
 
 The most fundamental consequence is that the split makes a whole category of mistakes **unrepresentable**: the app surface
@@ -199,33 +200,40 @@ the *reason* it is worth enforcing.
 
 ---
 
-## 6. The proof case: mattandjames boiled to application-logic-only
+## 6. The proof case: a demo web app as application-logic-only
 
-mattandjames is the canonical demonstration of this doctrine, because it currently violates it and the plan
-is to fix it.
+The canonical demonstration of this doctrine is a **demo web app** — the demo single-page web app each ML
+extension ships (one with infernix, one with jitML) to illustrate its ML workflow and render its results.
+Per [§8](#8-shared-library-use-is-application-logic), a demo web app is application logic that *uses* the
+infernix/jitML inference extension; it is **not** itself an extension. It is the cleanest case because it
+exercises every surface at once — a UI, user/render logic, durable data, auth rules, and a dependency on an
+ML inference extension — with nothing about scale, placement, or robustness anywhere in sight.
 
-**Today**, mattandjames bakes deployment decisions into the app: it ships a naive **CPU-only inference
-engine**, it deploys itself **exclusively on kind** in a **mock 3-replica mode**, and it simulates HA by
-standing up *multiple kind clusters*. Scale, substrate, and HA strategy are all welded into the application
-— so the "3" is unchangeable without editing the app, and the inference engine cannot move off CPU without a
-rewrite.
-
-**Target**: mattandjames is **boiled down to application logic only** — the UI,
-the user lifecycles, the durable data, the auth rules. Then a *single* `InForceSpec` deployment-rules
-layer configures, **with zero extra effort from the application itself**:
+Written the amoebius way, a demo web app is authored **once, as application logic only** — the UI, the user
+and render lifecycles, the durable data, the auth rules, and its *use* of the infernix/jitML inference
+extension. Everything about *how robustly and where it runs* is a separate, orthogonal deployment-rules
+surface: a *single* `InForceSpec` deployment-rules layer configures, **with zero extra effort from the
+application itself**:
 
 - the k8s cluster distro (kind / rke2 / provider),
-- the replication count (the "3" becomes a `replicas=n` dial on an unchanged HA chart), and
+- the HA replica count (a `replicas=n` dial on an unchanged HA chart
+  ([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1))),
+- chaos-test injection, geo-replication topology, and gateway failover — the app never knows it is scaled,
+  replicated, failed over, or tested, and
 - the model-inference substrate (Apple Metal on the host, CUDA on the cluster, or linux-cpu).
 
-The mock-3-replica pattern collapses to a `replicas=n` value; the multi-kind-cluster HA simulation collapses
-to the standard HA stack at the chosen replica count
-([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1)); the naive CPU inference is replaced
-by an infernix workflow ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)).
+The same app bytes therefore run at one replica on a single kind cluster or geo-replicated across N clusters
+with failover, served on whatever inference substrate the deployment picks — and the demo web app's own spec
+never names a replica count, a region, a chaos schedule, or a substrate, because the app surface has no field
+for them ([§2](#2-the-application-logic-surface--what-an-app-is)). The inference itself is an infernix/jitML
+workflow ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)), not a bespoke
+engine welded into the app.
 
-> **Honesty.** This reduction is **Phase 8** in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
-> and is **not started**. The current mattandjames behaviour above is observed fact; the boiled-down target
-> is design intent, not a proven amoebius result.
+> **Honesty.** This is Phase-0 design intent, not a proven amoebius result. The application-logic-only
+> demonstration lands **live** with the infernix demo web app in **Phase 6** and the jitML demo web app in
+> **Phase 7**, and the two are composed as a live SPA in **Phase 12**; the surfaces' in-process design
+> validation is front-loaded to **Phase 1** (see [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)).
+> None of these phases has been built.
 
 ---
 
@@ -273,7 +281,7 @@ on the application-logic surface. The clean way to hold this with [§7](#7-infer
   at what replica count — is a deployment rule.
 
 The typed shape of that dependency is the **`ExtensionSpec`** contract. Each in-tree extension in the v1
-closed set — **{infernix, jitML, mattandjames}** — plugs in by contributing one
+closed set — **{infernix, jitML}** — plugs in by contributing one
 `ExtensionSpec { extDhall, extChain, extCapabilities }`: a typed Dhall sub-catalog **nested inside the
 `InForceSpec`** ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)), a `cfg -> [Step]` chain, and the `List Capability` it declares. These specs are
 merged at **compile/link time into the single binary** — there is no per-extension image and no `dlopen`.
@@ -351,8 +359,10 @@ mechanics it points at:
 
 This document is normative classification doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md):
-the two DSL surfaces land with the type families in **Phase 3**, the mattandjames reduction is **Phase 8**,
-and the zero-app-change geo-replication case is **Phase 9**. This doc never maintains a competing status
+the two DSL surfaces land with the type families in **Phase 4** (their in-process design validation
+front-loaded to **Phase 1**), the application-logic-only demonstration lands with the infernix demo web app
+in **Phase 6** and the jitML demo web app in **Phase 7** (composed as an SPA in **Phase 12**), and the
+zero-app-change geo-replication case is **Phase 9**. This doc never maintains a competing status
 ledger; it states the target shape and links back for status.
 
 ---

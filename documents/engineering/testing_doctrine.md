@@ -166,6 +166,21 @@ machine-visible by emitting a ledger.
   [release_lifecycle_doctrine.md §4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable); this doc owns only the ledger the gate
   reads. *(Design intent: the release lifecycle is Phase-0 reference doctrine and this ledger harness is
   Phase 11 / not started — read as a specification to be validated, never a proven amoebius result.)*
+- **A Tier-1-only in-process ledger is structurally insufficient to advance a production `PromotionGate`.**
+  The front-loaded Phase-1 formal-validation track
+  ([../../DEVELOPMENT_PLAN/phase_01_formal_first_dsl_integrity.md](../../DEVELOPMENT_PLAN/phase_01_formal_first_dsl_integrity.md))
+  emits this *same* proven/tested/assumed ledger, but from a purely **in-process** run — Dhall typecheck +
+  Haskell decoder + QuickCheck + TLA+/TLC, with **no live substrate**. That is a **Tier-1 (design-time)
+  artifact only**: it establishes that the spec composes and the protocol is sound in the abstract, and it
+  leaves the **Runtime/chaos (Tier-2) layer UNVERIFIED by construction**, because a run that injected no fault
+  against a live cluster performed no applicable Runtime move. By the UNVERIFIED rule above, such a
+  Tier-1-only ledger is therefore **structurally insufficient to advance a production `PromotionGate`** —
+  prod requires the Runtime/chaos layer *proven*, and an in-process ledger carries no Runtime witness for the
+  advance constructor to consume, so "we validated the DSL in-process" cannot mean "the cluster enforces it."
+  The two-tier split (Tier-1 design-time integrity vs. Tier-2 runtime-enforcement / correspondence integrity)
+  is owned by [tla_modelling_assumptions.md](./tla_modelling_assumptions.md); the promotion-gate face of this
+  fence is owned by
+  [release_lifecycle_doctrine.md §4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable).
 
 The **methodology and grammar** of the ledger — the Extract → Model → Inject moves, the
 proven/tested/assumed strengths, and what each move can and cannot establish — are **owned by**

@@ -1,4 +1,4 @@
-# Phase 5: Determinism kernel + infernix migration
+# Phase 6: Determinism kernel + infernix migration
 
 **Status**: Authoritative source
 **Supersedes**: N/A
@@ -20,7 +20,7 @@ amoebius result.
 
 ## Phase Summary
 
-This phase turns the content-addressed runtime delivered in Phase 4 into a **determinism kernel** and
+This phase turns the content-addressed runtime delivered in Phase 5 into a **determinism kernel** and
 proves it against a real workload. It does three things, in order:
 
 1. Adds the kernel-level determinism primitives — a `ContentAddress` typeclass that makes an
@@ -35,16 +35,26 @@ proves it against a real workload. It does three things, in order:
    same-substrate reproducibility is the honest contract and cross-substrate bit-equality is never
    asserted.
 
-The kernel primitives consume Phase 4's three-tier store (pointers → manifests → blobs), Phase 4's
-native Pulsar client, and Phase 4's topology algebra; this phase does not re-implement them. infernix
+The kernel primitives consume Phase 5's three-tier store (pointers → manifests → blobs), Phase 5's
+native Pulsar client, and Phase 5's topology algebra; this phase does not re-implement them. infernix
 is treated as evidence that the design is realizable — its working artifact store and `.ready`
 staging are a sibling result, not an amoebius proof.
+
+The **infernix demo web app** — the result-rendering single-page app shipped with `~/infernix` that
+illustrates its inference workflow and renders its output — deploys in this phase as
+**application-logic-only**: it is authored once as application logic that *uses* the infernix
+inference extension, while its HA replica count, substrate, and inference binding are an orthogonal
+deployment-rules surface. It is this phase's app-vs-deployment demonstrator — the proof case that an
+app is written once as logic while its deployment shape is a separate dial — and per
+[`app_vs_deployment_doctrine.md` §8 — Shared-library use is application logic](../documents/engineering/app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic)
+a demo web app that *uses* an extension is application logic, not itself an extension, so the closed
+extension set stays {infernix, jitML}.
 
 ```mermaid
 flowchart LR
   dhall[Resolved app dhall normal form] --> eh[experimentHash kernel primitive]
   subfp[linux-cpu substrate fingerprint] --> eh
-  ca[ContentAddress typeclass] --> store[Phase 4 content-addressed store]
+  ca[ContentAddress typeclass] --> store[Phase 5 content-addressed store]
   eh --> store
   master[masterSeed declared in the dhall] --> seed[deriveSplitMixSeed kernel primitive]
   store --> infer[infernix deterministic CPU decode]
@@ -78,16 +88,16 @@ reproduction was *tested*, not that cross-substrate equality was claimed.
   logic; *where* inference runs is a deployment rule), migrating it onto the amoebius runtime behind
   reversible adapter seams rather than as a parallel system.
 - **Producer→precondition and the training-run topology (doctrine this round introduces; forward design
-  intent, not a Phase-5 gate claim).** This round's doctrine adds a **provenance-witness gate** to a serveable
+  intent, not a Phase-6 gate claim).** This round's doctrine adds a **provenance-witness gate** to a serveable
   `ModelArtifact` ([`content_addressing_doctrine.md` §4.5 — The three-tier ML-asset lifecycle: engine baked, model staged, kernel JIT'd](../documents/engineering/content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)):
   infernix may serve a model only once it witnesses a **committed producing checkpoint** — the jitML checkpoint
-  produced in [Phase 6](phase_06_jitml_ha_coordinator.md) — or a pinned content-addressed import, so a Phase-6
+  produced in [Phase 7](phase_07_jitml_ha_coordinator.md) — or a pinned content-addressed import, so a Phase-7
   jitML checkpoint is a **producer→precondition** for the infernix serve path, not merely a shared store entry.
   The same round introduces the **training-run topology** — fine-tune chains and continuous/online feeds
   ([§4.6 — The training-run topology: fine-tune chains and continuous feeds without an unbounded arm](../documents/engineering/content_addressing_doctrine.md#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm));
   infernix consumes the serve gate here (its CPU-inference determinism is unchanged), never the trainer. This is
   doctrine this round introduces, tracked here as a forward cross-reference, not a tested amoebius result of the
-  Phase-5 gate.
+  Phase-6 gate.
 - [`monitoring_doctrine.md` §2.3 — Per-extension surfaces](../documents/engineering/monitoring_doctrine.md#23-per-extension-surfaces--extensionspecextmonitoring):
   infernix's `ExtensionSpec` declares its mandatory `extMonitoring` — at least the generic `Slo` surface for
   inference metrics — so an infernix extension that declares no monitoring is unrepresentable.
@@ -98,7 +108,7 @@ reproduction was *tested*, not that cross-substrate equality was claimed.
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Kernel/ContentAddress.hs` (target path; not yet built)
-**Blocked by**: Phase 1 (the `dsl-step`/`chain` kernel); Phase 4 (the three-tier content-addressed store)
+**Blocked by**: Phase 2 (the `dsl-step`/`chain` kernel); Phase 5 (the three-tier content-addressed store)
 **Independent Validation**: a property test shows that the typeclass admits no constructor producing a name from a free string — every `ContentAddress` value is reachable only by hashing real bytes — and that two equal payloads derive the identical key.
 **Docs to update**: `documents/engineering/content_addressing_doctrine.md`
 
@@ -106,7 +116,7 @@ reproduction was *tested*, not that cross-substrate equality was claimed.
 
 Adopt [`content_addressing_doctrine.md` §2 — The three-tier store](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers)
 and its totality argument in [§4 — Determinism by construction](../documents/engineering/content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed):
-lift Phase 4's concrete blob/manifest key renderers into a kernel-level `ContentAddress` typeclass so
+lift Phase 5's concrete blob/manifest key renderers into a kernel-level `ContentAddress` typeclass so
 that the rule that a content-derived name cannot be forged is a single reusable primitive shared by both infernix
 and (later) jitML, not a per-store copy.
 
@@ -115,7 +125,7 @@ and (later) jitML, not a per-store copy.
 - A `ContentAddress a` typeclass whose only key-producing operation is `sha256(canonical-bytes a)`,
   with a canonical encoder requirement so equal logical content yields byte-identical keys.
 - Newtyped `BlobSha` / `ManifestSha` carriers with no public constructor from a free `Text`.
-- Adapters binding the typeclass to Phase 4's `blobs/<sha256>` and `manifests/<sha256>` writers
+- Adapters binding the typeclass to Phase 5's `blobs/<sha256>` and `manifests/<sha256>` writers
   (the `If-None-Match: *`, `412 = success` protocol stays owned by the store).
 
 ### Validation
@@ -133,7 +143,7 @@ The whole sprint.
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Kernel/ExperimentHash.hs`, `src/Amoebius/Kernel/Rng.hs` (target paths; not yet built)
-**Blocked by**: Sprint 5.1; Phase 1 (substrate detection / substrate fingerprint); Phase 3 (the resolved-`.dhall` normal form)
+**Blocked by**: Sprint 5.1; Phase 2 (substrate detection / substrate fingerprint); Phase 4 (the resolved-`.dhall` normal form)
 **Independent Validation**: unit tests prove `experimentHash` is a pure function of `(resolved-dhall, substrate-fingerprint)` and that `deriveSplitMixSeed` returns the same stream seed for a given `(masterSeed, streamIndex)` regardless of how many workers or in what order they are simulated.
 **Docs to update**: `documents/engineering/content_addressing_doctrine.md`, `documents/engineering/substrate_doctrine.md`
 
@@ -148,7 +158,7 @@ is independent of worker count, scheduling, and assignment.
 ### Deliverables
 
 - `deriveExperimentHash :: ResolvedDhall -> SubstrateFingerprint -> ExperimentHash` =
-  `sha256(resolved-dhall ‖ substrate-fingerprint)`, consuming the normal form from Phase 3 and the
+  `sha256(resolved-dhall ‖ substrate-fingerprint)`, consuming the normal form from Phase 4 and the
   fingerprint gathered by full-path subprocess probes (never env/`PATH`), per the substrate doctrine.
 - `deriveSplitMixSeed :: SplitMixSeed -> Word64 -> SplitMixSeed` with SplitMix64 mixing and the
   golden-ratio gamma, exposing a per-stream seed reachable only through this total function.
@@ -170,7 +180,7 @@ The whole sprint.
 
 **Status**: Planned
 **Implementation**: `infernix/src/Infernix/Adapter/Store.hs`, `infernix/infernix.cabal` (library target; not yet built)
-**Blocked by**: Sprint 5.1; Phase 4 (content-addressed store)
+**Blocked by**: Sprint 5.1; Phase 5 (content-addressed store)
 **Independent Validation**: with the seam in "amoebius" mode, infernix model staging writes blobs/manifests to the amoebius store and the `.ready` sentinel is written **last**; flipping the seam back to "legacy" mode restores the prior store with no infernix source change, proving reversibility.
 **Docs to update**: `documents/engineering/app_vs_deployment_doctrine.md`, `documents/engineering/content_addressing_doctrine.md`
 
@@ -206,7 +216,7 @@ The whole sprint.
 
 **Status**: Planned
 **Implementation**: `infernix/src/Infernix/Adapter/Pulsar.hs`, `infernix/src/Infernix/Adapter/Topology.hs` (target paths; not yet built)
-**Blocked by**: Sprint 5.3; Phase 4 (native Pulsar client + topology algebra)
+**Blocked by**: Sprint 5.3; Phase 5 (native Pulsar client + topology algebra)
 **Independent Validation**: an infernix inference request/response round-trips over `amoebius-pulsar` (native TCP binary protocol, no WebSockets) through the seam, and the topology seam expresses infernix's topics via the amoebius topology algebra; each seam reverts independently to its legacy backend with no infernix source change.
 **Docs to update**: `documents/engineering/app_vs_deployment_doctrine.md`
 
@@ -239,7 +249,7 @@ The whole sprint.
 ## Sprint 5.5: deterministic-by-construction CPU inference + reproducibility gate 📋
 
 **Status**: Planned
-**Implementation**: `infernix/src/Infernix/Inference/Deterministic.hs`, `test/dhall/phase_05_infernix_repro.dhall` (target paths; not yet built)
+**Implementation**: `infernix/src/Infernix/Inference/Deterministic.hs`, `test/dhall/phase_06_infernix_repro.dhall` (target paths; not yet built)
 **Blocked by**: Sprint 5.2; Sprint 5.3; Sprint 5.4
 **Independent Validation**: a `.dhall` workflow runs the same infernix CPU inference twice on linux-cpu and asserts byte-identical output for an unchanged `experimentHash`, asserts divergent `experimentHash` for any changed input, and emits a proven/tested/assumed ledger artifact.
 **Docs to update**: `documents/engineering/content_addressing_doctrine.md`
@@ -257,7 +267,7 @@ equality.
 
 - A pure infernix CPU decode stage taking a content-addressed model, a request, and a derived seed,
   with all I/O at the interpreter boundary.
-- The gate `.dhall` (`test/dhall/phase_05_infernix_repro.dhall`) that spins up the workflow, runs the
+- The gate `.dhall` (`test/dhall/phase_06_infernix_repro.dhall`) that spins up the workflow, runs the
   inference twice, tears down, and compares outputs by `experimentHash`.
 - A ledger artifact recording: identity/seed totality as **proven-in-types**, same-substrate
   reproduction as **tested on linux-cpu**, and cross-substrate bit-equality as **explicitly not
@@ -288,20 +298,20 @@ The whole sprint.
   consumed by `experimentHash` is exercised here, gathered by full-path probes with no env/`PATH`.
 
 **Cross-references to add:**
-- README.md — link the Phase 5 row to this document and mark the gate status as it progresses.
+- README.md — link the Phase 6 row to this document and mark the gate status as it progresses.
 - system_components.md — add the kernel determinism modules
   (`ContentAddress`/`ExperimentHash`/`Rng`) and the infernix adapter seams to the component
   inventory.
-- substrates.md — add the Phase 5 → linux-cpu row to the per-phase substrate map.
+- substrates.md — add the Phase 6 → linux-cpu row to the per-phase substrate map.
 
 ## Related Documents
 
-- [README.md](README.md) — the live tracker; Phase 5 objective, gate, and substrate
+- [README.md](README.md) — the live tracker; Phase 6 objective, gate, and substrate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys
 - [overview.md](overview.md) — target architecture and constraints
 - [system_components.md](system_components.md) — target component inventory (kernel + infernix module paths)
 - [substrates.md](substrates.md) — substrate registry and per-phase map
 - [Content Addressing & Determinism Doctrine](../documents/engineering/content_addressing_doctrine.md) — the determinism mechanism this phase implements
 - [Application Logic vs Deployment Rules Doctrine](../documents/engineering/app_vs_deployment_doctrine.md) — infernix as a shared library; inference substrate as a deployment rule
-- Earlier phase: Phase 4 — Native Pulsar client + content-addressed store + workflow-runtime (the store/transport/topology this phase consumes)
-- Next phase: Phase 6 — jitML migration + HA coordinator (the second shared library onto the same kernel)
+- Earlier phase: Phase 5 — Native Pulsar client + content-addressed store + workflow-runtime (the store/transport/topology this phase consumes)
+- Next phase: Phase 7 — jitML migration + HA coordinator (the second shared library onto the same kernel)

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/substrate_doctrine.md, documents/engineering/image_build_doctrine.md, DEVELOPMENT_PLAN/phase_07_host_compute_daemons.md, DEVELOPMENT_PLAN/system_components.md, DEVELOPMENT_PLAN/substrates.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/substrate_doctrine.md, documents/engineering/image_build_doctrine.md, DEVELOPMENT_PLAN/phase_08_host_compute_daemons.md, DEVELOPMENT_PLAN/system_components.md, DEVELOPMENT_PLAN/substrates.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for how the Apple-Metal host worker is **built and run on Apple
@@ -42,7 +42,7 @@ flowchart TD
 > is the authoritative reference (`~/jitML/documents/engineering/apple_silicon_metal_headless_builds.md` —
 > closed 2026-06-12 on Apple Silicon with no Tart/SwiftPM/offline-`metal`/Xcode/keychain step on the core
 > path). That is **sibling evidence, not an amoebius result**: amoebius has not built its Apple phase
-> (Phase 7), so every prescriptive statement below is a **target shape**, not a tested amoebius fact. Status
+> (Phase 8), so every prescriptive statement below is a **target shape**, not a tested amoebius fact. Status
 > and gates live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
@@ -193,8 +193,8 @@ GPU, and it compiles for the *actual* device that will execute the kernel.
 
 This document is normative Apple-build/run doctrine only. Delivery sequencing, completion status, and
 validation gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the
-headless fixed-Metal-bridge build + the native Apple-Metal host worker land in **Phase 7** (`apple`), whose
-gate ([phase_07_host_compute_daemons.md](../../DEVELOPMENT_PLAN/phase_07_host_compute_daemons.md)) brings up
+headless fixed-Metal-bridge build + the native Apple-Metal host worker land in **Phase 8** (`apple`), whose
+gate ([phase_08_host_compute_daemons.md](../../DEVELOPMENT_PLAN/phase_08_host_compute_daemons.md)) brings up
 the Apple cluster on Lima, builds the worker **headless on-host via the fixed bridge**, and dispatches a
 Metal inference job over Pulsar. This doc never maintains a competing status ledger; it states the target
 shape and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
@@ -209,7 +209,7 @@ shape and links back for status, per [documentation_standards.md §6](../documen
 - [Image Build Doctrine](./image_build_doctrine.md)
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md)
 - [Content Addressing Doctrine](./content_addressing_doctrine.md)
-- [Phase 7 — Host compute daemons](../../DEVELOPMENT_PLAN/phase_07_host_compute_daemons.md)
+- [Phase 8 — Host compute daemons](../../DEVELOPMENT_PLAN/phase_08_host_compute_daemons.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
 - External sibling provenance: `~/jitML/documents/engineering/apple_silicon_metal_headless_builds.md` (the

@@ -11,8 +11,9 @@
 amoebius is a single Haskell binary that runs as a **CLI**, a **sudo-capable host daemon**, and an
 **in-cluster singleton service**. It manages Kubernetes cluster lifecycle and interprets a `.dhall` DSL
 into opinionated, provably-coherent deployments. Its constituent capabilities are unified libraries, not
-separate products: **prodbox** (root control-plane behaviour), **infernix** + **jitML** (ML extensions),
-**hostbootstrap** (bootstrap + DSL core), and **mattandjames** (application logic).
+separate products: **prodbox** (root control-plane behaviour), **infernix** + **jitML** (ML extensions,
+each shipping a demo web app that is amoebius's application-logic demonstrator), and **hostbootstrap**
+(bootstrap + DSL core).
 
 ## Where to start
 

@@ -39,7 +39,7 @@ Both transports are deleted. One native client replaces both, with four concrete
 
 > **Honesty (per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).** "Performance via the
 > native protocol" is the **design rationale** — base64 elimination, persistent producers, no process hop —
-> not a benchmarked amoebius result. amoebius has not yet built Phase 4. The WebSocket costs above are read
+> not a benchmarked amoebius result. amoebius has not yet built Phase 5. The WebSocket costs above are read
 > off the infernix/jitML source as *sibling evidence*; the amoebius speedup is expected, not measured.
 
 The no-WebSockets rule is a **locked invariant**, recorded as a standard-service fact in
@@ -74,7 +74,7 @@ It deliberately does **not** own, and only references:
 | Intra-cluster HA correctness (delegated to brokers/bookies) | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
 
 Phase order and status are owned only by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
-(the client lands in **Phase 4**); this doc states the target shape and links back, never a status ledger.
+(the client lands in **Phase 5**); this doc states the target shape and links back, never a status ledger.
 
 ---
 
@@ -176,7 +176,7 @@ flowchart TD
   recv -->|decode, total Either| out[Right a, or Left DecodeError, never a silent misread]
 ```
 
-> **Honesty.** The CBOR-payload rule is Phase-4 design intent, not a tested amoebius result. Canonical CBOR
+> **Honesty.** The CBOR-payload rule is Phase-5 design intent, not a tested amoebius result. Canonical CBOR
 > is *proven in the sibling jitML content store* (`encodeManifestCbor`) — that is sibling evidence, not
 > amoebius proof ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)). The type-foreclosed claim is the
 > *produce* surface having no non-CBOR constructor; that a *received* body decodes is the same total-check /
@@ -205,7 +205,7 @@ Forking — rather than depending on the published package — is the honest cho
 
 > **Honesty.** Treat supernova as a *starting point with sibling provenance*, not a proven foundation.
 > Every capability in [§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek) is "supernova demonstrates it" or "the protocol provides it" — neither is an
-> amoebius test result. Hardening, reconnection semantics, and the dedup proof are Phase 4 work tracked in
+> amoebius test result. Hardening, reconnection semantics, and the dedup proof are Phase 5 work tracked in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -422,7 +422,7 @@ content-address to their owner in [content_addressing_doctrine.md](./content_add
   the retained span, is the same `SEEK` primitive ([§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)) already provides for rebuild-from-log and the
   geo-replication catch-up [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) reasons about — no new client capability.
 
-> **Honesty.** The training-feed view is Phase-4-and-later design intent layered on the client, not a built
+> **Honesty.** The training-feed view is Phase-5-and-later design intent layered on the client, not a built
 > or benchmarked amoebius result. The single-active-trainer property is **delegated** to Pulsar's
 > Exclusive/Failover subscription (jitML/infernix already coordinate this way — *sibling evidence*), not an
 > amoebius election proof; per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read this as the specified composition, not a
@@ -505,7 +505,7 @@ itself is not this doc's claim.
 | infernix dedup wiring | namespace dedup policy + `(producer_name, sequence_id)` + `initialSequenceId` URL workaround | broker-side dedup with `sequence_id` as a native field ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)) |
 
 infernix and jitML remain **ML extension libraries**; they stop shipping their own transports and consume
-`amoebius-pulsar` instead — one subsystem at a time, per the Phase 5 migration in
+`amoebius-pulsar` instead — one subsystem at a time, per the Phase 6 migration in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -514,8 +514,8 @@ infernix and jitML remain **ML extension libraries**; they stop shipping their o
 
 This document is normative client doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the native client,
-the topology algebra, and the round-trip gate land in **Phase 4**, and the infernix/jitML migration onto it
-is **Phase 5**. This doc never maintains a competing status ledger.
+the topology algebra, and the round-trip gate land in **Phase 5**, and the infernix/jitML migration onto it
+is **Phase 6**. This doc never maintains a competing status ledger.
 
 ---
 

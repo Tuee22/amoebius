@@ -36,9 +36,9 @@ It also provides a fourth property that applies elsewhere: content-addressed dat
 cluster boundaries without a divergence proof ([§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)).
 
 **The extension-library set is closed.** `infernix` and `jitML` are the two ML members of the v1
-extension-library set, which is **closed** at {`infernix`, `jitML`, `mattandjames`} — three libraries that LINK
-into the one amoebius binary at compile/link time, not an open plugin surface. Only the two ML libraries
-(`infernix`, `jitML`) instantiate this content-addressing contract; `mattandjames` is a non-ML member. Any
+extension-library set, which is **closed** at {`infernix`, `jitML`} — two libraries that LINK
+into the one amoebius binary at compile/link time, not an open plugin surface. Both ML libraries
+(`infernix`, `jitML`) instantiate this content-addressing contract. Any
 future ML family is **Phase-N design intent**, entering later through the same linked-extension seam (owned by
 [`dsl_doctrine.md`](./dsl_doctrine.md)); it is not a v1 member, and nothing in this doctrine is written for one.
 

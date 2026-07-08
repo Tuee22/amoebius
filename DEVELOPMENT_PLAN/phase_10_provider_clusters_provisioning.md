@@ -50,13 +50,13 @@ plane. It owns four deliverables, all driven from a single linux-cpu parent:
 This phase realizes the **first-class managed-provider arm** of the compute-engine axis: EKS is the
 `Managed Eks` constructor of the `ComputeEngine` union ([`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md)
 §2, [`illegal_state_catalog.md`](../documents/engineering/illegal_state_catalog.md) §3.13 / I13), a hostless
-arm carrying no `LinuxHost` witness — the type shape lands in Phase 3 (Sprint 3.6), and this phase provisions
+arm carrying no `LinuxHost` witness — the type shape lands in Phase 4 (Sprint 3.6), and this phase provisions
 it. The dynamic-provisioning deliverable is the runtime enaction of a typed `ScalingPolicy`
 ([`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) §6, catalog §3.21)
 whose cloud quota is the outer ceiling on the `CloudQuota` storage/compute backing.
 
-This phase consumes — and does not re-implement — the Phase 2 platform/storage/Vault substrate, the
-Phase 3 control-plane singleton + typed reconciler, and the Phase 9 amoebic-spawn machinery (SSH-key
+This phase consumes — and does not re-implement — the Phase 3 platform/storage/Vault substrate, the
+Phase 4 control-plane singleton + typed reconciler, and the Phase 9 amoebic-spawn machinery (SSH-key
 self-managed spawn, the encrypted MinIO backend, per-child Vault-envelope encryption). Provider-cluster
 spawn is the *cloud-keyed* sibling of Phase 9's *SSH-keyed* spawn over the same backend and the same
 lifecycle vocabulary.
@@ -123,7 +123,7 @@ below — never depended on here.)
 `amoebius-pulumi/src/Amoebius/Pulumi/Backend/EncryptedMinio.hs` (Vault-Transit-enveloped MinIO checkpoint),
 `amoebius-pulumi/src/Amoebius/Pulumi/Provider/Eks.hs` (the EKS provider program) (target layout from
 [system_components.md](system_components.md); not yet built)
-**Blocked by**: Phase 9 — amoebic spawning via Pulumi with the MinIO backend + per-child Vault-envelope encryption (external earlier-phase prerequisite); Phase 3 — control-plane singleton (runs the Pulumi engine); Phase 2 — MinIO + root Vault (the encrypted backend's substrate)
+**Blocked by**: Phase 9 — amoebic spawning via Pulumi with the MinIO backend + per-child Vault-envelope encryption (external earlier-phase prerequisite); Phase 4 — control-plane singleton (runs the Pulumi engine); Phase 3 — MinIO + root Vault (the encrypted backend's substrate)
 **Independent Validation**: from a `linux-cpu` parent, a `pulumi up` issued by the in-cluster singleton brings up a provider (EKS) control plane + node group; the checkpoint lands in MinIO as an opaque Vault-enveloped object and is unreadable without an unsealed Vault; a deploy attempted with a sealed Vault **refuses before any cloud mutation**; the `pulumi` binary and cloud plugin are invoked by full path with no `PULUMI_*`/`AWS_*`/`PATH` in the process environment
 **Docs to update**: `documents/engineering/pulumi_iac_doctrine.md` (§1, §2, §4), `documents/engineering/cluster_lifecycle_doctrine.md` (§3), `documents/engineering/substrate_doctrine.md` (the no-env/no-`PATH` lazy discovery of `pulumi` + the cloud plugin)
 
@@ -138,7 +138,7 @@ generalizing Phase 9's SSH-keyed self-managed spawn to a cloud-keyed provider sp
 ### Deliverables
 
 - An `Amoebius.Pulumi.Engine` seam that runs the Pulumi engine **only** under the in-cluster control-plane
-  singleton (Phase 3); there is no host-shell entrypoint that can `pulumi up` a provider cluster.
+  singleton (Phase 4); there is no host-shell entrypoint that can `pulumi up` a provider cluster.
 - An `Amoebius.Pulumi.Backend.EncryptedMinio` backend: the checkpoint is one opaque object in the
   cluster's MinIO, sealed with a Vault-Transit envelope; the plaintext data key never lands on disk, and a
   sealed/unreachable Vault **fails the deploy closed** (no unencrypted or un-checkpointed fallback).
@@ -172,7 +172,7 @@ The whole sprint.
 **Status**: Planned
 **Implementation**: `amoebius-runtime/src/Amoebius/Daemon/InClusterSingleton.hs` (provider-child singleton wiring),
 `amoebius-runtime/src/Amoebius/Cluster/ProviderBringUp.hs` (init-follows-readiness for a provider child) (target paths; not yet built)
-**Blocked by**: Sprint 10.1; Phase 2 — platform services rendered as typed manifests + the typed reconciler (external earlier-phase prerequisite); Phase 3 — control-plane singleton + leadership election
+**Blocked by**: Sprint 10.1; Phase 3 — platform services rendered as typed manifests + the typed reconciler (external earlier-phase prerequisite); Phase 4 — control-plane singleton + leadership election
 **Independent Validation**: a freshly provisioned EKS child converges the same nine standard services from typed manifests (no Helm, no public-registry pulls), reachable and HA, with ingress only via Keycloak; the cluster runs **no** host worker daemon and exposes **no** host substrate; re-running bring-up is a no-op
 **Docs to update**: `documents/engineering/cluster_lifecycle_doctrine.md` (§1, §2), `documents/engineering/daemon_topology_doctrine.md` (the in-cluster singleton as the only daemon on a provider child), `documents/engineering/platform_services_doctrine.md` (fungible standard-service convergence on a provider substrate)
 
@@ -189,7 +189,7 @@ provider child is the same machine as any other cluster from the reconciler's po
 - Provider-child bring-up that, once the EKS API is reachable, initializes Vault, hands the child its own
   projected `.dhall`, and converges the nine standard services (registry, MinIO, Vault, Pulsar,
   Prometheus/Grafana, Postgres, Envoy/Gateway API, Keycloak, cloud LoadBalancer) from typed manifests via
-  the Phase 2 reconciler — *not* a thinner or different service set.
+  the Phase 3 reconciler — *not* a thinner or different service set.
 - A daemon wiring that runs **exactly one** in-cluster singleton role and *no* host worker-daemon role on
   a provider child; the host-only NodePort comms path and host worker daemons are structurally absent
   (there is no host).
@@ -198,7 +198,7 @@ provider child is the same machine as any other cluster from the reconciler's po
   hostless provider child" spec is refused. This is the runtime face of the `Managed Eks` arm carrying **no**
   `LinuxHost` / host-worker index ([`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md)
   §2, [`illegal_state_catalog.md`](../documents/engineering/illegal_state_catalog.md) §3.13/§3.14): the type
-  makes it unrepresentable in Phase 3; this sprint confirms the provider child advertises no host substrate.
+  makes it unrepresentable in Phase 4; this sprint confirms the provider child advertises no host substrate.
 
 ### Validation
 
@@ -222,7 +222,7 @@ The whole sprint.
 **Status**: Planned
 **Implementation**: `amoebius-pulumi/src/Amoebius/Pulumi/Ebs.hs` (per-PV durable EBS program, own state, `protect`/`Retain`),
 `amoebius-pulumi/src/Amoebius/Pulumi/Credential.hs` (operational create-only vs elevated delete IAM policy split) (target paths; not yet built)
-**Blocked by**: Sprint 10.1; Phase 2 — `no-provisioner` retained PVs + storage-lifecycle substrate (external earlier-phase prerequisite)
+**Blocked by**: Sprint 10.1; Phase 3 — `no-provisioner` retained PVs + storage-lifecycle substrate (external earlier-phase prerequisite)
 **Independent Validation**: a per-PV EBS volume is created sized 1:1 to its PVC in **separate** durable state from the ephemeral cluster stack; a `pulumi destroy` of the cluster stack leaves the EBS **intact** (`protect`/`Retain`); a simulated `ec2:DeleteVolume` under the operational credential is **denied** at the policy layer; the next bring-up re-attaches the same volume to the same claim
 **Docs to update**: `documents/engineering/pulumi_iac_doctrine.md` (§6, §3), `documents/engineering/storage_lifecycle_doctrine.md` (per-PV EBS sizing 1:1 + node-vs-storage decoupling)
 
@@ -272,7 +272,7 @@ The whole sprint.
 **Status**: Planned
 **Implementation**: `amoebius-runtime/src/Amoebius/Cluster/NodeProvisioner.hs` (declarative node set reconcile),
 `amoebius-pulumi/src/Amoebius/Pulumi/NodeGroup.hs` (Pulumi add/drain of EC2/managed nodes) (target paths; not yet built)
-**Blocked by**: Sprint 10.1; Phase 3 — control-plane singleton + the typed reconciler (external earlier-phase prerequisite)
+**Blocked by**: Sprint 10.1; Phase 4 — control-plane singleton + the typed reconciler (external earlier-phase prerequisite)
 **Independent Validation**: a `.dhall`-declared node rule (load / spot-cost / workflow-completion) drives the live node set toward its desired shape; raising the declared target provisions an EC2/managed node that joins the cluster; lowering it drains and releases the node; re-running converges as a no-op; `Unreachable` node observation **refuses** rather than charging ahead
 **Docs to update**: `documents/engineering/cluster_lifecycle_doctrine.md` (§8), `documents/engineering/pulumi_iac_doctrine.md` (§4 — the dynamic-node catalog entry), `documents/engineering/app_vs_deployment_doctrine.md` (node elasticity as a deployment rule, never app logic)
 

@@ -1,4 +1,4 @@
-# Phase 7: Host compute daemons (Apple Metal / Windows CUDA)
+# Phase 8: Host compute daemons (Apple Metal / Windows CUDA)
 
 **Status**: Authoritative source
 **Supersedes**: N/A
@@ -53,7 +53,7 @@ The phase does four things, in order:
    content-addressed MinIO store, and there is **no bespoke binary↔daemon RPC** — coordination *is*
    Pulsar/MinIO. Security comes from the network restriction, not from transport crypto.
 
-This phase is where the **`LinuxHost` witness** of the topology type discipline (Phase 3, Sprint 3.6) meets
+This phase is where the **`LinuxHost` witness** of the topology type discipline (Phase 4, Sprint 3.6) meets
 reality: the Lima Ubuntu VM *is* the only `LinuxHost` an apple host can produce, so "an rke2/kind cluster on a
 bare Apple host" — unrepresentable at decode ([`illegal_state_catalog.md`](../documents/engineering/illegal_state_catalog.md)
 §3.14, [`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md) §3) — is
@@ -61,7 +61,7 @@ realized by *actually interposing* the VM here (the runtime-checked "the VM boot
 capacity budget is likewise the runtime cross-check for the host/VM capacity fold
 ([`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) §8,
 [`illegal_state_catalog.md`](../documents/engineering/illegal_state_catalog.md) §3.17): a spec whose VM/guest
-`Demand` exceeds the host is decode-rejected in Phase 3, and this phase refuses if the real Apple host is
+`Demand` exceeds the host is decode-rejected in Phase 4, and this phase refuses if the real Apple host is
 smaller than its declared `Capacity`.
 
 **Compute-half delivery cross-ref (doctrine this round introduces; delivery this phase carries).** This round
@@ -87,16 +87,16 @@ cluster's MinIO/Pulsar + Vault over a declared `Gateway | Vpn` networking capabi
 — a non-member data-plane client on **any** control plane, including `Managed Eks`
 ([`single_logical_data_plane_doctrine.md`](../documents/engineering/single_logical_data_plane_doctrine.md) §3/§4,
 [`network_fabric_doctrine.md`](../documents/engineering/network_fabric_doctrine.md) §5) — and the **K2 full-node
-control-plane-over-fabric listener** (self-managed rke2's kubelet↔apiserver span) rides the same Phase-7 fabric
+control-plane-over-fabric listener** (self-managed rke2's kubelet↔apiserver span) rides the same Phase-8 fabric
 work ([`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md) §4.1). A stretched
 cluster stays one boundary — this is a networking generalization of the host-worker wire, not a new cross-cluster
-obligation, and (like the compute half above) is delivery this phase carries, not a Phase-7 gate claim.
+obligation, and (like the compute half above) is delivery this phase carries, not a Phase-8 gate claim.
 
-This phase consumes earlier phases rather than re-implementing them: Phase 1's substrate detection, the
-`bootstrap` contract, and the lazy-tool-ensure kernel; Phase 2's MinIO and Pulsar standard services; and
-Phase 4's native Pulsar client, content-addressed store, topology algebra, and worker-daemon scaffolding. The
+This phase consumes earlier phases rather than re-implementing them: Phase 2's substrate detection, the
+`bootstrap` contract, and the lazy-tool-ensure kernel; Phase 3's MinIO and Pulsar standard services; and
+Phase 5's native Pulsar client, content-addressed store, topology algebra, and worker-daemon scaffolding. The
 Metal ML workload itself reuses the determinism kernel and the shared-library inference path landed in
-Phases 4–5; this phase contributes the *host worker* shell and *wire*, not a new inference algorithm.
+Phases 5–6; this phase contributes the *host worker* shell and *wire*, not a new inference algorithm.
 
 ```mermaid
 flowchart LR
@@ -130,7 +130,7 @@ This phase is the first implementation of three doctrines. Each bullet names the
 individual sprints cite the same sections where they adopt them.
 
 - [`host_cluster_comms_doctrine.md` §2 — The decision that was open, and is now resolved](../documents/engineering/host_cluster_comms_doctrine.md#2-the-decision-that-was-open-and-is-now-resolved):
-  Phase 7 builds the resolved channel-2 design — a host compute daemon as a plain Pulsar + MinIO peer over
+  Phase 8 builds the resolved channel-2 design — a host compute daemon as a plain Pulsar + MinIO peer over
   host-only NodePorts with **no mTLS** — taking the two localhost-only host-origin channels of
   [§1 — The whole surface: two channels, both localhost-only](../documents/engineering/host_cluster_comms_doctrine.md#1-the-whole-surface-two-channels-both-localhost-only),
   the no-bespoke-control-channel rule of
@@ -144,7 +144,7 @@ individual sprints cite the same sections where they adopt them.
   the daemon's only inbound coordination is Pulsar/MinIO peering, its only wire is the host-only loopback
   NodePort, and a wild-exposed variant is unrepresentable.
 - [`substrate_doctrine.md` §5 — Host worker nodes: substrate-specific hardware that refuses to be contained](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained):
-  Phase 7 implements the apple host worker (Apple-Metal on unified memory) — and names the windows-CUDA case
+  Phase 8 implements the apple host worker (Apple-Metal on unified memory) — and names the windows-CUDA case
   — as a managed subprocess of the host binary with the Load → Prereq → Acquire → Ready → Serve → Drain →
   Exit role lifecycle, built via the virtualized-substrate provider of
   [§4 — Virtualized substrates](../documents/engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)
@@ -157,7 +157,7 @@ individual sprints cite the same sections where they adopt them.
   with [§3 — Architecture (the fixed host Metal bridge)](../documents/engineering/apple_metal_headless_builds.md#3-architecture),
   [§4 — Build and prerequisite model](../documents/engineering/apple_metal_headless_builds.md#4-build-and-prerequisite-model),
   and [§6 — Why Tart is not viable (the no-VM rationale)](../documents/engineering/apple_metal_headless_builds.md#6-why-tart-is-not-viable-the-no-vm-rationale):
-  Phase 7 builds the Apple-Metal worker **headless on the host — no Tart, no macOS VM** — source-building the
+  Phase 8 builds the Apple-Metal worker **headless on the host — no Tart, no macOS VM** — source-building the
   fixed Objective-C/C Metal bridge with `/usr/bin/clang` by absolute path and compiling generated MSL at
   runtime through the OS Metal framework, so a cache miss never starts a VM, invokes SwiftPM, or depends on a
   login keychain.
@@ -168,7 +168,7 @@ individual sprints cite the same sections where they adopt them.
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Substrate/Apple.hs`, `src/Amoebius/Substrate/Lima.hs`, `src/Amoebius/Substrate/Brew.hs` (target paths; not yet built)
-**Blocked by**: Phase 1 gate (external prereq — substrate detection, the `bootstrap --distro` contract, and the closed-enum lazy-tool-ensure kernel that invokes by absolute path)
+**Blocked by**: Phase 2 gate (external prereq — substrate detection, the `bootstrap --distro` contract, and the closed-enum lazy-tool-ensure kernel that invokes by absolute path)
 **Independent Validation**: on a detected apple substrate, `ensure lima` is `brew install lima` when `limactl` is absent and a verified no-op otherwise; a named, project-budget-sized Ubuntu-24.04 VM starts and carries a single-node cluster; every host tool used is resolved to an absolute path via the package manager and **no bare command name and no environment variable (including `PATH`) is ever read** on the host surface.
 **Docs to update**: `documents/engineering/substrate_doctrine.md`
 
@@ -178,7 +178,7 @@ Adopt [`substrate_doctrine.md` §4.1 — Lima on Apple](../documents/engineering
 and [§3 — the no-environment / no-`PATH` lazy tool-ensure contract](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract),
 rooted in [§6 — the `bootstrap.sh` contract](../documents/engineering/substrate_doctrine.md#6-the-bootstrapsh-contract-ensure-a-toolchain-build-the-binary-hand-off):
 synthesize the Linux host the apple substrate's cluster runs on via Lima, with every host tool ensured and
-invoked by absolute path through brew — the substrate foundation every later Phase 7 sprint stands on.
+invoked by absolute path through brew — the substrate foundation every later Phase 8 sprint stands on.
 
 ### Deliverables
 
@@ -207,7 +207,7 @@ The whole sprint.
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/HostComms/NodePort.hs`, `src/Amoebius/HostComms/Loopback.hs` (target paths; not yet built)
-**Blocked by**: Sprint 7.1 (the Lima VM provides the node network whose NodePorts must be bound to the host's loopback); Phase 2 (external prereq — the in-cluster MinIO and Pulsar standard services to expose)
+**Blocked by**: Sprint 7.1 (the Lima VM provides the node network whose NodePorts must be bound to the host's loopback); Phase 3 (external prereq — the in-cluster MinIO and Pulsar standard services to expose)
 **Independent Validation**: after bring-up, MinIO and Pulsar are reachable from the host at `127.0.0.1:<nodeport>` and **unreachable** from another machine on the LAN and from the WAN; there is no `LoadBalancer`-typed Service, no Envoy route, and no wild listener for either port; the loopback binding holds even though the Lima VM's node network does not bind NodePorts to loopback by default.
 **Docs to update**: `documents/engineering/host_cluster_comms_doctrine.md`, `documents/engineering/substrate_doctrine.md`
 
@@ -326,7 +326,7 @@ The whole sprint.
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/HostWorker/Peer.hs`, `src/Amoebius/HostWorker/Auth.hs` (target paths; not yet built)
-**Blocked by**: Sprint 7.2 (the host-only loopback NodePorts the peer dials); Sprint 7.4 (the daemon lifecycle whose `Serve` step does the peering); Phase 4 (external prereq — the native Pulsar client, the content-addressed store, and the topology algebra); Phase 2 (external prereq — MinIO and Pulsar)
+**Blocked by**: Sprint 7.2 (the host-only loopback NodePorts the peer dials); Sprint 7.4 (the daemon lifecycle whose `Serve` step does the peering); Phase 5 (external prereq — the native Pulsar client, the content-addressed store, and the topology algebra); Phase 3 (external prereq — MinIO and Pulsar)
 **Independent Validation**: the worker subscribes to its work topic over the native Pulsar TCP binary protocol (no WebSockets), does the work, and writes outputs to the content-addressed MinIO store — all over `127.0.0.1:<nodeport>` with **no mTLS and no bespoke binary↔daemon RPC**; client auth resolves through Vault by secret-name, never via a host environment variable or `PATH`.
 **Docs to update**: `documents/engineering/host_cluster_comms_doctrine.md`
 
@@ -368,7 +368,7 @@ The whole sprint.
 ## Sprint 7.6: Wild-exposure unrepresentable + the Apple-Metal peer gate 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/HostComms/Illegal.hs`, `test/dhall/phase_07_apple_metal_peer.dhall` (target paths; not yet built)
+**Implementation**: `src/Amoebius/HostComms/Illegal.hs`, `test/dhall/phase_08_apple_metal_peer.dhall` (target paths; not yet built)
 **Blocked by**: Sprint 7.5 (the working channel-2 peer the gate dispatches to); Sprint 7.2 (the host-only NodePort the gate asserts is localhost-only)
 **Independent Validation**: a `.dhall` that tries to give a host-origin NodePort a `LoadBalancer` Service, an Envoy route, or any wild listener — or that gives the host daemon its own wild ingress — **fails to type-check**; the gate `.dhall` runs the full Apple-Metal peer workflow end-to-end and tears down, emitting a proven/tested/assumed ledger artifact.
 **Docs to update**: `documents/engineering/host_cluster_comms_doctrine.md`
@@ -388,7 +388,7 @@ ingress.
   here): a host-origin NodePort cannot be expressed as `LoadBalancer`-typed, Envoy-routed, or wild-listening,
   and a host compute daemon cannot publish wild ingress — its only inbound coordination is Pulsar/MinIO
   peering and its only privileged control path is the binary's channel 1.
-- The gate `.dhall` (`test/dhall/phase_07_apple_metal_peer.dhall`): bring up the apple cluster on Lima,
+- The gate `.dhall` (`test/dhall/phase_08_apple_metal_peer.dhall`): bring up the apple cluster on Lima,
   expose MinIO/Pulsar on the host-only loopback NodePort, build the worker **headless on-host via the fixed
   Metal bridge (no VM)**, start the daemon as a managed subprocess, dispatch a Metal inference job over
   Pulsar, land its output in the content-addressed store, then tear the worker and cluster down.
@@ -413,7 +413,7 @@ The whole sprint.
 
 **Engineering docs to update:**
 - `documents/engineering/host_cluster_comms_doctrine.md` — when this phase lands, its §9 planning-ownership
-  pointer resolves to delivered Phase 7 sprints, and the §2/§5/§6 honesty notes flip from "resolved design
+  pointer resolves to delivered Phase 8 sprints, and the §2/§5/§6 honesty notes flip from "resolved design
   decision / sibling evidence" to a delivered, apple-tested channel-2 peer (status recorded here in the plan,
   never as doctrine status); add the `Amoebius.HostComms.*` and `Amoebius.HostWorker.*` module paths to its
   cross-reference set.
@@ -421,14 +421,14 @@ The whole sprint.
   sibling evidence / design intent" to a delivered, apple-tested amoebius fixed-Metal-bridge build (status
   recorded here in the plan, never as doctrine status).
 - `documents/engineering/substrate_doctrine.md` — its §8 planning-ownership pointer resolves to delivered
-  Phase 7 sprints; the §4.3 "no macOS build VM" note and the §5 host-worker description gain their first
+  Phase 8 sprints; the §4.3 "no macOS build VM" note and the §5 host-worker description gain their first
   amoebius datapoint on apple; record that the Lima provider, the headless on-host Metal-bridge build, and the
   brew lazy-tool-ensure were exercised by full-path subprocess with no env/`PATH`.
 
 **Cross-references to add:**
-- [README.md](README.md) Phase index — flip the Phase 7 row from "not started" to its delivered status and
+- [README.md](README.md) Phase index — flip the Phase 8 row from "not started" to its delivered status and
   link this document.
-- [substrates.md](substrates.md) — record Phase 7's gate substrate (apple) in the per-phase substrate map,
+- [substrates.md](substrates.md) — record Phase 8's gate substrate (apple) in the per-phase substrate map,
   and note the windows-CUDA host worker as the structurally identical non-gate case.
 - [system_components.md](system_components.md) — add the host-worker and host-comms modules
   (`Substrate/Apple`, `Substrate/Lima`, `HostWorker/MetalBridge`, `HostComms/NodePort`, `HostWorker/Lifecycle`,
@@ -436,7 +436,7 @@ The whole sprint.
 
 ## Related Documents
 
-- [README.md](README.md) — the live tracker; Phase 7 objective, gate, and substrate
+- [README.md](README.md) — the live tracker; Phase 8 objective, gate, and substrate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants
 - [system_components.md](system_components.md) — the target component inventory for the module paths above
@@ -444,9 +444,9 @@ The whole sprint.
 - [Host ↔ Cluster Comms Doctrine](../documents/engineering/host_cluster_comms_doctrine.md) — the host-only NodePort, no-mTLS channel-2 design this phase implements
 - [Apple Metal Headless Builds](../documents/engineering/apple_metal_headless_builds.md) — the headless, on-host, no-Tart fixed-Metal-bridge build/run shape this phase implements
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — the apple/windows host worker nodes and the Lima/WSL2 providers this phase implements
-- [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — the worker-role taxonomy, the control-plane singleton, and the composition lift (cross-reference, not adopted in Phase 7)
-- [Pulsar Client Doctrine](../documents/engineering/pulsar_client_doctrine.md) — the native-protocol client, no-WebSockets, and topology algebra the peer rides on (cross-reference, not adopted in Phase 7)
-- [Vault / PKI Doctrine](../documents/engineering/vault_pki_doctrine.md) — the secrets-by-name client auth the channel-2 peer resolves through (cross-reference, not adopted in Phase 7)
-- Earlier phase: Phase 4 — Native Pulsar client + content-addressed store + workflow-runtime (the transport, store, and worker scaffolding this phase consumes)
-- Earlier phase: Phase 6 — jitML migration + HA coordinator (the prior host-adjacent ML workload; the CUDA-in-container contrast case)
+- [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — the worker-role taxonomy, the control-plane singleton, and the composition lift (cross-reference, not adopted in Phase 8)
+- [Pulsar Client Doctrine](../documents/engineering/pulsar_client_doctrine.md) — the native-protocol client, no-WebSockets, and topology algebra the peer rides on (cross-reference, not adopted in Phase 8)
+- [Vault / PKI Doctrine](../documents/engineering/vault_pki_doctrine.md) — the secrets-by-name client auth the channel-2 peer resolves through (cross-reference, not adopted in Phase 8)
+- Earlier phase: Phase 5 — Native Pulsar client + content-addressed store + workflow-runtime (the transport, store, and worker scaffolding this phase consumes)
+- Earlier phase: Phase 7 — jitML migration + HA coordinator (the prior host-adjacent ML workload; the CUDA-in-container contrast case)
 - [Engineering Doctrine Index](../documents/engineering/README.md) — the doctrine suite these phases adopt

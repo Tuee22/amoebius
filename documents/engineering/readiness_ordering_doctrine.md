@@ -224,9 +224,9 @@ This document is normative readiness-ordering doctrine only. Delivery sequencing
 validation gates, and remaining work are owned by
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the **bootstrap-tier** rule — `discover`/`RuntimeWitness` gates, no timers,
-the host-daemon→singleton handoff — rides **Phase 1** with the `chain`/`Step` kernel and idempotent kind
+the host-daemon→singleton handoff — rides **Phase 2** with the `chain`/`Step` kernel and idempotent kind
 bring-up; the **typed `Readiness` gate** and the [§3.41](./illegal_state_catalog.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race)
-catalog foreclosure land in **Phase 3** with the orchestration DSL and the control-plane singleton. This doc
+catalog foreclosure land in **Phase 4** with the orchestration DSL and the control-plane singleton. This doc
 states the target shape and links back for status.
 
 > **Honesty.** Everything here is Phase 0 design intent, specified before implementation. The reconciler's

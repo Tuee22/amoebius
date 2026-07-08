@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: ../README.md, ../documents/documentation_standards.md, ../documents/engineering/README.md, ../documents/engineering/app_vs_deployment_doctrine.md, ../documents/engineering/bootstrap_sequence_doctrine.md, ../documents/engineering/chaos_failover_doctrine.md, ../documents/engineering/cluster_lifecycle_doctrine.md, ../documents/engineering/content_addressing_doctrine.md, ../documents/engineering/daemon_topology_doctrine.md, ../documents/engineering/dsl_doctrine.md, ../documents/engineering/host_cluster_comms_doctrine.md, ../documents/engineering/illegal_state_catalog.md, ../documents/engineering/image_build_doctrine.md, ../documents/engineering/manifest_generation_doctrine.md, ../documents/engineering/platform_services_doctrine.md, ../documents/engineering/pulsar_client_doctrine.md, ../documents/engineering/pulumi_iac_doctrine.md, ../documents/engineering/readiness_ordering_doctrine.md, ../documents/engineering/service_capability_doctrine.md, ../documents/engineering/storage_lifecycle_doctrine.md, ../documents/engineering/substrate_doctrine.md, ../documents/engineering/testing_doctrine.md, ../documents/engineering/tla_modelling_assumptions.md, ../documents/engineering/vault_pki_doctrine.md, development_plan_standards.md, later_phases.md, legacy_tracking_for_deletion.md, overview.md, phase_00_documentation_suite.md, phase_01_bootstrap_kernel_kind.md, phase_02_platform_services_storage_vault.md, phase_03_dsl_control_plane_singleton.md, phase_04_pulsar_content_store_workflow.md, phase_05_determinism_infernix.md, phase_06_jitml_ha_coordinator.md, phase_07_host_compute_daemons.md, phase_08_mattandjames_app_logic.md, phase_09_multicluster_spawn_georeplication.md, phase_10_provider_clusters_provisioning.md, phase_11_test_topology_dsl.md, phase_12_spa_composition.md, substrates.md, system_components.md
+**Referenced by**: ../README.md, ../documents/documentation_standards.md, ../documents/engineering/README.md, ../documents/engineering/app_vs_deployment_doctrine.md, ../documents/engineering/bootstrap_sequence_doctrine.md, ../documents/engineering/chaos_failover_doctrine.md, ../documents/engineering/cluster_lifecycle_doctrine.md, ../documents/engineering/content_addressing_doctrine.md, ../documents/engineering/daemon_topology_doctrine.md, ../documents/engineering/dsl_doctrine.md, ../documents/engineering/host_cluster_comms_doctrine.md, ../documents/engineering/illegal_state_catalog.md, ../documents/engineering/image_build_doctrine.md, ../documents/engineering/manifest_generation_doctrine.md, ../documents/engineering/platform_services_doctrine.md, ../documents/engineering/pulsar_client_doctrine.md, ../documents/engineering/pulumi_iac_doctrine.md, ../documents/engineering/readiness_ordering_doctrine.md, ../documents/engineering/service_capability_doctrine.md, ../documents/engineering/storage_lifecycle_doctrine.md, ../documents/engineering/substrate_doctrine.md, ../documents/engineering/testing_doctrine.md, ../documents/engineering/tla_modelling_assumptions.md, ../documents/engineering/vault_pki_doctrine.md, development_plan_standards.md, later_phases.md, legacy_tracking_for_deletion.md, overview.md, phase_00_documentation_suite.md, phase_01_formal_first_dsl_integrity.md, phase_02_bootstrap_kernel_kind.md, phase_03_platform_services_storage_vault.md, phase_04_dsl_control_plane_singleton.md, phase_05_pulsar_content_store_workflow.md, phase_06_determinism_infernix.md, phase_07_jitml_ha_coordinator.md, phase_08_host_compute_daemons.md, phase_09_multicluster_spawn_georeplication.md, phase_10_provider_clusters_provisioning.md, phase_11_test_topology_dsl.md, phase_12_spa_composition.md, substrates.md, system_components.md
 **Generated sections**: none
 
 > **Purpose**: The single, authoritative, numerically-ordered phased plan that delivers the whole amoebius
@@ -15,8 +15,10 @@ non-binding vision.
 
 The constituent projects are **not separate products** — they are libraries and behaviours unified under
 the DSL: **prodbox** = the root single-node control-plane behaviour; **infernix** + **jitML** =
-ML extension libraries; **hostbootstrap** = the bootstrap + DSL-`chain` core; **mattandjames** =
-application logic only.
+the two ML extension libraries (the closed extension set), each shipping a **demo web app** that renders its
+ML results; **hostbootstrap** = the bootstrap + DSL-`chain` core. Those demo web apps
+(`~/infernix`, `~/jitML`) are amoebius's application-logic-only demonstrators and the SPA-composition
+shakedown fixtures.
 
 ---
 
@@ -34,7 +36,15 @@ These rules are absolute and govern all work:
    development. The required substrate is named in each phase below.
 4. **Phase 0 is the whole documentation suite.** The entire DSL is documented — comprehensively and
    explicitly — before any implementation phase begins. See [documents/engineering/README.md](../documents/engineering/README.md).
-5. **Honest ledger.** Every validation emits a proven/tested/assumed ledger artifact; skipping an
+5. **Design-first validation before real resources.** Phase 1 is a `none`-substrate, in-process
+   formal-validation phase: it proves the DSL's illegal-state-unrepresentable discipline, the SPA
+   composition, and the cross-cluster failover / singleton-election design invariants (Dhall typecheck +
+   Haskell decoder + QuickCheck + TLA+/TLC + io-sim) **before any phase provisions a real resource**.
+   Front-loading a *design* proof ahead of the phase that builds the runtime it later corresponds to is
+   legitimate **provided** the ledger marks model↔code correspondence and runtime fidelity UNVERIFIED — a
+   Tier-1-only in-process ledger can never advance a production `PromotionGate` (see the chaos/failover and
+   testing doctrines).
+6. **Honest ledger.** Every validation emits a proven/tested/assumed ledger artifact; skipping an
    *applicable* test move marks that correctness layer UNVERIFIED, never green (see the chaos/failover
    doctrine).
 
@@ -125,18 +135,18 @@ sprints, and its gate. *Substrate* is the single substrate the gate runs on.
 | Phase | Name | Substrate | Gate (one line) | Status | Document |
 |-------|------|-----------|-----------------|--------|----------|
 | 0 | Documentation suite (whole DSL) | none | the documentation lint passes (headers, SSoT, no orphan links) | 🔄 Active | [phase_00](phase_00_documentation_suite.md) |
-| 1 | Bootstrap + kernel + single kind cluster | linux-cpu | `amoebius bootstrap` brings up an empty cluster; re-run is a no-op | 📋 Planned | [phase_01](phase_01_bootstrap_kernel_kind.md) |
-| 2 | Platform services + retained storage + root Vault/PKI | linux-cpu | all standard services up HA from generated manifests + baked binaries; ingress only via Keycloak; storage rebinds | 📋 Planned | [phase_02](phase_02_platform_services_storage_vault.md) |
-| 3 | Orchestration Dhall DSL + control-plane singleton | linux-cpu | a `.dhall` deploys the platform + a trivial app; illegal `.dhall` files (bad PVC↔PV, open ingress, product-in-app-logic, overcommit, bad topology, unbounded storage, un-tiered topic) fail to type-check; a multi-substrate / managed-EKS `.dhall` decodes | 📋 Planned | [phase_03](phase_03_dsl_control_plane_singleton.md) |
-| 4 | Native Pulsar client + content-addressed store + workflow-runtime | linux-cpu | round-trip a workflow over native Pulsar + store/fetch a content-addressed artifact; a worker fails over | 📋 Planned | [phase_04](phase_04_pulsar_content_store_workflow.md) |
-| 5 | Determinism kernel + infernix migration | linux-cpu | an infernix CPU-inference workflow is reproducible (same `experimentHash` ⇒ same output) | 📋 Planned | [phase_05](phase_05_determinism_infernix.md) |
-| 6 | jitML migration + HA coordinator | linux-cuda | a jitML run is bit-deterministic per its contract; the coordinator fails over | 📋 Planned | [phase_06](phase_06_jitml_ha_coordinator.md) |
-| 7 | Host compute daemons (Apple Metal / Windows CUDA) | apple | an Apple-Silicon host daemon runs a Metal ML workload as a cluster Pulsar/MinIO peer | 📋 Planned | [phase_07](phase_07_host_compute_daemons.md) |
-| 8 | mattandjames as application-logic-only | linux-cpu | mattandjames deploys from one app `.dhall` at a configurable replica count, inference via infernix | 📋 Planned | [phase_08](phase_08_mattandjames_app_logic.md) |
-| 9 | Multi-cluster: amoebic spawning + geo-replication + failover | linux-cpu | two children geo-replicate; killing the lead triggers DNS failover within the loss budget; proofs green | 📋 Planned | [phase_09](phase_09_multicluster_spawn_georeplication.md) |
+| 1 | Formal-first DSL & protocol integrity (in-process) | none | in-process only: `dhall type` + decoder + QuickCheck prove the illegal-state-unrepresentable DSL **and** SPA composition; TLC proves the failover & election design invariants at scope 2; the Tier-1-only ledger marks correspondence + runtime UNVERIFIED | 📋 Planned | [phase_01](phase_01_formal_first_dsl_integrity.md) |
+| 2 | Bootstrap + kernel + single kind cluster | linux-cpu | `amoebius bootstrap` brings up an empty cluster; re-run is a no-op | 📋 Planned | [phase_02](phase_02_bootstrap_kernel_kind.md) |
+| 3 | Platform services + retained storage + root Vault/PKI | linux-cpu | all standard services up HA from generated manifests + baked binaries; ingress only via Keycloak; storage rebinds | 📋 Planned | [phase_03](phase_03_platform_services_storage_vault.md) |
+| 4 | Orchestration Dhall DSL + control-plane singleton | linux-cpu | a `.dhall` deploys the platform + a trivial app; illegal `.dhall` files (bad PVC↔PV, open ingress, product-in-app-logic, overcommit, bad topology, unbounded storage, un-tiered topic) fail to type-check (the Phase-1 in-process proof, here enforced live); a multi-substrate / managed-EKS `.dhall` decodes | 📋 Planned | [phase_04](phase_04_dsl_control_plane_singleton.md) |
+| 5 | Native Pulsar client + content-addressed store + workflow-runtime | linux-cpu | round-trip a workflow over native Pulsar + store/fetch a content-addressed artifact; a worker fails over | 📋 Planned | [phase_05](phase_05_pulsar_content_store_workflow.md) |
+| 6 | Determinism kernel + infernix migration | linux-cpu | an infernix CPU-inference workflow is reproducible (same `experimentHash` ⇒ same output); the infernix demo web app deploys as application-logic-only | 📋 Planned | [phase_06](phase_06_determinism_infernix.md) |
+| 7 | jitML migration + HA coordinator | linux-cuda | a jitML run is bit-deterministic per its contract; the coordinator fails over; the jitML demo web app deploys as application-logic-only | 📋 Planned | [phase_07](phase_07_jitml_ha_coordinator.md) |
+| 8 | Host compute daemons (Apple Metal / Windows CUDA) | apple | an Apple-Silicon host daemon runs a Metal ML workload as a cluster Pulsar/MinIO peer | 📋 Planned | [phase_08](phase_08_host_compute_daemons.md) |
+| 9 | Multi-cluster: amoebic spawning + geo-replication + failover | linux-cpu | two children geo-replicate; killing the lead triggers DNS failover within the loss budget; the failover **correspondence** is completed against the built modules and the Phase-1 design-model (already green) is shown to correspond | 📋 Planned | [phase_09](phase_09_multicluster_spawn_georeplication.md) |
 | 10 | Provider-managed clusters + dynamic provisioning | linux-cpu → provider | spin a provider cluster, dynamically provision a node, tear down leak-free | 📋 Planned | [phase_10](phase_10_provider_clusters_provisioning.md) |
 | 11 | Test-topology DSL + suggest-test + storage-lifecycle safety | per generated test | a generated test `.dhall` runs a failover/election simulation and tears down leak-free | 📋 Planned | [phase_11](phase_11_test_topology_dsl.md) |
-| 12 | SPA composition | linux-cpu | an SPA `.dhall` composes a multi-service app + an ML workflow, deployed and reachable | 📋 Planned | [phase_12](phase_12_spa_composition.md) |
+| 12 | SPA composition | linux-cpu | an SPA `.dhall` composes a multi-service app + an ML workflow (the infernix/jitML demo web apps), deployed and reachable; its representational composition was already proven in Phase 1 | 📋 Planned | [phase_12](phase_12_spa_composition.md) |
 | 13+ | Later phases | varies | each high-numbered in-scope phase gets its own gate when reached | 📋 Planned | [later_phases](later_phases.md) |
 
 The detailed objective, sprint breakdown, doctrine adoptions, and gate for each phase live in that phase's

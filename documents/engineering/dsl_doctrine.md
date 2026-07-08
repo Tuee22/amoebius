@@ -190,7 +190,12 @@ Total composability runs along four concrete axes, each owned in detail by a sib
   under the DSL, not separate products (DEVELOPMENT_PLAN), so an inference workload is a nested typed
   fragment, not a bolt-on. The precise seam by which such a library registers — the typed **`ExtensionSpec`**,
   merged at link time into the one binary — is spelled out below; this axis's closed v1 set is
-  `{infernix, jitML, mattandjames}`.
+  `{infernix, jitML}`. Each of infernix and jitML additionally ships a **demo web app** — a single-page web
+  app that drives its ML workflow and renders its results. Per
+  [app_vs_deployment_doctrine.md §8](./app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic),
+  a demo web app is *application logic that uses* its extension — **not** itself an extension (an arbitrary
+  container app is never an extension) — so it composes as an ordinary app-spec fragment, and these two demo
+  web apps are the **SPA-composition fixtures** (SPA composition itself is front-loaded to Phase 1, below).
 - **Child-cluster-in-parent.** The name *amoebius* is the recursion: a cluster spawns children, which
   spawn their own. A child receives only its own scoped `InForceSpec` — *"including
   their childrens'"* but nothing about siblings — and the whole tree is rolled out from the root. The
@@ -202,6 +207,12 @@ A fifth axis is the **test topology**: a test is a Dhall-authored `InForceSpec` 
 runs a workflow, and tears down resources — the same composition, with a teardown
 obligation. The testing surface is owned by the testing doctrine; it is named here only as proof that even
 *testing* is expressed in the one composable DSL rather than a parallel harness language.
+
+**SPA composition, front-loaded to Phase 1.** Composing a multi-service app together with an ML-workflow
+**demo web app** (the infernix/jitML fixtures above) as **typed Dhall fragments** — a single-page-app
+composition over this same extension seam — has its *representational / type-level* validity front-loaded to
+**Phase 1**, where it is proven at the Tier-1 design/spec layer (the same authoring-time gates of
+[§5](#5-the-illegal-state-unrepresentable-contract)); only the **live SPA deploy** stays in **Phase 12**.
 
 ```mermaid
 flowchart TD
@@ -238,7 +249,7 @@ non-optional** `NonEmpty` list of monitoring surfaces the extension stands up �
 an extension that declares no monitoring has no inhabitant
 ([monitoring_doctrine.md](./monitoring_doctrine.md)).
 
-**Linked, not loaded.** The v1 set is **closed at `{infernix, jitML, mattandjames}`**; each contributes one
+**Linked, not loaded.** The v1 set is **closed at `{infernix, jitML}`**; each contributes one
 `ExtensionSpec`, and the specs are merged at **compile/link time into the one binary** — no dlopen, no
 per-extension image, no runtime plugin path. The merge adopts hostbootstrap's additive `ProjectSpec` stream
 algebra and its **anti-shadow `validateProjectSpec`** (`.../CLI.hs`) — the duplicate-id,
@@ -257,7 +268,7 @@ this forbids — *sibling evidence of an anti-pattern*, corrected here, not a sh
 
 The `ExtensionSpec` seam is **Path 1**, and it is deliberately *not* open to the world:
 
-- **v1 — Path 1 (linked).** The closed set `{infernix, jitML, mattandjames}` is *vendored*: each links into
+- **v1 — Path 1 (linked).** The closed set `{infernix, jitML}` is *vendored*: each links into
   the one binary through its `ExtensionSpec`. This is the only extension mechanism v1 ships.
 - **v2 — Path 2 (the Haskell extension DSL).** A non-vendored third party enters *only* through the future
   **Haskell-as-DSL + custom AST checker + native JIT** — the forward pointer of [§8](#8-the-haskell-extension-dsl-forward-pointer-only), scheduled as provisional
@@ -375,6 +386,14 @@ The two gates compose: Gate 1 rejects what is not even well-typed Dhall; Gate 2 
 Dhall but not a legal amoebius world. What survives both is, by construction, a deployable cluster
 description — which is exactly *"if it decodes, it is deployable."*
 
+**Where the two gates are discharged: front-loaded to Phase 1 (Tier 1).** Both gates are *in-process,
+design-time* checks with no real resource behind them — Gate 1 is `dhall type` at authoring time, Gate 2 is
+the in-process `Dhall.inputFile auto` decode plus a QuickCheck exercise of the decoder's ADTs. Their
+integrity is therefore **discharged in-process in the front-loaded Phase 1** — the Tier-1 design/spec layer
+(dhall typecheck + decoder + QuickCheck), which needs no cluster. What stays deferred is only the **Tier-2
+runtime-enforcement residue** — that the *running* cluster enforces what the typed spec composed — owned by
+**Phase 4**. A green typecheck or decode proves the spec composes, not that the cluster enforces it.
+
 ### Recursion: a child's spec is a typed subtree projection
 
 The contract extends through the recursive forest. When a cluster spawns a child,
@@ -410,7 +429,9 @@ its building phase, not yet built.
 > mechanism; it does **not** claim any specific illegal state is *proven* unrepresentable — that claim is
 > made, state by state, only where the catalog exhibits the type that excludes it. Per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), a typing argument is evidence, not a
-> tested or proven result, until the catalog and Phase 3 make it concrete.
+> tested or proven result: the two gates' in-process integrity is front-loaded to Phase 1 (Tier 1), while
+> runtime enforcement — that the running cluster enforces what the spec composed — stays the Tier-2 residue
+> deferred to Phase 4.
 
 ---
 
@@ -472,7 +493,7 @@ v1 can be an orchestrator for arbitrary containers."*
 This doc is the SSoT for the **orchestration** DSL (the Dhall surface). The **extension** DSL — the
 Haskell-as-DSL plus its custom AST checker and native JIT — is a scheduled **later phase**, not specified
 here. In [§4](#4-total-composability)'s extension taxonomy this is **Path 2** — the *only* path by which a non-vendored third party
-extends amoebius (Path 1, the closed linked set `{infernix, jitML, mattandjames}`, is vendored) — scheduled
+extends amoebius (Path 1, the closed linked set `{infernix, jitML}`, is vendored) — scheduled
 as provisional **Phase 15**
 ([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md#candidate-phase-haskell-extension-dsl--custom-ast-checker--native-jit)).
 See also the "Later phases" entry in
@@ -503,14 +524,20 @@ does not serve as a message-payload format).
 ## 10. Planning ownership
 
 This document is normative DSL doctrine only. Delivery sequencing, completion status, validation gates, and
-remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (the
-orchestration Dhall DSL and the illegal-spec-fails-to-type-check gate land in **Phase 3**, atop the Phase 1
-`dsl-step`/`chain` kernel seeded from hostbootstrap). This doc never maintains a competing status ledger; it
-states the target shape and links back for status.
+remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). The
+orchestration Dhall DSL's **in-process contract validation** — the two typed gates of
+[§5](#5-the-illegal-state-unrepresentable-contract) that make an illegal spec fail to type-check (Tier 1:
+dhall typecheck + decoder + QuickCheck) — is **front-loaded to Phase 1**, while the DSL's
+**runtime-enforcement** half (the live deploy + elected-singleton reconcile that makes the running cluster
+enforce what the spec composed, Tier 2) lands in **Phase 4**, atop the Phase 2 `dsl-step`/`chain` kernel
+seeded from hostbootstrap. This doc never maintains a competing status ledger; it states the target shape and
+links back for status.
 
 > **Honesty.** Everything in this doctrine is Phase 0 design intent, specified before implementation. Where
 > it borrows behaviour proven in prodbox or implemented in hostbootstrap, that is *evidence from a sibling
-> system*, not proof in amoebius — which has not yet built Phase 3. Read every prescriptive statement here
+> system*, not proof in amoebius — which has built neither the front-loaded Phase 1 in-process validation of
+> this contract (Tier 1: dhall typecheck + decoder + QuickCheck) nor the Phase 4 runtime enforcement (Tier 2)
+> that makes the running cluster enforce what the spec composed. Read every prescriptive statement here
 > as the contract amoebius intends to satisfy, never as a tested amoebius result
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 

@@ -36,10 +36,11 @@ policy"). This is structural, not stylistic:
 
 The *constituent behaviours* of the binary map onto the role taxonomy below: **prodbox** is the root
 single-node control-plane behaviour ([§3](#3-the-control-plane-singleton--exactly-one-elected)), **infernix** + **jitML** are the ML worker roles ([§4](#4-worker-daemons--n-unelected)),
-**hostbootstrap** is the bootstrap + DSL-`chain` core that the host daemon drives, and **mattandjames** is
-the application logic a web-service worker hosts ([README](../../README.md);
-[DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md)). They are libraries inside one binary, not separate
-products.
+and **hostbootstrap** is the bootstrap + DSL-`chain` core that the host daemon drives. The application
+logic a web-service worker hosts is a **demo web app** — the single-page apps shipped with `infernix` and
+`jitML` — an app-spec that USES those extensions rather than a library linked into the binary
+([README](../../README.md); [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md)). The named behaviours are
+libraries inside one binary, not separate products.
 
 This document owns *which contexts exist and what each is for*. **How** the host daemon communicates — the
 distro-mTLS path to `kube-apiserver`, and the host-only NodePort peering with no mTLS — is owned by
@@ -214,7 +215,7 @@ each kind. The canonical worker kinds:
 
 | Worker kind | What it does | Constituent library |
 |-------------|--------------|---------------------|
-| **Web-service host** | Hosts an amoebius app's services behind the cluster edge | **mattandjames** (application logic) |
+| **Web-service host** | Hosts an amoebius app's services behind the cluster edge | a demo web app (application logic) |
 | **Pulsar topic-lifecycle coordinator** | Drives an app's declared topic lifecycles (create / retention / teardown) | the DSL + [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) |
 | **ML batch coordinator** | Schedules and tracks batch ML workflows | **infernix** / **jitML** |
 | **Inference engine** | Serves model inference — **in-cluster on linux-CUDA; host-level on Apple-Metal and Windows-CUDA** | **infernix** / **jitML** |
@@ -529,7 +530,7 @@ ownership fold ([§5.2](#52-the-ranked-failover-rule)) and the log gate ([§5.3]
 **Pulsar carries every *delegable* coordination concern already; the one custom exception is the singleton
 election, and it is a considered trade the primitives above cannot improve on.**
 
-> **Honesty.** This is a design decision recorded before Phase 3/9 implementation, not a benchmarked amoebius
+> **Honesty.** This is a design decision recorded before Phase 4/9 implementation, not a benchmarked amoebius
 > result. The exclusive-producer / TableView / compaction semantics cited are Pulsar 3.x/4.x features; that
 > they behave as described in an amoebius deployment is **assumed**, not tested
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
@@ -597,8 +598,8 @@ flowchart TD
 This document is normative daemon-topology doctrine only. Delivery sequencing, completion status,
 validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) and never restated here. For orientation
-only (the plan is authoritative): the contexts and the same-binary spine ride **Phase 1**; the in-cluster
-**control-plane singleton** lands in **Phase 3** (per
+only (the plan is authoritative): the contexts and the same-binary spine ride **Phase 2**; the in-cluster
+**control-plane singleton** lands in **Phase 4** (per
 [cluster_lifecycle_doctrine.md §10](./cluster_lifecycle_doctrine.md#10-planning-ownership)); and the **election correctness** plus
 cross-cluster gateway failover are owned, modeled, and gated by
 [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) in the failover phase. This doc states the target

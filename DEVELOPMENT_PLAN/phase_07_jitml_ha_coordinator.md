@@ -1,4 +1,4 @@
-# Phase 6: jitML migration + HA coordinator
+# Phase 7: jitML migration + HA coordinator
 
 **Status**: Authoritative source
 **Supersedes**: N/A
@@ -25,8 +25,8 @@ Done — or 🧪 Live-proof-pending — until its proof actually runs on `linux-
 ## Phase Summary
 
 This phase takes `jitML` — the sibling training + JIT-codegen ML library — and makes it an amoebius extension
-*library* rather than a standalone product: its checkpoints land in the Phase-4 content-addressed MinIO store,
-its training runs are made deterministic-by-construction using the Phase-5 determinism kernel (`experimentHash`
+*library* rather than a standalone product: its checkpoints land in the Phase-5 content-addressed MinIO store,
+its training runs are made deterministic-by-construction using the Phase-6 determinism kernel (`experimentHash`
 + SplitMix seed derivation), its CUDA backend is confined behind a cabal flag that is **off by default** (so
 the ordinary build stays CPU-only and portable), it composes as a shared library whose own `.dhall` nests
 inside the `InForceSpec`, and — the genuinely new distributed piece — a `jitML` **training coordinator**
@@ -35,18 +35,27 @@ single-writer election); the heavy synchronous consensus underneath it (object-s
 subscriptions, relational replication) is **delegated** to the standard services and never re-proved here.
 
 This phase is the first to require a GPU host, which is exactly why it is sequenced after the `linux-cpu`
-determinism kernel (Phase 5) rather than alongside it: the determinism *contract* is built and proven on CPU,
+determinism kernel (Phase 6) rather than alongside it: the determinism *contract* is built and proven on CPU,
 then **applied and re-validated on `linux-cuda`** here, where the substrate fingerprint changes and float
 reduction order differs.
 
+The **jitML demo web app** — the result-rendering single-page app shipped with `~/jitML` that illustrates its
+training/JIT workflow and renders its output — deploys in this phase as **application-logic-only**: it is authored
+once as application logic that *uses* the jitML extension, while its HA replica count, substrate, and compute
+binding are an orthogonal deployment-rules surface. It is this phase's app-vs-deployment demonstrator — the proof
+case that an app is written once as logic while its deployment shape is a separate dial — and per
+[`app_vs_deployment_doctrine.md` §8 — shared-library use is application logic](../documents/engineering/app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic)
+a demo web app that *uses* an extension is application logic, not itself an extension, so the closed extension set
+stays {infernix, jitML}.
+
 Scope **in**: mapping the `jitML` blob/manifest/pointer checkpoint format onto the amoebius three-tier
-content-addressed store (Phase 4); binding `experimentHash` to the `linux-cuda` substrate fingerprint and
+content-addressed store (Phase 5); binding `experimentHash` to the `linux-cuda` substrate fingerprint and
 deriving per-stream SplitMix seeds for `jitML` training; the default-off `cuda` cabal flag and the
 CPU/CUDA engine split; `jitML` as a shared library whose `.dhall` nests under the `InForceSpec`; the
 elected, single-writer HA training coordinator and its ranked failover; the bit-determinism + failover gate.
 Scope **out**: building the `ContentAddress` typeclass / `experimentHash` / SplitMix primitives themselves
-(Phase 5, `linux-cpu`); the content-addressed store + native Pulsar client themselves (Phase 4); Apple Metal /
-Windows host compute daemons (Phase 7); the `mattandjames` application-logic reduction (Phase 8); and the
+(Phase 6, `linux-cpu`); the content-addressed store + native Pulsar client themselves (Phase 5); Apple Metal /
+Windows host compute daemons (Phase 8); the demo-web-app application-logic-only demonstrations (Phases 6–7); and the
 **Second Axis** async cross-cluster geo-replication / gateway failover and its TLA+/io-sim proof (Phase 9).
 The honest ceiling is adopted verbatim: same-substrate (`linux-cuda`) bit-equality is the contract;
 cross-substrate bit-equality is **not asserted**, and off-policy RL is downgraded to a tested first-N-step
@@ -55,7 +64,7 @@ prefix.
 **Substrate:** linux-cuda (the single gate substrate; the first GPU substrate in the plan, tracked in
 [substrates.md](substrates.md), per [development_plan_standards.md §L](development_plan_standards.md)). The
 Apple Metal and Windows CUDA host substrates named in the substrate doctrine are explicitly **not** exercised
-by this gate; they land in Phase 7.
+by this gate; they land in Phase 8.
 
 **Gate:** on a `linux-cuda` host, a `jitML` training run is **bit-deterministic per its determinism contract**
 (the same `experimentHash` ⇒ the same checkpoint manifest SHA on the same `linux-cuda` substrate; off-policy RL
@@ -102,14 +111,14 @@ and the run continues from the last adopted `latest` pointer with no torn checkp
   ([`content_addressing_doctrine.md` §4.5 — The three-tier ML-asset lifecycle: engine baked, model staged, kernel JIT'd](../documents/engineering/content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)):
   a **committed jitML checkpoint** produced in this phase (Sprint 6.1's `latest`/`best` pointer CAS) is exactly
   the **producer** that satisfies the infernix serve gate consumed in
-  [Phase 5](phase_05_determinism_infernix.md) / Phase 8 (a `producer→precondition` edge across the
+  [Phase 6](phase_06_determinism_infernix.md) / Phase 9 (a `producer→precondition` edge across the
   `jitml-checkpoints/` → `infernix-models/` buckets, adopted by manifest SHA). The round also introduces the
   **training-run topology** — fine-tune chains (`Continue` from a witnessed `ModelArtifact`) and continuous/online
   feeds ([§4.6 — The training-run topology: fine-tune chains and continuous feeds without an unbounded arm](../documents/engineering/content_addressing_doctrine.md#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)):
   a `Continuous` feed trainer is the **existing jitML HA coordinator** (Sprint 6.5) parameterized with a `Feed`
   source, its single-writer role **delegated** to a Pulsar exclusive/failover subscription + the content-store
   CAS/`AdvancePredicate`, not a new elected worker kind. This is doctrine this round introduces, tracked here as a
-  forward cross-reference, not a tested result of the Phase-6 gate.
+  forward cross-reference, not a tested result of the Phase-7 gate.
 - **[`monitoring_doctrine.md` §5 — Extensible surfaces: TensorBoard](../documents/engineering/monitoring_doctrine.md#5-extensible-surfaces-tensorboard):**
   jitML's `ExtensionSpec` declares a **mandatory** `TensorBoard` monitoring surface backed by MinIO
   ([§2.3 — Per-extension surfaces](../documents/engineering/monitoring_doctrine.md#23-per-extension-surfaces--extensionspecextmonitoring)),
@@ -125,8 +134,8 @@ and the run continues from the last adopted `latest` pointer with no torn checkp
 **Status**: Planned
 **Implementation**: `src/Amoebius/JitML/Checkpoint/Store.hs`, `src/Amoebius/JitML/Checkpoint/Manifest.hs`
 (target: the `jitML` blob/manifest/pointer key renderers and the canonical-CBOR manifest encoder, mapped onto
-the Phase-4 three-tier store and native Pulsar client)
-**Blocked by**: the Phase-4 content-addressed MinIO store and native Pulsar client (earlier-phase prerequisite)
+the Phase-5 three-tier store and native Pulsar client)
+**Blocked by**: the Phase-5 content-addressed MinIO store and native Pulsar client (earlier-phase prerequisite)
 **Independent Validation**: pure tests that two writers with equal logical checkpoint content emit the same
 blob and manifest SHAs (canonical CBOR), and that the pure CAS decision returns `PointerWritten` /
 `PointerConflict` correctly — no live MinIO required for the pure layer.
@@ -146,7 +155,7 @@ optimizer, RNG, replay) named by `sha256(bytes)`, a canonical-CBOR manifest name
   the fixed prefix schema under one project bucket (`jitml-checkpoints/<experiment-hash>/…`).
 - A **canonical** `encodeManifestCbor` (tensors sorted by name, optimizer blobs by kind, RNG blobs by stream
   id, metrics by name) so equal logical content ⇒ byte-identical CBOR ⇒ the same manifest SHA.
-- The two write protocols wired through the Phase-4 store: blob/manifest PUTs with `If-None-Match: *` treating
+- The two write protocols wired through the Phase-5 store: blob/manifest PUTs with `If-None-Match: *` treating
   `412` as success, and the pointer `If-Match` CAS as the single atomic commit point, with the pure
   `applyPointerWrite` decision (`PointerWritten` vs `PointerConflict`) and a typed `AdvancePredicate`.
 - Checkpoint adopt/resume events carried over the native-protocol Pulsar client (no WebSockets), at-least-once
@@ -208,10 +217,10 @@ The whole sprint (📋 Planned).
 ## Sprint 6.3: jitML training determinism on linux-cuda 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/JitML/Determinism.hs` (target: the `jitML` binding of the Phase-5
+**Implementation**: `src/Amoebius/JitML/Determinism.hs` (target: the `jitML` binding of the Phase-6
 `experimentHash` and SplitMix seed-stream primitives to the `linux-cuda` substrate fingerprint and the
 training stream set)
-**Blocked by**: Sprint 6.1, Sprint 6.2 (and the Phase-5 determinism kernel as an earlier-phase prerequisite)
+**Blocked by**: Sprint 6.1, Sprint 6.2 (and the Phase-6 determinism kernel as an earlier-phase prerequisite)
 **Independent Validation**: pure tests that `experimentHash` changes when the substrate fingerprint changes
 and when any identity-bearing `.dhall` field changes (e.g. a metric `direction` flip), and that a stream's
 seed is a pure function of `(masterSeed, streamIndex)` independent of worker count.
@@ -229,10 +238,10 @@ and deriving every RNG stream (per-experiment, per-game RL self-play, per-HPO-tr
 
 ### Deliverables
 
-- A `jitML` `experimentHash` binding that consumes the Phase-5 `deriveExperimentHash` over
+- A `jitML` `experimentHash` binding that consumes the Phase-6 `deriveExperimentHash` over
   `(resolved-dhall, linux-cuda substrate fingerprint)`, so a `linux-cuda` run occupies a distinct namespace
   from any CPU run and a metric `direction` flip defines a different experiment.
-- Per-stream SplitMix seeds for the full `jitML` training stream set via the Phase-5 `deriveSplitMixSeed`, with
+- Per-stream SplitMix seeds for the full `jitML` training stream set via the Phase-6 `deriveSplitMixSeed`, with
   the proven-in-types property that a stream's seed is independent of worker count, scheduling, and assignment.
 - The honest ceiling encoded as the determinism *contract* this run is checked against: same-substrate
   bit-equality for SL / on-policy RL / per-game AlphaZero; a first-N-step prefix (default `rl_steps / 10`) for
@@ -356,7 +365,7 @@ Compose the bit-determinism contract of
 [`content_addressing_doctrine.md` §6 — the honest ceiling](../documents/engineering/content_addressing_doctrine.md#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic)
 with the First-Axis failover of
 [`chaos_failover_doctrine.md` §6 — the concentration principle](../documents/engineering/chaos_failover_doctrine.md#6-the-concentration-principle--where-the-obligation-lives)
-into the single Phase-6 acceptance gate: on `linux-cuda`, a `jitML` training run is bit-deterministic per its
+into the single Phase-7 acceptance gate: on `linux-cuda`, a `jitML` training run is bit-deterministic per its
 determinism contract **and** the elected coordinator fails over — the two claims this phase must demonstrate,
 each recorded honestly in the ledger.
 
@@ -395,14 +404,14 @@ The whole sprint (📋 Planned).
   the `InForceSpec`; CUDA is a default-off build flag).
 - `documents/engineering/chaos_failover_doctrine.md` — confirm the §6 First-Axis intra-cluster coordinator
   election (delegated synchronous consensus) is exercised, and that this phase makes **no** §16 Second-Axis
-  cross-cluster claim; add the Phase-6 failover row to the conformance matrix when the gate runs.
+  cross-cluster claim; add the Phase-7 failover row to the conformance matrix when the gate runs.
 - `documents/engineering/daemon_topology_doctrine.md` — note the §5 kernel election now carries the `jitML`
   training-coordinator single-writer role.
 
 **Cross-references to add:**
-- [README.md](README.md) — set the Phase 6 row status from "not started" once work begins, and link this
-  document from the Phase 6 paragraph.
-- [substrates.md](substrates.md) — record `linux-cuda` as the Phase 6 gate substrate (the first GPU substrate)
+- [README.md](README.md) — set the Phase 7 row status from "not started" once work begins, and link this
+  document from the Phase 7 paragraph.
+- [substrates.md](substrates.md) — record `linux-cuda` as the Phase 7 gate substrate (the first GPU substrate)
   in the per-phase substrate map.
 - [system_components.md](system_components.md) — register the target module paths named in the sprint
   `Implementation` fields (`Amoebius.JitML.Checkpoint.*`, `Amoebius.JitML.Engine.*`,
@@ -411,12 +420,12 @@ The whole sprint (📋 Planned).
 
 ## Related Documents
 
-- [README.md](README.md) — the live tracker; its Phase 6 paragraph is the authoritative objective and gate
+- [README.md](README.md) — the live tracker; its Phase 7 paragraph is the authoritative objective and gate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys
-- [substrates.md](substrates.md) — the substrate registry and per-phase map (Phase 6: `linux-cuda`)
+- [substrates.md](substrates.md) — the substrate registry and per-phase map (Phase 7: `linux-cuda`)
 - [system_components.md](system_components.md) — the target component inventory the `Implementation` paths map to
-- [README.md → Phase 4](README.md) — the content-addressed store + native Pulsar client this phase builds on
-- [README.md → Phase 5](README.md) — the determinism kernel (`experimentHash` + SplitMix) this phase applies to `jitML`
+- [README.md → Phase 5](README.md) — the content-addressed store + native Pulsar client this phase builds on
+- [README.md → Phase 6](README.md) — the determinism kernel (`experimentHash` + SplitMix) this phase applies to `jitML`
 - [Content Addressing Doctrine](../documents/engineering/content_addressing_doctrine.md) — content-addressed checkpoints + determinism by construction + the honest ceiling
 - [App vs Deployment Doctrine](../documents/engineering/app_vs_deployment_doctrine.md) — `jitML` as a shared library; the substrate as a deployment rule
 - [Chaos / Failover Doctrine](../documents/engineering/chaos_failover_doctrine.md) — the concentration principle (First-Axis intra-cluster election, NOT the Second Axis)

@@ -70,11 +70,11 @@ Concretely (DEVELOPMENT_PLAN cross-cutting invariants):
   never a hand-special-cased single-pod variant. Postgres at one node is still a Patroni-via-Percona
   cluster ([§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin)), not a bare `postgres` Pod.
 - **No degenerate single-node path.** prodbox historically simulated HA by deploying *multiple kind
-  clusters*; amoebius replaces that with one HA stack whose replica count is declarative. The mattandjames
+  clusters*; amoebius replaces that with one HA stack whose replica count is declarative. A demo web app's
   "mock 3-replica" pattern collapses to a `replicas=n` value.
 
 > **Honesty.** The HA-always model is *specified* here and inherited from prodbox where parts of it are
-> proven; in amoebius it is design intent for Phase 2, not a tested amoebius result. Status and gates live
+> proven; in amoebius it is design intent for Phase 3, not a tested amoebius result. Status and gates live
 > only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and
 > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)).
@@ -201,7 +201,7 @@ independent version and lifecycle, and clean per-namespace teardown.
 - **Canonical consumers.** Keycloak is the proven prodbox consumer; other standard services that need a
   relational database each get their own Patroni cluster + pgAdmin. (The registry does **not** —
   `distribution` needs no database, [§3](#3-the-registry--the-single-image-source) — which is one fewer Patroni consumer than prodbox's Harbor.) The
-  authoritative list of which standard services take a database is a Phase 2 delivery detail tracked in
+  authoritative list of which standard services take a database is a Phase 3 delivery detail tracked in
   [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), not frozen here.
 - **Storage is not owned here.** Retained PVs, the `<namespace>/<statefulset>/pv_<integer>` naming, sizing,
   and deterministic rebind are owned by [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md).
@@ -384,7 +384,7 @@ host tooling that brings these services up is discovered lazily through the subs
 invoked by full path — there is no `PATH`-based discovery anywhere in the bring-up sequence.
 
 > **Honesty.** Where this section generalizes a behaviour proven in prodbox, that proof is *evidence from a
-> sibling system*, not proof in amoebius — which has not yet built Phase 2. Read every prescriptive
+> sibling system*, not proof in amoebius — which has not yet built Phase 3. Read every prescriptive
 > statement here as design intent, never as a tested amoebius result.
 
 ---
@@ -393,7 +393,7 @@ invoked by full path — there is no `PATH`-based discovery anywhere in the brin
 
 This document is normative platform-services doctrine only. Delivery sequencing, completion status,
 validation gates, and remaining work are owned by
-[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (platform services land in **Phase 2**).
+[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (platform services land in **Phase 3**).
 This doc never maintains a competing status ledger; it states the target shape and links back for status.
 
 ---

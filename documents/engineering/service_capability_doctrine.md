@@ -112,7 +112,7 @@ the provider. But a union arm is not an adapter. amoebius **does not build a pro
 need**: the alternates are headroom in the type, not shipped code. Claiming MinIO is swappable for S3 *today*
 would be reporting a designed extension point as a built one.
 
-> **Honesty.** "One canonical provider, type admits alternates" is Phase 3 design intent. The alternate arms
+> **Honesty.** "One canonical provider, type admits alternates" is Phase 4 design intent. The alternate arms
 > are deliberately unbuilt; the canonical bindings above are the only providers amoebius implements. Status
 > lives only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
@@ -342,7 +342,7 @@ canonical provider deployed honestly at small scale, never a hand-special-cased 
 single-node `Sql` is a one-member Patroni cluster, never a bare `postgres` Pod. The dial got richer; it did
 not get bypassed.
 
-> **Honesty.** Per-cluster structural shapes are Phase 3 design intent. The sibling **prodbox** project is
+> **Honesty.** Per-cluster structural shapes are Phase 4 design intent. The sibling **prodbox** project is
 > evidence that typed records render the manifests a provider needs — its
 > [/home/matthewnowak/prodbox/src/Prodbox/Lib/Storage.hs](file:///home/matthewnowak/prodbox/src/Prodbox/Lib/Storage.hs)
 > renders `Namespace`/`PV`/`PVC`/`StorageClass` from a typed `ChartStorageSpec → ChartStorageBinding →
@@ -477,9 +477,9 @@ surface, never asserted here.
 This document is normative capability-model doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md),
 never restated here. For orientation only (the plan is authoritative): the **manifest generation + typed
-reconciler that render and apply a chosen shape** land with platform services in **Phase 2**, and the
+reconciler that render and apply a chosen shape** land with platform services in **Phase 3**, and the
 **capability abstraction itself — capability needs, the alternate-admitting provider binding, and per-cluster
-shapes** — lands with the DSL type families in **Phase 3**. This doc states the target shape and links back for
+shapes** — lands with the DSL type families in **Phase 4**. This doc states the target shape and links back for
 status.
 
 ---
@@ -500,7 +500,7 @@ status.
 - [Documentation Standards](../documentation_standards.md)
 
 > **Honesty.** Everything in this doctrine is Phase 0 design intent, specified before implementation:
-> manifest generation and the typed reconciler are Phase 2, and the capability abstraction is Phase 3. It is
+> manifest generation and the typed reconciler are Phase 3, and the capability abstraction is Phase 4. It is
 > generalized from evidence in the sibling **prodbox** project (typed-Haskell→Aeson→`kubectl apply` rendering,
 > a chart-platform planner) but **not yet built or proven in amoebius**, and prodbox itself names products and
 > enforces the very substrate-equivalence lint this doctrine reverses. Per

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, development_plan_standards.md, later_phases.md, phase_00_documentation_suite.md, phase_02_platform_services_storage_vault.md, phase_03_dsl_control_plane_singleton.md, phase_05_determinism_infernix.md, phase_07_host_compute_daemons.md, phase_08_mattandjames_app_logic.md, phase_09_multicluster_spawn_georeplication.md, phase_11_test_topology_dsl.md, phase_12_spa_composition.md, system_components.md
+**Referenced by**: README.md, development_plan_standards.md, later_phases.md, phase_00_documentation_suite.md, phase_01_formal_first_dsl_integrity.md, phase_03_platform_services_storage_vault.md, phase_04_dsl_control_plane_singleton.md, phase_06_determinism_infernix.md, phase_08_host_compute_daemons.md, phase_09_multicluster_spawn_georeplication.md, phase_11_test_topology_dsl.md, phase_12_spa_composition.md, system_components.md
 **Generated sections**: none
 
 > **Purpose**: The target-architecture / vision / current-baseline narrative — the "why and what" companion
@@ -65,7 +65,13 @@ substrate from a single `.dhall` with zero application change:
 | **prodbox** | root control-plane behaviour | the single-node root cluster: password-encrypted Vault unseal, PKI trust anchor, the human-gated init — see [`vault_pki_doctrine.md` §5 — The root cluster: single-node, password-encrypted unseal](../documents/engineering/vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal) |
 | **infernix** + **jitML** | ML extension libraries | shared inference/training libraries whose hardware substrate is a *deployment rule*, not app code — [`app_vs_deployment_doctrine.md` §7 — infernix is a shared library; the inference substrate is a deployment rule](../documents/engineering/app_vs_deployment_doctrine.md#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule); jitML is the seed of the forward-looking Haskell extension DSL noted in [`dsl_doctrine.md` §8](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl-forward-pointer-only) |
 | **hostbootstrap** | bootstrap + DSL-`chain` core | the substrate-specific `bootstrap.sh` (ensure toolchain, build binary, hand off) plus the `dsl-step`/`chain` kernel — [`substrate_doctrine.md` §6 — The `bootstrap.sh` contract](../documents/engineering/substrate_doctrine.md#6-the-bootstrapsh-contract-ensure-a-toolchain-build-the-binary-hand-off) |
-| **mattandjames** | application logic only | the proof case: boil an app down to logic, let the deployment-rules DSL drive distro/replicas/inference — [`app_vs_deployment_doctrine.md` §6 — The proof case: mattandjames boiled to application-logic-only](../documents/engineering/app_vs_deployment_doctrine.md#6-the-proof-case-mattandjames-boiled-to-application-logic-only) |
+
+Each of **infernix** and **jitML** additionally ships a **demo single-page web app** in its sibling repo that
+illustrates its ML workflow and renders its results. Those demo web apps are amoebius's
+**application-logic-only demonstrator** — the proof case that an app is written once as logic while HA replica
+count, substrate, and inference binding are an orthogonal deployment-rules surface — and the SPA-composition
+shakedown fixtures. A demo web app *uses* an extension but is not itself one — see
+[`app_vs_deployment_doctrine.md` §6 — The proof case: a demo web app as application-logic-only](../documents/engineering/app_vs_deployment_doctrine.md#6-the-proof-case-a-demo-web-app-as-application-logic-only).
 
 The unifying surface is the Dhall DSL: Dhall carries parameters, Haskell carries logic, and an app names
 *capabilities* (ObjectStore, Sql, MessageBus, …) rather than products — see
@@ -108,14 +114,14 @@ and status live in [README.md](README.md); the line below names the gate and lin
 are 📋 Planned (greenfield).
 
 - **Phase 0 — Documentation suite** (`none`) → [phase_00_documentation_suite.md](phase_00_documentation_suite.md): the documentation lint passes — valid headers, SSoT/no-duplication holds, no orphan cross-links.
-- **Phase 1 — Bootstrap + kernel + single kind cluster** (`linux-cpu`) → [phase_01_bootstrap_kernel_kind.md](phase_01_bootstrap_kernel_kind.md): `amoebius bootstrap` brings up an empty cluster; re-running is a no-op.
-- **Phase 2 — Platform services + retained storage + root Vault/PKI** (`linux-cpu`) → [phase_02_platform_services_storage_vault.md](phase_02_platform_services_storage_vault.md): all standard services up from generated manifests + baked binaries, HA, reachable, ingress only via Keycloak; storage rebinds across delete+recreate with no data loss.
-- **Phase 3 — Orchestration Dhall DSL + control-plane singleton** (`linux-cpu`) → [phase_03_dsl_control_plane_singleton.md](phase_03_dsl_control_plane_singleton.md): a `.dhall` deploys the platform + a trivial app; deliberately-illegal `.dhall` files (bad PVC↔PV, open ingress, product-in-app-logic, resource overcommit, illegal topology, unbounded storage, un-tiered topic) each fail to type-check; and a positive multi-substrate / managed-EKS `.dhall` decodes.
-- **Phase 4 — Native Pulsar client + content-addressed store + workflow-runtime** (`linux-cpu`) → [phase_04_pulsar_content_store_workflow.md](phase_04_pulsar_content_store_workflow.md): round-trip a workflow over native Pulsar, store/fetch a content-addressed artifact, and a worker daemon fails over when killed.
-- **Phase 5 — Determinism kernel + infernix migration** (`linux-cpu`) → [phase_05_determinism_infernix.md](phase_05_determinism_infernix.md): an infernix CPU-inference workflow is reproducible — same `experimentHash` ⇒ same output.
-- **Phase 6 — jitML migration + HA coordinator** (`linux-cuda`) → [phase_06_jitml_ha_coordinator.md](phase_06_jitml_ha_coordinator.md): a jitML training run is bit-deterministic per its contract, and the coordinator fails over.
-- **Phase 7 — Host compute daemons (Apple Metal / Windows CUDA)** (`apple`) → [phase_07_host_compute_daemons.md](phase_07_host_compute_daemons.md): an Apple-Silicon host daemon runs a Metal ML workload as a cluster Pulsar/MinIO peer.
-- **Phase 8 — mattandjames as application-logic-only** (`linux-cpu`) → [phase_08_mattandjames_app_logic.md](phase_08_mattandjames_app_logic.md): mattandjames deploys from one app `.dhall` at a configurable replica count, with inference via infernix.
+- **Phase 1 — Formal-first DSL & protocol integrity** (`none`) → [phase_01_formal_first_dsl_integrity.md](phase_01_formal_first_dsl_integrity.md): in-process, before any real resource, the DSL illegal-state discipline (Dhall typecheck + Haskell decoder + QuickCheck), SPA composition, and the failover/election design invariants (TLA+/TLC + io-sim) all validate; emits a Tier-1-only proven/tested/assumed ledger with correspondence-to-built-code and runtime enforcement left UNVERIFIED.
+- **Phase 2 — Bootstrap + kernel + single kind cluster** (`linux-cpu`) → [phase_02_bootstrap_kernel_kind.md](phase_02_bootstrap_kernel_kind.md): `amoebius bootstrap` brings up an empty cluster; re-running is a no-op.
+- **Phase 3 — Platform services + retained storage + root Vault/PKI** (`linux-cpu`) → [phase_03_platform_services_storage_vault.md](phase_03_platform_services_storage_vault.md): all standard services up from generated manifests + baked binaries, HA, reachable, ingress only via Keycloak; storage rebinds across delete+recreate with no data loss.
+- **Phase 4 — Orchestration Dhall DSL + control-plane singleton** (`linux-cpu`) → [phase_04_dsl_control_plane_singleton.md](phase_04_dsl_control_plane_singleton.md): a `.dhall` deploys the platform + a trivial app; deliberately-illegal `.dhall` files (bad PVC↔PV, open ingress, product-in-app-logic, resource overcommit, illegal topology, unbounded storage, un-tiered topic) each fail to type-check; and a positive multi-substrate / managed-EKS `.dhall` decodes.
+- **Phase 5 — Native Pulsar client + content-addressed store + workflow-runtime** (`linux-cpu`) → [phase_05_pulsar_content_store_workflow.md](phase_05_pulsar_content_store_workflow.md): round-trip a workflow over native Pulsar, store/fetch a content-addressed artifact, and a worker daemon fails over when killed.
+- **Phase 6 — Determinism kernel + infernix migration** (`linux-cpu`) → [phase_06_determinism_infernix.md](phase_06_determinism_infernix.md): an infernix CPU-inference workflow is reproducible — same `experimentHash` ⇒ same output.
+- **Phase 7 — jitML migration + HA coordinator** (`linux-cuda`) → [phase_07_jitml_ha_coordinator.md](phase_07_jitml_ha_coordinator.md): a jitML training run is bit-deterministic per its contract, and the coordinator fails over.
+- **Phase 8 — Host compute daemons (Apple Metal / Windows CUDA)** (`apple`) → [phase_08_host_compute_daemons.md](phase_08_host_compute_daemons.md): an Apple-Silicon host daemon runs a Metal ML workload as a cluster Pulsar/MinIO peer.
 - **Phase 9 — Multi-cluster: amoebic spawning + geo-replication + failover** (`linux-cpu`) → [phase_09_multicluster_spawn_georeplication.md](phase_09_multicluster_spawn_georeplication.md): two children geo-replicate; killing the lead triggers DNS failover with measured loss ≤ the declared budget; the proof artifacts are green.
 - **Phase 10 — Provider-managed clusters + dynamic provisioning** (`linux-cpu → provider`) → [phase_10_provider_clusters_provisioning.md](phase_10_provider_clusters_provisioning.md): spin a provider cluster, dynamically provision a node, and tear down leak-free.
 - **Phase 11 — Test-topology DSL + suggest-test + storage-lifecycle safety** (`per generated test`) → [phase_11_test_topology_dsl.md](phase_11_test_topology_dsl.md): a generated test `.dhall` runs a failover/election simulation and tears down leak-free.
@@ -151,7 +157,7 @@ self-tearing-down test topology of [`testing_doctrine.md`](../documents/engineer
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (§A header, §H citation rule, §K honesty, §L one-substrate)
 - [system_components.md](system_components.md) — the target component inventory: surface → owning doctrine → planned module path
 - [substrates.md](substrates.md) — the substrate registry and per-phase substrate map
-- [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) — the migration-removal ledger as prodbox/infernix/jitML/mattandjames converge
+- [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) — the migration-removal ledger as prodbox/infernix/jitML converge
 - [later_phases.md](later_phases.md) — the in-scope, high-numbered phases not yet given their own document
 - [Engineering Doctrine Index](../documents/engineering/README.md) — the doctrine SSoTs this overview summarizes and links
 - [Documentation Standards](../documents/documentation_standards.md) — the header/link mechanics this inherits

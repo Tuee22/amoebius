@@ -249,7 +249,7 @@ flowchart TD
   wait -->|failure| rollback[Re-apply last known-good generation]
 ```
 
-> **Honesty.** This engine is **design intent for Phase 2**, not a built amoebius result. SSA field
+> **Honesty.** This engine is **design intent for Phase 3**, not a built amoebius result. SSA field
 > managers, ApplySet pruning, and SSA-based drift correction are real, documented Kubernetes mechanisms;
 > *that amoebius wires them into this specific reconciler* is specified here and unproven until the phase
 > lands. The idempotent `discover → diff → enact` shape it specializes is *proven in prodbox* for AWS/cluster
@@ -298,9 +298,9 @@ data RolloutPhase = RolloutPhase
 
 ```mermaid
 flowchart TD
-  plan[RolloutPlan: ordered RolloutPhase list from render of spec] --> p1[Phase 1: SSA apply and prune its object subset]
+  plan[RolloutPlan: ordered RolloutPhase list from render of spec] --> p1[Phase 2: SSA apply and prune its object subset]
   p1 --> g1[Wait for readiness]
-  g1 -->|ready| p2[Phase 2: SSA apply and prune its object subset]
+  g1 -->|ready| p2[Phase 3: SSA apply and prune its object subset]
   p2 --> g2[Wait for readiness]
   g2 -->|ready| pn[Final phase converged]
   g1 -->|failure| rb[Re-apply prior generation or CAS pointer back]
@@ -319,8 +319,8 @@ flowchart TD
 > `HelmPhase` → `RolloutPhase`, and enacts each phase as a `render(spec)` SSA pass with **no Helm**. This is
 > sibling evidence, not an amoebius result.
 
-> **Honesty.** The `RolloutPlan` is **Phase-2 design intent** — it rides the tier-(c) SSA reconciler, itself
-> Phase 2 and unbuilt; the DB-schema-migration `RolloutPhase` is the **deferred Phase-14** shape, proven
+> **Honesty.** The `RolloutPlan` is **Phase-3 design intent** — it rides the tier-(c) SSA reconciler, itself
+> Phase 3 and unbuilt; the DB-schema-migration `RolloutPhase` is the **deferred Phase-14** shape, proven
 > *only* as the Helm-driven pattern in the jitML sibling. Read as the contract amoebius intends, never as a
 > tested amoebius result.
 
@@ -408,7 +408,7 @@ the reconciler converges *toward*.
   and are owned by release_lifecycle_doctrine.md [§3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer)–[§4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable), not here.
 
 > **Honesty.** The release ledger is **Phase-N design intent** — it composes with the content-store phase
-> ([§9](#9-planning-ownership)) and the tier-(c) reconciler (Phase 2), neither built in amoebius. Content-addressed immutable storage
+> ([§9](#9-planning-ownership)) and the tier-(c) reconciler (Phase 3), neither built in amoebius. Content-addressed immutable storage
 > is proven mechanism; *that amoebius records each converged generation as a `releaseHash`-keyed `Release` and
 > promotes environments by CAS over it* is specified across this [§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional) and release_lifecycle_doctrine.md and is
 > unbuilt.
@@ -435,7 +435,7 @@ later, and the per-cluster shapes — is owned by [service_capability_doctrine.m
 **this doc owns only the rendering consequence**: generation, not templating, is what makes per-cluster
 structural shapes expressible while keeping each shape best-practice-by-construction ([§3](#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)).
 
-> **Honesty.** Per-cluster structural shapes are design intent (Phase 3 capability abstraction), and the
+> **Honesty.** Per-cluster structural shapes are design intent (Phase 4 capability abstraction), and the
 > reversal of prodbox's substrate-equivalence lint is a deliberate amoebius decision, not an inherited-proven
 > behaviour. prodbox's equivalence lint is the *evidence* that structural divergence is the thing worth
 > controlling; amoebius chooses to control it by typing rather than by forbidding it.
@@ -464,8 +464,8 @@ This document is normative manifest-generation-and-reconcile doctrine only. Deli
 status, validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the **typed manifest renderer and the server-side-apply reconciler** land
-with platform services in **Phase 2**; the **capability abstraction and per-cluster shapes** ride the DSL
-type-family work in **Phase 3**; the **content-addressed release ledger ([§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional))** composes with the
+with platform services in **Phase 3**; the **capability abstraction and per-cluster shapes** ride the DSL
+type-family work in **Phase 4**; the **content-addressed release ledger ([§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional))** composes with the
 content-store phase; and the **`RolloutPlan` / `RolloutPhase`** enactment ([§5.1](#51-the-rolloutplan-ordered-readiness-gated-phases-on-this-same-reconciler-tier-c)) rides the tier-(c) reconciler,
 with the DB-schema-migration phase deferred to **Phase 14**. This doc states the target shape and links back
 for status.
@@ -495,7 +495,7 @@ for status.
 - [Documentation Standards](../documentation_standards.md)
 
 > **Honesty.** Everything in this doctrine is Phase 0 **design intent**: the typed manifest renderer and the
-> server-side-apply reconciler are Phase 2, and the capability abstraction is Phase 3 — neither is built or
+> server-side-apply reconciler are Phase 3, and the capability abstraction is Phase 4 — neither is built or
 > proven in amoebius. The approach is **generalized from the prodbox sibling**, which already renders a slice
 > of its object set from typed Haskell to Aeson and applies it with `kubectl`, stamps every object with an
 > owner label, and orchestrates a pure deployment planner — but prodbox still ships its workloads as Helm

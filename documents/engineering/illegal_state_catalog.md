@@ -36,8 +36,11 @@ entry uninhabitable.
 - The *normative rule* behind each catalog entry lives in that entry's owning doctrine
   (storage, gateway/ingress, secrets, …). This doc names the owner and never restates its content.
 
-Everything below is **design intent for Phase 3** (the orchestration Dhall DSL + control-plane singleton),
-not a tested amoebius result. Status and gates live only in
+Everything below is **design intent**, not a tested amoebius result: the **type discipline** it describes (the
+spec composes; no illegal value is constructible) is **validated in-process in Phase 1** (Tier 1 — the
+formal-first DSL gate: Dhall typecheck + Haskell decoder + QuickCheck), while its **runtime enforcement** remains
+**Phase 4** (Tier 2 — the orchestration Dhall DSL + control-plane singleton that renders and reconciles a live
+cluster). Status and gates live only in
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md); per
 [`documentation_standards.md` §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) this doc states the target shape and links
 back for status.
@@ -69,7 +72,10 @@ So the catalog's promise is exact: *a PVC that cannot bind a PV is unrepresentab
 no such spec can be written and type-check. It is **not** the claim that *the running cluster's PVC
 is bound*; that is a reconcile-time fact whose verification is owned by
 [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) and the testing doctrine. Amoebius **defers the
-runtime-enforcement proof there on purpose**, and never reports it here.
+runtime-enforcement proof there on purpose**, and never reports it here. In the two-tier integrity model this is
+exactly the tier split: the spec-composition proof is **Tier 1** (design-time, in-process integrity, front-loaded
+to **Phase 1**), while the cluster-enforcement claim is **Tier 2** (runtime-enforcement integrity, deferred to the
+real-resource phase).
 
 ```mermaid
 flowchart TD
@@ -81,7 +87,8 @@ flowchart TD
 ```
 
 > **Honesty.** "When implemented as specified, the type-check is a proof" is itself a claim about a design
-> not yet built (Phase 3). Read every "unrepresentable" below as *design intent for the type discipline*,
+> not yet built — a **Tier-1** (design-time / in-process) property targeted for in-process validation in **Phase 1**,
+> not Phase 4's runtime half. Read every "unrepresentable" below as *design intent for the type discipline*,
 > never as a tested amoebius behaviour.
 
 ---
@@ -1068,6 +1075,21 @@ are three layers, and a conformant claim names which one it is reaching:
    spec at all. These are **not** in this catalog's promise; their verification is owned by
    [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) and the testing doctrine ([§2](#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)).
 
+**The two-tier mapping.** Layers 1–2 (`type-foreclosed` + `decode-foreclosed`) are the **Tier-1** design-time /
+in-process integrity band — the spec composes and the type discipline holds in the abstract — validated
+**in-process in Phase 1** (Dhall Gate 1 `dhall type`, the Haskell decoder Gate 2, and QuickCheck). Layer 3
+(`runtime-checked`) is **Tier-2** runtime-enforcement integrity — that the running cluster enforces what the spec
+composed — and stays **deferred and UNVERIFIED** until its live real-resource phase (owned by
+[`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) and the testing doctrine).
+
+**Gate-1 vs Gate-2 caveat (Dhall has no opaque types).** The binding-by-construction and phantom-index / GADT
+foreclosures ([§4.1](#41-pvcpv-binding-by-construction)–[§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed))
+are only **partially** `type-foreclosed` at Gate 1: Dhall has no opaque types, so it cannot hide a record's or
+union's constructors, and the full "no illegal constructor" teeth land only at the Haskell **GADT** decoder (Gate 2,
+`Dhall.inputFile`). So the Phase-1 corpus must **split** its negative fixtures into *Gate-1-must-fail-`dhall type`*
+(illegal already at the Dhall layer) and *Gate-2-must-fail-decode* (well-typed Dhall the decoder rejects), and never
+bill a Gate-2-only foreclosure as a Gate-1 type-check failure.
+
 Worked example of the discipline: **every container declares cpu/ram**
 ([`platform_services_doctrine.md` §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)). As specified, a workload value
 *requires* a `Resources` field whose cpu and ram are refined non-zero quantities — type- or decode-foreclosed: a
@@ -1091,8 +1113,9 @@ offloading to S3, the pod actually scheduling, the Lima/WSL2 VM actually interpo
 growing capacity, and the cloud honoring the quota — are always runtime-checked, owned by
 [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) and the testing doctrine, never asserted here.
 
-> **Honesty.** amoebius has not built Phase 3. Every type-foreclosed and decode-foreclosed claim above is the *intended*
-> property of the type discipline, not a tested result; runtime-checked is explicitly deferred. Where a technique
+> **Honesty.** amoebius has built no phase yet. Every `type-foreclosed` and `decode-foreclosed` claim above is the *intended*
+> **Tier-1** (design-time / in-process) property of the type discipline — targeted for in-process validation in **Phase 1**,
+> not a tested result; the **Tier-2** `runtime-checked` residue is explicitly deferred to its live phase. Where a technique
 > generalizes a behaviour proven in prodbox (single-owner SSoT, Keycloak-owns-ingress), that proof is
 > evidence from a sibling system, not proof in amoebius.
 
@@ -1102,14 +1125,16 @@ growing capacity, and the cloud honoring the quota — are always runtime-checke
 
 This document is normative catalog-and-technique doctrine only. Delivery sequencing, completion status, and
 validation gates are owned by [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md): the
-DSL and its illegal-state-unrepresentable contract land in **Phase 3** (a deliberately-illegal `.dhall` that
-fails to type-check is part of that phase's acceptance gate). The [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](#322-a-hand-authored-un-derived-toleration) capacity / topology /
-bounded-storage block and its [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked)/[§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) techniques are the Phase-3 gate's added negative fixtures (with the
+DSL's illegal-state-unrepresentable **type discipline** is validated in-process in **Phase 1** (Tier 1 — a
+deliberately-illegal `.dhall` that fails Gate 1 `dhall type`, plus the Gate-2 decoder rejections and QuickCheck,
+form that phase's acceptance gate), while its **runtime enforcement** — the live control-plane singleton that
+renders and reconciles a cluster — remains **Phase 4** (Tier 2). The [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](#322-a-hand-authored-un-derived-toleration) capacity / topology /
+bounded-storage block and its [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked)/[§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) techniques supply the Phase-1 gate's added negative fixtures (with the
 multi-substrate and managed-EKS *positive* fixtures); their **runtime** residues distribute to the phases
-that own each substrate — the Pulsar two-ceiling offload in **Phase 4**, the Lima `LinuxHost` witness +
-host/VM capacity cross-check in **Phase 7**, live multi-node rke2/kind topology in **Phase 9**, and the
+that own each substrate — the Pulsar two-ceiling offload in **Phase 5**, the Lima `LinuxHost` witness +
+host/VM capacity cross-check in **Phase 8**, live multi-node rke2/kind topology in **Phase 9**, and the
 `Managed Eks` arm + `ScalingPolicy` enaction + cloud quota in **Phase 10**. The runtime-enforcement layers
-this doc defers are otherwise exercised across the platform (Phase 2), multi-cluster failover (Phase 9), and
+this doc defers are otherwise exercised across the platform (Phase 3), multi-cluster failover (Phase 9), and
 testing (Phase 11) phases. This doc never maintains a competing status ledger.
 
 ---

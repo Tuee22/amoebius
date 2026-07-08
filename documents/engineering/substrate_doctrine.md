@@ -117,7 +117,7 @@ Two classification rules are load-bearing and stated as hard failures, not warni
 > landing-relation entry.
 
 > **Honesty.** This is the `hostbootstrap` seed, ported from a prior Python detector. It is *evidence from
-> a sibling library*, not a tested amoebius result — amoebius has not built Phase 1. Read every mechanism
+> a sibling library*, not a tested amoebius result — amoebius has not built Phase 2. Read every mechanism
 > in this doc as design intent seeded from a working sibling, never as a proven amoebius behaviour. Status
 > and gates live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
@@ -520,9 +520,9 @@ this doc owns only the declared `Site` **fact**, not the classification.
 
 This document is normative substrate doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): substrate detection
-and the `bootstrap` contract land in **Phase 1** (`linux-cpu`); host compute daemons, the Lima/WSL2
-providers, and the headless Apple-Metal fixed-bridge build land in **Phase 7** (`apple`); the in-cluster CUDA path is exercised in
-**Phase 6** (`linux-cuda`). This doc never maintains a competing status ledger; it states the target shape
+and the `bootstrap` contract land in **Phase 2** (`linux-cpu`); host compute daemons, the Lima/WSL2
+providers, and the headless Apple-Metal fixed-bridge build land in **Phase 8** (`apple`); the in-cluster CUDA path is exercised in
+**Phase 7** (`linux-cuda`). This doc never maintains a competing status ledger; it states the target shape
 and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
 ---

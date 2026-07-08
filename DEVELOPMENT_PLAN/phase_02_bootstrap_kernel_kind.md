@@ -1,4 +1,4 @@
-# Phase 1: Bootstrap + kernel + single kind cluster
+# Phase 2: Bootstrap + kernel + single kind cluster
 
 **Status**: Authoritative source
 **Supersedes**: N/A
@@ -24,7 +24,7 @@ This phase delivers the smallest end-to-end slice of amoebius that can *act on a
 machine is, ensures the host tools it needs without ever consulting `PATH`, seeds the pure Step/Chain kernel
 that every later reconcile rides on, exposes the binary as a CLI carrying a typed host context, and uses all
 of that to stand up — and re-converge to — an empty single-node kind cluster. It is deliberately *empty*:
-no platform services, no storage, no Vault — those are [Phase 2](README.md). The one thing Phase 1 must prove
+no platform services, no storage, no Vault — those are [Phase 3](README.md). The one thing Phase 2 must prove
 is that `amoebius bootstrap` is an **idempotent reconcile**, not a one-shot script.
 
 Scope **in**: substrate detection (pure classify over three reads); the closed host-tool enum + `AbsExe`
@@ -38,7 +38,7 @@ clusters, amoebic spawning — all later phases.
 **Substrate:** linux-cpu (the default validation substrate; tracked in [substrates.md](substrates.md), per
 [development_plan_standards.md §L](development_plan_standards.md)). The Apple/Windows VM providers and host
 worker nodes named in the substrate doctrine are explicitly **not** exercised by this gate; they land in
-Phase 7.
+Phase 8.
 
 **Gate:** on a `linux-cpu` host, `amoebius bootstrap --distro=kind` brings up an empty single-node kind
 cluster (`kubectl get nodes` shows exactly one `Ready` node); **re-running the identical command is a
@@ -65,7 +65,7 @@ bare name (every external invocation went through an `AbsExe` absolute path).
   [`dsl_doctrine.md` §3 — the orchestration surface: parameters, context, witness](../documents/engineering/dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness)
   binary-context contract (parameters / context / witness), adapted to the no-environment-variable invariant
   via file/socket-existence witnesses. The full Dhall orchestration DSL and the illegal-state gates ride on
-  this kernel but are Phase 3, not here.
+  this kernel but are Phase 4, not here.
 - **Cluster lifecycle doctrine §1–§2 — two cluster kinds and bring-up-as-reconcile.** This phase implements
   the self-managed half of
   [`cluster_lifecycle_doctrine.md` §1 — two cluster kinds, one lifecycle shape](../documents/engineering/cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape)
@@ -131,7 +131,7 @@ rather than merely discouraged.
 
 ### Deliverables
 
-- A closed `HostTool` enum naming exactly the Phase-1 tool set (`ghcup`, `cabal`, `kubectl`, `kind`, and the
+- A closed `HostTool` enum naming exactly the Phase-2 tool set (`ghcup`, `cabal`, `kubectl`, `kind`, and the
   package-manager root) — an unlisted tool cannot be invoked, and Helm is intentionally absent.
 - An `AbsExe` newtype whose constructor is unexported; `mkAbsExe` rejects any non-absolute path, so a resolved
   tool is by type always an absolute path.
@@ -256,7 +256,7 @@ the self-managed, host-binary-present, single-node kind cluster, brought up by a
 - A `bootstrap` command chain that detects the substrate (Sprint 1.1), ensures `kind`/`kubectl` by absolute
   path (Sprint 1.2), and drives single-node kind bring-up as a `discover → diff → enact → re-observe`
   reconcile — not a one-shot script.
-- An empty cluster as the end state: one node, `Ready`, with **no** platform services (those are Phase 2).
+- An empty cluster as the end state: one node, `Ready`, with **no** platform services (those are Phase 3).
 
 ### Validation
 
@@ -275,26 +275,26 @@ The whole sprint (📋 Planned).
 
 **Engineering docs to update:**
 - `documents/engineering/substrate_doctrine.md` — when detection, the `AbsExe`/closed-enum tool-ensure, and
-  the `bootstrap.sh` hand-off land, flip the §8 planning-ownership orientation note for Phase 1 from intent to
+  the `bootstrap.sh` hand-off land, flip the §8 planning-ownership orientation note for Phase 2 from intent to
   delivered status pointer (status stays in the plan) and reconcile any seed-vs-target discovery caveats in §3.
 - `documents/engineering/dsl_doctrine.md` — record that the §2 chain/Step kernel and the §3 binary-context
-  surface are seeded in Phase 1 (the full Dhall DSL remains Phase 3).
+  surface are seeded in Phase 2 (the full Dhall DSL remains Phase 4).
 - `documents/engineering/cluster_lifecycle_doctrine.md` — confirm the §2 "bring-up is itself a reconcile"
-  no-op shape is exercised by the Phase 1 gate.
+  no-op shape is exercised by the Phase 2 gate.
 
 **Cross-references to add:**
-- [README.md](README.md) — set the Phase 1 row status from "not started" once work begins, and link this
-  document from the Phase 1 paragraph.
-- [substrates.md](substrates.md) — record `linux-cpu` as the Phase 1 gate substrate in the per-phase substrate
+- [README.md](README.md) — set the Phase 2 row status from "not started" once work begins, and link this
+  document from the Phase 2 paragraph.
+- [substrates.md](substrates.md) — record `linux-cpu` as the Phase 2 gate substrate in the per-phase substrate
   map.
 - [system_components.md](system_components.md) — register the target module paths named in the sprint
   `Implementation` fields (`Amoebius.Host.*`, `Amoebius.Kernel.*`, `Amoebius.Cluster.*`, `Amoebius.Cli`).
 
 ## Related Documents
 
-- [README.md](README.md) — the live tracker; its Phase 1 paragraph is the authoritative objective and gate
+- [README.md](README.md) — the live tracker; its Phase 2 paragraph is the authoritative objective and gate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys
-- [substrates.md](substrates.md) — the substrate registry and per-phase map (Phase 1: `linux-cpu`)
+- [substrates.md](substrates.md) — the substrate registry and per-phase map (Phase 2: `linux-cpu`)
 - [system_components.md](system_components.md) — the target component inventory the `Implementation` paths map to
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — detection, lazy tool-ensure, `bootstrap.sh`
 - [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — the chain/Step kernel and binary-context surface

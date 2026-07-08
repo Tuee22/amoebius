@@ -22,16 +22,18 @@ generalization** of the prodbox sibling's chaos-hardening doctrine
 obligation**.
 
 **One SSoT line, held throughout.** This doctrine owns the **method**, the **ledger discipline**, and the
-**proof obligation**. It does **not** own the concrete formal artifacts: the actual TLA+ spec, its
-invariant catalog, its model↔code correspondence, and its divergence record are owned by
-[tla_modelling_assumptions.md](./tla_modelling_assumptions.md) (scheduled Phase 9); the election *shape* is
+**proof obligation**. It does **not** own the concrete formal artifacts, which split across two tiers: the actual TLA+
+**design-model and its invariant catalog** are authored and TLC-checked design-first in **Phase 1**
+(Tier 1 — proven for the model at scope, needing no runtime), while their **model↔code correspondence
+and divergence record** are the deferred **Tier-2** obligation completed in **Phase 9** — both owned by
+[tla_modelling_assumptions.md](./tla_modelling_assumptions.md); the election *shape* is
 owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md); the teardown-versus-chaos
 distinction by [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md); the confluent data
 substrate by [content_addressing_doctrine.md](./content_addressing_doctrine.md). This doctrine grounds its
 narrative in those subsystems but never restates their normative content. Status, phase order, and
 adoption sequencing live only in [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
-> **Honesty up front.** amoebius has not built Phases 1–11. Every prescriptive statement below is **design
+> **Honesty up front.** amoebius has not built Phases 2–11. Every prescriptive statement below is **design
 > intent**, and every result attributed to prodbox is **evidence from a sibling system**, not a tested or
 > proven amoebius result. The proven/tested/assumed rule ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline))
 > is this document's own moral core ([§12](#12-the-moral-core--proven-tested-assumed)); it is enforced on the document itself.
@@ -237,8 +239,8 @@ wants TLA+ for all distributed consensus problems that aren't already handled by
 distributed consensus and georeplication (minio, pulsar, postgres, etc).*
 
 **Fact two: chaos, HA, geo-replication, and failover are deployment-rules, never application logic.** An
-app — **mattandjames** — is written **once**; its HA replica count, chaos-testing, geo-replication, and
-failover behaviour are an *orthogonal deployment-rules surface*
+app — a **demo web app** (shipped by infernix / jitML) — is written **once**; its HA replica count,
+chaos-testing, geo-replication, and failover behaviour are an *orthogonal deployment-rules surface*
 ([app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md)). So a per-app failover proof never
 arises: there is no app-specific failover logic to prove. The distribution behaviour is configured at the
 platform layer and proven *there, once.*
@@ -251,7 +253,7 @@ flowchart TD
   systems -->|no amoebius proof obligation| none[No per-service, no per-app proof]
   axis1[FIRST AXIS: one cluster's control-plane singleton election] -->|proven by| method[Extract + Model + Inject + ledger]
   axis2[SECOND AXIS: async cross-cluster geo-replication and gateway failover] -->|proven by| method
-  method -->|formal artifacts owned by| tla[tla_modelling_assumptions.md, Phase 9]
+  method -->|formal artifacts owned by| tla[tla_modelling_assumptions.md: design-model Phase 1, model-code correspondence Phase 9]
 ```
 
 - **First Axis — the control-plane singleton election.** Within one cluster's consistency boundary, exactly
@@ -394,9 +396,12 @@ invariant holds inside the condition, and that any violation outside it (under p
 self-healing** rather than permanent.
 
 **SSoT — who owns the spec.** This doctrine owns the *requirement* to model the two concentrated invariants
-([§6](#6-the-concentration-principle--where-the-obligation-lives)) and the honesty rule on what a green model means. The **concrete TLA+ spec, its invariant catalog, its
-model↔code correspondence, and its divergence record** are owned by
-[tla_modelling_assumptions.md](./tla_modelling_assumptions.md) (Phase 9). The sibling prodbox spec
+([§6](#6-the-concentration-principle--where-the-obligation-lives)) and the honesty rule on what a green model means. The **concrete TLA+ spec, its invariant catalog,
+its model↔code correspondence, and its divergence record** are owned by
+[tla_modelling_assumptions.md](./tla_modelling_assumptions.md), and split across the two tiers: the
+**design-model and invariant catalog** are authored and TLC-checked design-first in **Phase 1** (Tier 1 —
+proven for the model at scope, needing no runtime), while the **model↔code correspondence and divergence
+record** are the deferred **Tier-2** obligation completed in **Phase 9**. The sibling prodbox spec
 (`/home/matthewnowak/prodbox/documents/engineering/tla/gateway_orders_rule.tla`, six invariants explored to
 ~4.4M states at scope 3, `prodbox dev tla-check`) is **evidence from a sibling system, not an amoebius
 proof** — its invariants `UniqueOwner` / `NoTugOfWar` / `SingletonTakeover` are exactly the shape amoebius
@@ -459,8 +464,13 @@ faithfully reproduces production when they genuinely share *in-process* state. a
 they coordinate through Pulsar + MinIO + the commit log, so an `IOSim` run of one daemon rests on a
 hand-built stub of its peers, and the catastrophic *cross-actor* invariant is still better served by the
 TLA+ model. So Simulate stays parenthetical: never a fourth move, scoped to one subsystem, gated on
-evidence the tax is worth paying, and **not adopted in amoebius today** — the honest ledger entry ([§12](#12-the-moral-core--proven-tested-assumed))
-reads that the concurrent *schedule* is **unexercised** until it is.
+evidence the tax is worth paying — and it splits across the two tiers. The **in-process design-schedule
+check** — the pure decision run against hand-built peer stubs under `IOSimPOR`, exercising the schedule
+the pure decision leaves open — **is adopted early, in Phase 1**, as a Tier-1 design check, and its honest
+ledger entry ([§12](#12-the-moral-core--proven-tested-assumed)) reads **tested (sampled schedules)** for the design. But **io-sim *against the
+built runtime*** — the real daemon lifted onto io-classes and refined against the model — **stays
+Tier-2/deferred**, exactly per the fidelity ceiling above: the concurrent *schedule of the live daemon*
+is **unexercised** until then.
 
 ---
 
@@ -525,22 +535,23 @@ reported as proven. Keep this ledger explicitly:
 |---|---|---|---|
 | GADT-indexed state machine | Illegal in-process transitions are compile errors | **Proven** (machine-checked, exhaustive) | Anything across processes |
 | **Extract** — pure decision + property test | The branch is a total function of typed inputs; unknowns and distinguished states are explicit; safety-critical freshness is fenced | **Proven** for purity / totality / fence wiring; **tested** (sampled) for the property unless the input space is finite and exhausted | That the protocol composing these decisions is sound; that an unfenced observation is current |
-| **Model** — design model-checking | The *algorithm* upholds the (possibly *conditional*, R7) invariant under modeled crash/reorder, within scope | **Proven for the model**; **assumed** for model↔code refinement and actor counts beyond scope | That the code refines the model; behaviour above scope; real-time / clock-skew premises (R8) |
-| **Simulate** (optional) | The *real code* upholds the invariant under the schedules explored | **Tested** (sampled schedules) | Schedules not explored; anything outside the simulated subsystem |
+| **Model** — design model-checking | The *algorithm* upholds the (possibly *conditional*, R7) invariant under modeled crash/reorder, within scope | **Proven for the model** at TLC-green (the Tier-1 design-model, front-loaded to Phase 1); **assumed** for model↔code refinement (deferred Tier-2, Phase 9) and actor counts beyond scope | That the code refines the model; behaviour above scope; real-time / clock-skew premises (R8) |
+| **Simulate** (optional) | The pure decision upholds the invariant under the in-process schedules explored against peer stubs (the Tier-1 design-schedule check, Phase 1); the *built daemon's* real schedule stays deferred | **Tested (for design)** — sampled schedules | Schedules not explored; the live daemon's real schedule (Tier-2, deferred); anything outside the simulated subsystem |
 | **Inject** — live fault injection | The deployed forest survived the injected faults | **Tested** (the faults chosen), never proven | Faults/interleavings not injected; that the invariant is *sound* |
 | Synchrony / real-time assumption (R8) | The timing premise (clock skew, lease, heartbeat) is named, bounded, monitored | **Assumed** — monitored at runtime, never proven by any move | Behaviour when the bound is exceeded; that it holds in the field |
 
 (Three further rows — the cross-boundary consistency premise, the failover budget, and the
 invariant-confluence classification — belong to the Second Axis and are recorded in [§19](#19-the-cross-boundary-ledger-and-conformance-rows).)
 
-**Applied to amoebius today, the ledger is blunt — and that is by design.** Nothing in Phases 1–11 is
+**Applied to amoebius today, the ledger is blunt — and that is by design.** Nothing in Phases 2–11 is
 built. So **every** layer above is, for amoebius, **UNVERIFIED** pending implementation; the only
 *proven* facts available are sibling prodbox results, which are **evidence, not amoebius proof.** The
 [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) phase-discipline rule makes this binding: *every
 validation emits a proven/tested/assumed ledger artifact, and skipping an applicable test move marks that
-correctness layer UNVERIFIED, never green.* When the First-Axis election is built (Phase 3) and modeled
-(Phase 9), its ledger will read like prodbox's; until then, claiming the singleton is "hardened" because
-prodbox proved a sibling invariant is exactly what this section forbids.
+correctness layer UNVERIFIED, never green.* When the First-Axis election's design-model is TLC-checked
+(Phase 1, the Tier-1 design tier), the election is built (Phase 4), and its model↔code correspondence is
+closed (Phase 9, the deferred Tier-2), its ledger will read like prodbox's; until then, claiming the
+singleton is "hardened" because prodbox proved a sibling invariant is exactly what this section forbids.
 
 The rule, stated once and meant absolutely: **never report a tested, assumed, or merely argued result as
 proven.** Type-checking, decision purity, and finite-and-exhausted decision properties can be *proven* at
@@ -628,6 +639,13 @@ A protocol cannot be **Modeled** until the decision's snapshot and observation h
 invariant cannot be **asserted** in Inject or Simulate until it has been **stated** by Model (or at minimum
 made pure and checkable by Extract); Simulate sits between, checking the real code against schedules before
 the expense of live injection.
+
+Under amoebius's two-tier schedule this dependency runs *ahead of the built code*: the Phase-1 Model is
+authored against the **fixed Appendix A/B snapshot/observation vocabulary** before the built Extract
+exists, so it needs no runtime to be TLC-checked design-first. What is thereby deferred is not the design
+proof but the **Model↔Extract naming reconciliation** — the check that each modeled variable names a value
+the built decision actually computes — which is a tracked, **deferred (UNVERIFIED)** Tier-2 correspondence
+obligation discharged when the code lands, not a gap in the Phase-1 design-model.
 
 ### 14.2 Sequencing by ROI (per-project — not doctrine)
 
@@ -911,9 +929,10 @@ silently violates under partition. Build the first kind, and record which kind w
 >
 > **SSoT note.** This appendix narrates the singleton to teach the method; it does **not** own it. The
 > election *shape* is owned by [daemon_topology_doctrine.md §5](./daemon_topology_doctrine.md#5-leadership-election--the-mechanism-the-proof-lives-elsewhere); the formal
-> model, invariant catalog, and divergence record are owned by
-> [tla_modelling_assumptions.md](./tla_modelling_assumptions.md) (Phase 9). Cite those when implementing;
-> cite this appendix for the method it illustrates.
+> **design-model and invariant catalog** (authored and TLC-checked design-first in Phase 1, the Tier-1
+> tier) and their **model↔code correspondence and divergence record** (the deferred Tier-2 obligation,
+> Phase 9) are owned by [tla_modelling_assumptions.md](./tla_modelling_assumptions.md). Cite those when
+> implementing; cite this appendix for the method it illustrates.
 
 **The system.** A small fixed set of ranked control-plane candidate pods (the HA chart at a configurable
 replica count; at `replicas=1` the sole candidate self-elects — the degenerate single-rank instance, not a
@@ -995,8 +1014,10 @@ than corrupting the ordering.
 **The ledger this example keeps ([§12](#12-the-moral-core--proven-tested-assumed)).** *Proven* (once built) — election purity and the may-act fold
 (decision layer), and the modeled safety/liveness properties (for the model, at scope). *Tested* — the
 partition and kill-mid-claim scenarios. *Assumed* — the clock-skew premise (R8), model↔code refinement, and
-behaviour above scope. **For amoebius today, all of this is UNVERIFIED pending Phases 3 and 9;** the prodbox
-analogues are evidence, not amoebius proof. The compacted-topic/TableView read-model
+behaviour above scope. **Under the two-tier schedule, the modeled safety/liveness properties are *proven
+for the model at scope* in Phase 1** (design-first, ahead of code), while **election-correctness-in-the-
+running-cluster and the model↔code correspondence remain UNVERIFIED** until the election is built (Phase 4)
+and its correspondence closed (Phase 9); the prodbox analogues are evidence, not amoebius proof. The compacted-topic/TableView read-model
 ([daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#51-the-coordination-plane-pulsar--minio--the-commit-log)) adds **no** new ledger row: it is a
 projection whose authority is the ownership fold, and a bounded-retention *uncompacted* signed audit trail is
 retained beside it, so compaction's per-key discard does not erode the hash-chain tamper-evidence under
@@ -1138,8 +1159,10 @@ dedup + pointer-merge fold (decision layer); the modeled two-cluster safety/live
 *Tested* — the partition, kill-cluster-mid-workflow (recovery within budget, loss ≤ measured window),
 replication-lag/promotion-gate, and failback-idempotency drills. *Assumed* — the data-loss-window /
 replication-lag bound (R8/R9), monitored never proven; the PACELC latency-for-consistency posture (R7);
-model↔code refinement and behaviour beyond 2 clusters. **For amoebius today, all UNVERIFIED — this is the
-Phase-9 obligation, and the single place the per-system proof concentrates.**
+model↔code refinement and behaviour beyond 2 clusters. **Under the two-tier schedule, the two-cluster
+design-model's safety/liveness properties are *proven for the model at scope 2* in Phase 1 (design-first);
+the model↔code correspondence and live cross-cluster-failover-in-a-running-forest remain UNVERIFIED — the
+Tier-2 Phase-9 obligation, and the single place the per-system proof concentrates.**
 
 **Appendix B rests on doctrine (zero orphans).**
 
@@ -1263,8 +1286,11 @@ to a derived fold **must stay single-writer (coordinated) or be downgraded**. "M
 the budgeted/blocked/restructured subset; name the invariants it does *not* cover. And restructure *shifts*,
 does not remove, the burden: making "sum = total" a derived fold moves correctness onto the fold's idempotent
 replay, so R3's replication-surviving key must be verified to survive cross-cluster post-failover replay.
-**For amoebius today, all of this is UNVERIFIED** — there is no active-active OLTP deployment; this appendix
-exists so the invariant-confluence machinery is in place before any future schema needs it.
+**Under the two-tier schedule, the invariant-confluence classification and any design-model authored for
+it are design-layer artifacts, proven only for the model at scope; active-active-OLTP-correctness-in-a-
+running-cluster and the model↔code correspondence stay UNVERIFIED** — there is no active-active OLTP
+deployment; this appendix exists so the invariant-confluence machinery is in place before any future schema
+needs it.
 
 **Appendix C rests on doctrine (zero orphans).**
 
@@ -1290,7 +1316,7 @@ exists so the invariant-confluence machinery is in place before any future schem
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md) — phase order, adoption ownership, and validation closure (Phase 9 carries the cross-cluster failover proof). This doctrine maintains no competing status ledger.
 - [Documentation Standards](../documentation_standards.md) — the proven/tested/assumed honesty rule this doctrine owns.
 - [Engineering Doctrine Index](./README.md)
-- [TLA+ Modelling Assumptions](./tla_modelling_assumptions.md) — SSoT for the concrete formal spec, invariant catalog, and model↔code divergence record this doctrine's Model move requires (Phase 9).
+- [TLA+ Modelling Assumptions](./tla_modelling_assumptions.md) — SSoT for the concrete formal spec and invariant catalog (the Tier-1 design-model, authored design-first in Phase 1) and the model↔code correspondence and divergence record (the deferred Tier-2 obligation, Phase 9) this doctrine's Model move requires.
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the control-plane singleton election *shape* this doctrine proves.
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — graceful teardown (lossless) versus chaos-failover (bounded loss), and push-back on an unsatisfiable root `InForceSpec`.
 - [Gateway Migration Doctrine](./gateway_migration_doctrine.md) — the `GatewayMigration = <Planned | Failover>` taxonomy; the `Failover` branch is this doctrine's Second-Axis obligation, and its reconciliation-on-return is worked in Appendix B.

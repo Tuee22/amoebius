@@ -34,7 +34,7 @@ Because the deliverable is documentation, this phase establishes no cluster stat
 cross-cutting invariants the whole plan upholds (no environment variables ever including `PATH`;
 illegal/unsafe cluster state unrepresentable in Dhall; the app-logic/deployment-rules split; secrets-by-name;
 HA-always; `no-provisioner` retained PVs; declared cpu/ram; Keycloak-owns-all-ingress) are *first written
-down here* and then upheld by Phases 1–12.
+down here* and then upheld by Phases 2–12.
 
 **Substrate:** none (§L) — the gate is a pure documentation lint over text and the link graph; it touches no
 `apple`, `linux-cpu`, `linux-cuda`, or `windows` host and stands up no resources.
@@ -109,9 +109,10 @@ the sibling **prodbox** project — that is prior-art evidence, not amoebius pro
 - [`testing_doctrine.md` §1 — A test is an amoebius spec](../documents/engineering/testing_doctrine.md#1-a-test-is-an-amoebius-spec):
   this phase documents test-as-`InForceSpec` (spin up → run → always tear down), `suggest-test`, flagged
   credentials, and the per-run ledger artifact.
-- [`tla_modelling_assumptions.md` §0 — Scheduled stub — read this first](../documents/engineering/tla_modelling_assumptions.md#0-scheduled-stub--read-this-first):
-  this phase writes the honest scheduled-stub framing (the formal-model assumptions doc is filled in at
-  Phase 9; Phase 0 only records its SSoT scope and the stub marker).
+- [`tla_modelling_assumptions.md` §0 — Two tiers — read this first](../documents/engineering/tla_modelling_assumptions.md#0-two-tiers--read-this-first):
+  this phase writes the honest two-tier framing (Tier 1 — design-time / in-process integrity, front-loaded to
+  [Phase 1](phase_01_formal_first_dsl_integrity.md); Tier 2 — runtime-enforcement + model↔code correspondence,
+  deferred to Phase 9). Phase 0 only records the doc's SSoT scope and the tier split; it runs no model.
 
 ## Sprints
 
@@ -317,8 +318,8 @@ The whole sprint.
 `documents/engineering/tla_modelling_assumptions.md` (target documentation files; not yet complete)
 **Blocked by**: Sprint 0.1
 **Independent Validation**: lint the three verification docs together — the chaos/failover doctrine owns the
-proven/tested/assumed rule, the testing doctrine owns test-as-`InForceSpec`, and the TLA+ doc is an honest
-scheduled stub that names its Phase 9 fill-in.
+proven/tested/assumed rule, the testing doctrine owns test-as-`InForceSpec`, and the TLA+ doc honestly frames
+its two tiers (Tier-1 design-model front-loaded to Phase 1, Tier-2 correspondence named for Phase 9).
 **Docs to update**: `documents/engineering/chaos_failover_doctrine.md`,
 `documents/engineering/testing_doctrine.md`, `documents/engineering/tla_modelling_assumptions.md`,
 `documents/engineering/README.md`
@@ -327,10 +328,10 @@ scheduled stub that names its Phase 9 fill-in.
 
 Adopt [`chaos_failover_doctrine.md` §12 — The moral core — proven, tested, assumed](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed),
 [`testing_doctrine.md` §1 — A test is an amoebius spec](../documents/engineering/testing_doctrine.md#1-a-test-is-an-amoebius-spec),
-and [`tla_modelling_assumptions.md` §0 — Scheduled stub — read this first](../documents/engineering/tla_modelling_assumptions.md#0-scheduled-stub--read-this-first):
+and [`tla_modelling_assumptions.md` §0 — Two tiers — read this first](../documents/engineering/tla_modelling_assumptions.md#0-two-tiers--read-this-first):
 write the verification layer — the Extract→Model→Inject methodology, the proven/tested/assumed ledger that
-the whole plan's honesty rule descends from, the test-topology contract, and the honest scheduled-stub for
-the Phase 9 formal model.
+the whole plan's honesty rule descends from, the test-topology contract, and the honest two-tier framing of
+the formal model (Tier-1 design-model front-loaded to Phase 1, Tier-2 correspondence deferred to Phase 9).
 
 ### Deliverables
 
@@ -339,14 +340,15 @@ the Phase 9 formal model.
   worked examples.
 - `testing_doctrine.md`: test-as-`InForceSpec` (spin up → run → always tear down), `suggest-test`, flagged
   credentials, the elevated-harness-only deletion rule, the per-run ledger artifact.
-- `tla_modelling_assumptions.md`: the scheduled-stub marker, SSoT scope, and the single proof obligation the
-  Phase 9 model discharges.
+- `tla_modelling_assumptions.md`: the two-tier framing (§0), SSoT scope, and the split of proof obligations —
+  the Tier-1 design-model discharged in Phase 1 and the Tier-2 model↔code correspondence discharged in Phase 9.
 
 ### Validation
 
 1. Lint resolves all links; the proven/tested/assumed rule is owned by one doc and referenced (not restated)
    by the documentation standard and this plan.
-2. The TLA+ doc is unambiguously marked a scheduled stub — no green claim for unwritten proof content.
+2. The TLA+ doc unambiguously separates its two tiers — no green claim that a Tier-1 design-model result
+   proves Tier-2 runtime correspondence.
 
 ### Remaining Work
 
@@ -356,7 +358,7 @@ The whole sprint.
 
 **Status**: Planned
 **Implementation**: `tools/doc_lint.sh` (target standalone lint script; not yet built — it must not depend on
-the amoebius binary, which first appears in Phase 1)
+the amoebius binary, which first appears in Phase 2)
 **Blocked by**: Sprint 0.1, Sprint 0.2, Sprint 0.3, Sprint 0.4, Sprint 0.5
 **Independent Validation**: run the lint over the whole `documents/` + `DEVELOPMENT_PLAN/` tree; a seeded bad
 header, a duplicated normative paragraph, and a dangling anchor each make it exit non-zero.
@@ -416,6 +418,9 @@ The whole sprint.
 - [README.md](README.md) — the live tracker; its Phase 0 paragraph is the source for this phase's objective
   and gate.
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys.
+- [phase_01_formal_first_dsl_integrity.md](phase_01_formal_first_dsl_integrity.md) — the design-first
+  formal-validation phase that follows Phase 0: it validates the DSL type discipline and the failover-protocol
+  design invariants in-process (Tier 1), before any real resource is provisioned.
 - [overview.md](overview.md) — target architecture/vision (authored in Sprint 0.1).
 - [system_components.md](system_components.md) — surface → owning doctrine → planned module path (authored in
   Sprint 0.1).

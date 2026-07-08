@@ -91,7 +91,7 @@ backlog quota ([pulsar_client_doctrine.md §6.1](./pulsar_client_doctrine.md#61-
 ### 2.3 Per-extension surfaces — `ExtensionSpec.extMonitoring`
 
 An extension declares the monitoring surfaces it stands up. The v1 extension set is closed at
-`{infernix, jitML, mattandjames}` and linked, not loaded ([dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability)), so the surfaces it may
+`{infernix, jitML}` and linked, not loaded ([dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability)), so the surfaces it may
 declare are a **closed** union with no open "other service" arm — the same closure the capability union
 carries ([service_capability_doctrine.md](./service_capability_doctrine.md)):
 
@@ -106,7 +106,7 @@ MonitoringSurface =
 `extMonitoring` is `NonEmpty` and mandatory, so an extension's `extDhall` cannot be constructed without at
 least one declared surface — jitML's is a `TensorBoard` surface backed by MinIO
 ([§5](#5-extensible-surfaces-tensorboard)), so an unmonitored jitML run has no inhabitant. infernix and
-mattandjames declare at least the generic `Slo` surface.
+jitML (and every app, including the demo web apps) declare at least the generic `Slo` surface.
 
 ---
 
@@ -292,7 +292,7 @@ not a flat "type-foreclosed":
   port is responsive" residues ([illegal_state_catalog.md §2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)), owned by
   [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) and the review tier, never claimed stronger.
 
-> **Honesty.** amoebius has not built Phase 3. Every type-foreclosed and decode-foreclosed claim here is the
+> **Honesty.** amoebius has not built Phase 4. Every type-foreclosed and decode-foreclosed claim here is the
 > intended property of the type discipline, not a tested result; the runtime-checked residues are explicitly
 > deferred. Where a mechanism reuses a behaviour proven in a sibling system (Pulsar Failover subscriptions,
 > Keycloak ext-authz), that is evidence, not proof in amoebius.
@@ -303,10 +303,10 @@ not a flat "type-foreclosed":
 
 Phase order, status, and validation gates live only in
 [`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). The monitoring obligation types and the
-`validateTopology` fold land in **Phase 3**; the derived rules/panels, the baked TensorBoard renderer, the
-optional local Thanos companion, and the `workflow-health` TableView projection in **Phase 2** (Sprint 2.5);
-the orchestrator/worker SLO-status event in **Phase 4** (Sprint 4.6); the extension surfaces in **Phase 5**
-(infernix) and **Phase 6** (jitML → TensorBoard); the peer-cluster posture and the forest foreclosure in
+`validateTopology` fold land in **Phase 4**; the derived rules/panels, the baked TensorBoard renderer, the
+optional local Thanos companion, and the `workflow-health` TableView projection in **Phase 3** (Sprint 2.5);
+the orchestrator/worker SLO-status event in **Phase 5** (Sprint 4.6); the extension surfaces in **Phase 6**
+(infernix) and **Phase 7** (jitML → TensorBoard); the peer-cluster posture and the forest foreclosure in
 **Phase 9**; and the decode-rejection tests in **Phase 11**. This doc never maintains a competing status
 ledger; it states the target shape and links back for status, per
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).

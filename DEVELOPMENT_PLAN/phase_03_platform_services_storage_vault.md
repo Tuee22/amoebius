@@ -1,4 +1,4 @@
-# Phase 2: Platform services + retained storage + root Vault/PKI
+# Phase 3: Platform services + retained storage + root Vault/PKI
 
 **Status**: Authoritative source
 **Supersedes**: N/A
@@ -21,7 +21,7 @@ transitions are recorded reverse-chronologically here once work begins.
 
 ## Phase Summary
 
-This phase turns the empty kind cluster delivered by Phase 1 into a fully-provisioned amoebius cluster
+This phase turns the empty kind cluster delivered by Phase 2 into a fully-provisioned amoebius cluster
 carrying the complete **standard platform-service set** ([README.md](README.md) → *Standard platform
 services*): the `distribution` registry (replacing Harbor), MinIO, Vault, Pulsar, Prometheus/Grafana,
 Percona/Patroni Postgres + pgAdmin, Envoy / Gateway API, Keycloak, and MetalLB. Every one of those services
@@ -35,12 +35,12 @@ single Keycloak-owned door; no workload opens its own wild path.
 
 The scope deliberately stops at *standing the stack up and proving it rebinds*. The orchestration Dhall DSL,
 the service-capability abstraction, and the elected in-cluster control-plane singleton that will eventually
-*own* the reconciler are Phase 3 concerns; this phase exercises the reconciler from the host binary against a
+*own* the reconciler are Phase 4 concerns; this phase exercises the reconciler from the host binary against a
 fixed, hand-assembled service set so the platform exists before the DSL that will describe it. Pulsar is new
 relative to prodbox and is therefore the least evidence-backed service in the set.
 
 **Substrate:** linux-cpu (§L) — the whole gate runs on a single-node `kind` cluster on a linux-cpu host; no
-apple, linux-cuda, or windows substrate is touched in Phase 2.
+apple, linux-cuda, or windows substrate is touched in Phase 3.
 
 **Gate:** all standard services are up (from generated manifests + baked-binary images, with **no
 public-registry pulls**), HA-shaped, and reachable; **ingress is reachable only via Keycloak**; and durable
@@ -49,7 +49,7 @@ row/object into a Postgres cluster and a MinIO bucket, tearing the cluster down,
 the same bytes back.
 
 ```text
-phase 1 empty kind cluster (external prereq)
+phase 2 empty kind cluster (external prereq)
   -> 2.1 base container side-loaded on the node   (on-node image source; registry staged)
   -> 2.2 typed renderer + SSA reconciler          (apply engine exists)
   -> 2.3 no-provisioner retained storage          (durable land exists)
@@ -64,32 +64,32 @@ This phase is the first implementation of five doctrines. Each bullet names the 
 individual sprints cite the same sections where they adopt them.
 
 - [`platform_services_doctrine.md` §1 — The Invariant: every cluster is the same cluster](../documents/engineering/platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster):
-  Phase 2 materializes the fixed standard service set on the linux-cpu substrate, each service
+  Phase 3 materializes the fixed standard service set on the linux-cpu substrate, each service
   **HA-always even at `replicas=1`** ([§2 — HA always, including `replicas=1`](../documents/engineering/platform_services_doctrine.md#2-ha-always--including-replicas1)),
   with **every container declaring CPU and RAM**, the single **Keycloak-owned wild-ingress door**
   ([§9 — the LoadBalancer and the single wild-ingress path](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)),
   and the hard bring-up ordering edges of
   [§11 — Bring-up and dependency ordering](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering).
 - [`manifest_generation_doctrine.md` §5 — the apply/reconcile engine: server-side apply, owned field manager, prune, wait](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait):
-  Phase 2 builds the pure
+  Phase 3 builds the pure
   [§2 typed `render :: ServiceSpec -> [K8sObject]`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects)
   and the `discover → diff → enact` reconciler — server-side apply under a fixed `amoebius` field manager,
   ApplySet pruning, and wait-for-ready — that replaces Helm; **no third-party charts**, with operators
   *generated*
   ([§4](../documents/engineering/manifest_generation_doctrine.md#4-no-third-party-charts--no-third-party-software-operators-are-generated)).
 - [`image_build_doctrine.md` §2 — the single distribution rule: bake the binaries, build the amoebius image, pull only in-cluster](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster):
-  Phase 2 produces the **multi-arch base container** with every third-party service binary baked
+  Phase 3 produces the **multi-arch base container** with every third-party service binary baked
   (apt → official binary → build-from-source, incl. a Temurin JRE), published as one
   [§3 buildx manifest list](../documents/engineering/image_build_doctrine.md#3-buildx-multi-arch--amd64-and-arm64-one-manifest-list)
   into the single-binary `distribution` registry, so nothing in-cluster ever pulls from a public registry.
 - [`storage_lifecycle_doctrine.md` §2 — one storage class, and it provisions nothing](../documents/engineering/storage_lifecycle_doctrine.md#2-one-storage-class-and-it-provisions-nothing):
-  Phase 2 installs the single inert `no-provisioner` / `Retain` StorageClass, deterministic
+  Phase 3 installs the single inert `no-provisioner` / `Retain` StorageClass, deterministic
   [§4 `<namespace>/<statefulset>/pv_<integer>` naming with explicit `claimRef`](../documents/engineering/storage_lifecycle_doctrine.md#4-deterministic-pv-naming-and-the-explicit-bind),
   and proves the
   [§6 lossless-teardown guarantee](../documents/engineering/storage_lifecycle_doctrine.md#6-the-lossless-teardown-guarantee-deterministic-rebind)
   — durable bytes rebind across a cluster delete + recreate.
 - [`vault_pki_doctrine.md` §5 — the root cluster: single-node, password-encrypted unseal](../documents/engineering/vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal):
-  Phase 2 brings up the root Vault as a single-node, password-encrypted (Argon2id + AEAD, never raw SHA-256),
+  Phase 3 brings up the root Vault as a single-node, password-encrypted (Argon2id + AEAD, never raw SHA-256),
   human-gated, **fail-closed**
   ([§4 init follows readiness](../documents/engineering/vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init))
   secrets root, init-once / unseal-on-rebuild, that owns the self-signed
@@ -109,7 +109,7 @@ individual sprints cite the same sections where they adopt them.
 
 **Status**: Planned
 **Implementation**: `docker/base/Dockerfile`, `src/Amoebius/Image/Build.hs`, `src/Amoebius/Image/Registry.hs` (target paths; not yet built)
-**Blocked by**: Phase 1 gate (external prereq — an empty single-node `kind` cluster brought up idempotently)
+**Blocked by**: Phase 2 gate (external prereq — an empty single-node `kind` cluster brought up idempotently)
 **Independent Validation**: the published tag resolves as one OCI manifest list covering `amd64` and `arm64`; the base image is side-loaded onto the node and every platform pod resolves its image locally with **zero** requests leaving for a public registry (verified by a deny-all egress test to `docker.io`/`quay.io`). The registry's MinIO-backed blob serving is exercised once MinIO is up (Sprint 2.5).
 **Docs to update**: `documents/engineering/image_build_doctrine.md`, `documents/engineering/platform_services_doctrine.md`
 
@@ -353,10 +353,10 @@ The whole sprint.
 
 **Engineering docs to update:**
 - `documents/engineering/platform_services_doctrine.md` — when this phase lands, its §13 planning-ownership
-  pointer resolves to delivered Phase 2 sprints; the per-service "which standard services take a database"
+  pointer resolves to delivered Phase 3 sprints; the per-service "which standard services take a database"
   detail (§8) is filled in from Sprint 2.5.
 - `documents/engineering/manifest_generation_doctrine.md` — the §5/§8 honesty notes flip from "design intent
-  for Phase 2" to a delivered reconciler with the proven/tested ledger attached.
+  for Phase 3" to a delivered reconciler with the proven/tested ledger attached.
 - `documents/engineering/image_build_doctrine.md` — the §2/§4 fail-closed-publication claims gain their first
   amoebius validation; the open §5 (versioning) / §6 (host vs in-pod builder) decisions are recorded as
   taken.
@@ -367,9 +367,9 @@ The whole sprint.
   updated to reflect the delivered single-node root Vault.
 
 **Cross-references to add:**
-- [README.md](README.md) Phase index — flip the Phase 2 row from "not started" to its delivered status and
+- [README.md](README.md) Phase index — flip the Phase 3 row from "not started" to its delivered status and
   link this document.
-- [substrates.md](substrates.md) — record Phase 2's gate substrate (linux-cpu) in the per-phase substrate
+- [substrates.md](substrates.md) — record Phase 3's gate substrate (linux-cpu) in the per-phase substrate
   map.
 - [system_components.md](system_components.md) — reconcile the `src/Amoebius/...` target module paths named
   in each sprint against the component inventory once they become concrete.
@@ -386,5 +386,5 @@ The whole sprint.
 - [Image Build & Registry](../documents/engineering/image_build_doctrine.md) — the baked-binary base container + `distribution` registry adopted here
 - [Storage Lifecycle](../documents/engineering/storage_lifecycle_doctrine.md) — the no-provisioner retained-PV model adopted here
 - [Vault, PKI & Secret Injection](../documents/engineering/vault_pki_doctrine.md) — the root Vault + PKI trust anchor adopted here
-- [Cluster Lifecycle Doctrine](../documents/engineering/cluster_lifecycle_doctrine.md) — the bring-up/teardown the rebind gate exercises (cross-reference, not adopted in Phase 2)
+- [Cluster Lifecycle Doctrine](../documents/engineering/cluster_lifecycle_doctrine.md) — the bring-up/teardown the rebind gate exercises (cross-reference, not adopted in Phase 3)
 - [Engineering Doctrine Index](../documents/engineering/README.md) — the doctrine suite these phases adopt

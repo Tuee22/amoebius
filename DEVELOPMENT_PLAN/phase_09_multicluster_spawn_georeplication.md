@@ -8,17 +8,19 @@
 > **Purpose**: Turn the single-cluster control plane into a recursive forest — a parent spawns child
 > clusters, hands each only its own `project(subtree)` spec under a per-child Transit key, geo-replicates
 > two siblings over Pulsar/MinIO/Postgres, and fails the wild-ingress gateway over with a route53 repoint —
-> then discharge the one per-system proof obligation amoebius owns: the invariant-confluence async
-> cross-cluster failover boundary, with green TLA+/io-sim artifacts and an honest proven/tested/assumed
-> ledger.
+> then discharge the Tier-2 half of the one per-system proof obligation amoebius owns: the abstract
+> TLA+/io-sim model of the invariant-confluence async cross-cluster failover boundary is already authored
+> and proven-for-the-model in Phase 1, so this phase fills the variable→built-module correspondence table,
+> drills it against the running forest, and keeps an honest proven/tested/assumed ledger.
 
 ---
 
 ## Phase Status
 
 📋 Planned. Amoebic spawning, per-child unseal, geo-replication, gateway failover, teardown-vs-chaos
-distinction, the unsatisfiable-`.dhall` push-back, and the cross-cluster failover proof are all specified
-and unstarted; every sprint below is design intent and every prescriptive statement is a target shape, not
+distinction, the unsatisfiable-`.dhall` push-back, and the cross-cluster failover correspondence (against the
+Phase-1 design-model) are all specified and unstarted; every sprint below is design intent and every
+prescriptive statement is a target shape, not
 a tested amoebius result. Where this phase leans on the sibling prodbox project (the gateway single-writer
 pattern, the transit-seal trust tree), that is **sibling evidence**, not amoebius proof.
 
@@ -46,20 +48,22 @@ becomes a forest with an **asynchronous** boundary between its clusters. It does
    fail-closed freshness gate**, repoints route53, and accepts a bounded data-loss suffix — distinguished
    sharply from a graceful teardown-with-cleanup that rides a synchronization event and is lossless by
    construction.
-5. **The proof** — this phase carries the **TLA+/io-sim** artifact for the async cross-cluster failover
-   boundary (intra-cluster consensus is delegated to MinIO/Pulsar/Postgres-Patroni, which run their own),
-   plus the per-run proven/tested/assumed ledger the gate checks.
+5. **The correspondence** — the abstract **TLA+/io-sim** model of the async cross-cluster failover boundary
+   is already authored and proven-for-the-model in Phase 1 (intra-cluster consensus is delegated to
+   MinIO/Pulsar/Postgres-Patroni, which run their own); this phase discharges its Tier-2 half — the
+   variable→built-module correspondence table, io-sim/chaos against the built runtime, and the live failover
+   deploy — plus the per-run proven/tested/assumed ledger the gate checks.
 
-This phase is where the **cluster-topology types** (Phase 3, Sprint 3.6) are exercised live: a multi-node
+This phase is where the **cluster-topology types** (Phase 4, Sprint 3.6) are exercised live: a multi-node
 `rke2` child spawns one node **per Linux host** (SSH-keyed), so "more nodes than hosts" or "a host reused"
 — unrepresentable at decode ([`illegal_state_catalog.md`](../documents/engineering/illegal_state_catalog.md)
 §3.16, [`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md) §4) — is
 realized by actually standing up N nodes on N hosts, and a multi-node `kind` child stays on its single host
 (§3.15). The type layer forbids the illegal topology; this phase proves the legal one converges (runtime-checked).
 
-The phase consumes earlier phases and does not re-implement them: Phase 1's bootstrap of a `kind`/`rke2`
-cluster, Phase 2's root Vault/PKI + retained-PV storage + platform services, Phase 3's Dhall DSL +
-control-plane singleton, and Phase 4's native Pulsar client + content-addressed store. prodbox is treated
+The phase consumes earlier phases and does not re-implement them: Phase 2's bootstrap of a `kind`/`rke2`
+cluster, Phase 3's root Vault/PKI + retained-PV storage + platform services, Phase 4's Dhall DSL +
+control-plane singleton, and Phase 5's native Pulsar client + content-addressed store. prodbox is treated
 as evidence that the design is realizable — its gateway single-writer record and its transit-seal trust
 tree are a sibling result, not an amoebius proof.
 
@@ -72,7 +76,7 @@ flowchart LR
   dns[route53 gateway owner = active cluster] -->|wild ingress| childA
   dns -->|wild ingress on failover| childB
   childB -->|promote only through fail-closed freshness gate| dns
-  childA --> gate[Gate: two children geo-replicate, kill lead triggers DNS failover, loss within budget, proofs green]
+  childA --> gate[Gate: two children geo-replicate, kill lead triggers DNS failover, loss within budget, Phase-1 model corresponds to built modules]
   childB --> gate
 ```
 
@@ -95,10 +99,12 @@ cluster with the geo-replicated forest this phase proves.
 
 **Gate:** two children geo-replicate a workflow; killing the lead cluster mid-workflow triggers gateway
 failover and a route53 repoint to the surviving sibling; the measured data loss is **≤ the declared
-data-loss budget**; the TLA+ safety/liveness checks pass at scope 2 clusters and the io-sim drills pass; and
-the run emits a proven/tested/assumed ledger artifact that records the recovery-time bound as *tested*
-(drilled), the data-loss bound as *assumed* (monitored, not proven), and marks no assumed-and-monitored
-result as proven.
+data-loss budget**; the Phase-1 cross-cluster failover design-model (already green — TLA+/TLC
+proven-for-the-model at scope 2 clusters, io-sim skeleton sampled) is shown to **correspond** to the built
+`src/Amoebius/Multicluster/*` modules via a completed variable→module table, the io-sim/chaos drills run
+against the built runtime, and the live forest gate runs; and the run emits a proven/tested/assumed ledger
+artifact that records the recovery-time bound as *tested* (drilled), the data-loss bound as *assumed*
+(monitored, not proven), and marks no assumed-and-monitored result as proven.
 
 ## Doctrine adopted
 
@@ -132,10 +138,11 @@ result as proven.
 - [`tla_modelling_assumptions.md` §2 — The single proof obligation this model discharges](../documents/engineering/tla_modelling_assumptions.md#2-the-single-proof-obligation-this-model-discharges),
   with [§3 — The question the model must answer](../documents/engineering/tla_modelling_assumptions.md#3-the-question-the-model-must-answer)
   and [§4 — Planned structure (the skeleton, not the content)](../documents/engineering/tla_modelling_assumptions.md#4-planned-structure-the-skeleton-not-the-content):
-  this phase authors the reserved TLA+ artifact — the abstract two-cluster system model, the
-  variable-to-implementation correspondence, the modelling bounds, the invariant catalog, and the honest
-  verification status — defining *and then proving* "well-defined behaviour" for a failover into a
-  partially-synced cluster, tying the gate to the measurement *loss ≤ declared budget, proofs green*.
+  the abstract two-cluster TLA+ artifact — the system model, the modelling bounds, the invariant catalog,
+  and the "well-defined behaviour" definition for a failover into a partially-synced cluster — is already
+  authored and proven-for-the-model in Phase 1; this phase completes its Tier-2 residue, the
+  variable-to-implementation correspondence against the built `src/Amoebius/Multicluster/*` modules with real
+  paths, tying the gate to the measurement *loss ≤ declared budget, Phase-1 model corresponds*.
 - [`monitoring_doctrine.md` §6 — The parent-monitoring posture](../documents/engineering/monitoring_doctrine.md#6-the-parent-monitoring-posture):
   peer-cluster monitoring rides the existing async geo-replication (Sprint 9.3) plus the exported R8 live-lag
   monitor and `DataLossBudget` this phase already ships; in-cluster parent→child telemetry is **foreclosed** by
@@ -148,7 +155,7 @@ result as proven.
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Multicluster/Spawn.hs`, `src/Amoebius/Dsl/ChildInForceSpec.hs`, `pulumi/child-cluster/Pulumi.yaml` (target paths; not yet built)
-**Blocked by**: Phase 1 (bootstrap a `kind`/`rke2` cluster idempotently); Phase 2 (root Vault/PKI trust anchor + retained-PV storage); Phase 3 (the Dhall DSL + control-plane singleton); Phase 4 (Pulumi-from-inside-the-cluster with a Vault-enveloped MinIO backend)
+**Blocked by**: Phase 2 (bootstrap a `kind`/`rke2` cluster idempotently); Phase 3 (root Vault/PKI trust anchor + retained-PV storage); Phase 4 (the Dhall DSL + control-plane singleton); Phase 5 (Pulumi-from-inside-the-cluster with a Vault-enveloped MinIO backend)
 **Independent Validation**: a parent spawns one child `kind` cluster from inside itself; the child comes up empty and reconciles toward the spec; the child's received value is shown — at the type level — to be `project(subtree)` with no field carrying a sibling or ancestor-only branch, so handing a child anything beyond its own subtree fails to type-check.
 **Docs to update**: `documents/engineering/cluster_lifecycle_doctrine.md`, `documents/engineering/pulumi_iac_doctrine.md`, `documents/engineering/dsl_doctrine.md`
 
@@ -187,7 +194,7 @@ The whole sprint.
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Multicluster/ChildUnseal.hs`, `src/Amoebius/Vault/TransitChildKey.hs`, `src/Amoebius/Multicluster/SecretInjection.hs` (target paths; not yet built)
-**Blocked by**: Sprint 9.1; Phase 2 (root Vault init + the PKI trust anchor)
+**Blocked by**: Sprint 9.1; Phase 3 (root Vault init + the PKI trust anchor)
 **Independent Validation**: a spawned child unseals in each of the two sanctioned modes; the child's subtree ciphertext decrypts only under `transit/amoebius-<child-id>-config` and a sibling's key cannot decrypt it even with the parent's Vault unsealed; a named `SecretRef` resolves to bytes the parent injected into the child's Vault, never from a Dhall fragment or an environment variable.
 **Docs to update**: `documents/engineering/vault_pki_doctrine.md`, `documents/engineering/cluster_lifecycle_doctrine.md`
 
@@ -229,7 +236,7 @@ The whole sprint.
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Multicluster/GeoReplication.hs`, `src/Amoebius/Multicluster/ConfluenceClass.hs` (target paths; not yet built)
-**Blocked by**: Sprint 9.1; Phase 4 (native Pulsar client + three-tier content-addressed store); Phase 2 (MinIO + Patroni Postgres platform services)
+**Blocked by**: Sprint 9.1; Phase 5 (native Pulsar client + three-tier content-addressed store); Phase 3 (MinIO + Patroni Postgres platform services)
 **Independent Validation**: two sibling children replicate a `command → event* → result` workflow over Pulsar geo-replication, write-once content-addressed MinIO blobs, and Patroni Postgres; a duplicate cross-cluster write is shown idempotent; every crossing mutable multi-record invariant is sorted by the §17 classifier into confluent (crosses freely) or non-confluent (held by bounded authority), with an unclassified invariant defaulting to non-confluent.
 **Docs to update**: `documents/engineering/chaos_failover_doctrine.md`, `documents/engineering/content_addressing_doctrine.md`, `documents/engineering/platform_services_doctrine.md`
 
@@ -269,7 +276,7 @@ The whole sprint.
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Multicluster/GatewayAuthority.hs`, `src/Amoebius/Multicluster/PromotionGate.hs`, `src/Amoebius/Multicluster/DnsRepoint.hs` (target paths; not yet built)
-**Blocked by**: Sprint 9.3; Phase 2 (Keycloak-owned wild ingress via the LB + Gateway API)
+**Blocked by**: Sprint 9.3; Phase 3 (Keycloak-owned wild ingress via the LB + Gateway API)
 **Independent Validation**: with both siblings geo-replicating, killing the lead cluster mid-workflow drives the surviving sibling to promote *only after* its freshness gate proves it is caught up to a known commit watermark (or holds a fence), then repoint route53; the un-replicated suffix lost at the instant of failover is accounted for **only** by the R9 data-loss budget, never silently resolved to "absent."
 **Docs to update**: `documents/engineering/gateway_migration_doctrine.md`, `documents/engineering/chaos_failover_doctrine.md`, `documents/engineering/cluster_lifecycle_doctrine.md`, `documents/engineering/pulumi_iac_doctrine.md`
 
@@ -358,12 +365,12 @@ the declarative push-back that refuses — by default — a teardown which would
 
 The whole sprint.
 
-## Sprint 9.6: Cross-cluster failover proof — TLA+/io-sim artifacts + the gate `.dhall` + ledger 📋
+## Sprint 9.6: Cross-cluster failover correspondence — Tier-2 variable→module table + live gate `.dhall` + ledger 📋
 
 **Status**: Planned
-**Implementation**: `spec/tla/CrossClusterFailover.tla`, `test/iosim/CrossClusterFailover.hs`, `test/dhall/phase_09_failover.dhall`, `documents/engineering/tla_modelling_assumptions.md` (target paths; the TLA doc is authored here)
-**Blocked by**: Sprint 9.3; Sprint 9.4; Sprint 9.5
-**Independent Validation**: the TLA+ model checks at scope 2 clusters (exactly-one gateway authority once views converge; exactly-once for replicated-or-recovered effects; bounded mergeable divergence; no write after stale failover); the io-sim drills (cut replication, kill cluster mid-workflow, lag past bound, failback with late+duplicate arrivals) pass; and `test/dhall/phase_09_failover.dhall` spins the forest up, runs the failover, asserts measured loss ≤ the declared budget, tears down leak-free, and emits a proven/tested/assumed ledger artifact.
+**Implementation**: `test/dhall/phase_09_failover.dhall`, the correspondence table in `documents/engineering/tla_modelling_assumptions.md` §5, and the io-sim/chaos harness re-bound to the built `src/Amoebius/Multicluster/*` modules (target paths; not yet built). The abstract `spec/tla/CrossClusterFailover.tla` + `test/iosim/CrossClusterFailover.hs` skeleton were authored and proven-for-the-model in Phase 1 — this sprint consumes them, it does not re-author them.
+**Blocked by**: Phase 1 (the abstract cross-cluster failover TLA+/TLC model + io-sim skeleton, already proven-for-the-model); Sprint 9.3; Sprint 9.4; Sprint 9.5
+**Independent Validation**: the Phase-1 TLA+ model (already green at scope 2 clusters — exactly-one gateway authority once views converge; exactly-once for replicated-or-recovered effects; bounded mergeable divergence; no write after stale failover) is shown to **correspond** to the built runtime: every TLA+ variable/action has a row pointing at a real `src/Amoebius/Multicluster/*` module; the io-sim/chaos drills (cut replication, kill cluster mid-workflow, lag past bound, failback with late+duplicate arrivals) run against the BUILT modules and pass; and `test/dhall/phase_09_failover.dhall` spins the live forest up, runs the failover, asserts measured loss ≤ the declared budget, tears down leak-free, and emits a proven/tested/assumed ledger artifact.
 **Docs to update**: `documents/engineering/tla_modelling_assumptions.md`, `documents/engineering/chaos_failover_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
 ### Objective
@@ -371,40 +378,48 @@ The whole sprint.
 Adopt [`tla_modelling_assumptions.md` §2 — The single proof obligation this model discharges](../documents/engineering/tla_modelling_assumptions.md#2-the-single-proof-obligation-this-model-discharges),
 [§3 — The question the model must answer](../documents/engineering/tla_modelling_assumptions.md#3-the-question-the-model-must-answer),
 and [§4 — Planned structure (the skeleton, not the content)](../documents/engineering/tla_modelling_assumptions.md#4-planned-structure-the-skeleton-not-the-content),
-discharged by the Model/Simulate/Inject moves of
-[`chaos_failover_doctrine.md` §9 — Model](../documents/engineering/chaos_failover_doctrine.md#9-move-ii--model-prove-the-protocol-not-the-program),
-[§10 — Simulate (io-sim)](../documents/engineering/chaos_failover_doctrine.md#10-simulate--the-pure-program-lifted-io-sim),
-and [§11 — Inject](../documents/engineering/chaos_failover_doctrine.md#11-move-iii--inject-break-the-running-thing-on-purpose),
+whose abstract model was already discharged by the Model/Simulate moves of
+[`chaos_failover_doctrine.md` §9 — Model](../documents/engineering/chaos_failover_doctrine.md#9-move-ii--model-prove-the-protocol-not-the-program)
+and [§10 — Simulate (io-sim)](../documents/engineering/chaos_failover_doctrine.md#10-simulate--the-pure-program-lifted-io-sim)
+in Phase 1; this sprint runs the Inject move of
+[§11 — Inject](../documents/engineering/chaos_failover_doctrine.md#11-move-iii--inject-break-the-running-thing-on-purpose)
+against the built runtime,
 ledgered per [§12 — The moral core: proven, tested, assumed](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)
 and [§19](../documents/engineering/chaos_failover_doctrine.md#19-the-cross-boundary-ledger-and-conformance-rows):
-author the reserved TLA+ artifact — *defining* "well-defined behaviour" for a failover into a
-partially-synced cluster and *proving* the runtime always satisfies it within bounds — and tie the phase
-gate to the measurement *loss ≤ declared budget, proofs green*, as the test-`.dhall` of
+the Phase-1 TLA+ artifact already *defines* "well-defined behaviour" for a failover into a partially-synced
+cluster and *proves it for the model*; this phase completes the Tier-2 residue — the variable→built-module
+correspondence table — drills the built runtime, and ties the phase gate to the measurement
+*loss ≤ declared budget, Phase-1 model corresponds*, as the test-`.dhall` of
 [`testing_doctrine.md` §3 — spin up → run → always tear down](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down).
 
 ### Deliverables
 
-- A TLA+ spec (`CrossClusterFailover.tla`) with the cross-boundary adversary first-class — a replication
-  channel that delays/reorders/duplicates/cuts, the gateway meta-election, and actions
-  *produce/replicate/consume/advance-pointer/fail-over/fail-back/partition/heal* — checked to exhaustion at
-  scope 2 clusters, plus the authored `tla_modelling_assumptions.md` content (abstract model,
-  variable-to-implementation correspondence with real file paths, modelling bounds, invariant catalog,
-  verification status).
-- An io-sim harness lifting the Haskell failover runtime under the same fault assumptions (Model's logical
-  time handed off to Simulate), and an Inject drill set extended into the inter-cluster dimension.
+- The variable→built-module **correspondence table** in `tla_modelling_assumptions.md` §5: every Phase-1
+  TLA+ variable and action (`produce/replicate/consume/advance-pointer/fail-over/fail-back/partition/heal`,
+  the delays/reorders/duplicates/cuts replication channel, the gateway meta-election) mapped to the real
+  `src/Amoebius/Multicluster/*` module and function that realizes it — the Tier-2 correspondence the abstract
+  Phase-1 model deferred. (The `CrossClusterFailover.tla` spec itself is not authored here; it is the
+  already-green Phase-1 artifact this table points back at.)
+- The Phase-1 io-sim harness re-bound to the BUILT Haskell failover runtime under the same fault assumptions
+  (Model's logical time handed off to Simulate), and the Inject drill set run in the inter-cluster dimension
+  against the running forest.
 - `test/dhall/phase_09_failover.dhall`: spin two children up, geo-replicate, kill the lead, assert measured
   loss ≤ the declared data-loss window and recovery ≤ the bound, reconcile divergent histories, and always
   tear down leak-free — emitting the per-run ledger artifact.
 
 ### Validation
 
-1. TLC reaches the asserted safety/liveness invariants at scope 2 with no counterexample, within declared
-   bounds; the bounds are recorded honestly (what they prove and what they do **not**).
-2. The io-sim + Inject drills (partition, kill-mid-workflow, lag-past-bound, failback-idempotency) pass; the
-   gate `.dhall` reports measured loss ≤ budget and tears down leak-free.
-3. The ledger marks recovery time + reconciliation as **tested** (drilled), the data-loss/replication-lag
-   bound as **assumed** (monitored, never proven), and the modeled safety/liveness as **proven for the model
-   at scope 2** — and never reports an assumed-and-monitored result as proven.
+1. The correspondence table is complete: every Phase-1 TLA+ variable/action resolves to a real
+   `src/Amoebius/Multicluster/*` module/function, with no orphan variable and no unmodelled crossing action;
+   the residual gap between "model at scope 2" and "built runtime" is recorded honestly (what corresponds and
+   what does **not**).
+2. The io-sim + Inject drills (partition, kill-mid-workflow, lag-past-bound, failback-idempotency) run
+   against the built runtime and pass; the gate `.dhall` reports measured loss ≤ budget and tears down
+   leak-free.
+3. The ledger marks recovery time + reconciliation as **tested** (drilled against the built runtime), the
+   data-loss/replication-lag bound as **assumed** (monitored, never proven), and the modeled safety/liveness
+   as **proven for the Phase-1 model at scope 2** (a design-layer result, never a runtime guarantee) — and
+   never reports an assumed-and-monitored result as proven.
 
 ### Remaining Work
 
@@ -413,10 +428,10 @@ The whole sprint.
 ## Documentation Requirements
 
 **Engineering docs to update:**
-- `documents/engineering/tla_modelling_assumptions.md` — when Sprint 9.6 lands, replace the scheduled stub
-  with the authored cross-cluster failover model: the abstract two-cluster system model, the
+- `documents/engineering/tla_modelling_assumptions.md` — the abstract two-cluster failover model, modelling
+  bounds, and invariant catalog are already authored in Phase 1; when Sprint 9.6 lands, fill the reserved
   variable-to-implementation correspondence (TLA+ variables/actions → the `src/Amoebius/Multicluster/*`
-  modules with real paths), the modelling bounds, the invariant catalog, and the honest verification status
+  modules with real paths) that Phase 1 left as a Tier-2 stub, and update the honest verification status
   (status is recorded here in the plan, never as doctrine status).
 - `documents/engineering/chaos_failover_doctrine.md` — the §19 cross-boundary ledger and the §15/§19
   conformance rows gain an amoebius-tested linux-cpu datapoint (recovery-time drilled, data-loss assumed),
@@ -444,10 +459,10 @@ The whole sprint.
 - [overview.md](overview.md) — target architecture and constraints
 - [system_components.md](system_components.md) — target component inventory (the `Multicluster/*` + TLA module paths)
 - [substrates.md](substrates.md) — substrate registry and per-phase map
-- [Chaos & Failover Doctrine](../documents/engineering/chaos_failover_doctrine.md) — the invariant-confluence Second Axis this phase implements and proves
-- [TLA+ Modelling Assumptions](../documents/engineering/tla_modelling_assumptions.md) — the cross-cluster failover model artifact this phase authors
+- [Chaos & Failover Doctrine](../documents/engineering/chaos_failover_doctrine.md) — the invariant-confluence Second Axis this phase implements and drives to its live gate (its abstract model is proven-for-the-model in Phase 1)
+- [TLA+ Modelling Assumptions](../documents/engineering/tla_modelling_assumptions.md) — the cross-cluster failover model artifact (authored and proven-for-the-model in Phase 1); this phase fills its Tier-2 variable→built-module correspondence
 - [Vault, PKI & Secret Injection Doctrine](../documents/engineering/vault_pki_doctrine.md) — parent/child unseal + per-child Transit keys + secret injection
 - [Cluster Lifecycle Doctrine](../documents/engineering/cluster_lifecycle_doctrine.md) — amoebic spawning, teardown-vs-chaos, and push-back
 - [Gateway Migration Doctrine](../documents/engineering/gateway_migration_doctrine.md) — the `GatewayMigration = <Planned | Failover>` taxonomy; Sprint 9.4 builds the `Failover` branch (fail-closed promotion + route53 repoint)
-- Earlier phase: Phase 8 — mattandjames as application-logic-only (the app the forest geo-replicates)
+- Earlier phases: Phase 6 / Phase 7 — a demo web app (infernix/jitML) as application-logic-only (the app the forest geo-replicates)
 - Next phase: Phase 10 — Provider-managed clusters + dynamic provisioning (the forest extended to provider substrates)
