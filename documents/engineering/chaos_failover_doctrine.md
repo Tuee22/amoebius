@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: The amoebius concurrency-and-failover doctrine — *Extract* the decision into a value, *Model* the protocol into a proof, *Inject* faults into the deployment — plus the proven/tested/assumed ledger and the invariant-confluence **Second Axis** that governs asynchronous cross-cluster geo-replication and gateway failover, the one boundary where a per-system proof obligation concentrates.
@@ -1096,6 +1096,21 @@ partition, every cross-cluster write trades latency for consistency; amoebius ch
 (asynchronous replication), and the data-loss window *is* the explicitly-recorded price — synchronous
 cross-cluster replication would pay cross-cluster RTT per publish, which a realtime hop cannot afford.
 
+**Keycloak state on gateway failover — a worked classification ([§17](#17-the-boundary-and-its-classifier)).** The
+wild-ingress gateway is Keycloak, so a `Failover` gateway takeover
+([gateway_migration_doctrine.md](./gateway_migration_doctrine.md)) must reconcile Keycloak's own state, and it
+splits cleanly along the classifier. **Configuration** state — realms, clients, roles, users — is not
+stored-as-truth to be merged: it is a **deterministic projection of the authoritative `InForceSpec`** (RBAC is
+derived, not stored; the spec lives in the immutable `Release` ledger and geo-replicated Transit-enveloped
+MinIO), so on promotion the survivor **re-derives** it from that single authority — confluent by restructuring,
+bucket (i), no divergence-merge. **Runtime session** state is the non-confluent singleton: held
+**survivor-wins** under R7, the survivor's timeline is authoritative, and sessions on the lost fork past the
+divergence point re-authenticate (acceptable for an emergency failover) and are audited. The recovered old
+active **rewinds to the fork point**, re-syncs as a replica of the new primary, and quarantines its
+un-replicated writes to an **audited RPO-gap log** rather than merging them (Postgres is relational, not a
+CRDT) — accounted for only by the R9 data-loss budget. Convergence is therefore survivor-wins + rewind +
+config-re-derive + audited RPO gap, with no fabricated per-record merge.
+
 **Model applied.** Model the **two-cluster protocol** with the cross-boundary adversary **first-class**: a
 replication channel that delays, reorders, duplicates, and can be **cut**; the gateway meta-election (lifted
 from Appendix A); actions *produce / replicate / consume / advance-pointer / fail-over / fail-back /
@@ -1137,6 +1152,7 @@ Phase-9 obligation, and the single place the per-system proof concentrates.**
 | Coercion licensed for liveness, forbidden for a durability safety claim | [§8](#8-move-i--extract-make-the-decision-a-value) typed-unknown scoping |
 | No strong cross-cluster singleton; availability-first | R7 |
 | Blobs merge trivially; CAS pointer via timestamp-free deterministic total merge | [§17](#17-the-boundary-and-its-classifier) bucket (i) for state; R7 |
+| Keycloak config re-derived from `InForceSpec` (confluent); session survivor-wins; old-active rewind + audited RPO-gap | [§17](#17-the-boundary-and-its-classifier) buckets (i)/(ii); R7; R9; [gateway_migration_doctrine.md](./gateway_migration_doctrine.md) |
 | Deposed cluster keeps acting up to the lag = bounded self-healing violation | [§9](#9-move-ii--model-prove-the-protocol-not-the-program) note + R7 |
 | Replication lag named/bounded/monitored; data-loss window; promotion gate | R8; R7 (fail-closed promotion gate) |
 | Failover budget = (data-loss window assumed, recovery time drilled) | R9 |
@@ -1277,6 +1293,7 @@ exists so the invariant-confluence machinery is in place before any future schem
 - [TLA+ Modelling Assumptions](./tla_modelling_assumptions.md) — SSoT for the concrete formal spec, invariant catalog, and model↔code divergence record this doctrine's Model move requires (Phase 9).
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the control-plane singleton election *shape* this doctrine proves.
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — graceful teardown (lossless) versus chaos-failover (bounded loss), and push-back on an unsatisfiable root `InForceSpec`.
+- [Gateway Migration Doctrine](./gateway_migration_doctrine.md) — the `GatewayMigration = <Planned | Failover>` taxonomy; the `Failover` branch is this doctrine's Second-Axis obligation, and its reconciliation-on-return is worked in Appendix B.
 - [Platform Services Doctrine](./platform_services_doctrine.md) — the standard services whose intra-cluster consensus is delegated, concentrating the proof obligation.
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — the content-addressed MinIO store that lands cross-cluster artifacts in confluence bucket (i).
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — native-protocol (no-WebSockets) at-least-once + dedup, the R3 substrate.

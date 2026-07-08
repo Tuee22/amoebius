@@ -271,7 +271,7 @@ The whole sprint.
 **Implementation**: `src/Amoebius/Multicluster/GatewayAuthority.hs`, `src/Amoebius/Multicluster/PromotionGate.hs`, `src/Amoebius/Multicluster/DnsRepoint.hs` (target paths; not yet built)
 **Blocked by**: Sprint 9.3; Phase 2 (Keycloak-owned wild ingress via the LB + Gateway API)
 **Independent Validation**: with both siblings geo-replicating, killing the lead cluster mid-workflow drives the surviving sibling to promote *only after* its freshness gate proves it is caught up to a known commit watermark (or holds a fence), then repoint route53; the un-replicated suffix lost at the instant of failover is accounted for **only** by the R9 data-loss budget, never silently resolved to "absent."
-**Docs to update**: `documents/engineering/chaos_failover_doctrine.md`, `documents/engineering/cluster_lifecycle_doctrine.md`, `documents/engineering/pulumi_iac_doctrine.md`
+**Docs to update**: `documents/engineering/gateway_migration_doctrine.md`, `documents/engineering/chaos_failover_doctrine.md`, `documents/engineering/cluster_lifecycle_doctrine.md`, `documents/engineering/pulumi_iac_doctrine.md`
 
 ### Objective
 
@@ -448,5 +448,6 @@ The whole sprint.
 - [TLA+ Modelling Assumptions](../documents/engineering/tla_modelling_assumptions.md) — the cross-cluster failover model artifact this phase authors
 - [Vault, PKI & Secret Injection Doctrine](../documents/engineering/vault_pki_doctrine.md) — parent/child unseal + per-child Transit keys + secret injection
 - [Cluster Lifecycle Doctrine](../documents/engineering/cluster_lifecycle_doctrine.md) — amoebic spawning, teardown-vs-chaos, and push-back
+- [Gateway Migration Doctrine](../documents/engineering/gateway_migration_doctrine.md) — the `GatewayMigration = <Planned | Failover>` taxonomy; Sprint 9.4 builds the `Failover` branch (fail-closed promotion + route53 repoint)
 - Earlier phase: Phase 8 — mattandjames as application-logic-only (the app the forest geo-replicates)
 - Next phase: Phase 10 — Provider-managed clusters + dynamic provisioning (the forest extended to provider substrates)

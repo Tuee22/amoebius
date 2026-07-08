@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for amoebius's inter-node / inter-cluster network fabric — **raw kernel
@@ -111,8 +111,10 @@ flowchart TD
 ## 4. Topology: the hub is the gateway *role*, and the fabric moves with it
 
 - **The hub is bound to the gateway role, not to a fixed cluster.** The WireGuard hub is addressed by a
-  stable VPN IP + stable endpoint, reassigned on failover exactly as the route53 gateway record is repointed
-  ([chaos_failover_doctrine.md](./chaos_failover_doctrine.md)). When the gateway migrates or fails over, **the
+  stable VPN IP + stable endpoint, reassigned on a gateway migration — a planned handover or an unplanned
+  failover — exactly as the route53 gateway record is repointed
+  ([gateway_migration_doctrine.md](./gateway_migration_doctrine.md); the forced case is
+  [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)). When the gateway migrates or fails over, **the
   hub role moves with it**; peers keep the same hub VPN-IP view and only the endpoint behind it changes. (Shorthand: the flattened mesh
   moves with the gateway.)
 - **VPN-IP allocation is by disjoint per-cluster ranges.** Each cluster draws VPN IPs from its own
@@ -205,7 +207,7 @@ features have little surface to act on, and each is already covered:
 | East-west pod-to-pod mTLS | East-west is authorized by NetworkPolicy (default-deny + derived-allow, [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), identity is Vault PKI, and the cross-cluster wires §5 *renders* — the attach (K1) and stretched control-plane (K2) spans — are WireGuard-encrypted ([§5](#5-the-security-boundary-generalizes-localhost--authenticated-fabric); the broker↔broker geo-replication wire is deferred, [§1](#1-why-this-doctrine-exists-the-inter-cluster-wire-is-an-open-gap)). The in-cluster network is already treated as trusted, and coordination is broker-mediated Pulsar + MinIO, not synchronous pod-to-pod HTTP — little east-west surface to encrypt. |
 | Retries / timeouts / circuit-breaking | The bus already gives at-least-once + dedup ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)) at the typed application layer, where amoebius wants it — not hidden in a sidecar. |
 | Golden metrics | Prometheus/Grafana is already a standard service ([platform_services_doctrine.md](./platform_services_doctrine.md)). |
-| Traffic-split (the *one* relevant feature, for gateway migration) | **Gateway-API `HTTPRoute` `backendRefs` carry weights natively**, on the Envoy edge amoebius already renders and Keycloak-fronts. A planned home→provider migration is a weight shift on the edge already in the stack — no mesh needed. |
+| Traffic-split (the *one* relevant feature, for gateway migration) | **Gateway-API `HTTPRoute` `backendRefs` carry weights natively**, on the Envoy edge amoebius already renders and Keycloak-fronts. A planned home→provider migration ([gateway_migration_doctrine.md](./gateway_migration_doctrine.md)) is a weight shift on the edge already in the stack — no mesh needed. |
 | Multicluster service-mirroring | Introduces the **synchronous cross-cluster RPC the architecture deliberately avoids** ([app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md), [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)) and manufactures new non-confluent invariants + latency. Actively anti-doctrinal. |
 
 **Scope note (the stretched-cluster contrast case).** That last verdict targets **multicluster** service-mirroring —
@@ -232,8 +234,8 @@ workload certs consumed directly** (the reserved "any mesh" CA clause, [§3](#3-
 |-------------------|------------------------------|
 | Raw-WireGuard-over-Netmaker; the fabric primitive amoebius configures directly | — |
 | Rendered peer config, `wg`-reconcile distribution, disjoint-namespace VPN-IP allocation | The `render()` discipline → [manifest_generation_doctrine.md](./manifest_generation_doctrine.md); the reconcile shape → [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) |
-| The hub = gateway-role topology; the fabric moves with the gateway | The gateway authority + failover/migration → [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
-| The service-mesh (Linkerd) verdict + Gateway-API-weights-for-migration | The Gateway-API / Envoy edge → [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) |
+| The hub = gateway-role topology; the fabric moves with the gateway | Gateway ownership + its migration (planned or forced) → [gateway_migration_doctrine.md](./gateway_migration_doctrine.md); the forced-failover proof → [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
+| The service-mesh (Linkerd) verdict + Gateway-API-weights-for-migration | The Gateway-API / Envoy edge → [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path); the migration that shifts the weights → [gateway_migration_doctrine.md](./gateway_migration_doctrine.md) |
 | That WireGuard peer keys are a Vault KV secret class (not PKI certs) | The Vault secret model + the reserved "any mesh" CA clause → [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | The fabric that makes the localhost→fabric generalization safe | The channel-2 rule generalization itself → [host_cluster_comms_doctrine.md §5](./host_cluster_comms_doctrine.md#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary) |
 
@@ -269,7 +271,8 @@ ingress); the Linkerd half collapses to the written verdict in [§6](#6-the-serv
 - [Host ↔ Cluster Communication](./host_cluster_comms_doctrine.md) — [§5](./host_cluster_comms_doctrine.md#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary), the localhost→fabric generalization
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — WireGuard peer keys as a KV secret class; the reserved "any mesh" CA clause
 - [Platform Services Doctrine](./platform_services_doctrine.md) — [§9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) the single wild-ingress path + Gateway-API weights
-- [Chaos / Failover Doctrine](./chaos_failover_doctrine.md) — the gateway role the hub tracks; failover/migration
+- [Chaos / Failover Doctrine](./chaos_failover_doctrine.md) — the gateway role the hub tracks; the forced-failover proof
+- [Gateway Migration Doctrine](./gateway_migration_doctrine.md) — the `GatewayMigration = <Planned | Failover>` taxonomy the hub role moves with (planned handover and forced failover)
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the singleton that reconciles the fabric
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — the `render()` discipline the peer config reuses
 - [Substrate Doctrine](./substrate_doctrine.md) — the node inventory the peer config is rendered from

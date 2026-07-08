@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: The single source of truth for the catalog of illegal and unsafe cluster states amoebius
@@ -832,6 +832,27 @@ and the `routes[].workflow`-vs-`name` reconciliation; `runtime-checked` residue 
 the alert fires, the named `/metrics` series exists, and a `UserScoped` filter actually excludes another user's
 data — owned by [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md) and the review tier.
 
+### 3.44 A session that cannot rebind on gateway migration
+
+Raw DNS failover treats a gateway move as "repoint the record and hope": TTL and resolver caching leave a
+window in which a live client still resolves the old gateway address, and if the old ingress is hard-stopped a
+mid-session client is stranded with no working endpoint. amoebius models a `Planned` gateway migration
+([`gateway_migration_doctrine.md`](./gateway_migration_doctrine.md)) as an **ordered, edge-observed state
+machine** — `stand-up-replica → quiesce → drain/verify-caught-up → promote → (old-ingress = proxy + repoint
+DNS) → unfreeze → drain-monitor → decommission(old-ingress)` — in which `decommission(old-ingress)` is
+reachable **only** from an observed `drain-monitor` edge (old-gateway traffic ≈ 0). No transition removes the
+last working endpoint for a live session: while DNS drains, the old gateway survives as a transparent reverse
+proxy to the new, and the per-cluster stable address never migrates — so "a session in limbo that cannot
+rebind" has no representable path. On the `Failover` path (the active has vanished, no proxy) the guarantee
+weakens honestly to bounded rebind: clients error, re-resolve within the already-low TTL, and rebind to the
+survivor. **Owner:** [`gateway_migration_doctrine.md`](./gateway_migration_doctrine.md) (the migration state
+machine and the client-rebind protocol). **Technique:** [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
+(the migration GADT — the `decommission` handle exists only from a `drain-complete` index). **Layer:**
+`type-foreclosed` for the transition ordering (no path decommissions the last endpoint); `runtime-checked`
+residue — that the `drain-complete` edge (old-gateway traffic ≈ 0) is truthfully observed, owned by
+[`gateway_migration_doctrine.md`](./gateway_migration_doctrine.md) and
+[`readiness_ordering_doctrine.md`](./readiness_ordering_doctrine.md).
+
 ---
 
 ## 4. The typing techniques
@@ -1025,6 +1046,7 @@ Forecloses [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-manag
 | 3.41 Duration-gated / hand-ordered bring-up (readiness race) | 4.2 no-duration `Readiness` union + 4.3 derived readiness edge + 4.4 dep-graph owner + 4.6 `mkBringUpOrder` fold | [readiness_ordering](./readiness_ordering_doctrine.md), [platform_services §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering) |
 | 3.42 Admin mutation without root-token cap + unsealed-Vault witness | 4.2 `RootToken` capability + 4.3 `Unsealed`-edge-gated `dhall update` handle (channel-1 verb retired at handoff) | [bootstrap_sequence](./bootstrap_sequence_doctrine.md), [vault_pki §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) |
 | 3.43 Unmonitored workflow/extension or unauthenticated monitoring surface | 4.1 mandatory monitor/liveness/extMonitoring + absent Off/Public arms + 4.7 coverage fold + 4.6 rule-feasibility Σ | [monitoring](./monitoring_doctrine.md), [pulsar_client §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra) |
+| 3.44 A session that cannot rebind on gateway migration | 4.3 migration GADT (decommission handle only from a drain-complete index) | [gateway_migration](./gateway_migration_doctrine.md) |
 
 ---
 
@@ -1109,6 +1131,7 @@ testing (Phase 11) phases. This doc never maintains a competing status ledger.
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md) — the runtime-enforcement proof (the honest limit)
 - [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§3.41](#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race) the readiness race foreclosed (readiness is an edge, not a wait)
 - [Bootstrap Sequence Doctrine](./bootstrap_sequence_doctrine.md) — [§3.42](#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness) the admin control plane; an unauthenticated/unsealed admin mutation foreclosed
+- [Gateway Migration Doctrine](./gateway_migration_doctrine.md) — [§3.44](#344-a-session-that-cannot-rebind-on-gateway-migration) the migration state machine and client-rebind protocol (a session that cannot rebind foreclosed)
 - [Engineering Doctrine Index](./README.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

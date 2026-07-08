@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/gateway_migration_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Own the formal-model assumptions, implementation correspondence, known divergences, and verification boundaries for amoebius's async cross-cluster gateway-failover specification — authored when Phase 9 is reached.
@@ -55,8 +55,10 @@ It does **not** own the *methodology* (Extract → Model → Inject, the invaria
 [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). It does not own the failover
 *mechanics* (geo-replication wiring, gateway handoff, DNS repoint, teardown-with-cleanup vs
 chaos-failover) — those live in [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md)
-and [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). This doc references them; it never
-duplicates them.
+and [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). It does not own the
+`GatewayMigration = <Planned | Failover>` taxonomy or the planned/forced migration protocols — those
+are owned by [gateway_migration_doctrine.md](./gateway_migration_doctrine.md). This doc references
+them; it never duplicates them.
 
 ---
 
@@ -90,6 +92,17 @@ flowchart TD
   obligation -->|methodology owned by| method[chaos_failover_doctrine.md]
 ```
 
+**Only one of the two gateway-change branches reaches this boundary.** A gateway-ownership change is a
+value of `GatewayMigration = <Planned | Failover>`
+([gateway_migration_doctrine.md](./gateway_migration_doctrine.md)). Only the **Failover** branch — an
+active that has vanished, promoted from an async-replicated replica — crosses the asynchronous
+cross-cluster boundary this model targets. The **Planned** branch is a coordinated *synchronous*
+switchover (quiesce → drain → verify-caught-up → cutover): its RPO=0 is an **assumed, argued
+design-level property owned by [gateway_migration_doctrine.md](./gateway_migration_doctrine.md)** — it
+rests on a runtime-observed catch-up check, not on any result of this model — and it presents no async
+divergence to reconcile. This model therefore **does not verify** the Planned branch; excluding it is a
+scoping decision, not a verdict about its safety.
+
 ---
 
 ## 3. The question the model must answer
@@ -98,6 +111,12 @@ The worst case, in plain words: a sibling cluster is **mid geo-sync** — it has
 accepted some replicated state but not all — and at that instant it goes down, and a gateway
 failover *to that very cluster* is attempted. The honest answer today is that amoebius has not
 proven a well-defined behaviour for that state, and that is why the model is scheduled.
+
+This worst case is specific to the **Failover** branch of `GatewayMigration`
+([gateway_migration_doctrine.md](./gateway_migration_doctrine.md)): a mid-geo-sync failover can arise
+only when the active has vanished with no chance to freeze and drain. The **Planned** branch reaches
+cutover only after writes are frozen and the replica is verified caught-up, so "mid-geo-sync failover"
+is not a state its path represents.
 
 This is the motivating problem stated in the project vision: *"what exactly happens if a cluster goes down
 mid geo-sync and we try to failover the gateway to that cluster? We need to prove we always have
@@ -136,7 +155,7 @@ to fill it.
 | Known divergences & compression points | Every model-vs-runtime gap, recorded honestly (the prodbox analogue keeps a numbered list; this one will too). |
 | Modelling bounds & limitations | Cluster count, lag bound, and message/log-length constants the checker runs with — and what those bounds do **not** prove. |
 | Invariant catalog | Each safety/liveness property in plain terms + the concrete failure it prevents (single-gateway-owner, no-write-after-stale-failover, bounded self-healing divergence, …). |
-| Impossibility acknowledgment | The CAP/FLP boundary for async partitions, and amoebius's chosen branch (act-and-heal vs refuse-to-write) for *this* boundary — framed against, not duplicating, [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). |
+| Impossibility acknowledgment | The CAP/FLP boundary for async partitions, and amoebius's chosen branch (act-and-heal vs refuse-to-write) for *this* boundary — framed against, not duplicating, [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Records the planned/forced frame: this async model covers only the **Failover** branch; the **Planned** synchronous switchover is out of async scope and owned by [gateway_migration_doctrine.md](./gateway_migration_doctrine.md). |
 | Verification status | The honest ledger of what the checker actually reached, and where `io-sim`/runtime tests carry the rest. |
 
 Two adaptation notes carried over from the analogue, so the future author does not re-derive
@@ -169,6 +188,7 @@ state the layer it actually reaches — proof, test evidence, or assumption — 
 ## Cross-references
 
 - [Chaos & Failover Doctrine](./chaos_failover_doctrine.md) — the Extract→Model→Inject methodology, the proven/tested/assumed ledger, and the invariant-confluence "Second Axis" (owns the *method*; this doc owns the *model artifact*).
+- [Gateway Migration Doctrine](./gateway_migration_doctrine.md) — the `GatewayMigration = <Planned | Failover>` taxonomy and both migration protocols; this model targets only the **Failover** branch (the **Planned** branch is a synchronous switchover with no async divergence to prove).
 - [Development Plan → Phase 9](../../DEVELOPMENT_PLAN/README.md) — phase order, status, and the failover acceptance gate.
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — geo-replication, gateway failover, and teardown-with-cleanup vs chaos-failover mechanics.
 - [Platform Services Doctrine](./platform_services_doctrine.md) — which delegated subsystem (MinIO/Pulsar/Patroni) owns which intra-cluster consensus guarantee.

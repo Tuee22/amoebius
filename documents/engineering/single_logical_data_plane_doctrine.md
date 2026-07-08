@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the distinction between *one data plane reached from many compute
@@ -63,8 +63,8 @@ opening invariant, unchanged.
 | Its store | **None** — it is a *client* of the home cluster's one Pulsar/MinIO | Its own Pulsar/MinIO/Postgres |
 | Cross-boundary cost | **None** — one consistency boundary; no geo-replication | Async geo-replication; the Second-Axis obligation |
 | Data-loss budget (R9) | **Never applies** — nothing un-replicated to lose | Applies to the crash-failover suffix |
-| Canonical use | Batch/ML burst compute on cheap spot capacity | Serving-tier overflow with gateway migration |
-| Owned by | **This doc** + [network_fabric_doctrine.md](./network_fabric_doctrine.md) | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), Phase 9 |
+| Canonical use | Batch/ML burst compute on cheap spot capacity | Serving-tier overflow with [gateway migration](./gateway_migration_doctrine.md) |
+| Owned by | **This doc** + [network_fabric_doctrine.md](./network_fabric_doctrine.md) | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), [gateway_migration_doctrine.md](./gateway_migration_doctrine.md), Phase 9 |
 
 The load-bearing decision: **the worker pool is NOT a fourth arm of the closed `ComputeEngine` union**
 ([cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)). Making it an engine arm would give it a
@@ -256,7 +256,7 @@ fabric to the home store.
 
 | Owned here (SSoT) | Owned elsewhere (referenced) |
 |-------------------|------------------------------|
-| The attach-vs-second-cluster category distinction | The second-cluster/geo-replication/failover world → [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
+| The attach-vs-second-cluster category distinction | The second-cluster/geo-replication/failover world → [chaos_failover_doctrine.md](./chaos_failover_doctrine.md); the gateway-migration taxonomy + protocols → [gateway_migration_doctrine.md](./gateway_migration_doctrine.md) |
 | The `DataPlane c t` / `FabricMember c` binding making unreachable stores uninhabitable | The capability/phantom-tag and ownership-index techniques → [illegal_state_catalog.md](./illegal_state_catalog.md) |
 | That a remote worker pool is a *client* of the home cluster's one store | The WireGuard fabric wire it rides on → [network_fabric_doctrine.md](./network_fabric_doctrine.md); the peer model it generalizes → [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md) |
 | The storage-arm-free `Deprovision` shape (attach teardown) | Retained-storage mechanics, the elevated-harness sole-deleter rule → [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md), [testing_doctrine.md](./testing_doctrine.md) |
@@ -289,6 +289,7 @@ host-compute-daemon peer model it generalizes (Phase 7), and cloud spot provisio
 - [Network Fabric Doctrine](./network_fabric_doctrine.md) — the WireGuard wire a remote pool joins
 - [Host ↔ Cluster Communication](./host_cluster_comms_doctrine.md) — the Pulsar/MinIO peer model this generalizes
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md) — the second-cluster / geo-replication world this is *not*
+- [Gateway Migration Doctrine](./gateway_migration_doctrine.md) — the gateway migration by which a genuine second cluster takes over wild ingress (planned handover and forced failover)
 - [Illegal State Catalog](./illegal_state_catalog.md) — the capability/phantom-tag + ownership-index techniques
 - [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§3 reachability is a type, not a runtime probe](#3-the-binding-reachability-is-a-type-not-a-runtime-probe) is the static-reach instance of readiness-as-an-edge ([§7](./readiness_ordering_doctrine.md#7-one-discipline-many-instances))
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the `ScalingPolicy` / capacity fold the pool binds
