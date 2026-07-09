@@ -426,13 +426,17 @@ The control-plane taint and its tolerations are **derived** from the server set,
 union — the even/zero arm has no constructor). **Layer:** type-foreclosed uninhabitable; runtime-checked residue — that etcd
 actually forms and holds quorum, owned by [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md).
 
-### 3.25 An ML asset fetched or built at pod startup (or an unready / unlanded model)
+### 3.25 An ML asset named by arbitrary URL (or an unready / unlanded model)
 
-Three ML-asset illegal states ride together. **(a) An engine fetched or built at pod startup.** Sibling ML
+Three ML-asset illegal states ride together. **(a) An engine named by arbitrary URL.** Sibling ML
 runtimes curl-tar native payloads and install venvs at image *build* and then re-select per engine — amoebius
-makes the compute engine an `EngineRuntime`, a **closed union of substrate-tagged, baked engine identities with
-no `Url`/`Download`/`Fetch` arm**: the engine is *selected* by the detected substrate, never fetched, and since
-the numeric libraries LINK in, the engine exists the moment the pod does. A startup download has no syntax.
+makes the compute engine an `EngineRuntime`, a **closed union of substrate-tagged engine identities with no
+arbitrary-`Url`/`Download` arm**: the engine is *named* by a typed identity from a closed catalog, selected by
+the detected substrate, and the shared **jit-build resolver** materializes that named identity on first miss
+into a **`CacheBudget`-bounded content-addressed cache**
+([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
+Naming an engine by an arbitrary URL has no syntax; the first-miss resolve is a bounded-cache act, not a startup
+URL fetch, and "more cached than fits" is decode-rejected by the capacity fold over `CacheBudget`.
 **(b) A `ModelArtifact` without a completed `.ready` *and a provenance witness*.** A `ModelArtifact` yields an
 `ArtifactRef` **only** once its `.ready` sentinel exists (staging writes `.ready` LAST) **and** it carries a
 **provenance witness** — one of a **committed producing checkpoint** (a committed `latest`/`best` pointer that
@@ -450,12 +454,12 @@ unmatched model has no landing engine — a **decode-foreclosed total relation**
 collection shape as the engine↔substrate fold ([§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)). **Owner:**
 [`content_addressing_doctrine.md`](./content_addressing_doctrine.md) (the `EngineRuntime`/`ModelArtifact` asset
 tiers + the content-addressed store) + [`service_capability_doctrine.md`](./service_capability_doctrine.md) (the
-engine as a substrate-selected capability). **Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `EngineRuntime` union — no `Url` arm) +
+engine as a substrate-selected capability). **Technique:** [§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `EngineRuntime` union — no arbitrary-`Url` arm) +
 [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (an `ArtifactRef` handle exists only once its `.ready` edge does) + [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) (the model↔engine relation).
-**Layer:** type-foreclosed for the no-fetch engine and the `.ready`-**and-provenance-witness**-gated `ArtifactRef` (the
+**Layer:** type-foreclosed for the no-arbitrary-URL engine identity and the `.ready`-**and-provenance-witness**-gated `ArtifactRef` (the
 committed-checkpoint arm and the *presence* of a provenance witness are genuine no-inhabitant constructors); decode-foreclosed
-for the model↔engine relation (a checked total fold, not an absence of inhabitants); runtime-checked residue — that the
-staged bytes actually load on the substrate, and that an imported model's pin/tag is **truthful** (owned by
+for the model↔engine relation and the `Σ(resident) ≤ CacheBudget` cache fold (checked total folds, not an absence of inhabitants); runtime-checked residue — that the
+first-miss resolve succeeds, the staged bytes actually load on the substrate, and that an imported model's pin/tag is **truthful** (owned by
 [`content_addressing_doctrine.md`](./content_addressing_doctrine.md) §6.1).
 
 ### 3.26 An unverified environment promotion (promote → prod without the required evidence)
@@ -466,7 +470,7 @@ ETag-CAS pointer to a `Release` **requires** that the `Release`'s test-topology 
 ([`testing_doctrine.md`](./testing_doctrine.md) proven/tested/assumed) meet that environment's required evidence
 strength (Prod requires the chaos layer). The advance constructor demands an **evidence witness**, so
 "promote-unverified → prod" has no inhabitant — the same constructor-gating shape as the `.ready`-gated
-`ArtifactRef` ([§3.25](#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model)), applied to release evidence rather than model bytes. **Owner:**
+`ArtifactRef` ([§3.25](#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)), applied to release evidence rather than model bytes. **Owner:**
 [`release_lifecycle_doctrine.md` §4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable) (the `PromotionGate` precondition + the
 immutable release ledger). **Technique:** [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a promotion handle exists only once its evidence edge does).
 **Layer:** type-foreclosed uninhabitable; runtime-checked residue — that the tests actually ran and that prod actually converged
@@ -594,7 +598,7 @@ enaction (Phase 9).
 means nothing serveable and no resume point, and unbounded topic retention means BookKeeper fills. This round
 adds a **`TrainBudget = Bounded { steps | epochs } | Continuous { checkpointCadence }`** union: `Continuous`
 **requires** a `checkpointCadence` (each cadence commits a checkpoint — a committed pointer, hence serveable per
-[§3.25](#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model)(b): serve-from-any-committed-checkpoint
+[§3.25](#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)(b): serve-from-any-committed-checkpoint
 of a still-running job) and its `TrainData.Feed` **requires** a bounded-retention `StorageBudget`. "Train forever
 with no checkpoints and no retention" has **no constructor** — a **type-foreclosed union shape**, exactly the
 `Growable`/`ScalingPolicy` no-unbounded-arm idiom ([§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy)).
@@ -980,7 +984,7 @@ Dhall cannot express as a type and degrades to a decode-foreclosed fold. This co
 **binary relation over a collection**, and reads the single node inventory owned by
 [`substrate_doctrine.md`](./substrate_doctrine.md). The types are owned by
 [`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md); this doc owns the *relation technique*. The
-same **binary-relation-over-a-collection** shape covers the **model↔engine** relation ([§3.25](#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model)): a `ModelArtifact`
+same **binary-relation-over-a-collection** shape covers the **model↔engine** relation ([§3.25](#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)): a `ModelArtifact`
 is servable only by an `EngineRuntime` present on the deployment's substrate, so an unmatched model has no
 landing engine — a decode-foreclosed total fold exactly like the engine↔substrate check, owned by
 [`content_addressing_doctrine.md`](./content_addressing_doctrine.md) and
@@ -1002,7 +1006,7 @@ control plane [§3.37](#337-a-full-stretched-node-on-a-managed-eks-control-plane
 are the closed-union no-arm idiom, and a `Site`-indexed `Rke2Servers (s)` forcing a co-located etcd quorum
 ([§3.39](#339-a-split-site-etcd-quorum)). Folding such a cluster's capacity as *two* `Topology`s is the
 [§3.31](#331-a-capacity-or-workload-fold-spanning-two-clusters) cross-cluster fold that has no constructor.
-Forecloses [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.16](#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused), [§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain), and the model↔engine relation of [§3.25](#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model).
+Forecloses [§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.16](#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused), [§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain), and the model↔engine relation of [§3.25](#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model).
 
 ---
 
@@ -1148,8 +1152,8 @@ testing (Phase 11) phases. This doc never maintains a competing status ledger.
 - [Substrate Doctrine](./substrate_doctrine.md) — substrate/arch capabilities for placement, node inventory + taints
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the [§4.6](#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) capacity fold ([§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)–[§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy))
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) compute-engine/topology relation ([§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.16](#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused))
-- [Content Addressing Doctrine](./content_addressing_doctrine.md) — pointers→manifests→blobs totality, `EngineRuntime` / `ModelArtifact` tiers ([§3.25](#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model))
-- [Service Capability Doctrine](./service_capability_doctrine.md) — the engine as a substrate-selected capability ([§3.25](#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model))
+- [Content Addressing Doctrine](./content_addressing_doctrine.md) — pointers→manifests→blobs totality, `EngineRuntime` / `ModelArtifact` tiers ([§3.25](#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model))
+- [Service Capability Doctrine](./service_capability_doctrine.md) — the engine as a substrate-selected capability ([§3.25](#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model))
 - [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — the [§3.26](#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) `PromotionGate` (promote→prod unrepresentable)
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — route53 / zerossl name→address binding
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md) — the host-local NodePort carve-out

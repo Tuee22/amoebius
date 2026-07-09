@@ -62,7 +62,7 @@ replica is the chart that runs at five.
 
 Concretely (DEVELOPMENT_PLAN cross-cutting invariants):
 
-- **Replica count is a deployment-rules knob, not a chart fork.** `bootstrap.sh` requires
+- **Replica count is a deployment-rules knob, not a chart fork.** The midwife's `bootstrap` hand-off requires
   `--distro={kind,rke2}`; `kind` accepts `--replicas=n` (default `1`). The HA charts are identical across
   values of `n`. The application-logic-vs-deployment-rules split that makes replicas a separate orthogonal
   surface is owned by [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md).

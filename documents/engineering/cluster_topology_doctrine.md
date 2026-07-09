@@ -87,7 +87,7 @@ Rke2Servers            -- CLOSED odd-quorum union: an arm only for a legal etcd 
   the stretched treatment is [§4.1](#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation).
 
 The untyped CLI surface — `amoebius bootstrap --distro={kind,rke2} [--replicas=n]`
-([substrate_doctrine.md §6](./substrate_doctrine.md#6-the-bootstrapsh-contract-ensure-a-toolchain-build-the-binary-hand-off))
+([substrate_doctrine.md §6](./substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off))
 — is a *projection* of this typed `ComputeEngine`, not a second source of truth.
 
 ---

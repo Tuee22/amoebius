@@ -8,7 +8,7 @@
 > **Purpose**: Define the host substrates amoebius runs on (apple / linux-cpu / linux-cuda / windows),
 > the virtualized substrates that synthesize a Linux host (Lima / WSL2), the host worker nodes that
 > reach substrate-specific hardware as host subprocesses, the no-environment-variable / no-`PATH` lazy
-> tool-ensure contract, and the substrate-specific `bootstrap.sh` that hands off to the binary. The Apple-Metal
+> tool-ensure contract, and the substrate-specific midwife CLI that builds and hands off to the binary. The Apple-Metal
 > host worker's headless, on-host, **no-VM** build/run shape (fixed Metal bridge + runtime MSL compilation) is
 > owned by [apple_metal_headless_builds.md](./apple_metal_headless_builds.md).
 
@@ -338,27 +338,31 @@ flowchart TD
 
 ---
 
-## 6. The `bootstrap.sh` contract: ensure a toolchain, build the binary, hand off
+## 6. The midwife contract: a Python CLI ensures a toolchain, builds the binary, hands off
 
-`bootstrap.sh` is the **only shell script amoebius owns**, and it does as little as possible. Its entire
-job is to get a built amoebius binary onto the host and then get out of the way — because the no-`PATH` /
-no-env, lazy-tool-ensure discipline ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)) cannot start until there is a Haskell binary to enforce it.
-Everything after the binary exists is the binary's responsibility, in Haskell, under this doctrine: the
-script does not install brew packages, it ensures brew is installed, builds the project Haskell binary,
-then calls `bootstrap`, which takes over from there.
+The **midwife** is the one pre-binary tool amoebius owns — a **Python CLI, not a shell script** — and it
+does as little as possible: get a built amoebius Haskell binary onto the host and then get out of the way,
+because the no-`PATH` / no-env, lazy-tool-ensure discipline ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract))
+cannot start until there is a Haskell binary to enforce it. It is Python for two reasons: it must run on a
+**bare host before any Haskell toolchain exists**, and it is **unified with the operator CLI** — one Python
+CLI (`pb`) with two modes, **midwife** (bare host → build → `exec` the Haskell binary, this section) and
+**admin-REST client** (the operator CLI that drives the singleton after handoff,
+[bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api)).
+amoebius owns **no shell script**; the earlier `bootstrap.sh` is retired
+([../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md](../../DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md)).
 
-The contract, on the canonical Apple lane:
+The contract, on the canonical Apple lane (`pb bootstrap` mode):
 
 1. **Ensure the package manager.** On Apple that is **Homebrew**. Homebrew is the toolchain *root* — it
    cannot be installed *through* a resolved host tool because there is no prior package manager to install
-   it (`HostBootstrap.Ensure.Homebrew` is, by design, a verified no-op when `brew` is present and a
-   fail-fast with the install instruction otherwise). So the script installs `brew` **pre-binary**.
+   it (the midwife's Homebrew-ensure is, by design, a verified no-op when `brew` is present and a fail-fast
+   with the install instruction otherwise). So the midwife ensures `brew` **pre-binary**.
 2. **Ensure `ghcup` via the package manager** (`brew install ghcup`).
 3. **Install the pinned toolchain: GHC 9.12.4 and Cabal 3.16.1.0** via `ghcup`, and ensure they are
    available on the host. (GHC 9.14.1 is a deferred later-phase bump; the committed pin is 9.12.4 /
    3.16.1.0; see [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).)
 4. **Build the project Haskell binary** (`cabal build`).
-5. **Hand off to the binary.** The script's final act is to invoke the freshly built binary's `bootstrap`
+5. **Hand off to the binary.** The midwife's final act is to `exec` the freshly built binary's `bootstrap`
    subcommand with its mandatory distro flag — `amoebius bootstrap --distro={kind,rke2} [--replicas=n]`
    (`replicas` defaults to `1` on `kind`). From here the binary takes over: it installs further build tools
    and dependencies through the package manager **as needed and by full path** ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)) — including, on Apple,
@@ -366,17 +370,18 @@ The contract, on the canonical Apple lane:
    [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)), never in a VM — and drives cluster
    bring-up.
 
-`bootstrap.sh` is **substrate-specific** because step 1 differs: brew on apple, the system package manager
+The midwife is **substrate-specific** because step 1 differs: brew on apple, the system package manager
 (e.g. `apt`) on linux, `winget` on windows. Steps 2–5 are identical across substrates — the same `ghcup`
 toolchain pin, the same build, the same `bootstrap` hand-off — so the per-substrate surface area is exactly
-the package-manager-root bootstrap and nothing else.
+the package-manager-root bootstrap and nothing else. The midwife is a **thin driver**: it installs no
+packages beyond the toolchain root, holds no cluster logic, and never runs after the `exec`.
 
 ```mermaid
 flowchart TD
-  sh[Substrate bootstrap.sh] -->|ensure package-manager root| pm[brew / apt / winget]
+  pb[pb midwife CLI, Python] -->|ensure package-manager root| pm[brew / apt / winget]
   pm -->|install| ghcup[ghcup]
   ghcup -->|install GHC 9.12.4 and Cabal 3.16.1.0| tc[Pinned toolchain on host]
-  tc -->|cabal build| bin[amoebius binary on the host]
+  tc -->|cabal build| bin[amoebius Haskell binary on the host]
   bin -->|amoebius bootstrap --distro=kind or rke2| handoff[Binary owns the rest: lazy tool-ensure, VM providers, cluster bring-up]
 ```
 
@@ -385,7 +390,7 @@ cluster bring-up, the `--distro` / `--replicas` orchestration — is owned by
 [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md), not here. This section owns only the
 **pre-binary** contract and the hand-off point.
 
-> **Provider clusters have no `bootstrap.sh` and no host binary.** A fully managed cluster (e.g. EKS) is
+> **Provider clusters have no midwife and no host binary.** A fully managed cluster (e.g. EKS) is
 > provisioned over an API from within an existing amoebius cluster; there is no
 > host access, so there is no host worker node and no on-host bootstrap. That path is owned by
 > [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). The highest-level parent is therefore generally a

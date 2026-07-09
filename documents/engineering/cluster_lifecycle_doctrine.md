@@ -17,7 +17,7 @@ There are exactly **two** kinds of cluster amoebius drives, and they share **one
 | | **Self-managed** (`kind` / `rke2`) | **Provider-managed** (EKS — prodbox's reality) |
 |---|---|---|
 | Host binary present? | **Yes** — the binary lives on the host and owns bring-up | **No** — there is no direct host access |
-| How it comes up | `bootstrap.sh` on the host → `bootstrap --distro={kind,rke2}` ([§2](#2-bring-up-and-bootstrap)) | Provisioned **via cloud keys over the API, from inside an existing amoebius cluster** (Pulumi) |
+| How it comes up | the midwife CLI on the host → `bootstrap --distro={kind,rke2}` ([§2](#2-bring-up-and-bootstrap)) | Provisioned **via cloud keys over the API, from inside an existing amoebius cluster** (Pulumi) |
 | Host-level worker daemons | Supported (e.g. Apple-Metal inference) | **Not** supported — no host, no Apple substrate; only the in-cluster singleton daemon |
 | Typical role | Any tier, including the **root** (an admin's laptop kind, or a single-node rke2) | A **child** spawned by a parent; never the root |
 
@@ -25,7 +25,7 @@ The shared shape is what lets the rest of this document treat "a cluster" unifor
 EKS and a kind cluster on a laptop converge to the **same fungible shape** — the same nine standard
 services, wired the same way — owned by
 [platform_services_doctrine.md §1](./platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster). The *substrate-specific* mechanics —
-substrate detection, `bootstrap.sh`, the LoadBalancer choice, host worker nodes, and the
+substrate detection, the midwife CLI, the LoadBalancer choice, host worker nodes, and the
 no-environment-variables / no-`PATH` lazy-tool-ensure contract — are owned by
 [substrate_doctrine.md](./substrate_doctrine.md). The Pulumi spawn mechanism and the cloud-credential
 model are owned by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). The **declared compute-engine axis** —
@@ -36,7 +36,7 @@ owns the **lifecycle verbs** that ride on top.
 **Self-managed clusters amoebius *builds*; provider-managed clusters amoebius *surfaces*.** The split in the
 table above is precisely a *build-vs-surface* axis, and it is the axis the stretched-cluster question — can a
 full member node hang off a provider-managed control plane? — rests on. A self-managed `kind`/`rke2` cluster
-is one amoebius **builds** end to end: the host binary owns bring-up from `bootstrap.sh` through `bootstrap`
+is one amoebius **builds** end to end: the host binary owns bring-up from the midwife CLI through `bootstrap`
 ([§2](#2-bring-up-and-bootstrap)) and every node beneath it. A provider-managed cluster is one amoebius
 **surfaces** over the cloud provider's API — provisioned via Pulumi from inside an existing cluster, never
 touching a host amoebius does not have; amoebius wires up only what the provider itself exposes and **builds
@@ -58,7 +58,7 @@ own physical host (the host-worker row above), unaffected by the control plane's
 a host; every later cluster is *spawned* by a parent ([§3](#3-amoebic-spawning--the-recursive-forest)). Both end in the same place — a cluster running
 the standard service set, initialized, and reconciling toward its `.dhall`.
 
-- **`bootstrap.sh` is a thin igniter, not the orchestrator.** Its only job is to ensure the package
+- **The midwife CLI is a thin igniter, not the orchestrator.** Its only job is to ensure the package
   manager, ensure `ghcup`, install the pinned toolchain (GHC **9.12.4**, Cabal 3.16.1.0 — the
   [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) toolchain pin; 9.14.1 is a deferred, later-phase bump per the plan's Toolchain section),
   build the binary, and call `bootstrap`. From that call onward the **binary** owns everything. The script
@@ -106,7 +106,7 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
 > owned by [bootstrap_sequence_doctrine.md §3](./bootstrap_sequence_doctrine.md#3-the-ordered-bootstrap-sequence):
 > the initial in-force manifest is supplied **separately**, via the admin control plane's `dhall update`
 > **after** the singleton is up (never embedded in the igniter config), and the transient root config is the
-> binary-sibling `.dhall` `bootstrap.sh` establishes. Every deeper **child-frame** config is delivered by
+> binary-sibling `.dhall` the midwife establishes. Every deeper **child-frame** config is delivered by
 > in-place `stdin` streaming rather than a persistent file, per
 > [dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness). (Whether the
 > root may ever be **multi-node** remains the one open sub-question, [§2](#2-bring-up-and-bootstrap) above.)

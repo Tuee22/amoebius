@@ -43,7 +43,7 @@ future ML family is **Phase-N design intent**, entering later through the same l
 [`dsl_doctrine.md`](./dsl_doctrine.md)); it is not a v1 member, and nothing in this doctrine is written for one.
 
 **What this doc does not own.** This doctrine owns the shared *mechanism*. It does **not** re-derive the
-*totality typing* that makes names un-forgeable — that is technique [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) in
+*totality typing* that makes names un-forgeable — that is technique [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) in
 [`illegal_state_catalog.md`](./illegal_state_catalog.md). It does **not** own the per-substrate floating-point
 contract or the JIT cache key — those are owned by the sibling `jitML` project's
 `jitML/documents/engineering/determinism_contract.md`, which this doc references rather than restates. And it
@@ -131,13 +131,13 @@ checkpoint-format deferral this doctrine records for checkpoints ([§7](#7-what-
 manifest is content-addressed, any datum recorded *in* it travels with the bytes under [§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely) confluence. This round
 introduces two such fields, so the serve gate and the serve-landing relation are satisfiable in a cluster that
 merely *received* the artifact: (i) the **provenance witness** — the committed-checkpoint pointer or the
-pinned import that makes a `ModelArtifact` serveable ([§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)); making it a manifest field (not a side table) is what lets
+pinned import that makes a `ModelArtifact` serveable ([§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)); making it a manifest field (not a side table) is what lets
 the serve gate cross a cluster boundary alongside the weight bytes ([§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)/[§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)) — the doctrine adds this as the
 J∘H composition fix. (ii) the **engine-family tag** — the `EngineRuntime` family the weights target
-([§3.1](#31-producing-substrate-vs-serving-substrate-a-distinct-serving-run-fingerprint)/[§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)), which the cross-substrate serve-landing predicate keys on. Confirm alongside these that the
+([§3.1](#31-producing-substrate-vs-serving-substrate-a-distinct-serving-run-fingerprint)/[§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)), which the cross-substrate serve-landing predicate keys on. Confirm alongside these that the
 manifest's existing `parent` field is a **namespace-independent manifest SHA** (`sha256(canonical-cbor)`, above)
 — it names a checkpoint by content, not by an `experimentHash`-scoped path, so a `parent` / adopted checkpoint
-resolves **cross-bucket and cross-substrate-namespace** ([§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd), [§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)).
+resolves **cross-bucket and cross-substrate-namespace** ([§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss), [§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)).
 
 ```mermaid
 flowchart TD
@@ -178,7 +178,7 @@ differ), and **a pointer is the only mutable object, advanced only by ETag-CAS, 
 | class | formula / source | identifies | status |
 |-------|------------------|-----------|--------|
 | `experimentHash` | `sha256(resolved-dhall ‖ substrate-fingerprint)` | an ML run / artifact ([§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)) | existing (sibling `jitML`/`infernix`) |
-| `kernelKey` | `sha256(kernel-source ‖ substrate-fingerprint)` | a Tier-3 JIT kernel ([§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)) | Phase-N design intent (Q8) |
+| `kernelKey` | `sha256(kernel-source ‖ substrate-fingerprint)` | a Tier-3 JIT kernel ([§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)) | Phase-N design intent (Q8) |
 | `releaseHash` | `sha256(resolved-deployment-dhall ‖ image-digests ‖ substrate-fingerprint)` | a deployment generation | Phase-N design intent (Q13) |
 | OCI image digest | registry-owned (not amoebius-computed) | a container image | existing ([`image_build_doctrine.md` §5](./image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)) |
 
@@ -187,7 +187,7 @@ differ), and **a pointer is the only mutable object, advanced only by ETag-CAS, 
 | kind | points at | owner |
 |------|-----------|-------|
 | `trial` (`latest` / `best/<metric>`) | a manifest SHA | this doc, [§2](#2-the-three-tier-store-blobs--manifests--pointers) |
-| `model` | a provenance-witnessed `ModelArtifact` manifest; `.ready` **and** a committed provenance witness are the commit | [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) (Q8) |
+| `model` | a provenance-witnessed `ModelArtifact` manifest; `.ready` **and** a committed provenance witness are the commit | [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) (Q8) |
 | `environment` (`dev` / `staging` / `prod`) | a `Release` (keyed by `releaseHash`) | [`release_lifecycle_doctrine.md` §3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer) |
 
 Ownership and honesty for the registry:
@@ -196,7 +196,7 @@ Ownership and honesty for the registry:
   sibling implementation. Everything else here is amoebius **design intent**, not a built result.
 - `kernelKey` folds *kernel source* and the substrate fingerprint the same way `experimentHash` folds the
   resolved `.dhall`; the finer JIT cache-key composition is owned by the sibling
-  `jitML/documents/engineering/determinism_contract.md`. `kernelKey` is consumed by Tier 3 in [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd).
+  `jitML/documents/engineering/determinism_contract.md`. `kernelKey` is consumed by Tier 3 in [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss).
 - `releaseHash` and the `environment` pointer are **defined here** (this table is their canonical registry), but
   their *lifecycle* — the immutable release ledger, the promotion CAS, the `PromotionGate` — is owned by
   [`release_lifecycle_doctrine.md` §2/§3](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash). "Promote to prod" is an
@@ -278,7 +278,7 @@ program on a different accelerator produces different bytes," so the bytes move 
 or even loadable on a different lane. Cross-substrate serving is made representable by **new work this round
 adds**, never by a check that already existed:
 
-1. An **engine-`family` tag** on `ModelArtifact` / manifest ([§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) / [§2.1](#21-three-object-classes-two-write-protocols)) — the model side carries no family
+1. An **engine-`family` tag** on `ModelArtifact` / manifest ([§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) / [§2.1](#21-three-object-classes-two-write-protocols)) — the model side carries no family
    field today.
 2. A **redefined landing predicate** owned by
    [`service_capability_doctrine.md` §4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-baked-and-substrate-selected-never-fetched):
@@ -286,7 +286,7 @@ adds**, never by a check that already existed:
    lane. Family×lane availability is a **partial** relation (e.g. vLLM is not baked on Apple-Metal), so an
    unavailable-family-on-lane is an honest **decode-foreclosed** rejection.
 
-**Layer.** Producing-substrate provenance + the [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) witnessed constructor is **type-foreclosed**; the engine-family ↔
+**Layer.** Producing-substrate provenance + the [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) witnessed constructor is **type-foreclosed**; the engine-family ↔
 serving-substrate serve relation is **decode-foreclosed** (a checked rejection of a constructible value, [`illegal_state_catalog.md` §4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection)).
 Two **runtime-checked residues** are named, not foreclosed, and ledgered in [§6.1](#61-proven--tested--assumed-spelled-out): (i) **no cross-substrate bit-equality** back to the training
 substrate ([§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) ceiling, unchanged); (ii) a **weight-layout load residue** — a family-matched but
@@ -360,26 +360,45 @@ from ambient entropy." A stream's seed is reachable only through `deriveSplitMix
 typed `SplitMixSeed` and a `Word64` index — both pinned. An artifact's name is reachable only by hashing real
 bytes (`deriveExperimentHash`, `blobKey`, `manifestContentSha`); there is no constructor that takes a free
 string. So "use whatever entropy the worker had" and "point at a checkpoint that was never written" are not
-states that can be *fixed at runtime* — they are states that cannot be *written down*. This is the totality technique [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)
+states that can be *fixed at runtime* — they are states that cannot be *written down*. This is the totality technique [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
 in [`illegal_state_catalog.md`](./illegal_state_catalog.md), applied to seeds and store keys; this doc owns the
 content-addressing/determinism *use* of it, the catalog owns the typing discipline.
 
-### 4.5 The three-tier ML-asset lifecycle: engine baked, model staged, kernel JIT'd
+### 4.5 The ML-asset lifecycle: one bounded content-addressed cache, resolved on first miss
 
 The three legs above pin the *training/inference math*; this subsection pins the **asset axis** that feeds it —
-the three kinds of heavy thing a model-serving pod needs (a runtime engine, model weights, a compiled kernel),
-each with a *different* lifecycle and a *different* place in the store. The single design rule: **no asset is
-ever fetched or built at pod startup by authoring a URL** — each tier is either baked, eagerly staged before it
-is serveable, or lazily JIT'd behind a content-address, and each is reachable only through a total constructor.
+the three kinds of heavy thing a model-serving pod needs (a runtime engine, model weights, a compiled kernel).
+An earlier design gave each a *different* lifecycle (engine baked into the image, model eagerly staged, kernel
+lazily JIT'd). This round **collapses all three onto one shape**: a **bounded, content-addressed, ephemeral
+cache**, populated on first miss by `resolve = {download | build}`, shared across `infernix` and `jitML` through
+the **`jit-build` capability-extension** ([`service_capability_doctrine.md`](./service_capability_doctrine.md)).
+The DRY win is one resolver and one bounded pool for all three asset kinds instead of three bespoke paths.
+
+The single design rule survives, restated for the collapse: **no asset is ever fetched by authoring a URL.**
+Each asset is **named** by a typed content-addressed identity drawn from a **closed catalog** — there is no
+arbitrary-URL arm and no author-a-download syntax — and the `jit-build` resolver materializes the named identity
+into the bounded cache on first miss. The foreclosure therefore **shifts** from the old "no `Download` arm
+(baked)" to **"no arbitrary-URL arm (a closed named catalog) + a `CacheBudget`-bounded cache"**
+([`illegal_state_catalog.md` §3.25](./illegal_state_catalog.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)).
+
+The cache is a **bounded typed pool.** It carries an explicit **`CacheBudget` (a `Quantity`) ≤ host storage**,
+content-addressed with aggressive pin-aware pruning; "more cached than fits" is **unrepresentable** — the same
+capacity fold that bounds every other budget rejects a `Σ(resident) > CacheBudget` at decode
+([resource_capacity_doctrine.md §3–§4](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)).
+The trade this accepts, relative to baking, is stated plainly: baking gave no-network-at-boot and instant
+availability; the cache pays a **first-miss materialization** (download-or-build) the first time a named asset
+is needed on a host, amortized across every later use.
 
 Two types carry the axis:
 
-- **`EngineRuntime`** — a **closed** union of substrate-tagged, **baked** engine identities (the Apple-Metal
-  bridge, the CUDA runtime, the linux-cpu runtime, plus per-family adapters — llama.cpp / whisper.cpp / ONNX /
-  vLLM / pytorch / diffusers / transformers / Audiveris — enumerated as a closed provider union). It has **no
-  `Url`/`Download`/`Fetch` arm**: the `.dhall` *selects* an engine by substrate, it can never *author* a
-  download. An engine fetched or built at pod startup is therefore **type-foreclosed unrepresentable**
-  ([`illegal_state_catalog.md` §3.25](./illegal_state_catalog.md#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model)).
+- **`EngineRuntime`** — a **closed** union of substrate-tagged engine identities (the Apple-Metal bridge, the
+  CUDA runtime, the linux-cpu runtime, plus per-family adapters — llama.cpp / whisper.cpp / ONNX / vLLM /
+  pytorch / diffusers / transformers / Audiveris — enumerated as a closed catalog). It has **no
+  `Url`/`Download`/`Fetch` arm**: the `.dhall` *names* an engine identity selected by substrate, it can never
+  *author* a download; the `jit-build` resolver downloads-or-builds that named identity into the cache on first
+  miss. An engine **named by arbitrary URL** is therefore **type-foreclosed unrepresentable**; the first-miss
+  resolve is a bounded-cache act, not a startup URL fetch
+  ([`illegal_state_catalog.md` §3.25](./illegal_state_catalog.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)).
 - **`ModelArtifact`** — a by-name / content-address reference into the store of [§2](#2-the-three-tier-store-blobs--manifests--pointers). An `ArtifactRef` is
   obtainable **only** once the `.ready` sentinel exists: a half-staged model has no serveable reference
   (**type-foreclosed**, the existing `.ready`-gate discipline generalized — no constructor without the sentinel).
@@ -418,16 +437,20 @@ representable** ([§3.1](#31-producing-substrate-vs-serving-substrate-a-distinct
 predicate keys on that family being available on the **serving** substrate lane — so a CUDA-produced model may
 serve on Apple-Metal when the family is baked there, subject to the [§3.1](#31-producing-substrate-vs-serving-substrate-a-distinct-serving-run-fingerprint) runtime-checked weight-layout load residue.
 
-The three tiers, three lifecycles:
+The three asset kinds, **one cache shape** (`resolve = {download | build}` on first miss → the
+`CacheBudget`-bounded content-addressed cache):
 
-- **Tier 1 — `EngineRuntime` = BAKED.** The engine ships *inside* the base image via the MinIO/Vault/
-  distribution asset-map, so — because `infernix` and `jitML` LINK as libraries rather than run as fetched
-  sidecars — the engine exists the moment the pod does. The `.dhall` only selects by substrate; it can never
-  author a download. Baked engines are owned by [`image_build_doctrine.md`](./image_build_doctrine.md); this
-  replaces `infernix`'s per-engine Poetry-venv + curl-tar-at-image-build.
+- **Tier 1 — `EngineRuntime` = named + jit-resolved.** The `.dhall` **names** an engine identity selected by
+  substrate; on first miss the `jit-build` resolver downloads a prebuilt engine or builds it from source into
+  the bounded cache, and every later pod on that host reuses the cache-resident copy. Because `infernix` and
+  `jitML` LINK as libraries rather than run as fetched sidecars, the *library* is present the moment the pod is;
+  the *engine payload* the library drives is the cache-resident named identity. The `.dhall` can never author a
+  download — the identity is drawn from a closed catalog. The base image and the resolver's build inputs are
+  owned by [`image_build_doctrine.md`](./image_build_doctrine.md); this **replaces** `infernix`'s per-engine
+  Poetry-venv + curl-tar-at-image-build with the one shared resolve-on-miss path.
 - **Tier 2 — `ModelArtifact` = eager STAGE-THEN-SERVE, and *staging by name IS a provenance-carrying import*.**
-  The parent-minted nested `infernix.dhall` names the model *set*; the elected in-cluster singleton stages each
-  model, and the `.ready` sentinel is written **last** so the `model` pointer ([§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)) commits only a complete
+  The parent-minted nested `infernix.dhall` names the model *set*; the in-cluster singleton stages each
+  model into the shared bounded cache, and the `.ready` sentinel is written **last** so the `model` pointer ([§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)) commits only a complete
   artifact. This round **closes the unwitnessed hole** the bare stage-by-name path left open: **naming a model in
   `infernix.dhall` is an explicit content-addressed import (arm b above)** that carries a **pinned expected
   content-address (or detached signature)**; staging **verifies the pulled bytes against the pin and fails closed
@@ -440,11 +463,12 @@ The three tiers, three lifecycles:
   per-project store.
 - **Tier 3 — Kernel = LAZY content-addressed JIT.** A compiled kernel is materialized on the *first cache miss*
   (the sibling `jitML` `ensureKernelArtifact`: cache HIT returns a handle, MISS compiles then stores), keyed by
-  `kernelKey` ([§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)). It is **not** a startup build — a cold pod serves as soon as its baked engine and staged
-  model are ready, and pays JIT cost only on first use of a given kernel.
+  `kernelKey` ([§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)). It is **not** a startup build — a cold pod serves as soon as its cache-resident engine and staged
+  model are ready, and pays JIT cost only on first use of a given kernel. Tier 3 was **already** this cache
+  shape; the collapse extends it to Tiers 1 and 2.
 
-**Inference determinism still holds.** With the engine baked, the model pinned by content-address, and decoding
-pure, `infernix` inference is deterministic by the same recipe as [§4.1](#41-leg-one--pinned-content-addressed-inputs)–[§4.4](#44-what-the-types-make-these-total-cashes-out-to): greedy decoding, or seeded sampling
+**Inference determinism still holds.** With the engine cache-resident (resolved once, then content-addressed),
+the model pinned by content-address, and decoding pure, `infernix` inference is deterministic by the same recipe as [§4.1](#41-leg-one--pinned-content-addressed-inputs)–[§4.4](#44-what-the-types-make-these-total-cashes-out-to): greedy decoding, or seeded sampling
 with the seed carried *in the request* rather than drawn from ambient entropy. The honest ceiling in [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) applies
 unchanged — same-substrate reproducibility is the contract, cross-substrate bit-equality is not asserted. The
 cross-project artifact + `.ready` readiness contract is owned by `infernix`'s
@@ -452,12 +476,13 @@ cross-project artifact + `.ready` readiness contract is owned by `infernix`'s
 seed-derivation contract those tiers instantiate.
 
 **Sibling evidence, not an amoebius result.** `infernix`'s `Runtime/Worker.hs` already *selects* the engine by
-`adapterType` (never fetches it), its `docker/Dockerfile` curl-tars native payloads and installs venvs at
-**image build**, `Runtime/Daemon.hs` runs `sweepEagerModelCache`, and `model_bootstrap.py` writes `.ready`
-last — while `model_cache.py`'s `minioadmin` fallback is exactly the Vault violation this tier removes.
-`jitML`'s `Engines/Loader.hs` is the lazy per-kernel JIT (HIT→handle, MISS→compile). These are working sibling
-behaviors this doctrine *generalizes*; amoebius has built none of the three-tier asset lifecycle itself. The
-illegal states it closes are catalogued at [`illegal_state_catalog.md` §3.25](./illegal_state_catalog.md#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model).
+`adapterType` (never fetches it by URL); its `docker/Dockerfile` curl-tars native payloads and installs venvs
+at **image build** — the baked anti-pattern this round **replaces** with the one shared resolve-on-miss path —
+while `model_cache.py`'s `minioadmin` fallback is exactly the Vault violation this design removes. **`jitML`'s
+`Engines/Loader.hs` — the lazy per-kernel JIT (cache HIT → handle, MISS → compile-then-store) — is the shape
+this round generalizes to all three asset kinds.** These are working sibling behaviours this doctrine
+*generalizes*; amoebius has built none of the asset lifecycle itself. The illegal states it closes are
+catalogued at [`illegal_state_catalog.md` §3.25](./illegal_state_catalog.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model).
 
 ### 4.6 The training-run topology: fine-tune chains and continuous feeds without an unbounded arm
 
@@ -469,8 +494,8 @@ topic prefixes.** They are carried by three **closed** unions, **owned here** (m
 unrepresentability to this doc + [`illegal_state_catalog.md`](./illegal_state_catalog.md)):
 
 - **`TrainInit = FromScratch Seed | Continue ModelArtifactRef`** — `Continue` takes any **provenance-witnessed**
-  `ModelArtifact` ([§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)): a prior committed checkpoint **or** a pinned import. Fine-tuning / warm-starting
-  compose recursively with the [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) witness. Per the per-app isolation of [§2](#2-the-three-tier-store-blobs--manifests--pointers), a `Continue` chain's `parent`
+  `ModelArtifact` ([§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)): a prior committed checkpoint **or** a pinned import. Fine-tuning / warm-starting
+  compose recursively with the [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) witness. Per the per-app isolation of [§2](#2-the-three-tier-store-blobs--manifests--pointers), a `Continue` chain's `parent`
   edge stays **within one app's namespace** — no cross-app DAG edge.
 - **`TrainData = Dataset ContentAddressedRef | Feed { topic : PulsarTopicRef, from : Cursor }`** — `Feed` consumes
   a topic from a cursor. The consumed prefix `[from, to)` is **materialized at consume time into an immutable
@@ -482,8 +507,8 @@ unrepresentability to this doc + [`illegal_state_catalog.md`](./illegal_state_ca
   **typed single-partition-or-explicit-merge-function witness** — a non-deterministically-ordered feed has **no
   constructor**.
 - **`TrainBudget = Bounded { steps | epochs } | Continuous { checkpointCadence }`** — `Continuous` commits a
-  **checkpoint** every cadence; each is a committed pointer ([§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) arm a) and thus **serveable** — serve-from-any-
-  committed-checkpoint of a still-running job (composes with [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) "committed checkpoint," **not** "finished run").
+  **checkpoint** every cadence; each is a committed pointer ([§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) arm a) and thus **serveable** — serve-from-any-
+  committed-checkpoint of a still-running job (composes with [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) "committed checkpoint," **not** "finished run").
 
 **No bare-unbounded arm (mirrors `Growable`).** `Continuous` **requires** a `checkpointCadence`; `Feed` **requires**
 a bounded-retention `StorageBudget`. "Train forever with no checkpoints and no retention" has **no constructor** —
@@ -513,7 +538,7 @@ replication** ([§5](#5-confluence-content-addressed-data-crosses-cluster-bounda
 **Type coherence to confirm (not asserted).** The DAG `parent` field stores a **namespace-independent manifest
 SHA** (`sha256(canonical-cbor)`, [§2.1](#21-three-object-classes-two-write-protocols)), and `ModelArtifactRef` and a checkpoint-manifest-SHA must **unify as one
 content-address type** before a cross-import / cross-substrate `Continue` resolves — carried as a confirm-item,
-tied to [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)'s cross-bucket adoption.
+tied to [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)'s cross-bucket adoption.
 
 The illegal states this subsection closes — "a Continuous run with no cadence / a Feed with no bounded retention"
 (type-foreclosed shape + runtime-checked tail), "a multi-partition Feed with no defined merge" (type- or decode-foreclosed typed witness), "serving
@@ -561,7 +586,7 @@ store **algebra** only, **not** a built amoebius replication run. The **async ge
 and the First-Axis coordinator fact are owned by [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md)
 (this doc states them as cross-refs, not assertions). One composition obligation makes the policy sound: §H's
 **provenance witness must be a content-addressed manifest field** ([§2.1](#21-three-object-classes-two-write-protocols)) so it crosses under this confluence
-**alongside** the bytes — otherwise cluster B receives the weights but not the witness and the [§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) serve gate
+**alongside** the bytes — otherwise cluster B receives the weights but not the witness and the [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) serve gate
 rejects them.
 
 **Transport.** Cross-cluster movement of bodies and events rides the native-protocol Pulsar client — the TCP
@@ -686,7 +711,7 @@ design intent.
 - [Platform Services Doctrine](./platform_services_doctrine.md)
 - [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — `releaseHash` + the `environment` promotion pointer ([§2](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash)/[§3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer)), registered in the [§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) master table
 - [Service Capability Doctrine](./service_capability_doctrine.md) — the substrate `InferenceEngine` capability a `ModelArtifact` must match ([§4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding)), the engine↔model decode-foreclosed relation
-- [Image Build Doctrine](./image_build_doctrine.md) — baked `EngineRuntime`s ([§4.5](#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) Tier 1) + the OCI image digest ([§5](./image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest))
+- [Image Build Doctrine](./image_build_doctrine.md) — jit-resolved `EngineRuntime`s ([§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) Tier 1) + the base image's resolver/toolchain by OCI image digest ([§5](./image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest))
 - [DSL Doctrine](./dsl_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)

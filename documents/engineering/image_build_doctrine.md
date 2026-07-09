@@ -248,31 +248,34 @@ fall into two classes, and the third-party services are **baked**, not mirrored.
   (GHC 9.12.4), role-selected at the pod level — CLI, control-plane singleton, worker — adapting prodbox's
   union-image pattern (`local_registry_pipeline.md` [§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)). infernix and jitML are linked in as extension
   libraries, not separate images.
-- **The infernix/jitML engine runtimes are baked, not fetched.** The ML engine layer obeys the same
-  bake-not-mirror discipline as the platform services. Every infernix/jitML *engine runtime* — the adapter
-  processes, the native inference payloads (`llama.cpp`, `whisper.cpp`, the ONNX runtime, Audiveris), and
-  the JIT toolchain (`nvcc`, `g++`, the Apple-Metal bridge) — is installed into the multi-arch base image
-  at build time by the **same MinIO/Vault/`distribution` asset-map + version resolver** this section already
-  uses for the service binaries (the hostbootstrap seam below). Because infernix and jitML link as extension
-  libraries (bullet above), the engine exists the moment the pod does; **none is fetched at pod startup** —
-  not `curl`-tar'd, not `pip`/venv-installed. This explicitly **replaces infernix's per-engine Poetry-venv +
-  `curl`-tar-at-build** shape. The *type-level* guarantee that an engine can never be fetched — `EngineRuntime`
-  is a closed, substrate-selected union with **no `Url`/`Download`/`Fetch` arm (type-foreclosed)** — and the full
-  three-tier engine/model/kernel asset lifecycle are owned by
-  [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd) and
+- **The infernix/jitML engine runtimes are jit-resolved, not baked.** What the base image *does* bake for the
+  ML layer is the **jit-build resolver and its build toolchain** — the source-build inputs (`nvcc`, `g++`, the
+  Apple-Metal bridge, the pinned compilers) the resolver needs to build an engine from source on a cache miss.
+  The engine *payloads* themselves (`llama.cpp`, `whisper.cpp`, the ONNX runtime, Audiveris, the adapters) are
+  **named catalog identities** the shared `jit-build` resolver **downloads-or-builds on first miss into the
+  `CacheBudget`-bounded content-addressed cache** — none is baked into the image, and none is authored by URL.
+  Because infernix and jitML link as extension libraries (bullet above), the *library* is present the moment
+  the pod is; the *engine payload* it drives is cache-resident after the first resolve. This explicitly
+  **replaces infernix's per-engine Poetry-venv + `curl`-tar-at-build** shape with the one shared
+  resolve-on-miss path. The *type-level* guarantee — `EngineRuntime` is a closed, substrate-selected,
+  named-identity union with **no arbitrary-`Url`/`Download` arm (type-foreclosed)**, resolved into a bounded
+  cache — and the full one-cache-shape asset lifecycle are owned by
+  [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) and
   [service_capability_doctrine.md §4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding); this doc owns only the build-side
-  fact that the runtimes land in the base image. *Sibling evidence, not an amoebius result:* infernix's
-  `docker/Dockerfile` `curl`-tars the native payloads and installs per-engine venvs at IMAGE BUILD — amoebius
-  keeps the bake-at-build move but drops the per-engine venv and sources every asset from the asset-map. Read
-  as design intent for the ML phase, not a tested amoebius result.
-- **A baked engine runtime is OCI-digest bytes, not workflow-store bytes.** Because the engine runtimes are
-  part of the base image, each is identified by the **OCI image digest** (registry-owned, [§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)) — never by the
-  `experimentHash` of an ML run or the `releaseHash` of a deployment generation. The models an engine serves
-  (Tier 2 `ModelArtifact`) and the kernels it JITs (Tier 3, `kernelKey`) are the *content-addressed* tiers
-  that live in the `experimentHash`/`kernelKey` workflow store — distinct namespaces owned by
-  [content_addressing_doctrine.md](./content_addressing_doctrine.md). The [§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest) separation of OCI image digests
-  from the `experimentHash`-keyed workflow store extends unchanged to the ML engine layer: baked engine =
-  image digest; staged model / JIT kernel = workflow-store hash.
+  fact that the **resolver and its toolchain** land in the base image. *Sibling evidence, not an amoebius
+  result:* infernix's `docker/Dockerfile` `curl`-tars the native payloads and installs per-engine venvs at
+  IMAGE BUILD — amoebius drops the bake-the-payload move for the one resolve-on-miss path. Read as design intent
+  for the ML phase, not a tested amoebius result.
+- **A resolved engine is a content-addressed cache asset, not OCI-digest bytes.** With the engine jit-resolved,
+  all three ML-asset kinds — engine, model, kernel — live in the **content-addressed cache / workflow store**,
+  keyed by content-address (`CacheBudget`-bounded for the resident cache), never by the `experimentHash` of an
+  ML run or the `releaseHash` of a deployment generation. What the base image contributes by **OCI image
+  digest** ([§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)) is the platform-service binaries and the **jit-build resolver + toolchain**; the ML
+  engine payloads, the models (Tier 2 `ModelArtifact`), and the JIT kernels (Tier 3, `kernelKey`) are the
+  *content-addressed* tiers owned by [content_addressing_doctrine.md](./content_addressing_doctrine.md). The
+  [§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest) separation of OCI image digests from the content-addressed store therefore extends to all three
+  ML tiers: base image (services + resolver) = image digest; engine / model / kernel = content-addressed
+  cache/store hash.
 
 **The seam to extend is already proven in hostbootstrap.** Baking a service binary is the same move
 hostbootstrap already uses for Go/helm/mc/pulumi — a mechanism amoebius reuses for its own baked binaries,

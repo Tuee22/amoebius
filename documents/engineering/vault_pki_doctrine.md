@@ -197,7 +197,7 @@ distinct from custody — is flagged at [§9](#9-in-cluster-consumers-authentica
 
 The three-tier ML-asset lifecycle stages **Tier-2** model artifacts *eagerly*: an elected singleton pulls
 the parent-named model set from upstream and re-keys it onto the content-addressed store, writing `.ready`
-last ([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)).
+last ([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 That staging step needs **two** credentials, and **both resolve from Vault by name** as ordinary
 `SecretRef`s ([§3](#3-the-secretref-contract-a-name-never-a-value)):
 
@@ -216,12 +216,12 @@ the staging path; it specifies that the path carry no second store and no defaul
 
 The **upstream-pull** credential is, further, **scoped per app**. Naming a model to import is a first-class,
 provenance-carrying constructor (the import arm of a serveable `ModelArtifact`,
-[content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)),
+[content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)),
 and each app's staging resolves only its **own** app-namespaced upstream `SecretRef` — one app's staging
 cannot pull, and therefore cannot mint an artifact from, another app's model source. This is the
 secrets-by-name face of per-app model isolation (an app serves only models it produced or imported); the
 content-store namespacing and the decode-foreclosed "app B serving/continuing app A's model without a grant" illegal
-state are owned by [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)
+state are owned by [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
 and [illegal_state_catalog.md](./illegal_state_catalog.md); this section owns only that the pull credential
 is itself a per-app name. Correspondingly, the bytes that credential pulls are **verified against a pinned
 expected content-address, failing closed before `.ready`** — the pin-and-verify import constructor (and its
@@ -596,7 +596,7 @@ states the target shape and links back for status.
 - [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers) [§4 init-follows-readiness / fail-closed](#4-init-follows-readiness-fail-closed-vault-init) is the event-driven resolution of the readiness race, not a wait around it
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — the retained Vault PV and init-once / unseal-on-rebuild durability
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — Vault-Transit-envelope encryption of the MinIO Pulumi backend and the public-edge ZeroSSL/route53 path
-- [Content Addressing & Determinism](./content_addressing_doctrine.md) — the content-addressed model store the Tier-2 staging credentials write to ([§4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd))
+- [Content Addressing & Determinism](./content_addressing_doctrine.md) — the content-addressed model store the Tier-2 staging credentials write to ([§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss))
 - [Network Fabric Doctrine](./network_fabric_doctrine.md) — the Curve25519 WireGuard peer keys in the same parent-custody KV secret family as the `Rke2NodeToken` ([§3.1](#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken))
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md) — the host-only NodePort hop that is deliberately not PKI-secured
 - [Substrate Doctrine](./substrate_doctrine.md) — the no-environment-variables / no-`PATH` contract

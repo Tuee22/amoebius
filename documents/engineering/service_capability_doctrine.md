@@ -159,32 +159,37 @@ flowchart TD
   bound -->|rendered into typed manifests and applied by the typed reconciler| live[Running provider on this cluster]
 ```
 
-### 4.1 The InferenceEngine capability — the engine is baked and substrate-selected, never fetched
+### 4.1 The InferenceEngine capability — the engine is substrate-selected and jit-resolved, never authored
 
 ML serving adds a **ninth capability, `InferenceEngine`** — the abstract interface an ML workload names when it
 says *"I serve inference,"* exactly as an app names `ObjectStore` when it says "I keep durable objects." It
 exercises the [§4](#4-capability--provider--shape-the-binding) binding at its strictest: where a generic capability's provider *defaults* to the [§3](#3-one-canonical-provider-the-type-admits-alternates)
 canonical (part 2 above) and could later admit an alternate, an `InferenceEngine`'s provider is a union with
-**no arm to fetch and nothing to author** — it is **selected by the detected substrate**.
+**no arm to author a download** — it is **selected by the detected substrate** and materialized by the shared
+jit-build resolver on first miss.
 
-**The canonical provider is a closed union of substrate-tagged, baked `EngineRuntime`s.** `EngineRuntime` has
-one arm per substrate lane and per baked engine family, and — the load-bearing rule — **no
-`Url` / `Download` / `Build` / `Fetch` arm**:
+**The canonical provider is a closed union of substrate-tagged `EngineRuntime` identities.** `EngineRuntime` has
+one arm per substrate lane and per engine family, and — the load-bearing rule — **no arbitrary-`Url` /
+`Download` arm**; the named identity is resolved on first miss into a `CacheBudget`-bounded content-addressed
+cache ([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)):
 
 | Provider dimension | Arms (closed union) |
 |---|---|
 | Engine lane | `Apple-Metal` · `CUDA` · `linux-cpu` |
-| Baked engine family | `llama.cpp` · `whisper.cpp` · `ONNX` · `vLLM` · `pytorch` · `diffusers` · `transformers` · `Audiveris` |
+| Engine family (named identity) | `llama.cpp` · `whisper.cpp` · `ONNX` · `vLLM` · `pytorch` · `diffusers` · `transformers` · `Audiveris` |
 
-Every arm is a runtime already **baked into the amoebius base container**
-([image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)); because the ML siblings **link as libraries** rather
-than run as fetched sidecars, the engine exists the moment the pod does. The union is closed **here** because every
-arm must be baked into the base container: adding an engine family is a base-image build plus a new
-`EngineRuntime` arm, never something an app `.dhall` can author, and the families in the table above map to the
-inference modalities the base container serves. The deployment `.dhall` **selects** an
+The ML siblings **link as libraries** rather than run as fetched sidecars, so the library is present the moment
+the pod is; the engine *payload* the library drives is a named identity the shared **jit-build resolver**
+materializes on first miss into the `CacheBudget`-bounded cache
+([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)),
+with the resolver's build inputs and the base image owned by
+[image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain).
+The union is closed **here** because every arm is a **named catalog identity**: adding an engine family is a new
+`EngineRuntime` arm plus a resolver recipe, never something an app `.dhall` can author, and the families in the
+table above map to the inference modalities the platform serves. The deployment `.dhall` **selects** an
 arm by the *detected* substrate (the substrate is DETECTED, [substrate_doctrine.md](./substrate_doctrine.md));
-it has no syntax with which to *author* a download or a build. This is the [§1](#1-why-capabilities-not-products) object-storage lesson taken to
-its limit: an app can no more write "curl this engine tarball at boot" than it can write "deploy `minio`."
+it has no syntax with which to *author* an arbitrary download or build. This is the [§1](#1-why-capabilities-not-products) object-storage lesson taken to
+its limit: an app can no more write "curl this engine URL at boot" than it can write "deploy `minio`."
 
 **The engine offering is a quotient of the detected substrate — a surjection, not an orthogonal axis — and this
 doctrine owns that mapping.** `EngineRuntime` is a *coarsening* of the four-member substrate catalog
@@ -206,24 +211,24 @@ catalog owned by [substrate_doctrine.md §1](./substrate_doctrine.md#1-the-subst
 arm, two bootstraps; the pod-vs-subprocess realization and the `(substrate, bootstrap)` wiring are owned by
 [daemon_topology_doctrine.md §4](./daemon_topology_doctrine.md#4-worker-daemons--n-unelected) and
 [substrate_doctrine.md §5](./substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained),
-referenced here (this doctrine is scoped to the engine as a baked capability, not to where its process runs).
+referenced here (this doctrine is scoped to the engine as a substrate-selected, jit-resolved capability, not to where its process runs).
 **Windows honesty note.** Unlike the Apple-Metal host worker — which has a build-shape sibling doc,
 [apple_metal_headless_builds.md](./apple_metal_headless_builds.md) — the on-host Windows-`Cuda` build/run path is
 **design intent with no sibling evidence** this round *introduces*; read it as intent, not a tested or
 sibling-proven result.
 
-`InferenceEngine` is **Tier 1** of the three-tier ML-asset lifecycle
-([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)); the model and kernel tiers live
-there, not here:
+`InferenceEngine` is **Tier 1** of the ML-asset lifecycle
+([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)); the model and kernel tiers live
+there, not here — and all three now share one bounded-cache, resolve-on-miss shape:
 
-- **Tier 1 — the engine (this capability)** is baked and substrate-selected, as above.
+- **Tier 1 — the engine (this capability)** is substrate-selected and jit-resolved into the bounded cache, as above.
 - **Tier 2 — `ModelArtifact`** is an eager stage-then-serve into the content-addressed store, its `ArtifactRef`
   obtainable **only** once a `.ready` sentinel **and a provenance witness** exist — the witnessed serve gate (a
   committed producing checkpoint or a pinned content-addressed import) is owned by content_addressing
-  [§4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd),
+  [§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss),
   referenced here, not restated.
 - **Tier 3 — the JIT kernel** is lazily materialized behind a content address on first cache miss, never a
-  startup build. Owned by content_addressing [§4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd).
+  startup build. Owned by content_addressing [§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss).
 
 **The engine↔model landing relation this doctrine co-owns.** A served `ModelArtifact` must be servable by an
 `EngineRuntime` whose **engine family** is available on the **serving** substrate lane — the accelerator the
@@ -239,7 +244,7 @@ topology/relation-over-collection technique,
 [illegal_state_catalog.md §4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection)),
 never a runtime `Unschedulable`. The relation keys on an engine-**family** tag the model must carry; that tag is a
 `ModelArtifact`/manifest field owned by
-[content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)
+[content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
 (referenced, not restated). content_addressing owns the `ModelArtifact` side; this doctrine owns the
 engine-as-capability side — the family-availability-on-serving-substrate check — a model must match. A
 **runtime-checked** residue survives the decode-foreclosed check: a family-matched but substrate-specific-weight-layout model
@@ -261,13 +266,14 @@ which **consumes** this footprint. That the declared footprint actually fits at 
 (dynamic KV-cache/fragmentation) is **runtime-checked** residue, not foreclosed by the decode-foreclosed Σ.
 
 **Two mistakes become unrepresentable**, lifted at
-[illegal_state_catalog.md §3.25](./illegal_state_catalog.md#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model):
+[illegal_state_catalog.md §3.25](./illegal_state_catalog.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model):
 
-- **An engine fetched or built at pod startup is type-foreclosed unrepresentable** — the `EngineRuntime` union is
-  closed with no `Url`/`Download`/`Build` arm, so "fetch the engine at boot" has no syntax and fails Gate 1
-  (the Dhall typechecker) before any binary runs. (A `ModelArtifact` with no completed `.ready` **and no
+- **An engine named by arbitrary URL is type-foreclosed unrepresentable** — the `EngineRuntime` union is
+  closed with no arbitrary-`Url`/`Download` arm, so "name the engine by URL" has no syntax and fails Gate 1
+  (the Dhall typechecker) before any binary runs; the named identity is jit-resolved on first miss into the
+  bounded cache. (A `ModelArtifact` with no completed `.ready` **and no
   provenance witness** is likewise type-foreclosed, owned with the content store in content_addressing
-  [§4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd).)
+  [§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss).)
 - **A model whose engine family is not available on the serving substrate lane is decode-foreclosed rejected** at decode,
   by the partial family×lane relation above — not a runtime `Unschedulable`.
 
@@ -278,21 +284,21 @@ which **consumes** this footprint. That the declared footprint actually fits at 
 -- APPLICATION LOGIC names an inference need (no engine, no URL, no build):
 let InferenceNeed = { serves : List ModelArtifact }    -- "I serve these models" — that is all an app says
 
--- DEPLOYMENT RULES bind a BAKED engine, SELECTED by the DETECTED substrate — no Url/Download/Build arm exists:
+-- DEPLOYMENT RULES name a SUBSTRATE-SELECTED engine identity, jit-resolved on first miss — no arbitrary-Url arm:
 let EngineRuntime =
-      < AppleMetal | Cuda | LinuxCpu >                  -- engine lane; CLOSED, never fetched
+      < AppleMetal | Cuda | LinuxCpu >                  -- engine lane; CLOSED, a named identity, never a URL
 let InferenceBinding =
       { engine        : EngineRuntime                    -- selected by detected substrate, never authored
       , family        : < LlamaCpp | WhisperCpp | Onnx | Vllm | Pytorch | Diffusers | Transformers | Audiveris >
       , vramFootprint : Quantity                         -- per-served-model accelerator memory (owned HERE); declared for every accelerator family, recomputed on the SERVING substrate; consumed by resource_capacity §3 Σ
-      }                                                  -- every arm baked into the base container (image_build §7)
+      }                                                  -- every arm a named identity jit-resolved into the bounded cache (content_addressing §4.5)
 ```
 
 The three-tier store, the `.ready` commit, the re-keying onto content addresses, and the Tier-3 JIT are owned
-by [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd); the baked base container that
-carries every `EngineRuntime` arm is owned by [image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain); the lift
+by [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss); the base image carrying the
+jit-build resolver + toolchain that materializes every `EngineRuntime` arm is owned by [image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain); the lift
 of these mistakes into unrepresentable states is owned by
-[illegal_state_catalog.md §3.25](./illegal_state_catalog.md#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model). This doctrine owns only that the **engine is a
+[illegal_state_catalog.md §3.25](./illegal_state_catalog.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model). This doctrine owns only that the **engine is a
 capability whose provider is baked-and-substrate-selected.**
 
 > **Honesty.** `InferenceEngine` is Phase-N design intent — the ML-serving capability, specified before
@@ -491,11 +497,11 @@ status.
 - [Platform Services Doctrine](./platform_services_doctrine.md) — the concrete provider set, the derived-connectivity rule ([§9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), and the single wild-ingress path
 - [DSL Doctrine](./dsl_doctrine.md) — the typed Dhall surface, total composability, and the two typed gates a capability binding decodes through
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — rendering a chosen shape into typed manifests and the idempotent typed reconciler (no Helm)
-- [Image Build Doctrine](./image_build_doctrine.md) — the build pipeline, the `distribution` registry refs, the baked base container ([§7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain) bakes every `EngineRuntime` arm), and the Temurin JVM toolchain
-- [Content Addressing Doctrine](./content_addressing_doctrine.md) — the three-tier ML-asset lifecycle ([§4.5](./content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)) whose Tier-1 baked engine is the `InferenceEngine` provider; `ModelArtifact`/`.ready` and the JIT kernel
+- [Image Build Doctrine](./image_build_doctrine.md) — the build pipeline, the `distribution` registry refs, the base container ([§7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain) bakes the jit-build resolver + toolchain that materializes every `EngineRuntime` arm), and the Temurin JVM toolchain
+- [Content Addressing Doctrine](./content_addressing_doctrine.md) — the ML-asset lifecycle ([§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)) whose Tier-1 jit-resolved engine is the `InferenceEngine` provider; `ModelArtifact`/`.ready` and the JIT kernel
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — secrets-by-name, `SecretRef`, and Vault Kubernetes auth for provider credentials
 - [Substrate Doctrine](./substrate_doctrine.md) — the substrate catalog, the DETECTED substrate that selects an `EngineRuntime`, and the substrate-driven LoadBalancer choice beneath Edge
-- [Illegal State Catalog](./illegal_state_catalog.md) — best-practice-by-construction, which capability invariants are type-enforced, and the engine-fetch / unmatched-model states ([§3.25](./illegal_state_catalog.md#325-an-ml-asset-fetched-or-built-at-pod-startup-or-an-unready--unlanded-model))
+- [Illegal State Catalog](./illegal_state_catalog.md) — best-practice-by-construction, which capability invariants are type-enforced, and the engine-fetch / unmatched-model states ([§3.25](./illegal_state_catalog.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model))
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
 

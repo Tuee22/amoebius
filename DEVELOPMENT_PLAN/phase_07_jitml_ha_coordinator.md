@@ -108,7 +108,7 @@ and the run continues from the last adopted `latest` pointer with no torn checkp
 - **Producer→precondition and the training-run topology — jitML checkpoints are the witnessed producer
   (doctrine this round introduces; forward design intent).** This round's doctrine makes a serveable infernix
   `ModelArtifact` require a **provenance witness**
-  ([`content_addressing_doctrine.md` §4.5 — The three-tier ML-asset lifecycle: engine baked, model staged, kernel JIT'd](../documents/engineering/content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)):
+  ([`content_addressing_doctrine.md` §4.5 — The three-tier ML-asset lifecycle: engine baked, model staged, kernel JIT'd](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)):
   a **committed jitML checkpoint** produced in this phase (Sprint 6.1's `latest`/`best` pointer CAS) is exactly
   the **producer** that satisfies the infernix serve gate consumed in
   [Phase 6](phase_06_determinism_infernix.md) / Phase 9 (a `producer→precondition` edge across the

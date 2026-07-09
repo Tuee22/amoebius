@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define amoebius's durable-storage contract — the single `no-provisioner` retained PV model,
@@ -81,7 +81,10 @@ creation path to exactly one shape.
   stable per-ordinal identity (`<claim>-<statefulset>-<ordinal>`) that survives Pod reschedules — the
   identity the deterministic rebind in [§6](#6-the-lossless-teardown-guarantee-deterministic-rebind) depends on.
 - **Stateless ⇒ no claim.** A workload with no StatefulSet has no durable storage by construction; shared
-  state for such workloads lives in a platform service (MinIO, Postgres, Pulsar), never in an ad-hoc PV.
+  state for such workloads lives in a platform service (MinIO, Postgres, Pulsar), never in an ad-hoc PV. The
+  **control-plane singleton** is the canonical stateless case: it is a Deployment `replicas=1` with no PVC,
+  and its durable state is the MinIO bucket ([§7.2](#72-amoebius-own-control-plane-state-is-the-minio-bucket-not-a-pvc),
+  [daemon_topology_doctrine.md §3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)).
 - **The DSL is the gate.** The amoebius Dhall DSL does not expose a "make me a loose PVC" primitive at all;
   durable storage is requested through the app/StatefulSet surface and nowhere else. The illegal-state
   framing — *a claim that cannot bind, or storage attached to a non-StatefulSet, is unrepresentable* — is
@@ -269,6 +272,32 @@ path:
   **normal operation cannot delete durable data; the elevated harness is the sole actor that can, on
   test-flagged resources.**
 
+### 7.2 amoebius' own control-plane state is the MinIO bucket, not a PVC
+
+The retained-PV model of this doctrine governs the **platform services and the workloads** that hold durable
+bytes — MinIO's own backing disks, Pulsar/BookKeeper, Postgres/Patroni, and any app StatefulSet. It does
+**not** describe amoebius's *own* control-plane state, which follows a different, stricter rule:
+
+- **The amoebius control plane holds no PVC.** The control-plane singleton is a stateless Deployment
+  `replicas=1` ([daemon_topology_doctrine.md §3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election));
+  it mounts no durable volume and keeps nothing on local disk.
+- **Its durable state is exclusively the Vault-enveloped MinIO bucket.** The `InForceSpec`, the Pulumi
+  state, and every other byte the control plane must persist live as Vault-Transit-enveloped objects in
+  MinIO ([pulumi_iac_doctrine.md §2](./pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio),
+  [dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness)), decrypted
+  in-process and never written to a plaintext ConfigMap, to etcd, or to a control-plane PVC
+  ([illegal_state_catalog.md](./illegal_state_catalog.md), the plaintext-spec-at-rest entry).
+- **Why the distinction matters.** It keeps the singleton disposable — k8s can reschedule it anywhere with
+  no volume to re-attach and no data to lose ([§5.1](#51-storage-is-independent-of-the-node-lifecycle) applies
+  to platform-service volumes, not to the control plane, because the control plane has none). MinIO itself is
+  a platform service and *does* sit on retained PVs per this doctrine; the control plane is a *client* of
+  that bucket, not a holder of its own volume.
+
+This is the storage-side statement of the invariant **amoebius durable storage (for the control plane) is
+exclusively the MinIO bucket**; the object-store model MinIO provides is owned by
+[platform_services_doctrine.md](./platform_services_doctrine.md) and
+[content_addressing_doctrine.md](./content_addressing_doctrine.md).
+
 ---
 
 ## 8. Shrinking storage without representing data destruction
@@ -344,5 +373,6 @@ result: the model generalizes behaviour proven in prodbox into amoebius design i
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the aggregate `StorageBacking` fold and the `Growable` escape valve
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the stateless control-plane singleton whose state is the MinIO bucket ([§7.2](#72-amoebius-own-control-plane-state-is-the-minio-bucket-not-a-pvc))
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

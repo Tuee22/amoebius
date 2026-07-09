@@ -20,7 +20,7 @@ Two questions in the vision are left unowned by the docs that touch them:
 > the cluster daemon?"* — and — *"how does a new `.dhall` get implemented or unlock keys provided in the root
 > node? does the project binary provide a thin cli tool to interact with the amoebius daemon api?"*
 
-The bring-up *pieces* exist — `bootstrap.sh` ([`substrate_doctrine.md` §6](./substrate_doctrine.md#6-the-bootstrapsh-contract-ensure-a-toolchain-build-the-binary-hand-off)),
+The bring-up *pieces* exist — the midwife CLI ([`substrate_doctrine.md` §6](./substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off)),
 "init follows readiness" ([`cluster_lifecycle_doctrine.md` §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap)),
 the "midwife, not the brain" host daemon ([`daemon_topology_doctrine.md` §2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)),
 Vault init/unseal ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init)),
@@ -42,7 +42,7 @@ them**, and *who may touch the cluster's control surface* differs across them:
   default mTLS — **channel 1** of [`host_cluster_comms_doctrine.md` §4](./host_cluster_comms_doctrine.md#4-channel-1--the-host-binary--kube-apiserver-via-distro-mtls)
   — to install the distro, apply the platform manifests, and bring up the in-cluster singleton. It is the
   *midwife*, acting on behalf of the future singleton ([`daemon_topology_doctrine.md` §2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)).
-- **Steady-state régime — the singleton drives.** Once the platform services **and** the elected
+- **Steady-state régime — the singleton drives.** Once the platform services **and** the
   control-plane singleton are up and reachable, the host binary **defers**. From that instant — *even before
   Vault is initialised* — every operator interaction flows through the **admin control plane**
   ([§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)): the operator CLI → the amoebius NodePort
@@ -55,12 +55,12 @@ interactions occur through the [amoebius] NodePort."* The one-way handoff is [§
 
 ```mermaid
 flowchart TD
-  sh[bootstrap.sh: toolchain, build, exec binary] --> hb[Host binary / sudo host daemon]
+  pb[pb midwife CLI, Python: toolchain, build, exec binary] --> hb[Host binary / sudo host daemon]
   hb -->|channel 1: distro mTLS, BOOTSTRAP ONLY| api[kube-apiserver: install distro + apply platform manifests]
   api --> svc[Platform services up in the readiness DAG order]
-  svc --> singleton[In-cluster singleton pod up + elected]
+  svc --> singleton[In-cluster singleton pod up: Deployment replicas 1]
   singleton -->|exposes| rest[amoebius NodePort REST admin API]
-  singleton -.->|HANDOFF: /readyz + election-commit observed| hb
+  singleton -.->|HANDOFF: /readyz Serving edge observed| hb
   cli[Operator CLI] -->|vault init/unseal, then dhall update| rest
   rest --> reconcile[Singleton reconciles the cluster toward its InForceSpec]
 ```
@@ -74,8 +74,8 @@ an observed condition, never an elapsed wait** — enacted by the reconciler
 ([`cluster_lifecycle_doctrine.md` §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)).
 The ordered steps, each gated on the prior step's readiness:
 
-1. **`bootstrap.sh`** ensures the toolchain, builds the binary, and `exec`s `amoebius bootstrap
-   --distro={kind,rke2}` ([`substrate_doctrine.md` §6](./substrate_doctrine.md#6-the-bootstrapsh-contract-ensure-a-toolchain-build-the-binary-hand-off)).
+1. **The midwife CLI** (`pb bootstrap`) ensures the toolchain, builds the binary, and `exec`s `amoebius
+   bootstrap --distro={kind,rke2}` ([`substrate_doctrine.md` §6](./substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off)).
 2. **The host daemon brings up the distro** — the zero-secret single-node root (`kind`, or
    `Rke2Servers.Single`) — and waits on `discover = Present` for `kube-apiserver` (a successful mTLS call,
    not a timer; [`readiness_ordering_doctrine.md` §5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers)).
@@ -83,7 +83,7 @@ The ordered steps, each gated on the prior step's readiness:
    Vault-sealed for now ([`platform_services_doctrine.md` §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering)),
    applied by the tier-(c) SSA reconciler once the apiserver answers
    ([`manifest_generation_doctrine.md` §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)).
-4. **The control-plane singleton pod comes up and is elected** ([`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected))
+4. **The control-plane singleton pod comes up** ([`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton))
    and **exposes the admin REST service** ([§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)). This is the **handoff point** ([§4](#4-the-host-daemon--singleton-handoff)).
 5. **The operator initialises/unseals Vault through the admin REST** — `vault init/unseal`, authenticated by
    the operator password; init-once / unseal-on-rebuild ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init),
@@ -97,7 +97,7 @@ This is the **root** bootstrap; a *child* cluster is spawned by a parent (the Pu
 which injects the child's scoped `InForceSpec` + secrets rather than prompting a human. This ordered sequence **retires
 the open question** [`cluster_lifecycle_doctrine.md` §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap)
 recorded (bootstrap config / first-manifest delivery): the first manifest is delivered by step 6's `dhall
-update`, and the transient bootstrap config is the binary-sibling `amoebius.dhall` `bootstrap.sh` establishes.
+update`, and the transient bootstrap config is the binary-sibling `amoebius.dhall` the midwife establishes.
 
 ---
 
@@ -106,12 +106,13 @@ update`, and the transient bootstrap config is the binary-sibling `amoebius.dhal
 The handoff is **one-way, observed-gated, and transfers control-surface authority only**:
 
 - **The trigger is an edge, never a delay.** The host daemon hands off once it observes the singleton
-  **`/readyz` (a `Serving` edge)** *and* **the election commit on the coordination log (a `Committed` edge)**
-  — the gate owned by [`readiness_ordering_doctrine.md` §5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers).
-  Never "sleep, then assume the pod is up."
+  **`/readyz` (a `Serving` edge)** — the gate owned by [`readiness_ordering_doctrine.md` §5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers).
+  Never "sleep, then assume the pod is up." Single-instance of the singleton is a k8s/etcd property
+  ([`daemon_topology_doctrine.md` §3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)),
+  so there is no election commit to await.
 - **What transfers: the cluster control surface.** After handoff, amoebius-level control (Vault
-  init/unseal, spec delivery, reconcile triggers) is the **elected singleton's** sole authority
-  ([`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected)),
+  init/unseal, spec delivery, reconcile triggers) is the **singleton's** sole authority
+  ([`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)),
   reached only through the admin REST ([§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)).
   Channel 1 (host binary ↔ kube-apiserver) is **retired** — a bootstrap-only privilege.
 - **What does *not* transfer: host-worker supervision.** The sudo host daemon keeps supervising host-level
@@ -227,11 +228,11 @@ handoff** ride **Phase 2** (bootstrap + kernel + kind); the **`vault init/unseal
 
 - [Engineering Doctrine Index](./README.md)
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — [§2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap) the bring-up this sequences (its open question retired here), [§9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) the reconciler that enacts each edge
-- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid) midwife-then-defers, [§3](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected) the singleton that exposes the admin REST
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid) midwife-then-defers, [§3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) the singleton that exposes the admin REST
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — [§4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) init-follows-readiness, [§5](./vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal) the operator-password unseal the admin endpoint carries, [§10](./vault_pki_doctrine.md#10-the-chicken-and-egg-floor-what-stays-outside-vault) the pre-Vault trust floor
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md) — [§3](./host_cluster_comms_doctrine.md#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio) the workload-plane rule this admin plane is distinct from; [§4](./host_cluster_comms_doctrine.md#4-channel-1--the-host-binary--kube-apiserver-via-distro-mtls) channel 1 (bootstrap-only)
 - [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers) the handoff trigger (/readyz + election-commit)
-- [Substrate Doctrine](./substrate_doctrine.md) — [§6](./substrate_doctrine.md#6-the-bootstrapsh-contract-ensure-a-toolchain-build-the-binary-hand-off) the `bootstrap.sh` igniter
+- [Substrate Doctrine](./substrate_doctrine.md) — [§6](./substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off) the midwife CLI igniter
 - [Platform Services Doctrine](./platform_services_doctrine.md) — [§11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering) the derived platform bring-up DAG
 - [Illegal State Catalog](./illegal_state_catalog.md) — [§3.42](./illegal_state_catalog.md#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness) an unauthenticated admin mutation foreclosed
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

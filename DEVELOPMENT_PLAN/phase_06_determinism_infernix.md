@@ -77,7 +77,7 @@ reproduction was *tested*, not that cross-substrate equality was claimed.
 - [`content_addressing_doctrine.md` §4 — Determinism by construction: pinned inputs + pure stages + derived seed](../documents/engineering/content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed),
   with [§3 — `experimentHash`: identity is *what was requested* ‖ *where it ran*](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran),
   [§2 — The three-tier store](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers),
-  [§4.5 — The three-tier ML-asset lifecycle: engine baked, model staged, kernel JIT'd](../documents/engineering/content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd),
+  [§4.5 — The three-tier ML-asset lifecycle: engine baked, model staged, kernel JIT'd](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss),
   and the honest ceiling in [§6 — types make the bookkeeping total, not the physics deterministic](../documents/engineering/content_addressing_doctrine.md#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic):
   this phase implements the three legs (pinned content-addressed inputs, pure stages, derived seed)
   as kernel primitives and instantiates them for infernix decoding, while keeping the contract at
@@ -89,7 +89,7 @@ reproduction was *tested*, not that cross-substrate equality was claimed.
   reversible adapter seams rather than as a parallel system.
 - **Producer→precondition and the training-run topology (doctrine this round introduces; forward design
   intent, not a Phase-6 gate claim).** This round's doctrine adds a **provenance-witness gate** to a serveable
-  `ModelArtifact` ([`content_addressing_doctrine.md` §4.5 — The three-tier ML-asset lifecycle: engine baked, model staged, kernel JIT'd](../documents/engineering/content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)):
+  `ModelArtifact` ([`content_addressing_doctrine.md` §4.5 — The three-tier ML-asset lifecycle: engine baked, model staged, kernel JIT'd](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)):
   infernix may serve a model only once it witnesses a **committed producing checkpoint** — the jitML checkpoint
   produced in [Phase 7](phase_07_jitml_ha_coordinator.md) — or a pinned content-addressed import, so a Phase-7
   jitML checkpoint is a **producer→precondition** for the infernix serve path, not merely a shared store entry.
@@ -256,7 +256,7 @@ The whole sprint.
 
 ### Objective
 
-Adopt [`content_addressing_doctrine.md` §4.5 — The three-tier ML-asset lifecycle: engine baked, model staged, kernel JIT'd](../documents/engineering/content_addressing_doctrine.md#45-the-three-tier-ml-asset-lifecycle-engine-baked-model-staged-kernel-jitd)
+Adopt [`content_addressing_doctrine.md` §4.5 — The three-tier ML-asset lifecycle: engine baked, model staged, kernel JIT'd](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
 and the honest ceiling in [§6 — types make the bookkeeping total, not the physics deterministic](../documents/engineering/content_addressing_doctrine.md#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic):
 wire the three determinism legs through an infernix CPU decode — a pinned content-addressed model, a
 pure decode stage, and a request-carried seed (greedy or seeded sampling, never ambient entropy) —
