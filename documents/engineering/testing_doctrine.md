@@ -37,13 +37,13 @@ Three consequences fall straight out of "a test is a spec":
 - **A test cannot represent an illegal cluster.** Because the test reuses the production DSL, a test
   `.dhall` that tried to mis-bind a PVC to no PV, open a backdoor ingress, or place a CUDA workload on a
   GPU-less substrate would fail to type-check before it ever ran — the same contract owned by
-  [dsl_doctrine.md](./dsl_doctrine.md) / [illegal_state_catalog.md](./illegal_state_catalog.md).
+  [dsl_doctrine.md](./dsl_doctrine.md) / [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md).
 - **The test runs the real thing.** There is no parallel mock cluster. A test stands up real platform
   services (or a representative subset) and runs a real workflow against them; the only thing that makes it
   a *test* rather than a deployment is the chaos schedule and the always-teardown contract of [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).
 
 > **Honesty.** Test-as-an-`InForceSpec`-topology, `suggest-test`, flagged credentials, and the elevated
-> storage-deleting harness are **Phase 11** in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
+> storage-deleting harness are **Phase 31** in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
 > and are **not started**. This document generalizes patterns *proven in the sibling prodbox project*
 > (`prodbox/documents/engineering/unit_testing_policy.md`,
 > `prodbox/documents/engineering/integration_fixture_doctrine.md`) into amoebius *design intent*. Per
@@ -116,7 +116,7 @@ isolated ephemeral stacks, unique names per run, aggressive tagging, *always* te
 ```mermaid
 flowchart TD
   spec["test .dhall topology (deployment-rules layer + chaos schedule + teardown)"] -->|spin up| up["allocate resources: cluster, PVs, stacks, workloads (tagged test-owned)"]
-  up -->|run workflow| run["exercise workflow + inject faults (HA failover, leadership election)"]
+  up -->|run workflow| run["exercise workflow + inject faults (HA failover, substrate quorum re-election)"]
   run -->|success| down["teardown: idempotent destroy of every allocated resource"]
   run -->|workflow failure| down
   up -->|setup failure| down
@@ -165,10 +165,10 @@ machine-visible by emitting a ledger.
   and the required-evidence-strength-per-environment mapping are **owned by**
   [release_lifecycle_doctrine.md §4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable); this doc owns only the ledger the gate
   reads. *(Design intent: the release lifecycle is Phase-0 reference doctrine and this ledger harness is
-  Phase 11 / not started — read as a specification to be validated, never a proven amoebius result.)*
+  Phase 31 / not started — read as a specification to be validated, never a proven amoebius result.)*
 - **A Tier-1-only in-process ledger is structurally insufficient to advance a production `PromotionGate`.**
-  The front-loaded Phase-1 formal-validation track
-  ([../../DEVELOPMENT_PLAN/phase_01_formal_first_dsl_integrity.md](../../DEVELOPMENT_PLAN/phase_01_formal_first_dsl_integrity.md))
+  The front-loaded pre-cluster formal-validation track
+  ([../../DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md](../../DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md))
   emits this *same* proven/tested/assumed ledger, but from a purely **in-process** run — Dhall typecheck +
   Haskell decoder + QuickCheck + TLA+/TLC, with **no live substrate**. That is a **Tier-1 (design-time)
   artifact only**: it establishes that the spec composes and the protocol is sound in the abstract, and it
@@ -178,7 +178,7 @@ machine-visible by emitting a ledger.
   prod requires the Runtime/chaos layer *proven*, and an in-process ledger carries no Runtime witness for the
   advance constructor to consume, so "we validated the DSL in-process" cannot mean "the cluster enforces it."
   The two-tier split (Tier-1 design-time integrity vs. Tier-2 runtime-enforcement / correspondence integrity)
-  is owned by [tla_modelling_assumptions.md](./tla_modelling_assumptions.md); the promotion-gate face of this
+  is owned by [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md); the promotion-gate face of this
   fence is owned by
   [release_lifecycle_doctrine.md §4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable).
 
@@ -207,8 +207,7 @@ Per the original vision, `suggest-test`:
    can create EBS or a hosted zone, and how much) so the emitted test is *sized to what is actually reachable*, not a
    guess.
 3. **Writes a test `.dhall`** that (a) spins up a **representative set of resources** scaled to the detected
-   compute/memory/storage and the credential's authority, and (b) **simulates HA failovers and host-daemon
-   leadership elections** as appropriate to the substrate.
+   compute/memory/storage and the credential's authority, and (b) **simulates HA failovers and substrate quorum failovers (etcd/Patroni)** as appropriate to the substrate.
 
 ```mermaid
 flowchart TD
@@ -231,9 +230,9 @@ Three boundaries keep `suggest-test` honest and within doctrine:
   in Dhall; the parent injects them into the child's Vault. The `SecretRef`-by-name contract and the
   parent-injects-into-child model are owned by [vault_pki_doctrine.md](./vault_pki_doctrine.md). A
   `suggest-test` output that inlined a credential would be unrepresentable.
-- **The chaos schedule is deployment rules.** The HA-failover and leadership-election simulation it adds is
+- **The chaos schedule is deployment rules.** The HA-failover and substrate-quorum-failover simulation it adds is
   attached on the deployment-rules surface, so the app under test is none the wiser — owned by
-  [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md). The *mechanics* of leadership election
+  [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md). The *mechanics* of the singleton's k8s/etcd-delegated single-instance
   and HA failover are owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) and
   [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md); `suggest-test` only *schedules* them
   into a topology.
@@ -307,7 +306,7 @@ exception to this doc). This doc owns the **exception mechanism**:
 
 > **Honesty.** The flag-and-elevated-sweep mechanism above is a *design resolution* of an explicitly open
 > question in the vision, not a built or tested amoebius capability. Treat
-> the leak-free guarantee as a specification to be validated, never as a proven result. Delivery (Phase 11)
+> the leak-free guarantee as a specification to be validated, never as a proven result. Delivery (Phase 31)
 > is tracked in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -349,7 +348,7 @@ To keep the SSoT boundaries crisp:
 | Concern | Owned by |
 |---------|----------|
 | The Extract → Model → Inject moves, the proven/tested/assumed *methodology* and what each move establishes | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
-| The async cross-cluster failover correctness obligation + TLA+/io-sim proof artifacts | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), [tla_modelling_assumptions.md](./tla_modelling_assumptions.md) |
+| The async cross-cluster failover correctness obligation + TLA+/io-sim proof artifacts | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) |
 | The retained `no-provisioner` PV model, deterministic rebind, and the cardinal "no normal-operation deletion" rule | [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) |
 | The create-vs-delete credential model and Pulumi create/destroy mechanics (MinIO backend, Vault-envelope) | [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) |
 | The `PromotionGate`, the `Environment` promotion pointer, and each environment's required evidence strength (the gate that *consumes* this doc's [§4](#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) ledger) | [release_lifecycle_doctrine.md](./release_lifecycle_doctrine.md) ([§4](#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)) |
@@ -357,7 +356,7 @@ To keep the SSoT boundaries crisp:
 | Secrets-by-name, `SecretRef`, parent-injects-into-child Vault | [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | Substrate detection and the substrate catalog | [substrate_doctrine.md](./substrate_doctrine.md) |
 | Leadership-election and HA-failover mechanics the topologies exercise | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md), [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md) |
-| Making an illegal test cluster unrepresentable | [dsl_doctrine.md](./dsl_doctrine.md), [illegal_state_catalog.md](./illegal_state_catalog.md) |
+| Making an illegal test cluster unrepresentable | [dsl_doctrine.md](./dsl_doctrine.md), [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) |
 | Phase order, the "at most one substrate per validation" rule as phase discipline, the toolchain pin | [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) |
 
 ---
@@ -367,8 +366,8 @@ To keep the SSoT boundaries crisp:
 This document is normative testing doctrine only. Delivery sequencing, completion status, validation gates,
 and remaining work — the test-topology DSL, `suggest-test`, flagged credentials, the elevated
 storage-deleting harness, and the per-run ledger artifact — are owned by
-[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (Phase 11; with the cross-cluster
-failover proof artifacts in Phase 9). This doc never maintains a competing status ledger; it states the
+[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (Phase 31; with the cross-cluster
+failover proof artifacts in Phase 29). This doc never maintains a competing status ledger; it states the
 target shape and links back for status. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline),
 no statement here is a proven amoebius result: the model generalizes patterns proven in prodbox into
 amoebius design intent.
@@ -387,6 +386,6 @@ amoebius design intent.
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md)
 - [DSL Doctrine](./dsl_doctrine.md)
-- [Illegal State Catalog](./illegal_state_catalog.md)
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

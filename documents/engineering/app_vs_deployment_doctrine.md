@@ -35,8 +35,8 @@ which surface, and why the line must never be crossed (DEVELOPMENT_PLAN
 cross-cutting invariant "Application logic and deployment rules are separate DSL surfaces").
 
 > **Honesty.** This split is *specified* doctrine for Phase 4 (the DSL type families) — with its in-process
-> design validation front-loaded to Phase 1 — and *demonstrated* live by the infernix demo web app in Phase 6
-> and the jitML demo web app in Phase 7 (composed as an SPA in Phase 12); none of these phases has been built.
+> design validation front-loaded to the pre-cluster gates (Phases 4–6) — and *demonstrated* live by the infernix demo web app in Phase 26
+> and the jitML demo web app in Phase 27 (composed as an SPA in Phase 32); none of these phases has been built.
 > Read every prescriptive statement here as design intent, never as a tested amoebius result. Status and gates live only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
@@ -169,7 +169,7 @@ deliberately tricky cases:
 **Misfiling is a bug, not a style preference.** A replica count that leaks into the app spec re-couples
 scale to logic and breaks write-once; a UI route that leaks into deployment rules makes the deployment layer
 non-swappable. [dsl_doctrine.md](./dsl_doctrine.md) and
-[illegal_state_catalog.md](./illegal_state_catalog.md) are the SSoTs for *which* of these boundaries are
+[illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) are the SSoTs for *which* of these boundaries are
 lifted into the type layer so that a misfiled field is **unrepresentable** rather than merely discouraged —
 this doc states the policy; those docs own the enforcement.
 
@@ -195,7 +195,7 @@ The most fundamental consequence is that the split makes a whole category of mis
 literally has no field in which to name a replica count or a region, and the deployment surface has no field
 in which to name a UI route or a bucket. A "3 replicas" value cannot be accidentally hard-coded into application
 logic because there is nowhere to type it. That structural guarantee is owned by
-[dsl_doctrine.md](./dsl_doctrine.md) / [illegal_state_catalog.md](./illegal_state_catalog.md); this doc owns
+[dsl_doctrine.md](./dsl_doctrine.md) / [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md); this doc owns
 the *reason* it is worth enforcing.
 
 ---
@@ -230,9 +230,9 @@ workflow ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-dep
 engine welded into the app.
 
 > **Honesty.** This is Phase-0 design intent, not a proven amoebius result. The application-logic-only
-> demonstration lands **live** with the infernix demo web app in **Phase 6** and the jitML demo web app in
-> **Phase 7**, and the two are composed as a live SPA in **Phase 12**; the surfaces' in-process design
-> validation is front-loaded to **Phase 1** (see [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)).
+> demonstration lands **live** with the infernix demo web app in **Phase 26** and the jitML demo web app in
+> **Phase 27**, and the two are composed as a live SPA in **Phase 32**; the surfaces' in-process design
+> validation is front-loaded to the **pre-cluster gates (Phases 4–6)** (see [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)).
 > None of these phases has been built.
 
 ---
@@ -324,7 +324,7 @@ Cashing out "zero app change":
 - The app spec is **byte-identical** across the single-cluster and N-cluster deployments; the diff is
   entirely in the deployment-rules layer.
 
-> **Honesty.** Geo-replication and cross-cluster failover are **Phase 9** and **not started**. Synchronous
+> **Honesty.** Geo-replication and cross-cluster failover are **Phase 29** and **not started**. Synchronous
 > intra-cluster HA is delegated to the systems that do their own consensus (MinIO / Pulsar / Postgres /
 > Patroni); the **asynchronous** cross-cluster boundary — what happens if a cluster dies mid-geo-sync and amoebius
 > fails over to it — is an open correctness obligation owned by
@@ -341,7 +341,7 @@ mechanics it points at:
 | Topic | Owner |
 |-------|-------|
 | The DSL grammar, the cluster / app-spec / deployment-rules type families, total composability | [dsl_doctrine.md](./dsl_doctrine.md) |
-| Which misfiling boundaries are type-enforced (made unrepresentable) | [illegal_state_catalog.md](./illegal_state_catalog.md) |
+| Which misfiling boundaries are type-enforced (made unrepresentable) | [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) |
 | The standard service set, HA-always, Keycloak-owns-all-ingress | [platform_services_doctrine.md](./platform_services_doctrine.md) |
 | Durable-storage mechanics: retained `no-provisioner` PVs, sizing, rebind | [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) |
 | Secrets-by-name, `SecretRef`, parent-injects-into-child | [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
@@ -360,9 +360,9 @@ mechanics it points at:
 This document is normative classification doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md):
 the two DSL surfaces land with the type families in **Phase 4** (their in-process design validation
-front-loaded to **Phase 1**), the application-logic-only demonstration lands with the infernix demo web app
-in **Phase 6** and the jitML demo web app in **Phase 7** (composed as an SPA in **Phase 12**), and the
-zero-app-change geo-replication case is **Phase 9**. This doc never maintains a competing status
+front-loaded to the **pre-cluster gates (Phases 4–6)**), the application-logic-only demonstration lands with the infernix demo web app
+in **Phase 26** and the jitML demo web app in **Phase 27** (composed as an SPA in **Phase 32**), and the
+zero-app-change geo-replication case is **Phase 29**. This doc never maintains a competing status
 ledger; it states the target shape and links back for status.
 
 ---
@@ -374,7 +374,7 @@ ledger; it states the target shape and links back for status.
 - [Platform Services Doctrine](./platform_services_doctrine.md)
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md)
 - [Testing Doctrine](./testing_doctrine.md)
-- [Illegal State Catalog](./illegal_state_catalog.md)
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md)
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md)
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [Image Build Doctrine](./image_build_doctrine.md)

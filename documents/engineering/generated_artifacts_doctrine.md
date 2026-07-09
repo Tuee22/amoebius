@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/formal_model_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/system_components.md, DEVELOPMENT_PLAN/development_plan_standards.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/tla_modelling_assumptions.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the rule that every artifact amoebius can *render from a typed source* — Kubernetes manifests, the TLA+ `.tla`/`.cfg`, the Dhall schema, the PureScript frontend contracts — is a **build artifact emitted at build/check time and never committed to the repository**; the only committed truth is the Haskell (or authored-Dhall) source it is rendered from.

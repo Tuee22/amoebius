@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/monitoring_doctrine.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/monitoring_doctrine.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the ordered path from a bare host to a reconciling cluster — the
@@ -188,18 +188,18 @@ second binary.
 ## 6. What this forecloses, and the honest limits
 
 The admin plane is a place to make illegal control actions **unrepresentable**, on the catalog's
-[three layers](./illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force):
+[three layers](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force):
 
 - **A `dhall update` without an unsealed Vault + root token has no constructor** — the mutation is
   `type-foreclosed`: its handle is built only *from* a `RootToken` capability and an `Unsealed` witness
-  ([`illegal_state_catalog.md` §3.42](./illegal_state_catalog.md#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness),
+  ([`illegal_state_catalog.md` §3.42](../illegal_state/illegal_state_security.md#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness),
   the same capability + `.ready`-style edge discipline as the `PromotionGate` and the `Readiness` edge).
 - **An admin action bypassing the singleton is unrepresentable** by construction: post-handoff there is no
   exported channel-1 verb; the only control-surface constructor is an admin-REST call.
-- **The honest limit** ([`illegal_state_catalog.md` §2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)):
+- **The honest limit** ([`illegal_state_catalog.md` §2](../illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)):
   the type forecloses the *shape* of the control surface; that the singleton *actually* holds sole authority
   at runtime (single-writer, no split-brain admin) is `runtime-checked`, owned by the election safety of
-  [`daemon_topology_doctrine.md` §5](./daemon_topology_doctrine.md#5-leadership-election--the-mechanism-the-proof-lives-elsewhere)
+  [`daemon_topology_doctrine.md` §5](./daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected)
   and [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md).
 
 **Still open (deliberately, scoped narrower by this doc):** whether the **root may ever be multi-node**
@@ -213,9 +213,9 @@ this doc specifies the single-node-root answer the plan adopts and does not sett
 This document is normative bootstrap-sequence + admin-control-plane doctrine only. Delivery sequencing,
 status, and gates are owned by [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md), never
 restated here. For orientation only (the plan is authoritative): the **ordered sequence + host→singleton
-handoff** ride **Phase 2** (bootstrap + kernel + kind); the **`vault init/unseal` admin endpoint** rides
-**Phase 3** (root Vault/PKI); the **`dhall update` endpoint + the elected singleton REST surface** ride
-**Phase 4** (the control-plane singleton). This doc states the target shape and links back for status.
+handoff** ride **Phases 10 and 13** (kernel + bootstrap + kind); the **`vault init/unseal` admin endpoint** rides
+**Phase 17** (root Vault/PKI); the **`dhall update` endpoint + the singleton REST surface** ride
+**Phase 20** (the control-plane singleton). This doc states the target shape and links back for status.
 
 > **Honesty.** Everything here is Phase 0 design intent, specified before implementation. The "midwife then
 > defers" host-daemon model and the reconcile-driven bring-up are *proven in the prodbox / hostbootstrap
@@ -234,6 +234,6 @@ handoff** ride **Phase 2** (bootstrap + kernel + kind); the **`vault init/unseal
 - [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers) the handoff trigger (/readyz + election-commit)
 - [Substrate Doctrine](./substrate_doctrine.md) — [§6](./substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off) the midwife CLI igniter
 - [Platform Services Doctrine](./platform_services_doctrine.md) — [§11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering) the derived platform bring-up DAG
-- [Illegal State Catalog](./illegal_state_catalog.md) — [§3.42](./illegal_state_catalog.md#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness) an unauthenticated admin mutation foreclosed
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§3.42](../illegal_state/illegal_state_security.md#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness) an unauthenticated admin mutation foreclosed
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

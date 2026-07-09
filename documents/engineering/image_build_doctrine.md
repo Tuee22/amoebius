@@ -145,7 +145,7 @@ time on the missing arch, not at publish time. So amoebius treats a multi-arch i
   inherits prodbox's retry-then-fail-loud publication posture (`local_registry_pipeline.md` [§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)); for its
   multi-arch images the unit of success is the complete manifest list.
 
-> **Honesty.** Fail-closed atomic publication is the *specified* contract for Phase 3, not a tested amoebius
+> **Honesty.** Fail-closed atomic publication is the *specified* contract for Phase 14, not a tested amoebius
 > result. buildx's single-push manifest-list behaviour is a real registry mechanism; that amoebius wires it
 > exactly this way is design intent until validated. See
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
@@ -156,7 +156,7 @@ time on the missing arch, not at publish time. So amoebius treats a multi-arch i
 
 This is an explicitly open design question: whether to implement a versioned tagging system or just use
 `:latest`. It is flagged here as a
-[DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) decision (Phase 3); this section records the **trade and
+[DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) decision (Phase 14); this section records the **trade and
 the recommended default**, not a frozen mechanism.
 
 amoebius's core properties are fungibility and reproducibility — a cluster that was destroyed must rebind to
@@ -176,7 +176,7 @@ amoebius-owned images in cluster specs.**
 - **`:latest` is not used as a deployment reference.** A mutable convenience tag may exist as a *pointer*,
   but no cluster `.dhall` denotes a workload by `:latest`. Whether the type layer makes a `:latest`
   deployment reference outright **unrepresentable** is owned by
-  [illegal_state_catalog.md](./illegal_state_catalog.md); this doc owns only the policy that immutable
+  [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md); this doc owns only the policy that immutable
   references are the default.
 - **This is distinct from the content-addressed workflow store.** OCI image digests (registry-native) are
   not the `experimentHash`-keyed MinIO artifact store. They rhyme — both are "identify bytes by their
@@ -211,7 +211,7 @@ builds, which happen headless on the host (no VM; see
   in which host worker nodes exist precisely for substrate-specific hardware
   ([substrate_doctrine.md](./substrate_doctrine.md)).
 - **Why in-pod is the eventual target, not the v1 default.** An in-pod builder removes the host build
-  dependency for cloud-managed substrates that have no operator host (the Phase 10 stateless in-cluster
+  dependency for cloud-managed substrates that have no operator host (the Phase 30 stateless in-cluster
   daemon). The cost is a builder pod that needs privileged build access and its own multi-arch story —
   deferred, not adopted by default.
 - **The build location does not change the output contract.** Wherever it runs, the builder emits the [§3](#3-buildx-multi-arch--amd64-and-arm64-one-manifest-list)
@@ -356,7 +356,7 @@ a cycle — is owned elsewhere; this doc records only the build-side consequence
 
 ## 10. Honesty and planning ownership
 
-> **Honesty.** Every prescriptive statement here is *design intent for Phase 3*
+> **Honesty.** Every prescriptive statement here is *design intent for Phase 14*
 > (the `distribution` registry + baked service binaries + buildx multi-arch amoebius images,
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)), generalized from a pipeline proven
 > in `prodbox` but **not yet built in amoebius**. Per
@@ -382,7 +382,7 @@ the build-and-registry pipeline and links back for status; it never maintains a 
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md)
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [DSL Doctrine](./dsl_doctrine.md)
-- [Illegal State Catalog](./illegal_state_catalog.md)
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md)
 - [Engineering Doctrine Index](./README.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

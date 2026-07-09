@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define the host substrates amoebius runs on (apple / linux-cpu / linux-cuda / windows),
@@ -117,7 +117,7 @@ Two classification rules are load-bearing and stated as hard failures, not warni
 > landing-relation entry.
 
 > **Honesty.** This is the `hostbootstrap` seed, ported from a prior Python detector. It is *evidence from
-> a sibling library*, not a tested amoebius result — amoebius has not built Phase 2. Read every mechanism
+> a sibling library*, not a tested amoebius result — amoebius has not built Phase 13. Read every mechanism
 > in this doc as design intent seeded from a working sibling, never as a proven amoebius behaviour. Status
 > and gates live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
@@ -422,7 +422,7 @@ to render a different service set (the structural-equivalence rule,
 
 The substrate is a *fact about the host* ([§1](#1-the-substrate-is-a-fact-about-the-host-not-a-knob)); the **node inventory** is the typed projection of those facts
 that the rest of amoebius reads. It is the **single owner** (an ownership index,
-[illegal_state_catalog.md §4.4](./illegal_state_catalog.md#44-ownership-indices--single-owner-ssot-structurally)) of three things no other doc may re-declare:
+[illegal_state_catalog.md §4.4](../illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)) of three things no other doc may re-declare:
 *which hosts/substrates exist*, *how much each host advertises*, and *which taints a node carries*. Three
 consumers read it, and each is a foreclosure that depends on there being exactly one such list.
 
@@ -444,7 +444,7 @@ consumers read it, and each is a foreclosure that depends on there being exactly
   tolerations from the declared node taints ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)),
   so "a toleration for a taint no node declares" is unrepresentable and "a taint no workload tolerates" leaves
   the schedulability existence fold with no landable node
-  ([illegal_state_catalog.md §3.5, §3.22](./illegal_state_catalog.md#35-undeployable-pods-taints-tolerations--affinity)).
+  ([illegal_state_catalog.md §3.5, §3.22](../illegal_state/illegal_state_capacity.md#35-undeployable-pods-taints-tolerations--affinity)).
 - **The `LinuxHost` witnesses and substrate tags the topology relation reads.** The declared compute-engine
   axis ([cluster_topology_doctrine.md](./cluster_topology_doctrine.md)) pairs an engine with a node only when
   the relation permits it, and it reads *this* inventory for "what substrates exist" — so the compatibility
@@ -525,9 +525,9 @@ this doc owns only the declared `Site` **fact**, not the classification.
 
 This document is normative substrate doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): substrate detection
-and the `bootstrap` contract land in **Phase 2** (`linux-cpu`); host compute daemons, the Lima/WSL2
-providers, and the headless Apple-Metal fixed-bridge build land in **Phase 8** (`apple`); the in-cluster CUDA path is exercised in
-**Phase 7** (`linux-cuda`). This doc never maintains a competing status ledger; it states the target shape
+and the `bootstrap` contract land in **Phase 13** (`linux-cpu`); host compute daemons, the Lima/WSL2
+providers, and the headless Apple-Metal fixed-bridge build land in **Phase 28** (`apple`); the in-cluster CUDA path is exercised in
+**Phase 27** (`linux-cuda`). This doc never maintains a competing status ledger; it states the target shape
 and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
 ---

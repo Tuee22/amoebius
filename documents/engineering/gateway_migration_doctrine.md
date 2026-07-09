@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/dsl_doctrine.md, documents/engineering/tla_modelling_assumptions.md, DEVELOPMENT_PLAN/phase_09_multicluster_spawn_georeplication.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for how amoebius moves the wild-ingress gateway between clusters — the typed `GatewayMigration = <Planned | Failover>` taxonomy, the planned strong-consistency handover, the unplanned survivor-wins failover, and the client-rebind protocol that keeps a live session bindable throughout.
@@ -91,7 +91,7 @@ quiesce + verify-caught-up gate makes "authority moved to a target that had not 
 a state the protocol does not enter; the typed migration relation ([§6](#6-honesty-and-layer-markers)) carries
 no arm that repoints before the caught-up edge is observed. The foreclosure technique is the GADT-indexed
 state machine ([§5](#5-the-migration-as-a-typed-edge-observed-state-machine);
-[illegal_state_catalog.md §4.3](./illegal_state_catalog.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)),
+[illegal_state_catalog.md §4.3](../illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)),
 and the honest limit is that the caught-up edge is **runtime-observed**, not a constructive impossibility
 ([§6](#6-honesty-and-layer-markers)).
 
@@ -123,7 +123,7 @@ and the reconciliation of divergent histories are owned by
 [chaos_failover_doctrine.md §16–§19](./chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
 and its
 [Appendix B](./chaos_failover_doctrine.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question);
-the formal model is [tla_modelling_assumptions.md](./tla_modelling_assumptions.md) (Phase 9).
+the formal model is [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) (Phase 29).
 
 **Reconciliation on the primary's return** (summarized; owned by
 [chaos_failover_doctrine.md Appendix B](./chaos_failover_doctrine.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question)):
@@ -142,7 +142,7 @@ by the data-loss budget.
 Repointing DNS is not sufficient on its own. DNS TTL and resolver caching leave a window in which a client
 still resolves the old gateway address; if the old gateway is hard-stopped at the ingress, a mid-session
 client is stranded. "A session that cannot rebind to the migrated gateway" is an illegal state
-([illegal_state_catalog.md §3.44](./illegal_state_catalog.md#344-a-session-that-cannot-rebind-on-gateway-migration)).
+([illegal_state_catalog.md §3.44](../illegal_state/illegal_state_multicluster.md#344-a-session-that-cannot-rebind-on-gateway-migration)).
 
 **On the `Planned` path** a session always has a working endpoint:
 
@@ -171,7 +171,7 @@ still reached — the survivor holds the last-replicated session state and OIDC/
 
 A `Planned` migration is a GADT-indexed state machine whose transitions are ordered and gated on **observed
 edges**, never elapsed timers
-([illegal_state_catalog.md §4.3](./illegal_state_catalog.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)):
+([illegal_state_catalog.md §4.3](../illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)):
 
 ```mermaid
 flowchart LR
@@ -188,17 +188,17 @@ The `decommission(source-ingress)` state is reachable **only** from an observed 
 traffic ≈ 0), so no transition ever removes the last working endpoint for a live session. "A session in limbo
 that cannot rebind" therefore has no representable path — it is type-foreclosed by the state machine. The
 honest limit is that the `drain-complete` edge is runtime-observed, so the foreclosure is decode/runtime, not
-a constructive proof ([illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force);
+a constructive proof ([illegal_state_catalog.md §6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force);
 [§6](#6-honesty-and-layer-markers)).
 
 ---
 
 ## 6. Honesty and layer markers
 
-Everything in this document is **design intent for Phase 9** (multi-cluster: amoebic spawning +
+Everything in this document is **design intent for Phase 29** (multi-cluster: amoebic spawning +
 geo-replication + gateway/DNS failover). Nothing here is built or verified today. Phase order, status, and
 the acceptance gate are owned by
-[DEVELOPMENT_PLAN/README.md → Phase 9](../../DEVELOPMENT_PLAN/README.md); this document never restates phase
+[DEVELOPMENT_PLAN/README.md → Phase 29](../../DEVELOPMENT_PLAN/README.md); this document never restates phase
 status.
 
 - The `Planned` branch's **RPO=0** and its "committed-write-loss is unrepresentable" foreclosure are
@@ -209,7 +209,7 @@ status.
   this is stated as an assumption/argument, never as a proven or tested result.
 - The `Failover` branch's async correctness is an **open proof obligation** owned by
   [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) and modeled, when authored, by
-  [tla_modelling_assumptions.md](./tla_modelling_assumptions.md). That model targets only the `Failover`
+  [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md). That model targets only the `Failover`
   branch; the `Planned` branch is a synchronous switchover with no async divergence to model.
 - The typed `GatewayFailover { active : ClusterId, standby : ClusterId, dnsRecord, hubRole }` forest relation
   is a **parent-owned** relation in the `RootInForceSpec`, projected read-only into each child's
@@ -224,7 +224,7 @@ status.
   design time, parameterized over N clusters; a spec is validated only by the typed, decode-foreclosed check
   that it stays within the proven envelope
   ([chaos_failover_doctrine.md §17](./chaos_failover_doctrine.md#17-the-boundary-and-its-classifier);
-  [tla_modelling_assumptions.md](./tla_modelling_assumptions.md)).
+  [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md)).
 
 ---
 
@@ -237,8 +237,8 @@ status.
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — the route53 DNS record this migration repoints (§5.1).
 - [Platform Services Doctrine](./platform_services_doctrine.md) — Keycloak owns all wild ingress; the single wild-ingress path (§9).
 - [Single Logical Data Plane Doctrine](./single_logical_data_plane_doctrine.md) — a genuine second cluster reached by gateway migration, versus remote compute attached to one data plane.
-- [Illegal-State Catalog](./illegal_state_catalog.md) — the "session that cannot rebind on migration" entry (§3.44) and the GADT-indexed-state-machine technique (§4.3).
+- [Illegal-State Catalog](../illegal_state/illegal_state_catalog.md) — the "session that cannot rebind on migration" entry (§3.44) and the GADT-indexed-state-machine technique (§4.3).
 - [DSL Doctrine](./dsl_doctrine.md) — the typed `GatewayFailover` forest relation as a parent-minted, child-projected subtree field.
-- [TLA+ Modelling Assumptions](./tla_modelling_assumptions.md) — the formal model of the `Failover` branch (Phase 9).
-- [Development Plan → Phase 9](../../DEVELOPMENT_PLAN/README.md) — phase order, status, and the failover acceptance gate.
+- [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — the formal model of the `Failover` branch (Phase 29).
+- [Development Plan → Phase 29](../../DEVELOPMENT_PLAN/README.md) — phase order, status, and the failover acceptance gate.
 - [Documentation Standards](../documentation_standards.md) — header, SSoT, and the proven/tested/assumed honesty rule.

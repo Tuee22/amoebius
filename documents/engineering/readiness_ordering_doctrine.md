@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for how amoebius sequences bring-up — a dependent starts on a
@@ -42,14 +42,14 @@ where a `sleep` is most likely to be reached for and this doctrine most necessar
 ## 2. The load-bearing limit: the spec forecloses the sequence *shape*, not the port's *liveness*
 
 This section is the readiness face
-of the catalog's [§2 load-bearing limit](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it):
+of the catalog's [§2 load-bearing limit](../illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it):
 **a type-check cannot prove a port is responsive.** Whether Vault is unsealed, whether the apiserver answers,
 whether the LB has an address — these are eventually-consistent facts about a running world, settled only by
 *looking*. No Dhall value decides them.
 
 So this doctrine does **not** claim to make a readiness race "impossible" in the running cluster. It makes
 two weaker, honest, and sufficient claims, graded on the catalog's
-[three layers](./illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force):
+[three layers](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force):
 
 - **The gate is a condition, never a duration** — `type-foreclosed` at the sanctioned surface
   ([§3](#3-readiness-is-a-condition-never-a-duration)). A "wait N milliseconds then assume ready" has no
@@ -92,10 +92,10 @@ data Readiness
 ```
 
 This is the same **no-illegal-arm** idiom the catalog uses for
-[`Rke2Servers`](./illegal_state_catalog.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)
+[`Rke2Servers`](../illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)
 (no even/zero quorum arm), `StorageBacking`
-([§3.18](./illegal_state_catalog.md#318-unbounded-storage-anywhere), no unbounded arm), and `Growable`
-([§3.21](./illegal_state_catalog.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)): the
+([§3.18](../illegal_state/illegal_state_storage.md#318-unbounded-storage-anywhere), no unbounded arm), and `Growable`
+([§3.21](../illegal_state/illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)): the
 illegal case is not rejected, it is *unspellable*. Because `Readiness` has no duration arm, the sanctioned
 sequencing combinator — the readiness gate a `Step`
 ([`dsl_doctrine.md` §2](./dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic))
@@ -119,14 +119,14 @@ host-level bootstrap tier ([§5](#5-the-bootstrap-tier-local-observed-witnesses-
 
 The *order* is not authored either. amoebius already derives connectivity — a NetworkPolicy is *generated*
 from the declared dependency graph, never hand-written
-([`illegal_state_catalog.md` §3.6](./illegal_state_catalog.md#36-blocking-networkpolicy-services-cant-reach-each-other)),
+([`illegal_state_catalog.md` §3.6](../illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other)),
 and a toleration is *projected* from a node taint, never typed
-([§3.22](./illegal_state_catalog.md#322-a-hand-authored-un-derived-toleration)). Bring-up ordering rides the
+([§3.22](../illegal_state/illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration)). Bring-up ordering rides the
 **same declared dependency graph**:
 
 - **A start-handle exists only once its dependency's `Ready` edge does.** A dependent's "may-start"
   handle is constructed *from* the upstream's `Readiness`, exactly the
-  [catalog §4.3](./illegal_state_catalog.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
+  [catalog §4.3](../illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
   "a handle exists only once its edge does" discipline that already gates a `.ready`-sentinel `ArtifactRef`
   and an evidence-gated `PromotionGate`. A "start B before A is ready" edge has no constructor.
 - **The DAG is total and acyclic by decode.** The platform's hard ordering edges — LoadBalancer → edge,
@@ -135,7 +135,7 @@ and a toleration is *projected* from a node taint, never typed
   [`platform_services_doctrine.md` §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering),
   not a prose ordering an installer is trusted to honour. A total `mkBringUpOrder` fold rejects a **cycle** or
   an **undeclared dependency** at decode — `decode-foreclosed`, the same shape as `mkRke2`'s host-distinctness
-  fold ([§3.16](./illegal_state_catalog.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused)).
+  fold ([§3.16](../illegal_state/illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused)).
 
 The consequence: an operator cannot express *when* a service comes up — only *what it depends on being
 ready*. The order is a theorem of the dependency graph, and every edge in it is a
@@ -149,7 +149,7 @@ This is the section the vision's *"particularly in the initial cluster bootstrap
 readiness machinery — the SSA reconciler's wait-for-ready, Pulsar Failover subscriptions — does not exist yet
 during first bring-up: the host daemon is standing the cluster *up*
 ([`cluster_lifecycle_doctrine.md` §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap),
-[`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected)).
+[`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)).
 A `sleep` is most likely to be reached for here, precisely because no readiness signal is yet available to
 observe. The rule holds anyway, using the two primitives the host tier *does* have:
 
@@ -214,7 +214,7 @@ discipline once; each site keeps its own SSoT and is cited, never restated:
 | Daemon `/readyz`, no-`threadDelay` | a daemon self-reporting ready by a timer | `runtime-checked` discipline (forbids the timer) | [daemon_topology §6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine) |
 
 The catalog entry that turns "a duration-gated / hand-ordered bring-up sequence" into a foreclosed illegal
-state is [`illegal_state_catalog.md` §3.41](./illegal_state_catalog.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race).
+state is [`illegal_state_catalog.md` §3.41](../illegal_state/illegal_state_lifecycle.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race).
 
 ---
 
@@ -224,9 +224,9 @@ This document is normative readiness-ordering doctrine only. Delivery sequencing
 validation gates, and remaining work are owned by
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the **bootstrap-tier** rule — `discover`/`RuntimeWitness` gates, no timers,
-the host-daemon→singleton handoff — rides **Phase 2** with the `chain`/`Step` kernel and idempotent kind
-bring-up; the **typed `Readiness` gate** and the [§3.41](./illegal_state_catalog.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race)
-catalog foreclosure land in **Phase 4** with the orchestration DSL and the control-plane singleton. This doc
+the host-daemon→singleton handoff — rides **Phases 10 and 13** with the `chain`/`Step` kernel and idempotent kind
+bring-up; the **typed `Readiness` gate** and the [§3.41](../illegal_state/illegal_state_lifecycle.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race)
+catalog foreclosure land in **Phase 20** with the orchestration DSL and the control-plane singleton. This doc
 states the target shape and links back for status.
 
 > **Honesty.** Everything here is Phase 0 design intent, specified before implementation. The reconciler's
@@ -239,9 +239,9 @@ states the target shape and links back for status.
 ## Cross-references
 
 - [Engineering Doctrine Index](./README.md)
-- [Illegal State Catalog](./illegal_state_catalog.md) — [§3.41](./illegal_state_catalog.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race) the readiness race as a foreclosed illegal state; [§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)/[§6](./illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) the load-bearing limit and the three layers
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§3.41](../illegal_state/illegal_state_lifecycle.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race) the readiness race as a foreclosed illegal state; [§2](../illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)/[§6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) the load-bearing limit and the three layers
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — [§2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap) init-follows-readiness, [§9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) the reconciler that enacts every edge
-- [Bootstrap Sequence Doctrine](./bootstrap_sequence_doctrine.md) — [§4](./bootstrap_sequence_doctrine.md#4-the-host-daemon--singleton-handoff) consumes the [§5](#5-the-bootstrap-tier-local-observed-witnesses-never-timers) handoff trigger (`/readyz` + election-commit) as the host-daemon→singleton gate
+- [Bootstrap Sequence Doctrine](./bootstrap_sequence_doctrine.md) — [§4](./bootstrap_sequence_doctrine.md#4-the-host-daemon--singleton-handoff) consumes the [§5](#5-the-bootstrap-tier-local-observed-witnesses-never-timers) handoff trigger (`/readyz` + singleton-ready) as the host-daemon→singleton gate
 - [Platform Services Doctrine](./platform_services_doctrine.md) — [§11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering) the derived bring-up DAG
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — [§4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) ready-before-consumer / fail-closed
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine) the daemon spine forbids `threadDelay`/`sd_notify`/marker probes

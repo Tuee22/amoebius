@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/content_addressing_doctrine.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/pulsar_client_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the principle that amoebius **lifts the proven primitives** of the sibling projects (`prodbox`, `hostbootstrap`, `infernix`, `jitML`) and **re-homes them onto amoebius seams**, rather than reimplementing them — so amoebius's own work is the *composition and the typed surface*, not the numerics, the inference orchestration, or the deployment mechanics that already exist and run.

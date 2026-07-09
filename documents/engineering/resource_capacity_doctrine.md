@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the amoebius capacity model — the `Capacity` / `Demand` / `Budget`
@@ -42,11 +42,10 @@ the cloud quota ([pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md)), and the Pu
 ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)). Each number has exactly one owner elsewhere; this
 doc owns only the *placement / does-not-exceed* relation over them. The **catalog** of which capacity states are
 illegal and the technique that forecloses them is
-[illegal_state_catalog.md §3.17-§3.21 / §4.6](./illegal_state_catalog.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded); this doc is the normative home of
+[illegal_state_catalog.md §3.17-§3.21 / §4.6](../illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded); this doc is the normative home of
 the model that catalog names.
 
-Everything below is **design intent for Phase 4** (the type discipline) with runtime realization in Phases
-2/4/7/10. Status and gates live only in
+Everything below is **design intent for Phase 4** (the type discipline) with runtime realization in Phases 7, 28, and 30. Status and gates live only in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -60,7 +59,7 @@ uninhabitable-by-type proof.** Dhall (and the GADT-indexed Haskell it decodes in
 arithmetic**: capacity is a *value*, not a type index, so neither "a feasible packing exists" nor "the sum fits"
 can be a statement about type inhabitance. Each is a **total smart constructor / fold** that inspects a
 constructible value and rejects it (`Left Overcommit` / `Left Unschedulable`) at decode. Per the three
-foreclosure layers ([illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
+foreclosure layers ([illegal_state_catalog.md §6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
 this is decode-foreclosed: a *spec-layer guarantee* (the spec never reaches the interpreter), but a *checked rejection*,
 not an absence of inhabitants. Any doc that calls a capacity check "uninhabitable" is reporting the wrong layer,
 and this doc forbids that.
@@ -165,7 +164,7 @@ The fold is four total functions (decode-foreclosed checked rejections, [§2](#2
   capacity, returning the leftover headroom or `Left Overcommit` with the offending axis and magnitudes.
 - **`podFits :: Demand -> Node -> Bool`** — the per-pod placement primitive: one pod's `requests` against one
   node's *allocatable* `Capacity` **and** that node's affinity/taint eligibility
-  ([illegal_state_catalog.md §3.5](./illegal_state_catalog.md#35-undeployable-pods-taints-tolerations--affinity)).
+  ([illegal_state_catalog.md §3.5](../illegal_state/illegal_state_capacity.md#35-undeployable-pods-taints-tolerations--affinity)).
   A pod that satisfies `podFits` on *no* eligible node (or, in the elastic case, no candidate instance type)
   is `Left Unschedulable` immediately. This is the check the old aggregate sum omitted.
 - **`carve :: Capacity -> Demand -> Either Overcommit Capacity`** — allocate a sub-capacity (a VM out of a
@@ -178,7 +177,7 @@ The fold is four total functions (decode-foreclosed checked rejections, [§2](#2
   ([cluster_topology_doctrine.md](./cluster_topology_doctrine.md) owns the `Topology`; this doc owns the
   placement/envelope arithmetic over it.)
 
-The nesting is where the illegal states [§3.17](./illegal_state_catalog.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded) (I5/I6/I7) live:
+The nesting is where the illegal states [§3.17](../illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded) (I5/I6/I7) live:
 
 - **Host → engine.** A `kind`/`rke2`/VM compute engine's `Demand` on its host must `fits` the host `Capacity`
   (I5, I6). This is the same fold whether the "host" is a physical machine or a VM carved from one.
@@ -203,7 +202,7 @@ The nesting is where the illegal states [§3.17](./illegal_state_catalog.md#317-
   The three-way fit — the co-resident VM carve + the worker `Demand` ≤ physical-host allocatable, with the host
   binary's own footprint already netted into system-reserved (substrate §8) — is a **decode-foreclosed `Left Overcommit`
   at decode**, the host-tier analogue of the pod-tier aggregate overcommit
-  ([illegal_state_catalog.md §3.17](./illegal_state_catalog.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded));
+  ([illegal_state_catalog.md §3.17](../illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded));
   it is **never** "unrepresentable" — a capacity check is decode-foreclosed, never type-foreclosed ([§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed)).
 - **Accelerator worker → served-model (VRAM).** The one wholesale accelerator worker on a node
   ([daemon_topology_doctrine.md §4](./daemon_topology_doctrine.md)) carves the node's accelerator memory among
@@ -224,7 +223,7 @@ against the new bound, so growth never silently invalidates an earlier check.
 a `Topology` is one cluster ([cluster_topology_doctrine.md §4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction)),
 so a capacity fold spanning two clusters' `Topology`s has **no constructor — type-foreclosed by arity**
 ([§9.1](#91-the-cross-cluster-capacity-fold-is-a-type-foreclosed-non-goal-single-cluster-by-arity),
-[illegal_state_catalog.md §3.31](./illegal_state_catalog.md)). A **stretched cluster** — one whose nodes span
+[illegal_state_catalog.md §3.31](../illegal_state/illegal_state_catalog.md)). A **stretched cluster** — one whose nodes span
 two network-locality `Site`s across a WAN — is still **one** `Topology`; `place` runs **once** over it. The WAN
 there spans **nodes inside the one fold** (a full stretched member node) or a **host-worker subprocess client
 outside the cluster** (a stretched host worker), never two clusters. A stretched host worker is **not** a pod in
@@ -337,8 +336,8 @@ Growable = Bounded Capacity | Autoscaled ScalingPolicy
   and enacted by the host reconciler — **never** a `ScalingPolicy`/autoscale action, because etcd membership
   is a consensus decision, not an elastic-capacity one. So the elastic axis and the quorum axis stay
   orthogonal: the price-shopping / threshold policy above ranges over agents; the fold re-runs ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting), below)
-  against the grown *agent* set only. This is **Phase-10 design intent** (the `ScalingPolicy` enaction lands
-  in Phase 10, [§10](#10-planning-ownership)); the closed-union quorum shape it relies on is type-foreclosed and owned by cluster topology, not
+  against the grown *agent* set only. This is **Phase-30 design intent** (the `ScalingPolicy` enaction lands
+  in Phase 30, [§10](#10-planning-ownership)); the closed-union quorum shape it relies on is type-foreclosed and owned by cluster topology, not
   claimed here.
 - **The fold re-runs after growth ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)).** A `Growable` budget the fold checked at decode is re-checked
   against the grown capacity when the policy fires — so "unbounded" MinIO/Pulsar is representable **only**
@@ -365,7 +364,7 @@ the *two-ceiling arithmetic*):
 
 - **Hot-tier fit (availability-critical).** The offload trigger is a **size high-water mark** on the primary
   tier, not time (time may offload *sooner* for cost, but is never the sole trigger — a time-only policy is
-  uninhabitable, [illegal_state_catalog.md §3.20](./illegal_state_catalog.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)). The per-topic hot cap **plus
+  uninhabitable, [illegal_state_catalog.md §3.20](../illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)). The per-topic hot cap **plus
   headroom** — the open ledger, in-flight ingest during offload, and the deletion lag — folds against the
   BookKeeper `StorageBacking`: `Σ(hot caps + headroom) ≤ bookie disk`. A hot-tier overflow is a decode-foreclosed
   decode rejection.
@@ -423,7 +422,7 @@ declaration against reality at reconcile (runtime-checked).
 
 > **Honesty.** This model is Phase-0 design intent, specified before implementation. The fold is a real
 > decode-foreclosed spec-layer guarantee *when implemented as specified*; that claim is itself about a design not yet
-> built (Phase 4). The runtime-checked cross-check and enforcement are deferred by construction. Where the
+> built (Phase 7). The runtime-checked cross-check and enforcement are deferred by construction. Where the
 > capacity arithmetic generalizes the push-back soundness proven in prodbox
 > ([cluster_lifecycle_doctrine.md §6](./cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-root-inforcespec)),
 > that is sibling evidence, not amoebius proof ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
@@ -443,7 +442,7 @@ To keep SSoT boundaries crisp:
 | Cloud quota provisioning; dynamic node provisioning enaction; per-PV EBS | [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) |
 | The Pulsar topic-lifecycle policy (retention, size-triggered offload, backlog quota) | [pulsar_client_doctrine.md §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra) |
 | The content-addressed MinIO store as a storage backing | [content_addressing_doctrine.md](./content_addressing_doctrine.md) |
-| Which capacity states are illegal and the [§4.6](./illegal_state_catalog.md#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) technique that forecloses them | [illegal_state_catalog.md](./illegal_state_catalog.md) |
+| Which capacity states are illegal and the [§4.6](../illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) technique that forecloses them | [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) |
 | Runtime enforcement (host actually caps, scheduler places, autoscaler grows, quota holds) | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md), [testing_doctrine.md](./testing_doctrine.md) |
 | Capacity/scaling as a deployment-rules surface, never app logic | [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md) |
 | The monitoring obligation types, derived surfaces, and access model (this doc owns only how their cost folds — [§9.2](#92-monitoring-cost-folds-through-the-standard-machinery-and-the-forest-has-no-parent-rollup-budget)) | [monitoring_doctrine.md](./monitoring_doctrine.md) |
@@ -458,10 +457,10 @@ closed-union / no-arm idiom that forecloses the worker pool as a fourth `Compute
 ([single_logical_data_plane_doctrine.md §2](./single_logical_data_plane_doctrine.md#2-the-two-topologies)). This
 lives in its own subsection rather than a row of the §9 table because a non-goal has no *other* owner to name in
 the "Owned by" column; it is stated once, here, and cross-referenced from [§4](#4-the-total-fold-fits-carve-place-and-the-nesting)
-and [illegal_state_catalog.md §3.31](./illegal_state_catalog.md).
+and [illegal_state_catalog.md §3.31](../illegal_state/illegal_state_catalog.md).
 
 Distributing a workload across clusters is **geo-replication** — *N* independent clusters, each running its own
-`place` over its own `Topology`, related only by async transport (Phase-9 design intent,
+`place` over its own `Topology`, related only by async transport (Phase-29 design intent,
 [app_vs_deployment_doctrine.md §9](./app_vs_deployment_doctrine.md#9-composition-one-cluster--n-geo-replicated-clusters-zero-app-change)).
 It is emphatically **not** the stateless attach pool, which is **single-cluster** and lives **inside** `place`'s
 elastic branch: [single_logical_data_plane_doctrine.md §4](./single_logical_data_plane_doctrine.md#4-the-elastic-worker-pool-the-attach-topology)
@@ -471,7 +470,7 @@ forecloses. The **reason** a cluster is the fold boundary — the phantom cluste
 `FabricMember` — is owned by [single_logical_data_plane_doctrine.md §1](./single_logical_data_plane_doctrine.md#1-why-this-doctrine-exists-two-ways-to-say-run-this-elsewhere)
 and [§3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe); this
 subsection consumes that WHY, it does not restate it. The only runtime-checked residue is the deferred geo-replication
-enaction (Phase 9). A **stretched cluster** does not breach this arity: it is **one** `Topology` whose nodes span
+enaction (Phase 29). A **stretched cluster** does not breach this arity: it is **one** `Topology` whose nodes span
 two `Site`s, folded **once** ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)).
 
 ### 9.2 Monitoring cost folds through the standard machinery, and the forest has no parent-rollup budget
@@ -504,9 +503,9 @@ improvement.
 
 This document is normative capacity doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the capacity/topology
-type discipline lands in **Phase 4** (the fold and the negative `.dhall` gate), with runtime realization of
-the storage/pulsar folds in **Phase 3/4**, the host/VM cross-check in **Phase 8**, and the `ScalingPolicy`
-enaction in **Phase 10**. This doc never maintains a competing status ledger; it states the target shape and
+type discipline lands in **Phases 4 and 7** (the negative `.dhall` gate and the capacity/topology fold), with runtime realization of
+the storage/pulsar folds in **Phases 16 and 22**, the host/VM cross-check in **Phase 28**, and the `ScalingPolicy`
+enaction in **Phase 30**. This doc never maintains a competing status ledger; it states the target shape and
 links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
 ---
@@ -514,7 +513,7 @@ links back for status, per [documentation_standards.md §6](../documentation_sta
 ## Cross-references
 
 - [Engineering Doctrine Index](./README.md)
-- [Illegal State Catalog](./illegal_state_catalog.md) — the catalog ([§3.17](./illegal_state_catalog.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)-[§3.21](./illegal_state_catalog.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)) and technique ([§4.6](./illegal_state_catalog.md#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked)) this model realizes
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — the catalog ([§3.17](../illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)-[§3.21](../illegal_state/illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)) and technique ([§4.6](../illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)) this model realizes
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the `ComputeEngine` / `Topology` the fold ranges over; owns the `Rke2Servers` quorum + `agents` pools ([§2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)/[§4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction)) that [§6](./cluster_topology_doctrine.md#6-where-topology-meets-capacity-and-lifecycle) scales agents-only
 - [Substrate Doctrine](./substrate_doctrine.md) — the node inventory + per-host capacity numbers
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — per-volume sizing + the `StorageBacking` union

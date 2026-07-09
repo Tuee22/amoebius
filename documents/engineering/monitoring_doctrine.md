@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/illegal_state_catalog.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Make monitoring a mandatory, non-vacuous property of a workflow and of an extension — so an
@@ -25,7 +25,7 @@ nobody is alerted on.
 **Why the obvious alternative fails.** The tempting fix is an *optional* monitoring field plus a convention
 that operators fill it in, and a Grafana instance operators are trusted to add panels to. Optionality and
 operator diligence are exactly what the catalog rejects elsewhere: the mandatory non-optional `RetentionPolicy`
-([illegal_state_catalog.md §3.20](./illegal_state_catalog.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)) exists because "keep forever" as an optional
+([illegal_state_catalog.md §3.20](../illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)) exists because "keep forever" as an optional
 default is a disk-full outage, and `TestTopology`'s non-optional `teardown`
 ([testing_doctrine.md](./testing_doctrine.md)) exists because "tear down if the operator remembers" leaks
 resources. An optional monitor is monitored-if-remembered.
@@ -34,7 +34,7 @@ resources. An optional monitor is monitored-if-remembered.
 the surfaces it drives are **derived** from that field, never hand-authored. A `Workflow` without a
 `WorkflowMonitor`, a `RouteEntry` without a `Liveness`, and an `ExtensionSpec` without its `extMonitoring`
 surfaces each have **no inhabitant** ([§2](#2-the-three-mandatory-obligations)). This is the
-required-field-by-construction technique ([illegal_state_catalog.md §4.1](./illegal_state_catalog.md#41-pvcpv-binding-by-construction)) applied to observability, and it
+required-field-by-construction technique ([illegal_state_catalog.md §4.1](../illegal_state/illegal_state_techniques.md#41-pvcpv-binding-by-construction)) applied to observability, and it
 mirrors the `TrainBudget` `Continuous`-requires-`checkpointCadence` foreclosure
 ([content_addressing_doctrine.md](./content_addressing_doctrine.md)).
 
@@ -136,7 +136,7 @@ The operator sees monitoring two ways, both on pre-existing surfaces:
   ([platform_services_doctrine.md §7](./platform_services_doctrine.md#7-prometheus--grafana--observability-is-not-an-add-on)). This adds panels, not a new browser surface.
 - **The `workflow-health` read-model (typed).** A compacted `workflow-health` Pulsar topic is projected
   through the existing compaction + TableView machinery ([pulsar_client_doctrine.md §5.1](./pulsar_client_doctrine.md#51-two-derived-capabilities-read-model-and-two-deliberately-absent-ones),
-  [daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#51-the-coordination-plane-pulsar--minio--the-commit-log)) as `WorkflowName -> SLOStatus`, the first
+  [daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership)) as `WorkflowName -> SLOStatus`, the first
   operator-facing TableView beside the internal leader-election one. The singleton produces the projection
   inside its existing reconcile loop — no new container — and the operator reads it via a `pb workflow health`
   verb on the singleton admin REST ([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)).
@@ -163,11 +163,11 @@ another user's data, is a data-exposure defect that a convention ("remember to g
 
 **Why the obvious alternative fails.** An optional `public : Bool` or an ungated default route is the same
 optionality [§1](#1-monitoring-is-a-property-of-the-workflow-not-a-bolt-on) rejects, and it reproduces the
-insecure-ingress state the catalog already forecloses ([illegal_state_catalog.md §3.7](./illegal_state_catalog.md#37-accidental-insecure--backdoor-ingress)).
+insecure-ingress state the catalog already forecloses ([illegal_state_catalog.md §3.7](../illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)).
 
 **The chosen rule.** `AccessScope` has no `Public` arm, so an unauthenticated monitoring surface has no
 inhabitant — reinforcing the existing rule that only the Keycloak edge holds `ExposeToWild`
-([illegal_state_catalog.md §3.7](./illegal_state_catalog.md#37-accidental-insecure--backdoor-ingress)); every surface reaches the browser only through that edge
+([illegal_state_catalog.md §3.7](../illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)); every surface reaches the browser only through that edge
 ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)). Two arms:
 
 - **`AdminGlobal`** — the single admin identity. There is exactly one admin login, named in the `InForceSpec`
@@ -183,7 +183,7 @@ inhabitant — reinforcing the existing rule that only the Keycloak edge holds `
 
 **What it forecloses.** The type does **not** introduce a per-user ownership grain: ownership stops at
 app/namespace and tenant/cluster-subtree ([content_addressing_doctrine.md](./content_addressing_doctrine.md),
-[illegal_state_catalog.md §4.2](./illegal_state_catalog.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)). A `UserScoped` surface that leaks another user's data is therefore a
+[illegal_state_catalog.md §4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)). A `UserScoped` surface that leaks another user's data is therefore a
 Keycloak-auth-rule bug, runtime-checked ([§8](#8-the-three-foreclosure-layers)), not type-foreclosed. Extending the phantom-tenant-tag
 machinery to a user index — so a cross-user leak is uninhabitable — is a later hardening, recorded here as an
 open question, not built.
@@ -232,7 +232,7 @@ fabric's invariants are rejected.
   the synchronous cross-cluster RPC / multicluster service-mirroring ruled actively anti-doctrinal
   ([network_fabric_doctrine.md](./network_fabric_doctrine.md)). So in-cluster parent→child telemetry is
   foreclosed by the same isolation invariant that makes cross-tenant references unrepresentable
-  ([illegal_state_catalog.md §3.10](./illegal_state_catalog.md#310-a-child-spec-that-reaches-beyond-its-own-subtree)). The accepted cross-forest viewer is the out-of-forest
+  ([illegal_state_catalog.md §3.10](../illegal_state/illegal_state_security.md#310-a-child-spec-that-reaches-beyond-its-own-subtree)). The accepted cross-forest viewer is the out-of-forest
   human operator, whose laptop reaches each cluster's own Grafana and `pb` admin plane through Keycloak — a
   privileged admin path, not a forest data edge.
 
@@ -274,9 +274,9 @@ budget (`Σ derived rules ≤ declared rule-capacity`) closes this and is record
 
 ## 8. The three foreclosure layers
 
-Per the honesty discipline ([illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force),
+Per the honesty discipline ([illegal_state_catalog.md §6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force),
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)), each guarantee names the layer it reaches. The
-monitoring obligation is the same three-way split `RetentionPolicy` publishes ([illegal_state_catalog.md §3.20](./illegal_state_catalog.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)),
+monitoring obligation is the same three-way split `RetentionPolicy` publishes ([illegal_state_catalog.md §3.20](../illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)),
 not a flat "type-foreclosed":
 
 - **type-foreclosed** — field *presence* (`monitor`, `liveness`, `extMonitoring`), the `NonEmpty` lists, and
@@ -284,12 +284,12 @@ not a flat "type-foreclosed":
   omitting its obligation, a "monitoring off" value, or a public surface has no syntax and no inhabitant.
 - **decode-foreclosed** — non-vacuousness of the bounds (refinement smart constructors on `Freshness`,
   `ErrorBudget`), coverage across derived topics (a relation-over-a-collection fold that, per
-  [illegal_state_catalog.md §4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection), degrades to a decode-foreclosed fold and is **never**
+  [illegal_state_catalog.md §4.7](../illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection), degrades to a decode-foreclosed fold and is **never**
   type-foreclosed), feasibility (`MonitoringInfeasible`), and the `routes[].workflow`-vs-`name` reconciliation
   (`UnroutedMonitor`).
 - **runtime-checked** — that the SLO is actually met, the alert actually fires, the named `/metrics` series
   actually exists, and a `UserScoped` surface actually filters correctly. These are the "a type cannot prove a
-  port is responsive" residues ([illegal_state_catalog.md §2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)), owned by
+  port is responsive" residues ([illegal_state_catalog.md §2](../illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)), owned by
   [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) and the review tier, never claimed stronger.
 
 > **Honesty.** amoebius has not built Phase 4. Every type-foreclosed and decode-foreclosed claim here is the
@@ -302,19 +302,19 @@ not a flat "type-foreclosed":
 ## 9. Planning ownership
 
 Phase order, status, and validation gates live only in
-[`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). The monitoring obligation types and the
-`validateTopology` fold land in **Phase 4**; the derived rules/panels, the baked TensorBoard renderer, the
-optional local Thanos companion, and the `workflow-health` TableView projection in **Phase 3** (Sprint 2.5);
-the orchestrator/worker SLO-status event in **Phase 5** (Sprint 4.6); the extension surfaces in **Phase 6**
-(infernix) and **Phase 7** (jitML → TensorBoard); the peer-cluster posture and the forest foreclosure in
-**Phase 9**; and the decode-rejection tests in **Phase 11**. This doc never maintains a competing status
+[`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). The monitoring obligation types land in **Phase 4** and the
+`validateTopology` fold in **Phase 7**; the derived rules/panels, the baked TensorBoard renderer, the
+optional local Thanos companion, and the `workflow-health` TableView projection in **Phases 9, 15, and 18**;
+the orchestrator/worker SLO-status event in **Phases 22–23**; the extension surfaces in **Phase 26**
+(infernix) and **Phase 27** (jitML → TensorBoard); the peer-cluster posture and the forest foreclosure in
+**Phase 29**; and the decode-rejection tests in **Phase 31**. This doc never maintains a competing status
 ledger; it states the target shape and links back for status, per
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
 ## Cross-references
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
-- [Illegal State Catalog](./illegal_state_catalog.md)
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md)
 - [The Native Pulsar Client](./pulsar_client_doctrine.md)
 - [DSL Doctrine](./dsl_doctrine.md)
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)

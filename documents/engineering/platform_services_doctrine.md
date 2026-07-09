@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define the fixed set of standard services every amoebius cluster runs (the concrete providers
@@ -74,7 +74,7 @@ Concretely (DEVELOPMENT_PLAN cross-cutting invariants):
   "mock 3-replica" pattern collapses to a `replicas=n` value.
 
 > **Honesty.** The HA-always model is *specified* here and inherited from prodbox where parts of it are
-> proven; in amoebius it is design intent for Phase 3, not a tested amoebius result. Status and gates live
+> proven; in amoebius it is design intent for Phase 18, not a tested amoebius result. Status and gates live
 > only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and
 > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)).
@@ -201,7 +201,7 @@ independent version and lifecycle, and clean per-namespace teardown.
 - **Canonical consumers.** Keycloak is the proven prodbox consumer; other standard services that need a
   relational database each get their own Patroni cluster + pgAdmin. (The registry does **not** —
   `distribution` needs no database, [§3](#3-the-registry--the-single-image-source) — which is one fewer Patroni consumer than prodbox's Harbor.) The
-  authoritative list of which standard services take a database is a Phase 3 delivery detail tracked in
+  authoritative list of which standard services take a database is a Phase 18 delivery detail tracked in
   [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), not frozen here.
 - **Storage is not owned here.** Retained PVs, the `<namespace>/<statefulset>/pv_<integer>` naming, sizing,
   and deterministic rebind are owned by [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md).
@@ -215,7 +215,7 @@ WAN, LAN, and even a localhost *browser* connection — enters through the LoadB
 through the Gateway API, and is authenticated by Keycloak before it reaches any workload. No app publishes
 its own ingress; no chart opens a backdoor NodePort to the wild. Keycloak owning all wild ingress is
 the only sanctioned ingress shape, and the DSL makes the alternatives unrepresentable
-(see [dsl_doctrine.md](./dsl_doctrine.md) and [illegal_state_catalog.md](./illegal_state_catalog.md)).
+(see [dsl_doctrine.md](./dsl_doctrine.md) and [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)).
 
 - **The LoadBalancer is the one substrate-driven difference.** MetalLB on bare-metal / kind; a cloud LB
   (e.g. the AWS Load Balancer Controller) on provider-managed substrates. The *choice* of LB is owned by
@@ -254,7 +254,7 @@ hand-authored. An app declares which services it consumes; amoebius generates th
 exactly those edges are allowed and every other is denied. A service that does not declare consuming `B`
 cannot reach `B`. Consequently a blocking NetworkPolicy that severs a declared dependency, and an open
 policy that exposes an undeclared one, are both **unrepresentable**. This subsection is the SSoT for the
-connectivity rule that [illegal_state_catalog.md §3.6](./illegal_state_catalog.md#36-blocking-networkpolicy-services-cant-reach-each-other) turns into a
+connectivity rule that [illegal_state_catalog.md §3.6](../illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other) turns into a
 compile-time impossibility.
 
 ### Tolerations are derived from node taints, never hand-authored
@@ -267,7 +267,7 @@ taints owned by the node inventory ([substrate_doctrine.md §8](./substrate_doct
 — so a `Toleration` handle exists only once its taint edge does. Consequently the decode rejects a workload
 unless **there exists** a node satisfying its affinity **and** tolerating all its taints: a schedulability
 *existence fold* over the single node inventory, never a `Pending` pod. This subsection is the SSoT for the
-derivation rule that [illegal_state_catalog.md §3.5](./illegal_state_catalog.md#35-undeployable-pods-taints-tolerations--affinity) / [§3.22](./illegal_state_catalog.md#322-a-hand-authored-un-derived-toleration) turns into a
+derivation rule that [illegal_state_catalog.md §3.5](../illegal_state/illegal_state_capacity.md#35-undeployable-pods-taints-tolerations--affinity) / [§3.22](../illegal_state/illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration) turns into a
 compile/decode-time impossibility (type-foreclosed for the derived-toleration shape, decode-foreclosed for the existence fold).
 
 ---
@@ -292,7 +292,7 @@ cgroup ceiling (throttle/OOM), a runtime-checked enforcement fact, never summed 
 `requests ≤ limits` per axis (and `requests == limits` for gpu, which cannot be overcommitted). Whether this
 requirement is lifted into the Dhall type layer (so an under-declared workload is *unrepresentable*, not merely
 rejected at render time) is catalogued by
-[illegal_state_catalog.md](./illegal_state_catalog.md), which is the SSoT for which platform invariants are
+[illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md), which is the SSoT for which platform invariants are
 type-enforced.
 
 **Host-level worker subprocesses declare cpu/mem too — the host-worker `Demand` source.** This round extends
@@ -309,7 +309,7 @@ supplies only the declaration; the host-tier fold that packs it is owned there.
 This doc owns only the **per-container and per-host-worker declaration** — the atom. The **aggregate** — that a cluster's workloads
 admit a feasible placement of their `requests` against the cluster's allocatable `Capacity` (and, nested, that
 an engine/VM does not exceed its host) — is owned by [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) (the
-[§4.6](./illegal_state_catalog.md#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) capacity-accounting fold, [illegal_state_catalog.md §3.17](./illegal_state_catalog.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)/[§3.27](./illegal_state_catalog.md#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing)), which *reads*
+[§4.6](../illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) capacity-accounting fold, [illegal_state_catalog.md §3.17](../illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)/[§3.27](../illegal_state/illegal_state_capacity.md#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing)), which *reads*
 these per-container declarations. There is no second capacity fold here: this doc supplies the atoms (the
 `requests`), the capacity doctrine packs them.
 
@@ -324,7 +324,7 @@ of [readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md): each is a
 observed ready), never an elapsed duration, and the order is derived from the declared dependency graph — not a
 prose sequence an installer is trusted to honour. The catalog turns a duration-gated or hand-ordered bring-up
 into a foreclosed illegal state at
-[illegal_state_catalog.md §3.41](./illegal_state_catalog.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race).
+[illegal_state_catalog.md §3.41](../illegal_state/illegal_state_lifecycle.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race).
 
 - **LoadBalancer before the Envoy/Gateway edge** — the Gateway needs an LB address to publish a listener.
 - **MinIO before the registry** — the `distribution` registry stores its blobs via MinIO's S3 API
@@ -384,7 +384,7 @@ host tooling that brings these services up is discovered lazily through the subs
 invoked by full path — there is no `PATH`-based discovery anywhere in the bring-up sequence.
 
 > **Honesty.** Where this section generalizes a behaviour proven in prodbox, that proof is *evidence from a
-> sibling system*, not proof in amoebius — which has not yet built Phase 3. Read every prescriptive
+> sibling system*, not proof in amoebius — which has not yet built Phase 18. Read every prescriptive
 > statement here as design intent, never as a tested amoebius result.
 
 ---
@@ -393,7 +393,7 @@ invoked by full path — there is no `PATH`-based discovery anywhere in the brin
 
 This document is normative platform-services doctrine only. Delivery sequencing, completion status,
 validation gates, and remaining work are owned by
-[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (platform services land in **Phase 3**).
+[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (platform services land in **Phase 18**).
 This doc never maintains a competing status ledger; it states the target shape and links back for status.
 
 ---
@@ -411,7 +411,7 @@ This doc never maintains a competing status ledger; it states the target shape a
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)
 - [DSL Doctrine](./dsl_doctrine.md)
-- [Illegal State Catalog](./illegal_state_catalog.md)
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md)
 - [Content Addressing Doctrine](./content_addressing_doctrine.md)
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md)
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md)

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for what the amoebius Dhall DSL is — a typed orchestration surface
@@ -31,7 +31,7 @@ This document owns four things about that surface:
    that enforces it.
 
 It does **not** own: the *catalog* of specific illegal states and the typing techniques that defeat each
-one ([illegal_state_catalog.md](./illegal_state_catalog.md)); the application-logic-vs-deployment-rules
+one ([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)); the application-logic-vs-deployment-rules
 *split* substance ([app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md)); the SecretRef /
 Vault / parent-injection *mechanism* ([vault_pki_doctrine.md](./vault_pki_doctrine.md)); the standard
 service *set* the DSL compiles to ([platform_services_doctrine.md](./platform_services_doctrine.md)); or the
@@ -195,7 +195,7 @@ Total composability runs along four concrete axes, each owned in detail by a sib
   [app_vs_deployment_doctrine.md §8](./app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic),
   a demo web app is *application logic that uses* its extension — **not** itself an extension (an arbitrary
   container app is never an extension) — so it composes as an ordinary app-spec fragment, and these two demo
-  web apps are the **SPA-composition fixtures** (SPA composition itself is front-loaded to Phase 1, below).
+  web apps are the **SPA-composition fixtures** (SPA composition itself is front-loaded to Phase 12, below).
 - **Child-cluster-in-parent.** The name *amoebius* is the recursion: a cluster spawns children, which
   spawn their own. A child receives only its own scoped `InForceSpec` — *"including
   their childrens'"* but nothing about siblings — and the whole tree is rolled out from the root. The
@@ -208,11 +208,11 @@ runs a workflow, and tears down resources — the same composition, with a teard
 obligation. The testing surface is owned by the testing doctrine; it is named here only as proof that even
 *testing* is expressed in the one composable DSL rather than a parallel harness language.
 
-**SPA composition, front-loaded to Phase 1.** Composing a multi-service app together with an ML-workflow
+**SPA composition, front-loaded to Phase 12.** Composing a multi-service app together with an ML-workflow
 **demo web app** (the infernix/jitML fixtures above) as **typed Dhall fragments** — a single-page-app
 composition over this same extension seam — has its *representational / type-level* validity front-loaded to
-**Phase 1**, where it is proven at the Tier-1 design/spec layer (the same authoring-time gates of
-[§5](#5-the-illegal-state-unrepresentable-contract)); only the **live SPA deploy** stays in **Phase 12**.
+**Phase 12**, where it is proven at the Tier-1 design/spec layer (the same authoring-time gates of
+[§5](#5-the-illegal-state-unrepresentable-contract)); only the **live SPA deploy** stays in **Phase 32**.
 
 ```mermaid
 flowchart TD
@@ -272,9 +272,9 @@ The `ExtensionSpec` seam is **Path 1**, and it is deliberately *not* open to the
   the one binary through its `ExtensionSpec`. This is the only extension mechanism v1 ships.
 - **v2 — Path 2 (the Haskell extension DSL).** A non-vendored third party enters *only* through the future
   **Haskell-as-DSL + custom AST checker + native JIT** — the forward pointer of [§8](#8-the-haskell-extension-dsl-forward-pointer-only), scheduled as provisional
-  **Phase 15**
+  **Phase 35**
   ([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md#candidate-phase-haskell-extension-dsl--custom-ast-checker--native-jit)).
-  Path 2 is Phase-15 design intent, not built.
+  Path 2 is Phase-35 design intent, not built.
 
 And the boundary that keeps the seam honest: **an arbitrary container app is NOT an extension.** A party
 unwilling to be linked gets no `ExtensionSpec`; it runs as an ordinary app-spec `.dhall` workload —
@@ -302,7 +302,7 @@ The relation between them is itself typed: **a `ModelArtifact` must be servable 
 on the deployment's substrate** — an unmatched model has no landing engine (a decode-foreclosed total relation over
 the substrate's engine set, the same topology-relation-over-a-collection technique [§5](#5-the-illegal-state-unrepresentable-contract) defers to the catalog).
 The *detail* of all three — the no-`Url` closure, the `.ready`-plus-provenance-witness gate, and the model↔engine match — is owned by
-[illegal_state_catalog.md §3.25](./illegal_state_catalog.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) and
+[illegal_state_catalog.md §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) and
 [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss); this doc records only that the
 extension seam *carries* these typed fields and defers their unrepresentability there.
 
@@ -319,7 +319,7 @@ makes an unbounded, un-checkpointed, or non-deterministically-ordered run **unre
 union shapes, the no-bare-unbounded-`Continuous` foreclosure, and the fold that keeps a `Feed`'s consumed
 prefix content-addressed rather than cursor-keyed — is owned by
 [content_addressing_doctrine.md §4.6](./content_addressing_doctrine.md#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)
-and [illegal_state_catalog.md](./illegal_state_catalog.md), not defined here.
+and [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md), not defined here.
 
 ### The stretched-node reachability field the surface carries: `Networking`
 
@@ -331,7 +331,7 @@ field; what makes it total — that `Networking c = Gateway … | Vpn …` has *
 secure-gateway reach into wild ingress, and that a stretched shape has **no reachability witness** without a
 declared `Networking c` — is owned by
 [network_fabric_doctrine.md §5](./network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric)
-and [illegal_state_catalog.md §4.3](./illegal_state_catalog.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed),
+and [illegal_state_catalog.md §4.3](../illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed),
 never here.
 
 ---
@@ -352,7 +352,7 @@ resource overcommit, compute-engine/substrate incompatibility, illegal cluster t
 and un-tiered topic lifecycles) and the **techniques** that defeat each (capability/phantom tags,
 GADT-indexed state machines, ownership indices, content-address totality, the capacity-accounting fold, and
 topology relations over a collection) are owned in full by
-[illegal_state_catalog.md](./illegal_state_catalog.md) — do not look for them restated here.
+[illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) — do not look for them restated here.
 
 ### Gate 1 — the Dhall typechecker
 
@@ -386,13 +386,13 @@ The two gates compose: Gate 1 rejects what is not even well-typed Dhall; Gate 2 
 Dhall but not a legal amoebius world. What survives both is, by construction, a deployable cluster
 description — which is exactly *"if it decodes, it is deployable."*
 
-**Where the two gates are discharged: front-loaded to Phase 1 (Tier 1).** Both gates are *in-process,
+**Where the two gates are discharged: front-loaded to the pre-cluster gates, Phases 4–6 (Tier 1).** Both gates are *in-process,
 design-time* checks with no real resource behind them — Gate 1 is `dhall type` at authoring time, Gate 2 is
 the in-process `Dhall.inputFile auto` decode plus a QuickCheck exercise of the decoder's ADTs. Their
-integrity is therefore **discharged in-process in the front-loaded Phase 1** — the Tier-1 design/spec layer
+integrity is therefore **discharged in-process in the front-loaded pre-cluster gates (Phases 4–6)** — the Tier-1 design/spec layer
 (dhall typecheck + decoder + QuickCheck), which needs no cluster. What stays deferred is only the **Tier-2
 runtime-enforcement residue** — that the *running* cluster enforces what the typed spec composed — owned by
-**Phase 4**. A green typecheck or decode proves the spec composes, not that the cluster enforces it.
+**Phase 20**. A green typecheck or decode proves the spec composes, not that the cluster enforces it.
 
 ### Recursion: a child's spec is a typed subtree projection
 
@@ -408,7 +408,7 @@ same rule one level down, delivering each frame's minted context on the lift's `
 only in **transport**;
 the at-rest encryption under a per-child Transit key (so a child cannot even decrypt a sibling's subtree) is
 owned by [vault_pki_doctrine.md §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes); the
-unrepresentability is catalogued at [illegal_state_catalog.md §3.10](./illegal_state_catalog.md#310-a-child-spec-that-reaches-beyond-its-own-subtree). This doc
+unrepresentability is catalogued at [illegal_state_catalog.md §3.10](../illegal_state/illegal_state_security.md#310-a-child-spec-that-reaches-beyond-its-own-subtree). This doc
 owns only the `ChildInForceSpec` type and its projection.
 
 **Inter-cluster relations are parent-owned, projected read-only.** A relation with two cluster endpoints — a
@@ -425,13 +425,13 @@ and its parent-minted projection, which — like the rest of the extension surfa
 its building phase, not yet built.
 
 > **Honesty.** The *strength* of this contract is a property of the type designs catalogued in
-> [illegal_state_catalog.md](./illegal_state_catalog.md). This doc states the contract and the decode
+> [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md). This doc states the contract and the decode
 > mechanism; it does **not** claim any specific illegal state is *proven* unrepresentable — that claim is
 > made, state by state, only where the catalog exhibits the type that excludes it. Per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), a typing argument is evidence, not a
-> tested or proven result: the two gates' in-process integrity is front-loaded to Phase 1 (Tier 1), while
+> tested or proven result: the two gates' in-process integrity is front-loaded to the pre-cluster gates, Phases 4–6 (Tier 1), while
 > runtime enforcement — that the running cluster enforces what the spec composed — stays the Tier-2 residue
-> deferred to Phase 4.
+> deferred to Phase 20.
 
 ---
 
@@ -494,7 +494,7 @@ This doc is the SSoT for the **orchestration** DSL (the Dhall surface). The **ex
 Haskell-as-DSL plus its custom AST checker and native JIT — is a scheduled **later phase**, not specified
 here. In [§4](#4-total-composability)'s extension taxonomy this is **Path 2** — the *only* path by which a non-vendored third party
 extends amoebius (Path 1, the closed linked set `{infernix, jitML}`, is vendored) — scheduled
-as provisional **Phase 15**
+as provisional **Phase 35**
 ([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md#candidate-phase-haskell-extension-dsl--custom-ast-checker--native-jit)).
 See also the "Later phases" entry in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). It is named here only so the
@@ -527,16 +527,16 @@ This document is normative DSL doctrine only. Delivery sequencing, completion st
 remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). The
 orchestration Dhall DSL's **in-process contract validation** — the two typed gates of
 [§5](#5-the-illegal-state-unrepresentable-contract) that make an illegal spec fail to type-check (Tier 1:
-dhall typecheck + decoder + QuickCheck) — is **front-loaded to Phase 1**, while the DSL's
-**runtime-enforcement** half (the live deploy + elected-singleton reconcile that makes the running cluster
-enforce what the spec composed, Tier 2) lands in **Phase 4**, atop the Phase 2 `dsl-step`/`chain` kernel
+dhall typecheck + decoder + QuickCheck) — is **front-loaded to the pre-cluster gates (Phases 4–6)**, while the DSL's
+**runtime-enforcement** half (the live deploy + singleton reconcile that makes the running cluster
+enforce what the spec composed, Tier 2) lands in **Phase 20**, atop the Phase 10 `dsl-step`/`chain` kernel
 seeded from hostbootstrap. This doc never maintains a competing status ledger; it states the target shape and
 links back for status.
 
 > **Honesty.** Everything in this doctrine is Phase 0 design intent, specified before implementation. Where
 > it borrows behaviour proven in prodbox or implemented in hostbootstrap, that is *evidence from a sibling
-> system*, not proof in amoebius — which has built neither the front-loaded Phase 1 in-process validation of
-> this contract (Tier 1: dhall typecheck + decoder + QuickCheck) nor the Phase 4 runtime enforcement (Tier 2)
+> system*, not proof in amoebius — which has built neither the front-loaded pre-cluster (Phases 4–6) in-process validation of
+> this contract (Tier 1: dhall typecheck + decoder + QuickCheck) nor the Phase 20 runtime enforcement (Tier 2)
 > that makes the running cluster enforce what the spec composed. Read every prescriptive statement here
 > as the contract amoebius intends to satisfy, never as a tested amoebius result
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
@@ -547,7 +547,7 @@ links back for status.
 
 - [Engineering Doctrine Index](./README.md)
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — [§8](./app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic) an arbitrary container app is application logic, not an extension
-- [Illegal State Catalog](./illegal_state_catalog.md) — [§3.25](./illegal_state_catalog.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) an ML asset fetched/built at pod startup, and an unready/unlanded model, are unrepresentable
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) an ML asset fetched/built at pod startup, and an unready/unlanded model, are unrepresentable
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the three-tier ML-asset lifecycle (`EngineRuntime` baked, `ModelArtifact` `.ready`-gated)
 - [Service Capability Doctrine](./service_capability_doctrine.md) — the capability surface an `ExtensionSpec` declares into
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
@@ -558,6 +558,6 @@ links back for status.
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the capacity/budget/scaling types the surface carries
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the compute-engine/topology types the surface carries
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — [§3.1](./pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor) runtime message payloads are CBOR, not Dhall
-- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — Phase 15 Haskell extension DSL ([§4](#4-total-composability)/[§8](#8-the-haskell-extension-dsl-forward-pointer-only) Path 2 for third parties)
+- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — Phase 35 Haskell extension DSL ([§4](#4-total-composability)/[§8](#8-the-haskell-extension-dsl-forward-pointer-only) Path 2 for third parties)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

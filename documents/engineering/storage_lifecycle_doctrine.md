@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define amoebius's durable-storage contract — the single `no-provisioner` retained PV model,
@@ -89,7 +89,7 @@ creation path to exactly one shape.
   durable storage is requested through the app/StatefulSet surface and nowhere else. The illegal-state
   framing — *a claim that cannot bind, or storage attached to a non-StatefulSet, is unrepresentable* — is
   owned by [dsl_doctrine.md](./dsl_doctrine.md) and catalogued in
-  [illegal_state_catalog.md](./illegal_state_catalog.md); this doc states the storage-side invariant the
+  [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md); this doc states the storage-side invariant the
   DSL enforces.
 
 Per-app durable-storage requests (block volumes, Postgres, MinIO buckets) are declared in the app spec and
@@ -167,7 +167,7 @@ node-level precondition for the cluster-level guarantee in [§6](#6-the-lossless
 ### 5.2 The storage backing is bounded — the closed `StorageBacking` union
 
 [§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim) caps each *volume*; this subsection caps the *backing* a set of volumes draws from, so "unbounded storage"
-([illegal_state_catalog.md §3.18](./illegal_state_catalog.md#318-unbounded-storage-anywhere)) has no syntax. There is no such thing as
+([illegal_state_catalog.md §3.18](../illegal_state/illegal_state_storage.md#318-unbounded-storage-anywhere)) has no syntax. There is no such thing as
 unbounded storage in amoebius: durable storage is **either** host-level (bounded by a physical disk) **or**
 cloud (bounded by a quota), encoded as a **closed union with no unbounded arm**:
 
@@ -175,7 +175,7 @@ cloud (bounded by a quota), encoded as a **closed union with no unbounded arm**:
 StorageBacking = HostDisk Capacity | Ebs Capacity | CloudQuota Quota
 ```
 
-- **No unbounded constructor** (a type-foreclosed union shape, [illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
+- **No unbounded constructor** (a type-foreclosed union shape, [illegal_state_catalog.md §6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
   a value cannot denote unbounded storage. A `HostDisk`/`Ebs` backing is bounded by a physical/EBS size; a
   `CloudQuota` backing is bounded by a quota owned by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md); the
   content-addressed MinIO store is a `HostDisk`/`CloudQuota` backing owned by
@@ -183,9 +183,9 @@ StorageBacking = HostDisk Capacity | Ebs Capacity | CloudQuota Quota
   ceiling number, so "available storage" has one definition.
 - **The aggregate fold lives elsewhere.** This doc owns the *union shape* and the per-volume sizing ([§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim));
   the **aggregate arithmetic** — `Σ(PV caps) ≤ backing`, and the Pulsar two-ceiling fold — is owned by
-  [resource_capacity_doctrine.md §5, §7](./resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm) (the [§4.6](./illegal_state_catalog.md#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) capacity-accounting
+  [resource_capacity_doctrine.md §5, §7](./resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm) (the [§4.6](../illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) capacity-accounting
   technique). An app that would consume more storage than its backing
-  ([illegal_state_catalog.md §3.19](./illegal_state_catalog.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)) is rejected by that fold at decode; "unbounded"
+  ([illegal_state_catalog.md §3.19](../illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)) is rejected by that fold at decode; "unbounded"
   is representable **only** through a `Growable` scaling policy whose ceiling is itself a quota
   ([resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)).
 
@@ -245,7 +245,7 @@ normal circumstances." amoebius takes the strong reading: **forbid it.**
   backing bytes on a retained volume. The DSL surface exposes **no** "delete this durable volume"
   primitive; a `.dhall` value cannot denote "destroy these bytes." This is the storage-side reading of the
   illegal-state contract owned by [dsl_doctrine.md](./dsl_doctrine.md) /
-  [illegal_state_catalog.md](./illegal_state_catalog.md).
+  [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md).
 - **Teardown pushes back rather than deletes.** When tearing down a cluster would strand or endanger durable
   state, the safe-teardown path warns and falls back to the `.dhall` failback instead of silently
   destroying data; the push-back/override semantics are owned by
@@ -286,7 +286,7 @@ bytes — MinIO's own backing disks, Pulsar/BookKeeper, Postgres/Patroni, and an
   MinIO ([pulumi_iac_doctrine.md §2](./pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio),
   [dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness)), decrypted
   in-process and never written to a plaintext ConfigMap, to etcd, or to a control-plane PVC
-  ([illegal_state_catalog.md](./illegal_state_catalog.md), the plaintext-spec-at-rest entry).
+  ([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md), the plaintext-spec-at-rest entry).
 - **Why the distinction matters.** It keeps the singleton disposable — k8s can reschedule it anywhere with
   no volume to re-attach and no data to lose ([§5.1](#51-storage-is-independent-of-the-node-lifecycle) applies
   to platform-service volumes, not to the control plane, because the control plane has none). MinIO itself is
@@ -341,7 +341,7 @@ To keep the SSoT boundaries crisp:
 | EBS materialization and the create-vs-delete credential model | [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) |
 | The elevated harness as sole storage deleter; flagged test resources; leak-free cycles | [testing_doctrine.md](./testing_doctrine.md) |
 | Vault seal/unseal, secret-by-name, PKI trust anchor | [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
-| Making "a PVC that can't bind" / "durable storage without a StatefulSet" unrepresentable | [dsl_doctrine.md](./dsl_doctrine.md), [illegal_state_catalog.md](./illegal_state_catalog.md) |
+| Making "a PVC that can't bind" / "durable storage without a StatefulSet" unrepresentable | [dsl_doctrine.md](./dsl_doctrine.md), [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) |
 | Substrate catalog and the host-path vs cloud-LB/EBS substrate split | [substrate_doctrine.md](./substrate_doctrine.md) |
 | App-level durable-storage requests vs deployment-rules replica counts | [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md) |
 | The aggregate capacity fold over the `StorageBacking` (`Σ` sizes `≤` backing); the `Growable` escape valve | [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) |
@@ -369,7 +369,7 @@ result: the model generalizes behaviour proven in prodbox into amoebius design i
 - [Testing Doctrine](./testing_doctrine.md)
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [DSL Doctrine](./dsl_doctrine.md)
-- [Illegal State Catalog](./illegal_state_catalog.md)
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md)
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the aggregate `StorageBacking` fold and the `Growable` escape valve
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)

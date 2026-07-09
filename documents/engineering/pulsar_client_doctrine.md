@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define `amoebius-pulsar` — the one native-protocol Haskell Pulsar client (forked from
@@ -39,7 +39,7 @@ Both transports are deleted. One native client replaces both, with four concrete
 
 > **Honesty (per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).** "Performance via the
 > native protocol" is the **design rationale** — base64 elimination, persistent producers, no process hop —
-> not a benchmarked amoebius result. amoebius has not yet built Phase 5. The WebSocket costs above are read
+> not a benchmarked amoebius result. amoebius has not yet built Phase 22. The WebSocket costs above are read
 > off the infernix/jitML source as *sibling evidence*; the amoebius speedup is expected, not measured.
 
 The no-WebSockets rule is a **locked invariant**, recorded as a standard-service fact in
@@ -67,14 +67,14 @@ It deliberately does **not** own, and only references:
 | Concern | Owner |
 |---------|-------|
 | What a payload *references* (raw content-addressed blobs, the manifest CBOR shape) — the *encoding* of the payload envelope is CBOR, owned here ([§3.1](#31-payloads-are-exclusively-cbor)) | [content_addressing_doctrine.md](./content_addressing_doctrine.md) |
-| *Who* runs producers/consumers, topic-lifecycle coordinators, leadership election | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
+| *Who* runs producers/consumers, topic-lifecycle coordinators, single-instance delegation | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
 | *How* a host daemon reaches the broker (Pulsar peer over host-only NodePort, no mTLS) | [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md) |
 | That Pulsar is a standard HA service on every cluster | [platform_services_doctrine.md §6](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox) |
 | The app-spec surface that *declares* topic lifecycles | [dsl_doctrine.md](./dsl_doctrine.md) |
 | Intra-cluster HA correctness (delegated to brokers/bookies) | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
 
 Phase order and status are owned only by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
-(the client lands in **Phase 5**); this doc states the target shape and links back, never a status ledger.
+(the client lands in **Phase 22**); this doc states the target shape and links back, never a status ledger.
 
 ---
 
@@ -129,13 +129,13 @@ The **command/metadata layer** is protobuf — that is Pulsar's own wire format 
 metadata, via `proto-lens`), and it is not amoebius's to change. The **application payload** — the raw
 `payload` tail after the metadata — is amoebius's, and it is **exclusively CBOR**. There is no JSON, no
 base64, no protobuf, and no untyped `ByteString` application payload: a Pulsar message body that is not CBOR
-is **unrepresentable** ([illegal_state_catalog.md §3.23](./illegal_state_catalog.md#323-a-non-cbor-pulsar-payload)).
+is **unrepresentable** ([illegal_state_catalog.md §3.23](../illegal_state/illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload)).
 
 - **One codec, one body format.** A payload is produced only through a typed codec — `produce` takes a
   `Serialise`-constrained value (equivalently, a `CborPayload` newtype whose sole constructor is
   `encodeCbor :: Serialise a => a -> CborPayload`). There is **no** `produceRaw :: ByteString -> …` and no
   JSON/protobuf/base64 path, so a non-CBOR payload has no inhabitant — type-foreclosed uninhabitable
-  ([illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)).
+  ([illegal_state_catalog.md §6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)).
   Consume is the mirror: `Serialise a => … -> Either DecodeError a`, a **total, fail-fast** decode — a
   corrupt or mistyped body is a structured error, never a silent misread, the posture the mandatory
   CRC32C ([§3](#3-the-native-binary-protocol)) already takes on the frame.
@@ -176,7 +176,7 @@ flowchart TD
   recv -->|decode, total Either| out[Right a, or Left DecodeError, never a silent misread]
 ```
 
-> **Honesty.** The CBOR-payload rule is Phase-5 design intent, not a tested amoebius result. Canonical CBOR
+> **Honesty.** The CBOR-payload rule is Phase-22 design intent, not a tested amoebius result. Canonical CBOR
 > is *proven in the sibling jitML content store* (`encodeManifestCbor`) — that is sibling evidence, not
 > amoebius proof ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)). The type-foreclosed claim is the
 > *produce* surface having no non-CBOR constructor; that a *received* body decodes is the same total-check /
@@ -205,7 +205,7 @@ Forking — rather than depending on the published package — is the honest cho
 
 > **Honesty.** Treat supernova as a *starting point with sibling provenance*, not a proven foundation.
 > Every capability in [§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek) is "supernova demonstrates it" or "the protocol provides it" — neither is an
-> amoebius test result. Hardening, reconnection semantics, and the dedup proof are Phase 5 work tracked in
+> amoebius test result. Hardening, reconnection semantics, and the dedup proof are Phase 22 work tracked in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -253,7 +253,7 @@ choice so the omissions are auditable, not silent.
   coordinator reconciles like retention and dedup ([§6.1](#61-topic-storage-lifecycle-bounded-tiered-retained--and-the-hot-tier-never-overflows), [§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default));
   a *TableView* is a client-side `key → latest-value` materialization over a compacted `consume`. Together
   they give the control-plane its current-state **read-model** and resolved-singleton dissemination — adopted,
-  and owned, by [daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#51-the-coordination-plane-pulsar--minio--the-commit-log) / [§5.5](./daemon_topology_doctrine.md#55-pulsar-primitives-evaluated-for-the-election--and-why-the-custom-election-stays).
+  and owned, by [daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership) / [§5.5](./daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership).
   The operator-facing `workflow-health` projection (`WorkflowName → SLOStatus`) is a second application of the
   same primitive, owned by [monitoring_doctrine.md](./monitoring_doctrine.md).
   They are a *projection*, never a decision primitive: no ownership or election logic lives in a TableView.
@@ -261,7 +261,7 @@ choice so the omissions are auditable, not silent.
   Pulsar's purpose-built single-writer-with-fencing primitive is deliberately absent from the client surface —
   it was evaluated and rejected as the control-plane election substrate (bootstrap/DR circularity; it fences
   only Pulsar-topic writes, not the external route53/Vault effects; and it is incompatible with the
-  multi-writer commit log). Full rationale: [daemon_topology_doctrine.md §5.5](./daemon_topology_doctrine.md#55-pulsar-primitives-evaluated-for-the-election--and-why-the-custom-election-stays).
+  multi-writer commit log). Full rationale: [daemon_topology_doctrine.md §5.5](./daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership).
 - **Not exposed: transactions.** Cross-topic atomicity is unused — at-least-once + broker-side dedup
   ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)) delivers exactly-once *effect* more cheaply, so a transaction coordinator earns no place
   in the surface.
@@ -272,7 +272,7 @@ choice so the omissions are auditable, not silent.
 
 **Nobody writes a topic string by hand.** A topic name is a *derived* function of a typed
 descriptor, and a routing graph that fails validation cannot be reconciled. This is the
-illegal-state-unrepresentable principle ([illegal_state_catalog.md](./illegal_state_catalog.md)) applied to
+illegal-state-unrepresentable principle ([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)) applied to
 the message bus: a malformed topology is a compile/validate error, not a runtime mystery.
 
 The algebra is generalized from jitML's `JitML.Coordinator.Topology` (`RouteEntry` / `validateTopology` /
@@ -346,7 +346,7 @@ ledgers to S3 and does **not** free BookKeeper until retention deletes them (the
 currently-open ledger can never be offloaded. So a time-only offload does not bound occupancy: if ingest ×
 offload-lag exceeds the bookie disk, BookKeeper fills, bookies go read-only, and the topic — often the
 broker — becomes **unavailable**. amoebius makes that state unrepresentable
-([illegal_state_catalog.md §3.20](./illegal_state_catalog.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)) by making a topic's lifecycle a **pure typed
+([illegal_state_catalog.md §3.20](../illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)) by making a topic's lifecycle a **pure typed
 policy**, not an operator afterthought. This is the SSoT for that policy; the DSL *surface* that carries it is
 owned by [dsl_doctrine.md](./dsl_doctrine.md), and the two-ceiling *arithmetic* by
 [resource_capacity_doctrine.md §7](./resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total).
@@ -422,7 +422,7 @@ content-address to their owner in [content_addressing_doctrine.md](./content_add
   the retained span, is the same `SEEK` primitive ([§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)) already provides for rebuild-from-log and the
   geo-replication catch-up [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) reasons about — no new client capability.
 
-> **Honesty.** The training-feed view is Phase-5-and-later design intent layered on the client, not a built
+> **Honesty.** The training-feed view is Phase-22-and-later design intent layered on the client, not a built
 > or benchmarked amoebius result. The single-active-trainer property is **delegated** to Pulsar's
 > Exclusive/Failover subscription (jitML/infernix already coordinate this way — *sibling evidence*), not an
 > amoebius election proof; per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read this as the specified composition, not a
@@ -505,7 +505,7 @@ itself is not this doc's claim.
 | infernix dedup wiring | namespace dedup policy + `(producer_name, sequence_id)` + `initialSequenceId` URL workaround | broker-side dedup with `sequence_id` as a native field ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)) |
 
 infernix and jitML remain **ML extension libraries**; they stop shipping their own transports and consume
-`amoebius-pulsar` instead — one subsystem at a time, per the Phase 6 migration in
+`amoebius-pulsar` instead — one subsystem at a time, per the Phase 26 migration in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -514,8 +514,8 @@ infernix and jitML remain **ML extension libraries**; they stop shipping their o
 
 This document is normative client doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the native client,
-the topology algebra, and the round-trip gate land in **Phase 5**, and the infernix/jitML migration onto it
-is **Phase 6**. This doc never maintains a competing status ledger.
+the topology algebra, and the round-trip gate land in **Phase 22**, and the infernix/jitML migration onto it
+is **Phases 26 (infernix) and 27 (jitML)**. This doc never maintains a competing status ledger.
 
 ---
 
@@ -530,7 +530,7 @@ is **Phase 6**. This doc never maintains a competing status ledger.
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md)
 - [Platform Services Doctrine](./platform_services_doctrine.md)
 - [DSL Doctrine](./dsl_doctrine.md)
-- [Illegal State Catalog](./illegal_state_catalog.md)
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md)
 - [Substrate Doctrine](./substrate_doctrine.md)
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

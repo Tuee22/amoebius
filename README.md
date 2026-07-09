@@ -19,8 +19,9 @@ each shipping a demo web app that is amoebius's application-logic demonstrator),
 
 - **The plan:** [`DEVELOPMENT_PLAN/README.md`](./DEVELOPMENT_PLAN/README.md) — the single, authoritative,
   numerically-ordered phased plan that delivers the vision. Phase 0 is the complete documentation suite.
-- **The doctrine:** [`documents/engineering/README.md`](./documents/engineering/README.md) — the index of
-  all engineering doctrine (the DSL, platform services, storage, secrets, runtime, verification).
+- **The doctrine:** [`documents/README.md`](./documents/README.md) — the top-level index of all doctrine:
+  the engineering family (the DSL, platform services, storage, secrets, runtime, verification) and the
+  illegal-state catalog family.
 - **How docs work:** [`documents/documentation_standards.md`](./documents/documentation_standards.md).
 
 ## Toolchain

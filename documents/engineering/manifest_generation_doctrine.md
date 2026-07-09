@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/release_lifecycle_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/release_lifecycle_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for how amoebius turns a typed cluster spec into running Kubernetes objects — a pure `render(spec)` that emits the full per-service object set from Haskell ADTs, and amoebius's own idempotent server-side-apply reconciler that applies, prunes, and waits — with **no Helm, no templating layer, and no third-party charts**.
@@ -26,7 +26,7 @@ Two reasons motivate the decision, and they are different:
   Secret exists, or that an `image:` resolves, until the apiserver rejects it (or worse, accepts something
   subtly wrong) at deploy time. The template language has no type system, so `{{ .Values.replicas }}`
   landing in a field that wants an int, or a missing `with` guard emitting `null`, is a runtime surprise.
-  This is exactly the *"valid YAML, wrong cluster"* failure class [illegal_state_catalog.md §1](./illegal_state_catalog.md#1-illegal-states-fail-to-type-check)
+  This is exactly the *"valid YAML, wrong cluster"* failure class [illegal_state_catalog.md §1](../illegal_state/illegal_state_catalog.md#1-illegal-states-fail-to-type-check)
   exists to abolish — and a string template re-opens it underneath an otherwise-typed system.
 - **A third-party chart is unreviewed YAML amoebius does not own.** Pulling `bitnami/postgresql` or an operator's
   upstream chart means running hundreds of lines of someone else's templated manifests — with their RBAC,
@@ -62,7 +62,7 @@ and *how* those objects are applied and reconciled ([§5](#5-the-applyreconcile-
 | *What* services/capabilities exist, their canonical providers, and the per-cluster deployment *shape* | [service_capability_doctrine.md](./service_capability_doctrine.md) |
 | The standard service set, HA-always, the derived-NetworkPolicy connectivity rule, the cpu/ram rule, the single ingress path | [platform_services_doctrine.md](./platform_services_doctrine.md) |
 | The DSL surface the spec decodes from, and the two typed gates | [dsl_doctrine.md](./dsl_doctrine.md) |
-| The *catalog* of unrepresentable states and the typing techniques | [illegal_state_catalog.md](./illegal_state_catalog.md) |
+| The *catalog* of unrepresentable states and the typing techniques | [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) |
 | Secrets-by-name / `SecretRef` / Vault k8s auth — a manifest never carries a plaintext secret | [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | Retained `no-provisioner` PV mechanics for StatefulSet storage | [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) |
 | The build pipeline, the baked base container, and registry refs | [image_build_doctrine.md](./image_build_doctrine.md) |
@@ -124,14 +124,14 @@ flowchart TD
 Because amoebius *generates* every object, it can make the safe shape the *only* shape — the manifest that
 omits a best practice is not a manifest the renderer can emit. Each rule below is enforced at the type/decode
 layer; the *unrepresentability* of its violation is catalogued, state by state, by
-[illegal_state_catalog.md](./illegal_state_catalog.md) (the owner — this section only names which generation
+[illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) (the owner — this section only names which generation
 rules feed it):
 
 - **Every container declares CPU and RAM.** The workload record *requires* a `Resources` field with refined
   non-zero requests and limits, so an "unlimited pod" has no inhabitant. The rule itself is owned by
   [platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram);
   whether it is a type-inhabitance or a decode-time check is classified by
-  [illegal_state_catalog.md §6](./illegal_state_catalog.md#6-three-layers-of-foreclosure-and-the-honesty-they-force).
+  [illegal_state_catalog.md §6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force).
 - **Every pod gets a hardened `securityContext`.** `render` attaches a non-root, no-privilege-escalation,
   read-only-root-filesystem-by-default, dropped-capabilities security context to every workload it emits;
   there is no code path that renders a bare pod spec. A chart amoebius does not own cannot make this promise ([§1](#1-why-this-doctrine-exists-types-render-manifests-helm-does-not)).
@@ -144,7 +144,7 @@ rules feed it):
   The connectivity rule is owned by
   [platform_services_doctrine.md §9 → east-west connectivity is derived from the dependency graph](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path),
   and the "service stranded from a dependency it declared" / "open policy for an undeclared edge" states are
-  catalogued unrepresentable at [illegal_state_catalog.md §3.6](./illegal_state_catalog.md#36-blocking-networkpolicy-services-cant-reach-each-other).
+  catalogued unrepresentable at [illegal_state_catalog.md §3.6](../illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other).
 - **Secrets are Vault-only; a manifest never carries a plaintext secret.** A rendered object references a
   secret by name and the workload reads it via Vault Kubernetes auth at runtime; the renderer has no input
   that is a literal secret value, because the spec carries only a `SecretRef`. The whole model — `SecretRef`,
@@ -205,8 +205,8 @@ desired object set and *make the cluster match it, idempotently*. amoebius's eng
 `discover → diff → enact → re-observe` reconciler of
 [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine),
 specialized from "any resource the forest can create" down to "Kubernetes objects in this cluster." It is
-**run by the elected control-plane singleton** — the in-cluster role with total cluster authority owned by
-[daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected) —
+**run by the control-plane singleton** — the in-cluster role with total cluster authority owned by
+[daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) —
 never by a CLI invocation racing another writer.
 
 The mechanism, four parts:
@@ -249,7 +249,7 @@ flowchart TD
   wait -->|failure| rollback[Re-apply last known-good generation]
 ```
 
-> **Honesty.** This engine is **design intent for Phase 3**, not a built amoebius result. SSA field
+> **Honesty.** This engine is **design intent for Phase 15**, not a built amoebius result. SSA field
 > managers, ApplySet pruning, and SSA-based drift correction are real, documented Kubernetes mechanisms;
 > *that amoebius wires them into this specific reconciler* is specified here and unproven until the phase
 > lands. The idempotent `discover → diff → enact` shape it specializes is *proven in prodbox* for AWS/cluster
@@ -277,7 +277,7 @@ data RolloutPhase = RolloutPhase
   cloud IaC) and tier (b) (checkpoint-free tag-discovery host) live in
   [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). A `RolloutPlan` introduces **no new reconciler** and no
   orchestration daemon — the plan is a `render(spec)`-derived value folded by the engine already run by the
-  control-plane singleton ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected)).
+  control-plane singleton ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)).
 - **Where the plan is owned.** The typed `RolloutPlan` / `RolloutPhase`, the `Environment` promotion pointer,
   and the `Release` a rollout advances are owned by [release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)
   (and [§2](#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects) for the ledger it advances); **this doc owns only their *enactment* on the tier-(c) reconciler.**
@@ -319,8 +319,8 @@ flowchart TD
 > `HelmPhase` → `RolloutPhase`, and enacts each phase as a `render(spec)` SSA pass with **no Helm**. This is
 > sibling evidence, not an amoebius result.
 
-> **Honesty.** The `RolloutPlan` is **Phase-3 design intent** — it rides the tier-(c) SSA reconciler, itself
-> Phase 3 and unbuilt; the DB-schema-migration `RolloutPhase` is the **deferred Phase-14** shape, proven
+> **Honesty.** The `RolloutPlan` is **Phase-15 design intent** — it rides the tier-(c) SSA reconciler, itself
+> Phase 15 and unbuilt; the DB-schema-migration `RolloutPhase` is the **deferred Phase-34** shape, proven
 > *only* as the Helm-driven pattern in the jitML sibling. Read as the contract amoebius intends, never as a
 > tested amoebius result.
 
@@ -408,7 +408,7 @@ the reconciler converges *toward*.
   and are owned by release_lifecycle_doctrine.md [§3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer)–[§4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable), not here.
 
 > **Honesty.** The release ledger is **Phase-N design intent** — it composes with the content-store phase
-> ([§9](#9-planning-ownership)) and the tier-(c) reconciler (Phase 3), neither built in amoebius. Content-addressed immutable storage
+> ([§9](#9-planning-ownership)) and the tier-(c) reconciler (Phase 15), neither built in amoebius. Content-addressed immutable storage
 > is proven mechanism; *that amoebius records each converged generation as a `releaseHash`-keyed `Release` and
 > promotes environments by CAS over it* is specified across this [§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional) and release_lifecycle_doctrine.md and is
 > unbuilt.
@@ -435,7 +435,7 @@ later, and the per-cluster shapes — is owned by [service_capability_doctrine.m
 **this doc owns only the rendering consequence**: generation, not templating, is what makes per-cluster
 structural shapes expressible while keeping each shape best-practice-by-construction ([§3](#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)).
 
-> **Honesty.** Per-cluster structural shapes are design intent (Phase 4 capability abstraction), and the
+> **Honesty.** Per-cluster structural shapes are design intent (the Phase 8 capability binder and Phase 9 per-cluster render), and the
 > reversal of prodbox's substrate-equivalence lint is a deliberate amoebius decision, not an inherited-proven
 > behaviour. prodbox's equivalence lint is the *evidence* that structural divergence is the thing worth
 > controlling; amoebius chooses to control it by typing rather than by forbidding it.
@@ -464,10 +464,10 @@ This document is normative manifest-generation-and-reconcile doctrine only. Deli
 status, validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the **typed manifest renderer and the server-side-apply reconciler** land
-with platform services in **Phase 3**; the **capability abstraction and per-cluster shapes** ride the DSL
-type-family work in **Phase 4**; the **content-addressed release ledger ([§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional))** composes with the
+with platform services in **Phases 15 and 18**; the **capability abstraction and per-cluster shapes** ride the DSL
+type-family work in **Phases 8 and 9**; the **content-addressed release ledger ([§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional))** composes with the
 content-store phase; and the **`RolloutPlan` / `RolloutPhase`** enactment ([§5.1](#51-the-rolloutplan-ordered-readiness-gated-phases-on-this-same-reconciler-tier-c)) rides the tier-(c) reconciler,
-with the DB-schema-migration phase deferred to **Phase 14**. This doc states the target shape and links back
+with the DB-schema-migration phase deferred to **Phase 34**. This doc states the target shape and links back
 for status.
 
 ---
@@ -477,7 +477,7 @@ for status.
 - [Engineering Doctrine Index](./README.md)
 - [Service Capability Doctrine](./service_capability_doctrine.md) — *what* shape each capability takes and its canonical provider; this doc owns *how* it renders
 - [DSL Doctrine](./dsl_doctrine.md) — the spec surface the renderer consumes and the two typed gates
-- [Illegal State Catalog](./illegal_state_catalog.md) — the unrepresentability of the unsafe manifests [§3](./illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent) forecloses
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — the unrepresentability of the unsafe manifests [§3](../illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent) forecloses
 - [Platform Services Doctrine](./platform_services_doctrine.md) — the standard set, the derived-NetworkPolicy rule ([§9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), the cpu/ram rule ([§10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)), substrate-equivalence ([§12](./platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant))
 - [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§6](./readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps) the [§5](#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait) wait-for-ready is the runtime enactor of a readiness edge (observed from the live object, never a `threadDelay`)
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — `render` consumes the capacity-checked IR; overcommit is rejected before render
@@ -495,7 +495,7 @@ for status.
 - [Documentation Standards](../documentation_standards.md)
 
 > **Honesty.** Everything in this doctrine is Phase 0 **design intent**: the typed manifest renderer and the
-> server-side-apply reconciler are Phase 3, and the capability abstraction is Phase 4 — neither is built or
+> server-side-apply reconciler are Phase 15, and the capability abstraction is Phase 8 — neither is built or
 > proven in amoebius. The approach is **generalized from the prodbox sibling**, which already renders a slice
 > of its object set from typed Haskell to Aeson and applies it with `kubectl`, stamps every object with an
 > owner label, and orchestrates a pure deployment planner — but prodbox still ships its workloads as Helm

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/illegal_state_catalog.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the discipline that lets amoebius validate the overwhelming majority of its behaviour **before any cluster exists** — the pre-cluster conformance spine that exercises decode → validate → render → plan → dry-run end to end in Registers 1 and 2, and the load-bearing invariant that **rendering a plan must never require live infrastructure**.
@@ -71,7 +71,7 @@ Two consequences follow directly:
   rendered value ([generated_artifacts_doctrine.md](./generated_artifacts_doctrine.md)); the preview is a golden
   fixture of the renderer, not a committed artifact.
 - A large share of the illegal-state catalog is caught here, not at runtime: the **rendered-output-golden**
-  validation locus ([illegal_state_catalog.md](./illegal_state_catalog.md)) — an unsafe manifest is not a value
+  validation locus ([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)) — an unsafe manifest is not a value
   `render` can return, and a golden test over the emitted objects proves it without a cluster.
 
 ---
@@ -126,6 +126,6 @@ Every statement here is design intent, never a tested amoebius result.
 - [Generated Artifacts Doctrine](./generated_artifacts_doctrine.md) — why the render is pure and its output uncommitted
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — `render` and the reconcile/apply seam
 - [Formal Model Doctrine](./formal_model_doctrine.md) — the in-process `Model` explorer that mirrors TLC
-- [Illegal State Catalog](./illegal_state_catalog.md) — the rendered-output-golden validation locus
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — the rendered-output-golden validation locus
 - [Documentation Standards](../documentation_standards.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, later_phases.md, legacy_tracking_for_deletion.md, overview.md, phase_00_documentation_suite.md, phase_01_formal_first_dsl_integrity.md, phase_02_bootstrap_kernel_kind.md, phase_03_platform_services_storage_vault.md, phase_04_dsl_control_plane_singleton.md, phase_05_pulsar_content_store_workflow.md, phase_06_determinism_infernix.md, phase_07_jitml_ha_coordinator.md, phase_08_host_compute_daemons.md, phase_09_multicluster_spawn_georeplication.md, phase_10_provider_clusters_provisioning.md, phase_11_test_topology_dsl.md, phase_12_spa_composition.md, substrates.md, system_components.md
+**Referenced by**: README.md, later_phases.md, legacy_tracking_for_deletion.md, overview.md, phase_00_documentation_suite.md, phase_01_toolchain_spike.md, phase_02_formal_model_kernel.md, phase_03_gateway_migration_model.md, phase_04_dhall_gate1_schema.md, phase_05_gadt_decoder_gate2.md, phase_06_illegal_state_corpus.md, phase_07_capacity_topology_folds.md, phase_08_capability_binder.md, phase_09_render_manifest_goldens.md, phase_10_chain_kernel_dryrun.md, phase_11_boundary_fake_tool_harness.md, phase_12_spa_composition_representational.md, phase_13_midwife_bootstrap_kind.md, phase_14_base_image_registry.md, phase_15_renderer_reconciler.md, phase_16_retained_storage.md, phase_17_vault_pki.md, phase_18_platform_services.md, phase_19_keycloak_ingress.md, phase_20_live_dsl_singleton.md, phase_21_app_tenancy.md, phase_22_pulsar_client.md, phase_23_content_store_workflow.md, phase_24_determinism_kernel.md, phase_25_jitbuild_engine_cache.md, phase_26_infernix_lift.md, phase_27_jitml_lift_cuda.md, phase_28_apple_metal_host_daemon.md, phase_29_multicluster_gateway_migration.md, phase_30_provider_clusters.md, phase_31_test_topology_dsl.md, phase_32_spa_live_deploy.md, substrates.md, system_components.md
 **Generated sections**: none
 
 > **Purpose**: The rulebook for the amoebius `DEVELOPMENT_PLAN/` suite — the canonical file layout, the
@@ -54,11 +54,16 @@ ALL-CAPS exception is `README.md`). The canonical set:
 | `system_components.md` | Target component inventory: surface → owning doctrine → planned module path. |
 | `substrates.md` | Substrate registry + per-phase substrate map; sole home of generated tables. |
 | `legacy_tracking_for_deletion.md` | The migration-removal ledger (what the convergence retires, and when). |
-| `phase_NN_<slug>.md` | One document per phase, zero-padded `NN` for sort order (`phase_00_documentation_suite.md` … `phase_12_spa_composition.md`). |
+| `phase_NN_<slug>.md` | One document per phase, zero-padded `NN` for sort order (`phase_00_documentation_suite.md` … `phase_32_spa_live_deploy.md`). |
 | `later_phases.md` | The in-scope, high-numbered phases not yet given their own document. |
 
 This deviates from prodbox's hyphenated names (`phase-3-gateway-dns.md`) on purpose: amoebius's
 documentation standard mandates snake_case. The *structure* mirrors prodbox; the *naming* follows amoebius.
+
+**Generated artifacts are never a committed module path.** A phase's `Implementation` field (§F) names
+authored Haskell/Dhall *source*, never a generated artifact — a rendered k8s manifest, an emitted TLA+
+`.tla`/`.cfg`, a reflected Dhall schema, or a PureScript contract are emitted from a Haskell source of truth
+and not committed ([`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md)).
 
 ## C. Status vocabulary
 
@@ -89,7 +94,8 @@ Every `phase_NN_<slug>.md` follows this skeleton:
 
 ## Phase Summary
 <what this phase owns, declarative; the objective and scope>
-**Substrate:** <apple | linux-cpu | linux-cuda | windows | none> (§L)
+**Substrate:** <none | apple | linux-cpu | linux-cuda | windows> (§L)
+**Register:** <1 pure/golden · 2 boundary-with-fakes · 3 live> (§K)
 **Gate:** <the concrete acceptance test that must pass before the next phase opens>
 
 ## Doctrine adopted
@@ -200,12 +206,22 @@ marking it generated is reserved for when the generator does.
 The plan inherits the chaos/failover moral rule (documentation_standards §6,
 [`chaos_failover_doctrine.md`](../documents/engineering/chaos_failover_doctrine.md)): **never mark a sprint
 ✅ Done on the strength of "it compiles."** A sprint whose live/substrate proof has not run is
-🧪 Live-proof-pending, not Done. A phase gate is passed only when its acceptance test actually ran on its
-substrate (§L). Pre-implementation, every phase and sprint is 📋 Planned and every prescriptive statement is
-design intent.
+🧪 Live-proof-pending, not Done. A phase gate is passed only when its acceptance test actually ran in its
+register on its substrate (§L). Pre-implementation, every phase and sprint is 📋 Planned and every prescriptive
+statement is design intent.
+
+**Validation happens in three registers, and the ledger names the one it reached.** Every phase gate runs in
+exactly one register ([`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md),
+[`testing_doctrine.md` §2](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing)):
+**Register 1** (pure/golden, in-process, no cluster), **Register 2** (boundary integration with fake tools, no
+cluster), and **Register 3** (live infrastructure). The pre-cluster band (phases 1–12, substrate `none`)
+discharges Registers 1–2; the live band (phases 13–32) is Register 3. **Rendering a plan / `--dry-run` must
+never require live infrastructure.** The per-phase proven/tested/assumed ledger names the register its gate
+reached; a Register-1/2 in-process ledger marks the Register-3 runtime layer UNVERIFIED and can never advance a
+production `PromotionGate`.
 
 A **design-proof / in-process phase** — one whose substrate is `none` (§L) and whose gate is an in-process
-type/model check rather than a live-substrate run, e.g. [Phase 1](phase_01_formal_first_dsl_integrity.md) —
+type/model check rather than a live-substrate run, e.g. the pre-cluster band, [phases 1–12](README.md) —
 emits a ledger whose acceptance token reads **"spec-composition proven"** / **"proven for the model"**, never
 **"runtime proven"**: a green Dhall typecheck, Haskell decoder, or TLC run establishes that the spec composes
 and the protocol is sound in the abstract, not that any cluster enforces it. Front-loading such a design
@@ -217,8 +233,9 @@ own single-substrate (`none`) gate.
 
 ## L. One-substrate discipline
 
-Each phase's acceptance gate requires **at most one** substrate (`apple` | `linux-cuda` | `linux-cpu` |
-`windows`), named in the phase's `Phase Summary` and tracked in [`substrates.md`](substrates.md). This
+Each phase's acceptance gate requires **at most one** substrate (`none` for the pre-cluster band; else
+`apple` | `linux-cuda` | `linux-cpu` | `windows`), named in the phase's `Phase Summary` and tracked in
+[`substrates.md`](substrates.md). This
 prevents cross-substrate flip-flopping mid-development. A phase whose work touches several substrates is
 split until each gate is single-substrate.
 

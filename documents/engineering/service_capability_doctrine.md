@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the abstraction by which amoebius application logic names abstract
@@ -65,7 +65,7 @@ to name. They are not a new service set; they are the abstraction *over* the sta
 These eight are the Phase-0 core vocabulary an app spec has for "a service I depend on." There is no arm for
 "some other service," and no arm that names a product. An app that needs object storage selects
 `ObjectStore`; it has no syntax with which to select `minio` ([§8](#8-capabilities-and-the-illegal-state-contract)). A ninth capability, **InferenceEngine**, is
-added for ML serving as Phase-N design intent ([§4.1](#41-the-inferenceengine-capability--the-engine-is-baked-and-substrate-selected-never-fetched)); it is one more *specific* closed-union capability — not
+added for ML serving as Phase-N design intent ([§4.1](#41-the-inferenceengine-capability--the-engine-is-substrate-selected-and-jit-resolved-never-authored)); it is one more *specific* closed-union capability — not
 the generic "some other service" escape hatch this rule forbids, and its provider still has no product arm and
 no URL arm.
 
@@ -112,7 +112,7 @@ the provider. But a union arm is not an adapter. amoebius **does not build a pro
 need**: the alternates are headroom in the type, not shipped code. Claiming MinIO is swappable for S3 *today*
 would be reporting a designed extension point as a built one.
 
-> **Honesty.** "One canonical provider, type admits alternates" is Phase 4 design intent. The alternate arms
+> **Honesty.** "One canonical provider, type admits alternates" is Phase 8 design intent. The alternate arms
 > are deliberately unbuilt; the canonical bindings above are the only providers amoebius implements. Status
 > lives only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
@@ -241,7 +241,7 @@ is no "already checks the deployment's substrate" here). Availability is a **par
 family may be baked on some lanes and not others (e.g. `vLLM` is not baked on Apple-Metal) — so a
 family-not-available-on-the-serving-lane is a **decode-foreclosed** decode-time rejection (the
 topology/relation-over-collection technique,
-[illegal_state_catalog.md §4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection)),
+[illegal_state_catalog.md §4.7](../illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)),
 never a runtime `Unschedulable`. The relation keys on an engine-**family** tag the model must carry; that tag is a
 `ModelArtifact`/manifest field owned by
 [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
@@ -266,7 +266,7 @@ which **consumes** this footprint. That the declared footprint actually fits at 
 (dynamic KV-cache/fragmentation) is **runtime-checked** residue, not foreclosed by the decode-foreclosed Σ.
 
 **Two mistakes become unrepresentable**, lifted at
-[illegal_state_catalog.md §3.25](./illegal_state_catalog.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model):
+[illegal_state_catalog.md §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model):
 
 - **An engine named by arbitrary URL is type-foreclosed unrepresentable** — the `EngineRuntime` union is
   closed with no arbitrary-`Url`/`Download` arm, so "name the engine by URL" has no syntax and fails Gate 1
@@ -298,7 +298,7 @@ The three-tier store, the `.ready` commit, the re-keying onto content addresses,
 by [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss); the base image carrying the
 jit-build resolver + toolchain that materializes every `EngineRuntime` arm is owned by [image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain); the lift
 of these mistakes into unrepresentable states is owned by
-[illegal_state_catalog.md §3.25](./illegal_state_catalog.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model). This doctrine owns only that the **engine is a
+[illegal_state_catalog.md §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model). This doctrine owns only that the **engine is a
 capability whose provider is baked-and-substrate-selected.**
 
 > **Honesty.** `InferenceEngine` is Phase-N design intent — the ML-serving capability, specified before
@@ -348,7 +348,7 @@ canonical provider deployed honestly at small scale, never a hand-special-cased 
 single-node `Sql` is a one-member Patroni cluster, never a bare `postgres` Pod. The dial got richer; it did
 not get bypassed.
 
-> **Honesty.** Per-cluster structural shapes are Phase 4 design intent. The sibling **prodbox** project is
+> **Honesty.** Per-cluster structural shapes are Phase 9 design intent. The sibling **prodbox** project is
 > evidence that typed records render the manifests a provider needs — its
 > [/home/matthewnowak/prodbox/src/Prodbox/Lib/Storage.hs](file:///home/matthewnowak/prodbox/src/Prodbox/Lib/Storage.hs)
 > renders `Namespace`/`PV`/`PVC`/`StorageClass` from a typed `ChartStorageSpec → ChartStorageBinding →
@@ -422,7 +422,7 @@ composability, and the two typed gates that make "if it decodes, it is deployabl
   capabilities it consumes, that dependency graph is exactly what the platform derives east-west connectivity
   from — an app that does not declare consuming `Sql` cannot reach the Sql provider. The derivation rule
   itself is owned by [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path),
-  and its lift into a compile-time impossibility by [illegal_state_catalog.md §3.6](./illegal_state_catalog.md#36-blocking-networkpolicy-services-cant-reach-each-other).
+  and its lift into a compile-time impossibility by [illegal_state_catalog.md §3.6](../illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other).
 - **The Edge capability does not let an app open a backdoor.** An app declares *what to publish* through
   `Edge`; *whether* wild traffic reaches it is still gated by the Identity-owned (Keycloak) wild-ingress door
   ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)). The capability publishes a route; it
@@ -435,7 +435,7 @@ composability, and the two typed gates that make "if it decodes, it is deployabl
 The capability indirection is not only an abstraction for tidiness — it makes a class of mistakes
 **unrepresentable**. amoebius's general claim that *best practice is enforced by construction because the
 alternative is unrepresentable* is owned, as a typing claim, by
-[illegal_state_catalog.md](./illegal_state_catalog.md); this section records the capability-specific instances
+[illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md); this section records the capability-specific instances
 it foreclosed:
 
 - **An app cannot name a product.** The app surface offers a capability union ([§2](#2-the-capability-set)) with no product arms, so
@@ -445,7 +445,7 @@ it foreclosed:
 - **A capability cannot be left unbound.** Every declared capability resource requires a binding; a capability
   need with no provider+shape is an undecodable record, not a runtime `Pending`.
 
-The honest limit is the catalog's limit ([illegal_state_catalog.md §2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)): a green
+The honest limit is the catalog's limit ([illegal_state_catalog.md §2](../illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)): a green
 type-check proves the *spec composes* — that the capability binding is coherent — not that the *running
 provider* came up. The latter is a reconcile-time fact owned by the typed reconciler
 ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)) and verified by the chaos/testing
@@ -461,7 +461,7 @@ surface, never asserted here.
 | Secrets-by-name, `SecretRef`, Vault k8s auth, the PKI anchor | [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | The app-logic-vs-deployment-rules classification | [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md) |
 | The DSL grammar, total composability, the two typed gates | [dsl_doctrine.md](./dsl_doctrine.md) |
-| Which capability invariants are type-enforced (made unrepresentable) | [illegal_state_catalog.md](./illegal_state_catalog.md) |
+| Which capability invariants are type-enforced (made unrepresentable) | [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) |
 | The substrate catalog and the substrate-driven LoadBalancer choice beneath Edge | [substrate_doctrine.md](./substrate_doctrine.md) |
 
 > **Honesty.** The sibling **prodbox** project is *evidence* that the binding can be rendered and reconciled:
@@ -483,9 +483,9 @@ surface, never asserted here.
 This document is normative capability-model doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md),
 never restated here. For orientation only (the plan is authoritative): the **manifest generation + typed
-reconciler that render and apply a chosen shape** land with platform services in **Phase 3**, and the
+reconciler that render and apply a chosen shape** land with platform services in **Phases 15 and 18**, and the
 **capability abstraction itself — capability needs, the alternate-admitting provider binding, and per-cluster
-shapes** — lands with the DSL type families in **Phase 4**. This doc states the target shape and links back for
+shapes** — lands with the DSL type families in **Phase 8**. This doc states the target shape and links back for
 status.
 
 ---
@@ -501,12 +501,12 @@ status.
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — the ML-asset lifecycle ([§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)) whose Tier-1 jit-resolved engine is the `InferenceEngine` provider; `ModelArtifact`/`.ready` and the JIT kernel
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — secrets-by-name, `SecretRef`, and Vault Kubernetes auth for provider credentials
 - [Substrate Doctrine](./substrate_doctrine.md) — the substrate catalog, the DETECTED substrate that selects an `EngineRuntime`, and the substrate-driven LoadBalancer choice beneath Edge
-- [Illegal State Catalog](./illegal_state_catalog.md) — best-practice-by-construction, which capability invariants are type-enforced, and the engine-fetch / unmatched-model states ([§3.25](./illegal_state_catalog.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model))
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — best-practice-by-construction, which capability invariants are type-enforced, and the engine-fetch / unmatched-model states ([§3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model))
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)
 
 > **Honesty.** Everything in this doctrine is Phase 0 design intent, specified before implementation:
-> manifest generation and the typed reconciler are Phase 3, and the capability abstraction is Phase 4. It is
+> manifest generation and the typed reconciler are Phase 15, and the capability abstraction is Phase 8. It is
 > generalized from evidence in the sibling **prodbox** project (typed-Haskell→Aeson→`kubectl apply` rendering,
 > a chart-platform planner) but **not yet built or proven in amoebius**, and prodbox itself names products and
 > enforces the very substrate-equivalence lint this doctrine reverses. Per

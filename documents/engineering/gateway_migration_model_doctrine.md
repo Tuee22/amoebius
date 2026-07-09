@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: documents/engineering/tla_modelling_assumptions.md
-**Referenced by**: documents/engineering/README.md, documents/engineering/formal_model_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/daemon_topology_doctrine.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/tla_modelling_assumptions.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the *one* protocol amoebius proves itself — the cross-cluster **gateway migration**, covering **both** branches of `GatewayMigration = <Planned | Failover>` — expressed as a reifiable `Model` ([formal_model_doctrine.md](./formal_model_doctrine.md)), **simulated** with io-sim and **proven** with TLC, and reduced to every `InForceSpec` by a decode-time structural-fit fold rather than any per-spec model-check.
@@ -67,7 +67,7 @@ Invariants the model asserts (each named, checked on every reachable state; conc
 
 - **`UniqueGatewayOwner`** — at most one cluster ever holds the wild-ingress role (no split-brain gateway).
 - **`SessionAlwaysRebindable`** — no reachable transition removes the last working endpoint for a live session
-  (the client-rebind property; the illegal state is [illegal_state_catalog §3.44](./illegal_state_catalog.md)).
+  (the client-rebind property; the illegal state is [illegal_state_catalog §3.44](../illegal_state/illegal_state_catalog.md)).
 - **`PlannedIsLossless`** — on the `Planned` branch, cutover is reachable only after `verify-caught-up`, so no
   committed write is lost (RPO=0) — the property the superseded doc left merely assumed.
 - **`FailoverBounded`** — on the `Failover` branch, any divergence is named and within the declared data-loss
@@ -120,7 +120,7 @@ Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the
   is an assumed premise the whole reduction rests on, recorded as such.
 - **Correspondence is by construction, not deferred.** Because `interpret` and `emitTLA` render one `Model`,
   there is no separate variable→module correspondence table to complete later — the inversion the superseded
-  doc left "empty and UNVERIFIED until Phase 9" is dissolved. What remains for the live phase is Register-3
+  doc left "empty and UNVERIFIED until Phase 29" is dissolved. What remains for the live phase is Register-3
   chaos injection against the running forest (that the abstracted physics actually hold), never a paper
   correspondence.
 
@@ -143,7 +143,7 @@ tested amoebius result.
 - [Gateway Migration Doctrine](./gateway_migration_doctrine.md) — the `GatewayMigration` taxonomy and the state machine this models
 - [Chaos & Failover Doctrine](./chaos_failover_doctrine.md) — the Extract→Model→Inject methodology and the concentration principle
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the singleton is a Deployment, single-instance delegated to k8s/etcd (no election)
-- [Illegal State Catalog](./illegal_state_catalog.md) — a session that cannot rebind on migration is unrepresentable
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — a session that cannot rebind on migration is unrepresentable
 - [Conformance Harness Doctrine](./conformance_harness_doctrine.md) — the Register-1 explorer + io-sim, no cluster
 - [Documentation Standards](../documentation_standards.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

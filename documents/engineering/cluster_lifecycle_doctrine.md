@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for amoebius cluster bring-up and teardown across kind / rke2 / provider clusters — bootstrap, recursive **amoebic spawning**, graceful teardown-with-cleanup versus chaos-failover, push-back on an unsatisfiable root `InForceSpec`, dynamic node provisioning, and ephemeral spin-up/down with deterministic rebind.
@@ -88,7 +88,7 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
   readiness-edge rule (a condition never a duration; the bootstrap tier's `discover`/`RuntimeWitness` gates)
   is owned by [readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md).
 - **Bring-up is itself a reconcile.** "Come up" is not a one-shot script; it is the [§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) reconciler driving
-  the world toward the `.dhall`. Re-running it is a no-op when already converged — that is the Phase 2
+  the world toward the `.dhall`. Re-running it is a no-op when already converged — that is the Phase 13
   acceptance shape.
 - **A stretched rke2 agent joins only once it is reachable.** Growing a cluster with a **stretched** agent —
   a full member node whose declared network-locality `Site` differs from the control-plane servers' `Site`
@@ -154,7 +154,7 @@ Two encapsulation rules make the forest safe to reason about:
   not a convention the parent is trusted to honour: the value a child receives is, by construction,
   `project(subtree)` — a typed `ChildInForceSpec` ([dsl_doctrine.md](./dsl_doctrine.md)) with no field in which a
   sibling or ancestor-only branch can appear, so handing a child anything beyond its own subtree is
-  *unrepresentable* ([illegal_state_catalog.md](./illegal_state_catalog.md)), exactly as a cross-tenant
+  *unrepresentable* ([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)), exactly as a cross-tenant
   secret already is. The projection is enforced *cryptographically* as well: the spawn envelopes each
   child's subtree under its **own per-child Vault Transit key**, so a child cannot decrypt a sibling's
   subtree even under an unsealed parent
@@ -178,7 +178,7 @@ Two encapsulation rules make the forest safe to reason about:
   [monitoring_doctrine.md](./monitoring_doctrine.md).
 
 > **Honesty.** Amoebic spawning, per-child unseal, and geo-replicated children are *specified* here and
-> scheduled for Phase 9; nothing in this section is a tested amoebius result. Status and gates live only in
+> scheduled for Phase 29; nothing in this section is a tested amoebius result. Status and gates live only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and
 > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)).
@@ -289,7 +289,7 @@ flowchart TD
   configurable and govern *whether* push-back fires. Because every container
   declares explicit CPU and RAM ([platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)),
   the capacity arithmetic — "does the surviving forest have room for what C was running?" — is sound rather
-  than guesswork; that arithmetic is the same [§4.6](./illegal_state_catalog.md#46-capacity-accounting--placement-witness-compute-and-σ-demand--capacity-storage-checked) capacity-accounting fold owned by
+  than guesswork; that arithmetic is the same [§4.6](../illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) capacity-accounting fold owned by
   [resource_capacity_doctrine.md](./resource_capacity_doctrine.md).
 - **Same fail-closed posture as the reconciler.** Refusing-by-default on an unsatisfiable spec is the
   lifecycle analogue of the [§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) `Unreachable → refuse` rule: a state the system cannot safely reach is
@@ -387,8 +387,8 @@ sibling's** reconciler-with-predicates doctrine
   model goes stale the moment an eventually-consistent API answers, and crash recovery forces a re-discover
   anyway. "Data in, data out" — each `discover` queries the right authority *at the moment of use* — adds
   safety without the coupling a state machine would impose.
-- **Driven by the elected control-plane singleton.** The reconcile loop is run by the in-cluster
-  control-plane singleton (elected; total cluster + secret authority), whose election and worker-role model
+- **Driven by the control-plane singleton.** The reconcile loop is run by the in-cluster
+  control-plane singleton (total cluster + secret authority), whose single-instance delegation and worker-role model
   are owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md).
 
 > **Honesty.** This reconciler model is *proven in prodbox* for AWS teardown; that is **evidence from a
@@ -403,12 +403,12 @@ sibling's** reconciler-with-predicates doctrine
 This document is normative cluster-lifecycle doctrine only. Delivery sequencing, completion status,
 validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
-only (the plan is authoritative): bootstrap + a single kind cluster land in **Phase 2**; platform services
-+ retained storage + root Vault/PKI in **Phase 3**; the control-plane singleton in **Phase 4**; **amoebic
+only (the plan is authoritative): bootstrap + a single kind cluster land in **Phase 13**; platform services
++ retained storage + root Vault/PKI in **Phases 16–18**; the control-plane singleton in **Phase 20**; **amoebic
 spawning, geo-replication, gateway failover + route53 repoint, the teardown-with-cleanup-vs-chaos-failover
-distinction, and push-back-on-unsatisfiable-`.dhall`** in **Phase 9**; provider-managed clusters + dynamic
-node provisioning in **Phase 10**; and the storage-lifecycle safety that makes teardown leak-free in
-**Phase 11**. This doc states the target shape and links back for status.
+distinction, and push-back-on-unsatisfiable-`.dhall`** in **Phase 29**; provider-managed clusters + dynamic
+node provisioning in **Phase 30**; and the storage-lifecycle safety that makes teardown leak-free in
+**Phase 31**. This doc states the target shape and links back for status.
 
 ---
 
@@ -465,12 +465,12 @@ verbs that stand it up. There is no rke2 state machine, exactly as there is no l
   can never mint or drop an etcd voter. A 0- or 2-server (no-quorum / split-brain) control plane has no
   constructor at all — **type-foreclosed unrepresentable** via the closed `Rke2Servers` union
   ([cluster_topology_doctrine.md §2/§4](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm);
-  [illegal_state_catalog.md §3.24](./illegal_state_catalog.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)). Host distinctness across `servers ∪ agents`
+  [illegal_state_catalog.md §3.24](../illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)). Host distinctness across `servers ∪ agents`
   is the **decode-foreclosed** `mkRke2` decode fold, likewise owned by cluster_topology.
 - **The server/agent axis is orthogonal.** Whether a host is a server or an agent is **DECLARED**, and it is
   independent of the **DETECTED** substrate and the **ELECTED** daemon role — orthogonal typed axes
   ([daemon_topology_doctrine.md](./daemon_topology_doctrine.md)), never fused: an rke2 server can run on any
-  substrate, and the singleton is elected independently of a node's server/agent role.
+  substrate, and the singleton's single-instance is delegated to k8s/etcd independently of a node's server/agent role.
 
 > **Honesty (sibling evidence, not an amoebius result).** prodbox proves the **single-node base only**:
 > `~/prodbox/src/Prodbox/CLI/Rke2.hs` installs `rke2-server.service`, writes
@@ -498,9 +498,9 @@ verbs that stand it up. There is no rke2 state machine, exactly as there is no l
 - [Gateway Migration Doctrine](./gateway_migration_doctrine.md) — the `GatewayMigration = <Planned | Failover>` taxonomy and the live-to-live migration protocol; a teardown's gateway handoff ([§5](#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction)) is one `Planned` trigger
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — [§0](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision) is the home of the checkpoint-free tag-discovery host reconciler, tier (b) ([§11](#11-rke2-rollout-as-a-reconcile))
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — [§5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait), the in-cluster SSA/ApplySet reconciler, tier (c), that fills the cluster after the apiserver is up ([§11](#11-rke2-rollout-as-a-reconcile))
-- [Illegal State Catalog](./illegal_state_catalog.md) — [§3.24](./illegal_state_catalog.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain), an even/zero-server rke2 control plane as type-foreclosed unrepresentable ([§11](#11-rke2-rollout-as-a-reconcile))
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§3.24](../illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain), an even/zero-server rke2 control plane as type-foreclosed unrepresentable ([§11](#11-rke2-rollout-as-a-reconcile))
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
-- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the sudo host daemon and elected in-cluster singleton enactors of the rke2 rollout ([§11](#11-rke2-rollout-as-a-reconcile))
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the sudo host daemon and in-cluster singleton enactors of the rke2 rollout ([§11](#11-rke2-rollout-as-a-reconcile))
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md)
 - [Testing Doctrine](./testing_doctrine.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

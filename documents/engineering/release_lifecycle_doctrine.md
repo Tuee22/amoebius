@@ -26,7 +26,7 @@ repo and reconciles the diff, Flux does the same with its own CRDs, Tekton runs 
 its own operator, its own RBAC surface, its own upgrade cycle, its own store of "what should be deployed."
 That second plane is, to delivery, exactly what Helm is to manifests and Harbor is to the registry: an
 unowned, unreviewed intermediary that re-introduces the *"valid YAML, wrong cluster"* failure class
-([illegal_state_catalog.md §1](./illegal_state_catalog.md#1-illegal-states-fail-to-type-check)) at the delivery layer — a git-polling controller
+([illegal_state_catalog.md §1](../illegal_state/illegal_state_catalog.md#1-illegal-states-fail-to-type-check)) at the delivery layer — a git-polling controller
 can apply a manifest set no amoebius type ever inspected.
 
 **amoebius refuses the second control plane, exactly as it refuses Helm and Harbor.** Delivery is not a
@@ -36,8 +36,8 @@ elsewhere. There is nothing to install, nothing to poll, and nothing to reconcil
 - **One binary, two enactment frames.** The single amoebius binary composes the whole pipeline. The **build**
   half — producing multi-arch images and pushing them to the in-cluster `distribution` registry — is enacted
   by the **sudo host daemon** ([image_build_doctrine.md](./image_build_doctrine.md)). The
-  **test / promote / rollout** half is enacted by the **elected in-cluster singleton**
-  ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected)). No third process arbitrates between them.
+  **test / promote / rollout** half is enacted by the **in-cluster singleton**
+  ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)). No third process arbitrates between them.
 - **Auditability comes from an immutable ledger, not a controller's opinion.** What a conventional platform
   gets from "the state Argo believes is desired," amoebius gets from the immutable `Release` ledger ([§2](#2-release-and-the-immutable-release-ledger-releasehash)) plus
   the ETag-CAS pointer history ([§3](#3-environment-and-the-etag-cas-promotion-pointer)): a content-addressed, append-only record of every generation ever built
@@ -59,7 +59,7 @@ and how they chain. Every primitive they compose is owned elsewhere:
 | That env differences are **deployment rules**, and app bytes are byte-identical across environments | [app_vs_deployment_doctrine.md §3 / §4](./app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs) |
 | `create-new → verified-migrate → retire-old` for the schema-migration phase | [storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction) |
 | Gateway-API `HTTPRoute` `backendRefs` weights the canary shifts | [network_fabric_doctrine.md](./network_fabric_doctrine.md) |
-| The elected singleton that runs the promote/rollout half | [daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected) |
+| The control-plane singleton that runs the promote/rollout half | [daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) |
 
 > **Honesty.** This whole doctrine is **Phase-0 reference-only design intent**. None of the four values is
 > built in amoebius. Where a sibling exhibits the shape — jitML's phased rollout, jitML's pre/post-grant
@@ -185,7 +185,7 @@ advance :: Environment -> Release -> EvidenceWitness -> PointerCas
   [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact))
   yields no witness for that layer — so a `Release` short of prod's required strength has **no** `advance`
   value to hand the CAS.
-- **A Tier-1-only in-process ledger cannot advance the gate to prod.** The front-loaded Phase-1
+- **A Tier-1-only in-process ledger cannot advance the gate to prod.** The front-loaded pre-cluster (Phases 2–6)
   formal-validation track emits its evidence ledger from a purely **in-process** run — Dhall typecheck +
   decoder + QuickCheck + TLA+/TLC, **no live substrate** — a **Tier-1 (design-time) artifact** that
   establishes only that the spec composes and the protocol is sound in the abstract, with the Runtime/chaos
@@ -202,7 +202,7 @@ advance :: Environment -> Release -> EvidenceWitness -> PointerCas
   constructed. This is the same idiom as infernix's `.ready`-gated `ArtifactRef` (an artifact handle exists
   only once the `.ready` sentinel does) and as amoebius's own `ModelArtifact` (§ content-addressing) — *a
   handle exists only once its evidence edge does*. This state is catalogued at
-  [illegal_state_catalog.md §3.26](./illegal_state_catalog.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) (an
+  [illegal_state_catalog.md §3.26](../illegal_state/illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) (an
   unverified environment promotion), owned by this doctrine, technique "a handle exists only once its evidence
   edge does."
 - **Generalizes the already-planned `Multicluster/PromotionGate.hs`.** amoebius already scopes a
@@ -248,7 +248,7 @@ data RolloutPhase = RolloutPhase
   requires so that **no `.dhall` value ever denotes "discard these bytes"**: the migrate phase provisions the
   new schema/columns, migrates and **verifies** the copy, and only a later phase retires the old — with the
   retire step inheriting the durable-data-deletion prohibition. This is the delivery home of the promoted
-  **Phase-14** candidate ("DB schema-migration automation + manifest-change correctness semantics",
+  **Phase-34** candidate ("DB schema-migration automation + manifest-change correctness semantics",
   [DEVELOPMENT_PLAN/later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md)): the schema-migration engine is a
   `RolloutPhase`, and the manifest-change-correctness half hardens the typed diff of
   [manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed).
@@ -273,7 +273,7 @@ data RolloutPhase = RolloutPhase
 > so a `RolloutPhase` applies **rendered objects**, never a `helm install`. The pattern is borrowed; the Helm
 > is dropped.
 
-> **Layer / honesty.** The `RolloutPlan` is **Phase-N design intent** enacted by the Phase-3 SSA reconciler,
+> **Layer / honesty.** The `RolloutPlan` is **Phase-N design intent** enacted by the Phase-15 SSA reconciler,
 > which is itself unbuilt. Ordering, readiness-gating, canary weights, and rollback are real, documented
 > Kubernetes / Gateway-API mechanisms; *that amoebius wires them into this plan type* is specified here and
 > unproven until the phase lands.
@@ -286,7 +286,7 @@ jitML's `src/JitML/Cluster/Helm.hs` defines exactly this shape — a `HelmPhase`
 proven in a sibling** (but bound to Helm, which amoebius drops). jitML's `src/JitML/Bootstrap.hs` splits its
 rollout in two around the Postgres schema grant (`livePreGrantSubprocessesForPort → postgresSchemaGrantIO →
 livePostGrantSubprocessesForPort`), which is **the schema-migration-as-a-phase shape, LIVE in a sibling** and
-the concrete evidence behind the promoted Phase-14 candidate. By contrast, hostbootstrap's only delivery gate
+the concrete evidence behind the promoted Phase-34 candidate. By contrast, hostbootstrap's only delivery gate
 is the build-time `check-code`, with no rollout-phase or promotion concept at all. All sibling evidence, not
 amoebius results.
 
@@ -308,17 +308,17 @@ elsewhere:
 | Gateway-API `HTTPRoute` weights the canary shifts, and the no-mesh verdict | [network_fabric_doctrine.md](./network_fabric_doctrine.md) |
 | Pulsar subscription / consumer-group cutover mechanics | [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) |
 | The build half of the pipeline (multi-arch images, the `distribution` registry) | [image_build_doctrine.md](./image_build_doctrine.md) |
-| The sudo host daemon and the elected in-cluster singleton that enact the two halves | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
-| The catalogued unrepresentability of an unverified promotion | [illegal_state_catalog.md §3.26](./illegal_state_catalog.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) |
+| The sudo host daemon and the in-cluster singleton that enact the two halves | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
+| The catalogued unrepresentability of an unverified promotion | [illegal_state_catalog.md §3.26](../illegal_state/illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) |
 
 **Planning ownership.** This document is normative release-lifecycle doctrine only. Delivery sequencing,
 completion status, and validation gates are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the environment/promotion values compose with the SSA reconciler landing in
-**Phase 3** and the test-topology / evidence-ledger work in **Phase 11**; the **DB schema-migration
-`RolloutPhase` + manifest-change correctness** is the promoted **Phase-14** candidate
+**Phase 15** and the test-topology / evidence-ledger work in **Phase 31**; the **DB schema-migration
+`RolloutPhase` + manifest-change correctness** is the promoted **Phase-34** candidate
 ([DEVELOPMENT_PLAN/later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md)), and the generic third-party
-extension mechanism remains at Phase-15. This doc states the target shape and links back for status.
+extension mechanism remains at Phase-35. This doc states the target shape and links back for status.
 
 ---
 
@@ -334,17 +334,17 @@ extension mechanism remains at Phase-15. This doc states the target shape and li
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — [§8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction) `create-new → verified-migrate → retire-old` for the schema-migration `RolloutPhase`
 - [Network Fabric Doctrine](./network_fabric_doctrine.md) — Gateway-API `HTTPRoute` weights the canary phase shifts; the no-mesh verdict
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — consumer-group / subscription cutover for Pulsar workloads
-- [Illegal State Catalog](./illegal_state_catalog.md) — [§3.26](./illegal_state_catalog.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) promote-unverified→prod is type-foreclosed unrepresentable
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§3.26](../illegal_state/illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) promote-unverified→prod is type-foreclosed unrepresentable
 - [Image Build Doctrine](./image_build_doctrine.md) — the build half (multi-arch images, the `distribution` registry)
-- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§3](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected) the elected singleton that runs promote/rollout; the host daemon that builds
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) the control-plane singleton that runs promote/rollout; the host daemon that builds
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — reconciler tiers (a) cloud-IaC and (b) the tag-discovery host reconciler, distinct from tier (c)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
-- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — the promoted Phase-14 schema-migration candidate this doctrine homes
+- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — the promoted Phase-34 schema-migration candidate this doctrine homes
 - [Documentation Standards](../documentation_standards.md)
 
 > **Honesty.** Everything here is Phase-0 **reference-only design intent**. The `Release` ledger, the
 > `Environment` promotion pointer, the `PromotionGate`, and the `RolloutPlan`/`RolloutPhase` are **unbuilt in
-> amoebius** and compose primitives that are themselves Phase-3-and-later. The shapes are **generalized from
+> amoebius** and compose primitives that are themselves Phase-15-and-later. The shapes are **generalized from
 > siblings** — jitML's phased readiness-gated rollout and its pre/post-grant schema phase, infernix's
 > `.ready`-gated artifact, the content store's ETag-CAS `trial` pointer — each of which is **sibling evidence,
 > not proof in amoebius**. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define exactly how the host amoebius binary and any host-level worker daemons talk to the
@@ -77,7 +77,7 @@ This takes option (c)'s security goal — *no malicious network traffic can use 
 achieves it by **network restriction** instead of by crypto or by a single bottlenecking socket, while
 keeping option (b)'s bandwidth headroom (a real socket per stream) without paying (b)'s mTLS tax.
 
-> **Honesty.** This is a *resolved design decision* for Phase 8, argued from the threat model and bandwidth
+> **Honesty.** This is a *resolved design decision* for Phase 28, argued from the threat model and bandwidth
 > economics below — **not** a tested or proven amoebius result. The loopback-NodePort pattern has a sibling
 > precedent in prodbox ([§6](#6-the-host-only-restriction-in-practice-and-its-sibling-precedent)), which is evidence from another system, not proof here. Status and gates live
 > only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
@@ -101,7 +101,7 @@ Concretely:
   (see [platform_services_doctrine.md §4 and §6](./platform_services_doctrine.md#4-minio--the-object-substrate)).
 - **The host daemon and an in-cluster worker are the same kind of thing.** A daemon is a worker role that
   happens to run on the host for hardware reasons; its *coordination* is identical to a worker Pod's. The
-  daemon roles, the elected control-plane singleton's authority, and leadership election are owned by
+  daemon roles, the control-plane singleton's authority, and its single-instance delegation are owned by
   [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) — this doc does not restate them; it only
   fixes *the wire they ride on*.
 - **The line-74 sub-question is answered the same way.** "Should host↔service access pass back through
@@ -140,7 +140,7 @@ identity; it consumes the distro's kubeconfig and talks to the apiserver like an
 - **This is the *control* path, not a data path.** It applies manifests, reads cluster state, and drives
   reconciliation. Bulk artifact/event traffic never rides the apiserver — that is channel 2's job.
 - **It is the binary's distinguishing privilege.** The host binary (in its sudo host-daemon context) is the
-  bootstrap and total-authority root; the in-cluster control-plane singleton's elected authority is owned
+  bootstrap and total-authority root; the in-cluster control-plane singleton's authority is owned
   by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md). This doc only records that channel 1's
   transport is "whatever mTLS the distro already created," not an amoebius-bespoke scheme.
 - **Provider-managed clusters have no channel 1.** On EKS there is no host and no host binary; the in-cluster stateless singleton reaches its own control plane instead. The
@@ -208,7 +208,7 @@ and nowhere else.
   crypto tax did not come back.
 - **A fabric peer is still not wild ingress.** The fabric-reachable listener is a distinct endpoint kind —
   a `FabricPeer`, sitting alongside `HostLocalPeer` and `WildIngress` with **no constructor turning it into a
-  `WildIngress`** ([illegal_state_catalog.md §4.3](./illegal_state_catalog.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)) — so "Keycloak owns all wild
+  `WildIngress`** ([illegal_state_catalog.md §4.3](../illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)) — so "Keycloak owns all wild
   ingress" ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)) is preserved: a spot worker
   is an authenticated *peer* of MinIO/Pulsar, never a wild client, exactly as a host daemon is ([§3](#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)).
 
@@ -241,7 +241,7 @@ only where each attaches and defers the wire itself to
   the authenticated WireGuard fabric" widens to *"localhost **or** the authenticated WireGuard fabric (VPN) **or**
   an authenticated secure gateway"* — the **`Gateway` arm** is the seam this generalization attaches to: a distinct
   network_fabric endpoint index with **no constructor into `WildIngress`**
-  ([illegal_state_catalog.md §4.3](./illegal_state_catalog.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)),
+  ([illegal_state_catalog.md §4.3](../illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)),
   so "Keycloak owns all wild ingress"
   ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path))
   still holds. The gateway *wire* — including the authentication/encryption a shared loopback did not need — is
@@ -266,7 +266,7 @@ the comms-relevant requirement each substrate must satisfy:
 - **This generalizes a pattern proven in the sibling prodbox project**, where in-cluster Harbor is reached
   by host-origin clients at `127.0.0.1:30080` over a NodePort bound to loopback (prodbox CLAUDE.md,
   "Substrate Equivalence"). That is **evidence from another system, not proof in amoebius** — amoebius has
-  not yet built Phase 8. It is precedent for *feasibility*, not a tested amoebius guarantee.
+  not yet built Phase 28. It is precedent for *feasibility*, not a tested amoebius guarantee.
 - **The DSL never lets a substrate "fix" a missing piece by widening exposure.** If a substrate's node
   networking makes the loopback binding awkward, the resolution is to extend that substrate's installer to
   honor the host-only contract — not to publish the port wider. Substrate equivalence is structural
@@ -278,7 +278,7 @@ the comms-relevant requirement each substrate must satisfy:
 
 The carve-out is safe only if its boundaries cannot be drawn wrong, so the relevant illegal states are
 type-excluded rather than merely linted. The catalog of illegal states and the typing techniques that make
-each unrepresentable is owned by [illegal_state_catalog.md](./illegal_state_catalog.md), and the
+each unrepresentable is owned by [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md), and the
 orchestration surface by [dsl_doctrine.md](./dsl_doctrine.md); this section names only the host-comms
 invariants those docs must uphold:
 
@@ -315,7 +315,7 @@ secrets-by-name, never the method.
 | The two host-origin channels and that both are localhost-only | — |
 | The resolution of the line-27 / line-74 open question (host-only NodePort, no mTLS) and its rationale | — |
 | Why no mTLS is safe (network-restriction threat model) and why no crypto/socket (bandwidth) | — |
-| "No bespoke control channel; coordination is Pulsar/MinIO" as the host-comms wire rule | Daemon roles, control-plane singleton, election → [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
+| "No bespoke control channel; coordination is Pulsar/MinIO" as the host-comms wire rule | Daemon roles, control-plane singleton, single-instance delegation → [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
 | The host-only network-restriction requirement each substrate must meet | The substrate catalog, virtualized substrates, no-env/PATH contract → [substrate_doctrine.md](./substrate_doctrine.md) |
 | That channel-2 transport is plain Pulsar/MinIO peering | The native-protocol client, no-WebSockets, topology algebra → [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) |
 | Naming the one carve-out from Keycloak-owns-all-ingress | The wild-ingress rule itself → [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) |
@@ -327,7 +327,7 @@ secrets-by-name, never the method.
 
 This document is normative host↔cluster comms doctrine only. Delivery sequencing, completion status, and
 validation gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) — host
-compute daemons (the Apple-Metal / Windows-CUDA Pulsar+MinIO peers) land in **Phase 8**. This doc never
+compute daemons (the Apple-Metal / Windows-CUDA Pulsar+MinIO peers) land in **Phase 28**. This doc never
 maintains a competing status ledger; it states the target shape and links back for status.
 
 ---
@@ -341,7 +341,7 @@ maintains a competing status ledger; it states the target shape and links back f
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md)
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md)
-- [Illegal State Catalog](./illegal_state_catalog.md)
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md)
 - [DSL Doctrine](./dsl_doctrine.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

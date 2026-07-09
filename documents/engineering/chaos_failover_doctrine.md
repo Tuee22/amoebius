@@ -2,14 +2,15 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
-> **Purpose**: The amoebius concurrency-and-failover doctrine — *Extract* the decision into a value, *Model* the protocol into a proof, *Inject* faults into the deployment — plus the proven/tested/assumed ledger and the invariant-confluence **Second Axis** that governs asynchronous cross-cluster geo-replication and gateway failover, the one boundary where a per-system proof obligation concentrates.
+> **Purpose**: The amoebius concurrency-and-failover doctrine — *Extract* the decision into a value, *Model* the protocol into a proof, *Inject* faults into the deployment — plus the proven/tested/assumed ledger and the invariant-confluence **cross-cluster boundary** that governs asynchronous geo-replication and gateway migration (both `Planned` and `Failover`), the **one** boundary where a per-system proof obligation concentrates on amoebius itself.
 
-**Audience**: amoebius engineers hardening the two places in the forest that decide under concurrency — the
-in-cluster control-plane singleton election, and the asynchronous cross-cluster failover boundary — and
-anyone who wants the method, whether or not they have met TLA+, chaos engineering, or Haskell before.
+**Audience**: amoebius engineers hardening the **one** place in the forest that decides under concurrency and
+is amoebius's own to prove — the asynchronous cross-cluster gateway-migration boundary (intra-cluster
+single-instance is delegated to k8s/etcd) — and anyone who wants the method, whether or not they have met
+TLA+, chaos engineering, or Haskell before.
 
 **Scope**: this is **amoebius's** concurrency-hardening doctrine, worked in **Haskell** (GHC **9.12.4**,
 the [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) toolchain pin) and stated in the terms this
@@ -18,16 +19,17 @@ codebase uses: pure functions and ADTs, the type system, QuickCheck, the **Plan 
 generalization** of the prodbox sibling's chaos-hardening doctrine
 (`/home/matthewnowak/prodbox/documents/engineering/chaos_hardening_doctrine.md`), lifted from
 "the prodbox gateway single-writer" to "the amoebius control-plane singleton," and from prodbox's
-*forward-looking* async-replication appendices to amoebius's **first-class Phase-9 cross-cluster failover
+*forward-looking* async-replication appendices to amoebius's **first-class Phase-29 cross-cluster failover
 obligation**.
 
 **One SSoT line, held throughout.** This doctrine owns the **method**, the **ledger discipline**, and the
 **proof obligation**. It does **not** own the concrete formal artifacts, which split across two tiers: the actual TLA+
-**design-model and its invariant catalog** are authored and TLC-checked design-first in **Phase 1**
+**design-model and its invariant catalog** are authored and TLC-checked design-first in **Phase 3**
 (Tier 1 — proven for the model at scope, needing no runtime), while their **model↔code correspondence
-and divergence record** are the deferred **Tier-2** obligation completed in **Phase 9** — both owned by
-[tla_modelling_assumptions.md](./tla_modelling_assumptions.md); the election *shape* is
-owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md); the teardown-versus-chaos
+and divergence record** are the runtime obligation completed in the multi-cluster phase — both owned by
+[gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md); the control-plane singleton
+(a Deployment `replicas=1`, single-instance delegated to k8s/etcd, no election) is owned by
+[daemon_topology_doctrine.md](./daemon_topology_doctrine.md); the teardown-versus-chaos
 distinction by [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md); the confluent data
 substrate by [content_addressing_doctrine.md](./content_addressing_doctrine.md). This doctrine grounds its
 narrative in those subsystems but never restates their normative content. Status, phase order, and
@@ -57,7 +59,7 @@ Both decisions were correct — for the world each actor read. Both were wrong f
 This is the bug that survives ten thousand green test runs and surfaces only at runtime, in the deployed
 forest: not a typo, not an off-by-one, but **a decision made on a premise that was true when it was read and
 false by the time it was acted on.** It has exactly one shape, and that shape recurs everywhere —
-inside one cluster's election, and across the asynchronous gap between two clusters.
+in any branch taken against externally-mutable state, and above all across the asynchronous gap between two clusters.
 
 Everything that follows is a discipline against trusting a premise that cannot be proven still current. The
 discipline has three moves — **Extract**, **Model**, **Inject** — and the rest of this document argues why it
@@ -78,7 +80,7 @@ This discipline earns its cost only when **all three** of these hold:
 2. **Coordination only through shared, durable substrates** — actors share no in-memory state; they agree
    only through a log, a broker, an object store, or a database. In amoebius that substrate is the
    **coordination plane: Pulsar + MinIO + the signed, hash-chained commit log**
-   ([daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#51-the-coordination-plane-pulsar--minio--the-commit-log)).
+   ([daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership)).
 3. **A safety invariant no single actor can enforce alone** — *exactly one control-plane singleton*,
    *exactly-once effect under redelivery*, *no split-brain gateway across clusters* — belongs to a
    protocol spanning several actors plus the substrate, not to any one process.
@@ -226,17 +228,21 @@ nine standard services, N worker daemons, and an arbitrary app on every cluster 
 it appears as if *every* component carries its own split-brain proof obligation. It does not. The obligation
 **concentrates**, because of two structural facts amoebius commits to.
 
-**Fact one: intra-cluster consensus is delegated, not re-proved.** The standard platform services each run
-their own, already-proven distributed consensus and synchronous replication: MinIO erasure-codes and
-quorum-replicates within a cluster; Pulsar's brokers/bookies own subscription and acknowledgment
-semantics; Percona/Patroni Postgres runs synchronous replication with its own leader election
+**Fact one: intra-cluster consensus and single-instance are delegated, not re-proved.** The standard platform
+services each run their own, already-proven distributed consensus and synchronous replication: MinIO
+erasure-codes and quorum-replicates within a cluster; Pulsar's brokers/bookies own subscription and
+acknowledgment semantics; Percona/Patroni Postgres runs synchronous replication with its own leader election
 ([platform_services_doctrine.md §6, §8](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox)). amoebius **delegates** the
 synchronous-HA correctness obligation to these systems rather than re-deriving it. A Pulsar
 topic-lifecycle coordinator that needs single-consumer semantics gets it from Pulsar's subscription model
 and the at-least-once + dedup discipline, not from a bespoke amoebius election
-([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)). The governing rule is stated directly: *amoebius
-wants TLA+ for all distributed consensus problems that aren't already handled by systems that do their own
-distributed consensus and georeplication (minio, pulsar, postgres, etc).*
+([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)). **Crucially, the control-plane singleton's
+single-instance is likewise delegated — to Kubernetes/etcd.** The singleton is a Deployment `replicas=1` (a
+k8s `Lease`, itself etcd-backed, if a hard lock is ever needed), never a bespoke amoebius election
+([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)); amoebius does
+not duplicate the consensus etcd already provides. The governing rule is stated directly: *amoebius wants TLA+
+only for distributed problems that aren't already handled by systems that do their own consensus and
+georeplication (minio, pulsar, postgres, k8s/etcd).*
 
 **Fact two: chaos, HA, geo-replication, and failover are deployment-rules, never application logic.** An
 app — a **demo web app** (shipped by infernix / jitML) — is written **once**; its HA replica count,
@@ -245,39 +251,41 @@ chaos-testing, geo-replication, and failover behaviour are an *orthogonal deploy
 arises: there is no app-specific failover logic to prove. The distribution behaviour is configured at the
 platform layer and proven *there, once.*
 
-Put the two facts together and the obligation collapses onto exactly **two** boundaries:
+Put the two facts together and the obligation collapses onto exactly **one** boundary:
 
 ```mermaid
 flowchart TD
-  delegated[Intra-cluster synchronous consensus] -->|delegated to| systems[MinIO + Pulsar + Postgres-Patroni own consensus]
-  systems -->|no amoebius proof obligation| none[No per-service, no per-app proof]
-  axis1[FIRST AXIS: one cluster's control-plane singleton election] -->|proven by| method[Extract + Model + Inject + ledger]
-  axis2[SECOND AXIS: async cross-cluster geo-replication and gateway failover] -->|proven by| method
-  method -->|formal artifacts owned by| tla[tla_modelling_assumptions.md: design-model Phase 1, model-code correspondence Phase 9]
+  delegated[Intra-cluster consensus + control-plane single-instance] -->|delegated to| systems[MinIO + Pulsar + Postgres-Patroni + k8s and etcd own it]
+  systems -->|no amoebius proof obligation| none[No per-service, no per-app, no election proof]
+  axis[THE obligation: async cross-cluster gateway MIGRATION, both Planned and Failover] -->|proven by| method[Extract + Model + Inject + ledger]
+  method -->|formal artifact owned by| model[gateway_migration_model_doctrine.md, rendered from a Model per formal_model_doctrine.md]
 ```
 
-- **First Axis — the control-plane singleton election.** Within one cluster's consistency boundary, exactly
-  one daemon must hold total cluster + secret authority. This is the **prodbox gateway single-writer
-  invariant, generalized** from "owns the public DNS record" to "owns the whole cluster and its secrets"
-  ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected)). It is a genuine cross-actor invariant
-  no system off the shelf provides, so it earns the full Extract → Model → Inject treatment (Appendix A).
-  *Why* no system provides it is precise and load-bearing: the authority is exercised as **external side
-  effects** — route53 and Vault — that validate no broker epoch, so even Pulsar's purpose-built
-  exclusive-producer fence ([daemon_topology_doctrine.md §5.5](./daemon_topology_doctrine.md#55-pulsar-primitives-evaluated-for-the-election--and-why-the-custom-election-stays))
-  cannot discharge it. This external single-writer invariant is the irreducible First-Axis core; it is **not**
-  among the delegated intra-cluster consensus of Fact one.
-- **Second Axis — the async cross-cluster boundary.** Across clusters, geo-replication is asynchronous and
-  the gateway can fail over from one cluster to another. *This* is where the genuinely new, hard amoebius
-  obligation lives — the boundary no single system proves end-to-end, the one this doctrine flags as genuinely
-  "tricky": *asynchronous geo-replication is hard. what exactly happens if a cluster goes down mid
-  geo-sync and we try to failover the gateway to that cluster? we need to prove we always have well-defined
-  behaviour.* The whole of [§16](#16-the-second-axis--when-one-cluster-becomes-a-forest)–[§19](#19-the-cross-boundary-ledger-and-conformance-rows) and Appendix B exist to answer that question.
+- **The one obligation — the async cross-cluster gateway migration.** Across clusters, geo-replication is
+  asynchronous and the wild-ingress gateway can move from one cluster to another — a **`Planned`** coordinated
+  RPO=0 handover *and* a **`Failover`** survivor-takeover ([gateway_migration_doctrine.md](./gateway_migration_doctrine.md)).
+  *This* is where the genuinely new, hard amoebius obligation lives — the boundary no single system proves
+  end-to-end. Its authority is exercised as **external side effects** — a route53 DNS write and Vault — that
+  validate no broker epoch, so no off-the-shelf fence discharges it; the *intra-cluster* single-instance of the
+  writer is delegated to k8s/etcd (Fact one), but **which cluster owns the record, and how ownership moves
+  across clusters, is amoebius's own**. The doctrine flags it as genuinely "tricky": *asynchronous
+  geo-replication is hard. what exactly happens if a cluster goes down mid geo-sync and we try to failover the
+  gateway to that cluster? we need to prove we always have well-defined behaviour.* The whole of
+  [§16](#16-the-second-axis--when-one-cluster-becomes-a-forest)–[§19](#19-the-cross-boundary-ledger-and-conformance-rows)
+  and Appendix B exist to answer it; the model that discharges it is owned by
+  [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md).
 
-Everything intra-cluster and synchronous is a solved problem owned by another system; amoebius spends its
-formal-verification budget on the two invariants that are uniquely its own, and on nothing else. (Shorthand:
-delegate the easy proofs, concentrate the hard one.) A proof obligation that appears anywhere *other* than
-these two boundaries **indicates a modelling error** — usually a sign that a deployment-rules concern leaked
-into app logic, or that someone is re-proving what Pulsar/MinIO/Postgres already prove.
+(Historically this doctrine named *two* axes — a "First Axis" in-cluster control-plane election and this
+"Second Axis" cross-cluster boundary. The First Axis is **retired**: single-instance is delegated to k8s/etcd
+per Fact one, so amoebius runs no election and there is no in-cluster proof obligation. Only the cross-cluster
+gateway migration remains.)
+
+Everything intra-cluster and synchronous — **including the control-plane singleton's single-instance** — is a
+solved problem owned by another system; amoebius spends its formal-verification budget on the **one** invariant
+that is uniquely its own, and on nothing else. (Shorthand: delegate the easy proofs, concentrate the hard one.)
+A proof obligation that appears anywhere *other* than this one boundary **indicates a modelling error** —
+usually a sign that a deployment-rules concern leaked into app logic, or that someone is re-proving what
+Pulsar/MinIO/Postgres/etcd already prove.
 
 ---
 
@@ -341,16 +349,19 @@ Three sub-rules make it sound:
 and it cannot hide an effectful branch in the middle of a race. The branch becomes a *value* — and a value
 can be exhaustively property-tested without a cluster, a clock, or a network. (This is the level the type
 system already operates at, for free: a GADT-indexed state machine makes illegal transitions *compile
-errors* — see [illegal_state_catalog.md](./illegal_state_catalog.md). Extract extends that reach to the
+errors* — see [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md). Extract extends that reach to the
 runtime values the type system can't see.)
 
-**The amoebius shape.** The control-plane singleton's election decision **is** this, generalized from the
-prodbox gateway. Election is a *deterministic total function* over the ranked candidate set folded from the
-convergent commit log; the owner-only action (reconcile the cluster, act as secret authority, write the
-gateway DNS record) is gated by a second pure predicate over the **log**: *may-act = (I am the computed
+**The amoebius shape.** The **cross-cluster gateway-ownership decision** — which cluster holds the
+wild-ingress gateway — **is** this, generalized from the prodbox gateway single-writer. (Intra-cluster
+single-instance is delegated to k8s/etcd — there is no in-cluster election to extract — so the decision that
+remains amoebius's own is this cross-cluster one, [§6](#6-the-concentration-principle--where-the-obligation-lives).)
+The ownership decision is a *deterministic total function* over the ranked cluster-candidate set folded from the
+convergent commit log; the owner-only action (write the gateway DNS record, drive the migration) is gated by a
+second pure predicate over the **log**: *may-act = (I am the computed
 owner) ∧ (my latest claim is unsuperseded by a later yield)*. Because the gate folds over the convergent
 log rather than local belief, it is pure *because its input converges*. The election *shape* is owned by
-[daemon_topology_doctrine.md §5](./daemon_topology_doctrine.md#5-leadership-election--the-mechanism-the-proof-lives-elsewhere); this doctrine owns the rule that the
+[daemon_topology_doctrine.md §5](./daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected); this doctrine owns the rule that the
 decision must be Extracted before it can be modeled.
 
 **The deeper structural form, and its boundary limit.** The strongest Extract makes the observation a
@@ -398,10 +409,10 @@ self-healing** rather than permanent.
 **SSoT — who owns the spec.** This doctrine owns the *requirement* to model the two concentrated invariants
 ([§6](#6-the-concentration-principle--where-the-obligation-lives)) and the honesty rule on what a green model means. The **concrete TLA+ spec, its invariant catalog,
 its model↔code correspondence, and its divergence record** are owned by
-[tla_modelling_assumptions.md](./tla_modelling_assumptions.md), and split across the two tiers: the
-**design-model and invariant catalog** are authored and TLC-checked design-first in **Phase 1** (Tier 1 —
+[gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md), and split across the two tiers: the
+**design-model and invariant catalog** are authored and TLC-checked design-first in **Phase 3** (Tier 1 —
 proven for the model at scope, needing no runtime), while the **model↔code correspondence and divergence
-record** are the deferred **Tier-2** obligation completed in **Phase 9**. The sibling prodbox spec
+record** are the deferred **Tier-2** obligation completed in **Phase 29**. The sibling prodbox spec
 (`/home/matthewnowak/prodbox/documents/engineering/tla/gateway_orders_rule.tla`, six invariants explored to
 ~4.4M states at scope 3, `prodbox dev tla-check`) is **evidence from a sibling system, not an amoebius
 proof** — its invariants `UniqueOwner` / `NoTugOfWar` / `SingletonTakeover` are exactly the shape amoebius
@@ -466,7 +477,7 @@ hand-built stub of its peers, and the catastrophic *cross-actor* invariant is st
 TLA+ model. So Simulate stays parenthetical: never a fourth move, scoped to one subsystem, gated on
 evidence the tax is worth paying — and it splits across the two tiers. The **in-process design-schedule
 check** — the pure decision run against hand-built peer stubs under `IOSimPOR`, exercising the schedule
-the pure decision leaves open — **is adopted early, in Phase 1**, as a Tier-1 design check, and its honest
+the pure decision leaves open — **is adopted early, in Phase 3**, as a Tier-1 design check, and its honest
 ledger entry ([§12](#12-the-moral-core--proven-tested-assumed)) reads **tested (sampled schedules)** for the design. But **io-sim *against the
 built runtime*** — the real daemon lifted onto io-classes and refined against the model — **stays
 Tier-2/deferred**, exactly per the fidelity ceiling above: the concurrent *schedule of the live daemon*
@@ -486,7 +497,7 @@ it.
 
 **In amoebius, the fault harness is itself an `InForceSpec` topology.** A test is a Dhall-authored spec that spins
 up resources, runs a workflow, and — by definition — always tears down, simulating HA failovers and
-leadership elections; `suggest-test` detects the substrate and emits a representative one. That entire
+substrate quorum re-elections (etcd/Patroni); `suggest-test` detects the substrate and emits a representative one. That entire
 machinery — the test-as-`InForceSpec` contract, `suggest-test`, the flagged test credentials, and the per-run
 ledger artifact — is owned by [testing_doctrine.md](./testing_doctrine.md). This doctrine owns only the
 rule that each concentrated invariant ([§6](#6-the-concentration-principle--where-the-obligation-lives)) must have an adversarial scenario asserting its *declared form*.
@@ -535,8 +546,8 @@ reported as proven. Keep this ledger explicitly:
 |---|---|---|---|
 | GADT-indexed state machine | Illegal in-process transitions are compile errors | **Proven** (machine-checked, exhaustive) | Anything across processes |
 | **Extract** — pure decision + property test | The branch is a total function of typed inputs; unknowns and distinguished states are explicit; safety-critical freshness is fenced | **Proven** for purity / totality / fence wiring; **tested** (sampled) for the property unless the input space is finite and exhausted | That the protocol composing these decisions is sound; that an unfenced observation is current |
-| **Model** — design model-checking | The *algorithm* upholds the (possibly *conditional*, R7) invariant under modeled crash/reorder, within scope | **Proven for the model** at TLC-green (the Tier-1 design-model, front-loaded to Phase 1); **assumed** for model↔code refinement (deferred Tier-2, Phase 9) and actor counts beyond scope | That the code refines the model; behaviour above scope; real-time / clock-skew premises (R8) |
-| **Simulate** (optional) | The pure decision upholds the invariant under the in-process schedules explored against peer stubs (the Tier-1 design-schedule check, Phase 1); the *built daemon's* real schedule stays deferred | **Tested (for design)** — sampled schedules | Schedules not explored; the live daemon's real schedule (Tier-2, deferred); anything outside the simulated subsystem |
+| **Model** — design model-checking | The *algorithm* upholds the (possibly *conditional*, R7) invariant under modeled crash/reorder, within scope | **Proven for the model** at TLC-green (the Tier-1 design-model, front-loaded to Phase 3); **assumed** for model↔code refinement (deferred Tier-2, Phase 29) and actor counts beyond scope | That the code refines the model; behaviour above scope; real-time / clock-skew premises (R8) |
+| **Simulate** (optional) | The pure decision upholds the invariant under the in-process schedules explored against peer stubs (the Tier-1 design-schedule check, Phase 3); the *built daemon's* real schedule stays deferred | **Tested (for design)** — sampled schedules | Schedules not explored; the live daemon's real schedule (Tier-2, deferred); anything outside the simulated subsystem |
 | **Inject** — live fault injection | The deployed forest survived the injected faults | **Tested** (the faults chosen), never proven | Faults/interleavings not injected; that the invariant is *sound* |
 | Synchrony / real-time assumption (R8) | The timing premise (clock skew, lease, heartbeat) is named, bounded, monitored | **Assumed** — monitored at runtime, never proven by any move | Behaviour when the bound is exceeded; that it holds in the field |
 
@@ -548,9 +559,9 @@ built. So **every** layer above is, for amoebius, **UNVERIFIED** pending impleme
 *proven* facts available are sibling prodbox results, which are **evidence, not amoebius proof.** The
 [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) phase-discipline rule makes this binding: *every
 validation emits a proven/tested/assumed ledger artifact, and skipping an applicable test move marks that
-correctness layer UNVERIFIED, never green.* When the First-Axis election's design-model is TLC-checked
-(Phase 1, the Tier-1 design tier), the election is built (Phase 4), and its model↔code correspondence is
-closed (Phase 9, the deferred Tier-2), its ledger will read like prodbox's; until then, claiming the
+correctness layer UNVERIFIED, never green.* When the gateway-migration design-model is TLC-checked
+(the pre-cluster formal phase, Register 1), the multi-cluster runtime is built, and its model↔code correspondence is
+closed (Phase 29, the deferred Tier-2), its ledger will read like prodbox's; until then, claiming the
 singleton is "hardened" because prodbox proved a sibling invariant is exactly what this section forbids.
 
 The rule, stated once and meant absolutely: **never report a tested, assumed, or merely argued result as
@@ -603,8 +614,9 @@ cross-boundary.)
   view convergence*); (b) **choose the failure mode explicitly** — *safety-first* (fail closed) or
   *availability-first* (act, accept a **bounded** violation that deterministically heals on reconvergence)
   — and document which; (c) **record** the chosen mode in the ledger. amoebius inherits prodbox's explicit
-  **availability-first** election choice (an isolated singleton candidate self-elects as a failsafe;
-  [daemon_topology_doctrine.md §5.4](./daemon_topology_doctrine.md#54-the-safety-boundary-stated-honestly)).
+  **availability-first** stance for the one boundary it owns — the gateway migration, where a promoted cluster
+  acts on failover and accepts a **bounded** violation that deterministically heals on reconvergence
+  ([gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md)).
 - **R8 — Name and bound every synchrony assumption; no move verifies it.** Where correctness rests on a
   real-time premise — bounded cross-node clock skew, a lease/TTL, heartbeat timing — that premise is proven
   by **none** of the moves: Extract abstracts it, Model uses logical time, Inject only samples. Therefore
@@ -640,12 +652,12 @@ invariant cannot be **asserted** in Inject or Simulate until it has been **state
 made pure and checkable by Extract); Simulate sits between, checking the real code against schedules before
 the expense of live injection.
 
-Under amoebius's two-tier schedule this dependency runs *ahead of the built code*: the Phase-1 Model is
+Under amoebius's two-tier schedule this dependency runs *ahead of the built code*: the Phase-3 Model is
 authored against the **fixed Appendix A/B snapshot/observation vocabulary** before the built Extract
 exists, so it needs no runtime to be TLC-checked design-first. What is thereby deferred is not the design
 proof but the **Model↔Extract naming reconciliation** — the check that each modeled variable names a value
 the built decision actually computes — which is a tracked, **deferred (UNVERIFIED)** Tier-2 correspondence
-obligation discharged when the code lands, not a gap in the Phase-1 design-model.
+obligation discharged when the code lands, not a gap in the Phase-3 design-model.
 
 ### 14.2 Sequencing by ROI (per-project — not doctrine)
 
@@ -670,7 +682,7 @@ concern**, name the demonstration. The cell is not "is there a test" but "what d
 |---|:--:|:--:|:--:|:--:|:--:|
 | Each branch reading externally-mutable state | required (+ fence if safety-critical, [§8](#8-move-i--extract-make-the-decision-a-value)) | — | required where the branch races | — | — |
 | Each take-then-act / claim primitive | — | required | **required** (contention + async-exception) | — | — |
-| Control-plane singleton ownership ([§6](#6-the-concentration-principle--where-the-obligation-lives) First Axis) | the decision is pure | — | required | **required** | **required** (kill mid-claim) |
+| Cross-cluster gateway ownership migration ([§6](#6-the-concentration-principle--where-the-obligation-lives), the one obligation) | the decision is pure | — | — | **required** | **required** (kill mid-migration) |
 | At-least-once + idempotency (R3) | — | required | required | **required** | **required** (reorder/redeliver, incl. post-failover cross-cluster replay) |
 | Crash / recovery & failover (R4) | — | the recovery decision is pure | — | recommended | **required** (failover under load, incl. cross-cluster) |
 | Impossibility-bounded invariant (R7) | — | — | — | **required** (state condition; choose mode; model the *conditional* invariant) | **required** (partition; assert violation bounded & self-healing) |
@@ -693,7 +705,7 @@ the first says nothing about the other two. Audit all three.
 > that describes the subsystem, **the analysis can stop here** — Appendix A is the worked example. Read on only if
 > the subsystem's data is geo-replicated across more than one cluster with *asynchronous* replication between them.
 
-For amoebius this gate is not a rare edge case — it is **Phase 9**. The moment a parent spawns a child and
+For amoebius this gate is not a rare edge case — it is **Phase 29**. The moment a parent spawns a child and
 the two geo-replicate, the forest crosses this line, and the [§3](#3-the-defect-class--one-shape-two-disguises) defect returns in a new and more dangerous
 form. Recall the fourth blindness ([§5](#5-three-layers-and-the-blindness-that-binds-them)): **every move is blind to the cluster boundary unless the boundary
 is modeled in.** Extract's convergent fold is pure *because its input converges* — and is blind to the fact
@@ -905,7 +917,8 @@ faults into the deployment, so the running forest cannot hide a failure that onl
 the three is sufficient; each is blind exactly where the next one looks. The concentration principle
 narrows the scope: because the standard services run their own consensus and because chaos/HA/failover are
 deployment-rules and not app logic, the obligation does not spread across the forest — it concentrates at
-the singleton election and the cross-cluster boundary, and nowhere else.
+the cross-cluster gateway-migration boundary (intra-cluster single-instance being delegated to k8s/etcd), and
+nowhere else.
 
 The deliverable is the **ledger**, not the moves. For amoebius today the ledger is
 almost entirely UNVERIFIED, with prodbox standing in only as *sibling evidence*. That is a fact to record,
@@ -920,123 +933,17 @@ silently violates under partition. Build the first kind, and record which kind w
 
 ---
 
-## Appendix A — Worked example (fenced): the control-plane singleton, elected over a replicated log
+## Appendix A — retired (control-plane single-instance is delegated to k8s/etcd)
 
-> The First-Axis example, within a single cluster's consistency boundary. It is the **prodbox gateway
-> single-writer pattern generalized** from "owns the public DNS record" to "owns the whole cluster and its
-> secrets." It exercises an impossibility-bounded conditional invariant (R7) and a load-bearing synchrony
-> premise (R8).
->
-> **SSoT note.** This appendix narrates the singleton to teach the method; it does **not** own it. The
-> election *shape* is owned by [daemon_topology_doctrine.md §5](./daemon_topology_doctrine.md#5-leadership-election--the-mechanism-the-proof-lives-elsewhere); the formal
-> **design-model and invariant catalog** (authored and TLC-checked design-first in Phase 1, the Tier-1
-> tier) and their **model↔code correspondence and divergence record** (the deferred Tier-2 obligation,
-> Phase 9) are owned by [tla_modelling_assumptions.md](./tla_modelling_assumptions.md). Cite those when
-> implementing; cite this appendix for the method it illustrates.
-
-**The system.** A small fixed set of ranked control-plane candidate pods (the HA chart at a configurable
-replica count; at `replicas=1` the sole candidate self-elects — the degenerate single-rank instance, not a
-special-cased dev path) must keep **exactly one active singleton** holding total cluster + secret authority.
-The candidates share no in-memory state; they coordinate only through the **coordination plane: Pulsar
-(native binary protocol, no WebSockets) for the live event stream, Pulsar's tiered/retained topic lifecycle
-(offloading to MinIO/S3) for durable retention, and a signed, hash-chained, append-only commit log**
-(`claim` / `yield` / `heartbeat` / domain events, merged idempotently by event hash), with the current-state
-projection materialized as a compacted-topic **TableView** — a read-model only, computing no ownership
-([daemon_topology_doctrine.md §5.1, §5.5](./daemon_topology_doctrine.md#51-the-coordination-plane-pulsar--minio--the-commit-log)). Crucially the availability-first
-isolation failsafe reads *nothing* — it fires on the *absence* of fresh peer heartbeats — so the election
-stays sound even when its own broker is down (the bootstrap/DR independence that keeps it a custom, not a
-Pulsar-native, election). The externally-visible effects are the cluster gateway's DNS A record (route53) and,
-via the fused secret authority ([daemon_topology_doctrine.md §3.2](./daemon_topology_doctrine.md#32-what-total-authority-over-the-cluster-and-its-secrets-cashes-out-to)), Vault — and **no Pulsar primitive
-can fence either** (they validate no broker epoch), which is exactly why this invariant is amoebius's own to
-prove.
-The invariant: **at most one daemon exercises singleton authority — once views have converged.** That
-conditional clause is load-bearing (R7). It meets the [§2](#2-when-this-applies--the-gate) gate.
-
-**The defect ([§3](#3-the-defect-class--one-shape-two-disguises) made concrete).** Each candidate decides whether it is the singleton and may act, from its
-local view of peer liveness (heartbeat ages) and the log. The naive path reads a *peer heartbeat older than
-the timeout* as "that peer is dead," self-elects, and acts on "I am the sole brain" — a premise that may
-already be false. This is *timeout-coerces-unknown*: a missing heartbeat means *unreachable-or-slow*, not
-provably *dead*. It compounds with *state-conflation* if the daemon collapses "I pushed to the peer's
-socket" (outbound reachability) with "the peer is alive and emitting" (inbound freshness) — two distinct
-facts a one-way partition drives apart, which must be tracked as **separate** observations.
-
-**Extract applied.** Make the decision a pure function of a convergent input ([§8](#8-move-i--extract-make-the-decision-a-value), log-fold form). Election
-is `decide : (orders, heartbeat-observations, up-set) → owner`, a *deterministic total* function over the
-ranked set — given identical observations, every candidate computes the same owner, so convergence alone
-removes accidental split-brain. The owner-only action is gated by a second pure predicate over the **log**:
-*may-act = (I am the computed owner) ∧ (my latest claim is unsuperseded by a later yield)*. Because the gate
-folds over the convergent log, it is pure *because its input converges*. Note the typed-unknown scoping: the
-daemon **does** coerce "stale heartbeat → drop peer from the up-set," but that coercion only changes *who
-attempts to lead* (liveness); it never authorizes an action, because the action is gated by the log, not the
-heartbeat — so the coercion is licensed and cannot violate safety.
-
-```mermaid
-flowchart TD
-  T1["before: read peer heartbeats"] --> T2["coerce stale heartbeat to peer dead"]
-  T2 --> T3["self-elect and act"]
-  T3 --> T4["act on sole-owner belief"]
-  L1["after: snapshot orders + observations"] --> L2["pure deterministic owner decision"]
-  L2 --> L3["may-act checks unsuperseded claim"]
-  L3 --> L4["exercise authority only if gate passes"]
-  T4 -->|"refactor into"| L1
-```
-
-**Impossibility and synchrony (R7, R8).** Under partition, *no two singletons* and *autonomous failover
-progress* cannot both hold (FLP/CAP). amoebius makes the R7 choice **explicit and availability-first**
-(inherited from prodbox): an isolated candidate may self-elect as a failsafe, so under severe partition the
-absolute single-singleton invariant is not claimed. Because authority stays gated by the local log view, any
-split admitted by that choice is *temporary*, bounded by the partition, and **deterministically heals on
-reconvergence** (the losing side observes a superseding claim/yield and stops). The invariant is therefore
-*≤ 1 singleton once views converge*. Safety further rests on a **bounded clock-skew premise** (R8): the log
-compares wall-clock UTC stamps across daemons, so the bound (`max_clock_skew_seconds`) is named, **enforced**
-(reject inbound events outside it), and **monitored** (export the maximum observed inter-node skew). No move
-proves this premise; it is recorded **assumed**.
-
-**Model applied.** Model the ranked nodes, an up-set derived from heartbeat-timeout, and actions *claim /
-yield / act / crash*, explored to exhaustion at a scope matching the real node count. State deterministic
-election for equal views, no tug-of-war once converged, at most one active singleton when stable, every act
-preceded by an unsuperseded claim, and a sole-survivor self-election; plus a liveness property. The model
-rules out the deposed-daemon hazard (a daemon that still believes it is the singleton and keeps acting) —
-barred because acting requires an unsuperseded self-claim a deposed daemon cannot have once its yield (or the
-new owner's claim) has propagated. **The concrete spec is owned by
-[tla_modelling_assumptions.md](./tla_modelling_assumptions.md);** the prodbox `UniqueOwner` / `NoTugOfWar` /
-`SingletonTakeover` results (~4.4M states at scope 3) are **sibling evidence, not an amoebius proof.** Honest
-limit: the model is in logical time at bounded scope and proves nothing about the clock-skew premise it
-abstracts (R8's ledger row).
-
-**Inject applied.** Extend the test-`.dhall` harness ([testing_doctrine.md](./testing_doctrine.md)) with:
-partition the mesh and assert the chosen R7 mode (bounded divergence during the partition, single active
-singleton once converged); kill the current singleton *mid-claim under load* and assert exactly one survives
-after convergence; drive a **one-way** partition and confirm inbound-vs-outbound health stay distinguished;
-inject **clock skew beyond the bound** and confirm the daemon rejects the out-of-bound events (R8) rather
-than corrupting the ordering.
-
-**The ledger this example keeps ([§12](#12-the-moral-core--proven-tested-assumed)).** *Proven* (once built) — election purity and the may-act fold
-(decision layer), and the modeled safety/liveness properties (for the model, at scope). *Tested* — the
-partition and kill-mid-claim scenarios. *Assumed* — the clock-skew premise (R8), model↔code refinement, and
-behaviour above scope. **Under the two-tier schedule, the modeled safety/liveness properties are *proven
-for the model at scope* in Phase 1** (design-first, ahead of code), while **election-correctness-in-the-
-running-cluster and the model↔code correspondence remain UNVERIFIED** until the election is built (Phase 4)
-and its correspondence closed (Phase 9); the prodbox analogues are evidence, not amoebius proof. The compacted-topic/TableView read-model
-([daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#51-the-coordination-plane-pulsar--minio--the-commit-log)) adds **no** new ledger row: it is a
-projection whose authority is the ownership fold, and a bounded-retention *uncompacted* signed audit trail is
-retained beside it, so compaction's per-key discard does not erode the hash-chain tamper-evidence under
-amoebius's crash/omission threat model — the swap is proof-neutral, not an assumption disguised as proof.
-
-**Appendix A rests on doctrine (zero orphans).**
-
-| Claim / mechanism | Doctrine home it instantiates |
-|---|---|
-| Ranked candidates, HA chart, `replicas=1` self-elect | [daemon_topology_doctrine.md §3, §5](./daemon_topology_doctrine.md#3-the-control-plane-singleton--exactly-one-elected); [platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1) |
-| Coordination plane: Pulsar live stream + tiered/MinIO retention + signed commit log; compacted-topic TableView read-model (projection only) | [daemon_topology_doctrine.md §5.1, §5.5](./daemon_topology_doctrine.md#51-the-coordination-plane-pulsar--minio--the-commit-log); R1 |
-| External route53/Vault effects unfenceable by any Pulsar primitive; availability-first bounded self-healing | [daemon_topology_doctrine.md §3.2, §5.3](./daemon_topology_doctrine.md#32-what-total-authority-over-the-cluster-and-its-secrets-cashes-out-to); R7 |
-| Pure `decide` + `may-act` log-fold; typed-unknown scoping | [§8](#8-move-i--extract-make-the-decision-a-value) (convergent-log fold); [§8](#8-move-i--extract-make-the-decision-a-value) typed-unknown |
-| Stale-heartbeat coercion licensed for liveness only | [§8](#8-move-i--extract-make-the-decision-a-value) typed-unknown scoping |
-| Availability-first; bounded self-healing split | R7 |
-| Clock-skew bound named/enforced/monitored | R8 |
-| Deposed-daemon hazard barred by unsuperseded-claim gate | [§9](#9-move-ii--model-prove-the-protocol-not-the-program) |
-| Partition / kill-mid-claim / skew faults | [§11](#11-move-iii--inject-break-the-running-thing-on-purpose) Inject (extend the test-`.dhall` harness) |
-| Concrete TLA+ spec + invariant catalog | [tla_modelling_assumptions.md](./tla_modelling_assumptions.md) |
+> The former **First-Axis** worked example — a control-plane singleton *elected over a replicated log* — is
+> **retired**. Single-instance of the control-plane singleton is delegated to Kubernetes/etcd (a Deployment
+> `replicas=1`; a k8s `Lease`, itself etcd-backed, if a hard lock is ever needed), so amoebius runs **no
+> election** and this axis carries **no proof obligation**
+> ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton),
+> [§6](#6-the-concentration-principle--where-the-obligation-lives)). The one worked example that remains
+> amoebius's own is the cross-cluster **gateway migration** — **Appendix B** — modelled as data in
+> [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) and
+> [formal_model_doctrine.md](./formal_model_doctrine.md).
 
 ---
 
@@ -1046,7 +953,7 @@ amoebius's crash/omission threat model — the swap is proof-neutral, not an ass
 > cluster goes down mid geo-sync and the gateway is failed over to it?** It crosses the cluster boundary
 > (R1/[§17](#17-the-boundary-and-its-classifier), R9), rests on a bounded-staleness / data-loss premise and an explicit failover budget (R8, R9),
 > and reconciles divergent histories under an availability-first choice (R7). It is **forward-looking**:
-> amoebius runs no cross-cluster geo-replication today, but Phase 9 is exactly this shape, so the doctrine
+> amoebius runs no cross-cluster geo-replication today, but Phase 29 is exactly this shape, so the doctrine
 > works it through before the need is live.
 
 **The system.** Two sibling child clusters with the same parent geo-replicate a realtime workflow
@@ -1055,7 +962,7 @@ durable outputs written as **content-addressed, write-once MinIO blobs** plus a 
 pointer**. *Within* one cluster the log and object store are strongly consistent (delegated, [§6](#6-the-concentration-principle--where-the-obligation-lives)). *Across*
 clusters they replicate **asynchronously**. The cluster **gateway DNS owner** (route53) = the active cluster
 — a meta-election that is *itself* only R7-conditional (both may briefly self-elect under partition; this is
-Appendix A's singleton lifted to cluster scale). The invariant: *for effects that have replicated or are
+the cross-cluster meta-election the gateway migration models, Appendix B). The invariant: *for effects that have replicated or are
 later reconciled, no effect is double-applied; at most one cluster holds gateway authority once views
 converge; acknowledged-but-un-replicated work is bounded by the R9 data-loss budget.* Per [§17](#17-the-boundary-and-its-classifier)'s classifier,
 the content-addressed blobs and the Pulsar log are confluent and cross safely; the CAS pointer and the
@@ -1142,7 +1049,7 @@ workflow with a live cluster eventually completes through one authority.* Honest
 **logical time** — it encodes "an effect either had or had not crossed the boundary before the cut" but says
 **nothing** about the real size of that window; whether field lag stays within bound is the **R8/R9 assumed
 premise**, in the ledger, not the model. **The concrete spec is owned by
-[tla_modelling_assumptions.md](./tla_modelling_assumptions.md) (Phase 9), which the
+[gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) (Phase 29), which the
 [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) names as the phase that carries this proof.**
 
 **Inject applied.** Extend the test-`.dhall` harness into the inter-cluster dimension: **cut the
@@ -1160,9 +1067,9 @@ dedup + pointer-merge fold (decision layer); the modeled two-cluster safety/live
 replication-lag/promotion-gate, and failback-idempotency drills. *Assumed* — the data-loss-window /
 replication-lag bound (R8/R9), monitored never proven; the PACELC latency-for-consistency posture (R7);
 model↔code refinement and behaviour beyond 2 clusters. **Under the two-tier schedule, the two-cluster
-design-model's safety/liveness properties are *proven for the model at scope 2* in Phase 1 (design-first);
+design-model's safety/liveness properties are *proven for the model at scope 2* in Phase 3 (design-first);
 the model↔code correspondence and live cross-cluster-failover-in-a-running-forest remain UNVERIFIED — the
-Tier-2 Phase-9 obligation, and the single place the per-system proof concentrates.**
+Tier-2 Phase-29 obligation, and the single place the per-system proof concentrates.**
 
 **Appendix B rests on doctrine (zero orphans).**
 
@@ -1180,7 +1087,7 @@ Tier-2 Phase-9 obligation, and the single place the per-system proof concentrate
 | Replication lag named/bounded/monitored; data-loss window; promotion gate | R8; R7 (fail-closed promotion gate) |
 | Failover budget = (data-loss window assumed, recovery time drilled) | R9 |
 | PACELC: async posture chosen | R7 (PACELC) |
-| Two-cluster model; ≤ 1 authority once converged | [§9](#9-move-ii--model-prove-the-protocol-not-the-program) Model; R7; [tla_modelling_assumptions.md](./tla_modelling_assumptions.md) |
+| Two-cluster model; ≤ 1 authority once converged | [§9](#9-move-ii--model-prove-the-protocol-not-the-program) Model; R7; [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) |
 | Extend the harness with partition / kill-cluster / lag / failback | [§11](#11-move-iii--inject-break-the-running-thing-on-purpose) Inject; [testing_doctrine.md](./testing_doctrine.md) |
 | Ledger proven/tested/assumed; conformance rows | [§12](#12-the-moral-core--proven-tested-assumed) + [§19](#19-the-cross-boundary-ledger-and-conformance-rows) |
 
@@ -1269,7 +1176,7 @@ pairwise-disjoint`, preserved by every action including rebalances (a rebalance 
 *creates* it); (3) **exhaustion is fail-closed**; (4) **no fabricated cross-record invariant (CALM made
 executable)** — the model shows the naive merge *breaks* "sum = total," and that the only sound options are
 **single-writer** co-location or **restructure** to a derived fold. The concrete spec is owned by
-[tla_modelling_assumptions.md](./tla_modelling_assumptions.md). Honest limit: logical time at bounded scope —
+[gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md). Honest limit: logical time at bounded scope —
 nothing about real lag, real lease timing, or cluster counts beyond scope (R8/R9 ledger rows).
 
 **Inject applied.** Extend the test-`.dhall` harness: partition during bounded-authority writes (assert each
@@ -1307,17 +1214,17 @@ needs it.
 | Data lost / allowance & block stranded at failover; RTO reclaim | R9 (data-loss assumed, recovery-time tested) |
 | Idempotent absorption of duplicate replayed writes | R3 (replication-surviving identity key) |
 | No global cross-record invariant fabricated by merge | [§17](#17-the-boundary-and-its-classifier) (I-confluence corollary); [§8](#8-move-i--extract-make-the-decision-a-value) boundary-scoped note |
-| Concrete TLA+ spec + invariant catalog | [tla_modelling_assumptions.md](./tla_modelling_assumptions.md) |
+| Concrete TLA+ spec + invariant catalog | [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) |
 
 ---
 
 ## Cross-references
 
-- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — phase order, adoption ownership, and validation closure (Phase 9 carries the cross-cluster failover proof). This doctrine maintains no competing status ledger.
+- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — phase order, adoption ownership, and validation closure (Phase 29 carries the cross-cluster failover proof). This doctrine maintains no competing status ledger.
 - [Documentation Standards](../documentation_standards.md) — the proven/tested/assumed honesty rule this doctrine owns.
 - [Engineering Doctrine Index](./README.md)
-- [TLA+ Modelling Assumptions](./tla_modelling_assumptions.md) — SSoT for the concrete formal spec and invariant catalog (the Tier-1 design-model, authored design-first in Phase 1) and the model↔code correspondence and divergence record (the deferred Tier-2 obligation, Phase 9) this doctrine's Model move requires.
-- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the control-plane singleton election *shape* this doctrine proves.
+- [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — SSoT for the concrete formal spec and invariant catalog (the Tier-1 design-model, authored design-first in Phase 3) and the model↔code correspondence and divergence record (the deferred Tier-2 obligation, Phase 29) this doctrine's Model move requires.
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the control-plane singleton (a Deployment `replicas=1`, single-instance delegated to k8s/etcd, no election).
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — graceful teardown (lossless) versus chaos-failover (bounded loss), and push-back on an unsatisfiable root `InForceSpec`.
 - [Gateway Migration Doctrine](./gateway_migration_doctrine.md) — the `GatewayMigration = <Planned | Failover>` taxonomy; the `Failover` branch is this doctrine's Second-Axis obligation, and its reconciliation-on-return is worked in Appendix B.
 - [Platform Services Doctrine](./platform_services_doctrine.md) — the standard services whose intra-cluster consensus is delegated, concentrating the proof obligation.

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for how amoebius runs Pulumi — only from inside an existing amoebius cluster, with every byte of state held as a Vault-Transit-enveloped object in MinIO — to provision provider-managed clusters (EKS), spawn self-managed children, materialize per-PV EBS volumes under the create-but-never-delete credential model, and integrate DNS (route53) and TLS (zerossl); and how independent deploys are parallelized applicatively.
@@ -40,7 +40,7 @@ the thesis.
 *in-cluster*, collapsing this engine into the server-side-apply manifest reconciler and removing the external
 checkpoint — is **declined** for a provability-first system. Crossplane requires parent/management clusters to
 run its provider controllers **continuously** (a standing footprint on even the laptop root, *and* an
-autonomous substrate authority acting on its own reconcile loop beside the elected singleton — a categorically
+autonomous substrate authority acting on its own reconcile loop beside the control-plane singleton — a categorically
 larger delegation than the in-cluster operators the manifest doctrine blesses
 ([manifest_generation_doctrine.md §4](./manifest_generation_doctrine.md#4-no-third-party-charts--no-third-party-software-operators-are-generated))); it stores state in **k8s Secrets,
 at odds with the Vault-centric secrets model** the whole forest trust tree rests on
@@ -52,7 +52,7 @@ with helm?"*: **yes — Pulumi stays for v1, Crossplane is out.**
 **The same "surface a provider capability, do not build a second control plane" line governs stretched full
 nodes.** The Crossplane rejection above generalizes into a discipline this round leans on elsewhere: where a
 *provider-managed* control plane would otherwise force amoebius to stand up an autonomous continuous fabric
-beside the elected singleton, amoebius declines to build it and instead surfaces the provider's own capability
+beside the control-plane singleton, amoebius declines to build it and instead surfaces the provider's own capability
 if one exists. The concrete case is a **stretched full k8s member node** (a kubelet whose declared
 network-locality differs from its control plane's): on a self-managed rke2 control plane it is representable
 over amoebius's own WireGuard fabric + distro-mTLS, but on a **`Managed Eks`** control plane it is
@@ -60,7 +60,7 @@ representable **only** if the provider natively supports it — **EKS Hybrid Nod
 provider capability the `Managed Eks` arm would *surface* (provisioned via the cloud API,
 [§4](#4-what-pulumi-provisions-the-resource-catalog)), **never** an amoebius-built continuous second
 control-plane fabric — which would be exactly the "autonomous substrate authority acting on its own reconcile
-loop beside the elected singleton" Crossplane shape rejected here. Absent that provider-native arm, a stretched
+loop beside the control-plane singleton" Crossplane shape rejected here. Absent that provider-native arm, a stretched
 full node on a managed control plane simply has **no constructor** — type-foreclosed uninhabitable, the closed-union
 "no arm = not supported" idiom owned by [cluster_topology_doctrine.md §2, §4.1](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm);
 the surface-a-provider-capability-vs-build-a-fabric axis it rests on is
@@ -96,7 +96,7 @@ an existing amoebius cluster, using MinIO as the backend and vault envelope encr
 Concretely:
 
 - **The Pulumi engine runs under the in-cluster control-plane singleton**, never on a bare host. The
-  singleton is the elected total cluster + secret authority; its election and worker-role model are owned
+  singleton is the total cluster + secret authority; its single-instance delegation and worker-role model are owned
   by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md). A deploy is therefore something the
   cluster *does*, gated by the same authority that owns every other mutation — not something an operator's
   shell does behind the cluster's back.
@@ -275,7 +275,7 @@ binding is unrepresentable**.
 - **"DNS that binds to the wrong IP address" is unrepresentable.** The DSL ties a record to the cluster's
   *actual* LB endpoint rather than a free-text address, so the illegal binding the vision names
   cannot be written. The typing technique that enforces this lives in
-  [dsl_doctrine.md](./dsl_doctrine.md) / [illegal_state_catalog.md](./illegal_state_catalog.md); this doc
+  [dsl_doctrine.md](./dsl_doctrine.md) / [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md); this doc
   owns the route53 *realization* of the bound record.
 - **Failover repoint is a different owner.** Geo-replicated siblings repointing DNS when the lead's gateway
   dies is a *failover behaviour* owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). This
@@ -460,8 +460,8 @@ To keep SSoT boundaries crisp:
 | DNS failover **repoint** when a lead's gateway dies; the async cross-cluster proof obligation | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
 | Wild-ingress routing (LB → Gateway API → Keycloak) that DNS/TLS front; the in-cluster standard services Pulumi does *not* deploy | [platform_services_doctrine.md](./platform_services_doctrine.md) |
 | The `chain`/`Step` algebra and the applicative/monadic composition primitives themselves | [dsl_doctrine.md](./dsl_doctrine.md) |
-| Making "DNS bound to the wrong IP", "a PVC that can't bind", "open ingress" unrepresentable | [dsl_doctrine.md](./dsl_doctrine.md), [illegal_state_catalog.md](./illegal_state_catalog.md) |
-| Which daemon context runs the Pulumi engine (the elected control-plane singleton) | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
+| Making "DNS bound to the wrong IP", "a PVC that can't bind", "open ingress" unrepresentable | [dsl_doctrine.md](./dsl_doctrine.md), [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) |
+| Which daemon context runs the Pulumi engine (the control-plane singleton) | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
 | The no-env / no-`PATH` lazy-tool-ensure contract for the `pulumi` binary and plugins | [substrate_doctrine.md](./substrate_doctrine.md) |
 
 ---
@@ -472,10 +472,10 @@ This document is normative Pulumi-IaC doctrine only. Delivery sequencing, comple
 gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the DNS (route53) + TLS (zerossl) provider integration and root
-Vault/PKI land in **Phase 3**; amoebic spawning via SSH-key Pulumi with the MinIO backend + Vault-envelope
-encryption lands in **Phase 9**; provider-managed clusters (EKS) and dynamic node
-provisioning land in **Phase 10**; the elevated-harness storage-deletion safety that makes the [§6](#6-the-ebs-create-vs-delete-credential-model)
-create-vs-delete model leak-free lands in **Phase 11**. Per
+Vault/PKI land in **Phase 17**; amoebic spawning via SSH-key Pulumi with the MinIO backend + Vault-envelope
+encryption lands in **Phase 29**; provider-managed clusters (EKS) and dynamic node
+provisioning land in **Phase 30**; the elevated-harness storage-deletion safety that makes the [§6](#6-the-ebs-create-vs-delete-credential-model)
+create-vs-delete model leak-free lands in **Phase 31**. Per
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), no statement here is a proven amoebius
 result: the model generalizes behaviour proven in prodbox into amoebius design intent, and the [§6](#6-the-ebs-create-vs-delete-credential-model) EBS
 credential model is an explicit *resolution of an open question*, not a tested capability.
@@ -494,7 +494,7 @@ credential model is an explicit *resolution of an open question*, not a tested c
 - [Platform Services Doctrine](./platform_services_doctrine.md)
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md)
 - [DSL Doctrine](./dsl_doctrine.md)
-- [Illegal State Catalog](./illegal_state_catalog.md)
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md)
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)

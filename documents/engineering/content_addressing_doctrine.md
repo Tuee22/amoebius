@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/chaos_failover_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define amoebius's cross-project content-addressed store (blobs ← manifests ← pointers), the
@@ -44,7 +44,7 @@ future ML family is **Phase-N design intent**, entering later through the same l
 
 **What this doc does not own.** This doctrine owns the shared *mechanism*. It does **not** re-derive the
 *totality typing* that makes names un-forgeable — that is technique [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) in
-[`illegal_state_catalog.md`](./illegal_state_catalog.md). It does **not** own the per-substrate floating-point
+[`illegal_state_catalog.md`](../illegal_state/illegal_state_catalog.md). It does **not** own the per-substrate floating-point
 contract or the JIT cache key — those are owned by the sibling `jitML` project's
 `jitML/documents/engineering/determinism_contract.md`, which this doc references rather than restates. And it
 does **not** own where the bytes physically live (retained-PV MinIO) — that is
@@ -91,7 +91,7 @@ stays content-addressed and dedup-able within the bucket; only the *mutable poin
 app may serve this" — is app-scoped. Two consequences fall out and are owned elsewhere: there is **no** cross-app
 training-DAG `parent` edge (a `Continue` chain, [§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm), stays within one app's namespace), and "app B serving or
 continuing app A's model without an explicit grant" is a **decode-foreclosed** illegal state
-([`illegal_state_catalog.md`](./illegal_state_catalog.md)). The upstream-pull credential a stage-by-name import
+([`illegal_state_catalog.md`](../illegal_state/illegal_state_catalog.md)). The upstream-pull credential a stage-by-name import
 resolves is likewise scoped per app ([`vault_pki_doctrine.md`](./vault_pki_doctrine.md)).
 
 The `tb/` prefix under an experiment holds the jitML **TensorBoard event files** (`tfevents`) that the
@@ -281,13 +281,13 @@ adds**, never by a check that already existed:
 1. An **engine-`family` tag** on `ModelArtifact` / manifest ([§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) / [§2.1](#21-three-object-classes-two-write-protocols)) — the model side carries no family
    field today.
 2. A **redefined landing predicate** owned by
-   [`service_capability_doctrine.md` §4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-baked-and-substrate-selected-never-fetched):
+   [`service_capability_doctrine.md` §4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-substrate-selected-and-jit-resolved-never-authored):
    "the model's engine **family** is available on the **serving** substrate lane," decoupled from the producing
    lane. Family×lane availability is a **partial** relation (e.g. vLLM is not baked on Apple-Metal), so an
    unavailable-family-on-lane is an honest **decode-foreclosed** rejection.
 
 **Layer.** Producing-substrate provenance + the [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) witnessed constructor is **type-foreclosed**; the engine-family ↔
-serving-substrate serve relation is **decode-foreclosed** (a checked rejection of a constructible value, [`illegal_state_catalog.md` §4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection)).
+serving-substrate serve relation is **decode-foreclosed** (a checked rejection of a constructible value, [`illegal_state_catalog.md` §4.7](../illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)).
 Two **runtime-checked residues** are named, not foreclosed, and ledgered in [§6.1](#61-proven--tested--assumed-spelled-out): (i) **no cross-substrate bit-equality** back to the training
 substrate ([§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic) ceiling, unchanged); (ii) a **weight-layout load residue** — a family-matched but
 substrate-specific-**weight-layout** model (the manifest carries "weight layout," [§2.1](#21-three-object-classes-two-write-protocols)) passes the decode-foreclosed
@@ -361,7 +361,7 @@ typed `SplitMixSeed` and a `Word64` index — both pinned. An artifact's name is
 bytes (`deriveExperimentHash`, `blobKey`, `manifestContentSha`); there is no constructor that takes a free
 string. So "use whatever entropy the worker had" and "point at a checkpoint that was never written" are not
 states that can be *fixed at runtime* — they are states that cannot be *written down*. This is the totality technique [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
-in [`illegal_state_catalog.md`](./illegal_state_catalog.md), applied to seeds and store keys; this doc owns the
+in [`illegal_state_catalog.md`](../illegal_state/illegal_state_catalog.md), applied to seeds and store keys; this doc owns the
 content-addressing/determinism *use* of it, the catalog owns the typing discipline.
 
 ### 4.5 The ML-asset lifecycle: one bounded content-addressed cache, resolved on first miss
@@ -379,7 +379,7 @@ Each asset is **named** by a typed content-addressed identity drawn from a **clo
 arbitrary-URL arm and no author-a-download syntax — and the `jit-build` resolver materializes the named identity
 into the bounded cache on first miss. The foreclosure therefore **shifts** from the old "no `Download` arm
 (baked)" to **"no arbitrary-URL arm (a closed named catalog) + a `CacheBudget`-bounded cache"**
-([`illegal_state_catalog.md` §3.25](./illegal_state_catalog.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)).
+([`illegal_state_catalog.md` §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)).
 
 The cache is a **bounded typed pool.** It carries an explicit **`CacheBudget` (a `Quantity`) ≤ host storage**,
 content-addressed with aggressive pin-aware pruning; "more cached than fits" is **unrepresentable** — the same
@@ -398,7 +398,7 @@ Two types carry the axis:
   *author* a download; the `jit-build` resolver downloads-or-builds that named identity into the cache on first
   miss. An engine **named by arbitrary URL** is therefore **type-foreclosed unrepresentable**; the first-miss
   resolve is a bounded-cache act, not a startup URL fetch
-  ([`illegal_state_catalog.md` §3.25](./illegal_state_catalog.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)).
+  ([`illegal_state_catalog.md` §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)).
 - **`ModelArtifact`** — a by-name / content-address reference into the store of [§2](#2-the-three-tier-store-blobs--manifests--pointers). An `ArtifactRef` is
   obtainable **only** once the `.ready` sentinel exists: a half-staged model has no serveable reference
   (**type-foreclosed**, the existing `.ready`-gate discipline generalized — no constructor without the sentinel).
@@ -406,7 +406,7 @@ Two types carry the axis:
 **The serve gate is provenance, not just staging completeness (this round).** The `.ready` sentinel proves
 **staging completeness (bytes written)** — it does **not** prove *training provenance*. This round makes a
 serveable `ModelArtifact`'s constructor additionally require a **provenance witness**, one of exactly two arms
-(this is the single-owner constructor; [`service_capability_doctrine.md` §4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-baked-and-substrate-selected-never-fetched) and [`dsl_doctrine.md`](./dsl_doctrine.md) **reference** it, never restate the precondition):
+(this is the single-owner constructor; [`service_capability_doctrine.md` §4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-substrate-selected-and-jit-resolved-never-authored) and [`dsl_doctrine.md`](./dsl_doctrine.md) **reference** it, never restate the precondition):
 
 - **(a) a committed producing checkpoint** — a committed `latest` / `best` pointer (the single atomic pointer CAS,
   [§2](#2-the-three-tier-store-blobs--manifests--pointers)) that **always names a complete checkpoint** — never "a finished *run*," so it composes with [§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)'s
@@ -431,7 +431,7 @@ fail-closed), and "the pin names the *intended* model" = runtime-checked / assum
 
 **The engine↔model relation.** A `ModelArtifact` must be servable by an `EngineRuntime` that is available on the
 deployment's substrate — an unmatched model has no landing engine. This is a **decode-foreclosed** total relation
-(technique [`illegal_state_catalog.md` §4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection)); the substrate `InferenceEngine`
+(technique [`illegal_state_catalog.md` §4.7](../illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)); the substrate `InferenceEngine`
 capability a model must match is owned by [`service_capability_doctrine.md` §4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding). **Cross-substrate serving is
 representable** ([§3.1](#31-producing-substrate-vs-serving-substrate-a-distinct-serving-run-fingerprint)): the `ModelArtifact` / manifest carries an **engine-`family` tag** ([§2.1](#21-three-object-classes-two-write-protocols)), and the landing
 predicate keys on that family being available on the **serving** substrate lane — so a CUDA-produced model may
@@ -482,7 +482,7 @@ while `model_cache.py`'s `minioadmin` fallback is exactly the Vault violation th
 `Engines/Loader.hs` — the lazy per-kernel JIT (cache HIT → handle, MISS → compile-then-store) — is the shape
 this round generalizes to all three asset kinds.** These are working sibling behaviours this doctrine
 *generalizes*; amoebius has built none of the asset lifecycle itself. The illegal states it closes are
-catalogued at [`illegal_state_catalog.md` §3.25](./illegal_state_catalog.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model).
+catalogued at [`illegal_state_catalog.md` §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model).
 
 ### 4.6 The training-run topology: fine-tune chains and continuous feeds without an unbounded arm
 
@@ -491,7 +491,7 @@ The training surface today models only a fixed dataset split + a finite budget w
 train-forever-from-a-feed — unified by a single principle: **online training is an unbounded fine-tune chain over successive
 topic prefixes.** They are carried by three **closed** unions, **owned here** (matching the `EngineRuntime` /
 `ModelArtifact` precedent, [`dsl_doctrine.md`](./dsl_doctrine.md) **carries the field only**, deferring
-unrepresentability to this doc + [`illegal_state_catalog.md`](./illegal_state_catalog.md)):
+unrepresentability to this doc + [`illegal_state_catalog.md`](../illegal_state/illegal_state_catalog.md)):
 
 - **`TrainInit = FromScratch Seed | Continue ModelArtifactRef`** — `Continue` takes any **provenance-witnessed**
   `ModelArtifact` ([§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)): a prior committed checkpoint **or** a pinned import. Fine-tuning / warm-starting
@@ -543,7 +543,7 @@ tied to [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-r
 The illegal states this subsection closes — "a Continuous run with no cadence / a Feed with no bounded retention"
 (type-foreclosed shape + runtime-checked tail), "a multi-partition Feed with no defined merge" (type- or decode-foreclosed typed witness), "serving
 an uncommitted / in-flight checkpoint of a running job," and "two authoritative Continuous trainers on one logical
-model across clusters" — are catalogued in [`illegal_state_catalog.md`](./illegal_state_catalog.md); the retention
+model across clusters" — are catalogued in [`illegal_state_catalog.md`](../illegal_state/illegal_state_catalog.md); the retention
 and replay ceilings are ledgered in [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic)/[§6.1](#61-proven--tested--assumed-spelled-out).
 
 ---
@@ -674,7 +674,7 @@ specification to validate, never as a proven amoebius result. Status and gates: 
 
 | Concern | Owned by |
 |---------|----------|
-| The totality *typing* — names as total functions of content, no inhabitant for a dangling reference | [`illegal_state_catalog.md` §4.5](./illegal_state_catalog.md#45-content-address-totality--names-are-total-functions-of-content) |
+| The totality *typing* — names as total functions of content, no inhabitant for a dangling reference | [`illegal_state_catalog.md` §4.5](../illegal_state/illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content) |
 | Where the bytes physically live: `no-provisioner` retained-PV MinIO, deterministic rebind | [`storage_lifecycle_doctrine.md`](./storage_lifecycle_doctrine.md) |
 | MinIO/Pulsar as HA-always standard services | [`platform_services_doctrine.md`](./platform_services_doctrine.md) |
 | The resolved-`.dhall` identity input and the purity boundary | [`dsl_doctrine.md`](./dsl_doctrine.md) |
@@ -705,9 +705,9 @@ design intent.
 ## Cross-references
 
 - [Engineering Doctrine Index](./README.md)
-- [Illegal State Catalog](./illegal_state_catalog.md) — content-address totality ([§4.5](./illegal_state_catalog.md#45-content-address-totality--names-are-total-functions-of-content))
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — content-address totality ([§4.5](../illegal_state/illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content))
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md)
-- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the MinIO content store is a `StorageBacking` ceiling for host-bounded clusters ([§3.19](./illegal_state_catalog.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar))
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the MinIO content store is a `StorageBacking` ceiling for host-bounded clusters ([§3.19](../illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar))
 - [Platform Services Doctrine](./platform_services_doctrine.md)
 - [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — `releaseHash` + the `environment` promotion pointer ([§2](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash)/[§3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer)), registered in the [§2.3](#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) master table
 - [Service Capability Doctrine](./service_capability_doctrine.md) — the substrate `InferenceEngine` capability a `ModelArtifact` must match ([§4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding)), the engine↔model decode-foreclosed relation

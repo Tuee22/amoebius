@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for amoebius secrets and trust — Vault as the fail-closed secrets root, the SecretRef-by-name contract, the root cluster's single-node password-encrypted unseal, the two sanctioned parent/child unseal modes, parent-injects-secrets-into-child, and the root-owned PKI trust anchor for the whole forest.
@@ -195,7 +195,7 @@ distinct from custody — is flagged at [§9](#9-in-cluster-consumers-authentica
 
 ### 3.2 ML asset-staging credentials resolve from Vault by name — no second store
 
-The three-tier ML-asset lifecycle stages **Tier-2** model artifacts *eagerly*: an elected singleton pulls
+The three-tier ML-asset lifecycle stages **Tier-2** model artifacts *eagerly*: the control-plane singleton pulls
 the parent-named model set from upstream and re-keys it onto the content-addressed store, writing `.ready`
 last ([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 That staging step needs **two** credentials, and **both resolve from Vault by name** as ordinary
@@ -222,7 +222,7 @@ cannot pull, and therefore cannot mint an artifact from, another app's model sou
 secrets-by-name face of per-app model isolation (an app serves only models it produced or imported); the
 content-store namespacing and the decode-foreclosed "app B serving/continuing app A's model without a grant" illegal
 state are owned by [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
-and [illegal_state_catalog.md](./illegal_state_catalog.md); this section owns only that the pull credential
+and [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md); this section owns only that the pull credential
 is itself a per-app name. Correspondingly, the bytes that credential pulls are **verified against a pinned
 expected content-address, failing closed before `.ready`** — the pin-and-verify import constructor (and its
 layers: pin *presence* type-foreclosed, pin *match* decode-foreclosed, "the pin names the intended model" runtime-checked/assumed)
@@ -261,7 +261,7 @@ This section owns the Vault-init contract those two point at.
   Kubernetes ConfigMap or to etcd. Any ConfigMap a workload reads may carry only the [§6](#6-parentchild-unseal-two-sanctioned-modes) unencrypted-basics
   floor — never the spec, secrets, or downstream inventory. As defense-in-depth, etcd is configured with
   an `--encryption-provider-config` so even that floor is encrypted at rest. A plaintext spec at rest is
-  therefore *unrepresentable* ([illegal_state_catalog.md](./illegal_state_catalog.md)).
+  therefore *unrepresentable* ([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)).
 - **Ready-before-consumer is absolute.** No consumer of a secret may run before Vault reports
   reachable, initialized, and unsealed. A consumer that reaches a sealed Vault fails closed rather than
   racing it ([§2](#2-vault-is-the-fail-closed-secrets-root)). This generalizes prodbox's `secret_derivation_doctrine.md [§7](#7-parent-injects-secrets-into-the-childs-vault)` bootstrap-order rule.
@@ -313,7 +313,7 @@ proven in prodbox (`vault_doctrine.md [§6](#6-parentchild-unseal-two-sanctioned
 one interface, because the load-bearing property is only that the unseal material is **password-AEAD-
 sealed and never plaintext at rest**, not which vault holds the ciphertext. The *channel* by which the
 operator supplies the password at bring-up (and on every reboot) is the admin control plane's
-**`vault init/unseal` endpoint** — the operator CLI → the amoebius NodePort service → the elected singleton —
+**`vault init/unseal` endpoint** — the operator CLI → the amoebius NodePort service → the control-plane singleton —
 owned by [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api);
 this section owns the *sealed-material* model, that doc owns the *delivery channel*. Because a reboot
 re-enters the sealed régime, that reach is the **seal-critical, node-local** arm of that doc's admin-plane
@@ -501,6 +501,14 @@ prodbox's proven model (`secret_derivation_doctrine.md [§5](#5-the-root-cluster
 - **Generated once, never derived.** A secret a chart needs is minted once into Vault (KV) or issued
   by Vault (PKI) at install and persisted on the durable PV ([§2](#2-vault-is-the-fail-closed-secrets-root), [§4](#4-init-follows-readiness-fail-closed-vault-init)); no chart template generates or
   stores a secret value, and there is no seed to derive from.
+- **A built-in Haskell Vault client, no Agent sidecar.** Vault is reached through a **built-in Haskell client
+  library linked into the one amoebius binary** — never a Vault Agent sidecar, a CSI secrets-store driver, or a
+  `vault` CLI subprocess. One client, one auth path, one dependency closure
+  ([daemon_topology_doctrine.md §1](./daemon_topology_doctrine.md#1-one-binary-three-contexts)): the singleton
+  operates Vault, and every worker reads only its own paths through the same in-process client. A sidecar would
+  add a second process, a second failure mode, and a file-mounted secret surface this contract forbids; a
+  built-in client keeps the read in-process (the `InForceSpec` and every envelope are decrypted in-process and
+  never written to a plaintext ConfigMap or PVC).
 
 > **Non-member auth-method seam (named this round, not yet closed).** The Vault Kubernetes auth above
 > **assumes the consumer is a cluster member** — a pod with a Kubernetes service account whose JWT Vault

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/illegal_state_catalog.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/dsl_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the amoebius **declared** compute-engine axis — the `ComputeEngine`
@@ -33,8 +33,7 @@ topology it induces; it owns **no** substrate names, no detection, no VM-provide
 numbers (those are [substrate_doctrine.md](./substrate_doctrine.md) and
 [resource_capacity_doctrine.md](./resource_capacity_doctrine.md)).
 
-Everything below is **design intent for Phase 4** (the type discipline) with runtime realization in Phases
-7/9/10. Status and gates live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
+Everything below is **design intent for Phase 4** (the type discipline) with runtime realization in Phases 28/29/30. Status and gates live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
@@ -58,15 +57,15 @@ Rke2Servers            -- CLOSED odd-quorum union: an arm only for a legal etcd 
 
 - **`Kind`** carries **exactly one** `LinuxHost` field. A multi-node kind cluster is `replicas > 1` on that
   *one* host — kind runs every node as a container on a single Docker host, so "a multi-node kind cluster
-  spread across hosts" (I3) has no field to express it ([§4](#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction), [illegal_state_catalog.md §3.15](./illegal_state_catalog.md#315-a-multi-node-kind-cluster-not-on-a-single-linux-host)).
+  spread across hosts" (I3) has no field to express it ([§4](#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction), [illegal_state_catalog.md §3.15](../illegal_state/illegal_state_topology.md#315-a-multi-node-kind-cluster-not-on-a-single-linux-host)).
 - **`Rke2`** carries `{ servers : Rke2Servers, agents : List LinuxHost }` — a **control plane** and a **data
   plane**, not a flat node bag. `Rke2Servers` is a **closed odd-quorum union** (`Single` / `Ha3` / `Ha5`), so
   an **even- or zero-server** control plane (no etcd majority / split-brain) has no constructor and is
-  **type-foreclosed unrepresentable** ([illegal_state_catalog.md §3.24](./illegal_state_catalog.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)); it caps HA at
+  **type-foreclosed unrepresentable** ([illegal_state_catalog.md §3.24](../illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)); it caps HA at
   five by design (a `Ha7` arm is a deliberate future add). Agents are an ordinary `List LinuxHost`. "More
   nodes than hosts" stays uninhabitable and "the same host reused for two nodes" — now over `servers ∪ agents`
   — is a decode-rejected distinctness violation (I4,
-  [illegal_state_catalog.md §3.16](./illegal_state_catalog.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused)); the cardinality detail is [§4.1](#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation).
+  [illegal_state_catalog.md §3.16](../illegal_state/illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused)); the cardinality detail is [§4.1](#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation).
   This same `{ servers, agents }` split, given a **`Site`-indexed quorum**, expresses a **self-managed
   stretched cluster** — data-plane agents at a network `Site` distinct from the co-located control plane —
   **without a new `ComputeEngine` arm**; that stretched refinement is [§4.1](#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation).
@@ -102,8 +101,8 @@ the virtualization provider.
 - **`LinuxHost` is substrate-indexed and its constructor is gated.** On `linux-cpu`/`linux-cuda` a host *is* a
   `LinuxHost`. On `apple` the only constructor is `limaHost` (a Lima Ubuntu VM); on `windows` the only
   constructor is `wsl2Host` (a WSL2 Ubuntu distro). There is **no** `bareAppleHost : LinuxHost` and no
-  `bareWindowsHost : LinuxHost` ([§4.3](./illegal_state_catalog.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) constructor-gating,
-  [illegal_state_catalog.md §3.14](./illegal_state_catalog.md#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm)).
+  `bareWindowsHost : LinuxHost` ([§4.3](../illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) constructor-gating,
+  [illegal_state_catalog.md §3.14](../illegal_state/illegal_state_topology.md#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm)).
 - **So "rke2 on a bare Apple host" (I1) has no inhabitant.** `Rke2`/`Kind` demand a `LinuxHost`; on apple the
   only way to produce one is `limaHost`, so the VM interposition the substrate doctrine describes as reconcile
   behaviour ([substrate_doctrine.md §4](./substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux))
@@ -115,7 +114,7 @@ the virtualization provider.
 - **Honesty.** The witness demand is type-foreclosed (no constructor). That the Lima/WSL2 VM *actually boots* and
   presents a working kernel is runtime-checked, owned by
   [substrate_doctrine.md §4](./substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)
-  and exercised in Phase 8.
+  and exercised in Phase 28.
 
 ---
 
@@ -138,7 +137,7 @@ Node     = { host : Host, substrate : Substrate }   -- Host is a LinuxHost witne
   the server count is now pinned to a legal odd etcd quorum by the closed `Rke2Servers` union rather than left
   to a runtime check. **Distinctness** ("no host reused for two nodes") now ranges over `servers ∪ agents` and
   is still the one part Dhall cannot express as a type (no Set-distinctness), so it degrades to a **decode-foreclosed
-  total decode fold** (`mkRke2` rejects a duplicate `HostId`), and the catalog classifies [§3.16](./illegal_state_catalog.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused) at that weaker
+  total decode fold** (`mkRke2` rejects a duplicate `HostId`), and the catalog classifies [§3.16](../illegal_state/illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused) at that weaker
   floor honestly. Full cardinality treatment is [§4.1](#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation).
 - **Multi-substrate clusters stay legal (I2 carve-out).** A `Topology` may mix nodes of *different*
   substrates — a heterogeneous cluster is explicitly allowed. Compatibility ([§5](#5-the-compatibility-relation-technique-47-only-compatible-pairs-have-a-constructor)) is checked **elementwise**
@@ -160,18 +159,18 @@ pins three properties at three honest layers.
   synchronous write-quorum cost, so a seventh member buys tolerance for a third concurrent failure this topology
   never needs at a steady-state write-latency price. A `Ha7` arm is therefore a deliberate deferral, not an
   oversight — a future add. This is catalog entry
-  [illegal_state_catalog.md §3.24](./illegal_state_catalog.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain) (Owner: this doc; Technique: [§4.2](./illegal_state_catalog.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) closed union).
+  [illegal_state_catalog.md §3.24](../illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain) (Owner: this doc; Technique: [§4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) closed union).
 - **Distinctness by fold over `servers ∪ agents` (decode-foreclosed).** Dhall has no Set-distinctness, so "no host reused
   for two nodes" cannot be a type. It degrades to the **decode-foreclosed total decode fold** `mkRke2`, which now ranges
   over the **union of the server set and the agent list** and rejects a duplicate `HostId`. This *generalizes*
   the old single-node-list fold: distinctness must hold across both planes at once, so a host cannot be both a
   server and an agent, nor appear twice in either. The catalog classifies
-  [illegal_state_catalog.md §3.16](./illegal_state_catalog.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused) to this weaker floor honestly and now scopes it
+  [illegal_state_catalog.md §3.16](../illegal_state/illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused) to this weaker floor honestly and now scopes it
   to `servers ∪ agents`.
 - **Control-plane taint by derivation (type-foreclosed structural, runtime-checked residue).** The control-plane node taint and
   its matching workload tolerations are **derived from the server set**, never hand-authored — the same
   derive-don't-author discipline the catalog names for tolerations
-  ([illegal_state_catalog.md §3.22](./illegal_state_catalog.md#322-a-hand-authored-un-derived-toleration)). Because `servers` is the single source of the
+  ([illegal_state_catalog.md §3.22](../illegal_state/illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration)). Because `servers` is the single source of the
   taint, there is no seam to author an un-derived one; the derivation is type-foreclosed at the spec layer, with the
   actual kube-level taint/toleration application a runtime-checked residue on the reconciler.
 
@@ -238,7 +237,7 @@ This doc owns the classifier and the K2 (full-node) control-plane witness; the K
 union gains a phantom `Site` index so every server of one quorum unifies on **one** `Site`, and only
 `mkStretchedAgent` places agents at `Site' ≠ s`. A **split-`Site` etcd quorum** therefore has **no inhabitant** —
 **type-foreclosed by phantom-`Site` unification**, a *different* mechanism from the odd-count closure that forecloses a
-2/0-server quorum ([illegal_state_catalog.md §3.24](./illegal_state_catalog.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)
+2/0-server quorum ([illegal_state_catalog.md §3.24](../illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)
 is the count union; this is the locality index). Runtime residue is **runtime-checked**: the co-located servers keep a
 low-latency majority when the WAN link degrades.
 
@@ -270,9 +269,9 @@ this doc mints only the K2 `ReachesControlPlane c` and owns the classifier that 
 written — so a `Node` is built by a **compatible-pair smart constructor** that only accepts an
 `(engine, substrate-indexed host)` pair the relation permits.
 
-This is the catalog's **[§4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection) technique — compatibility/topology relations by construction over a collection**
-([illegal_state_catalog.md §4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection)): it composes the phantom-index ([§4.2](./illegal_state_catalog.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)),
-constructor-gating ([§4.3](./illegal_state_catalog.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)), and ownership-fold ([§4.4](./illegal_state_catalog.md#44-ownership-indices--single-owner-ssot-structurally)) techniques and applies them to a **binary relation over a
+This is the catalog's **[§4.7](../illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) technique — compatibility/topology relations by construction over a collection**
+([illegal_state_catalog.md §4.7](../illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)): it composes the phantom-index ([§4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)),
+constructor-gating ([§4.3](../illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)), and ownership-fold ([§4.4](../illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)) techniques and applies them to a **binary relation over a
 collection**.
 
 - **Element-level (type-foreclosed where structural).** `Managed Eks` pairs only with a hostless provider slot;
@@ -286,7 +285,7 @@ collection**.
   rejected.
 - **The node inventory is the single owner of "what substrates exist."** The relation reads the closed
   substrate catalog and the per-host node inventory owned by [substrate_doctrine.md](./substrate_doctrine.md)
-  ([§4.4](./illegal_state_catalog.md#44-ownership-indices--single-owner-ssot-structurally) ownership index), so the compatibility check is against one authoritative list, never a guess.
+  ([§4.4](../illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) ownership index), so the compatibility check is against one authoritative list, never a guess.
 
 ```mermaid
 flowchart LR
@@ -339,7 +338,7 @@ This doctrine owns the *shape* of a legal cluster; two siblings own what rides o
 > **Honesty.** Everything here is Phase-0 design intent. The type demands ([§3](#3-the-linuxhost-witness-rke2kind-on-a-host-with-no-linux-node-is-uninhabitable)-[§5](#5-the-compatibility-relation-technique-47-only-compatible-pairs-have-a-constructor)) are type-foreclosed/decode-foreclosed
 > spec-layer properties *when implemented as specified* (Phase 4); the runtime residue — the VM actually
 > booting, N rke2 nodes actually joining on N hosts, an EKS cluster actually coming up — is runtime-checked, owned by
-> the Phase 8/9/10 gates and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Where a mechanism
+> the Phase 28/29/30 gates and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Where a mechanism
 > generalizes hostbootstrap's virtualization providers or prodbox's EKS reality, that is sibling evidence,
 > not amoebius proof ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
@@ -350,8 +349,8 @@ This doctrine owns the *shape* of a legal cluster; two siblings own what rides o
 This document is normative topology doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the `ComputeEngine` /
 `LinuxHost` / `Topology` types and the compatibility relation land in **Phase 4** (with the negative `.dhall`
-gate); the Lima `LinuxHost` witness is exercised on **Phase 8** (`apple`); live multi-node rke2/kind topology
-on **Phase 9**; the `Managed Eks` arm on **Phase 10**. This doc never maintains a competing status ledger; it
+gate); the Lima `LinuxHost` witness is exercised on **Phase 28** (`apple`); live multi-node rke2/kind topology
+on **Phase 29**; the `Managed Eks` arm on **Phase 30**. This doc never maintains a competing status ledger; it
 states the target shape and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
 ---
@@ -360,7 +359,7 @@ states the target shape and links back for status, per [documentation_standards.
 
 - [Engineering Doctrine Index](./README.md)
 - [Substrate Doctrine](./substrate_doctrine.md) — the detected substrate catalog, virtualization providers, and node inventory this axis ranges over
-- [Illegal State Catalog](./illegal_state_catalog.md) — the catalog ([§3.13](./illegal_state_catalog.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)-[§3.16](./illegal_state_catalog.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused), [§3.24](./illegal_state_catalog.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)) and technique ([§4.7](./illegal_state_catalog.md#47-compatibility--topology-relations-by-construction-over-a-collection)) this doctrine realizes
+- [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — the catalog ([§3.13](../illegal_state/illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)-[§3.16](../illegal_state/illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused), [§3.24](../illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)) and technique ([§4.7](../illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)) this doctrine realizes
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the `place` fold over this `Topology`, and the `ScalingPolicy` ([§6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)) that grows the `agents` list while server quorum stays declared
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — the bring-up / spawn / teardown verbs over these engines, including the rke2 server/agent rollout (reconciler tier (b))
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — provisioning the `Managed Eks` arm and dynamic nodes
