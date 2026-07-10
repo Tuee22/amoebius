@@ -198,25 +198,21 @@ channel 2 across the public internet, where "localhost-only" cannot hold. The in
 than breaks**: channel 2 is reachable *either* from localhost *or* over the **authenticated WireGuard fabric**,
 and nowhere else.
 
-- **The listener binds to `wg0`, never to `0.0.0.0`/LAN/WAN.** The security property moves from *"reachable
-  only from localhost"* to *"reachable only over the authenticated fabric"* — only a peer holding a
-  Vault-minted WireGuard key can open the socket. The fabric itself (raw WireGuard, keys, rendered peer
-  config, the hub=gateway-role topology) is owned by
-  [network_fabric_doctrine.md](./network_fabric_doctrine.md); this doc owns only that channel 2 may ride it. The
-  operator **admin** plane's own reach class — node-local for seal-critical operations, and only *optionally*
-  the fabric post-unseal — is owned by [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api), not here; do not read this
-  channel-2 generalization as the owner of the admin NodePort's reach.
-- **The mTLS rejection ([§2](#2-the-decision-that-was-open-and-is-now-resolved), option b) still holds — no tax returns.** The one thing localhost gave that the
-  WAN cannot, that an attacker cannot reach the wire, WireGuard now supplies with Curve25519 peer
-  authentication + ChaCha20-Poly1305 encryption at the tunnel. Because the peer is already authenticated and
-  the bytes already encrypted, the Pulsar/MinIO wire stays **mTLS-free**, so the high-bandwidth-bulk economics
-  of [§5](#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary) survive over the WAN. The boundary moved from "localhost" to "authenticated fabric"; the per-byte
-  crypto tax did not come back.
-- **A fabric peer is still not wild ingress.** The fabric-reachable listener is a distinct endpoint kind —
-  a `FabricPeer`, sitting alongside `HostLocalPeer` and `WildIngress` with **no constructor turning it into a
-  `WildIngress`** ([illegal_state_catalog.md §4.3](../illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)) — so "Keycloak owns all wild
-  ingress" ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)) is preserved: a spot worker
-  is an authenticated *peer* of MinIO/Pulsar, never a wild client, exactly as a host daemon is ([§3](#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)).
+The three normative points of the generalization — the `wg0`-binding, the still-no-mTLS rationale, and the
+`FabricPeer`-has-no-`WildIngress` constructor — are authored by
+[network_fabric_doctrine.md §5](./network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric); this doc restates none of them, and records only the channel-2-specific readings and carve-out:
+
+- **`wg0`-binding.** Channel 2's listener binds `wg0`, reachable only by a Vault-keyed peer; this doc owns
+  only that channel 2 *may ride* the fabric. **Host-comms carve-out:** the operator **admin** plane's reach —
+  node-local for seal-critical operations, only *optionally* the fabric post-unseal — is owned by
+  [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api), **not** here; do not read this channel-2 generalization as the owner of the admin NodePort's reach.
+- **mTLS stays rejected over the WAN.** WireGuard's peer auth + tunnel encryption supply the "attacker cannot
+  reach the wire" property localhost gave, so the Pulsar/MinIO wire stays **mTLS-free** and the
+  [§5](#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary) high-bandwidth-bulk economics survive — the boundary moved, the per-byte crypto tax did not return.
+- **A fabric peer is not wild ingress.** A `FabricPeer` has **no constructor into `WildIngress`**, so a spot
+  worker is an authenticated *peer* of MinIO/Pulsar, never a wild client (exactly as a host daemon is,
+  [§3](#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)) — "Keycloak owns all wild
+  ingress" ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)) is preserved.
 
 The rest of [§6](#6-the-host-only-restriction-in-practice-and-its-sibling-precedent)'s host-only realization applies unchanged to the localhost case; the fabric case substitutes
 "authenticated-fabric-origin" for "host-origin" as the network restriction, with WireGuard providing the

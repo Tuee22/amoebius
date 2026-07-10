@@ -78,7 +78,9 @@ WSL2) or as the on-host CUDA worker case ([§5](#5-host-worker-nodes-substrate-s
 
 Detection separates cleanly into **what was observed** (impure: read the platform, probe for a GPU) and
 **what that means** (pure: classify). The classification is a total function so it is unit-testable
-without touching a host, and the only `IO` is the three reads that feed it.
+without touching a host, and the only `IO` **feeding the classifier** is the three reads (OS, arch,
+GPU-presence). On a positive GPU probe the detector performs two further reads — device count and per-device
+VRAM — but those populate the per-host `Capacity`, not the substrate class (below).
 
 In the `hostbootstrap` seed (`HostBootstrap.Substrate`), this is `classify :: osName -> rawArch -> gpu ->
 Either String Substrate` wrapped by `detect :: IO (Either String Substrate)`:

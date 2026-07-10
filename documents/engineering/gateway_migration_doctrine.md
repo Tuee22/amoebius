@@ -77,9 +77,11 @@ proper begins only from a target that already holds the source's state.
 2. **Drain** — let the async replica catch up to the frozen snapshot.
 3. **Verify caught-up** — confirm the target holds the frozen snapshot in full. The freeze is what buys RPO=0
    without steady-state synchronous replication.
-4. **Cutover** — repoint the gateway DNS record, the WireGuard hub role
-   ([network_fabric_doctrine.md §4](./network_fabric_doctrine.md#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)),
-   and the apiserver VPN-IP to the target, then unfreeze.
+4. **Cutover** — repoint the gateway DNS record and the WireGuard hub role
+   ([network_fabric_doctrine.md §4](./network_fabric_doctrine.md#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it))
+   to the target, then unfreeze. A gateway migration moves the *wild-ingress* role, not a control-plane
+   endpoint: the target cluster is reached through its **own** apiserver, and the apiserver-VPN-IP is a
+   per-cluster (stretched-cluster) construct owned by that cluster, never a shared address repointed here.
 
 **Guarantee — RPO=0.** No committed write is lost — the `PlannedIsLossless` model invariant, proven-for-the-model
 at scope 2 (the runtime fidelity of the caught-up verification stays assumed until Phase 29;

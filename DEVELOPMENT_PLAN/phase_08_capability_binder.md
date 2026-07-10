@@ -27,11 +27,11 @@ payloads, the exact couplings this phase's abstraction dissolves.
 ## Phase Summary
 
 This phase makes amoebius's *"application logic names a capability, never a product"* invariant executable as a
-pure decode-and-bind path. It delivers the **capability model** as data: the closed eight-arm capability union
-(`ObjectStore`, `SecretStore`, `MessageBus`, `Sql`, `Identity`, `Observability`, `Registry`, `Edge`) on the
-app surface with **no product arm** — `minio` has no syntax — plus the ninth `InferenceEngine` capability whose
-provider is a substrate-selected, jit-resolved `EngineRuntime` identity with **no arbitrary-`Url`/`Download`
-arm**. It delivers the **three-part binding**: the `CapabilityNeed` an app writes once and carries everywhere,
+pure decode-and-bind path. It delivers the **capability model** as data: the closed **nine-arm** capability
+union — the eight ordinary capabilities (`ObjectStore`, `SecretStore`, `MessageBus`, `Sql`, `Identity`,
+`Observability`, `Registry`, `Edge`) plus a distinct ninth `InferenceEngine` arm — on the app surface with
+**no product arm** (`minio` has no syntax), the `InferenceEngine` provider a substrate-selected, jit-resolved
+`EngineRuntime` identity with **no arbitrary-`Url`/`Download` arm**. It delivers the **three-part binding**: the `CapabilityNeed` an app writes once and carries everywhere,
 the `CapabilityBinding` (a one-arm-today provider union defaulting to the canonical provider, plus a typed
 `shape` that selects *which* manifest graph to render), and the total function
 `bind :: CapabilityNeed -> CapabilityBinding -> ServiceSpec` that projects a need + binding into the
@@ -116,8 +116,8 @@ the `ServiceSpec` skeleton the binder targets) — target paths, not yet built.
 **Blocked by**: Phase 4 gate (the Gate-1 Dhall schema + smart-constructor prelude the union lives in); Phase 5
 gate (the GADT-indexed IR + total decoder the `ServiceSpec` is a projection of).
 **Independent Validation**: `dhall type` accepts every positive `CapabilityNeed` fixture and rejects an app
-fixture naming `minio` at authoring time (Gate 1); a unit check confirms the union has exactly the eight arms
-(plus the `InferenceEngine` head from Sprint 8.3) and no product arm and no "other service" escape arm.
+fixture naming `minio` at authoring time (Gate 1); a unit check confirms the union has exactly nine arms
+(the eight ordinary capabilities plus the `InferenceEngine` head from Sprint 8.3) and no product arm and no "other service" escape arm.
 **Docs to update**: `documents/engineering/service_capability_doctrine.md` (Phase-8 status backlink),
 `documents/engineering/app_vs_deployment_doctrine.md` (the app-surface capability-resource read-side),
 `DEVELOPMENT_PLAN/system_components.md`.

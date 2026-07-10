@@ -196,17 +196,20 @@ that continues to be a host-daemon responsibility. Flagged as a
 [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) decision; recommended default below.
 
 A builder needs a Docker/buildx engine *somewhere*. Two homes are possible — the host's
-build daemon (the prodbox model: `docker build` on the host, `local_registry_pipeline.md` [§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)) or an in-pod
+build daemon (the prodbox model: `docker build` on the host, `local_registry_pipeline.md` §6) or an in-pod
 builder running inside the cluster. The vision states the argument for host directly: a host
 builder is "guaranteed to keep all builds in the same place" — including Apple-Silicon native `arm64`
-builds, which happen headless on the host (no VM; see
-[apple_metal_headless_builds.md](./apple_metal_headless_builds.md)).
+container images. (Two build kinds must not be conflated: the native `arm64` **container image** build on
+macOS runs against a Linux docker engine — a Lima/Colima VM, [substrate_doctrine.md §4](./substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux) — whereas the
+**no-VM** property of [apple_metal_headless_builds.md](./apple_metal_headless_builds.md) is the *Metal worker*
+build, on-host MSL compilation, not the container image.)
 
 **Recommended default: the host builder for v1.**
 
 - **Why host first.** amoebius already requires a sudo-capable host daemon and host build tooling for
-  bootstrap; the host is where Apple-Silicon native `arm64` builds happen (headless on-host, no VM —
-  [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)), and a single host build
+  bootstrap; the host is where Apple-Silicon native `arm64` container images are built (against a Linux docker
+  engine in a Lima/Colima VM, [substrate_doctrine.md §4](./substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux); the Metal *worker* build is separately
+  on-host, no VM — [apple_metal_headless_builds.md](./apple_metal_headless_builds.md)), and a single host build
   location keeps arch coverage and build caches in one predictable place. This matches the substrate model
   in which host worker nodes exist precisely for substrate-specific hardware
   ([substrate_doctrine.md](./substrate_doctrine.md)).

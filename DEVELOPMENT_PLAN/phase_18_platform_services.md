@@ -7,7 +7,7 @@
 
 > **Purpose**: Stand up the complete standard platform-service set — MetalLB, MinIO, Pulsar,
 > Prometheus/Grafana, and the Percona-operator-managed per-service Patroni Postgres clusters with pgAdmin — on
-> a single-node linux-cpu cluster, each as its HA chart from Haskell-generated manifests and baked-binary
+> a single-node linux-cpu cluster, each as its HA topology from Haskell-generated manifests and baked-binary
 > images, brought up in the derived readiness-DAG order by the Phase-15 reconciler's event-driven
 > wait-for-ready.
 
@@ -20,7 +20,7 @@ statement is design intent, never a tested amoebius result. This phase opens aft
 gate passes and runs on the **linux-cpu** substrate across **Register 3** (live infrastructure) — a
 single-node `kind` cluster on a linux-cpu host, on top of the Phase-14 registry + baked base image, the
 Phase-15 typed renderer + SSA reconciler, the Phase-16 no-provisioner retained storage, and the Phase-17
-unsealed root Vault. The HA-chart, reconciled-manifest, and derived-DAG-ordering shapes are inherited as
+unsealed root Vault. The HA-topology, reconciled-manifest, and derived-DAG-ordering shapes are inherited as
 **sibling evidence from prodbox**, not amoebius results; **Pulsar is new relative to prodbox** and is the
 least evidence-backed service in the set. Status transitions are recorded reverse-chronologically here once
 work begins.
@@ -31,7 +31,7 @@ This phase turns the storage-and-secrets-provisioned cluster of Phase 17 into a 
 cluster carrying the standard platform-service backbone. It renders and reconciles the L4 LoadBalancer
 (MetalLB), the MinIO S3 object substrate, the Pulsar native-protocol event/workflow backbone, the
 Prometheus/Grafana observability pair, and the Percona operator with its per-consumer Patroni Postgres
-clusters and paired pgAdmin — each as the byte-identical **HA chart even at `replicas=1`**, each rendered as
+clusters and paired pgAdmin — each as the byte-identical **HA topology even at `replicas=1`**, each rendered as
 typed Kubernetes objects by the Phase-15 pure `render` (no Helm, no third-party charts, and the emitted
 manifests are generated from Haskell and never committed), each served from binaries **baked into the
 multi-arch base image** with no public-registry pull, and each on the Phase-16 `no-provisioner` retained PVs
@@ -57,7 +57,7 @@ on a real cluster, emitting a proven/tested/assumed ledger that names Register 3
 
 **Gate:** on a single-node linux-cpu `kind` cluster the complete standard backbone — MetalLB, MinIO, Pulsar,
 Prometheus/Grafana, and the Percona-operator-managed per-service Patroni Postgres clusters with pgAdmin —
-**comes up HA** (each is its HA chart even at `replicas=1`; Postgres is a Patroni-via-Percona cluster, never a
+**comes up HA** (each is its HA topology even at `replicas=1`; Postgres is a Patroni-via-Percona cluster, never a
 bare Pod) **from generated manifests + baked binaries** (typed objects rendered by the Phase-15 `render`,
 images resolved only in-cluster with **no public-registry pull**), **in the derived readiness-DAG order**
 (§11 hard edges — LoadBalancer before the edge, Percona operator before any Postgres consumer, Vault
@@ -69,7 +69,7 @@ every container declaring explicit CPU/RAM.
 
 - [`platform_services_doctrine.md §1 — the invariant: every cluster is the same cluster`](../documents/engineering/platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster)
   with [`§2 — HA always, including replicas=1`](../documents/engineering/platform_services_doctrine.md#2-ha-always--including-replicas1):
-  Phase 18 materializes the fixed standard service set on linux-cpu, each service the byte-identical HA chart
+  Phase 18 materializes the fixed standard service set on linux-cpu, each service the byte-identical HA topology
   a production cluster runs with only the replica count changed — no "dev topology," no hand-special-cased
   single-Pod variant.
 - [`platform_services_doctrine.md §4 — MinIO, the object substrate`](../documents/engineering/platform_services_doctrine.md#4-minio--the-object-substrate),
@@ -114,14 +114,14 @@ every container declaring explicit CPU/RAM.
 **Status**: Planned
 **Implementation**: `src/Amoebius/Platform/LoadBalancer.hs`, `src/Amoebius/Platform/Minio.hs` (target paths; not yet built)
 **Blocked by**: Phase 15 (the typed `render` + SSA reconciler that applies these objects), Phase 16 (the retained PVs MinIO's StatefulSet binds), Phase 14 (the baked MetalLB/MinIO binaries in the in-cluster registry)
-**Independent Validation**: after apply, MetalLB advertises a LoadBalancer address on the linux-cpu node before any edge asks for one; MinIO runs as its HA (distributed) chart on identity-named retained PVs, never a bare Pod; a put/get round-trips the same bytes; every MetalLB and MinIO container declares CPU/RAM requests and limits; a deny-all egress test to `docker.io`/`quay.io` breaks no startup.
+**Independent Validation**: after apply, MetalLB advertises a LoadBalancer address on the linux-cpu node before any edge asks for one; MinIO runs as its HA (distributed) topology on identity-named retained PVs, never a bare Pod; a put/get round-trips the same bytes; every MetalLB and MinIO container declares CPU/RAM requests and limits; a deny-all egress test to `docker.io`/`quay.io` breaks no startup.
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/engineering/storage_lifecycle_doctrine.md`
 
 ### Objective
 Adopt [`platform_services_doctrine.md §9 — the LoadBalancer`](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)
 (the MetalLB half) and [`§4 — MinIO, the object substrate`](../documents/engineering/platform_services_doctrine.md#4-minio--the-object-substrate):
 render and reconcile MetalLB as the linux-cpu L4 entry point and MinIO as the HA S3 object substrate, both as
-HA charts on baked binaries and retained storage — the two roots of the standard-service DAG.
+HA topologies on baked binaries and retained storage — the two roots of the standard-service DAG.
 
 ### Deliverables
 - MetalLB rendered as a standard service that publishes a LoadBalancer address on the kind node, available
@@ -145,7 +145,7 @@ The whole sprint (📋 Planned).
 **Status**: Planned
 **Implementation**: `src/Amoebius/Platform/Pulsar.hs` (target paths; not yet built)
 **Blocked by**: Sprint 18.1 (MinIO backs Pulsar's size-triggered S3 offload), Phase 16 (retained bookie/broker storage), Phase 17 (Pulsar's credentials are Vault `SecretRef`s, resolved fail-closed)
-**Independent Validation**: Pulsar comes up as an HA broker/bookie chart over its **native TCP binary protocol** (no WebSockets) on retained storage; a produce/consume round-trips at-least-once with broker-side dedup; each topic carries a bounded retention + a size-triggered MinIO offload; every container declares CPU/RAM; a secret-dependent Pulsar component reaching a sealed Vault fails closed.
+**Independent Validation**: Pulsar comes up as an HA broker/bookie topology over its **native TCP binary protocol** (no WebSockets) on retained storage; a produce/consume round-trips at-least-once with broker-side dedup; each topic carries a bounded retention + a size-triggered MinIO offload; every container declares CPU/RAM; a secret-dependent Pulsar component reaching a sealed Vault fails closed.
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/engineering/pulsar_client_doctrine.md`
 
 ### Objective
@@ -163,7 +163,7 @@ storage, delegating its intra-cluster HA consensus to its own brokers/bookies ra
 
 ### Validation
 1. Apply Pulsar through the reconciler; assert the broker/bookie set reaches Ready on retained storage as an
-   HA chart (never a single bare broker).
+   HA topology (never a single bare broker).
 2. Produce then consume a message; assert an at-least-once round-trip with dedup, and that a CBOR payload
    round-trips byte-for-byte (full native-client proof deferred to Phase 22, marked UNVERIFIED here).
 3. Assert bounded retention + size-triggered offload to MinIO is configured, and every container declares

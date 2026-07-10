@@ -156,8 +156,9 @@ Dhall cannot express as a type and degrades to a decode-foreclosed fold. This co
 [`substrate_doctrine.md`](../engineering/substrate_doctrine.md). The types are owned by
 [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md); this doc owns the *relation technique*. The
 same **binary-relation-over-a-collection** shape covers the **model↔engine** relation ([§3.25](./illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)): a `ModelArtifact`
-is servable only by an `EngineRuntime` present on the deployment's substrate, so an unmatched model has no
-landing engine — a decode-foreclosed total fold exactly like the engine↔substrate check, owned by
+is servable only by an `EngineRuntime` present on the **serving substrate lane** (where inference runs, not where
+the model was produced), so an unmatched model has no landing engine — a decode-foreclosed total fold exactly like
+the engine↔substrate check, owned by
 [`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) and
 [`service_capability_doctrine.md`](../engineering/service_capability_doctrine.md). And the rke2 **server/agent** inventory
 ([§3.24](./illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain), [§3.16](./illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused)) is this same collection shape with a *closed-cardinality* server set (`Rke2Servers`, type-foreclosed)

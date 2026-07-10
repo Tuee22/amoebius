@@ -168,15 +168,17 @@ canonical (part 2 above) and could later admit an alternate, an `InferenceEngine
 **no arm to author a download** — it is **selected by the detected substrate** and materialized by the shared
 jit-build resolver on first miss.
 
-**The canonical provider is a closed union of substrate-tagged `EngineRuntime` identities.** `EngineRuntime` has
-one arm per substrate lane and per engine family, and — the load-bearing rule — **no arbitrary-`Url` /
-`Download` arm**; the named identity is resolved on first miss into a `CacheBudget`-bounded content-addressed
+**The canonical provider is a closed union of substrate-tagged `EngineRuntime` identities.** `EngineRuntime` is
+a **closed union over substrate lanes** (one arm per lane); the **engine family** is a *separate* closed-union
+field of the `InferenceBinding` (the two compose as a product — lane × family — not one fused index; see the
+Dhall below). Neither admits an arbitrary-`Url` / `Download` arm — the load-bearing rule — and each named
+identity is resolved on first miss into a `CacheBudget`-bounded content-addressed
 cache ([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)):
 
 | Provider dimension | Arms (closed union) |
 |---|---|
-| Engine lane | `Apple-Metal` · `CUDA` · `linux-cpu` |
-| Engine family (named identity) | `llama.cpp` · `whisper.cpp` · `ONNX` · `vLLM` · `pytorch` · `diffusers` · `transformers` · `Audiveris` |
+| Engine lane (the `EngineRuntime` union) | `Apple-Metal` · `CUDA` · `linux-cpu` |
+| Engine family (the `InferenceBinding.family` union, a named identity) | `llama.cpp` · `whisper.cpp` · `ONNX` · `vLLM` · `pytorch` · `diffusers` · `transformers` · `Audiveris` |
 
 The ML siblings **link as libraries** rather than run as fetched sidecars, so the library is present the moment
 the pod is; the engine *payload* the library drives is a named identity the shared **jit-build resolver**
@@ -184,8 +186,8 @@ materializes on first miss into the `CacheBudget`-bounded cache
 ([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)),
 with the resolver's build inputs and the base image owned by
 [image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain).
-The union is closed **here** because every arm is a **named catalog identity**: adding an engine family is a new
-`EngineRuntime` arm plus a resolver recipe, never something an app `.dhall` can author, and the families in the
+The unions are closed **here** because every arm is a **named catalog identity**: adding an engine family is a new
+`InferenceBinding.family` arm plus a resolver recipe, never something an app `.dhall` can author, and the families in the
 table above map to the inference modalities the platform serves. The deployment `.dhall` **selects** an
 arm by the *detected* substrate (the substrate is DETECTED, [substrate_doctrine.md](./substrate_doctrine.md));
 it has no syntax with which to *author* an arbitrary download or build. This is the [§1](#1-why-capabilities-not-products) object-storage lesson taken to
@@ -238,7 +240,7 @@ Serving substrate **need not equal** producing substrate: weight bytes are subst
 content-addressed), not substrate-identical, so a model produced on one lane may serve on another. This round
 **introduces** that decoupling — the relation keys on the serving lane, not on where the model was produced (there
 is no "already checks the deployment's substrate" here). Availability is a **partial** family×lane relation — a
-family may be baked on some lanes and not others (e.g. `vLLM` is not baked on Apple-Metal) — so a
+family may be available (resolver-supported) on some lanes and not others (e.g. `vLLM` is not available on Apple-Metal) — so a
 family-not-available-on-the-serving-lane is a **decode-foreclosed** decode-time rejection (the
 topology/relation-over-collection technique,
 [illegal_state_catalog.md §4.7](../illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)),

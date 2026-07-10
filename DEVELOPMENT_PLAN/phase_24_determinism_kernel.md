@@ -66,7 +66,7 @@ requires live infrastructure (those stay pure, Registers 1–2).
 **Gate:** `experimentHash = sha256(resolved-dhall ‖ substrate-fingerprint)` together with SplitMix seed
 derivation reproduce **byte-identical output on the same linux-cpu substrate** — the gate workload runs twice
 under an unchanged `experimentHash` and produces byte-for-byte equal output, while a deliberately changed input
-(the resolved `.dhall`, the substrate fingerprint, or a flipped metric direction) yields a **different**
+(the resolved `.dhall` — e.g. a flipped metric direction within it — or the substrate fingerprint) yields a **different**
 `experimentHash`, occupies a different store namespace, and is allowed to differ; the run emits a
 proven/tested/assumed ledger recording that same-substrate reproduction was *tested* and cross-substrate
 equality was *not asserted*.
@@ -82,8 +82,8 @@ names the section it implements; individual sprints cite the same sections where
   `If-None-Match: *` / `412 = success` write protocol owned by the store.
 - [`content_addressing_doctrine.md §3`](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran)
   — *`experimentHash`: identity is what was requested ‖ where it ran*: the run identity folds the resolved
-  `.dhall` normal form and the substrate fingerprint into one digest, so a flipped metric direction or a
-  different substrate is a different experiment in a different namespace.
+  `.dhall` normal form and the substrate fingerprint into one digest, so a flipped metric direction (a
+  resolved-`.dhall` change) or a different substrate is a different experiment in a different namespace.
 - [`content_addressing_doctrine.md §4`](../documents/engineering/content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed)
   — *determinism by construction: pinned inputs + pure stages + derived seed*, with its pinned-input leg
   ([§4.1](../documents/engineering/content_addressing_doctrine.md#41-leg-one--pinned-content-addressed-inputs)),
@@ -159,11 +159,11 @@ no-env/no-`PATH` contract.
   `sha256(resolved-dhall ‖ substrate-fingerprint)`, with the fingerprint gathered by full-path subprocess
   probes, never from environment or `PATH`.
 - The store namespace key `<experimentHash>/…` wired so two genuinely different runs — including a flipped
-  metric direction or a different substrate fingerprint — cannot collide.
+  metric direction (part of the resolved `.dhall`) or a different substrate fingerprint — cannot collide.
 
 ### Validation
-1. `experimentHash` changes when any of the resolved `.dhall`, the substrate fingerprint, or a metric direction
-   changes; it is stable across re-evaluation of the same inputs.
+1. `experimentHash` changes when either the resolved `.dhall` (e.g. a metric direction within it) or the
+   substrate fingerprint changes; it is stable across re-evaluation of the same inputs.
 2. The linux-cpu fingerprint is gathered only by absolute-path probes; no probe reads `PATH` or an environment
    variable, and two probes of the same host fold to the same digest.
 
@@ -234,7 +234,7 @@ reproducibility as the phase gate without overclaiming cross-substrate equality.
 
 ### Validation
 1. Two runs with the same `experimentHash` on linux-cpu produce byte-identical output.
-2. Changing the resolved `.dhall`, the substrate fingerprint, or a metric direction produces a different
+2. Changing the resolved `.dhall` (e.g. a metric direction) or the substrate fingerprint produces a different
    `experimentHash`; the run is allowed to differ and does not collide in the store namespace.
 3. The ledger artifact is emitted and marks no cross-substrate claim green.
 

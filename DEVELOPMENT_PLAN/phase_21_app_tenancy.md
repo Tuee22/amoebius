@@ -73,7 +73,9 @@ proven in-process in the pre-cluster band).
   SQL grant.
 - [`tenancy_doctrine.md §3`](../documents/engineering/tenancy_doctrine.md#3-what-a-tenant-is) — *what a tenant
   is*: the immutable `TenantId` bundles a Keycloak realm, a Vault policy over `secret/tenants/<t>/…`, Pulsar
-  tenant-namespaces, the `<t>/<bucket>` MinIO prefix (extending the per-app `<app>/<bucket>` binding), and an
+  tenant-namespaces, the `<t>/<bucket>` MinIO prefix (extending the per-app `<app>/<bucket>` binding — for this
+  single-root app-tenancy projection the app *is* its own data-tenant, so `<t>` is the app's tenant id and the
+  `<t>/<bucket>` policy scopes exactly the `<app>/<bucket>` bytes Sprint 21.1 stores), and an
   optional co-located Postgres database — minted once and travelling with the bytes it tags, so no migration
   re-tags a datum from `t1` to `t2`.
 - [`tenancy_doctrine.md §7`](../documents/engineering/tenancy_doctrine.md#7-two-isolation-layers-and-the-honest-limit)
@@ -203,7 +205,8 @@ The whole sprint (📋 Planned).
 per-tenant policies) and Phase 19 (the Keycloak-owned edge whose realms these roles populate) — external
 earlier-phase prereqs.
 **Independent Validation**: the total `render` emits, for a two-tenant fixture, a per-tenant Vault policy over
-`secret/tenants/<t>/…`, a MinIO bucket policy on `<t>/<bucket>`, a Pulsar namespace grant on
+`secret/tenants/<t>/…`, a MinIO bucket policy on `<t>/<bucket>` (which — the app being its own data-tenant —
+guards the same path the Sprint-21.1 store keys under as `<app>/<bucket>`), a Pulsar namespace grant on
 `persistent://<t>/…`, and a Keycloak realm role set; a live cross-tenant read is refused by the derived provider
 policy; there is **no** DSL surface with which to hand-author any of these grants (a hand-authored grant has no
 syntax, catalog §3.45).

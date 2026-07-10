@@ -120,9 +120,11 @@ retained PV — the prodbox root-unseal shape as **sibling evidence, not an amoe
   and immediately sealed under the operator's password with a real KDF (**Argon2id**) feeding an AEAD
   (ChaCha20-Poly1305 / AES-256-GCM) — **never raw SHA-256**; the password memorized, entered at the prompt on
   init and every unseal, persisted nowhere; raw keys never printed.
-- A **pluggable unlock-material backend** behind one interface (a sealed object in durable MinIO, a host-side
-  `.age` file, a cloud KMS, or a TPM/YubiKey identity) — the load-bearing property is only that the material is
-  password-AEAD-sealed and never plaintext at rest.
+- A **pluggable unlock-material backend** behind one interface — the load-bearing property is only that the
+  material is password-AEAD-sealed and never plaintext at rest. **At the root Phase-17 bring-up the backend is
+  the host-side `.age` file**: MinIO does not exist until Phase 18, so a MinIO-sealed object (and equally a cloud
+  KMS or TPM/YubiKey identity) is a *later* backend option, never a root-unseal prerequisite — the root Vault
+  must not depend on a platform service it precedes (no Vault↔MinIO bootstrap cycle).
 - **Fail-closed ordering**: no secret-dependent workload runs before Vault reports reachable, initialized, and
   unsealed; a consumer reaching a sealed Vault fails closed.
 

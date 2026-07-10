@@ -298,9 +298,9 @@ data RolloutPhase = RolloutPhase
 
 ```mermaid
 flowchart TD
-  plan[RolloutPlan: ordered RolloutPhase list from render of spec] --> p1[Phase 2: SSA apply and prune its object subset]
+  plan[RolloutPlan: ordered RolloutPhase list from render of spec] --> p1[RolloutPhase 1: SSA apply and prune its object subset]
   p1 --> g1[Wait for readiness]
-  g1 -->|ready| p2[Phase 3: SSA apply and prune its object subset]
+  g1 -->|ready| p2[RolloutPhase 2: SSA apply and prune its object subset]
   p2 --> g2[Wait for readiness]
   g2 -->|ready| pn[Final phase converged]
   g1 -->|failure| rb[Re-apply prior generation or CAS pointer back]

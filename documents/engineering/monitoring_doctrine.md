@@ -67,7 +67,11 @@ Severity     = < Page | Warn >
 ```
 
 `sli` is `NonEmpty` — the same no-empty-list idiom that makes a routing entry with no lanes unroutable
-([pulsar_client_doctrine.md §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra)). `AlertBinding` has **one** arm, routing to the cluster
+([pulsar_client_doctrine.md §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra)). The two
+`objective` fields are distinct, not redundant: each **`Sli.objective`** is the per-indicator target that one
+indicator must hold (its own `threshold`+`window`), while the top-level **`WorkflowMonitor.objective`** is the
+**workflow-level SLO** the workflow as a whole is judged and alerted against — the per-SLI objectives gate each
+indicator, the workflow objective gates the composite. `AlertBinding` has **one** arm, routing to the cluster
 `Observability` capability by name — no URL arm and no product arm, mirroring the capability surface's
 no-product rule ([service_capability_doctrine.md](./service_capability_doctrine.md)) — and it has **no**
 `Off`/`None`/`Silent` arm, mirroring `RetentionPolicy`'s absent keep-forever arm. `Objective.threshold` is a

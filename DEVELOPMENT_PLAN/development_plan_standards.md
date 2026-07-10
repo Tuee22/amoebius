@@ -243,6 +243,17 @@ Each phase's acceptance gate requires **at most one** substrate (`none` for the 
 prevents cross-substrate flip-flopping mid-development. A phase whose work touches several substrates is
 split until each gate is single-substrate.
 
+**Two named forms satisfy the one-substrate rule without naming a fixed catalog member on the parent gate**, and
+both keep the discipline checkable rather than bending it:
+
+- **Deferred-to-generation** (Phase 31, `per generated test`). A gate that *emits* a test `.dhall` names the
+  **rule** that each generated test is substrate-locked to exactly one substrate, chosen at generation time — the
+  single-substrate property holds per generated artifact, not as a fixed member on the emitting gate.
+- **Parent-drives-provider** (Phase 30, `linux-cpu → provider`). The gate runs on one hardware substrate (the
+  `linux-cpu` parent) and *targets* a provider it does not itself run — EKS is a **declared managed engine, not a
+  detected substrate** ([`substrates.md` §2](substrates.md#2-substrate-inventory)). The single substrate the gate
+  keys to is the parent's; the provider is a compute-engine axis, never a fifth substrate.
+
 ---
 
 ## Related Documents

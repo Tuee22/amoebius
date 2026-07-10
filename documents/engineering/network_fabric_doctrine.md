@@ -87,8 +87,11 @@ WireGuard fits the amoebius disciplines cleanly because it is a *primitive*, not
   ([vault_pki_doctrine.md §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes), [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api)), so no fabric key ever gates an unseal.
 - **Peer config is rendered, not managed.** `render(nodeInventory) -> [WireGuardPeerConfig]` — the pure
   `render()` discipline of [manifest_generation_doctrine.md §2](./manifest_generation_doctrine.md#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects) lifted to
-  `wg` config. Illegal peer configurations — overlapping VPN IPs, a keyless peer, an `AllowedIPs` outside the
-  fabric CIDR — become unrepresentable in the typed inventory rather than caught at runtime. For a **stretched
+  `wg` config. Illegal peer configurations are foreclosed before runtime, at the honest layer for each: a
+  **keyless peer** (a mandatory key field) is **type-foreclosed** — unrepresentable — while **overlapping VPN
+  IPs** and an **`AllowedIPs` outside the fabric CIDR** are **decode-foreclosed**, a total relation/fold over
+  the peer set returning a `Left` rather than an uninhabitable type. Either way the error surfaces in the typed
+  inventory, never at runtime. For a **stretched
   full k8s node** (the K2 case), `render()` additionally emits a `ControlPlanePeer` covering that cluster's
   **apiserver VPN-IP** ([§4](#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)) — the
   kubelet↔apiserver span is a rendered peer like any other, so the render fold stays *total* over it (a

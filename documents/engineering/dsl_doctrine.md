@@ -299,8 +299,8 @@ must hold apart — and, per [§1](#1-why-this-doctrine-exists), *carries but do
   were truly trained is runtime residue, owned downstream, not a decode-time claim).
 
 The relation between them is itself typed: **a `ModelArtifact` must be servable by an `EngineRuntime` present
-on the deployment's substrate** — an unmatched model has no landing engine (a decode-foreclosed total relation over
-the substrate's engine set, the same topology-relation-over-a-collection technique [§5](#5-the-illegal-state-unrepresentable-contract) defers to the catalog).
+on the serving substrate lane** (the lane where inference runs, not where the model was produced) — an unmatched
+model has no landing engine (a decode-foreclosed total relation over the serving lane's engine set, the same topology-relation-over-a-collection technique [§5](#5-the-illegal-state-unrepresentable-contract) defers to the catalog).
 The *detail* of all three — the no-`Url` closure, the `.ready`-plus-provenance-witness gate, and the model↔engine match — is owned by
 [illegal_state_catalog.md §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) and
 [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss); this doc records only that the
