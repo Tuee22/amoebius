@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for how amoebius moves the wild-ingress gateway between clusters — the typed `GatewayMigration = <Planned | Failover>` taxonomy, the planned strong-consistency handover, the unplanned survivor-wins failover, and the client-rebind protocol that keeps a live session bindable throughout.
@@ -48,10 +48,13 @@ it is delegated to MinIO, Pulsar, and Percona/Patroni Postgres
 the sum: graceful teardown's gateway-handoff step and a planned home→provider migration are both `Planned`;
 chaos-failover's emergency DNS repoint is `Failover`.
 
-| Arm | Trigger | Both clusters up? | Data-loss guarantee | Async proof obligation? |
+| Arm | Trigger | Both clusters up? | Data-loss guarantee | Modelled? |
 |---|---|---|---|---|
-| `Planned` | A new `InForceSpec`, or amoebius automated logic (e.g. a `ScalingPolicy`) | Yes | RPO=0 — no committed write lost (argued design-level; [§6](#6-honesty-and-layer-markers)) | No — a coordinated synchronous switchover |
-| `Failover` | The active gateway is down or unreachable | No — the active has vanished | RPO>0 — bounded by the declared data-loss budget | Yes — the "Second Axis" ([chaos_failover_doctrine.md §16](./chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)) |
+| `Planned` | A new `InForceSpec`, or amoebius automated logic (e.g. a `ScalingPolicy`) | Yes | RPO=0 — no committed write lost (the `PlannedIsLossless` model invariant, proven-for-the-model; [§6](#6-honesty-and-layer-markers)) | Yes — `PlannedIsLossless` (cutover reachable only after `verify-caught-up`); no *async* divergence |
+| `Failover` | The active gateway is down or unreachable | No — the active has vanished | RPO>0 — bounded by the declared data-loss budget | Yes — the async "Second Axis" (`FailoverBounded`/`MergeConverges`; [chaos_failover_doctrine.md §16](./chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)) |
+
+Both branches are modelled as one reifiable `Model` — simulated (io-sim) and proven (TLC) at design time — by
+[gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md), amoebius's one proof obligation.
 
 ---
 
@@ -78,8 +81,9 @@ proper begins only from a target that already holds the source's state.
    ([network_fabric_doctrine.md §4](./network_fabric_doctrine.md#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)),
    and the apiserver VPN-IP to the target, then unfreeze.
 
-**Guarantee — RPO=0.** No committed write is lost (an argued design-level property, not a verified result;
-[§6](#6-honesty-and-layer-markers)), because writes were frozen and the replica was verified
+**Guarantee — RPO=0.** No committed write is lost — the `PlannedIsLossless` model invariant, proven-for-the-model
+at scope 2 (the runtime fidelity of the caught-up verification stays assumed until Phase 29;
+[§6](#6-honesty-and-layer-markers)) — because writes were frozen and the replica was verified
 caught-up before authority moved. This is a coordinated cross-cluster switchover (Patroni-style), **not** an
 asynchronous [Second-Axis](./chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
 event: it presents no async divergence to reconcile. Logged-in sessions persist — Keycloak's session
@@ -201,16 +205,23 @@ the acceptance gate are owned by
 [DEVELOPMENT_PLAN/README.md → Phase 29](../../DEVELOPMENT_PLAN/README.md); this document never restates phase
 status.
 
-- The `Planned` branch's **RPO=0** and its "committed-write-loss is unrepresentable" foreclosure are
-  **argued design-level properties** of the coordinated freeze protocol. They rest on a **runtime-observed**
-  caught-up edge — the freeze makes RPO=0 achievable, but the guarantee is only as strong as the catch-up
-  verification, not a constructive impossibility. Per the honesty rule
-  ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)),
-  this is stated as an assumption/argument, never as a proven or tested result.
-- The `Failover` branch's async correctness is an **open proof obligation** owned by
-  [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) and modeled, when authored, by
-  [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md). That model targets only the `Failover`
-  branch; the `Planned` branch is a synchronous switchover with no async divergence to model.
+- The `Planned` branch's **RPO=0** is the model invariant **`PlannedIsLossless`** — cutover is reachable only
+  after a `verify-caught-up` edge, so no committed write is lost. It is **proven-for-the-model at scope 2**
+  ([gateway_migration_model_doctrine.md §3](./gateway_migration_model_doctrine.md#3-the-model),
+  [§6](./gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty)), not merely argued. What stays
+  **assumed** is the *runtime physics* the model abstracts — that the caught-up verification and the
+  MinIO/Pulsar/Patroni lossless delegation actually hold live — a **runtime-observed** caught-up edge, not a
+  constructive type-level impossibility, confirmed only by the Register-3 chaos injection of Phase 29. Per the
+  honesty rule ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)),
+  the model property is *proven-for-the-model* and the runtime fidelity is *assumed until Phase 29*.
+- **Both** branches are the subject of amoebius's one proof obligation, owned by
+  [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) and set in the concentration
+  principle of [chaos_failover_doctrine.md](./chaos_failover_doctrine.md): the `Failover` async correctness via
+  `FailoverBounded`/`MergeConverges`/`NoWriteAfterStaleFailover`, and the `Planned` handover via
+  `PlannedIsLossless` — one reifiable `Model`, simulated (io-sim) and proven (TLC) at design time, with
+  model↔code correspondence **by construction** (no deferred correspondence table). What remains for Phase 29
+  is Register-3 chaos injection against the running forest — confirming the abstracted physics hold — never a
+  paper correspondence.
 - The typed `GatewayFailover { active : ClusterId, standby : ClusterId, dnsRecord, hubRole }` forest relation
   is a **parent-owned** relation in the `RootInForceSpec`, projected read-only into each child's
   `ChildInForceSpec` — the same derive-don't-author, relations-owned-by-the-enclosing-scope pattern the
@@ -220,8 +231,9 @@ status.
   A cluster's own gateway presence and routes stay in the child's spec; the failover/migration pairing, DNS
   record, and hub role are the parent's. The **DSL type and its projection are design intent**, authored in
   the DSL phase and not built today ([dsl_doctrine.md](./dsl_doctrine.md#recursion-a-childs-spec-is-a-typed-subtree-projection)).
-- Per-upload spec validation does **not** re-run the model: TLA+/TLC proves the `Failover` (async) migration protocol once at
-  design time, parameterized over N clusters; a spec is validated only by the typed, decode-foreclosed check
+- Per-upload spec validation does **not** re-run the model: TLA+/TLC proves the gateway-migration protocol —
+  **both** the `Planned` and `Failover` branches — once at design time, parameterized over N clusters and
+  reduced by the pairwise cutoff; a spec is validated only by the typed, decode-foreclosed check
   that it stays within the proven envelope
   ([chaos_failover_doctrine.md §17](./chaos_failover_doctrine.md#17-the-boundary-and-its-classifier);
   [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md)).

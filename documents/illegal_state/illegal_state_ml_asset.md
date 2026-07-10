@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md, documents/engineering/service_capability_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_25_jitbuild_engine_cache.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering the engine/model/kernel asset
@@ -22,7 +22,7 @@ ML-asset and training illegal states ([§3.25](#325-an-ml-asset-named-by-arbitra
 It is **not** the index of the catalog. The full catalog index, the SSoT split, and the load-bearing honesty
 limit (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned by
 [`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage
-matrix** ([§5](./illegal_state_catalog.md)), the **three-layer foreclosure** model ([§6](./illegal_state_catalog.md)), and the **validation-locus
+matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three-layer foreclosure** model ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus
 axis** (the orthogonal `Gate-1-editor` / `Gate-2-decoder` / `rendered-output-golden` / `live-effect` axis added
 on top of the foreclosure layer) are owned by
 [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice **references** those — it does not
@@ -91,7 +91,7 @@ of a still-running job) and its `TrainData.Feed` **requires** a bounded-retentio
 with no checkpoints and no retention" has **no constructor** — a **type-foreclosed union shape**, exactly the
 `Growable`/`ScalingPolicy` no-unbounded-arm idiom ([§3.21](./illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)).
 The authoritative Continuous trainer is **single-cluster** (the existing jitML First-Axis coordinator, its
-single-writer *delegated* to a Pulsar Exclusive/Failover subscription + content-store CAS/`AdvancePredicate`, not
+single-writer *delegated* to a Pulsar Failover subscription + content-store CAS/`AdvancePredicate`, not
 a bespoke election); cross-cluster is serve-by-replication, never a second trainer on the same feed. **Owner:**
 [`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) (owns the `TrainInit`/`TrainData`/`TrainBudget`
 unions + the foreclosure; `dsl_doctrine.md` carries the field only), with retention bounded by the two-ceiling
@@ -122,8 +122,8 @@ materialized-prefix content-address) + [`pulsar_client_doctrine.md` §6](../engi
 (the topic as a cursor-anchored replayable feed). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (the closed merge-witness on `Feed`) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
 (a `Feed` handle exists only once its single-partition-or-merge witness does). **Layer:** type-foreclosed/decode-foreclosed — the merge
-witness makes the non-deterministic feed unrepresentable (type-foreclosed where the witness is a closed union arm;
-decode-foreclosed where the explicit merge function is a decode-checked total order); runtime-checked residue — that the broker
+witness forecloses the non-deterministic feed at two layers — type-foreclosed (uninhabitable) where the witness is a closed union arm,
+decode-foreclosed (a decode-time `Left`) where the explicit merge function is a decode-checked total order; runtime-checked residue — that the broker
 actually replays the pinned prefix within retention.
 
 **Validation-locus:** `Gate-1-editor` (where the merge witness is a closed union arm — single-partition or a

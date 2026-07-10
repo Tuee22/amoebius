@@ -2,13 +2,13 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_22_pulsar_client.md, phase_24_determinism_kernel.md, phase_27_jitml_lift_cuda.md, phase_31_test_topology_dsl.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_22_pulsar_client.md, DEVELOPMENT_PLAN/phase_24_determinism_kernel.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_31_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Stand up amoebius's durable-artifact substrate — the three-tier content-addressed MinIO store —
 > and the orchestrator/worker workflow runtime on top of the Phase-22 native Pulsar client, gated live on
 > linux-cpu by a store/fetch-by-manifest-SHA round-trip whose active worker fails over to a Pulsar
-> Exclusive/Failover standby with no bespoke election and a leak-free teardown.
+> Failover standby with no bespoke election and a leak-free teardown.
 
 ---
 
@@ -35,7 +35,7 @@ Precondition Failed` treated as success), and the only mutable objects, `pointer
 `If-Match` compare-and-swap that is the single atomic commit point — keyed under a caller-supplied
 `experiment-hash` namespace within an app's Phase-21 ObjectStore bucket. Second, an **orchestrator/worker
 workflow runtime** on top of the Phase-22 client: an orchestrator worker produces a workflow `command` on a
-derived topic; worker daemons attached over a Pulsar **Exclusive/Failover** subscription have one active
+derived topic; worker daemons attached over a Pulsar **Failover** subscription have one active
 consumer and the rest as name-ordered hot standbys; the active worker writes a content-addressed artifact and
 produces an `event` carrying the manifest SHA the orchestrator fetches back by that SHA.
 
@@ -54,10 +54,12 @@ typeclass, and SplitMix seed derivation are the Phase 24 determinism kernel, not
 Register 3 (live infrastructure); no apple, linux-cuda, or windows substrate is touched, and the store's CAS
 protocol and worker failover are substrate-agnostic in design but validated only here.
 
+**Register:** 3 — live infrastructure (§K).
+
 **Gate:** an `InForceSpec` test topology on the linux-cpu kind cluster **stores and fetches a content-addressed
 artifact by its manifest SHA** — a worker writes the artifact into the three-tier MinIO store and the
 orchestrator reads it back by the manifest SHA carried in the workflow event — then **kills the active worker
-and observes a name-ordered standby take over the Pulsar Exclusive/Failover subscription** (single-writer
+and observes a name-ordered standby take over the Pulsar Failover subscription** (single-writer
 delegated to Pulsar, never a bespoke amoebius election) with at-least-once redelivery of the un-acked command,
 and the whole topology spins up, runs, and **tears down leak-free**, idempotently on re-run, emitting a per-run
 proven/tested/assumed ledger artifact.
@@ -66,7 +68,7 @@ proven/tested/assumed ledger artifact.
 flowchart LR
   dhall[InForceSpec test topology] --> up[Bring up on linux-cpu kind: Pulsar plus MinIO already HA]
   up --> produce[Orchestrator worker produces workflow command on the derived topic]
-  produce --> worker[Active worker consumes via Exclusive/Failover subscription]
+  produce --> worker[Active worker consumes via Failover subscription]
   worker --> store[Worker writes content-addressed artifact to the three-tier MinIO store]
   store --> event[Worker produces workflow event carrying the manifest SHA]
   event --> fetch[Orchestrator fetches artifact by manifest SHA]
@@ -223,7 +225,7 @@ artifact reference a content address.
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 23.3: Pulsar Exclusive/Failover standby takeover + leak-free teardown (gate) 📋
+## Sprint 23.3: Pulsar Failover standby takeover + leak-free teardown (gate) 📋
 
 **Status**: Planned
 **Implementation**: `amoebius-runtime/dhall/test/round_trip_failover.dhall` (the gate topology),
@@ -247,7 +249,7 @@ prove that killing the active worker yields standby takeover through Pulsar's ow
 bespoke amoebius election — and assemble the phase gate.
 
 ### Deliverables
-- Worker daemons attached over a Pulsar **Exclusive/Failover** subscription (Phase 22): one active, the rest
+- Worker daemons attached over a Pulsar **Failover** subscription (Phase 22): one active, the rest
   name-ordered hot standbys; single-writer liveness is the subscription, safety is the store's ETag-CAS commit
   point plus the typed `AdvancePredicate` (Sprint 23.1), so even a bounded failover overlap cannot regress
   HEAD.
@@ -267,7 +269,7 @@ bespoke amoebius election — and assemble the phase gate.
    [`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed);
    skipping the applicable failover-injection move marks that layer UNVERIFIED, never green.
 
-> **Honesty.** This sprint exercises the **intra-cluster** Exclusive/Failover subscription only; the
+> **Honesty.** This sprint exercises the **intra-cluster** Failover subscription only; the
 > asynchronous cross-cluster failover boundary and its formal gateway-migration model are owned by
 > [`chaos_failover_doctrine.md §16`](../documents/engineering/chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
 > and scheduled for Phase 29, not here. Pulsar's own broker/bookie consensus is delegated, not re-proven. The

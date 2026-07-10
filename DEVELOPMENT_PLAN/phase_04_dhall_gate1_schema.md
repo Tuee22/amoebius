@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_05_gadt_decoder_gate2.md, phase_06_illegal_state_corpus.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Stand up the typed Dhall DSL surfaces and their smart-constructor prelude so that Gate 1 — the
@@ -35,6 +35,8 @@ corpus and touches no infrastructure.
 
 **Substrate:** none — no host, no cluster; the gate is an in-process `dhall type` battery over the fixture
 corpus.
+
+**Register:** 1 — pure/golden, in-process, no cluster (§K).
 
 **Gate:** `dhall type` over the Gate-1 corpus is green — each positive cluster / app / deployment fixture
 type-checks, and each Gate-1-class negative fixture (a product-named capability, an insecure-ingress arm, an

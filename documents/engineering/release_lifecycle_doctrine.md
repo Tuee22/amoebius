@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/testing_doctrine.md, DEVELOPMENT_PLAN/later_phases.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define delivery — build, promote, roll out — as **typed composition on primitives amoebius

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_02_formal_model_kernel.md, phase_29_multicluster_gateway_migration.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Author amoebius's one formal proof obligation — the cross-cluster gateway migration, both the
@@ -44,6 +44,8 @@ the spec-decode path.
 
 **Substrate:** `none` — no host, no cluster. The gate is an in-process check battery (TLC + io-sim +
 explorer), analogous to the Phase-0 documentation lint and the Phase-2 kernel round-trip.
+
+**Register:** 1 — pure/golden, in-process, no cluster (§K).
 
 **Gate:** `emitTLA` renders the concrete `GatewayMigration` `Model` to a generated, never-committed
 `.tla`/`.cfg` on which TLC reaches every named invariant — `UniqueGatewayOwner`, `SessionAlwaysRebindable`,

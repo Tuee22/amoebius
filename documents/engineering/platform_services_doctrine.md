@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_base_image_registry.md, DEVELOPMENT_PLAN/phase_17_vault_pki.md, DEVELOPMENT_PLAN/phase_18_platform_services.md, DEVELOPMENT_PLAN/phase_19_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_32_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define the fixed set of standard services every amoebius cluster runs (the concrete providers
@@ -192,7 +192,7 @@ independent version and lifecycle, and clean per-namespace teardown.
 - **The Percona operator is itself a platform component**, drawn from the shared inventory ([§12](#12-substrate-equivalence-as-a-structural-invariant)) so it
   installs identically on every substrate. A service needing SQL renders a `PerconaPGCluster` in its own
   namespace; the cluster-wide operator reconciles it. (This generalizes the prodbox
-  `helm_chart_platform_doctrine.md` [§4](#4-minio--the-object-substrate) Patroni dependency contract, where Keycloak is the proven
+  `helm_chart_platform_doctrine.md` §4 Patroni dependency contract, where Keycloak is the proven
   consumer — without restating its prodbox-specific naming.)
 - **HA always applies here too ([§2](#2-ha-always--including-replicas1)).** At its configured steady state a Patroni cluster runs multiple
   replicas with synchronous replication; at `replicas=1` it is still a Patroni cluster, never a bare Pod.
@@ -289,7 +289,9 @@ the `Resources = { requests, limits }` pair whose shape is owned by
 The two are read at *different* layers: **`requests`** is the scheduling number — it is what the placement fold
 sums against allocatable capacity, because it is what the scheduler reserves — while **`limits`** is the runtime
 cgroup ceiling (throttle/OOM), a runtime-checked enforcement fact, never summed by the fold. Both are mandatory, with
-`requests ≤ limits` per axis (and `requests == limits` for gpu, which cannot be overcommitted). Whether this
+`requests ≤ limits` per axis. (There is no per-pod GPU axis here: accelerators are owned *wholesale per node*,
+not requested/limited per container — see the accelerator model in
+[resource_capacity_doctrine.md](./resource_capacity_doctrine.md) and the separate VRAM note below.) Whether this
 requirement is lifted into the Dhall type layer (so an under-declared workload is *unrepresentable*, not merely
 rejected at render time) is catalogued by
 [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md), which is the SSoT for which platform invariants are
@@ -356,7 +358,7 @@ flowchart TD
 
 "Same service set on every cluster" is **enforced structurally**, not maintained by parallel hand-edited
 installers. This generalizes the prodbox substrate-equivalence mechanism (prodbox CLAUDE.md "Substrate
-Equivalence" and `helm_chart_platform_doctrine.md` [§3](#3-the-registry--the-single-image-source)A) from two substrates to all of them. The three
+Equivalence" and `helm_chart_platform_doctrine.md` §3A) from two substrates to all of them. The three
 mechanisms, adapted:
 
 1. **One release/version value per platform-component image, shared across substrates.** A platform

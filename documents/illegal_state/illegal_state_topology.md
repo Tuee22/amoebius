@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/engineering/readiness_ordering_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering compute-engine/substrate
@@ -27,7 +27,7 @@ below) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.m
 them and does not restate them.
 
 Everything below is **design intent**, per the honesty discipline of
-[`illegal_state_catalog.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force):
+[`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force):
 a green type-check proves the specification composes into something internally coherent; it does not prove
 the running deployment enforces it. Each `**Layer:**` tag records where the foreclosure lives, and each
 `**Validation-locus:**` line records the gate that catches the state — plus, for most entries, the
@@ -62,7 +62,7 @@ virtualization provider (`limaHost` on apple, `wsl2Host` on windows), so "rke2/k
 describes as reconcile behaviour) becomes a *type demand* — the bare-host spec has no inhabitant. (Distinct
 from the Apple-Metal *build* carve-out, which is on-host by design,
 [`apple_metal_headless_builds.md`](../engineering/apple_metal_headless_builds.md).) **Owner:**
-[`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) (+ substrate [§4](./illegal_state_techniques.md#4-the-typing-techniques) for the synthesis).
+[`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) (+ substrate [§4](../engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux) for the synthesis).
 **Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a distro GADT indexed by a required `LinuxHost` witness). **Layer:** type-foreclosed uninhabitable;
 runtime-checked residue — that the Lima/WSL2 VM actually boots.
 **Validation-locus:** `Gate-2-decoder` (the distro GADT indexed by the required `LinuxHost` witness — a bare-host distro has no inhabitant once decoded) + `live-effect` (that the interposed Lima/WSL2 VM actually boots).
@@ -156,8 +156,8 @@ actually keep a low-latency majority.
   ([§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)),
   and the three foreclosure layers ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)).
   This document is one themed slice of it.
-- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques (§4), the
-  coverage matrix (§5), the foreclosure layers, and the **validation-locus axis** used on every entry above.
+- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
+  coverage matrix ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the foreclosure layers, and the **validation-locus axis** used on every entry above.
 - [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract ("a valid `InForceSpec` cannot
   represent illegal state") these topology entries instantiate.
 - [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) — the owning doctrine for every entry

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_12_spa_composition_representational.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_12_spa_composition_representational.md
 **Generated sections**: none
 
 > **Purpose**: Deploy the Phase-12 decode-proven SPA composition live on `linux-cpu` — a multi-service app
@@ -64,6 +64,8 @@ flowchart LR
 in Register 3 and exercises a CPU-bound infernix inference round-trip; no apple, linux-cuda, or windows
 substrate is touched, and the jitML RL-gaming demo is built and type-checks as a second composition without its
 workflow being run.
+
+**Register:** 3 — live infrastructure (§K).
 
 **Gate:** an SPA `.dhall` composes a **multi-service app + an ML-workflow demo app, deployed and reachable behind
 Keycloak/Envoy; an inference request round-trips; leak-free teardown** — concretely, a single SPA spec declaring

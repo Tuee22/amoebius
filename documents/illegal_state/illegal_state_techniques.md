@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_topology.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_21_app_tenancy.md, documents/README.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: The mechanism slice of the illegal-state catalog — the seven reusable typing techniques that
@@ -31,7 +31,7 @@ below cite it.
 
 Everything here is **design intent**, not a tested amoebius result: the type discipline it describes (the spec
 composes; no illegal value is constructible) is a **Tier-1** (design-time / in-process) property targeted for
-in-process validation in the **pre-cluster gates (Phases 4–6)** (Dhall Gate 1 `dhall type` + the Haskell decoder Gate 2 + QuickCheck), while
+in-process validation in the **pre-cluster gates (Phases 4–7)** (Dhall Gate 1 `dhall type` + the Haskell decoder Gate 2 + QuickCheck), while
 its **runtime enforcement** remains **Phase 20** (Tier 2). Status and gates live only in
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
 
@@ -229,6 +229,7 @@ Forecloses [§3.13](./illegal_state_topology.md#313-a-compute-engine-incompatibl
 | 3.42 Admin mutation without root-token cap + unsealed-Vault witness | 4.2 `RootToken` capability + 4.3 `Unsealed`-edge-gated `dhall update` handle (channel-1 verb retired at handoff) | [bootstrap_sequence](../engineering/bootstrap_sequence_doctrine.md), [vault_pki §4](../engineering/vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) |
 | 3.43 Unmonitored workflow/extension or unauthenticated monitoring surface | 4.1 mandatory monitor/liveness/extMonitoring + absent Off/Public arms + 4.7 coverage fold + 4.6 rule-feasibility Σ | [monitoring](../engineering/monitoring_doctrine.md), [pulsar_client §6](../engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra) |
 | 3.44 A session that cannot rebind on gateway migration | 4.3 migration GADT (decommission handle only from a drain-complete index) | [gateway_migration](../engineering/gateway_migration_doctrine.md) |
+| 3.45 A cross-tenant or hand-authored RBAC binding | 4.2 phantom tenant tags + 4.4 tenant→role ownership index (every grant is the image of one total function of the typed tenant→role graph) | [tenancy §5](../engineering/tenancy_doctrine.md#5-rbac-is-derived-never-authored), [vault_pki](../engineering/vault_pki_doctrine.md) |
 
 ---
 
@@ -252,7 +253,7 @@ are three layers, and a conformant claim names which one it is reaching:
 
 **The two-tier mapping.** Layers 1–2 (`type-foreclosed` + `decode-foreclosed`) are the **Tier-1** design-time /
 in-process integrity band — the spec composes and the type discipline holds in the abstract — validated
-**in-process in the pre-cluster gates (Phases 4–6)** (Dhall Gate 1 `dhall type`, the Haskell decoder Gate 2, and QuickCheck). Layer 3
+**in-process in the pre-cluster gates (Phases 4–7)** (Dhall Gate 1 `dhall type`, the Haskell decoder Gate 2, and QuickCheck). Layer 3
 (`runtime-checked`) is **Tier-2** runtime-enforcement integrity — that the running cluster enforces what the spec
 composed — and stays **deferred and UNVERIFIED** until its live real-resource phase (owned by
 [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the testing doctrine).
@@ -289,7 +290,7 @@ growing capacity, and the cloud honoring the quota — are always runtime-checke
 [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the testing doctrine, never asserted here.
 
 > **Honesty.** amoebius has built no phase yet. Every `type-foreclosed` and `decode-foreclosed` claim above is the *intended*
-> **Tier-1** (design-time / in-process) property of the type discipline — targeted for in-process validation in the **pre-cluster gates (Phases 4–6)**,
+> **Tier-1** (design-time / in-process) property of the type discipline — targeted for in-process validation in the **pre-cluster gates (Phases 4–7)**,
 > not a tested result; the **Tier-2** `runtime-checked` residue is explicitly deferred to its live phase. Where a technique
 > generalizes a behaviour proven in prodbox (single-owner SSoT, Keycloak-owns-ingress), that proof is
 > evidence from a sibling system, not proof in amoebius.
@@ -343,7 +344,7 @@ monitor field, the absent `Off`/`Public` arms), `Gate-2-decoder` (the coverage /
 `rendered-output-golden` (the derived rules/panels in the emitted objects), and `live-effect` (that the alert actually
 fires) — and the foreclosure *layer* of each part is stated separately in the entry. The loci also map loosely onto
 the two-tier band: `Gate-1-editor`, `Gate-2-decoder`, and `rendered-output-golden` are **Tier-1** design-time /
-in-process gates (validated in the **pre-cluster band, Phases 4–6**), while `live-effect` is the **Tier-2** runtime-enforcement residue
+in-process gates (validated in the **pre-cluster band, Phases 4–7**), while `live-effect` is the **Tier-2** runtime-enforcement residue
 deferred to its live phase.
 
 ### 6.2 The enumeration limit — the catalog is enumerated, not proven exhaustive
@@ -380,5 +381,5 @@ about the running cluster ([§2](./illegal_state_catalog.md#2-the-load-bearing-l
 - [Pulumi IaC Doctrine](../engineering/pulumi_iac_doctrine.md) — route53 / zerossl name→address binding ([§4.5](#45-content-address-totality--names-are-total-functions-of-content))
 - [Chaos / Failover Doctrine](../engineering/chaos_failover_doctrine.md) — the `runtime-checked` / `live-effect` residue (the honest limit)
 - [Documentation Standards](../documentation_standards.md) — §6 proven/tested/assumed honesty discipline
-- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — status, gates, and the Tier-1 (Phases 4–6) / Tier-2 (Phase 20) tier split
+- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — status, gates, and the Tier-1 (Phases 4–7) / Tier-2 (Phase 20) tier split
 - [Engineering Doctrine Index](../engineering/README.md)

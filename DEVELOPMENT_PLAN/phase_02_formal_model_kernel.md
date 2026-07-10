@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Build the reusable formal-model kernel — the reifiable Haskell `Model` fragment and its two total renderings, the in-process `interpret` explorer and the `emitTLA` TLA+ emitter — and prove them on one small model whose generated `.tla` is TLC-checkable and never committed.
@@ -44,6 +44,8 @@ runs on the emitted spec through the version-stable JVM `tla2tools` toolchain. T
 (pure/golden, in-process, no cluster) design-proof phase.
 
 **Substrate:** none
+**Register:** 1 — pure/golden, in-process, no cluster (§K).
+
 **Gate:** The reifiable `Model` explorer (`interpret` plus the in-process bounded-reachability checker) and
 the `emitTLA` renderer round-trip a single small transition-system model — the in-process explorer and TLC
 (run through the standard `tla2tools` toolchain over the freshly emitted `.tla`/`.cfg`) reach the *identical*

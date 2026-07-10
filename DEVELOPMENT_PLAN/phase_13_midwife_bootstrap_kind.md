@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, legacy_tracking_for_deletion.md, overview.md, phase_14_base_image_registry.md, phase_15_renderer_reconciler.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_base_image_registry.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Specify the first live phase — the Python `pb` midwife that ensures a toolchain and builds the
@@ -275,5 +275,3 @@ The whole sprint (📋 Planned).
   two modes (midwife here; admin-REST client later).
 - [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — the parameters/context/witness orchestration surface
   the `bootstrap` command carries.
-</content>
-</invoke>

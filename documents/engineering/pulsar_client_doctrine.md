@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_22_pulsar_client.md, DEVELOPMENT_PLAN/phase_23_content_store_workflow.md, DEVELOPMENT_PLAN/phase_26_infernix_lift.md, DEVELOPMENT_PLAN/phase_28_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define `amoebius-pulsar` — the one native-protocol Haskell Pulsar client (forked from
@@ -253,7 +253,7 @@ choice so the omissions are auditable, not silent.
   coordinator reconciles like retention and dedup ([§6.1](#61-topic-storage-lifecycle-bounded-tiered-retained--and-the-hot-tier-never-overflows), [§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default));
   a *TableView* is a client-side `key → latest-value` materialization over a compacted `consume`. Together
   they give the control-plane its current-state **read-model** and resolved-singleton dissemination — adopted,
-  and owned, by [daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership) / [§5.5](./daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership).
+  and owned, by [daemon_topology_doctrine.md §5.2](./daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership).
   The operator-facing `workflow-health` projection (`WorkflowName → SLOStatus`) is a second application of the
   same primitive, owned by [monitoring_doctrine.md](./monitoring_doctrine.md).
   They are a *projection*, never a decision primitive: no ownership or election logic lives in a TableView.
@@ -261,7 +261,7 @@ choice so the omissions are auditable, not silent.
   Pulsar's purpose-built single-writer-with-fencing primitive is deliberately absent from the client surface —
   it was evaluated and rejected as the control-plane election substrate (bootstrap/DR circularity; it fences
   only Pulsar-topic writes, not the external route53/Vault effects; and it is incompatible with the
-  multi-writer commit log). Full rationale: [daemon_topology_doctrine.md §5.5](./daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership).
+  multi-writer commit log). Full rationale: [daemon_topology_doctrine.md §5.2](./daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership).
 - **Not exposed: transactions.** Cross-topic atomicity is unused — at-least-once + broker-side dedup
   ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)) delivers exactly-once *effect* more cheaply, so a transaction coordinator earns no place
   in the surface.
@@ -417,14 +417,14 @@ content-address to their owner in [content_addressing_doctrine.md](./content_add
   "consensus is delegated, not re-proven" posture [§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default) takes for HA. *Who* runs the feed-sourced trainer,
   and the content-store commit that makes each checkpoint's `latest` advance race-free, are owned by
   [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) / [content_addressing_doctrine.md](./content_addressing_doctrine.md); the client owns only that the feed subscription is
-  Exclusive/Failover.
+  Failover.
 - **Replay is Seek.** Resuming a feed from a checkpoint's committed cursor, or rebuilding from the start of
   the retained span, is the same `SEEK` primitive ([§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)) already provides for rebuild-from-log and the
   geo-replication catch-up [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) reasons about — no new client capability.
 
 > **Honesty.** The training-feed view is Phase-22-and-later design intent layered on the client, not a built
 > or benchmarked amoebius result. The single-active-trainer property is **delegated** to Pulsar's
-> Exclusive/Failover subscription (jitML/infernix already coordinate this way — *sibling evidence*), not an
+> Failover subscription (jitML/infernix already coordinate this way — *sibling evidence*), not an
 > amoebius election proof; per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read this as the specified composition, not a
 > proven behaviour.
 

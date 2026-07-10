@@ -2,11 +2,11 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, development_plan_standards.md, later_phases.md, legacy_tracking_for_deletion.md, overview.md, phase_00_documentation_suite.md, phase_12_spa_composition_representational.md, phase_13_midwife_bootstrap_kind.md, phase_14_base_image_registry.md, phase_17_vault_pki.md, phase_18_platform_services.md, phase_19_keycloak_ingress.md, phase_20_live_dsl_singleton.md, phase_21_app_tenancy.md, phase_22_pulsar_client.md, phase_27_jitml_lift_cuda.md, phase_28_apple_metal_host_daemon.md, phase_29_multicluster_gateway_migration.md, phase_30_provider_clusters.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_12_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_13_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_14_base_image_registry.md, DEVELOPMENT_PLAN/phase_17_vault_pki.md, DEVELOPMENT_PLAN/phase_18_platform_services.md, DEVELOPMENT_PLAN/phase_19_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_20_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_21_app_tenancy.md, DEVELOPMENT_PLAN/phase_22_pulsar_client.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_28_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: The plan-side substrate registry and the per-phase substrate map — which single substrate each
-> phase's acceptance gate keys to (phases 0–12), keyed to the closed substrate catalog owned by the substrate
+> phase's acceptance gate keys to (phases 0–32), keyed to the closed substrate catalog owned by the substrate
 > doctrine.
 
 ---
@@ -79,7 +79,7 @@ gates.
 | Virtualization | Lima (Ubuntu-24.04 Linux VM) — see §3. **No macOS build VM (no Tart)**: Apple-Metal builds are headless on-host |
 | LoadBalancer | MetalLB (bare-metal / kind / rke2 lane) |
 | What it validates | The Phase 28 gate — an Apple-Silicon **host compute daemon** runs a Metal ML workload as an in-cluster Pulsar/MinIO peer over host-only NodePorts ([`substrate_doctrine.md` §5 — host worker nodes](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)) |
-| Gate phase(s) | 8 |
+| Gate phase(s) | Phase 28 — the per-phase assignment is owned by [§4](#4-per-phase-substrate-map-phases-032) |
 | Status | 📋 Planned |
 
 ### linux-cpu
@@ -92,7 +92,7 @@ gates.
 | Virtualization | none (native Linux); Incus / Colima where a nested Linux VM is wanted |
 | LoadBalancer | MetalLB |
 | What it validates | The **default validation substrate** — the bulk of the plan: bootstrap, platform services + retained storage, the DSL + control-plane singleton, the Pulsar/store/workflow runtime, CPU-inference determinism, the demo web apps (application-logic-only), multi-cluster spawn/geo-replication/failover, and SPA composition |
-| Gate phase(s) | 2, 3, 4, 5, 6, 9, 12 (and the local control side of 10) |
+| Gate phase(s) | Phases 13–26, 29, and the `linux-cpu` parent side of 30, plus 32 — the live band's default substrate; the per-phase assignment is owned by [§4](#4-per-phase-substrate-map-phases-032) |
 | Status | 📋 Planned |
 
 ### linux-cuda
@@ -105,7 +105,7 @@ gates.
 | Virtualization | none |
 | LoadBalancer | MetalLB |
 | What it validates | The Phase 27 gate — a jitML training run is bit-deterministic per its determinism contract and the HA coordinator fails over; CUDA stays confined behind a default-off cabal flag |
-| Gate phase(s) | 7 |
+| Gate phase(s) | Phase 27 — the per-phase assignment is owned by [§4](#4-per-phase-substrate-map-phases-032) |
 | Status | 📋 Planned |
 
 ### windows
@@ -118,7 +118,7 @@ gates.
 | Virtualization | WSL2 (Ubuntu-24.04 Linux distro) for the Linux-host role — see §3 |
 | LoadBalancer | MetalLB (when acting as a Linux cluster host) |
 | What it validates | No phase gate in 0–12 keys its single substrate to `windows`: Windows participates either as a Linux host (via WSL2) or as the Windows-CUDA host-worker case, which shares the Phase 28 host-compute doctrine whose gate substrate is `apple`. This round elevates the Windows-CUDA host worker to a **first-class** case alongside Apple-Metal — role parity, not evidence parity ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained), `daemon_topology_doctrine.md` §4). The standalone `windows` gate is a later-phase concern (README later phases) |
-| Gate phase(s) | none in 0–12 (host-worker doctrine shared with Phase 28) |
+| Gate phase(s) | none in 0–32 (host-worker doctrine shared with Phase 28) |
 | Status | 📋 Planned |
 
 > **Honesty.** Detection and classification are seeded from the sibling `hostbootstrap` library (a closed
@@ -151,7 +151,7 @@ it has no host to detect and no `LinuxHost` witness. It is the `Managed Eks` arm
 | Node capacity | From the declared **instance types**, not a physical host; folded like any other `Capacity` ([`resource_capacity_doctrine.md` §3](../documents/engineering/resource_capacity_doctrine.md)) |
 | Storage ceiling | A **cloud quota** (`CloudQuota` `StorageBacking`); "unbounded" storage/compute only via a quota-bounded `ScalingPolicy` |
 | LoadBalancer | Cloud LoadBalancer (the one substrate-driven difference, [`substrate_doctrine.md` §7](../documents/engineering/substrate_doctrine.md#7-the-loadbalancer-is-the-one-substrate-driven-platform-difference)) |
-| Gate phase(s) | 10 (the `linux-cpu` parent drives the deploy; the provider target is not a hardware substrate) |
+| Gate phase(s) | 30 (the `linux-cpu` parent drives the deploy; the provider target is not a hardware substrate) — owned by [§4](#4-per-phase-substrate-map-phases-032) |
 | Status | 📋 Planned |
 
 ---

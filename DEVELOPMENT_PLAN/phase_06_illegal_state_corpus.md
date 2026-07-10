@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_05_gadt_decoder_gate2.md, phase_07_capacity_topology_folds.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Assemble the exhaustive illegal-state corpus — every negative fixture split by the locus that
@@ -41,6 +41,8 @@ the representational SPA-composition corpus (Phase 12), and every `live-effect` 
 
 **Substrate:** `none` — no host, no cluster; the gate is an in-process `cabal test` + `dhall type` +
 `ghc -fno-code` corpus battery analogous to the Phase-0 documentation lint.
+
+**Register:** 1 — pure/golden, in-process, no cluster (§K).
 
 **Gate:** every negative fixture is rejected at its tagged locus — each Gate-1-class negative fails
 `dhall type` at authoring time, each Gate-2-class negative passes `dhall type` and decodes to a structured

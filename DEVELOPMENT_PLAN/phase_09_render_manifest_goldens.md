@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_06_illegal_state_corpus.md, phase_08_capability_binder.md, phase_10_chain_kernel_dryrun.md, phase_11_boundary_fake_tool_harness.md, phase_15_renderer_reconciler.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Stand up the pure, total `render :: ServiceSpec -> [K8sObject]` and lock its emitted object
@@ -42,6 +42,8 @@ locks the **render** step of the pre-cluster spine.
 
 **Substrate:** `none` — no host, no cluster; the gate is an in-process `cabal test` render-and-golden battery
 analogous to the Phase-5 decode battery and the Phase-4 `dhall type` corpus.
+
+**Register:** 1 — pure/golden, in-process, no cluster (§K).
 
 **Gate:** `cabal test render-golden` is green — the pure, total `render :: ServiceSpec -> [K8sObject]` emits,
 for a representative service set, an object set a **byte-for-byte** golden pins exactly, and the three

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_25_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the amoebius capacity model — the `Capacity` / `Demand` / `Budget`
@@ -286,10 +286,12 @@ StorageBudget = Fixed Capacity | QuotaCapped Quota | Growable ScalingPolicy
 ```
 
 - **No unbounded constructor** — the union shape is type-foreclosed: a value cannot denote unbounded storage. This is
-  the storage-side reading of the illegal-state contract; the closed `StorageBacking` union it pairs with
-  (host-disk-bounded | EBS-bounded | cloud-quota-bounded) is owned by
-  [storage_lifecycle_doctrine.md §5.2](./storage_lifecycle_doctrine.md#52-the-storage-backing-is-bounded--the-closed-storagebacking-union), and this doc owns the *aggregate
-  arithmetic* over it.
+  the storage-side reading of the illegal-state contract. The two types are distinct and pair: **`StorageBudget`**
+  (this doc) is the *policy-wrapped ceiling* — the declared limit and its growth policy — while the closed
+  **`StorageBacking`** union (host-disk-bounded | EBS-bounded | cloud-quota-bounded), the *physical backing* each
+  budget arm resolves to, is owned by
+  [storage_lifecycle_doctrine.md §5.2](./storage_lifecycle_doctrine.md#52-the-storage-backing-is-bounded--the-closed-storagebacking-union). This doc owns the *aggregate
+  arithmetic*: the [§4](#4-the-total-fold-fits-carve-place-and-the-nesting) fold checks `Σ demand ≤` the `StorageBacking` the `StorageBudget` names.
 - **Single-owner ceiling per arm.** Each arm names exactly one owner of its ceiling number, so "available
   storage" has one definition: a **host-disk** arm's ceiling is owned by
   [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) (the retained-PV host root) and, for the
@@ -299,7 +301,7 @@ StorageBudget = Fixed Capacity | QuotaCapped Quota | Growable ScalingPolicy
 - **Both MinIO and Pulsar fold against a `StorageBudget`.** An app's object usage (`<app>/<bucket>` MinIO
   buckets) and a topic's retained bytes ([§7](#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total)) each contribute a storage `Demand`; the sum against the backing
   is the same [§4](#4-the-total-fold-fits-carve-place-and-the-nesting) fold. "An app that can consume more storage than is available" (I10) is therefore
-  unrepresentable for both.
+  decode-foreclosed (a total decode-time rejection) for both — never type-`unrepresentable`, per [§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed).
 
 ---
 
@@ -389,7 +391,7 @@ the *two-ceiling arithmetic*):
 
 ## 8. Where the numbers come from: declared at decode, cross-checked at runtime
 
-For overcommit to be *unrepresentable* rather than a runtime error, the capacity the fold checks
+For overcommit to be **decode-foreclosed** (caught at decode) rather than a runtime error, the capacity the fold checks
 against must be a **spec input** — a demand cannot be type-checked against a number learned only at runtime.
 So amoebius **declares** capacity in the spec and folds at decode (decode-foreclosed), then **cross-checks** the
 declaration against reality at reconcile (runtime-checked).

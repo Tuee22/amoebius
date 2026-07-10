@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md
+**Referenced by**: documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering the lifecycle band — the readiness
@@ -30,7 +30,7 @@ It owns nothing of the catalog's framing.
   lifecycle, monitoring, …). This doc names the owner and never restates its content.
 
 Everything below is **design intent** for the type discipline, per the honesty discipline the catalog states
-([`illegal_state_catalog.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
+([`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
 a green type-check proves the *specification* composes into something internally coherent — the spec value is
 well-formed, every reference resolves, every required field is present — and proves **nothing** about whether the
 *running cluster* renders, admits, schedules, and reconciles it. Read every "unrepresentable" and

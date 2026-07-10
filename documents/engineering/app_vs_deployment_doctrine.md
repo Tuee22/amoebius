@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_12_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_26_infernix_lift.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_31_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_32_spa_live_deploy.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define the hard separation between an app's **application logic** (what it *is* to a user)
@@ -35,7 +35,7 @@ which surface, and why the line must never be crossed (DEVELOPMENT_PLAN
 cross-cutting invariant "Application logic and deployment rules are separate DSL surfaces").
 
 > **Honesty.** This split is *specified* doctrine for Phase 4 (the DSL type families) — with its in-process
-> design validation front-loaded to the pre-cluster gates (Phases 4–6) — and *demonstrated* live by the infernix demo web app in Phase 26
+> design validation front-loaded to the pre-cluster gates (Phases 4–7) — and *demonstrated* live by the infernix demo web app in Phase 26
 > and the jitML demo web app in Phase 27 (composed as an SPA in Phase 32); none of these phases has been built.
 > Read every prescriptive statement here as design intent, never as a tested amoebius result. Status and gates live only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
@@ -232,7 +232,7 @@ engine welded into the app.
 > **Honesty.** This is Phase-0 design intent, not a proven amoebius result. The application-logic-only
 > demonstration lands **live** with the infernix demo web app in **Phase 26** and the jitML demo web app in
 > **Phase 27**, and the two are composed as a live SPA in **Phase 32**; the surfaces' in-process design
-> validation is front-loaded to the **pre-cluster gates (Phases 4–6)** (see [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)).
+> validation is front-loaded to the **pre-cluster gates (Phases 4–7)** (see [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)).
 > None of these phases has been built.
 
 ---
@@ -360,7 +360,7 @@ mechanics it points at:
 This document is normative classification doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md):
 the two DSL surfaces land with the type families in **Phase 4** (their in-process design validation
-front-loaded to the **pre-cluster gates (Phases 4–6)**), the application-logic-only demonstration lands with the infernix demo web app
+front-loaded to the **pre-cluster gates (Phases 4–7)**), the application-logic-only demonstration lands with the infernix demo web app
 in **Phase 26** and the jitML demo web app in **Phase 27** (composed as an SPA in **Phase 32**), and the
 zero-app-change geo-replication case is **Phase 29**. This doc never maintains a competing status
 ledger; it states the target shape and links back for status.

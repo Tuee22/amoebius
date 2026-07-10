@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_17_vault_pki.md, DEVELOPMENT_PLAN/phase_18_platform_services.md, DEVELOPMENT_PLAN/phase_21_app_tenancy.md, DEVELOPMENT_PLAN/phase_26_infernix_lift.md, DEVELOPMENT_PLAN/phase_28_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_31_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for amoebius secrets and trust — Vault as the fail-closed secrets root, the SecretRef-by-name contract, the root cluster's single-node password-encrypted unseal, the two sanctioned parent/child unseal modes, parent-injects-secrets-into-child, and the root-owned PKI trust anchor for the whole forest.
@@ -64,8 +64,8 @@ pile of durable data that reveals nothing.
 > unwrap, no certificate issued. PVs and MinIO objects may still exist, but they yield no secret, no
 > in-force config, and no downstream-cluster inventory until Vault is unsealed.
 
-Three invariants make that concrete (generalized from prodbox's `vault_doctrine.md [§2](#2-vault-is-the-fail-closed-secrets-root)` and
-`secret_derivation_doctrine.md [§3](#3-the-secretref-contract-a-name-never-a-value)`, lifted from "prodbox-managed cluster" to "every amoebius cluster"):
+Three invariants make that concrete (generalized from prodbox's `vault_doctrine.md §2` and
+`secret_derivation_doctrine.md §3`, lifted from "prodbox-managed cluster" to "every amoebius cluster"):
 
 1. **Sole-backend invariant.** Every secret / credential / key / certificate is a Vault object. There
    is no second store and no plaintext fallback; no secret reconstructs from any non-Vault source.
@@ -88,7 +88,7 @@ Every amoebius secret is one of **three Vault object shapes**:
 
 This *replaces*, rather than extends, any earlier "derive secrets from a seed" scheme: prodbox's
 master-seed HMAC-derivation model was retired in favour of exactly this Vault-object model
-(`secret_derivation_doctrine.md [§1](#1-why-this-doctrine-exists), [§4](#4-init-follows-readiness-fail-closed-vault-init)`), and amoebius adopts the finished shape — there is no seed, no
+(`secret_derivation_doctrine.md §1, §4`), and amoebius adopts the finished shape — there is no seed, no
 host-side cache, and no chart-template `lookup`+`randAlphaNum` path. A secret is **generated once and
 persisted on Vault's durable storage**, then fetched by each consumer ([§9](#9-in-cluster-consumers-authenticate-to-vault-directly)). Vault is a singleton HA
 platform service on every cluster ([platform_services_doctrine.md §5](./platform_services_doctrine.md#5-vault--the-secrets-root-reference-only)),
@@ -105,7 +105,7 @@ this section owns the *typed mechanism* it defers to). The reference names *wher
 Vault holds *what* it is.
 
 Conceptual Dhall union, imported by every app/cluster schema (adapted from prodbox's proven `SecretRef`
-in its `config_doctrine.md` / `vault_doctrine.md [§3](#3-the-secretref-contract-a-name-never-a-value)`):
+in its `config_doctrine.md` / `vault_doctrine.md §3`):
 
 ```dhall
 -- Example: shared SecretRef type, imported wherever a sensitive value would otherwise appear
@@ -261,10 +261,12 @@ This section owns the Vault-init contract those two point at.
   Kubernetes ConfigMap or to etcd. Any ConfigMap a workload reads may carry only the [§6](#6-parentchild-unseal-two-sanctioned-modes) unencrypted-basics
   floor — never the spec, secrets, or downstream inventory. As defense-in-depth, etcd is configured with
   an `--encryption-provider-config` so even that floor is encrypted at rest. A plaintext spec at rest is
-  therefore *unrepresentable* ([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)).
+  therefore foreclosed at two layers: the spec is an envelope handle **by type** (author-time), and the
+  daemon decrypts it only **in-process**, never persisting plaintext — a **runtime** discipline, not a
+  type-level impossibility ([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)).
 - **Ready-before-consumer is absolute.** No consumer of a secret may run before Vault reports
   reachable, initialized, and unsealed. A consumer that reaches a sealed Vault fails closed rather than
-  racing it ([§2](#2-vault-is-the-fail-closed-secrets-root)). This generalizes prodbox's `secret_derivation_doctrine.md [§7](#7-parent-injects-secrets-into-the-childs-vault)` bootstrap-order rule.
+  racing it ([§2](#2-vault-is-the-fail-closed-secrets-root)). This generalizes prodbox's `secret_derivation_doctrine.md §7` bootstrap-order rule.
 
 ---
 

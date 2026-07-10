@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_20_live_dsl_singleton.md, phase_22_pulsar_client.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_20_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_22_pulsar_client.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Realize an app's tenant slice live — its own namespace, the `<app>/<bucket>` ObjectStore prefix,
@@ -47,6 +47,8 @@ cluster's app-tenant projection and its author-time no-foreign-tenant foreclosur
 
 **Substrate:** linux-cpu — the whole gate runs on the single-node `kind` cluster from Phases 17–20; no apple,
 linux-cuda, or windows substrate is touched.
+
+**Register:** 3 — live infrastructure (§K).
 
 **Gate:** on a single-node linux-cpu cluster a `.dhall` app spec is decoded and reconciled by the
 Deployment-`replicas=1` singleton (no election) so the app receives its own **namespace**, its declared

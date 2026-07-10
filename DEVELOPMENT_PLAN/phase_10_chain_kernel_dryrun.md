@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_09_render_manifest_goldens.md, phase_11_boundary_fake_tool_harness.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Seed the pure chain/Step reconcile kernel and its `--dry-run` plan render — `chain :: cfg ->
@@ -41,6 +41,8 @@ no singleton runtime** in this phase, only the pure kernel and its no-effect ren
 
 **Substrate:** none — no host, no cluster, no effectful interpreter; the gate is an in-process `cabal test`
 plan-render battery analogous to the Phase-9 rendered-output goldens.
+
+**Register:** 1 — pure/golden, in-process, no cluster (§K).
 
 **Gate:** `chain :: cfg -> [Step]` renders a byte-for-byte `--dry-run` plan with no effects and the pure
 descent is golden-locked — concretely, `cabal test chain-spec` is green: `chain` produces a pure plan value

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_17_vault_pki.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_17_vault_pki.md
 **Generated sections**: none
 
 > **Purpose**: Install the single inert `no-provisioner`/`Retain` StorageClass and the deterministic
@@ -47,6 +47,8 @@ volume holder while the control plane is only a client of that bucket.
 **Substrate:** linux-cpu — the whole gate runs on a single-node `kind` cluster on a linux-cpu host, in
 Register 3 (live infrastructure); no apple, linux-cuda, or windows substrate is touched, and no live
 infrastructure is required to *render* the StorageClass or PV objects (that stays pure, Registers 1–2).
+
+**Register:** 3 — live infrastructure (§K).
 
 **Gate:** durable **storage rebinds after a cluster delete + recreate with no data loss** — a marker row
 written into a Postgres witness StatefulSet and a marker object written into a MinIO witness bucket both

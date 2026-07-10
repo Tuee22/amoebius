@@ -2,12 +2,12 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, legacy_tracking_for_deletion.md, overview.md, phase_25_jitbuild_engine_cache.md, phase_26_infernix_lift.md, phase_28_apple_metal_host_daemon.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_25_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_26_infernix_lift.md, DEVELOPMENT_PLAN/phase_28_apple_metal_host_daemon.md
 **Generated sections**: none
 
 > **Purpose**: Lift the sibling `jitML` training/JIT library onto the amoebius seams — checkpoints on the
 > Phase-23 content store, a `linux-cuda`-bound determinism contract, a Feed-sourced single-writer trainer whose
-> failover is **delegated** to a Pulsar Exclusive/Failover subscription plus the content-store CAS (never an
+> failover is **delegated** to a Pulsar Failover subscription plus the content-store CAS (never an
 > amoebius election), and a jit-resolved CUDA engine — gated live on `linux-cuda` by a bit-deterministic run, a
 > delegated trainer failover, and a demo web app that deploys as application-logic-only.
 
@@ -54,7 +54,7 @@ role with **no new machinery and no election**: the trainer is the **existing ML
 ([`daemon_topology_doctrine.md` §4.3](../documents/engineering/daemon_topology_doctrine.md#43-the-feed-sourced-continuous-trainer-single-writer-delegated))
 parameterized with a `Feed` data source — not a new elected worker kind, and not folded into the control-plane
 singleton. Single-writer is **delegated, not elected**: liveness (at most one active trainer per feed) is a
-Pulsar **Exclusive/Failover** subscription with automatic ranked failover on death and resume-from-`latest`;
+Pulsar **Failover** subscription with automatic ranked failover on death and resume-from-`latest`;
 safety (a race-free `latest` pointer) is the content store's ETag-CAS single atomic commit point plus the typed
 `AdvancePredicate`, a monotone idempotent join that absorbs a bounded two-writer failover overlap. There is no
 bespoke ranked-failover election, no signed-commit-log kernel, no "First Axis" election, and no warm-standby
@@ -78,7 +78,7 @@ flowchart LR
   owner --> train[jitML training run: experimentHash bound to the linux-cuda fingerprint]
   train --> ckpt[Checkpoints written to the Phase-23 three-tier content store]
   ckpt --> det[Assert bit-determinism: two fresh runs, equal manifest SHA per contract]
-  det --> feed[Feed-sourced single-writer trainer on a Pulsar Exclusive/Failover subscription]
+  det --> feed[Feed-sourced single-writer trainer on a Pulsar Failover subscription]
   feed --> kill[Kill the active trainer]
   kill --> failover[Pulsar promotes the name-ordered standby: CAS plus AdvancePredicate keep latest safe, NO election]
   failover --> spa[Demo web app deploys application-logic-only: contracts regenerated from Haskell]
@@ -97,7 +97,7 @@ injects a trainer kill, and tears down, emitting a per-run proven/tested/assumed
 **Gate:** a `jitML` run is **bit-deterministic per its determinism contract** (two fresh runs at the same
 `experimentHash` produce equal checkpoint manifest SHAs on the same linux-cuda substrate; off-policy RL asserted
 only on the first-N-step prefix; no cross-substrate equality claim), the **single-writer Feed trainer fails
-over via a Pulsar Exclusive/Failover subscription plus the content-store ETag-CAS + `AdvancePredicate`** — a
+over via a Pulsar Failover subscription plus the content-store ETag-CAS + `AdvancePredicate`** — a
 name-ordered standby takes over with no torn or regressed `latest` and **no amoebius election of any kind** —
 and the **jitML demo web app deploys as application-logic-only**, all on `linux-cuda` with a leak-free
 idempotent teardown and an emitted ledger.
@@ -148,7 +148,7 @@ idempotent teardown and an emitted ledger.
   and [`§3.1`](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)
   — *the Feed-sourced continuous trainer: single-writer delegated* / *workers, N, unelected* / *single-instance
   and coordination — delegated, not elected*: the trainer is the existing ML batch coordinator worker plus a
-  `Feed` source; liveness is a Pulsar Exclusive/Failover subscription and safety is the store's ETag-CAS +
+  `Feed` source; liveness is a Pulsar Failover subscription and safety is the store's ETag-CAS +
   `AdvancePredicate`; single-instance of the control-plane singleton that schedules it is a k8s/etcd property,
   so nothing in this phase runs an election.
 - [`chaos_failover_doctrine.md` §12](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)
@@ -314,10 +314,10 @@ The whole sprint (📋 Planned).
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/JitML/FeedTrainer.hs` (target path; not yet built) — the existing ML batch
-coordinator worker parameterized with a `Feed` source, riding a Pulsar Exclusive/Failover subscription and the
+coordinator worker parameterized with a `Feed` source, riding a Pulsar Failover subscription and the
 content-store CAS commit point.
 **Blocked by**: Sprint 27.1 (the checkpoint store and its `latest` pointer CAS); Phase 23 gate (external prereq
-— the orchestrator/worker workflow runtime and the Exclusive/Failover standby-takeover path); Phase 22 gate
+— the orchestrator/worker workflow runtime and the Failover standby-takeover path); Phase 22 gate
 (external prereq — the subscription surface and at-least-once + dedup).
 **Independent Validation**: a pure model of the single-writer decision (capture inputs → decide → fence → act)
 shows at most one active trainer per feed and that a lost CAS never produces a torn or double-adopted `latest`;
@@ -333,14 +333,14 @@ Adopt [`daemon_topology_doctrine.md` §4.3](../documents/engineering/daemon_topo
 [`§5`](../documents/engineering/daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected),
 and [`content_addressing_doctrine.md` §5](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely):
 place the single authoritative writer per feed with no new machinery — the existing coordinator worker plus a
-`Feed` source — and delegate liveness to a Pulsar Exclusive/Failover subscription and safety to the store's
+`Feed` source — and delegate liveness to a Pulsar Failover subscription and safety to the store's
 ETag-CAS + `AdvancePredicate`, so single-writer is a **delegation, never an election**.
 
 ### Deliverables
 - The Feed trainer as the existing ML batch coordinator worker parameterized with a `Feed` data source — **not**
   a new elected worker kind and **not** folded into the control-plane singleton; its checkpoint-advance branch
   is an extracted pure decision over captured typed inputs, never computed mid-race.
-- Liveness — at most one active trainer per feed — from a **Pulsar Exclusive/Failover subscription** on the feed
+- Liveness — at most one active trainer per feed — from a **Pulsar Failover subscription** on the feed
   topic (automatic name-ordered ranked failover on death, resume-from-`latest`); safety — a race-free `latest` —
   from the content store's ETag-CAS single atomic commit point plus the typed `AdvancePredicate`, a monotone
   idempotent join so a bounded two-writer failover overlap cannot corrupt or regress HEAD.
@@ -393,7 +393,7 @@ delegated trainer failover, and the application-logic-only demo — into the sin
 - The gate `.dhall` (`test/dhall/phase_27_jitml_cuda.dhall`, emitted from Haskell, never committed): bring up
   the linux-cuda cluster, jit-resolve the CUDA engine, run a jitML training to a checkpoint at a fixed
   `experimentHash`, assert bit-determinism (two fresh runs; first-N-step prefix for off-policy RL), inject a
-  Feed-trainer kill, assert Pulsar Exclusive/Failover standby takeover with the CAS + `AdvancePredicate` keeping
+  Feed-trainer kill, assert Pulsar Failover standby takeover with the CAS + `AdvancePredicate` keeping
   `latest` intact, deploy the demo app, and tear everything down.
 - A proven/tested/assumed ledger artifact per [`chaos_failover_doctrine.md` §12](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed):
   same-substrate bit-equality *tested*; delegated (no-election) failover *tested*; cross-substrate equality and
@@ -403,7 +403,7 @@ delegated trainer failover, and the application-logic-only demo — into the sin
 ### Validation
 1. **Gate (determinism).** Two fresh linux-cuda runs at the same `experimentHash` produce equal manifest SHAs
    (or equal first-N-step prefix for off-policy), with the ceiling's not-asserted rows recorded.
-2. **Gate (delegated failover).** Killing the active Feed trainer triggers Pulsar Exclusive/Failover standby
+2. **Gate (delegated failover).** Killing the active Feed trainer triggers Pulsar Failover standby
    takeover — no amoebius election — and the run resumes from the last adopted `latest` with no torn or
    duplicated state.
 3. **Gate (app-logic-only).** The demo web app deploys as an app that uses the extension, its contracts a
@@ -426,7 +426,7 @@ The whole sprint (📋 Planned).
   a GPU substrate, and that the §4.5 CUDA engine stayed jit-resolved into the Phase-25 cache (never baked, never
   URL-fetched) and §4.6's continuous-feed arm was realized.
 - `documents/engineering/daemon_topology_doctrine.md` — confirm the §4.3 Feed-sourced trainer is single-writer
-  **delegated** (Pulsar Exclusive/Failover + CAS/`AdvancePredicate`), that the §4.2 accelerator-owner worker
+  **delegated** (Pulsar Failover + CAS/`AdvancePredicate`), that the §4.2 accelerator-owner worker
   owns the linux-cuda node's GPUs wholesale, and that **no** election was introduced anywhere.
 - `documents/engineering/chaos_failover_doctrine.md` — record the §12 per-run ledger for the intra-cluster
   trainer-kill injection, and that the §16 cross-cluster boundary stays deferred to Phase 29.

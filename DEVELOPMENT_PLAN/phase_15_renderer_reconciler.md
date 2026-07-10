@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_09_render_manifest_goldens.md, phase_11_boundary_fake_tool_harness.md, phase_14_base_image_registry.md, phase_16_retained_storage.md, phase_17_vault_pki.md, phase_20_live_dsl_singleton.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_14_base_image_registry.md, DEVELOPMENT_PLAN/phase_16_retained_storage.md, DEVELOPMENT_PLAN/phase_17_vault_pki.md, DEVELOPMENT_PLAN/phase_20_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Take the Phase-9 pure `render`'s object set and apply it to a live single-node `kind`
@@ -48,6 +48,8 @@ to k8s/etcd, no election) is Phase 20.
 
 **Substrate:** linux-cpu — the whole gate runs on the single-node `kind` cluster on a linux-cpu host from
 Phase 13; no apple, linux-cuda, or windows substrate is touched.
+
+**Register:** 3 — live infrastructure (§K).
 
 **Gate:** in **Register 3**, the Phase-9 pure `render` output for a representative hand-assembled service
 set is applied to a scratch namespace on the live single-node `kind` cluster by the amoebius reconciler

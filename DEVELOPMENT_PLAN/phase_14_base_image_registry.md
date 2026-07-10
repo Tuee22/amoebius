@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, later_phases.md, legacy_tracking_for_deletion.md, overview.md, phase_15_renderer_reconciler.md, phase_25_jitbuild_engine_cache.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_25_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Build the multi-arch amoebius base image — every third-party service binary plus the shared
@@ -49,6 +49,8 @@ credential is likewise a later-phase hardening.
 **Substrate:** linux-cpu (§L) — the whole gate runs on a single-node `kind` cluster on a linux-cpu host; no
 apple, linux-cuda, or windows substrate is touched in Phase 14. This is a **Register 3** (live-infrastructure)
 gate.
+
+**Register:** 3 — live infrastructure (§K).
 
 **Gate:** on the single-node linux-cpu `kind` cluster, the multi-arch base image — carrying every third-party
 service binary and the jit-build resolver + its toolchain, but **no** ML engine payload — is built as one

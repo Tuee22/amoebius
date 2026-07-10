@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, legacy_tracking_for_deletion.md, overview.md, phase_08_capability_binder.md, phase_14_base_image_registry.md, phase_24_determinism_kernel.md, phase_26_infernix_lift.md, phase_27_jitml_lift_cuda.md, phase_28_apple_metal_host_daemon.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_14_base_image_registry.md, DEVELOPMENT_PLAN/phase_24_determinism_kernel.md, DEVELOPMENT_PLAN/phase_26_infernix_lift.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_28_apple_metal_host_daemon.md
 **Generated sections**: none
 
 > **Purpose**: Prove on live linux-cpu that the shared jit-build resolver materializes a named `EngineRuntime`

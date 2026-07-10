@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, legacy_tracking_for_deletion.md, overview.md, phase_24_determinism_kernel.md, phase_25_jitbuild_engine_cache.md, phase_27_jitml_lift_cuda.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_24_determinism_kernel.md, DEVELOPMENT_PLAN/phase_25_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md
 **Generated sections**: none
 
 > **Purpose**: Lift the sibling `infernix` inference library onto the amoebius runtime — its store onto the
@@ -76,6 +76,8 @@ flowchart LR
 Register 3 (live infrastructure); no accelerator is in scope (the CUDA training lift is Phase 27), so
 cross-substrate behaviour is explicitly out of contract, and the seam re-homings themselves are
 decode/render/compose work that stays Register-1/2 validatable ahead of the live proof.
+
+**Register:** 3 — live infrastructure (§K).
 
 **Gate:** an infernix CPU-inference workflow is **reproducible on linux-cpu** — running it twice under an
 unchanged `experimentHash` produces byte-identical output, while a deliberately changed input (the pinned

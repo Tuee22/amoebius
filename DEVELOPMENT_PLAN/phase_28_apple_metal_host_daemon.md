@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_27_jitml_lift_cuda.md, phase_29_multicluster_gateway_migration.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/apple_metal_headless_builds.md
 **Generated sections**: none
 
 > **Purpose**: Stand up the Apple-Silicon host compute daemon that runs a Metal ML workload as a plain cluster
@@ -72,6 +72,8 @@ flowchart LR
 **Substrate:** apple — the whole gate runs on an Apple-Silicon host whose Lima-synthesized Linux VM carries a
 single-node cluster in Register 3 (live infrastructure); no linux-cpu, linux-cuda, or windows substrate is
 touched by the gate, and the windows-CUDA host worker is named only as the structurally identical non-gate case.
+
+**Register:** 3 — live infrastructure (§K).
 
 **Gate:** an Apple-Silicon host daemon runs a Metal ML workload as a cluster Pulsar/MinIO peer over a host-only
 NodePort — one `InForceSpec` in Register 3 brings up the apple-substrate cluster on Lima, exposes MinIO and

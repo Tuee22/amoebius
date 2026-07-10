@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_12_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_21_app_tenancy.md, DEVELOPMENT_PLAN/phase_25_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_32_spa_live_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the abstraction by which amoebius application logic names abstract
@@ -299,7 +299,9 @@ by [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-th
 jit-build resolver + toolchain that materializes every `EngineRuntime` arm is owned by [image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain); the lift
 of these mistakes into unrepresentable states is owned by
 [illegal_state_catalog.md §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model). This doctrine owns only that the **engine is a
-capability whose provider is baked-and-substrate-selected.**
+capability whose provider is substrate-selected and jit-resolved** — the resolver + toolchain are baked into the
+base container, the engine *payload* is not (it is materialized on first miss into the `CacheBudget`-bounded
+content-addressed cache, [content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 
 > **Honesty.** `InferenceEngine` is Phase-N design intent — the ML-serving capability, specified before
 > implementation like the rest of this doctrine. The sibling **infernix** project is *evidence* that the
@@ -311,8 +313,10 @@ capability whose provider is baked-and-substrate-selected.**
 > installs per-engine Poetry venvs at image build**, and its
 > [python/adapters/model_cache.py](file:///home/matthewnowak/infernix/python/adapters/model_cache.py) carries a
 > hardcoded `minioadmin/minioadmin123` fallback — a second secret store that violates the Vault-by-name rule
-> ([§7](#7-expressing-a-capability-in-the-dsl)). amoebius keeps infernix's engine-selection idiom, promotes those payloads into the *one* baked base
-> container (image_build [§7](#7-expressing-a-capability-in-the-dsl)), and routes every staging credential through Vault by name. amoebius has built
+> ([§7](#7-expressing-a-capability-in-the-dsl)). amoebius keeps infernix's engine-selection idiom but **replaces that image-build payload baking with
+> jit-resolution** — the payload is materialized on first miss into the *one* `CacheBudget`-bounded
+> content-addressed cache, never baked; only the resolver + toolchain are baked into the base container
+> ([image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)), and routes every staging credential through Vault by name. amoebius has built
 > none of this; read it as the contract amoebius intends to satisfy, never a tested result. Status lives only
 > in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 

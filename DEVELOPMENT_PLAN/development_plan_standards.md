@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, later_phases.md, legacy_tracking_for_deletion.md, overview.md, phase_00_documentation_suite.md, phase_01_toolchain_spike.md, phase_02_formal_model_kernel.md, phase_03_gateway_migration_model.md, phase_04_dhall_gate1_schema.md, phase_05_gadt_decoder_gate2.md, phase_06_illegal_state_corpus.md, phase_07_capacity_topology_folds.md, phase_08_capability_binder.md, phase_09_render_manifest_goldens.md, phase_10_chain_kernel_dryrun.md, phase_11_boundary_fake_tool_harness.md, phase_12_spa_composition_representational.md, phase_13_midwife_bootstrap_kind.md, phase_14_base_image_registry.md, phase_15_renderer_reconciler.md, phase_16_retained_storage.md, phase_17_vault_pki.md, phase_18_platform_services.md, phase_19_keycloak_ingress.md, phase_20_live_dsl_singleton.md, phase_21_app_tenancy.md, phase_22_pulsar_client.md, phase_23_content_store_workflow.md, phase_24_determinism_kernel.md, phase_25_jitbuild_engine_cache.md, phase_26_infernix_lift.md, phase_27_jitml_lift_cuda.md, phase_28_apple_metal_host_daemon.md, phase_29_multicluster_gateway_migration.md, phase_30_provider_clusters.md, phase_31_test_topology_dsl.md, phase_32_spa_live_deploy.md, substrates.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_12_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_13_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_14_base_image_registry.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_16_retained_storage.md, DEVELOPMENT_PLAN/phase_17_vault_pki.md, DEVELOPMENT_PLAN/phase_18_platform_services.md, DEVELOPMENT_PLAN/phase_19_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_20_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_21_app_tenancy.md, DEVELOPMENT_PLAN/phase_22_pulsar_client.md, DEVELOPMENT_PLAN/phase_23_content_store_workflow.md, DEVELOPMENT_PLAN/phase_24_determinism_kernel.md, DEVELOPMENT_PLAN/phase_25_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_26_infernix_lift.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_28_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_31_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_32_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/generated_artifacts_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: The rulebook for the amoebius `DEVELOPMENT_PLAN/` suite — the canonical file layout, the
@@ -210,15 +210,19 @@ The plan inherits the chaos/failover moral rule (documentation_standards §6,
 register on its substrate (§L). Pre-implementation, every phase and sprint is 📋 Planned and every prescriptive
 statement is design intent.
 
-**Validation happens in three registers, and the ledger names the one it reached.** Every phase gate runs in
-exactly one register ([`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md),
+**Validation happens in three registers, and the ledger names the register(s) it reached.** A phase gate runs
+in **exactly one register** ([`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md),
 [`testing_doctrine.md` §2](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing)):
 **Register 1** (pure/golden, in-process, no cluster), **Register 2** (boundary integration with fake tools, no
-cluster), and **Register 3** (live infrastructure). The pre-cluster band (phases 1–12, substrate `none`)
-discharges Registers 1–2; the live band (phases 13–32) is Register 3. **Rendering a plan / `--dry-run` must
-never require live infrastructure.** The per-phase proven/tested/assumed ledger names the register its gate
-reached; a Register-1/2 in-process ledger marks the Register-3 runtime layer UNVERIFIED and can never advance a
-production `PromotionGate`.
+cluster), and **Register 3** (live infrastructure) — with exactly two deliberate exceptions at the two ends of
+the count: **Phase 0** (the documentation-lint gate) reaches **no** register (it validates text and the link
+graph, not amoebius behaviour), and **Phase 12** (the representational SPA phase) is the single gate that
+spans **two** — Register 1 (the composition property decodes) *and* Register 2 (the PureScript demo SPA against
+a faked backend), both in-process, no cluster. The pre-cluster band (phases 1–12, substrate `none`) discharges
+Registers 1–2; the live band (phases 13–32) is Register 3. **Rendering a plan / `--dry-run` must never require
+live infrastructure.** The per-phase proven/tested/assumed ledger names the register(s) its gate reached; a
+Register-1/2 in-process ledger marks the Register-3 runtime layer UNVERIFIED and can never advance a production
+`PromotionGate`.
 
 A **design-proof / in-process phase** — one whose substrate is `none` (§L) and whose gate is an in-process
 type/model check rather than a live-substrate run, e.g. the pre-cluster band, [phases 1–12](README.md) —

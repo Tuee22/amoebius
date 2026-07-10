@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_16_retained_storage.md, phase_18_platform_services.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_16_retained_storage.md, DEVELOPMENT_PLAN/phase_18_platform_services.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Stand up the root single-node password-encrypted Vault as the fail-closed secrets root, root its
@@ -43,6 +43,8 @@ single-node Vault, its self-signed anchor, and the in-cluster read path are in s
 
 **Substrate:** linux-cpu — the whole gate runs on a single-node `kind` cluster on a linux-cpu host; no apple,
 linux-cuda, or windows substrate is touched.
+
+**Register:** 3 — live infrastructure (§K).
 
 **Gate:** on a single-node linux-cpu cluster, the root single-node password-encrypted Vault **inits exactly once
 and unseals fail-closed** (an empty PV inits and password-seals its unlock material without printing raw keys, a

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, legacy_tracking_for_deletion.md, overview.md, phase_05_gadt_decoder_gate2.md, phase_06_illegal_state_corpus.md, phase_10_chain_kernel_dryrun.md, phase_11_boundary_fake_tool_harness.md, phase_15_renderer_reconciler.md, phase_18_platform_services.md, phase_21_app_tenancy.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_18_platform_services.md, DEVELOPMENT_PLAN/phase_21_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Turn the pre-cluster-proven DSL into a live deploy — the Deployment-`replicas=1` control-plane singleton decodes one `.dhall` and reconciles the platform plus a trivial app onto a real cluster, with single-instance delegated to k8s/etcd and no amoebius election.
@@ -47,6 +47,8 @@ in-namespace Sql) is deliberately deferred to Phase 21; the app here is trivial.
 
 **Substrate:** linux-cpu — the single-node `kind` cluster from Phases 13–19; no apple, linux-cuda, or windows
 substrate is exercised by this phase's gate.
+
+**Register:** 3 — live infrastructure (§K).
 
 **Gate:** on a single-node linux-cpu `kind` cluster, one `.dhall` decodes and the **Deployment-`replicas=1`
 control-plane singleton** — single-instance delegated to k8s/etcd, with **no amoebius election** — reconciles

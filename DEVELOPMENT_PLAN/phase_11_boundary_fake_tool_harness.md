@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_10_chain_kernel_dryrun.md, phase_12_spa_composition_representational.md, phase_15_renderer_reconciler.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_12_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md
 **Generated sections**: none
 
 > **Purpose**: Run the real amoebius binary over the pure `[Step]` plan against fake `kubectl`/`helm`/`docker`/`pulumi`
@@ -44,6 +44,8 @@ Tier-2 residue this register leaves UNVERIFIED by construction.
 **Substrate:** none — no host, no cluster; the gate is an in-process `cabal test boundary-spec` battery driving
 the real binary against fake tool binaries in a controlled directory, analogous to the Phase-9/10 goldens it
 consumes.
+
+**Register:** 2 — boundary integration with fake tools, no cluster (§K).
 
 **Gate:** `cabal test boundary-spec` is green — the real amoebius binary runs the Phase-10 `[Step]` plan against
 fake `kubectl`/`helm`/`docker`/`pulumi` invoked by absolute path, the recorded argv sequence equals the expected

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/dsl_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_security.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_21_app_tenancy.md, documents/engineering/README.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the amoebius tenant axis — the first-class `TenantId` orthogonal to the cluster axis, the `TenantSpec`/`UserSpec`/`RoleBinding` types by which a valid `InForceSpec` cannot name a foreign tenant's resource, cross-tenant sharing as an append-only revocable capability edge (never a re-tag), the rule that provider RBAC is derived from the tenant→role graph rather than authored, and the tenant-admin surface that reduces to a scope-narrowed admin mutation.

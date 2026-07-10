@@ -2,7 +2,7 @@
 
 **Status**: Reference only
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, documents/documentation_standards.md
+**Referenced by**: documents/engineering/daemon_topology_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Entry point for amoebius — an everything-orchestrator whose Dhall DSL makes illegal cluster

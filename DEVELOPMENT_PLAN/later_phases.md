@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, documents/engineering/dsl_doctrine.md, documents/engineering/release_lifecycle_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: The holding pen for the in-scope, high-numbered phases that are real commitments but do not
@@ -12,7 +12,7 @@
 ---
 
 Phases 0–32 each own a dedicated `phase_NN_<slug>.md`. Everything past Phase 32 is *in scope* but not yet
-detailed: the README phase index lists it as the single row **`13+ — Later phases`**. This document is that
+detailed: the README phase index lists it as the single row **`33+ — Later phases`**. This document is that
 row, expanded into a candidate pool.
 
 Read it as a **backlog of confirmed-but-unscheduled work**, governed by the same disciplines as the rest of
@@ -27,7 +27,7 @@ the suite:
   a concrete single-substrate gate ([§L](development_plan_standards.md)), and a contiguous id — Phase 33, 34,
   … with no gaps or fractional ids ([§E](development_plan_standards.md)). The provisional numbers below are
   *ordering hints only*; the real id is assigned at promotion.
-- **No forward dependencies.** A later phase consumes earlier phases; nothing in Phases 0–12 is allowed to
+- **No forward dependencies.** A later phase consumes earlier phases; nothing in Phases 0–32 is allowed to
   declare a `Blocked by` that points here ([§E](development_plan_standards.md)). These candidates sit strictly
   *after* the live-SPA-deploy gate of Phase 32.
 - **One substrate per gate.** Each candidate names at most one provisional acceptance substrate; a candidate
@@ -186,7 +186,7 @@ phase.
 
 ## Related Documents
 
-- [README.md](README.md) — the live tracker; the `13+ — Later phases` row this document expands
+- [README.md](README.md) — the live tracker; the `33+ — Later phases` row this document expands
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook (§D skeleton, §E one-phase
   model, §K honesty, §L one-substrate) every candidate obeys at promotion
 - [overview.md](overview.md) — target architecture and constraints these candidates extend

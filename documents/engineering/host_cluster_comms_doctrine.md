@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_28_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define exactly how the host amoebius binary and any host-level worker daemons talk to the
@@ -120,7 +120,7 @@ No WebSockets anywhere: the daemon speaks the native Pulsar TCP binary protocol 
 
 **This is a workload-plane rule, not an admin-plane one** — [§1](#1-the-whole-surface-two-channels-both-localhost-only) draws that split up front. The operator admin control plane it excludes — administering the cluster's own configuration
 (Vault init/unseal, delivering a new `.dhall`), a *control* concern rather than worker coordination — rides the
-distinct privileged REST channel (the operator CLI → the amoebius NodePort service → the elected
+distinct privileged REST channel (the operator CLI → the amoebius NodePort service → the control-plane
 singleton), owned by [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api).
 That channel is privileged, not wild (so it is not a Keycloak bypass, [§1](#1-the-whole-surface-two-channels-both-localhost-only)),
 and channel 1 ([§4](#4-channel-1--the-host-binary--kube-apiserver-via-distro-mtls)) is retired to
@@ -184,6 +184,12 @@ Net: **security from network restriction, bandwidth from plain sockets.** That i
 buys.
 
 ### 5.1 The generalization: localhost **or** the authenticated WireGuard fabric
+
+> **Owner.** The generalization's normative mechanism — the `wg0`-binding, the still-no-mTLS rationale, and the
+> `FabricPeer`-has-no-`WildIngress` constructor — is owned by
+> [network_fabric_doctrine.md §5](./network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric).
+> This subsection gives the host↔cluster-comms *reading* of it (why the channel-2 localhost premise generalizes
+> rather than breaks); it names those points, it does not re-own them.
 
 The [§5](#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary) argument has one load-bearing premise — *no attacker can reach the wire* — and it is realized by
 localhost binding. Remote elastic compute breaks that premise: a spot node attached to the home cluster's one

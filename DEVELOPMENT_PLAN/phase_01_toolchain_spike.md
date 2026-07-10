@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_02_formal_model_kernel.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md
 **Generated sections**: none
 
 > **Purpose**: Prove — before any later phase promises an executable decoder, simulator, or resolver — that
@@ -39,6 +39,8 @@ suite), not an amoebius result.
 
 **Substrate:** `none` — no host, no cluster; the gate resolves and compiles Hackage packages on the developer
 toolchain only.
+
+**Register:** 1 — pure/build, in-process, no cluster (§K).
 
 **Gate:** a single throwaway probe package that build-depends on `dhall`, `io-sim`, and `io-classes` **and**
 the `jit-build` resolver's Haskell dependencies compiles and links under **GHC 9.12.4 / Cabal 3.16.1.0** with
@@ -219,5 +221,3 @@ like the removed formal-model spike; nothing here is a durable amoebius module.
   `emitTLA`} mechanism whose spike is sibling evidence, not an amoebius result.
 - [Content Addressing Doctrine](../documents/engineering/content_addressing_doctrine.md) — the `jit-build`
   resolver and the `CacheBudget`-bounded cache whose deps this probe includes.
-</content>
-</invoke>

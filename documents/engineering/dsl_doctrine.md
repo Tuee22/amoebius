@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_12_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_13_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_20_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_21_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for what the amoebius Dhall DSL is — a typed orchestration surface
@@ -386,10 +386,10 @@ The two gates compose: Gate 1 rejects what is not even well-typed Dhall; Gate 2 
 Dhall but not a legal amoebius world. What survives both is, by construction, a deployable cluster
 description — which is exactly *"if it decodes, it is deployable."*
 
-**Where the two gates are discharged: front-loaded to the pre-cluster gates, Phases 4–6 (Tier 1).** Both gates are *in-process,
+**Where the two gates are discharged: front-loaded to the pre-cluster gates, Phases 4–7 (Tier 1).** Both gates are *in-process,
 design-time* checks with no real resource behind them — Gate 1 is `dhall type` at authoring time, Gate 2 is
 the in-process `Dhall.inputFile auto` decode plus a QuickCheck exercise of the decoder's ADTs. Their
-integrity is therefore **discharged in-process in the front-loaded pre-cluster gates (Phases 4–6)** — the Tier-1 design/spec layer
+integrity is therefore **discharged in-process in the front-loaded pre-cluster gates (Phases 4–7)** — the Tier-1 design/spec layer
 (dhall typecheck + decoder + QuickCheck), which needs no cluster. What stays deferred is only the **Tier-2
 runtime-enforcement residue** — that the *running* cluster enforces what the typed spec composed — owned by
 **Phase 20**. A green typecheck or decode proves the spec composes, not that the cluster enforces it.
@@ -429,7 +429,7 @@ its building phase, not yet built.
 > mechanism; it does **not** claim any specific illegal state is *proven* unrepresentable — that claim is
 > made, state by state, only where the catalog exhibits the type that excludes it. Per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), a typing argument is evidence, not a
-> tested or proven result: the two gates' in-process integrity is front-loaded to the pre-cluster gates, Phases 4–6 (Tier 1), while
+> tested or proven result: the two gates' in-process integrity is front-loaded to the pre-cluster gates, Phases 4–7 (Tier 1), while
 > runtime enforcement — that the running cluster enforces what the spec composed — stays the Tier-2 residue
 > deferred to Phase 20.
 
@@ -527,7 +527,7 @@ This document is normative DSL doctrine only. Delivery sequencing, completion st
 remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). The
 orchestration Dhall DSL's **in-process contract validation** — the two typed gates of
 [§5](#5-the-illegal-state-unrepresentable-contract) that make an illegal spec fail to type-check (Tier 1:
-dhall typecheck + decoder + QuickCheck) — is **front-loaded to the pre-cluster gates (Phases 4–6)**, while the DSL's
+dhall typecheck + decoder + QuickCheck) — is **front-loaded to the pre-cluster gates (Phases 4–7)**, while the DSL's
 **runtime-enforcement** half (the live deploy + singleton reconcile that makes the running cluster
 enforce what the spec composed, Tier 2) lands in **Phase 20**, atop the Phase 10 `dsl-step`/`chain` kernel
 seeded from hostbootstrap. This doc never maintains a competing status ledger; it states the target shape and
@@ -535,7 +535,7 @@ links back for status.
 
 > **Honesty.** Everything in this doctrine is Phase 0 design intent, specified before implementation. Where
 > it borrows behaviour proven in prodbox or implemented in hostbootstrap, that is *evidence from a sibling
-> system*, not proof in amoebius — which has built neither the front-loaded pre-cluster (Phases 4–6) in-process validation of
+> system*, not proof in amoebius — which has built neither the front-loaded pre-cluster (Phases 4–7) in-process validation of
 > this contract (Tier 1: dhall typecheck + decoder + QuickCheck) nor the Phase 20 runtime enforcement (Tier 2)
 > that makes the running cluster enforce what the spec composed. Read every prescriptive statement here
 > as the contract amoebius intends to satisfy, never as a tested amoebius result

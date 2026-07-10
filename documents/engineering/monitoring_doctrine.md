@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_18_platform_services.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Make monitoring a mandatory, non-vacuous property of a workflow and of an extension — so an
@@ -136,7 +136,7 @@ The operator sees monitoring two ways, both on pre-existing surfaces:
   ([platform_services_doctrine.md §7](./platform_services_doctrine.md#7-prometheus--grafana--observability-is-not-an-add-on)). This adds panels, not a new browser surface.
 - **The `workflow-health` read-model (typed).** A compacted `workflow-health` Pulsar topic is projected
   through the existing compaction + TableView machinery ([pulsar_client_doctrine.md §5.1](./pulsar_client_doctrine.md#51-two-derived-capabilities-read-model-and-two-deliberately-absent-ones),
-  [daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership)) as `WorkflowName -> SLOStatus`, the first
+  [daemon_topology_doctrine.md §5.2](./daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership)) as `WorkflowName -> SLOStatus`, the first
   operator-facing TableView beside the internal leader-election one. The singleton produces the projection
   inside its existing reconcile loop — no new container — and the operator reads it via a `pb workflow health`
   verb on the singleton admin REST ([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)).

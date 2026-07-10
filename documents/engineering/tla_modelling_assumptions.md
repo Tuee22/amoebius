@@ -2,7 +2,7 @@
 
 **Status**: Deprecated
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/formal_model_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, documents/engineering/README.md
 **Generated sections**: none
 
 > **Purpose**: This document is **superseded**. Its subject — the formal model of the cross-cluster failover boundary — is now owned by [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md), authored against the model-as-data approach of [formal_model_doctrine.md](./formal_model_doctrine.md).

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/dsl_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_19_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_21_app_tenancy.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering gateway/DNS/NetworkPolicy wiring,
@@ -18,8 +18,8 @@ This document is a **themed slice** of the illegal-state catalog: the security, 
 faithfully reproduced from [`illegal_state_catalog.md`](./illegal_state_catalog.md) and reorganized as their
 own doc. It owns nothing new. The **catalog index** (which states are illegal, in full) and the **load-bearing
 honesty limit** (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned
-by [`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques** (§4), the
-**coverage matrix** (§5), the **three foreclosure layers** (§6), and the **validation-locus axis** (the
+by [`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
+**coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three foreclosure layers** ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the
 orthogonal `Gate-1-editor` / `Gate-2-decoder` / `rendered-output-golden` / `live-effect` classification each
 entry below carries) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice
 **references** those; it does not restate them.
@@ -271,8 +271,8 @@ cross-tenant read — the cryptographic/runtime isolation that backs the author-
 
 - [`illegal_state_catalog.md`](./illegal_state_catalog.md) — the authoritative catalog: the full index of
   illegal states and the load-bearing honesty limit ([§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)). This slice is carved from it.
-- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — owns the seven typing techniques (§4), the
-  coverage matrix (§5), the foreclosure layers, and the **validation-locus axis** each entry above is
+- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — owns the seven typing techniques ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
+  coverage matrix ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the foreclosure layers, and the **validation-locus axis** each entry above is
   classified against.
 - [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract ("a valid `InForceSpec` cannot
   represent illegal state") these entries instantiate.

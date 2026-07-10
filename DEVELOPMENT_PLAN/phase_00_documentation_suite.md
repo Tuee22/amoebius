@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md
 **Generated sections**: none
 
 > **Purpose**: Author the complete amoebius DSL specification and every engineering doctrine before any
@@ -48,6 +48,8 @@ first written down here and then adopted, phase by phase, by the pre-cluster and
 
 **Substrate:** none (§L) — the gate is a pure documentation lint over text and the link graph; it touches no
 `apple`, `linux-cpu`, `linux-cuda`, or `windows` host and stands up no resources.
+
+**Register:** — (no register: the documentation-lint gate validates text and the link graph, not amoebius behaviour, §K).
 
 **Gate:** the documentation lint passes — every document in `documents/` and `DEVELOPMENT_PLAN/` carries valid
 header metadata (per the documentation standard), the SSoT/no-duplication rules hold (each concept owned by

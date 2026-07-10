@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_04_dhall_gate1_schema.md, phase_06_illegal_state_corpus.md, phase_07_capacity_topology_folds.md, phase_08_capability_binder.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Stand up the GADT-indexed Haskell IR and the total, fail-fast `Dhall.inputFile auto` decoder
@@ -37,6 +37,8 @@ on a representative Gate-2 negative set; the exhaustive corpus rides on top of i
 
 **Substrate:** `none` — no host, no cluster; the gate is an in-process `cabal test` battery analogous to the
 Phase-0 documentation lint and the Phase-4 `dhall type` corpus.
+
+**Register:** 1 — pure/golden, in-process, no cluster (§K).
 
 **Gate:** `cabal test dsl-spec` is green — each positive fixture decodes through the total `decodeCluster`
 into its `ClusterIR`, each Gate-2-class negative fixture returns a structured `Left DecodeError` with its

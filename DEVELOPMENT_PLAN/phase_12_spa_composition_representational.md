@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_11_boundary_fake_tool_harness.md, phase_32_spa_live_deploy.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_32_spa_live_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/tenancy_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Prove — in-process, before any cluster exists — that a multi-service app spec composes with an
@@ -43,6 +43,8 @@ pure decode and a locally-served browser run can settle.
 (Register 1) plus a locally-served demo SPA driven under Playwright against a faked backend (Register 2),
 analogous to the Phase-11 boundary fake-tool harness. The inference/training substrate is structurally absent
 from the SPA surface — it is a deployment rule bound only at [Phase 32](phase_32_spa_live_deploy.md).
+
+**Register:** 1/2 — the single deliberate two-register gate: Register 1 (the composition property decodes) + Register 2 (the PureScript demo SPA against a faked backend), both in-process, no cluster (§K).
 
 **Gate:** two in-process registers pass together — **(Register 1)** a multi-service app-spec fixture composes
 with an infernix/jitML ML-workflow demo fragment into one well-typed Dhall value that decodes through Gate 1

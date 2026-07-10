@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/content_addressing_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md
+**Referenced by**: documents/engineering/README.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering durable storage, bounded backing, and
@@ -20,8 +20,8 @@ stay stable. It is not self-contained framing — it owns only the deep treatmen
 - The **catalog index** (which states are illegal, the full §3.x list) and the **honesty limit** (a
   type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned by
   [`illegal_state_catalog.md`](./illegal_state_catalog.md) — referenced here, not restated.
-- The **seven typing techniques** (§4), the **coverage matrix** (§5), the **three-layer foreclosure**
-  (§6), and the **validation-locus axis** (the orthogonal question of *where* each state is caught —
+- The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three-layer foreclosure**
+  ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the orthogonal question of *where* each state is caught —
   `Gate-1-editor`, `Gate-2-decoder`, `rendered-output-golden`, `live-effect`) are owned by
   [`illegal_state_techniques.md`](./illegal_state_techniques.md) — referenced here, not restated.
 
@@ -128,8 +128,8 @@ grows capacity and the cloud honors the quota).
 - [`illegal_state_catalog.md`](./illegal_state_catalog.md) — the authoritative catalog index (the full §3.x
   list) and the load-bearing honesty limit (a type-check proves the spec composes, not that the cluster
   enforces it); this document is the storage slice carved from it.
-- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques (§4), the
-  coverage matrix (§5), the three-layer foreclosure (§6), and the validation-locus axis referenced by every
+- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
+  coverage matrix ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the three-layer foreclosure ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the validation-locus axis referenced by every
   entry above.
 - [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract that a valid `InForceSpec`
   cannot represent illegal state.

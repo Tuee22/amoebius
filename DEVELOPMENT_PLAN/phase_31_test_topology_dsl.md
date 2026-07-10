@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_30_provider_clusters.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md
 **Generated sections**: none
 
 > **Purpose**: Deliver amoebius testing as a self-tearing-down `.dhall` topology — the always-teardown
@@ -71,6 +71,8 @@ flowchart LR
 **Substrate:** per generated test — each emitted test `.dhall` is substrate-locked to exactly one substrate
 with no silent fallback; the canonical Register-3 gate run is exercised on `linux-cpu`, where an intra-cluster
 failover simulation needs no accelerator, while the harness itself is substrate-parametric.
+
+**Register:** 3 — live infrastructure; the substrate is chosen per generated test (§K).
 
 **Gate:** a generated test `.dhall` — produced by `suggest-test` and reviewed by an operator — runs a
 **failover simulation** on its single named substrate (the active worker is killed and a name-ordered standby

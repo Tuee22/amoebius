@@ -137,11 +137,11 @@ election** and **not** the control-plane singleton: single-writer here is *deleg
 This doctrine records only its edges:
 
 - **PROVIDES `Coordination`** — the daemon-workflow primitive by which at most one active writer holds a feed:
-  a Pulsar **Exclusive/Failover subscription** for liveness, plus the content-store **ETag-CAS single atomic
+  a Pulsar **Failover subscription** for liveness, plus the content-store **ETag-CAS single atomic
   commit point** and the typed `AdvancePredicate` for safety
   ([content_addressing_doctrine.md §2](./content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers)).
   Authored once, consumed by the workload extensions that run trainers.
-- **REQUIRES `MessageBus`** — the Exclusive/Failover subscription is a Pulsar primitive, so `coordination`
+- **REQUIRES `MessageBus`** — the Failover subscription is a Pulsar primitive, so `coordination`
   consumes the core `MessageBus` capability ([service_capability_doctrine.md §2](./service_capability_doctrine.md#2-the-capability-set)).
 
 The distinction is load-bearing and never blurred: the control-plane singleton's single-instance is a k8s/etcd

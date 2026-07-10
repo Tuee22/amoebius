@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_23_content_store_workflow.md, phase_25_jitbuild_engine_cache.md, phase_26_infernix_lift.md, phase_27_jitml_lift_cuda.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_23_content_store_workflow.md, DEVELOPMENT_PLAN/phase_25_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_26_infernix_lift.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Land the three determinism-kernel primitives — the `ContentAddress` typeclass, the
@@ -60,6 +60,8 @@ flowchart LR
 Register 3 (live infrastructure); no apple, linux-cuda, or windows substrate is touched, and cross-substrate
 behaviour is explicitly out of contract, while nothing about deriving `experimentHash` or a SplitMix seed
 requires live infrastructure (those stay pure, Registers 1–2).
+
+**Register:** 3 — live infrastructure (§K).
 
 **Gate:** `experimentHash = sha256(resolved-dhall ‖ substrate-fingerprint)` together with SplitMix seed
 derivation reproduce **byte-identical output on the same linux-cpu substrate** — the gate workload runs twice

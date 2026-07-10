@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_18_platform_services.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for how amoebius sequences bring-up — a dependent starts on a
@@ -168,8 +168,9 @@ observe. The rule holds anyway, using the two primitives the host tier *does* ha
 
 The **host-daemon → in-cluster-singleton handoff** — the open bootstrap-sequencing question the vision pairs
 with this one — is gated the same way: the host daemon hands off once the singleton reports ready over its
-`/readyz` (a `Serving` edge) and the election commit is observed on the coordination log (a `Committed`
-edge), **never** on a fixed delay after launching the pod. Vault init is the canonical worked example:
+`/readyz` (a `Serving` edge), **never** on a fixed delay after launching the pod (and never on an
+"election" edge — the singleton runs no election; its single-instance is delegated to k8s/etcd,
+[`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)). Vault init is the canonical worked example:
 **no secret consumer runs before Vault reports reachable, initialized, and unsealed; a consumer that reaches
 a sealed Vault fails closed rather than racing it**
 ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init)) —

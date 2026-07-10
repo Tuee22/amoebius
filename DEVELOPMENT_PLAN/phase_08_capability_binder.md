@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: README.md, overview.md, phase_07_capacity_topology_folds.md, phase_09_render_manifest_goldens.md, system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Build the pure three-part capability binding — application logic names an abstract capability,
@@ -77,8 +77,8 @@ binary run — a **Register-1** in-process check that runs on no substrate.
   (`SingleNode` vs `Distributed`) that selects *which manifest graph* to render — the structural generalization
   of the replica dial — and amoebius builds no alternate provider arm it does not yet need (headroom in the
   type, not shipped code).
-- [`service_capability_doctrine.md §4.1`](../documents/engineering/service_capability_doctrine.md)
-  (§4.1 — the `InferenceEngine` capability: the engine is substrate-selected and jit-resolved, never authored),
+- [`service_capability_doctrine.md §4.1`](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-substrate-selected-and-jit-resolved-never-authored)
+  — the `InferenceEngine` capability: the engine is substrate-selected and jit-resolved, never authored —
   grounded in [`content_addressing_doctrine.md §4.5`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
   — the ninth capability's provider is a closed union of substrate-tagged `EngineRuntime` identities with **no
   arbitrary-`Url`/`Download` arm**: an ML engine is a **named catalog identity** the shared jit-build resolver
@@ -206,7 +206,7 @@ structured `Left` at decode (the relation-over-a-collection technique).
 `documents/illegal_state/illegal_state_catalog.md` (§3.25 layer reconciliation), `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
-Adopt [`service_capability_doctrine.md §4.1`](../documents/engineering/service_capability_doctrine.md) (§4.1)
+Adopt [`service_capability_doctrine.md §4.1`](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-substrate-selected-and-jit-resolved-never-authored)
 and [`content_addressing_doctrine.md §4.5`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss):
 build the ninth capability as the strictest instance of the [§4](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding)
 binding — a provider that is **selected by the detected substrate** and materialized on first miss, with no arm
@@ -220,7 +220,7 @@ to author a download — as a representational union and relation, no live resol
   `{ linux-cuda, windows } → Cuda`, `Cuda` OS-agnostic with no Linux-vs-Windows constructor) — the engine is
   *projected from* the detected substrate, never declared free of it — and the closed engine-family union.
 - The **partial** family×lane availability relation making a served model whose family is unavailable on the
-  serving lane a **decode-foreclosed** `Left` (the [`illegal_state_catalog.md §4.7`](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent)
+  serving lane a **decode-foreclosed** `Left` (the [`illegal_state_techniques.md §4.7`](../documents/illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)
   relation-over-a-collection technique), and the per-served-model `vramFootprint` field consumed by the Phase-7
   `Σ served-model VRAM ≤ node vram` fold.
 - An in-file honesty note: this is the representational union + relation only; the actual jit-build resolve into
