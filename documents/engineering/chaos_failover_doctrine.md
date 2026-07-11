@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/deterministic_simulation_doctrine.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_23_content_store_workflow.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_31_test_topology_dsl.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: documents/engineering/deterministic_simulation_doctrine.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_23_content_store_workflow.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_31_test_topology_dsl.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_22_pulsar_client.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: The amoebius concurrency-and-failover doctrine — *Extract* the decision into a value, *Model* the protocol into a proof, *Inject* faults into the deployment — plus the proven/tested/assumed ledger and the invariant-confluence **cross-cluster boundary** that governs asynchronous geo-replication and gateway migration (both `Planned` and `Failover`), the **one** boundary where a per-system proof obligation concentrates on amoebius itself.
@@ -46,31 +46,34 @@ adoption sequencing live only in [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_
 
 ---
 
-## 1. Prologue — the bug that only happens to other people
+## 1. The defect this doctrine targets
 
-Two control-plane candidate pods in the same cluster wake a microsecond apart and each asks whether it is
-the singleton. Each reads the commit log; each sees no fresher claim than its own; each concludes it
-may reconcile the cluster and mint its secrets. In the space of that microsecond, two daemons both believe
-they are the singleton.
+A control-plane decision is unsound when it acts on a premise that was true when read and false when acted on.
+Two illustrations fix the shape.
 
-Now lift the same bug to the forest. A child cluster's gateway falls silent. A sibling reads its last
-geo-replicated offset, sees nothing past it, and concludes the dead cluster held no further committed work
-— so it promotes itself, repoints DNS, and resumes. But the silent cluster had *acknowledged* a burst of
-writes that never crossed the replication boundary. Two clusters now disagree about what happened, and the
-disagreement is durable.
+**Intra-cluster.** Two control-plane candidate pods each read the commit log, each observe no claim fresher than
+their own, and each conclude they may reconcile the cluster and mint its secrets. If both act on that
+observation, two daemons hold singleton authority at once — a split-brain the individual reads never revealed.
+(amoebius forecloses this specific case by delegating single-instance to k8s/etcd,
+[§6](#6-the-concentration-principle--where-the-obligation-lives); the shape is retained here because it recurs.)
 
-Both decisions were correct — for the world each actor read. Both were wrong for the world they acted in.
-This is the bug that survives ten thousand green test runs and surfaces only at runtime, in the deployed
-forest: not a typo, not an off-by-one, but **a decision made on a premise that was true when it was read and
-false by the time it was acted on.** It has exactly one shape, and that shape recurs everywhere —
-in any branch taken against externally-mutable state, and above all across the asynchronous gap between two clusters.
+**Cross-cluster.** A child cluster's gateway goes silent. A sibling reads its last geo-replicated offset,
+observes nothing past it, and promotes itself, repoints DNS, and resumes — but the silent cluster had
+*acknowledged* writes that never crossed the replication boundary. The two clusters then hold durably-divergent
+histories.
 
-Everything that follows is a discipline against trusting a premise that cannot be proven still current. The
-discipline has three moves — **Extract**, **Model**, **Inject** — and the rest of this document argues why it
-takes all three, because each is blind to the failures the other two were built to catch. The
-amoebius-specific twist ([§6](#6-the-concentration-principle--where-the-obligation-lives)) is *where* the discipline applies: because the standard platform services
-run their own consensus, the obligation does not spread across every app — it **concentrates** at two
-boundaries.
+Both decisions are correct for the state each actor read and wrong for the state it acted in. The defect is
+neither a typo nor an off-by-one: it is **a decision made on a premise that was true when read and false by the
+time it was acted on**, and it is detected only at **runtime**, in the deployed forest — a single-threaded test
+never schedules the two actors whose interleaving exposes it
+([§3](#3-the-defect-class--one-shape-two-disguises)). The shape recurs in any branch taken against
+externally-mutable state, and most sharply across the asynchronous gap between clusters.
+
+The discipline against it has three moves — **Extract**, **Model**, **Inject** — each blind to the failures the
+other two catch ([§5](#5-three-layers-and-the-blindness-that-binds-them)). The amoebius-specific narrowing
+([§6](#6-the-concentration-principle--where-the-obligation-lives)): because the standard platform services run
+their own consensus, the obligation does not spread across every app — it **concentrates** onto the one boundary
+§6 identifies.
 
 ---
 
@@ -549,6 +552,39 @@ and forfeiting the lossless guarantee.
 **What this move cannot see.** It cannot prove soundness, and it cannot see the interleavings not
 injected. A green Inject run is the strongest *empirical* confidence available and the weakest *logical*
 guarantee — which is why the moves are plural.
+
+### 11.1 The typed fault schedule: `ChaosSchedule` / `FaultTarget`
+
+A chaos scenario is a typed value on the deployment-rules surface, not free-authored prose, so a fault can only
+target a component the spec actually declares. The shape:
+
+```haskell
+ChaosSchedule  = NonEmpty FaultInjection
+FaultInjection = { target :: FaultTarget, kind :: FaultKind, … }
+FaultKind      = < Partition | KillMidClaim | Latency | ReorderRedeliver | KillClusterMidGeoSync >
+```
+
+`FaultTarget` is a **projection over the enclosing `InForceSpec`'s declared components** — a fault handle
+resolves only against a component the spec declares, the same derive-don't-author discipline that makes
+tolerations, `NetworkPolicy`, and the readiness DAG projections of the spec rather than hand-authored fields
+([readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md)). A fault on a component the spec never
+declared — a VPN partition in a spec with no VPN, a broker kill in a spec with no Pulsar — therefore has no
+inhabitant, foreclosed at decode ([illegal_state_lifecycle.md §3.46](../illegal_state/illegal_state_lifecycle.md#346-a-chaos-fault-targeting-a-component-the-spec-never-declared)).
+
+Each `FaultKind` names the invariant its drill stresses, so an Inject scenario asserts the *declared form* of a
+concentrated invariant ([§6](#6-the-concentration-principle--where-the-obligation-lives)) rather than mere
+survival of a reboot:
+
+| `FaultKind` | The invariant the drill must not break |
+|---|---|
+| `Partition` / `KillClusterMidGeoSync` | `UniqueGatewayOwner` and `NoWriteAfterStaleFailover`, and — once views reconverge — the liveness `MergeConverges` ([gateway_migration_model_doctrine.md §3](./gateway_migration_model_doctrine.md#3-the-model)) |
+| `KillMidClaim` | `PlannedIsLossless` and `SessionAlwaysRebindable` — no cutover strands a live session |
+| `ReorderRedeliver` | R3 exactly-once — no effect lost or double-applied under redelivery ([§13](#13-the-supporting-rules--the-conditions-the-moves-need)) |
+| `Latency` | the R8 synchrony bound — the fail-closed promotion gate fires before a too-stale cluster resumes service |
+
+The harness that *runs* the schedule — the test-as-`InForceSpec` topology, `suggest-test`, and the
+always-teardown contract — is owned by [testing_doctrine.md](./testing_doctrine.md); this doctrine owns the
+typed shape and the `FaultKind`→invariant map.
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md
+**Referenced by**: documents/engineering/README.md, DEVELOPMENT_PLAN/overview.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the amoebius capability-extension graph — how a linked

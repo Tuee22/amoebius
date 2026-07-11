@@ -210,7 +210,7 @@ The plan inherits the chaos/failover moral rule (documentation_standards §6,
 register on its substrate (§L). Pre-implementation, every phase and sprint is 📋 Planned and every prescriptive
 statement is design intent.
 
-**Validation happens in three registers, and the ledger names the register(s) it reached.** A phase gate runs
+**Validation happens in registers, and the ledger names the register(s) it reached.** A phase gate runs
 in **exactly one register** ([`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md),
 [`testing_doctrine.md` §2](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing)):
 **Register 1** (pure/golden, in-process, no cluster), **Register 2** (boundary integration with fake tools, no
@@ -223,6 +223,17 @@ Registers 1–2; the live band (phases 13–32) is Register 3. **Rendering a pla
 live infrastructure.** The per-phase proven/tested/assumed ledger names the register(s) its gate reached; a
 Register-1/2 in-process ledger marks the Register-3 runtime layer UNVERIFIED and can never advance a production
 `PromotionGate`.
+
+**Register 2.5 — deterministic simulation — is a pre-cluster validation *activity*, not a phase-gate register.**
+A live-band phase may additionally run its real daemon/reconciler code under `IOSim`/`IOSimPOR` against a
+modeled, fault-injectable environment (no cluster, deterministically replayable;
+[`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md),
+[`testing_doctrine.md` §2](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing))
+as an in-process check **before** its Register-3 gate. Because **no phase's acceptance gate keys to Register
+2.5** — the phase's single gate remains its Register-3 live proof — the one-gate-one-register rule above is
+unbroken; a `**Register:**` field is never `2.5`. The Register-2.5 run emits its own proven/tested/assumed
+ledger (its result is *tested against a modeled environment*, with the environment's fidelity to the real
+substrate recorded **assumed**), which does not by itself advance a `PromotionGate`.
 
 A **design-proof / in-process phase** — one whose substrate is `none` (§L) and whose gate is an in-process
 type/model check rather than a live-substrate run, e.g. the pre-cluster band, [phases 1–12](README.md) —

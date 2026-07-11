@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_13_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_13_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the ordered path from a bare host to a reconciling cluster — the
@@ -132,7 +132,7 @@ After handoff, the operator drives the cluster through **one surface**: the oper
 tool [that] interact[s] with the amoebius daemon api"* — and the answer is a typed REST control plane, not a
 second binary.
 
-- **The endpoints.** The two load-bearing ones:
+- **The endpoints.** The load-bearing ones:
   - **`vault init/unseal`** — authenticated by the **operator password** (Argon2id→AEAD unlock material,
     [`vault_pki_doctrine.md` §5](./vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal));
     this is the concrete channel that fills the *pluggable pre-Vault unseal seam* that doctrine explicitly
@@ -142,6 +142,16 @@ second binary.
     ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init))
     and reconciles toward it. This is how a new desired-state Dhall value reaches an already-running root — the operator flow
     the reconcile mechanics ([`daemon_topology_doctrine.md` §6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine) hot-reload) only hinted at.
+  - **`kv put/get/list/delete` — secret KV-CRUD.** The operator CRUDs Vault KV secrets **by name** over the same
+    admin REST (requires an unsealed Vault and the root token). This is how a production `InForceSpec`'s named
+    `SecretRef`s come to *exist in Vault before the `.dhall` is uploaded*: secret material crosses
+    CLI → NodePort → singleton **by value here** and is stored enveloped, while the `.dhall` itself never carries
+    a value, only the name ([`dsl_doctrine.md` §6](./dsl_doctrine.md#6-secrets-are-names-never-values),
+    [`vault_pki_doctrine.md` §3](./vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)). `dhall
+    update` then **verifies each named secret is present and permission-valid, or rejects the upload** — so a
+    spec referencing an absent secret cannot be admitted. In tests this operator interaction is *simulated* from
+    a single flagged `test-secrets.dhall`, the only place secret values live at rest
+    ([`testing_doctrine.md` §6](./testing_doctrine.md#6-flagged-test-credentials)).
 - **This is the admin plane, distinct from the workload plane.** [`host_cluster_comms_doctrine.md` §3](./host_cluster_comms_doctrine.md#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)'s
   "no bespoke control channel — coordination *is* Pulsar + MinIO" governs the **worker/workload** plane (host
   compute daemons + the host binary *coordinating* with workers). It is **not** an admin-plane rule: operator

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_17_vault_pki.md, DEVELOPMENT_PLAN/phase_18_platform_services.md, DEVELOPMENT_PLAN/phase_22_pulsar_client.md, DEVELOPMENT_PLAN/phase_23_content_store_workflow.md, DEVELOPMENT_PLAN/phase_24_determinism_kernel.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md, documents/engineering/README.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/conformance_harness_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_17_vault_pki.md, DEVELOPMENT_PLAN/phase_18_platform_services.md, DEVELOPMENT_PLAN/phase_22_pulsar_client.md, DEVELOPMENT_PLAN/phase_23_content_store_workflow.md, DEVELOPMENT_PLAN/phase_24_determinism_kernel.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md, documents/engineering/README.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/conformance_harness_doctrine.md, DEVELOPMENT_PLAN/system_components.md, DEVELOPMENT_PLAN/development_plan_standards.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for **deterministic simulation testing (DST)** in amoebius — running the
@@ -62,7 +62,7 @@ all future change**, not a one-time edit. It is paid deliberately, in exchange f
 
 ## 3. The simulated environment and its fault model
 
-The marquee limit of a single-daemon io-sim run is that amoebius daemons coordinate through Pulsar + MinIO + the
+The principal limit of a single-daemon io-sim run is that amoebius daemons coordinate through Pulsar + MinIO + the
 commit log, **not in-process shared state** ([chaos_failover_doctrine.md §10](./chaos_failover_doctrine.md#10-simulate--the-pure-program-lifted-io-sim)),
 so a run rests on stubbed peers. This doctrine's move is to make those substrates **first-class simulated
 components with a typed fault model**, rather than inert stubs — the FoundationDB approach. The modeled
@@ -114,7 +114,7 @@ schedules and faults explored* against the modeled environment. It does **not** 
 Pulsar/apiserver/route53 behave as modeled — that is the boundary [§7](#7-the-boundary--what-stays-register-3)
 draws.
 
-The tradeoff is the whole point, and it is honest: DST **replaces** a large *"the code is unvalidated until a
+The tradeoff is deliberate, and it is stated honestly: DST **replaces** a large *"the code is unvalidated until a
 live cluster exists"* surface with a small *"the code is validated against a model of the environment, and the
 model's fidelity to the real substrate is assumed"* premise. That is strictly the better place to stand — a
 narrow, testable fidelity assumption in place of a broad unverified one — and it matches amoebius's own instinct

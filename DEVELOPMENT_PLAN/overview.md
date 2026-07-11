@@ -78,6 +78,15 @@ The unifying surface is the Dhall DSL: Dhall carries parameters, Haskell carries
 [`service_capability_doctrine.md` §1 — Why capabilities, not products](../documents/engineering/service_capability_doctrine.md#1-why-capabilities-not-products)
 and [`service_capability_doctrine.md` §2 — The capability set](../documents/engineering/service_capability_doctrine.md#2-the-capability-set).
 
+**Convergence stance.** The sibling projects are **frozen typed evidence** that a shape works, not lockstep
+peers to track: amoebius lifts each sibling's *role* onto its own seams and reimplements nothing
+([`lift_and_compose_doctrine.md`](../documents/engineering/lift_and_compose_doctrine.md)), while what stops being
+carried forward is the [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) ledger. infernix and
+jitML join as the **closed `ExtensionSpec` set** linked onto the amoebius base — never a migration through
+hostbootstrap first — with their engines jit-resolved into a bounded content-addressed cache rather than baked
+([`capability_extension_doctrine.md`](../documents/engineering/capability_extension_doctrine.md),
+[`content_addressing_doctrine.md` §4.5](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
+
 ## 3. The hard constraints (cross-cutting invariants)
 
 These are the README "Cross-cutting invariants" — documented in Phase 0, upheld by every later phase. Each is
@@ -114,6 +123,14 @@ Each phase ends in a single, checkable acceptance gate on **at most one** substr
 discipline, [development_plan_standards.md §L](development_plan_standards.md)). The authoritative gate text
 and status live in [README.md](README.md); the line below names the gate and links the phase document. All
 are 📋 Planned (greenfield).
+
+The DSL is validated and **simulated per phase**, never as a monolithic pre-implementation: each phase
+discharges its own Register-1 (and, for the concurrency-bearing live-band phases, a Register-2.5
+deterministic-simulation) gate before the next opens. Front-loading a *design* proof ahead of the phase that
+builds the runtime it corresponds to is legitimate under the ledger discipline that marks correspondence and
+runtime fidelity UNVERIFIED until that phase discharges them
+([development_plan_standards.md §K](development_plan_standards.md),
+[`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md)).
 
 *Pre-cluster band (substrate `none`, Registers 1–2):*
 - **Phase 0 — Documentation suite** (`none`) → [phase_00](phase_00_documentation_suite.md): the documentation lint passes — valid headers, SSoT/no-duplication, no orphan cross-links.

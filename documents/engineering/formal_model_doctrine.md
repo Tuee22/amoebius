@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/deterministic_simulation_doctrine.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/tla_modelling_assumptions.md
+**Referenced by**: documents/engineering/deterministic_simulation_doctrine.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/tla_modelling_assumptions.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for how amoebius expresses a concurrent protocol as **one reifiable Haskell `Model` value** from which both the runtime decision function (`interpret`) and the TLA+ specification (`emitTLA`) are total renderings — so the model↔code correspondence holds *by construction*, and the `.tla`/`.cfg` are **generated, never-committed** artifacts.
@@ -167,7 +167,7 @@ kernel for a **proof assistant**: a machine-checked meta-theorem that each `Expr
 `interpret`-denotation equals the TLA+ denotation `emitTLA` targets would upgrade faithfulness from
 *tested* to *proven*. That meta-theorem, and the fold-closure proofs the confluence ledger requires
 ([chaos_failover_doctrine.md §19](./chaos_failover_doctrine.md#19-the-cross-boundary-ledger-and-conformance-rows)),
-are the **only** two places a proof assistant earns its keep here — adopt it surgically (evaluate Liquid Haskell,
+are the **only** two places a proof assistant is warranted here — adopt it surgically (evaluate Liquid Haskell,
 which checks the *actual* Haskell and so introduces no second artifact to drift, against Lean) or not at all; a
 broad proof-assistant layer would re-introduce exactly the artifact-drift the `Model`-as-data pattern exists to
 foreclose ([§1](#1-why-this-doctrine-exists)).

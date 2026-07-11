@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, documents/engineering/dsl_doctrine.md, documents/engineering/release_lifecycle_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, documents/engineering/dsl_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/resource_capacity_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: The holding pen for the in-scope, high-numbered phases that are real commitments but do not

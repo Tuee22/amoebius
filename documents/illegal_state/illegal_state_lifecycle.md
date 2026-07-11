@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/engineering/chaos_failover_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering the lifecycle band — the readiness
@@ -145,6 +145,38 @@ behind the Keycloak-owned edge with no `Public` listener — the no-backdoor-ing
 [§3.7](./illegal_state_security.md#37-accidental-insecure--backdoor-ingress), caught by a golden test on the rendered manifest rather than a
 cluster) + `live-effect` (that the SLO is actually met, the alert fires, the named `/metrics` series exists, and
 a `UserScoped` filter actually excludes another user's data). Per the validation-locus axis of
+[`illegal_state_techniques.md`](./illegal_state_techniques.md), orthogonal to the foreclosure layer above.
+
+---
+
+### 3.46 A chaos fault targeting a component the spec never declared
+
+Raw fault-injection tooling lets a scenario name any target: a test can script "partition the VPN" or "kill the
+broker" against a cluster that runs neither, so the scenario is meaningless — or, worse, asserts an invariant no
+declared component upholds. amoebius makes the fault schedule a **typed projection over the enclosing
+`InForceSpec`'s declared components**: `ChaosSchedule = NonEmpty FaultInjection`, and each `FaultInjection`'s
+`FaultTarget` is a reference that resolves **only** against a component the spec actually declares — the same
+derive-don't-author discipline that makes tolerations, `NetworkPolicy`, and the readiness DAG projections of the
+spec rather than hand-authored fields ([`readiness_ordering_doctrine.md`](../engineering/readiness_ordering_doctrine.md)).
+A fault on a component the spec never declared — "a VPN partition with no VPN," "a broker kill with no Pulsar" —
+therefore has **no inhabitant**. The chaos schedule is a deployment-rules layer invisible to the app under test
+([`app_vs_deployment_doctrine.md`](../engineering/app_vs_deployment_doctrine.md)), and each `FaultKind` is bound
+to the invariant it stresses. **Owner:**
+[`chaos_failover_doctrine.md` §11.1](../engineering/chaos_failover_doctrine.md#111-the-typed-fault-schedule-chaosschedule--faulttarget)
+(the typed shape + the `FaultKind`→invariant map) + [`testing_doctrine.md`](../engineering/testing_doctrine.md)
+(the harness that runs it). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
+(a phantom-typed reference that cannot name a component outside the enclosing spec) +
+[§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (the `NonEmpty` schedule).
+**Layer:** `type-foreclosed` at the Haskell IR — a `FaultTarget` referencing an undeclared component has no
+inhabitant (a compile-fail golden, like the cross-tenant [§3.8](./illegal_state_security.md#38-cross-tenant-references-and-literal-secrets)) —
+with a `runtime-checked` residue only that the injected fault *actually* perturbs the live component as modeled.
+
+**Validation-locus:** `Gate-2-decoder` — because Dhall has no opaque or dependent types (the caveat of
+[`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
+the cross-field "target ∈ declared components" constraint cannot be a Dhall type index; the total decoder
+resolving the `FaultTarget` against the declared component set returns `Left` on an undeclared target, and the
+Haskell-IR "no inhabitant" teeth land there — plus `live-effect` (that the injected fault perturbs the live
+component as the drill assumes). Per the validation-locus axis of
 [`illegal_state_techniques.md`](./illegal_state_techniques.md), orthogonal to the foreclosure layer above.
 
 ---

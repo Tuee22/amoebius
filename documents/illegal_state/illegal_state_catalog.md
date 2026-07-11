@@ -196,6 +196,7 @@ residue Register 3 owns). Most entries name a primary locus plus a live-effect r
 - [§3.26](./illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) — An unverified environment promotion (promote → prod without the required evidence)
 - [§3.41](./illegal_state_lifecycle.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race) — A duration-gated / hand-ordered bring-up sequence (a readiness race)
 - [§3.43](./illegal_state_lifecycle.md#343-an-unmonitored-workflow-or-extension-or-an-unauthenticated-monitoring-surface) — An unmonitored workflow or extension (or an unauthenticated monitoring surface)
+- [§3.46](./illegal_state_lifecycle.md#346-a-chaos-fault-targeting-a-component-the-spec-never-declared) — A chaos fault targeting a component the spec never declared
 
 ---
 
