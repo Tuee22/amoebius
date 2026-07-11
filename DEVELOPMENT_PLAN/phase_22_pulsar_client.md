@@ -290,6 +290,44 @@ command→event round-trip over the native protocol with dedup on and CBOR paylo
 ### Remaining Work
 The whole sprint (📋 Planned).
 
+## Sprint 22.5: Register-2.5 exactly-once effect under simulated redelivery 📋
+
+**Status**: Planned
+**Implementation**: `test/sim/PulsarDedupSimSpec.hs` (the `IOSimPOR` battery over the modeled Pulsar), driving
+the real `amoebius-pulsar/src/Amoebius/Pulsar/Dedup.hs` consumer-side fold lifted onto the Phase-11.4
+`io-classes` `Env` interface — target paths, not yet built.
+**Blocked by**: Sprint 22.4 (the built at-least-once + dedup client); Phase 11 Sprint 11.4 (the `io-classes`
+seams + the modeled Pulsar).
+**Independent Validation**: the real dedup fold — keyed by a replication-surviving work-id — runs under
+`IOSimPOR` against the modeled Pulsar with injected reorder, duplicate, crash-mid-acknowledge, and partition;
+the suite asserts the **exactly-once effect** invariant (R3): on every explored schedule, no effect is lost and
+none is double-applied. This is the amoebius-owned fold; Pulsar's broker/bookie consensus stays delegated and
+is *modeled*, not re-proven. Deterministically replayable, substrate `none`, Register 2.5.
+**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (Phase-22 status backlink),
+`documents/engineering/pulsar_client_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+
+### Objective
+Adopt [`deterministic_simulation_doctrine.md §3/§4`](../documents/engineering/deterministic_simulation_doctrine.md#3-the-simulated-environment-and-its-fault-model)
+and the R3 rule ([`chaos_failover_doctrine.md §13`](../documents/engineering/chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need)):
+validate that the *built* dedup fold makes at-least-once delivery effectively-once under adversarial
+redelivery/reorder/crash schedules **in-process and deterministically replayable**, before the Register-3 live
+gate — the interleaving a single-threaded test cannot reach.
+
+### Deliverables
+- The `PulsarDedupSimSpec` battery: the real dedup fold under `IOSimPOR` against the modeled Pulsar, asserting
+  no-loss + no-double-apply under injected reorder/duplicate/crash-mid-ack/partition schedules.
+- A Register-2.5 proven/tested/assumed ledger — the fold upholds exactly-once under the modeled schedules and
+  faults; honest limit: modeled-Pulsar fidelity is **assumed**, discharged by the Sprint-22.4 Register-3 live
+  gate.
+
+### Validation
+1. `cabal test pulsar-dedup-sim` is green — no schedule loses or double-applies an effect; a deliberately broken
+   fold (a non-stable key, an ack-before-process) is caught red; the discovered counterexample replays
+   identically under its seed.
+
+### Remaining Work
+The whole sprint (📋 Planned).
+
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
@@ -325,6 +363,7 @@ The whole sprint (📋 Planned).
 - [system_components.md](system_components.md) — the target component inventory for the module paths above
 - [Native Pulsar Client Doctrine](../documents/engineering/pulsar_client_doctrine.md) — the adopted transport,
   capability, topology, CBOR-payload, and dedup doctrine
+- [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — the Register-2.5 io-sim environment the dedup fold's exactly-once is validated against in Sprint 22.5
 - [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — §3.23, the non-CBOR payload made
   unrepresentable
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — the no-env/no-`PATH` lazy tool

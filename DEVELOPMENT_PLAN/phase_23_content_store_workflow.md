@@ -281,6 +281,75 @@ bespoke amoebius election — and assemble the phase gate.
 ### Remaining Work
 The whole sprint (📋 Planned).
 
+## Sprint 23.4: Register-2.5 workflow failover takeover under simulated fault 📋
+
+**Status**: Planned
+**Implementation**: `amoebius-runtime/test/sim/WorkflowFailoverSimSpec.hs` (the `IOSimPOR` property harness),
+`amoebius-runtime/test/sim/WorkflowSimScenario.hs` (the injected kill/redelivery/partition schedule) — the
+*same* `Amoebius.Workflow.Runtime`/`Orchestrator`/`Worker` code from Sprints 23.2–23.3 run against the Phase-11
+modeled environment (`src/Amoebius/Sim/Env.hs` + `src/Amoebius/Sim/Fakes/*`), nothing forked or re-implemented
+(target paths; not yet built).
+**Blocked by**: Sprint 23.2 (the orchestrator/worker runtime the schedule drives) and Sprint 23.3 (the
+Failover-takeover + leak-free-teardown behaviour whose properties are replayed here); Phase 11 Sprint 11.4 (the
+`Amoebius.Sim.Env` substrate and the fake Pulsar/MinIO the runtime binds against through `io-classes`).
+**Independent Validation**: the real workflow runtime, bound to `io-classes` and executed under `IOSimPOR`,
+takes the modeled fake Pulsar + fake MinIO with a `kill-worker-mid-workflow` fault injected between the store
+write and the `event` produce, un-acked-command **redelivery**, and a broker/consumer **partition**; over every
+schedule `IOSimPOR` explores it asserts (a) the Pulsar-Failover subscription takeover is **leak-free** — no
+orphaned consumer, producer, or in-flight artifact handle survives the promoted standby — and (b) there is **no
+double-application** of any effect: the content-addressed store makes a re-fetch a no-op and the log-fold dedup
+collapses the redelivered command, so the pointer HEAD and downstream state are byte-identical whether or not
+the fault fired; each run emits a Register-2.5 ledger listing the explored-schedule count and the properties
+discharged.
+**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (the Register-2.5 workflow
+failover simulation entry), `documents/engineering/chaos_failover_doctrine.md` (§12 — the Register-2.5 ledger
+feeding the same proven/tested/assumed ledger as the live gate), `DEVELOPMENT_PLAN/system_components.md`, this
+document.
+
+### Objective
+Adopt [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md) at
+**Register 2.5** on the **`none`** substrate: run the *real* Sprint-23.2/23.3 workflow runtime and its
+Failover-takeover path — the daemon/workflow code written against `io-classes` — under `IOSimPOR` against the
+Phase-11.4 modeled fault-injectable environment, and assert the same load-bearing properties the Sprint-23.3
+live gate asserts (leak-free standby takeover; no double-application), now **deterministically replayable** under
+adversarial schedules instead of a single live wall-clock trace.
+
+### Deliverables
+- A `WorkflowFailoverSimSpec` that binds `Amoebius.Workflow.Runtime`/`Orchestrator`/`Worker` (Sprints 23.2–23.3)
+  to the Phase-11.4 `Amoebius.Sim.Env` substrate through `io-classes` and drives it under `IOSimPOR` — the
+  production code path, not a simulation-only re-implementation.
+- The injected fault schedule (`WorkflowSimScenario`): a `kill-worker-mid-workflow` between the store write and
+  the `event` produce, at-least-once **redelivery** of the un-acked command, and a broker/consumer
+  **partition** — modeled by the fake Pulsar/MinIO of Phase 11 Sprint 11.4, not a live cluster.
+- A property that, over *every* schedule `IOSimPOR` explores, asserts the Pulsar-Failover subscription takeover
+  is **leak-free** (no orphaned consumer/producer/artifact handle survives the promotion) and that **no effect
+  is double-applied** — content-addressed re-fetch is a no-op and log-fold dedup collapses the redelivery — so
+  the committed pointer HEAD and downstream state are identical across all explored interleavings.
+- A **Register-2.5 ledger** artifact per run, recording the explored-schedule count and the leak-free /
+  no-double-application properties discharged, feeding the same proven/tested/assumed ledger
+  ([`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed))
+  as the Sprint-23.3 live gate.
+
+### Validation
+1. Run `WorkflowFailoverSimSpec` under `IOSimPOR` and assert that, on every explored schedule with the
+   `kill-worker-mid-workflow` fault, a name-ordered standby takes over the Failover subscription and the run is
+   leak-free — no orphaned consumer, producer, or artifact handle outlives the promoted standby.
+2. Assert **no double-application**: across all interleavings of redelivery and partition the content-addressed
+   re-fetch is a no-op and the log-fold dedup collapses the redelivered command, so the pointer HEAD and
+   downstream state are byte-identical whether or not the fault fired.
+3. Assert the run emits a Register-2.5 ledger recording the explored-schedule count and the discharged
+   properties, and that a failure replays deterministically from its seed and schedule.
+
+> **Honesty.** This is a **Register 2.5** result on the **`none`** substrate: it proves the runtime's failover
+> logic and dedup are correct under *every schedule the model explores*, not that the modeled fake Pulsar/MinIO
+> match the live broker/bookie and object store. **Modeled-substrate fidelity is assumed** and is discharged
+> only by this phase's **Register-3 live gate** (Sprint 23.3) on the linux-cpu kind cluster — the deterministic
+> simulation is a fast, adversarial, replayable *pre*-gate, never a substitute for it. The properties asserted
+> here are exactly the ones the live gate asserts; the register is lower because the environment is modeled.
+
+### Remaining Work
+The whole sprint (📋 Planned).
+
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
@@ -319,6 +388,9 @@ The whole sprint (📋 Planned).
   surface (the Failover subscription) and the at-least-once/dedup contract this phase consumes
 - [Chaos / Failover Doctrine](../documents/engineering/chaos_failover_doctrine.md) — the proven/tested/assumed
   ledger and the deferred cross-cluster (Second Axis) boundary
+- [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — the
+  Register-2.5 `IOSimPOR`-over-modeled-environment pre-gate that replays the failover-takeover properties under
+  adversarial schedules
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — Register 3 (live), the spin-up → run →
   always-tear-down contract, and the elevated harness as the sole deleter of test-flagged durable storage
 - [phase_22](phase_22_pulsar_client.md) — the native Pulsar client this workflow runtime is built on

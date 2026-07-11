@@ -147,9 +147,33 @@ implementation to evaluate — and the honest default outcome is **reject-as-red
 already renders. That evaluation and its written verdict are owned by
 [`network_fabric_doctrine.md` §6 — the service-mesh verdict](../documents/engineering/network_fabric_doctrine.md#6-the-service-mesh-verdict-no-linkerd-for-v1).
 
----
+## Candidate phase: Surgical proof-assistant track (`emitTLA` faithfulness + fold-closure)
 
-## Resolved — *not* a later phase: one base container with everything
+**Status**: 📋 Planned (provisional Phase 37)
+**Provisional substrate**: none (a pure-proof track, validated by the proof checker + the existing suite)
+**Scope** (one line): discharge — machine-checked — the **two** load-bearing meta-properties the rest of the
+suite currently only *tests*: (a) the `emitTLA`/`interpret` **faithfulness meta-theorem** (each `Expr`/`Temporal`
+constructor's `interpret`-denotation equals the TLA+ denotation `emitTLA` targets), and (b) the **fold-closure**
+laws (commutativity/associativity/idempotence) for the capacity folds, the Pulsar dedup fold, and the CAS-pointer
+merge that the I-confluence ledger rests on.
+**Provisional gate**: the two meta-properties are machine-checked green by the chosen proof tool, and a
+deliberately broken variant (a mistranslated quantifier in `emitTLA`; a non-commutative merge) fails the check —
+after which the corresponding
+[`chaos_failover_doctrine.md §19`](../documents/engineering/chaos_failover_doctrine.md#19-the-cross-boundary-ledger-and-conformance-rows)
+confluence ledger rows and the
+[`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-correspondence-by-construction)
+faithfulness claim may move from **tested** to **proven**.
+
+This is a **surgical** track, not a broad proof-assistant layer — those two properties are the only places a
+proof assistant earns its keep, precisely because they are small, closed, and load-bearing, and are today only
+property-tested (`formal_model_doctrine.md §4`; the confluence ledger's own rule that a closure claim "is proof
+only when its closure argument is shown"). It is explicitly deferred because it *hardens* claims the Phase-2/3/7
+differential and closure property-tests already exercise; the property tests are the affordable first line, and
+this candidate upgrades them to proof only where the payoff is a genuine ledger promotion. A first sprint is an
+**evaluation**: **Liquid Haskell vs Lean** — Liquid Haskell checks refinement types on the *actual* Haskell and
+so introduces no second artifact to drift (the drift the whole `Model`-as-data pattern exists to foreclose),
+while Lean/Agda offers a fuller metatheory; the verdict picks the tool the two proofs are written in. A broad
+adoption is out of scope by design.
 
 The "one base container with everything" packaging question is sometimes mistaken for deferred work. It is
 **not**. It is **resolved and adopted in Phase 14**: every third-party service binary (the registry, MinIO,

@@ -247,6 +247,30 @@ closing the phase with the full-stack HA gate.
 ### Remaining Work
 The whole sprint (📋 Planned).
 
+## Sprint 18.5: Register-2.5 readiness-DAG bring-up under simulated partial failure 📋
+
+**Status**: Planned
+**Implementation**: `test/Amoebius/Platform/BringUpSim.hs` (the `IOSimPOR` harness driving the *unmodified* Sprint-18.4 `src/Amoebius/Platform/BringUp.hs` orchestration; target paths, not yet built) over the Phase-11.4 modeled substrate `src/Amoebius/Sim/Env.hs` + `src/Amoebius/Sim/Fakes/*`
+**Blocked by**: Sprint 18.4 (the derived readiness-DAG bring-up this sprint drives unchanged), Sprint 18.1–18.3 (the services it assembles), Phase 11 Sprint 11.4 (the modeled fault-injectable environment — fake Pulsar/MinIO/apiserver/route53/Vault/clock — this runs against)
+**Independent Validation**: the exact Sprint-18.4 bring-up orchestration, written against `io-classes` with no real IO, runs under `IOSimPOR` against the Phase-11.4 fakes with injected partial failure / restart / partition on the modeled dependencies, and across the explored schedules asserts (a) no service starts before its readiness precondition, (b) the applicative-concurrent bring-up is deadlock-free and fail-closed on a missing/unhealthy dependency, and (c) it never reports success until every service is Ready; each run is deterministically replayable from its seed on substrate `none` and emits a Register-2.5 ledger.
+**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`
+
+### Objective
+Adopt [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md) as [Register 2.5](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) over this phase's own bring-up: take the *real* Sprint-18.4 readiness-DAG orchestration — the derived DAG with **applicative concurrent deploy where services are independent and sequential where they depend**, the HA-always readiness ordering this phase owns — and run it unchanged under `IOSimPOR` against the Phase-11.4 modeled substrates, validating the ordering and fail-closed invariants deterministically in-process before the Register-3 live gate ever runs.
+
+### Deliverables
+- An `IOSimPOR` harness that drives the *unmodified* Sprint-18.4 `BringUp` orchestration (written against `io-classes`, no real IO) against the Phase-11.4 fake Pulsar/MinIO/apiserver/route53/Vault/clock (`src/Amoebius/Sim/Env.hs` + `src/Amoebius/Sim/Fakes/*`), with injected **partial failure, restart, and network partition** on the modeled dependencies.
+- Schedule-exhaustive assertions over the partial-order search: (a) **no service starts before its readiness precondition** on any explored schedule, (b) the concurrent bring-up is **deadlock-free** and **fail-closed** — a missing or unhealthy dependency halts the dependent and is never silently proceeded past, and (c) the orchestration **does not report success until every service is Ready**.
+- A deterministically replayable seed on any failing schedule and a Register-2.5 ledger recording substrate `none`, the register, and the honest limit that modeled-substrate fidelity is *assumed*.
+
+### Validation
+1. Run the bring-up under `IOSimPOR`; assert across explored schedules that every §11 hard edge (LoadBalancer → edge, Percona operator → Postgres consumer, Vault-unsealed → secret-dependent startup) holds — no dependent observed to start before its precondition on any schedule.
+2. Inject partial failure / restart / partition on a modeled dependency; assert the applicative-concurrent bring-up stays deadlock-free and fails closed on the missing/unhealthy dependency, never reporting success with a service not-Ready.
+3. Replay a captured seed and assert a bit-identical schedule and outcome; emit the Register-2.5 ledger — substrate `none`, Register 2.5 — recording the honest limit that modeled-substrate fidelity is *assumed* and is discharged only by this phase's Register-3 live gate (Sprint 18.4).
+
+### Remaining Work
+The whole sprint (📋 Planned).
+
 ## Documentation Requirements
 
 **Engineering docs to update:**
@@ -279,6 +303,7 @@ The whole sprint (📋 Planned).
 - [Image Build & Registry](../documents/engineering/image_build_doctrine.md) — the baked-binary base image, pull-only-in-cluster
 - [Storage Lifecycle](../documents/engineering/storage_lifecycle_doctrine.md) — the no-provisioner retained PVs the stateful services land on
 - [Monitoring Doctrine](../documents/engineering/monitoring_doctrine.md) — the derived observability surfaces
+- [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — the Register-2.5 `IOSim`/`IOSimPOR` simulation of the real bring-up over the Phase-11.4 modeled substrates
 - [phase_17](phase_17_vault_pki.md) — the root Vault/PKI whose unseal edge gates secret-dependent startup here
 - [phase_19](phase_19_keycloak_ingress.md) — the Keycloak-owned ingress edge that fronts this backbone next
 - [Engineering Doctrine Index](../documents/engineering/README.md) — the doctrine suite these phases adopt

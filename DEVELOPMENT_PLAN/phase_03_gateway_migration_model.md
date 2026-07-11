@@ -48,13 +48,18 @@ explorer), analogous to the Phase-0 documentation lint and the Phase-2 kernel ro
 **Register:** 1 — pure/golden, in-process, no cluster (§K).
 
 **Gate:** `emitTLA` renders the concrete `GatewayMigration` `Model` to a generated, never-committed
-`.tla`/`.cfg` on which TLC reaches every named invariant — `UniqueGatewayOwner`, `SessionAlwaysRebindable`,
-`PlannedIsLossless`, `FailoverBounded` — with no counterexample at bounded scope for **both** the `Planned`
-and `Failover` branches, the run passing its vacuity check (no invariant is trivially satisfied and no action
-is dead) and its scope-2 pairwise cutoff check; the in-process io-sim / reachability explorer over the same
-`Model`'s `interpret` agrees on the same safety predicates; and a seeded mutation of the `Model` (a transition
-that drops the fence, or decommissions before `drain-complete`) is caught — goes red — in **both** instruments.
-Register 1, in-process, substrate `none`.
+`.tla`/`.cfg` on which TLC reaches every named **safety** invariant — `UniqueGatewayOwner`,
+`SessionAlwaysRebindable`, `PlannedIsLossless`, `NoWriteAfterStaleFailover` — with no counterexample **and**
+proves the **liveness** `PROPERTY`s `MergeConverges` / `SessionEventuallyRebinds` under the declared weak
+fairness, at bounded scope for **both** the `Planned` and `Failover` branches, the run passing its vacuity
+check (no invariant trivially satisfied, no action dead), its **fairness-sensitivity** check (each liveness
+`PROPERTY` goes red with fairness removed), and its scope-2 pairwise cutoff check (the decode-time
+structural-fit fold's *accepts ⟺ in-envelope* equivalence holds under QuickCheck, with a shared-resource-modeled
+over-scope stress run and the decomposition lemma recorded as an open obligation); the in-process io-sim /
+reachability explorer over the same `Model`'s `interpret` agrees on the **safety** predicates (liveness is
+TLC-only); and both a **safety** mutation (a transition that drops the fence or decommissions before
+`drain-complete`, red in all instruments) and a **liveness** mutation (a stall that never reconverges, red only
+in TLC's `PROPERTY`) are caught. Register 1, in-process, substrate `none`.
 
 ## Doctrine adopted
 
@@ -110,9 +115,13 @@ four named invariants — with **no** singleton-election variable anywhere.
 ### Deliverables
 - The `GatewayMigration` `Model` value in the Phase-2 first-order fragment, both branches expressed as guarded
   parameterized actions.
-- The four invariants encoded as boolean `Expr`: `UniqueGatewayOwner`, `SessionAlwaysRebindable`,
-  `PlannedIsLossless` (cutover reachable only after `verify-caught-up`), `FailoverBounded` (`MergeConverges`,
-  `NoWriteAfterStaleFailover`, capped divergence).
+- The **safety** invariants encoded as boolean `Expr` (`modelInvariants`): `UniqueGatewayOwner`,
+  `SessionAlwaysRebindable`, `PlannedIsLossless` (cutover reachable only after `verify-caught-up`),
+  `NoWriteAfterStaleFailover` (capped divergence within the declared budget).
+- The **liveness** properties encoded as `Temporal` under a named weak-fairness annotation (`modelFairness` +
+  `modelProperties`): `MergeConverges` (`ownerCount ~> ownerCount = 1` after heal) and `SessionEventuallyRebinds`
+  — the properties a safety invariant cannot express, per
+  [`gateway_migration_model_doctrine.md §3`](../documents/engineering/gateway_migration_model_doctrine.md#3-the-model).
 - A `modelConstraint` bounding exploration at scope 2 (two clusters, one DNS record).
 
 ### Validation
@@ -129,10 +138,12 @@ The whole sprint (📋 Planned).
 `gen/tla/GatewayMigration.{tla,cfg}` (emitted, git-ignored, never committed) and running `tla2tools` — target
 paths, not yet built.
 **Blocked by**: Sprint 3.1.
-**Independent Validation**: TLC reaches every named invariant with no counterexample at scope 2 for **both**
-branches; a vacuity check confirms each invariant is non-trivially satisfied and no action is dead; the
-emitted `.tla`/`.cfg` are absent from version control (a `.gitignore` entry and a committed-artifact scan
-confirm it).
+**Independent Validation**: TLC reaches every named safety invariant with no counterexample at scope 2 for
+**both** branches, **and** proves each liveness `PROPERTY` (`MergeConverges`, `SessionEventuallyRebinds`) under
+the declared weak fairness; a vacuity check confirms each invariant is non-trivially satisfied and no action is
+dead, and a **fairness-sensitivity** check confirms each liveness `PROPERTY` goes red when its fairness
+annotation is removed (it was not vacuously true); the emitted `.tla`/`.cfg` are absent from version control (a
+`.gitignore` entry and a committed-artifact scan confirm it).
 **Docs to update**: `documents/engineering/gateway_migration_model_doctrine.md` (§4 prove row →
 proven-for-the-model when green), `documents/engineering/generated_artifacts_doctrine.md` (the emitted
 `.tla`/`.cfg` registered as generated).
@@ -145,14 +156,16 @@ exhaustively model-check it at the bounded scope, proving both branches reach ev
 
 ### Deliverables
 - The TLC harness invoking `emitTLA` → git-ignored `gen/tla/GatewayMigration.{tla,cfg}` → `tla2tools`, run
-  over both the `Planned` and `Failover` branch scenarios.
+  over both the `Planned` and `Failover` branch scenarios, checking the `INVARIANT`s (safety) and the
+  `PROPERTY`s (liveness, under the emitted `WF_`/`SF_` fairness).
 - A vacuity assertion (invariants are not trivially true; every declared action is enabled on some reachable
-  state) and the scope-bound `CONSTRAINT` carried through from the `Model`.
+  state), a **fairness-sensitivity** assertion (each liveness `PROPERTY` fails with fairness removed), and the
+  scope-bound `CONSTRAINT` carried through from the `Model`.
 - A committed-artifact scan proving no `.tla`/`.cfg` is versioned.
 
 ### Validation
-1. TLC is green — every invariant, both branches, no counterexample at scope 2 — with the vacuity check
-   passing and no committed emitted spec.
+1. TLC is green — every safety invariant and every liveness `PROPERTY`, both branches, no counterexample at
+   scope 2 — with the vacuity and fairness-sensitivity checks passing and no committed emitted spec.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -180,13 +193,19 @@ scheduler over adversarial interleavings, and demonstrate that both readings of 
 sensitivity to one seeded fault — the operational form of correspondence-by-construction.
 
 ### Deliverables
-- The `IOSimPOR` harness asserting the TLC-mirrored safety predicates on explored schedules for both branches,
-  labeled **TESTED (sampled schedules)**.
-- One seeded-mutation `Model` variant reaching the illegal state, wired into both the TLC and io-sim suites.
-- An assertion that the correct model is green in both and the mutant is red in both.
+- The `IOSimPOR` harness asserting the TLC-mirrored **safety** predicates on explored schedules for both
+  branches, labeled **TESTED (sampled schedules)** — io-sim and the explorer cover safety only; liveness is a
+  TLC-only verdict ([`formal_model_doctrine.md §3`](../documents/engineering/formal_model_doctrine.md#3-two-total-renderings)).
+- Two seeded-mutation `Model` variants: a **safety** mutant (drop the fence / decommission before
+  `drain-complete`) reaching the illegal state — red in TLC, io-sim, and the explorer — and a **liveness**
+  mutant (a stall/livelock that reaches no illegal state but never reconverges) — red only in TLC's `PROPERTY`,
+  demonstrating the liveness check catches faults safety and the safety instruments miss.
+- An assertion that the correct model is green in all instruments; the safety mutant is red in all three; the
+  liveness mutant is red in TLC and (correctly) not flagged by the safety-only instruments.
 
 ### Validation
-1. io-sim finds no violation on the correct model; both TLC and io-sim report the seeded mutation.
+1. io-sim finds no safety violation on the correct model; the safety mutant is red in TLC + io-sim + explorer;
+   the liveness mutant is red in TLC's `PROPERTY` (and not spuriously flagged by the safety instruments).
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -198,10 +217,11 @@ The whole sprint (📋 Planned).
 `InForceSpec` migration graph) and `test/formal/CutoffSpec.hs` (the envelope corpus + the over-scope stress
 run) — target paths, not yet built.
 **Blocked by**: Sprint 3.2.
-**Independent Validation**: the fold accepts every in-envelope migration graph (pairwise: one active + one
-standby per DNS record; independent; acyclic) and rejects every out-of-envelope fixture, with **no** per-spec
-model-check; at least one over-scope TLC run (3 clusters, chained) stresses the cutoff assumption and finds no
-counterexample.
+**Independent Validation**: a QuickCheck generator over random migration graphs shows the fold **accepts ⟺**
+the graph is pairwise (one active + one standby per DNS record), independent, and acyclic (equivalence, not just
+soundness), and the fold is total; **no** per-spec model-check runs; and at least one over-scope TLC run
+(3 clusters, chained) that **models the shared resources in** (a survivor reused across records, one route53
+zone, one Vault) stresses the cutoff's shared-resource-independence assumption and finds no counterexample.
 **Docs to update**: `documents/engineering/gateway_migration_model_doctrine.md` (§5/§6 — the cutoff and the
 over-scope stress row), `documents/engineering/formal_model_doctrine.md` (§6 backlink — what scope 2 proves
 here).
@@ -216,14 +236,21 @@ total fold, never a per-`InForceSpec` TLC.
 ### Deliverables
 - The structural-fit fold rejecting any spec whose migration graph falls outside the proven envelope, tagged
   with the illegal-state entry it forecloses.
-- A corpus of in-envelope (accepted) and out-of-envelope (rejected: multi-active, cyclic, shared-DNS)
-  fixtures.
-- One over-scope (3-cluster, chained) TLC run recorded as the §6 stress check, with the abstracted premises
-  (real-time / clock-skew; the MinIO/Pulsar/Patroni lossless delegation) named as assumptions.
+- A QuickCheck property over random migration graphs asserting **accepts ⟺ pairwise ∧ independent ∧ acyclic**
+  (equivalence), plus a corpus of in-envelope (accepted) and out-of-envelope (rejected: multi-active, cyclic,
+  shared-DNS) fixtures.
+- One over-scope (3-cluster, chained) TLC run that **models the shared resources in**, recorded as the §6
+  stress check, with the abstracted premises (real-time / clock-skew; the MinIO/Pulsar/Patroni lossless
+  delegation; shared-resource independence) named as assumptions.
+- The **decomposition lemma** recorded as a named, still-open obligation — that the N-instance product refines
+  the 2-instance model under the fold's independence predicate — to be discharged by a machine-checked proof
+  (TLAPS/Lean) or a shared-resource-modeled scope-3–4 run; until then the cutoff is logged **argued/tested**,
+  never *proven* ([`gateway_migration_model_doctrine.md §5`](../documents/engineering/gateway_migration_model_doctrine.md#5-one-and-done-plus-a-per-inforcespec-structural-fit)).
 
 ### Validation
-1. The fold accepts in-envelope graphs and rejects out-of-envelope graphs and is total; the over-scope run
-   confirms the cutoff assumption; TLC is never invoked on the per-spec decode path.
+1. The fold's **accepts ⟺ in-envelope** equivalence holds under QuickCheck and the fold is total; the
+   shared-resource-modeled over-scope run confirms the cutoff assumption; the decomposition lemma is recorded as
+   an open obligation and the cutoff is labelled argued/tested; TLC is never invoked on the per-spec decode path.
 
 ### Remaining Work
 The whole sprint (📋 Planned).

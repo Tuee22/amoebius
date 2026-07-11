@@ -220,6 +220,61 @@ through the **built-in** client, with a typed, no-leak error model. The `Prodbox
 ### Remaining Work
 The whole sprint (📋 Planned).
 
+## Sprint 17.4: Register-2.5 fail-closed Vault unseal under simulated faults 📋
+
+**Status**: Planned
+**Implementation**: `test/Amoebius/Sim/Vault/UnsealFailClosedSpec.hs` (the `IOSim`/`IOSimPOR` driver that runs the
+**real** `src/Amoebius/Vault/{Init,Unseal,Seal,Client}.hs` against the modeled Vault) — target path, not yet built.
+**Blocked by**: Sprint 17.1 (the real init/unseal/seal client under test), Sprint 17.3 (the real `SecretRef`
+resolver + typed error under test); Phase 11 Sprint 11.4 (`src/Amoebius/Sim/Env.hs` + `src/Amoebius/Sim/Fakes/*` —
+the modeled fault-injectable Vault with the sealed / unreachable / lease-expiry knobs the schedules drive).
+**Independent Validation**: the **real** Vault init/unseal client code — written against `io-classes`, unchanged
+from the live path — runs under `IOSim`/`IOSimPOR` against the Phase-11.4 modeled Vault with injected **sealed /
+unreachable / lease-expiry / restart** faults, and under adversarial schedules the **fail-closed invariant** holds:
+the daemon **never** proceeds — never issues from `pki/`, never accepts a `.dhall`, never reads a `SecretRef` —
+while Vault is sealed or its freshness is unproven; every failing schedule is **deterministically replayable** from
+its seed; substrate `none`, **Register 2.5**.
+**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md`,
+`documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+
+### Objective
+Adopt [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md) and
+re-adopt [`vault_pki_doctrine.md §2`](../documents/engineering/vault_pki_doctrine.md#2-vault-is-the-fail-closed-secrets-root):
+prove the **fail-closed secrets-root invariant in simulation** — run the real init/unseal client against the
+modeled fault-injectable Vault under `IOSim`/`IOSimPOR` and assert that no adversarial fault schedule (sealed,
+unreachable, lease-expiry, restart) ever lets the daemon proceed while Vault is sealed or its freshness is
+unproven. This is a **Register-2.5** deterministic-simulation check, run in-process **before** the Sprint-17.3
+Register-3 live gate — not a substitute for it.
+
+### Deliverables
+- An `IOSim`/`IOSimPOR` harness running the **real** `src/Amoebius/Vault/{Init,Unseal,Seal,Client}.hs` code
+  (`io-classes`-written, byte-for-byte the live path — no simulation-only fork) against the **Phase-11.4 modeled
+  Vault** (`src/Amoebius/Sim/Fakes/*`) with its fault knobs — **sealed**, **unreachable**, **lease-expiry**, and
+  **restart** — driven by the scheduler.
+- The **fail-closed invariant** asserted under **adversarial schedules**: across the explored interleavings the
+  daemon **never** issues from `pki/`, **never** accepts a `.dhall`, and **never** resolves a `SecretRef` while
+  Vault is sealed or while its unseal freshness is unproven; a sealed→unreachable→lease-expiry→restart sequence
+  leaves the consumer failed closed with a typed error, never a plaintext fallback and never a stale read.
+- **Deterministic replay**: every schedule is seed-addressed, so a counterexample is replayable byte-for-byte from
+  its seed for debugging.
+- A **Register-2.5** proven/tested/assumed ledger (substrate `none`), stating the **honest limit** — the harness
+  proves the *client's* fail-closed logic against a **modeled** Vault whose fidelity is **assumed**; that fidelity
+  assumption is discharged only by this phase's **Sprint-17.3 Register-3 live gate**, never by simulation.
+
+### Validation
+1. Run the real init/unseal client under `IOSim`/`IOSimPOR` against the modeled Vault under adversarial
+   sealed / unreachable / lease-expiry / restart schedules and assert the fail-closed invariant holds on every
+   explored interleaving — no PKI issuance, no `.dhall` acceptance, no `SecretRef` read while sealed or
+   freshness-unproven.
+2. Force a counterexample (e.g. a modeled-Vault fault that would tempt a stale read) and assert it is
+   **deterministically replayable** from its seed.
+3. Emit the Register-2.5 ledger (substrate `none`); assert it records modeled-Vault fidelity as **assumed** and
+   names the Sprint-17.3 Register-3 live gate as the discharge, never marking the live invariant green from
+   simulation.
+
+### Remaining Work
+The whole sprint (📋 Planned).
+
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
@@ -252,6 +307,8 @@ The whole sprint (📋 Planned).
   ordering edge this phase installs
 - [Storage Lifecycle Doctrine](../documents/engineering/storage_lifecycle_doctrine.md) — the retained Vault PV and
   init-once / unseal-on-rebuild durability
+- [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — the
+  Register-2.5 `IOSim` fail-closed check the real unseal client runs against the modeled Vault before the live gate
 - [phase_15](phase_15_renderer_reconciler.md) — the typed renderer + SSA reconciler that renders and applies Vault
 - [phase_16](phase_16_retained_storage.md) — the no-provisioner retained PV Vault's durable KV lives on
 - [phase_18](phase_18_platform_services.md) — the standard-service stack that consumes these Vault secrets

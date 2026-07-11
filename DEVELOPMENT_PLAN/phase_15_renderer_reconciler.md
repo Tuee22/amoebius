@@ -216,6 +216,45 @@ Register-3 proven/tested/assumed ledger, tearing the scratch namespace down leak
 ### Remaining Work
 The whole sprint (📋 Planned).
 
+## Sprint 15.5: Register-2.5 reconciler convergence under simulated faults 📋
+
+**Status**: Planned
+**Implementation**: `test/sim/ReconcileSimSpec.hs` (the `IOSimPOR` reconcile battery over the modeled
+apiserver), driving the real `src/Amoebius/Manifest/{Reconcile,Diff,Apply,Prune,Wait}.hs` code lifted onto the
+Phase-11.4 `io-classes` `Env` interface — target paths, not yet built.
+**Blocked by**: Sprint 15.4 (the built reconcile/apply/wait engine); Phase 11 Sprint 11.4 (the `io-classes`
+seams + the modeled apiserver).
+**Independent Validation**: the real reconcile loop (`discover → diff → enact → re-observe`) runs under
+`IOSimPOR` against the modeled apiserver with injected `resourceVersion` conflict, watch-gap, apiserver
+restart, and interleaved external mutation; the suite asserts **idempotent convergence** (a re-run applies zero
+mutations and prunes nothing — the same no-op the Register-3 gate asserts, now under adversarial schedules) and
+the **`Unreachable → refuse` fail-closed** rule; a discovered interleaving is deterministically replayable
+under its seed; substrate `none`, Register 2.5.
+**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (Phase-15 status backlink),
+`documents/engineering/manifest_generation_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+
+### Objective
+Adopt [`deterministic_simulation_doctrine.md §4`](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits):
+validate the *built* reconciler's concurrent schedule and its behaviour under injected apiserver faults
+**in-process and deterministically replayable**, before the Register-3 live gate — closing the code-schedule gap
+the pure-value tests and the live gate each leave open ([`chaos_failover_doctrine.md §10`](../documents/engineering/chaos_failover_doctrine.md#10-simulate--the-pure-program-lifted-io-sim)).
+
+### Deliverables
+- The `ReconcileSimSpec` battery: the real reconcile/apply/prune/wait code under `IOSimPOR` against the modeled
+  apiserver, asserting idempotent convergence and the fail-closed refuse rule under injected
+  conflict/watch-gap/restart/external-mutation schedules.
+- A Register-2.5 proven/tested/assumed ledger — the reconciler upholds convergence + fail-closed under the
+  modeled schedules and faults; honest limit: modeled-apiserver fidelity is **assumed**, discharged by the
+  Sprint-15.4 Register-3 live gate.
+
+### Validation
+1. `cabal test reconcile-sim` is green — no schedule reaches a non-convergent or non-fail-closed state; a
+   deliberately broken reconciler (a lost-conflict retry, a sleep-gated readiness) is caught red; the discovered
+   counterexample replays identically under its seed.
+
+### Remaining Work
+The whole sprint (📋 Planned).
+
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
@@ -243,6 +282,7 @@ The whole sprint (📋 Planned).
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
   live-proof acceptance token: *converges and re-run is a no-op*, proven in Register 3)
 - [overview.md](overview.md) — target architecture and the no-Helm / no-release-store reconciler posture
+- [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — the Register-2.5 io-sim environment the reconciler is validated against in Sprint 15.5, before the Register-3 live gate
 - [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — §5 the apply/reconcile
   engine adopted here; §6 the reconcile state model; §2 the pure renderer consumed from Phase 9
 - [Readiness Ordering Doctrine](../documents/engineering/readiness_ordering_doctrine.md) — §6 the runtime

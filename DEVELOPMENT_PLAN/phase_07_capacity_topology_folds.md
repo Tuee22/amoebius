@@ -204,15 +204,22 @@ Register-1 property register), `DEVELOPMENT_PLAN/system_components.md`.
 ### Objective
 Adopt [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md) §2 (Register 1) and the honesty
 limit of [`resource_capacity_doctrine.md §2`](../documents/engineering/resource_capacity_doctrine.md#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed):
-express the capacity fold and the topology relation as QuickCheck properties that assert **soundness** (the
-fold never admits an over-committed or incompatible spec) without ever claiming completeness, proving the
-in-process laws hold on generated corpora.
+express the capacity fold and the topology relation as QuickCheck properties. For the checks that are decidable
+in **both** directions — the storage `Σ ≤ backing` sum and the elementwise-compatibility relation — assert the
+stronger **accept ⟺ in-envelope equivalence** (the fold accepts *exactly* the in-envelope inputs) over generated
+corpora, not merely soundness. Reserve **soundness-only** (the fold never admits an over-committed spec, but may
+reject a packable one) for the single sound-not-complete check, compute `place`
+([`resource_capacity_doctrine.md §2`](../documents/engineering/resource_capacity_doctrine.md#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed)),
+and never claim completeness there.
 
 ### Deliverables
 - Capacity properties: `fits d c = Right h ⟹` `d + h` reconstructs `c` per axis with no underflow; `carve` is
   total subtraction; a returned `place` witness assigns every pod to a node it `podFits` (soundness); `place`
   may return `Left` on a packable spec but never a witness that violates an allocatable (the one-directional
   soundness caveat); the fold re-runs consistently after a `Growable` growth.
+- Equivalence (both-directions) properties for the complete checks: the storage/retention `Σ demand ≤ backing`
+  fold accepts **iff** the sum is within backing, and the Pulsar two-ceiling fold accepts **iff** both ceilings
+  hold — over generated corpora, not just a fixed fixture set (the `accepts ⟺ in-envelope` strengthening).
 - Topology properties: the elementwise compatibility fold accepts a heterogeneous multi-substrate `NonEmpty
   Node` iff every pair is compatible and returns the exact incompatible-node set otherwise; `mkRke2` rejects a
   duplicate `HostId`; kind cardinality is fixed at one host regardless of `replicas`.

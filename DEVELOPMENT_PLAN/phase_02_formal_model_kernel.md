@@ -27,7 +27,8 @@ a single reifiable Haskell `Model` value from which both the runtime decision co
 are total functions, so the model↔code correspondence holds by construction. It stands up three things and
 nothing more. First, the `Model` fragment itself — a deliberately small, first-order, side-effect-free
 transition-system EDSL (named state variables, an initial assignment, guarded parameterized actions, named
-boolean invariants, an optional bounding constraint). Second, the two total renderings of that value:
+boolean *safety* invariants, per-action *fairness* annotations, named *liveness* (temporal) properties, and
+an optional bounding constraint). Second, the two total renderings of that value:
 `interpret :: Model -> (Event -> State -> State)`, the pure decision core, paired with an in-process
 bounded-reachability explorer that walks reachable states the same way TLC does; and
 `emitTLA :: Model -> (Tla, Cfg)`, a structural walk of the fragment that emits a TLA+ module and its `.cfg`.
@@ -49,9 +50,12 @@ runs on the emitted spec through the version-stable JVM `tla2tools` toolchain. T
 **Gate:** The reifiable `Model` explorer (`interpret` plus the in-process bounded-reachability checker) and
 the `emitTLA` renderer round-trip a single small transition-system model — the in-process explorer and TLC
 (run through the standard `tla2tools` toolchain over the freshly emitted `.tla`/`.cfg`) reach the *identical*
-verdict on the correct model, and **both** go red under one seeded mutation — while the emitted `.tla`/`.cfg`
-are rendered fresh from the committed `Model` source and are **never committed** to the repository. The run
-emits a Register-1 proven-for-the-model ledger; it establishes that the two renderings agree, not that any
+safety verdict on the correct model, **both** go red under one seeded safety mutation, TLC proves the model's
+liveness `PROPERTY` under weak fairness and reports it red both with fairness removed and under a
+liveness-breaking variant, and a QuickCheck generator over the fragment finds no explorer/TLC disagreement
+across random small models — while the emitted `.tla`/`.cfg` are rendered fresh from the committed `Model`
+source and are **never committed** to the repository. The run emits a Register-1 proven-for-the-model ledger
+(liveness proven only under the assumed fairness); it establishes that the two renderings agree, not that any
 cluster enforces anything.
 
 ## Doctrine adopted
@@ -101,9 +105,13 @@ emitting faithful TLA+ rather than hand-writing it.
 
 ### Deliverables
 - `data Model`, `data Action`, and the `Expr` fragment carrying only booleans, arithmetic comparison, finite
-  sets, quantifiers over finite sets, and function literal/update/application — and no more.
+  sets, quantifiers over finite sets, and function literal/update/application — and no more; plus the closed
+  liveness pieces `data Fairness = WeakFair | StrongFair` and `data Temporal = Always Expr | Eventually Expr |
+  LeadsTo Expr Expr`, carried by the `modelFairness`/`modelProperties` fields
+  ([`formal_model_doctrine.md §2`](../documents/engineering/formal_model_doctrine.md#2-the-model-is-data)).
 - A worked small model (`ToyModel` — e.g. a bounded two-process mutual exclusion) authored purely inside the
-  fragment, carrying at least one named safety invariant and a bounding constraint.
+  fragment, carrying at least one named safety invariant, a bounding constraint, and — under a weak-fairness
+  annotation — at least one liveness property (e.g. *each process eventually enters its critical section*).
 
 ### Validation
 1. The fragment types and `ToyModel` compile on the pinned toolchain; `ToyModel`'s transition relation is
@@ -163,11 +171,14 @@ and [`§5 — generated, never committed`](../documents/engineering/formal_model
 with [`generated_artifacts_doctrine.md §3 — the rule`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule):
 build `emitTLA :: Model -> (Tla, Cfg)` as a structural walk of the fragment — state variables become
 `VARIABLES`, the initial assignment becomes `Init`, each action an operator, their disjunction `Next`,
-invariants named operators in the `.cfg`, and the constraint a `CONSTRAINT` — emitted by an `amoebius`
-subcommand, stamped generated, and never committed.
+invariants named operators listed as `INVARIANT`s in the `.cfg`, the constraint a `CONSTRAINT`, each
+`modelFairness` entry a `WF_vars`/`SF_vars` conjunct on the temporal `Spec`, and each `modelProperties` entry a
+named temporal operator listed as a `PROPERTY` — emitted by an `amoebius` subcommand, stamped generated, and
+never committed.
 
 ### Deliverables
-- `emitTLA`, a total renderer, with the structural mapping above.
+- `emitTLA`, a total renderer, with the structural mapping above — safety (`INVARIANT`), the fairness-annotated
+  `Spec`, and liveness (`PROPERTY`).
 - An `amoebius dev model` subcommand that emits the `.tla`/`.cfg` fresh into an ignored build directory with a
   generated-by header; no `.tla`/`.cfg` is added to version control.
 - A Register-1 golden test pinning the *renderer's* byte-for-byte output — the golden is a fixture of the
@@ -187,9 +198,12 @@ The whole sprint (📋 Planned).
 `tla2tools` invocation wrapper, a seeded-mutation variant of `ToyModel` — target paths, not yet built.
 **Blocked by**: Sprint 2.2, Sprint 2.3.
 **Independent Validation**: on the correct `ToyModel` the in-process explorer and TLC (over the freshly
-emitted spec, via the version-stable JVM `tla2tools` toolchain) reach the identical verdict (same
-reachable-state count, no counterexample); on one seeded mutation **both** report the same reachable illegal
-state.
+emitted spec, via the version-stable JVM `tla2tools` toolchain) reach the identical **safety** verdict (same
+reachable-state count, no counterexample); on one seeded safety mutation **both** report the same reachable
+illegal state; TLC proves the `ToyModel` liveness `PROPERTY` under weak fairness and that same property goes
+**red** with the fairness annotation removed (the fairness-sensitivity check); and a QuickCheck generator over
+the `Model` fragment finds no random small model on which the explorer and TLC disagree (identical verdict +
+reachable-state count — the differential faithfulness test).
 **Docs to update**: `documents/engineering/formal_model_doctrine.md` (§4/§6 — the correspondence + honesty
 ledger this gate emits), `DEVELOPMENT_PLAN/README.md` (flip the Phase-2 status when the gate passes),
 `DEVELOPMENT_PLAN/substrates.md` (the Phase-2 `none` gate row).
@@ -203,15 +217,24 @@ operational form of "the two renderings mean the same thing."
 
 ### Deliverables
 - A round-trip harness that: emits `ToyModel` to `.tla`/`.cfg`, runs TLC through `tla2tools`, runs the
-  in-process explorer, and asserts identical verdicts.
+  in-process explorer, and asserts identical safety verdicts; and drives TLC on the liveness `PROPERTY` under
+  fairness (green) and with fairness removed (red).
 - A deliberately broken `ToyModel'` (a mutated guard or effect that reaches the illegal state) that **both**
-  checkers catch, with the counterexample reported by each.
+  checkers catch, plus a **liveness-breaking** variant (a stall/livelock that safety misses) that TLC's
+  `PROPERTY` catches — showing liveness adds fault-detection safety alone lacks.
+- A **differential faithfulness** property test: a QuickCheck generator over the `Model` fragment runs the
+  explorer and TLC on random small models and asserts identical verdicts + reachable-state counts, shrinking any
+  divergence to a minimal offending model
+  ([`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-correspondence-by-construction)).
 - The Register-1 proven-for-the-model ledger token, carrying the honest caveats of §6 (bounded scope; not a
-  general-scope proof; not a proof the model is the right model).
+  general-scope proof; not a proof the model is the right model; liveness proven only under the assumed
+  fairness).
 
 ### Validation
 1. Explorer and TLC agree (same reachable-state count, no counterexample) on the correct `ToyModel`; both go
-   red on the seeded mutation — the round-trip closes and the kernel is validated for the model at scope.
+   red on the seeded safety mutation; TLC proves the liveness `PROPERTY` under fairness and reports it red with
+   fairness removed and on the liveness-breaking variant; the differential generator finds no
+   explorer/TLC disagreement — the round-trip closes and the kernel is validated for the model at scope.
 
 ### Remaining Work
 The whole sprint (📋 Planned). This sprint carries the phase gate.

@@ -313,7 +313,53 @@ with an explicit operator override the only escape.
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 29.5: Register-3 correspondence — Inject drills against the running forest + live gate `.dhall` + ledger 📋
+## Sprint 29.5: Register-2.5 gateway-migration runtime fidelity — simulation + trace validation 📋
+
+**Status**: Planned
+**Implementation**: `test/sim/GatewayMigrationSimSpec.hs` (the `IOSimPOR` battery over the modeled
+route53 + geo-replicated Pulsar) and `test/sim/GatewayMigrationTrace.hs` (the trace-validator checking observed
+transitions against the emitted `Next`), driving the real `src/Amoebius/Multicluster/*` forest code lifted onto
+the Phase-11.4 `io-classes` `Env` interface — target paths, not yet built.
+**Blocked by**: Sprint 29.2, Sprint 29.3 (the built `Multicluster/*` forest code); Phase 3 (the emitted TLA+
+spec + `interpret`); Phase 11 Sprint 11.4 (the `io-classes` seams + the modeled route53/Pulsar).
+**Independent Validation**: the real `Multicluster/*` forest code runs under `IOSimPOR` against the modeled
+route53 (short-TTL, **no compare-and-swap**, propagation delay) and modeled geo-replicated Pulsar with injected
+partition, kill-cluster-mid-geo-sync, and replication-lag; the suite asserts the four **safety** invariants
+(`UniqueGatewayOwner`, `SessionAlwaysRebindable`, `PlannedIsLossless`, `NoWriteAfterStaleFailover`) hold on
+every explored schedule, **and** trace-validates the forest's observed transition log step-by-step against the
+Phase-3 emitted spec's `Next` relation
+([`formal_model_doctrine.md §8`](../documents/engineering/formal_model_doctrine.md#8-trace-validation-the-earlier-codemodel-bridge))
+— pulling the runtime-fidelity (Tier-2) obligation **forward** from Register-3-only chaos into deterministic,
+replayable simulation. Substrate `none`, Register 2.5.
+**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (Phase-29 status backlink),
+`documents/engineering/gateway_migration_model_doctrine.md` (§6 the Register-2.5 trace-validation bridge),
+`DEVELOPMENT_PLAN/system_components.md`.
+
+### Objective
+Adopt [`deterministic_simulation_doctrine.md §4`](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits)
+and [`gateway_migration_model_doctrine.md §6`](../documents/engineering/gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty):
+discharge the runtime-fidelity obligation in two stages, not one — first as trace-validated deterministic
+simulation against the modeled world here (Register 2.5), then as live Inject drills (Sprint 29.6, Register 3)
+— so the code↔model bridge is a formal, early, replayable check rather than only sampled live chaos.
+
+### Deliverables
+- The `GatewayMigrationSimSpec` battery: the real forest code under `IOSimPOR` against the modeled
+  route53/Pulsar, asserting the four safety invariants under injected partition/kill-cluster-mid-geo-sync/lag.
+- The `GatewayMigrationTrace` validator: each observed transition of the simulated forest is a legal `Next`-step
+  of the Phase-3 emitted spec (a mismatch is a code↔model divergence, red).
+- A Register-2.5 proven/tested/assumed ledger — the built forest upholds the safety invariants and refines the
+  model's `Next` under the modeled schedules and faults; honest limit: modeled route53/Pulsar fidelity and real
+  replication-lag / clock-skew physics remain the Register-3 residue (Sprint 29.6).
+
+### Validation
+1. `cabal test gateway-migration-sim` is green — no schedule violates a safety invariant and no observed
+   transition falls outside `Next`; a deliberately broken forest (a fence dropped, a decommission-before-drain)
+   is caught red; the discovered counterexample replays identically under its seed.
+
+### Remaining Work
+The whole sprint (📋 Planned).
+
+## Sprint 29.6: Register-3 correspondence — Inject drills against the running forest + live gate `.dhall` + ledger 📋
 
 **Status**: Planned
 **Implementation**: `test/dhall/phase_29_gateway_migration.dhall` (the live gate topology) and
@@ -322,7 +368,8 @@ against the built runtime) — target paths, not yet built. The Phase-3 `Gateway
 proof, and its io-sim agreement were authored and discharged in Phase 3; this sprint consumes them, it does not
 re-author them.
 **Blocked by**: Phase 3 (the proven-for-the-model `GatewayMigration` `Model` + `interpret` + structural-fit
-fold); Sprint 29.2; Sprint 29.3; Sprint 29.4.
+fold); Sprint 29.2; Sprint 29.3; Sprint 29.4; Sprint 29.5 (the Register-2.5 simulation + trace validation that
+precedes the live drills).
 **Independent Validation**: the built `src/Amoebius/Multicluster/*` decision core is shown to be the Phase-3
 `interpret` (correspondence-by-construction — no variable→module table, per the superseded framing's reversal);
 the Register-3 Inject drills (cut replication, kill the lead mid-`Planned`-handover, kill the lead with no drain
@@ -398,6 +445,7 @@ The whole sprint (📋 Planned).
 - [system_components.md](system_components.md) — target component inventory (the `Multicluster/*` module paths)
 - [substrates.md](substrates.md) — substrate registry and per-phase map
 - [Gateway Migration Model Doctrine](../documents/engineering/gateway_migration_model_doctrine.md) — the one obligation, both branches, correspondence-by-construction, and the Register-3 chaos residue this phase discharges
+- [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — the Register-2.5 io-sim + trace-validation (Sprint 29.5) that pulls the runtime-fidelity obligation forward from Register-3-only chaos
 - [Gateway Migration Doctrine](../documents/engineering/gateway_migration_doctrine.md) — the `GatewayMigration = <Planned | Failover>` taxonomy, client rebind, and the typed edge-observed state machine
 - [Chaos & Failover Doctrine](../documents/engineering/chaos_failover_doctrine.md) — the invariant-confluence Second Axis, the Inject move, and the proven/tested/assumed cross-boundary ledger
 - [Cluster Lifecycle Doctrine](../documents/engineering/cluster_lifecycle_doctrine.md) — amoebic spawning, teardown-vs-chaos, and push-back

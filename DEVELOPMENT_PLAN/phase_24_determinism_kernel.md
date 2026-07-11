@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_23_content_store_workflow.md, DEVELOPMENT_PLAN/phase_25_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_26_infernix_lift.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: documents/engineering/deterministic_simulation_doctrine.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_23_content_store_workflow.md, DEVELOPMENT_PLAN/phase_25_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_26_infernix_lift.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Land the three determinism-kernel primitives — the `ContentAddress` typeclass, the
@@ -33,6 +33,13 @@ live linux-cpu substrate fingerprint — so two runs share a store namespace onl
 same experiment on the same substrate. Third, it implements the SplitMix seed derivation that gives every
 stream a seed that is a pure function of `(masterSeed, streamIndex)` alone, independent of worker count,
 scheduling, and assignment.
+
+These seams are shared, not ML-specific. The SplitMix seed derivation and the `MonadTime`/`MonadTimer` clock
+injection that make an ML run bit-reproducible are the **same** injection seams the **Register-2.5 deterministic
+simulation** ([`deterministic_simulation_doctrine.md §6`](../documents/engineering/deterministic_simulation_doctrine.md#6-one-determinism-substrate-two-uses))
+uses to make a simulation deterministically replayable — one determinism substrate, two uses (reproducible ML
+*and* replayable simulation). Injecting time and randomness through typed seams rather than reading wall-clock
+or ambient entropy is what makes both "deterministic by construction."
 
 The scope deliberately stops at the kernel primitives and one live reproducibility proof. The gate workload is
 a small seeded compute stage — a pinned content-addressed input, a pure stage, and a request-carried derived

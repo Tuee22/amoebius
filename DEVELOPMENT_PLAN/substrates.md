@@ -213,8 +213,8 @@ sprint breakdown lives in its phase document (`phase_00_documentation_suite.md` 
 |-------|------|-----------|--------------------|
 | 0 | Documentation suite (whole DSL) | `none` | The gate is the documentation lint — header metadata, SSoT/no-duplication, no orphan cross-links. No host, no cluster. |
 | 1 | Toolchain spike | `none` | A build-only probe of `dhall` + `io-sim` + resolver deps on the pinned toolchain; no host or cluster. |
-| 2 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | `none` | Register 1: the in-process explorer + the `emitTLA` renderer + TLC on the generated `.tla`; no host or cluster. |
-| 3 | Gateway-migration model (both branches) | `none` | Register 1: `emitTLA` + TLC + io-sim over the `GatewayMigration` `Model`, before any real resource. |
+| 2 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | `none` | Register 1: the in-process explorer + the `emitTLA` renderer + TLC on the generated `.tla` (safety `INVARIANT`s + fairness/temporal `PROPERTY`s) + the differential explorer↔TLC property; no host or cluster. |
+| 3 | Gateway-migration model (both branches) | `none` | Register 1: `emitTLA` + TLC (safety + liveness under fairness) + io-sim over the `GatewayMigration` `Model`, before any real resource. |
 | 4 | Dhall Gate-1 schema + smart-constructor prelude | `none` | Register 1: `dhall type` over the schema + corpus; authoring-time only, no binary. |
 | 5 | GADT IR + total decoder (Gate 2) | `none` | Register 1: the in-process `Dhall.inputFile` decode + total refining fold; no cluster. |
 | 6 | Illegal-state corpus + properties + validation-locus ledger | `none` | Register 1: the negative/positive corpus + QuickCheck + compile-fail goldens; no cluster. |
@@ -222,7 +222,7 @@ sprint breakdown lives in its phase document (`phase_00_documentation_suite.md` 
 | 8 | Capability → provider → shape binder | `none` | Register 1: the capability→`ServiceSpec` binding checked at the type level. |
 | 9 | Pure `render` + rendered-output goldens | `none` | Register 1: `render` + byte-for-byte manifest goldens; rendering never touches live infra. |
 | 10 | chain/Step kernel + `--dry-run` plan render | `none` | Register 1: the pure `[Step]` plan + `--dry-run` golden; no effects. |
-| 11 | Boundary-integration fake-tool harness | `none` | Register 2: the binary run against fake `kubectl`/`helm`/`docker`/`pulumi`; no cluster. |
+| 11 | Boundary-integration fake-tool harness + deterministic-simulation substrate | `none` | Register 2 (fake tools) + Register 2.5 (the `io-classes` env + modeled fault-injectable substrates under `IOSim`); no cluster. |
 | 12 | SPA composition (representational) + demo-SPA local | `none` | Register 1/2: composition property + the PureScript demo SPA against a faked backend (Playwright); no cluster. |
 | 13 | Python midwife + substrate detect + single kind cluster | `linux-cpu` | The default substrate brings up an empty single-node kind cluster idempotently; substrate *detection* runs here. First live (Register 3) phase. |
 | 14 | Multi-arch base image + jit-build resolver + `distribution` registry | `linux-cpu` | The base-image build + atomic publish into the in-cluster registry, on the default substrate. |

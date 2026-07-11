@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_12_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md
+**Referenced by**: documents/engineering/deterministic_simulation_doctrine.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_12_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the discipline that lets amoebius validate the overwhelming majority of its behaviour **before any cluster exists** — the pre-cluster conformance spine that exercises decode → validate → render → plan → dry-run end to end in Registers 1 and 2, and the load-bearing invariant that **rendering a plan must never require live infrastructure**.
@@ -49,12 +49,20 @@ Naming the three registers (definitions owned by [testing_doctrine.md §2](./tes
   `helm`/`kubectl`/`docker`/`pulumi` (or a fake interpreter over the `[Step]`/effect data) that record their
   argv and applied bytes, asserting the exact commands and manifests — plus the demo SPAs run locally against a
   faked backend, driven end to end.
-- **Register 3 — live infrastructure only.** The residue that cannot be settled by inspecting source: the
-  apiserver admitting and the scheduler placing pods, the LoadBalancer coming up, etcd forming quorum, a VM
-  interposing, a broker offloading, geo-replication lag, DNS propagation, chaos/partition healing.
+- **Register 2.5 — deterministic simulation (no cluster).** The *real* daemon/reconciler code, lifted onto
+  `io-classes`, run under `IOSim`/`IOSimPOR` against a modeled, fault-injectable environment (fake
+  Pulsar/MinIO/apiserver/route53/Vault/clock) — concurrent schedules and injected partition/reorder/redelivery/
+  crash, deterministically replayable. This exercises the daemon's real *schedule* under faults, which Registers
+  1 and 2 structurally cannot reach; owned by
+  [deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md) (register definition in
+  [testing_doctrine.md §2](./testing_doctrine.md#2-three-registers-of-amoebius-testing)).
+- **Register 3 — live infrastructure only.** The residue that cannot be settled by inspecting source or by
+  simulation: the apiserver admitting and the scheduler placing pods, the LoadBalancer coming up, etcd forming
+  quorum, a VM interposing, a broker offloading, geo-replication lag, DNS propagation, chaos/partition healing —
+  and that the real substrates behave as Register 2.5 models them.
 
-The conformance harness is Registers 1 and 2. Register 3 is the acceptance gate of each live phase, not part of
-the harness.
+The conformance harness is Registers 1, 2, and 2.5. Register 3 is the acceptance gate of each live phase, not
+part of the harness.
 
 ## 3. The load-bearing invariant: rendering never touches live infrastructure
 
@@ -89,9 +97,14 @@ For every feature, the harness exercises the full pure pipeline and locks it:
 4. **Plan** — `chain` produces the `[Step]` value; `--dry-run` renders it; a golden test pins the plan.
 5. **Fake apply (Register 2)** — the binary runs the plan against fake tools; the recorded commands and applied
    bytes are asserted.
+6. **Simulate (Register 2.5)** — where a feature carries real concurrency (a reconcile loop, a failover
+   takeover, a dedup fold), the real code runs under `IOSim`/`IOSimPOR` against the modeled faulty environment,
+   asserting its invariants under injected schedules and faults ([deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md)).
 
-Nothing in steps 1–5 requires a cluster. The single IO seam (the step that would actually invoke a tool or the
-apiserver) is the only thing deferred to Register 3.
+Nothing in steps 1–6 requires a cluster. The single IO seam (the step that would actually invoke a real tool or
+the real apiserver) is the only thing deferred to Register 3 — and even its *behaviour under faults* is
+exercised against modeled substrates in step 6, so what Register 3 uniquely adds is **fidelity** (that the real
+substrates behave as modeled), not first exposure.
 
 ---
 
@@ -104,8 +117,13 @@ and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md):
   spec-composition and rendered-output layers.
 - It proves **nothing** about whether the physical effects converge (Register 3). A green harness is quoted as
   "decodes + renders coherently + plan is exact," never as "the cluster is correct."
+- A green **Register 2.5** run proves the *real code upholds its invariants under the modeled schedules and
+  faults* — a genuinely stronger claim than the fake-tool boundary — but says **nothing** about whether the real
+  Pulsar/apiserver/route53 behave as modeled; that fidelity is an assumed premise, discharged by a narrow
+  Register-3 conformance check ([deterministic_simulation_doctrine.md §5](./deterministic_simulation_doctrine.md#5-what-dst-establishes-and-the-one-premise-it-buys)).
 - The blindness between registers is load-bearing: a green Register-1 suite says nothing about what Register 3
-  would find, and a fake-tool Register-2 run says nothing about a real broker's behaviour.
+  would find, a fake-tool Register-2 run says nothing about a real broker's behaviour, and a green Register-2.5
+  run says nothing about whether the modeled broker matches the real one.
 
 ---
 

@@ -2,12 +2,15 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_12_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md
+**Referenced by**: documents/engineering/deterministic_simulation_doctrine.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_12_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md
 **Generated sections**: none
 
 > **Purpose**: Run the real amoebius binary over the pure `[Step]` plan against fake `kubectl`/`helm`/`docker`/`pulumi`
 > that record their argv and applied-manifest bytes, asserting the exact commands and bytes byte-for-byte — the
-> Register-2 boundary that closes the pre-cluster conformance spine without ever standing up a cluster.
+> Register-2 boundary that closes the pre-cluster conformance spine without ever standing up a cluster — and
+> stand up the **Register-2.5 deterministic-simulation substrate**: the `io-classes` seams and the modeled,
+> fault-injectable environment (fake Pulsar/MinIO/apiserver/route53/Vault/clock) the later live-band phases run
+> their real code against under `IOSimPOR`.
 
 ---
 
@@ -192,6 +195,47 @@ enforcement is owned by [Phase 20](phase_20_live_dsl_singleton.md)).
 ### Remaining Work
 The whole sprint (📋 Planned).
 
+## Sprint 11.4: The `io-classes` seams + the modeled deterministic-simulation environment (Register 2.5) 📋
+
+**Status**: Planned
+**Implementation**: `src/Amoebius/Sim/Env.hs` (the typed effect interface — publish/consume, put/get-blob,
+apply-object, write-DNS, vault-op, now/delay — polymorphic over an `io-classes` monad `m`),
+`src/Amoebius/Sim/Fakes/{Pulsar,MinIO,ApiServer,Route53,Vault,Clock}.hs` (the in-`IOSim` modeled substrates with
+a typed fault model), and a `sim-spec` test-suite stanza — target paths, not yet built.
+**Blocked by**: Sprint 11.1 (the single IO seam this generalizes into a typed effect interface); Phase 1's
+recorded `io-sim`/`io-classes` pin under GHC 9.12.4.
+**Independent Validation**: a toy reconcile loop written against the `Env` interface runs under both `m = IO`
+(no-op real clients) and `m = IOSim s` (the modeled substrates); an `IOSimPOR` run injects a
+partition/redelivery schedule and the discovered interleaving is **deterministically replayable** (the same
+seed reproduces the same trace byte-for-byte); a source gate confirms concurrency-touching code is polymorphic
+in `m` (no bare `IO`, no `forkIO`).
+**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (Phase-11 status backlink),
+`documents/engineering/testing_doctrine.md` (the Register-2.5 substrate), `DEVELOPMENT_PLAN/system_components.md`.
+
+### Objective
+Adopt [`deterministic_simulation_doctrine.md §2/§3`](../documents/engineering/deterministic_simulation_doctrine.md#2-the-io-classes-environment-abstraction--build-it-pure-lift-it-whole):
+build the `io-classes` effect interface and the modeled, fault-injectable environment so that the *real*
+daemon/reconciler code — written once, polymorphic over `m` — runs as the production daemon (`m = IO`) and as a
+deterministic model under test (`m = IOSim s`) from one source, per the "build it pure; lift it whole" ladder
+([`chaos_failover_doctrine.md §10`](../documents/engineering/chaos_failover_doctrine.md#10-simulate--the-pure-program-lifted-io-sim)).
+
+### Deliverables
+- The typed `Env m` effect interface and its two interpreters (real clients under `IO`; the modeled substrates
+  under `IOSim s`), reusing the `MonadTime`/`MonadTimer` clock and the seed seams the determinism kernel
+  ([phase_24](phase_24_determinism_kernel.md)) also uses — one determinism substrate, two uses.
+- The modeled Pulsar/MinIO/apiserver/route53/Vault/clock, each with the typed fault model (delay, reorder,
+  duplicate, partition, crash) named in
+  [`deterministic_simulation_doctrine.md §3`](../documents/engineering/deterministic_simulation_doctrine.md#3-the-simulated-environment-and-its-fault-model).
+- A demo `IOSimPOR` run of a toy reconcile loop showing a partition/redelivery schedule is deterministically
+  replayable, wired as the `sim-spec` skeleton the live-band phases extend.
+
+### Validation
+1. The toy loop runs under both interpreters; the `IOSimPOR` partition/redelivery run replays identically under
+   the same seed; the `m`-polymorphism source gate is green.
+
+### Remaining Work
+The whole sprint (📋 Planned).
+
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
@@ -216,7 +260,8 @@ The whole sprint (📋 Planned).
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — §2 the three registers (Register 2 adopted
   here), §4 the per-run proven/tested/assumed ledger
 - [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — §2 the registers for
-  pre-cluster validation, §3 the load-bearing invariant, §4 the spine (fake-apply step), §5 the honesty limit
+  pre-cluster validation, §3 the load-bearing invariant, §4 the spine (fake-apply + simulate steps), §5 the honesty limit
+- [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — the Register-2.5 io-classes environment substrate built in Sprint 11.4 and extended by the live-band phases
 - [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — why the applied
   bytes equal the `--dry-run` bytes and are never committed
 - [phase_09](phase_09_render_manifest_goldens.md) — the `render` manifest goldens = the applied bytes asserted here

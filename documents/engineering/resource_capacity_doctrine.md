@@ -64,6 +64,13 @@ this is decode-foreclosed: a *spec-layer guarantee* (the spec never reaches the 
 not an absence of inhabitants. Any doc that calls a capacity check "uninhabitable" is reporting the wrong layer,
 and this doc forbids that.
 
+Because the guarantee is a *checked rejection*, the check's own correctness is a property to establish, not a
+given. The fold's soundness — and, for the two-directionally-decidable checks (`Σ ≤ backing`, elementwise
+compatibility), its **accepts ⟺ in-envelope equivalence** — is property-tested over generated inputs in Phase 7
+(never a fixed fixture set alone). Where a specific fold's algebraic laws are load-bearing enough to warrant a
+machine-checked proof, that is the surgical, deferred proof-assistant track
+([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md)), not a broad proof layer.
+
 **The compute placement is sound, not complete.** Optimal bin-packing is NP-hard, so `place`
 ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)) searches for a feasible pod→node assignment by a
 total heuristic (first-fit-decreasing) rather than an exhaustive optimum. The honesty this buys is

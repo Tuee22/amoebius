@@ -37,10 +37,13 @@ These rules are absolute and govern all work:
    during development. The required substrate is named in each phase below.
 4. **Phase 0 is the whole documentation suite.** The entire DSL is documented — comprehensively and
    explicitly — before any implementation phase begins. See [documents/engineering/README.md](../documents/engineering/README.md).
-5. **Validate in three registers; pre-cluster before live.** Validation happens in three registers
+5. **Validate in the registers; pre-cluster before live.** Validation happens in registers
    ([`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md),
    [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md)): **Register 1** (pure/golden,
-   in-process, no cluster), **Register 2** (boundary integration with fake tools, no cluster), and
+   in-process, no cluster), **Register 2** (boundary integration with fake tools, no cluster),
+   **Register 2.5** (deterministic simulation — the real daemon/reconciler code under `IOSim`/`IOSimPOR`
+   against a modeled fault-injectable environment, no cluster;
+   [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md)), and
    **Register 3** (live infrastructure). The **pre-cluster band (phases 1–12, substrate `none`)** discharges
    Registers 1–2 — the DSL's illegal-state-unrepresentable discipline, the pure `render`/plan/`--dry-run`, the
    SPA composition, and the gateway-migration design invariants (both `Planned` and `Failover` branches) — via
@@ -153,8 +156,8 @@ ordered by substrate; phases **33+** are the backlog.
 |-------|------|-----------|----------|-----------------|--------|----------|
 | 0 | Documentation suite (whole DSL) | none | — | the documentation lint passes (headers, SSoT, no orphan links) | 🔄 Active | [phase_00](phase_00_documentation_suite.md) |
 | 1 | Toolchain spike | none | 1 | a probe package with `dhall` + `io-sim` + `io-classes` (and the jit-build resolver deps) builds under the pinned GHC/Cabal, or the exact `allow-newer`/patch/blocker is recorded | 📋 Planned | [phase_01](phase_01_toolchain_spike.md) |
-| 2 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | none | 1 | the reifiable `Model` explorer and the `emitTLA` renderer round-trip a small model; the generated `.tla` is TLC-checkable and never committed | 📋 Planned | [phase_02](phase_02_formal_model_kernel.md) |
-| 3 | Gateway-migration model (both branches) | none | 1 | `emitTLA` renders the `GatewayMigration` `Model`; TLC reaches every invariant at scope (both `Planned` + `Failover`) with a passing vacuity/cutoff check; io-sim agrees; a seeded mutation is caught | 📋 Planned | [phase_03](phase_03_gateway_migration_model.md) |
+| 2 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | none | 1 | the reifiable `Model` explorer and the `emitTLA` renderer round-trip a small model (safety **and** a liveness `PROPERTY` under fairness, fairness-sensitivity checked); a differential generator finds no explorer/TLC disagreement; the generated `.tla` is TLC-checkable and never committed | 📋 Planned | [phase_02](phase_02_formal_model_kernel.md) |
+| 3 | Gateway-migration model (both branches) | none | 1 | `emitTLA` renders the `GatewayMigration` `Model`; TLC reaches every safety invariant and every liveness `PROPERTY` (under fairness) at scope (both `Planned` + `Failover`) with passing vacuity/fairness-sensitivity/cutoff checks; io-sim agrees on safety; both a safety and a liveness mutation are caught | 📋 Planned | [phase_03](phase_03_gateway_migration_model.md) |
 | 4 | Dhall Gate-1 schema + smart-constructor prelude | none | 1 | `dhall type` accepts the positive corpus and rejects each Gate-1-class negative at authoring time (no binary) | 📋 Planned | [phase_04](phase_04_dhall_gate1_schema.md) |
 | 5 | GADT IR + total decoder (Gate 2) | none | 1 | `cabal test dsl-spec` green — each positive fixture decodes; each Gate-2 negative returns a structured `Left`; the decode path is total | 📋 Planned | [phase_05](phase_05_gadt_decoder_gate2.md) |
 | 6 | Illegal-state corpus + properties + validation-locus ledger | none | 1 | every negative fixture is rejected at its tagged locus (Gate-1 / Gate-2 / compile-fail); QuickCheck green; the per-entry validation-locus ledger is emitted | 📋 Planned | [phase_06](phase_06_illegal_state_corpus.md) |
@@ -162,7 +165,7 @@ ordered by substrate; phases **33+** are the backlog.
 | 8 | Capability → provider → shape binder | none | 1 | a capability need decodes to a `ServiceSpec` at the type level; a product-named app fails Gate 1 | 📋 Planned | [phase_08](phase_08_capability_binder.md) |
 | 9 | Pure `render` + rendered-output goldens | none | 1 | `render :: ServiceSpec -> [K8sObject]` byte-for-byte golden-locked; the rendered-output-golden illegal states (hardened context, no backdoor ingress, derived NetworkPolicy) hold on the emitted objects | 📋 Planned | [phase_09](phase_09_render_manifest_goldens.md) |
 | 10 | chain/Step kernel + `--dry-run` plan render | none | 1 | `chain :: cfg -> [Step]` renders a byte-for-byte `--dry-run` plan with no effects; the pure descent is golden-locked | 📋 Planned | [phase_10](phase_10_chain_kernel_dryrun.md) |
-| 11 | Boundary-integration fake-tool harness | none | 2 | the binary runs the plan against fake `kubectl`/`helm`/`docker`/`pulumi`, asserting exact commands + applied bytes — no cluster | 📋 Planned | [phase_11](phase_11_boundary_fake_tool_harness.md) |
+| 11 | Boundary-integration fake-tool harness + deterministic-simulation substrate | none | 2 / 2.5 | the binary runs the plan against fake `kubectl`/`helm`/`docker`/`pulumi`, asserting exact commands + applied bytes; and the `io-classes` env substrate + modeled fault-injectable Pulsar/MinIO/apiserver/route53/Vault/clock replays a partition/redelivery schedule deterministically — no cluster | 📋 Planned | [phase_11](phase_11_boundary_fake_tool_harness.md) |
 | 12 | SPA composition (representational) + demo-SPA local | none | 1/2 | a multi-service app + an ML-workflow demo fragment composes and decodes (`prop_spaCompositionDecodes`); the PureScript demo SPA runs locally against a faked backend (Playwright) | 📋 Planned | [phase_12](phase_12_spa_composition_representational.md) |
 | 13 | Python midwife + substrate detect + single kind cluster | linux-cpu | 3 | `pb bootstrap --distro=kind` brings up an empty single-node kind cluster; re-run is a no-op; every external invocation went through an absolute path | 📋 Planned | [phase_13](phase_13_midwife_bootstrap_kind.md) |
 | 14 | Multi-arch base image + jit-build resolver + `distribution` registry | linux-cpu | 3 | the multi-arch base image (service binaries + jit-build resolver/toolchain) publishes atomically into the in-cluster `distribution` registry; no public-registry pulls | 📋 Planned | [phase_14](phase_14_base_image_registry.md) |
