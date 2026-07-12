@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for how amoebius moves the wild-ingress gateway between clusters — the typed `GatewayMigration = <Planned | Failover>` taxonomy, the planned strong-consistency handover, the unplanned survivor-wins failover, and the client-rebind protocol that keeps a live session bindable throughout.
@@ -37,8 +37,12 @@ the mechanics each arm invokes — the traffic weight-shift, the hub-role move, 
 proof — stay with their existing owners and are linked, never restated.
 
 **What it forecloses.** Naming a gateway change without committing to a guarantee. The cost is that a gateway
-migration is now a first-class deployment-rules concept an operator must classify as `Planned` or
-`Failover`; there is no untyped "repoint DNS and hope" path.
+migration is now a first-class deployment-rules concept with a committed guarantee per arm; there is no untyped
+"repoint DNS and hope" path. The mode is **world-triggered, not an authored field**: an operator initiates a
+`Planned` migration by editing the parent-owned pairing (or a `ScalingPolicy` initiates one on a home→cloud
+move), and `Failover` is the automatic, availability-first response to a vanished active — never an
+operator-selected posture. The unified PACELC deployment-rules surface that carries the failover budget and
+the participation flag is owned by [`consistency_pacelc_doctrine.md`](./consistency_pacelc_doctrine.md).
 
 Across both arms one thing is invariant: the strong-consistency boundary *within* a cluster is unchanged —
 it is delegated to MinIO, Pulsar, and Percona/Patroni Postgres
@@ -233,6 +237,10 @@ status.
   A cluster's own gateway presence and routes stay in the child's spec; the failover/migration pairing, DNS
   record, and hub role are the parent's. The **DSL type and its projection are design intent**, authored in
   the DSL phase and not built today ([dsl_doctrine.md](./dsl_doctrine.md#recursion-a-childs-spec-is-a-typed-subtree-projection)).
+  The unified PACELC deployment-rules surface that gathers this relation with the R8 replication-lag bound and
+  the R9 recovery-time budget — and the derived-RPO rule (the data-loss window *is* the lag bound, not a
+  separately-authored field) — is owned by
+  [`consistency_pacelc_doctrine.md` §3](./consistency_pacelc_doctrine.md#3-the-one-configurable-axis--the-deployment-rules-pacelc-surface).
 - Per-upload spec validation does **not** re-run the model: TLA+/TLC proves the gateway-migration protocol —
   **both** the `Planned` and `Failover` branches — once at design time, parameterized over N clusters and
   reduced by the pairwise cutoff; a spec is validated only by the typed, decode-foreclosed check
@@ -251,6 +259,7 @@ status.
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — the route53 DNS record this migration repoints (§5.1).
 - [Platform Services Doctrine](./platform_services_doctrine.md) — Keycloak owns all wild ingress; the single wild-ingress path (§9).
 - [Single Logical Data Plane Doctrine](./single_logical_data_plane_doctrine.md) — a genuine second cluster reached by gateway migration, versus remote compute attached to one data plane.
+- [Consistency & PACELC Doctrine](./consistency_pacelc_doctrine.md) — the whole-stance PACELC posture and the unified deployment-rules surface (the R8 lag bound, R9 RTO budget, and per-app participation flag) that this taxonomy's budget and pairing feed into.
 - [Illegal-State Catalog](../illegal_state/illegal_state_catalog.md) — the "session that cannot rebind on migration" entry (§3.44) and the GADT-indexed-state-machine technique (§4.3).
 - [DSL Doctrine](./dsl_doctrine.md) — the typed `GatewayFailover` forest relation as a parent-minted, child-projected subtree field.
 - [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — the formal model of the `Failover` branch (Phase 29).

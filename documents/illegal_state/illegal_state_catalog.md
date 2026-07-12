@@ -103,7 +103,7 @@ flowchart TD
 
 ## 3. The catalog — states a valid spec cannot represent
 
-This section is the **themed map**. Each of the forty-five illegal states is treated in depth in exactly one
+This section is the **themed map**. Each illegal state is treated in depth in exactly one
 of the eight themed sub-catalogs below; the *how* — the seven typing techniques, the coverage matrix, and
 the foreclosure layers — is owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md). Each
 entry: the **failure** (how it goes wrong in raw k8s), the **owning doctrine** (the SSoT for the rule), the
@@ -190,6 +190,11 @@ residue Register 3 owns). Most entries name a primary locus plus a live-effect r
 - [§3.36](./illegal_state_multicluster.md#336-a-declared-remote-full-agent-with-no-control-plane-witness) — A declared-remote full agent with no control-plane witness
 - [§3.38](./illegal_state_multicluster.md#338-a-host-worker-granted-a-control-plane-witness-or-treated-as-a-member) — A host worker granted a control-plane witness or treated as a member
 - [§3.44](./illegal_state_multicluster.md#344-a-session-that-cannot-rebind-on-gateway-migration) — A session that cannot rebind on gateway migration
+- [§3.47](./illegal_state_multicluster.md#347-a-failover-data-loss-budget-authored-below-the-replication-lag-bound) — A failover data-loss budget authored below the replication-lag bound
+- [§3.48](./illegal_state_multicluster.md#348-a-geo-replication-pair-whose-active-and-standby-are-the-same-cluster) — A geo-replication pair whose active and standby are the same cluster
+- [§3.49](./illegal_state_multicluster.md#349-a-child-spec-that-authors-its-own-gateway-failover-pairing) — A child spec that authors its own gateway-failover pairing
+- [§3.50](./illegal_state_multicluster.md#350-a-standing-spec-that-authors-an-emergency-failover-as-desired-state) — A standing spec that authors an emergency Failover as desired state
+- [§3.51](./illegal_state_multicluster.md#351-an-operator-authored-confluent-cross-boundary-disposition) — An operator-authored Confluent cross-boundary disposition
 
 ### Readiness, promotion & monitoring — [`illegal_state_lifecycle.md`](./illegal_state_lifecycle.md)
 

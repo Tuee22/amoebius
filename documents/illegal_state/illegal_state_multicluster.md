@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/gateway_migration_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering cross-cluster capacity folds,
@@ -147,6 +147,103 @@ residue — that the `drain-complete` edge (old-gateway traffic ≈ 0) is truthf
 `drain-complete` index, so no path that would strand a live session survives decode); `live-effect` (that the
 `drain-complete` edge, old-gateway traffic ≈ 0, is truthfully observed at reconcile time).
 
+### 3.47 A failover data-loss budget authored below the replication-lag bound
+
+Raw failover configuration lets an operator promise a recovery-point objective smaller than the asynchronous
+replication lag can actually lose, so the declared budget is a fiction the physics violates at the first
+partition: up to a full lag-window of acknowledged-but-un-replicated writes is gone at the instant of failover.
+amoebius carries **no independent RPO field**. The data-loss window is derived by construction from the one R8
+`lagBound` on the standing `ReplicationLink` — `dataLossWindow := lagBound` — the binding-by-construction idiom
+that emits a matched pair from a single declared quantity rather than two fields that can disagree
+([`consistency_pacelc_doctrine.md` §3.2](../engineering/consistency_pacelc_doctrine.md#32-the-typed-surface-dhall)).
+"An RPO authored below the lag" therefore has no field to write. The residual question — whether the declared
+`lagBound` itself holds against the monitored live lag — is not a type fact; it is the upload-time feasibility
+push-back ([`consistency_pacelc_doctrine.md` §3.5](../engineering/consistency_pacelc_doctrine.md#35-the-upload-time-feasibility-push-back)),
+a hybrid decode+runtime gate. **Owner:** [`consistency_pacelc_doctrine.md`](../engineering/consistency_pacelc_doctrine.md),
+realizing R9's rule that the data-loss window *is* the R8 replication-lag bound at the instant of failover, not a
+separately-derived quantity ([`chaos_failover_doctrine.md` §18](../engineering/chaos_failover_doctrine.md#18-the-rules-scale-to-the-boundary)).
+**Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (one `lagBound` emits both
+the monitored premise and the derived loss window; there is no separate RPO field to under-declare). **Layer:**
+`type-foreclosed` for the absent below-lag field; `runtime-checked` residue — the declared `lagBound` holding
+against monitored live lag (the feasibility push-back).
+**Validation-locus:** `Gate-1-editor` (there is no RPO field to set below the lag); `live-effect` (the
+upload-time push-back of the declared bound against monitored lag).
+
+### 3.48 A geo-replication pair whose active and standby are the same cluster
+
+A failover pairing that names one cluster as both `active` and `standby` crosses no asynchronous boundary yet
+owes a failover budget — a degenerate "geo pair" raw configuration admits, and whose failover can never execute
+because there is no second cluster to promote. amoebius rejects `active == standby` on the parent-owned
+`GatewayFailover` relation with a total decode-time distinctness fold — the weaker floor `mkRke2` applies to
+reject a reused host across servers ∪ agents
+([`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md)). **Owner:**
+[`consistency_pacelc_doctrine.md` §3.3](../engineering/consistency_pacelc_doctrine.md#33-the-ir-and-its-decode-foreclosures-haskell-gate-2),
+cross-referencing the parent-owned relation of [`gateway_migration_doctrine.md` §6](../engineering/gateway_migration_doctrine.md#6-honesty-and-layer-markers).
+**Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (the
+value-level distinctness fold, the same shape as the rke2 host-distinctness check of
+[§3.16](./illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused)).
+**Layer:** `decode-foreclosed` (a total decode-time rejection of a constructible value).
+**Validation-locus:** `Gate-2-decoder` (the total `active ≠ standby` fold returns `Left`).
+
+### 3.49 A child spec that authors its own gateway-failover pairing
+
+The failover pairing is a forest relation with two endpoints (an `active` and a `standby` cluster); raw
+configuration would let a child author a pairing naming a sibling or ancestor, minting cross-cluster authority a
+single child cannot own — the same class as a child spec reaching beyond its subtree
+([§3.10](./illegal_state_security.md#310-a-child-spec-that-reaches-beyond-its-own-subtree)). amoebius makes the
+`GatewayFailover` relation a parent-scope-indexed value (a phantom `Scope` tag) in the `RootInForceSpec`,
+projected read-only into a `ChildInForceSpec` as a handle; a child has no constructor that produces one — the
+derive-don't-author, relations-owned-by-the-enclosing-scope pattern the fabric peer graph uses. **Owner:**
+[`gateway_migration_doctrine.md` §6](../engineering/gateway_migration_doctrine.md#6-honesty-and-layer-markers)
+(the parent-owned relation), typed on the surface of
+[`consistency_pacelc_doctrine.md` §3.3](../engineering/consistency_pacelc_doctrine.md#33-the-ir-and-its-decode-foreclosures-haskell-gate-2).
+**Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
+(parent-scope ownership index) + [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
+(the phantom `Scope` tag). **Layer:** `type-foreclosed` uninhabitable (a child has no constructor for the
+parent-scoped relation).
+**Validation-locus:** `Gate-2-decoder` (the parent-scope-indexed handle has no child-authored inhabitant that
+survives decode).
+
+### 3.50 A standing spec that authors an emergency `Failover` as desired state
+
+Treating a gateway change as a free choice of posture, raw configuration would let an operator declare "prefer
+`Failover` / availability-first" as standing desired state on any gateway change — licensing an availability-first
+cutover, with its bounded data loss, where a lossless `Planned` handover was possible, and encoding a mode a live
+source cannot execute (a `Failover` has no quiesce/drain). amoebius carries **no `mode` field** on the
+`GatewayFailover` relation; `Planned` and `Failover` are an event classified at the gateway-change edge from
+observed world state — both clusters up (author- or `ScalingPolicy`-driven) yields `Planned`, a vanished active
+yields the automatic, availability-first `Failover`
+([`gateway_migration_doctrine.md` §1](../engineering/gateway_migration_doctrine.md#1-why-this-doctrine-exists)).
+A standing spec that authors an emergency `Failover` has no field to write. **Owner:**
+[`consistency_pacelc_doctrine.md` §3.4](../engineering/consistency_pacelc_doctrine.md#34-the-mode-is-world-triggered-not-authored)
++ [`gateway_migration_doctrine.md` §1](../engineering/gateway_migration_doctrine.md#1-why-this-doctrine-exists).
+**Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
+(the mode is an observed edge in the migration state machine, not a decoded field) +
+[§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (no authored `mode` field on the relation).
+**Layer:** `type-foreclosed` for the absent field; `runtime-checked` residue — the trigger edge (active
+reachable vs vanished) observed at reconcile time.
+**Validation-locus:** `Gate-1-editor` (there is no `mode` field to author); `live-effect` (the trigger edge
+observed at the gateway-change moment).
+
+### 3.51 An operator-authored `Confluent` cross-boundary disposition
+
+Raw configuration would let an operator label a genuinely non-confluent cross-cluster invariant — a global
+floor, global uniqueness, or a sum-to-whole — as "confluent", so it is merged active-active and diverges; the
+false claim type-checks, because confluence (closed-under-merge) is undecidable in Dhall. amoebius's authorable
+`CrossBoundaryDisposition` union has **no `Confluent` arm**: an unclassified mutable multi-record invariant folds
+to non-confluent held by bounded authority, and the authorable arms are the bounded-authority mechanisms only
+(single-writer, escrow, disjoint-namespace, downgrade, restructure). The confluent classification is a proven,
+design-time model property carried by the model, never a spec value
+([`consistency_pacelc_doctrine.md` §3.6](../engineering/consistency_pacelc_doctrine.md#36-the-cross-boundary-disposition)).
+**Owner:** [`consistency_pacelc_doctrine.md` §3.6](../engineering/consistency_pacelc_doctrine.md#36-the-cross-boundary-disposition),
+realizing the I-confluence classifier of [`chaos_failover_doctrine.md` §17](../engineering/chaos_failover_doctrine.md#17-the-boundary-and-its-classifier).
+**Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
+(a closed union whose vocabulary omits the `Confluent` arm — a false confluence claim has no word). **Layer:**
+`type-foreclosed` for the arm absence; the confluence classification itself is an `assumed` model obligation (the
+honest limit — a genuinely-confluent invariant's confluence is proven at design time, not decidable in the spec).
+**Validation-locus:** `Gate-1-editor` (no `Confluent` arm exists in the authorable union); `live-effect` residue
+— the model's confluence classification actually holding under merge.
+
 ---
 
 ## Cross-references
@@ -174,6 +271,9 @@ Owning doctrines cited by the entries in this slice:
 - [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) §8 — the `Site` axis
   ([§3.35](#335-a-stretched-host-worker-with-no-declared-networking-capability)).
 - [`gateway_migration_doctrine.md`](../engineering/gateway_migration_doctrine.md) — the migration state machine and the
-  client-rebind protocol ([§3.44](#344-a-session-that-cannot-rebind-on-gateway-migration)).
+  client-rebind protocol ([§3.44](#344-a-session-that-cannot-rebind-on-gateway-migration)); the parent-owned
+  `GatewayFailover` pairing relation ([§3.48](#348-a-geo-replication-pair-whose-active-and-standby-are-the-same-cluster), [§3.49](#349-a-child-spec-that-authors-its-own-gateway-failover-pairing)); the world-triggered mode ([§3.50](#350-a-standing-spec-that-authors-an-emergency-failover-as-desired-state)).
+- [`consistency_pacelc_doctrine.md`](../engineering/consistency_pacelc_doctrine.md) — the PACELC deployment-rules
+  surface: the derived-RPO rule ([§3.47](#347-a-failover-data-loss-budget-authored-below-the-replication-lag-bound)), the `active ≠ standby` fold ([§3.48](#348-a-geo-replication-pair-whose-active-and-standby-are-the-same-cluster)), the world-triggered mode ([§3.50](#350-a-standing-spec-that-authors-an-emergency-failover-as-desired-state)), and the no-`Confluent`-arm disposition ([§3.51](#351-an-operator-authored-confluent-cross-boundary-disposition)).
 - [`readiness_ordering_doctrine.md`](../engineering/readiness_ordering_doctrine.md) — the edge-observed drain residue
   ([§3.44](#344-a-session-that-cannot-rebind-on-gateway-migration)).
