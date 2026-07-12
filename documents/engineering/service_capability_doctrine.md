@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_12_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_21_app_tenancy.md, DEVELOPMENT_PLAN/phase_25_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_32_spa_live_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, DEVELOPMENT_PLAN/phase_32_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the abstraction by which amoebius application logic names abstract
@@ -308,12 +308,12 @@ content-addressed cache, [content_addressing_doctrine.md §4.5](./content_addres
 > **Honesty.** `InferenceEngine` is Phase-N design intent — the ML-serving capability, specified before
 > implementation like the rest of this doctrine. The sibling **infernix** project is *evidence* that the
 > select-don't-fetch engine binding is real code — **sibling evidence, not an amoebius result**:
-> [/home/matthewnowak/infernix/src/Infernix/Runtime/Worker.hs](file:///home/matthewnowak/infernix/src/Infernix/Runtime/Worker.hs)
+> `infernix/src/Infernix/Runtime/Worker.hs` (sibling source)
 > selects the engine by `adapterType` (`case engineBindingAdapterType engineBinding of …`) and **never fetches
 > it** — precisely the Tier-1 discipline above. But infernix also shows the exact divergences amoebius fixes:
-> its [docker/Dockerfile](file:///home/matthewnowak/infernix/docker/Dockerfile) **curl-tars native payloads and
+> its `infernix/docker/Dockerfile` **curl-tars native payloads and
 > installs per-engine Poetry venvs at image build**, and its
-> [python/adapters/model_cache.py](file:///home/matthewnowak/infernix/python/adapters/model_cache.py) carries a
+> `infernix/python/adapters/model_cache.py` carries a
 > hardcoded `minioadmin/minioadmin123` fallback — a second secret store that violates the Vault-by-name rule
 > ([§7](#7-expressing-a-capability-in-the-dsl)). amoebius keeps infernix's engine-selection idiom but **replaces that image-build payload baking with
 > jit-resolution** — the payload is materialized on first miss into the *one* `CacheBudget`-bounded
@@ -356,7 +356,7 @@ not get bypassed.
 
 > **Honesty.** Per-cluster structural shapes are Phase 9 design intent. The sibling **prodbox** project is
 > evidence that typed records render the manifests a provider needs — its
-> [/home/matthewnowak/prodbox/src/Prodbox/Lib/Storage.hs](file:///home/matthewnowak/prodbox/src/Prodbox/Lib/Storage.hs)
+> `prodbox/src/Prodbox/Lib/Storage.hs` (sibling source)
 > renders `Namespace`/`PV`/`PVC`/`StorageClass` from a typed `ChartStorageSpec → ChartStorageBinding →
 > Data.Aeson.object` — but prodbox renders **one** shape per service and *enforces substrate-equivalence with a
 > lint*. The per-cluster *structural* shape is the new, unproven move ([§6](#6-fungibility-reconciled-app-surface-invariant-shape-deployment-ruled)).
@@ -471,12 +471,12 @@ surface, never asserted here.
 | The substrate catalog and the substrate-driven LoadBalancer choice beneath Edge | [substrate_doctrine.md](./substrate_doctrine.md) |
 
 > **Honesty.** The sibling **prodbox** project is *evidence* that the binding can be rendered and reconciled:
-> [/home/matthewnowak/prodbox/src/Prodbox/CLI/Rke2.hs](file:///home/matthewnowak/prodbox/src/Prodbox/CLI/Rke2.hs)
+> `prodbox/src/Prodbox/CLI/Rke2.hs` (sibling source)
 > renders `Secret`/`ServiceAccount`/`Role`/`ClusterIssuer`/`GatewayClass`/`HTTPRoute`/`IPAddressPool` from
 > typed Haskell → Aeson → `kubectl apply`;
-> [/home/matthewnowak/prodbox/src/Prodbox/Lib/Storage.hs](file:///home/matthewnowak/prodbox/src/Prodbox/Lib/Storage.hs)
+> `prodbox/src/Prodbox/Lib/Storage.hs` (sibling source)
 > renders storage objects from typed records; and
-> [/home/matthewnowak/prodbox/src/Prodbox/Lib/ChartPlatform.hs](file:///home/matthewnowak/prodbox/src/Prodbox/Lib/ChartPlatform.hs)
+> `prodbox/src/Prodbox/Lib/ChartPlatform.hs` (sibling source)
 > is a planner/dependency/values orchestration the capability binding generalizes. But prodbox **names
 > products**, still leans on a handful of third-party charts, and **enforces substrate-equivalence with a
 > lint** — the capability abstraction, the alternate-admitting provider type, and per-cluster shapes are
@@ -512,7 +512,7 @@ status.
 - [Documentation Standards](../documentation_standards.md)
 
 > **Honesty.** Everything in this doctrine is Phase 0 design intent, specified before implementation:
-> manifest generation and the typed reconciler are Phase 15, and the capability abstraction is Phase 8. It is
+> manifest generation and the typed reconciler are Phase 16, and the capability abstraction is Phase 8. It is
 > generalized from evidence in the sibling **prodbox** project (typed-Haskell→Aeson→`kubectl apply` rendering,
 > a chart-platform planner) but **not yet built or proven in amoebius**, and prodbox itself names products and
 > enforces the very substrate-equivalence lint this doctrine reverses. Per

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_18_platform_services.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Make monitoring a mandatory, non-vacuous property of a workflow and of an extension — so an
@@ -309,9 +309,9 @@ Phase order, status, and validation gates live only in
 [`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). The monitoring obligation types land in **Phase 4** and the
 `validateTopology` fold in **Phase 7**; the derived rules/panels, the baked TensorBoard renderer, the
 optional local Thanos companion, and the `workflow-health` TableView projection in **Phases 9, 15, and 18**;
-the orchestrator/worker SLO-status event in **Phases 22–23**; the extension surfaces in **Phase 26**
-(infernix) and **Phase 27** (jitML → TensorBoard); the peer-cluster posture and the forest foreclosure in
-**Phase 29**; and the decode-rejection tests in **Phase 31**. This doc never maintains a competing status
+the orchestrator/worker SLO-status event in **Phases 22–23**; the extension surfaces in **Phase 33**
+(infernix) and **Phase 34** (jitML → TensorBoard); the peer-cluster posture and the forest foreclosure in
+**Phase 28**; and the decode-rejection tests in **Phase 36**. This doc never maintains a competing status
 ledger; it states the target shape and links back for status, per
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 

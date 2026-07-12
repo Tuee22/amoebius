@@ -39,9 +39,43 @@ corpus.
 **Register:** 1 — pure/golden, in-process, no cluster (§K).
 
 **Gate:** `dhall type` over the Gate-1 corpus is green — each positive cluster / app / deployment fixture
-type-checks, and each Gate-1-class negative fixture (a product-named capability, an insecure-ingress arm, an
-unbounded storage backing, an even/zero-server rke2 control plane, an un-tiered Pulsar topic) fails `dhall
-type` at authoring time, in the operator's editor or CI, with no amoebius binary ever run.
+type-checks, and each Gate-1-class negative fixture fails `dhall type` at authoring time, in the operator's
+editor or CI, with no amoebius binary ever run. The gate is bound by the concrete criteria below; a bare
+nonzero exit on a negative is not sufficient.
+
+- **Representative set (explicit, §M.7).** The Gate-1-class negative corpus is EXACTLY these seven catalog
+  entries, one committed `dhall/examples/illegal_*.dhall` fixture each: product-named capability (§3.12),
+  insecure/backdoor ingress arm (§3.7), unbounded storage backing (§3.18), un-tiered / no-retention topic
+  (§3.20), capacity-growth-without-scaling-policy (§3.21), even/zero-server rke2 control plane (§3.24), and a
+  substrate/topology arm the union does not offer (§3.14/§3.15). The non-CBOR payload entry (§3.23) is a
+  layer-2 decode-foreclosure NOT constructible as a Gate-1 `dhall type` fixture; it is recorded in the
+  partial-foreclosure ledger as deferred to [Phase 5](phase_05_gadt_decoder_gate2.md)'s Gate 2, never
+  counted toward this gate's green. This seven-entry set is the single canonical Gate-1-class membership and
+  supersedes any shorter parenthetical elsewhere in this doc.
+- **Paired positive per negative (§M.8 / §M.3).** Each `illegal_*.dhall` is a MINIMAL one-construct mutation
+  of a named committed green positive (its `legal_*.dhall` sibling): reverting only the single tagged illegal
+  construct yields a fixture that type-checks. `tools/dhall_gate1_negatives.sh` asserts BOTH directions per
+  fixture — the negative fails `dhall type` AND its reverted paired positive type-checks — and is red if
+  either direction is violated.
+- **Specific-reason error goldens (§M.8 / §M.1).** For each negative, a golden `dhall type` error transcript
+  is authored and COMMITTED IN PHASE 0 (`tests/oracle/gate1/<entry>.err`), pinning the failure to name the
+  targeted union/arm/field/record; the harness is red if the observed `dhall type` stderr does not match its
+  committed golden (a negative that fails for an unrelated typo/import/field error mismatches and goes red).
+- **Arm-inventory oracle, independent of the schema (§M.3).** A committed hand-authored catalog table
+  (`tests/oracle/gate1/arm_inventory.csv`, authored in Phase 0 from `illegal_state_catalog` §3.12/§3.24/§3.7,
+  NOT derived from the schema modules) pins each union's exact arm set; the harness normalizes each shipped
+  schema module and compares its arm inventory byte-exactly against this table, red on any extra (e.g. a
+  `Custom : Text` / `Raw : Text` escape arm) or missing arm.
+- **Committed seeded mutant (§M.2).** At least one committed seeded mutant MUST turn the harness red and is
+  re-run every gate: `mutants/gate1_capability_custom_arm.dhall` adds a `Custom : Text` arm to `Capability`
+  (union-arm-addition operator). The gate is invalid if that mutant type-checks the product-named negative or
+  passes the arm-inventory oracle.
+- **Oracle-pinning (§M.1).** All goldens, the arm-inventory table, and the seeded mutant above are committed
+  in Phase 0 before any schema module exists; none is regenerated from the shipped schema's own output.
+
+This gate is Register 1 (pure/golden, in-process, no cluster). It still emits the [§K](development_plan_standards.md#k-honesty-proven--tested--assumed)
+proven/tested/assumed ledger (below), marks binding/index (layer-2/3) foreclosures UNVERIFIED here, and
+carries the acceptance token *spec-composition proven*, never *runtime proven*.
 
 ## Doctrine adopted
 
@@ -72,7 +106,10 @@ type` at authoring time, in the operator's editor or CI, with no amoebius binary
 **Blocked by**: Phase 3 gate. External prerequisite: the `dhall` CLI only — this sprint needs **no** Haskell
 skeleton (that arrives with the Gate-2 decoder in Phase 5).
 **Independent Validation**: `dhall type` / `dhall lint` accept every schema module on its own — each surface
-type is well-formed and every smart constructor elaborates to a value of its declared type.
+type is well-formed and every smart constructor elaborates to a value of its declared type — AND each shipped
+union's arm inventory and each surface record's required-field set match their committed Phase-0 oracle tables
+(`arm_inventory.csv`, `surface_fields.csv`) byte-exactly, so no freeform escape arm and no missing foreclosing
+field passes.
 **Docs to update**: `documents/engineering/dsl_doctrine.md` (Gate-1 status backlink),
 `DEVELOPMENT_PLAN/system_components.md` (DSL schema inventory).
 
@@ -91,10 +128,20 @@ an authoring-time boundary that fires before any binary runs.
 - An in-file **honesty caveat**: because Dhall has no opaque types, binding- and phantom-index foreclosures
   (catalog §4.1–§4.3) are only *partially* Gate-1-foreclosed by smart-constructor convention and get real
   teeth at the Haskell GADT decoder in [Phase 5](phase_05_gadt_decoder_gate2.md) (Gate 2).
+- **Wired surfaces (forecloses detached-ornament stubs).** The three surface records carry the foreclosing
+  types as REQUIRED fields, not as standalone unreferenced modules: `App` demands `caps : List Capability`
+  and storage via `StorageBacking` + `RetentionPolicy`; `Cluster` demands `Rke2Servers` for an rke2 engine
+  and `Ingress` for every route. A committed schema-shape oracle (`tests/oracle/gate1/surface_fields.csv`,
+  hand-authored in Phase 0) pins these required field-name→type bindings; Sprint 4.1 validation compares the
+  shipped record types against it byte-exactly.
 
 ### Validation
-1. `dhall type` accepts each schema module; a smart constructor cannot be applied to an out-of-schema argument
-   without a type error — proven for the schema, at authoring time, with no binary run.
+1. `dhall type` accepts each schema module. A smart constructor cannot be applied to an out-of-schema argument
+   without a type error — discharged by a named committed fixture set `tests/gate1/ctor_reject/*.dhall`
+   (≥1 expect-fail application fixture per smart constructor, enumerated in the harness manifest), each of
+   which MUST fail `dhall type`; this is not discharged by appeal to Dhall function typing alone.
+2. The shipped record types match the committed `surface_fields.csv` oracle byte-exactly (the wiring above),
+   red on any missing required foreclosing field.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -116,12 +163,20 @@ positive fixtures that a legal amoebius world is authored from and prove they pa
 the authoring-time demonstration that the schema *admits* every intended world.
 
 ### Deliverables
-- Positive fixtures — `legal_multisubstrate_cluster`, `legal_managed_eks`, `trivial_app`, and a deployment-
-  rules fixture — each a well-typed Dhall value built entirely through the Sprint-4.1 smart constructors.
+- Positive fixtures — the explicit representative set `legal_multisubstrate_cluster`, `legal_managed_eks`,
+  `trivial_app`, and `legal_deployment_rules` — each a well-typed Dhall value built entirely through the
+  Sprint-4.1 smart constructors, and each populating every REQUIRED foreclosing field of its surface record
+  (a `Cluster` carrying `Rke2Servers` + `Ingress`; an `App` carrying `List Capability` + `StorageBacking` +
+  `RetentionPolicy`). A positive that routes through none of the foreclosing types does not satisfy this set.
+- Each of the seven Gate-1 negatives of Sprint 4.3 names one of these positives as its paired sibling (the
+  fixture it is a one-construct mutation of); this set is the source of those paired positives.
 - A corpus harness that runs `dhall type` over the positive set and reports one aggregate result.
 
 ### Validation
 1. Every positive fixture type-checks; the harness is red if any positive fixture fails `dhall type`.
+2. Each positive fixture's surface record instantiates every required foreclosing field named in
+   `surface_fields.csv` (checked by the harness against the committed oracle), so the positives exercise the
+   Sprint-4.1 foreclosures rather than a toy `{ name : Text }` skeleton.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -132,9 +187,11 @@ The whole sprint (📋 Planned).
 **Implementation**: `dhall/examples/illegal_*.dhall` (the Gate-1 subset); `tools/dhall_gate1_negatives.sh`
 (an expect-fail `dhall type` harness) — target paths, not yet built.
 **Blocked by**: Sprint 4.1, Sprint 4.2.
-**Independent Validation**: every Gate-1-class negative fixture **fails** `dhall type` at authoring time; a
-coverage note maps each negative to its catalog entry and marks whether Gate 1 forecloses it fully or only
-partially (the residue owned by Phase 5's Gate 2).
+**Independent Validation**: every one of the seven canonical Gate-1-class negative fixtures **fails** `dhall
+type` at authoring time for the pinned reason (its stderr matches the committed `<entry>.err` golden) while
+its reverted paired positive type-checks; the committed seeded mutant goes red; and the committed
+partial-foreclosure ledger maps each negative to its catalog entry and foreclosure layer (fully vs. residue
+owned by Phase 5's Gate 2), with the non-CBOR §3.23 entry recorded as deferred, not counted green.
 **Docs to update**: `documents/illegal_state/illegal_state_catalog.md` (per-entry Gate-1 foreclosure-layer
 annotation), `DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md` (backlink: the decode-foreclosed residue lands
 there).
@@ -146,18 +203,39 @@ honestly recording which foreclosures are complete at Gate 1 and which are only 
 at Gate 2.
 
 ### Deliverables
-- Gate-1 negatives that must fail `dhall type`: a product-named capability (catalog §3.12), an
-  insecure/backdoor ingress arm (§3.7), an unbounded storage backing or un-tiered topic (§3.18/§3.20),
-  capacity growth with no scaling policy (§3.21), an even/zero-server rke2 control plane (§3.24), a
-  non-CBOR payload declaration (§3.23), and a substrate/topology arm the union does not offer (§3.14/§3.15).
-- A partial-foreclosure ledger: for each negative, its catalog entry and whether Gate 1 forecloses it fully
-  (no-arm / required-field) or only by smart-constructor convention (binding/index shapes), with the residue
-  routed to [Phase 5](phase_05_gadt_decoder_gate2.md).
+- The seven canonical Gate-1 negatives named in the **Gate** representative set, one committed
+  `illegal_*.dhall` each, MUST fail `dhall type`: product-named capability (§3.12), insecure/backdoor ingress
+  arm (§3.7), unbounded storage backing (§3.18), un-tiered / no-retention topic (§3.20), capacity-growth-
+  without-scaling-policy (§3.21), even/zero-server rke2 control plane (§3.24), and an un-offered
+  substrate/topology arm (§3.14/§3.15). Each is a MINIMAL one-construct mutation of its named `legal_*.dhall`
+  paired positive, and each embeds its illegal construct inside a full positive-derived cluster/app spec —
+  NOT a detached import of an ornamental type — so the illegal state is exercised in a wired surface.
+- The non-CBOR payload entry (§3.23) is explicitly NOT authored as a Gate-1 fixture: it is layer-2
+  decode-foreclosed, unconstructible at `dhall type`, and appears in the ledger only as a deferred row owned
+  by [Phase 5](phase_05_gadt_decoder_gate2.md)'s Gate 2.
+- A committed per-negative golden `dhall type` error transcript (`tests/oracle/gate1/<entry>.err`, authored
+  in Phase 0) pinning each failure's targeted union/arm/field.
+- The committed seeded mutant `mutants/gate1_capability_custom_arm.dhall` (union-arm-addition operator) that
+  the harness re-runs and MUST report red.
+- The **partial-foreclosure ledger** is the §K proven/tested/assumed artifact this phase emits — a committed
+  file at `DEVELOPMENT_PLAN/ledgers/phase_04_gate1.md`, schema per `testing_doctrine.md`. It names Register 1,
+  carries the acceptance token *spec-composition proven*, maps each of the seven negatives to its catalog
+  entry and foreclosure layer (fully no-arm/required-field vs. conventional binding/index residue), marks
+  layer-2/3 residue UNVERIFIED, and routes that residue to [Phase 5](phase_05_gadt_decoder_gate2.md). This
+  ledger is the single §K artifact the Definition of Done requires; there is no separate coverage note.
 
 ### Validation
-1. Every Gate-1-class negative fixture fails `dhall type` at authoring time with no binary run; the expect-fail
-   harness is red if any tagged negative type-checks; the coverage note maps every negative to a catalog entry
-   and a foreclosure layer.
+1. Every one of the seven canonical Gate-1-class negatives fails `dhall type` at authoring time with no
+   binary run; `tools/dhall_gate1_negatives.sh` is red if any tagged negative type-checks.
+2. Per negative, the harness asserts the paired positive (the fixture with only the tagged illegal construct
+   reverted) type-checks (§M.8/§M.3), AND the observed `dhall type` stderr matches the committed per-entry
+   `<entry>.err` golden naming the targeted type/arm/field (§M.8); red if either the paired positive fails or
+   the error text diverges from its golden.
+3. The harness re-runs the committed seeded mutant `mutants/gate1_capability_custom_arm.dhall` and is red
+   unless the mutant is detected (its product-named negative type-checks or the arm-inventory oracle passes)
+   (§M.2).
+4. The partial-foreclosure ledger at `DEVELOPMENT_PLAN/ledgers/phase_04_gate1.md` maps all seven negatives to
+   a catalog entry and a foreclosure layer and is committed; the gate is incomplete without it.
 
 ### Remaining Work
 The whole sprint (📋 Planned).

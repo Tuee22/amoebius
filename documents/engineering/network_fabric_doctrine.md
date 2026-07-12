@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_27_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for amoebius's inter-node / inter-cluster network fabric — **raw kernel
@@ -26,7 +26,7 @@ rides — broker↔broker, or a remote worker↔home broker over the WAN — is 
 `notes.txt` question *"vpn and linkerd service mesh story (certs?)"*. This doctrine closes it **for the two
 spans it actually renders** — the remote-worker↔home-broker attach wire (K1, [§3](#3-keys-config-and-distribution--wireguard-as-just-another-reconcile)) and the stretched
 full-node kubelet↔apiserver wire (K2, [§3](#3-keys-config-and-distribution--wireguard-as-just-another-reconcile)/[§4](#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)) — and **defers the cross-cluster
-broker↔broker geo-replication wire to Phase 29**: it is design-intent, its `render()` obligation is not yet
+broker↔broker geo-replication wire to Phase 28**: it is design-intent, its `render()` obligation is not yet
 written, and it carries the same *"witness present, constructor deferred"* posture the `Gateway` arm of the
 `Networking` sum carries in [§5](#5-the-security-boundary-generalizes-localhost--authenticated-fabric). The addressing precondition exists (disjoint per-cluster VPN ranges,
 [§4](#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)); the per-peer render does not.

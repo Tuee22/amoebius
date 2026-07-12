@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_16_retained_storage.md, DEVELOPMENT_PLAN/phase_18_platform_services.md, DEVELOPMENT_PLAN/phase_19_keycloak_ingress.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_17_retained_storage.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_21_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_27_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for how amoebius turns a typed cluster spec into running Kubernetes objects — a pure `render(spec)` that emits the full per-service object set from Haskell ADTs, and amoebius's own idempotent server-side-apply reconciler that applies, prunes, and waits — with **no Helm, no templating layer, and no third-party charts**.
@@ -211,12 +211,19 @@ never by a CLI invocation racing another writer.
 
 The mechanism, four parts:
 
-- **Server-side apply under a fixed `amoebius` field manager.** Every object is applied with SSA declaring
-  the `amoebius` field manager. The apiserver then tracks, per field, that amoebius owns it. amoebius
-  declares the fields it intends and lets Kubernetes merge — it does **not** GET-modify-PUT, so it does not
-  clobber fields owned by other managers (e.g. a controller-populated status), and a field amoebius owns
-  that has drifted is forced back to the declared value on the next apply. Drift self-heals because re-apply
-  re-asserts ownership.
+- **Server-side apply under a fixed `amoebius` field manager, with `force: true`.** Every object is applied
+  with SSA declaring the `amoebius` field manager and a conflict-resolution policy of **`force: true`**. The
+  apiserver then tracks, per field, which managers own it. amoebius declares the fields it intends and lets
+  Kubernetes merge — it does **not** GET-modify-PUT, so it does not clobber fields owned solely by other
+  managers (e.g. a controller-populated status). A field amoebius declares whose ownership was shared or
+  taken by an intervening `Update` is reclaimed and forced back to the declared value on the next apply:
+  `force: true` resolves the ownership conflict that `Update` would otherwise raise, so amoebius re-asserts
+  shared ownership of the fields it declares and heals their drift. Two honest limits bound this. (a) An
+  `Update` by another manager — e.g. `kubectl scale`/`edit` *without* `--server-side` — shares or transfers
+  ownership of the touched field until amoebius force-re-applies; the foreign value stands between applies,
+  so drift heals at the next apply, not continuously. (b) SSA reverts only fields amoebius **declares** — a
+  field a different manager *adds* that amoebius never names lies outside the declared set and is not
+  reverted by re-apply; only owner-label pruning removes whole objects, never stray sub-fields.
 - **Owner-label / ApplySet pruning.** Every rendered object carries an `amoebius/owner` label identifying
   the spec generation that produced it. After applying the desired set, the engine lists the previously-owned
   objects (the prior ApplySet) and **prunes any object with the owner label that is no longer in the desired
@@ -249,7 +256,7 @@ flowchart TD
   wait -->|failure| rollback[Re-apply last known-good generation]
 ```
 
-> **Honesty.** This engine is **design intent for Phase 15**, not a built amoebius result. SSA field
+> **Honesty.** This engine is **design intent for Phase 16**, not a built amoebius result. SSA field
 > managers, ApplySet pruning, and SSA-based drift correction are real, documented Kubernetes mechanisms;
 > *that amoebius wires them into this specific reconciler* is specified here and unproven until the phase
 > lands. The idempotent `discover → diff → enact` shape it specializes is *proven in prodbox* for AWS/cluster
@@ -320,7 +327,7 @@ flowchart TD
 > sibling evidence, not an amoebius result.
 
 > **Honesty.** The `RolloutPlan` is **Phase-15 design intent** — it rides the tier-(c) SSA reconciler, itself
-> Phase 15 and unbuilt; the DB-schema-migration `RolloutPhase` is the **deferred Phase-34** shape, proven
+> Phase 16 and unbuilt; the DB-schema-migration `RolloutPhase` is the **deferred Phase-34** shape, proven
 > *only* as the Helm-driven pattern in the jitML sibling. Read as the contract amoebius intends, never as a
 > tested amoebius result.
 
@@ -345,7 +352,10 @@ release as an opaque gzipped Secret holding the rendered manifests, and the clus
   replicas is a change to the *rendered spec value*, and SSA simply **declares the new owned field**. amoebius
   does **not** need to read the old replica count to set the new one — it declares `replicas = 3` as a field
   it owns, and the apiserver reconciles. Drift (someone hand-scaled to 5) is corrected on the next apply
-  because amoebius re-asserts the owned value. This is why "declare-new, no need to know the old" is sound.
+  because amoebius re-asserts the declared value under `force: true` — the hand-scale was an `Update` that
+  shared ownership of `replicas`, and `force` resolves that conflict so amoebius reclaims the field ([§5](#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)).
+  Correction lands at the next apply, not continuously. This is why "declare-new, no need to know the old"
+  is sound for fields amoebius declares.
 - **Pruning recovers the prior set from etcd, not from a release manifest.** When a service is removed from
   the spec, its objects are found by their `amoebius/owner` label on the live objects ([§5](#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)) and pruned — the
   prior object set is reconstructed from the cluster, never from a stored Helm release.
@@ -408,7 +418,7 @@ the reconciler converges *toward*.
   and are owned by release_lifecycle_doctrine.md [§3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer)–[§4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable), not here.
 
 > **Honesty.** The release ledger is **Phase-N design intent** — it composes with the content-store phase
-> ([§9](#9-planning-ownership)) and the tier-(c) reconciler (Phase 15), neither built in amoebius. Content-addressed immutable storage
+> ([§9](#9-planning-ownership)) and the tier-(c) reconciler (Phase 16), neither built in amoebius. Content-addressed immutable storage
 > is proven mechanism; *that amoebius records each converged generation as a `releaseHash`-keyed `Release` and
 > promotes environments by CAS over it* is specified across this [§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional) and release_lifecycle_doctrine.md and is
 > unbuilt.
@@ -495,7 +505,7 @@ for status.
 - [Documentation Standards](../documentation_standards.md)
 
 > **Honesty.** Everything in this doctrine is Phase 0 **design intent**: the typed manifest renderer and the
-> server-side-apply reconciler are Phase 15, and the capability abstraction is Phase 8 — neither is built or
+> server-side-apply reconciler are Phase 16, and the capability abstraction is Phase 8 — neither is built or
 > proven in amoebius. The approach is **generalized from the prodbox sibling**, which already renders a slice
 > of its object set from typed Haskell to Aeson and applies it with `kubectl`, stamps every object with an
 > owner label, and orchestrates a pure deployment planner — but prodbox still ships its workloads as Helm

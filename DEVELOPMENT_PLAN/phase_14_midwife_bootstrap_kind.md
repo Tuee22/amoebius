@@ -1,8 +1,8 @@
-# Phase 13: Python midwife + substrate detect + single kind cluster
+# Phase 14: Python midwife + substrate detect + single kind cluster
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_base_image_registry.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_15_base_image_registry.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Specify the first live phase — the Python `pb` midwife that ensures a toolchain and builds the
@@ -33,7 +33,7 @@ substrate detection that learns what the machine *is*; the no-environment / no-`
 resolves `ghcup`/`cabal`/`kubectl`/`kind` — and pointedly **not** Helm — through the substrate's package manager
 and invokes each by absolute path; and an idempotent single-node kind bring-up driven as a reconcile. The
 cluster it produces is deliberately **empty**: no platform services, no retained storage, no Vault, no
-control-plane singleton — those land in Phase 14 onward. The two load-bearing claims this gate proves are that
+control-plane singleton — those land in Phase 15 onward. The two load-bearing claims this gate proves are that
 bring-up is an **idempotent reconcile** (re-running changes nothing), not a one-shot script, and that **every**
 external invocation went through an `AbsExe` absolute path rather than a bare-name `PATH` lookup.
 
@@ -51,12 +51,47 @@ in the Apple/Windows phases.
 **Register:** 3 (live infrastructure) — the gate provisions a real kind cluster on a real `linux-cpu` host and
 tears down leak-free; a Register-1/2 in-process check cannot discharge it.
 
-**Gate:** on a `linux-cpu` host, the Python `pb` midwife's `pb bootstrap --distro=kind` ensures the
-package-manager root, the pinned GHC 9.12.4 / Cabal 3.16.1.0 toolchain, and a built binary, then `exec`s
-`amoebius bootstrap --distro=kind`, which brings an empty single-node kind cluster to exactly one `Ready` node
-(`kubectl get nodes` shows one node, `Ready`); **re-running the identical command reports already-converged and
-changes nothing**; and **every external tool invocation during the run resolved through an `AbsExe` absolute
-path** — no bare-name `PATH` lookup, and Helm is never ensured or invoked.
+**Gate prerequisite (stated, not ensured):** a container runtime (Docker or Podman) is a **pre-installed host
+prerequisite** of this gate, *not* a member of the closed `HostTool` enum. `kind` cannot create a cluster
+without one, but amoebius does not provision it; the enum stays exactly `ghcup`, `cabal`, `kubectl`, `kind`,
+and the package-manager root. The gate preflight records the runtime's presence in the ledger as an assumed
+input; the enum's closedness (no sixth member) is asserted structurally in Sprint 13.2.
+
+**External-observer requirement (§M.5).** Every "how it behaved" assertion in this gate — every invocation went
+through an absolute path, zero Helm, zero mutating package-manager calls on a re-run — is read from an
+**OS-boundary observer**, never a trace the code under test emits about itself. The observer of record is an
+`execve` audit log (`strace -f -e trace=execve,execveat` or an equivalent eBPF/auditd capture) wrapping the
+entire process tree of the run, committed as a gate artifact. As a redundant trap, the run also executes with
+`PATH` pointed at a directory of same-named trap executables (`kind`, `kubectl`, `helm`, `apt`, …) that abort
+loudly and log if invoked by bare name; any trap firing fails the gate. A self-emitted `runTool` compliance
+trace is **not** an admissible observer for any of these assertions.
+
+**Oracle-pinning (§M.1).** The gate's oracles are authored and **committed in Phase 0**, before any
+implementation exists: the `classify` decision table (Sprint 13.1), the per-substrate `[InstallStep]` golden
+plans and the `mkAbsExe`-reject expected-error set (Sprint 13.2), and the named divergent-start fixtures with
+their expected converged observation (Sprint 13.4). A golden regenerated from the implementation is not
+admitted.
+
+**Committed seeded mutants (§M.2).** The gate re-runs against committed mutants that MUST go red: (M1) a
+`classify` guard-negation that drops the "present NVIDIA GPU promotes Linux to `linux-cuda`" rule; (M2) an
+`Ensure` variant that resolves one tool by bare name (`execve` argv[0] non-absolute) — the observer must catch
+it; (M3) a bring-up that replaces the reconciler with the `kind get clusters | grep` one-shot guard — the
+divergence-repair fixture must go red against it. A gate run in which any of M1–M3 stays green is void.
+
+**Gate:** on a `linux-cpu` host with a container runtime pre-installed, the Python `pb` midwife's
+`pb bootstrap --distro=kind` ensures the package-manager root, the pinned GHC 9.12.4 / Cabal 3.16.1.0
+toolchain, and a built binary, then `exec`s `amoebius bootstrap --distro=kind`, which brings an empty
+single-node kind cluster to exactly one `Ready` node (`kubectl get nodes` shows one node, `Ready`);
+**re-running the identical command reports already-converged and changes nothing** — where "changes nothing"
+means the observable triple `(docker/podman container list, `kind get clusters`, kubeconfig file bytes)` is
+byte-for-byte identical before and after the re-run, and the `execve` audit log for the re-run contains **zero
+mutating package-manager or `kind create` invocations**; from at least one named partially-converged start
+state the identical run **converges without recreating the cluster** (divergence-repair, Sprint 13.4); **every
+external tool invocation during the run resolved through an `AbsExe` absolute path** as witnessed by the
+`execve` audit log (every `argv[0]` absolute, drawn from the resolved tool map), no bare-name `PATH` lookup,
+and Helm is never ensured or invoked (no `helm` `execve`, no `helm` trap fired); and the gate ends by tearing
+the cluster down (`kind delete cluster`) and asserting a **leak-free postflight sweep** (no residual kind
+cluster, node container, or kubeconfig context).
 
 ## Doctrine adopted
 
@@ -103,10 +138,17 @@ path** — no bare-name `PATH` lookup, and Helm is never ensured or invoked.
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Host/Substrate.hs` (target: the total `classify` plus the three-read `detect`)
-**Blocked by**: Phase 12 gate (the pre-cluster band closes; this is the first live phase).
-**Independent Validation**: a unit table of `classify` over the full OS × arch × GPU cross-product asserts each
-expected substrate and each expected hard failure with zero host I/O; on the gate host, `detect` returns
-`linux-cpu`.
+**Blocked by**: Phase 13 gate (the pre-cluster band closes; this is the first live phase).
+**Independent Validation**: a unit table of `classify` over the enumerated cross-product asserts each expected
+substrate and each expected hard failure with zero host I/O, checked against a **Phase-0-committed
+hand-authored decision table** (§M.1, §M.3) that is written independently of `classify` — never regenerated
+from it. The representative set is defined explicitly (§M.7): OS ∈ {`"linux"`, `"darwin"`, one unknown-OS
+sentinel e.g. `"freebsd"`}, arch ∈ {`"x86_64"`/`amd64`, `"aarch64"`/`arm64`, one unknown-arch sentinel e.g.
+`"ppc64le"`}, GPU ∈ {present, absent} — the full 3×3×2 = 18-cell product, so that the unknown-OS and
+unknown-arch `Left` cases are exercised, not merely the four known-good substrates. The committed table pins
+the expected `Right Substrate` or `Left <reason>` for all 18 cells, including the two load-bearing hard
+failures (Intel-Mac `darwin`+`amd64` → `Left`, and Linux+GPU → `linux-cuda`). On the gate host, `detect`
+returns `linux-cpu`.
 **Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/substrates.md`.
 
 ### Objective
@@ -121,10 +163,20 @@ a knob.
   NVIDIA GPU promotes Linux to `linux-cuda`.
 - An `Either`-returning `detect :: IO (Either String Substrate)` wrapping `classify` over the three reads
   (non-`amd64`/`arm64` a hard `Left`), classifying the gate host as `linux-cpu` (no GPU).
+- A **Phase-0-committed independent decision table** (the 18-cell OS × arch × GPU oracle, authored before
+  `classify` exists and never regenerated from it) and the committed `classify` mutant M1 (GPU-guard negated)
+  that Validation 2 turns red.
 
 ### Validation
-1. Unit-test `classify` across the full cross-product with no host access.
-2. Run `detect` on the `linux-cpu` gate host; confirm it returns `linux-cpu`.
+1. Unit-test `classify` across the enumerated 18-cell cross-product (OS × arch × GPU, including the unknown-OS
+   and unknown-arch sentinels) with no host access, asserting each cell against the Phase-0-committed
+   independent decision table — including the Intel-Mac and Linux+GPU hard-failure cells, and the two sentinel
+   `Left` cells. **Specific-reason negatives (§M.8):** each `Left` cell asserts its *expected reason string/tag*
+   (e.g. `apple-arm64-only` for `darwin`+`amd64`, `unknown-arch` for the arch sentinel), paired with the
+   positive that differs only in the foreclosed dimension (`darwin`+`arm64` → `Right macos-arm64`).
+2. **Committed mutant M1 (§M.2):** re-run test 1 against the committed `classify` mutant with the GPU-promotion
+   guard negated; assert the Linux+GPU cell flips and the test goes **red**. A run where M1 stays green is void.
+3. Run `detect` on the `linux-cpu` gate host; confirm it returns `linux-cpu`.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -135,9 +187,14 @@ The whole sprint (📋 Planned).
 **Implementation**: `src/Amoebius/Host/HostTool.hs`, `src/Amoebius/Host/Ensure.hs` (target: the `HostTool` enum
 + `AbsExe` newtype + `HostConfig` tool map + the `installAndVerify` driver)
 **Blocked by**: Sprint 13.1.
-**Independent Validation**: pure `[InstallStep]` plan tests per substrate, plus a property that `mkAbsExe`
-rejects every non-absolute path; on the host, ensuring `kind`/`kubectl`/`cabal`/`ghcup` from clean then re-running
-is a verified no-op, and Helm is never ensured or invoked.
+**Independent Validation**: pure `[InstallStep]` plan tests per substrate asserted against **Phase-0-committed
+golden plans** (authored independently of the reconciler, not regenerated from it — §M.1, §M.3), plus a
+property that `mkAbsExe` rejects every non-absolute path with `cover`/`classify` obligations (§M.4) forcing the
+reject branch; on the host, ensuring `kind`/`kubectl`/`cabal`/`ghcup` **from a machine-verified clean state**
+(a preflight probe, recorded in the phase ledger, shows ghc/cabal/ghcup/kind/kubectl all absent before the
+first run) then re-running is a **verified no-op — defined as zero mutating package-manager invocations on the
+re-run, read from the `execve` audit log** (§M.5, §M.6), never inferred from an exit-0 re-run of idempotent
+installers; and Helm is never ensured or invoked (no `helm` `execve`; the `helm` `PATH` trap never fires).
 **Docs to update**: `documents/engineering/substrate_doctrine.md`.
 
 ### Objective
@@ -148,18 +205,38 @@ than merely discouraged.
 
 ### Deliverables
 - A closed `HostTool` enum naming exactly the Phase-13 tool set (`ghcup`, `cabal`, `kubectl`, `kind`, and the
-  package-manager root); an unlisted tool cannot be invoked, and Helm is intentionally absent.
+  package-manager root — **five members, no sixth**; the container runtime is a stated host prerequisite, not
+  an enum member; Helm is intentionally absent); an unlisted tool cannot be invoked. A structural/CI check
+  asserts the enum has exactly these five constructors.
 - An `AbsExe` newtype whose constructor is unexported; `mkAbsExe` rejects any non-absolute path.
+- A **CI structural check that no module outside `src/Amoebius/Host/Ensure.hs` imports any process-spawn API**
+  (`System.Process`, `System.Posix.Process` exec family, `typed-process`, etc.), so bring-up cannot bypass the
+  `AbsExe` chokepoint with a bare-name spawn (§M.5 forecloses the self-emitted-trace bypass at the source
+  level).
 - A `HostConfig` carrying the detected substrate (Sprint 13.1) plus a `Map HostTool AbsExe`, and a probe-first,
   idempotent `installAndVerify` driver (probe → verified no-op if satisfied, else run the pure
   substrate-branched `[InstallStep]` plan, re-resolving after each step, then re-verify or fail fast), with
   `runTool`/`runToolWithStdin` exec-ing `absExePath` only.
+- **Phase-0-committed oracles/mutants:** the per-substrate `[InstallStep]` golden plans, the `mkAbsExe`-reject
+  expected-error set, and the committed mutant M2 (`Ensure` resolves one tool by bare name) that Validation 4
+  turns red under the `execve` observer.
 
 ### Validation
-1. Unit-test each reconciler's `[InstallStep]` plan as a pure value per substrate (no package-manager call).
-2. Property-test that `mkAbsExe` rejects non-absolute paths and that no invocation path accepts a bare name.
-3. On the `linux-cpu` host, ensure the four tools from clean, re-run for a verified no-op, and confirm Helm is
-   never ensured or invoked.
+1. Unit-test each reconciler's `[InstallStep]` plan as a pure value per substrate (no package-manager call),
+   asserting equality against the **Phase-0-committed golden plans** — the reference side is the committed
+   hand-authored table, never the reconciler's own output (§M.3).
+2. Property-test that `mkAbsExe` rejects non-absolute paths, with a `cover`/`classify` obligation requiring at
+   least 20% of generated inputs to hit the non-absolute (reject) branch and at least 20% the absolute branch
+   (§M.4); a **specific-reason negative (§M.8)** asserts the reject carries the expected non-absolute-path
+   error tag, paired with an absolute-path positive that succeeds. The structural/CI check confirms no module
+   outside `Ensure.hs` imports a process-spawn API.
+3. On the `linux-cpu` host, **record a preflight probe in the ledger showing ghc/cabal/ghcup/kind/kubectl all
+   absent**, ensure the four tools from clean, then re-run; assert the re-run is a **verified no-op = zero
+   mutating package-manager (`apt`/`ghcup`/`cabal`) invocations in the `execve` audit log** (§M.5), not merely
+   exit-0; and confirm Helm is never ensured or invoked (no `helm` `execve`; `helm` `PATH` trap silent).
+4. **Committed mutant M2 (§M.2):** re-run the host ensure under the `execve` observer against the committed
+   `Ensure` mutant that resolves one tool by bare name; assert a non-absolute `argv[0]` appears (or the bare-name
+   `PATH` trap fires) and the gate goes **red**. A run where M2 stays green is void.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -171,10 +248,13 @@ The whole sprint (📋 Planned).
 sprint delivers the **midwife** mode only — the admin-REST client mode lands with the singleton). No shell
 script: amoebius owns none.
 **Blocked by**: Phase 1 gate (the pinned toolchain builds the binary).
-**Independent Validation**: on a bare `linux-cpu` host with no GHC, `pb bootstrap --distro=kind` ensures the
+**Independent Validation**: on a bare `linux-cpu` host **whose cleanliness is machine-verified by a
+preflight probe recorded in the ledger (no GHC/cabal/ghcup present)**, `pb bootstrap --distro=kind` ensures the
 package-manager root (`apt`), `ghcup`, GHC 9.12.4 / Cabal 3.16.1.0, `cabal build`s the binary, and `exec`s
 `amoebius bootstrap --distro=kind`; a second run with the toolchain present is a verified no-op up to the
-`exec`; the repository tree contains no `bootstrap.sh` and no shell script.
+`exec` — **no-op defined as zero mutating `apt`/`ghcup`/`cabal-install` invocations in the second run's
+`execve` audit log** (§M.5, §M.6), never an exit-0 re-run of idempotent installers; the repository tree
+contains no `bootstrap.sh` and no shell script.
 **Docs to update**: `documents/engineering/substrate_doctrine.md`,
 `documents/engineering/bootstrap_sequence_doctrine.md`, `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`.
 
@@ -195,8 +275,10 @@ with the operator CLI as `pb`'s midwife mode, the second mode being the admin-RE
 - The retirement of `bootstrap.sh` recorded in the removal ledger; amoebius owns no shell script.
 
 ### Validation
-1. On a clean `linux-cpu` host, `pb bootstrap --distro=kind` completes steps 1–4 and `exec`s the binary.
-2. Re-run with the toolchain already present is a verified no-op up to the `exec`.
+1. On a `linux-cpu` host **with a ledger-recorded preflight probe confirming ghc/cabal/ghcup absent**,
+   `pb bootstrap --distro=kind` completes steps 1–4 and `exec`s the binary.
+2. Re-run with the toolchain already present is a **verified no-op up to the `exec`, defined as zero mutating
+   `apt`/`ghcup`/`cabal-install` invocations in the re-run's `execve` audit log** (§M.5), not merely exit-0.
 3. Confirm the tree contains no `bootstrap.sh` / no `.sh` igniter.
 
 ### Remaining Work
@@ -210,8 +292,14 @@ The whole sprint (📋 Planned).
 parameters/context/witness host context)
 **Blocked by**: Sprint 13.2, Sprint 13.3.
 **Independent Validation**: on a `linux-cpu` host, `amoebius bootstrap --distro=kind` yields exactly one `Ready`
-node, an immediate re-run reports already-converged and changes nothing, and a run trace shows every external
-invocation went through an `AbsExe` absolute path.
+node; an immediate re-run reports already-converged and **changes nothing — the observable triple `(docker/
+podman container list, `kind get clusters`, kubeconfig file bytes)` is byte-identical before and after, and the
+re-run's `execve` audit log holds zero `kind create` or mutating package-manager calls**; from at least one
+**named partially-converged start state** the identical re-run **converges without recreating the cluster** and
+prints an explicit per-managed-resource discover/diff result showing an empty diff; and **every external
+invocation went through an `AbsExe` absolute path as witnessed by the `execve` audit log** (every `argv[0]`
+absolute, from the resolved tool map — §M.5), never a self-emitted `runTool` trace; the sprint ends by tearing
+the cluster down and asserting a leak-free postflight sweep.
 **Docs to update**: `documents/engineering/cluster_lifecycle_doctrine.md`,
 `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/substrates.md`.
 
@@ -226,16 +314,38 @@ typed host context per [`dsl_doctrine.md` §3](../documents/engineering/dsl_doct
 ### Deliverables
 - A `bootstrap` command chain that detects the substrate (Sprint 13.1), assembles a `BinaryContext`
   (parameters + context + file/socket witnesses), ensures `kind`/`kubectl` by absolute path (Sprint 13.2), and
-  drives single-node kind bring-up as a reconcile — not a one-shot script.
-- An empty cluster as the end state: one node, `Ready`, with **no** platform services (those are Phase 14+).
+  drives single-node kind bring-up as a genuine `discover → diff → enact → re-observe` reconcile over a
+  managed-resource registry — not a one-shot script — such that each managed resource's discover/diff result is
+  printed on every run.
+- An empty cluster as the end state: one node, `Ready`, with **no** platform services (those are Phase 15+).
+- **Phase-0-committed divergent-start fixtures** (§M.1) with their expected converged observation, and the
+  committed mutant M3 (reconciler replaced by a `kind get clusters | grep <name>` one-shot guard) that the
+  divergence-repair validation turns red.
+- A **teardown + leak-free postflight sweep** (`kind delete cluster`, then assert no residual kind cluster,
+  node container, or kubeconfig context) that closes the gate.
 
 ### Validation
-1. **Gate.** On a `linux-cpu` host, `amoebius bootstrap --distro=kind`; assert `kubectl get nodes` shows exactly
-   one `Ready` node.
-2. **Idempotence (the gate's core claim).** Re-run the identical command; assert it reports already-converged,
-   creates nothing, and leaves the single node `Ready`.
-3. Assert every external tool invocation during the run resolved through an `AbsExe` absolute path — no bare
-   name, no Helm.
+1. **Gate.** On a `linux-cpu` host (container runtime pre-installed), `amoebius bootstrap --distro=kind`; assert
+   `kubectl get nodes` shows exactly one `Ready` node.
+2. **Idempotence (the gate's core claim).** Re-run the identical command; assert it reports already-converged
+   and **changes nothing — the observable triple `(docker/podman container list, `kind get clusters`,
+   kubeconfig file bytes)` is byte-identical before and after the re-run, and the re-run's `execve` audit log
+   contains zero `kind create` and zero mutating package-manager calls** — leaving the single node `Ready`, and
+   printing the per-managed-resource empty-diff discover result.
+3. **Divergence-repair (§M — forecloses the one-shot-guard stub).** From each Phase-0-committed
+   partially-converged start state — at minimum (a) the kind cluster exists but its node container is stopped /
+   `NotReady`, and (b) the kubeconfig context is missing — run the identical command; assert it converges to
+   exactly one `Ready` node **without recreating the cluster** (no `kind create` for an existing cluster in the
+   `execve` log; cluster UID/creation-timestamp unchanged), the printed diff was non-empty then re-observes
+   empty.
+4. **External-observer absolute-path assertion (§M.5).** From the committed `execve` audit log of the whole run,
+   assert every `argv[0]` is an absolute path drawn from the resolved tool map — no bare name, no Helm `execve`,
+   and the bare-name `PATH` trap directory recorded no hits. A self-emitted `runTool` trace is inadmissible.
+5. **Committed mutant M3 (§M.2).** Re-run Validation 3 against the committed one-shot-guard mutant; assert at
+   least one divergent-start fixture goes **red** (the guard skips repair or recreates the cluster). A run where
+   M3 stays green is void.
+6. **Teardown + leak sweep.** `kind delete cluster`; assert the postflight sweep finds no residual kind
+   cluster, node container, or kubeconfig context.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -252,9 +362,9 @@ The whole sprint (📋 Planned).
   no-op shape is exercised by this phase's gate.
 
 **Cross-references to add:**
-- [README.md](README.md) — flip the Phase 13 row status once work begins, and link this document from the Phase
+- [README.md](README.md) — flip the Phase 14 row status once work begins, and link this document from the Phase
   13 paragraph.
-- [substrates.md](substrates.md) — record `linux-cpu` as the Phase 13 gate substrate (the first Register-3 row).
+- [substrates.md](substrates.md) — record `linux-cpu` as the Phase 14 gate substrate (the first Register-3 row).
 - [legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md) — mark `bootstrap.sh` retired, superseded
   by the Python `pb` midwife.
 - [system_components.md](system_components.md) — register the target paths named in the sprint `Implementation`
@@ -262,7 +372,7 @@ The whole sprint (📋 Planned).
 
 ## Related Documents
 
-- [README.md](README.md) — the live tracker; its Phase 13 row is the authoritative one-line gate and status.
+- [README.md](README.md) — the live tracker; its Phase 14 row is the authoritative one-line gate and status.
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
   Register-3 honesty token: a passed gate is a live-substrate result, never a compile claim).
 - [overview.md](overview.md) — target architecture, the GHC 9.12.4 / Cabal 3.16.1.0 pin, and the pre-cluster →

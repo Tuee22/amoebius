@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Author amoebius's one formal proof obligation — the cross-cluster gateway migration, both the
@@ -52,14 +52,32 @@ explorer), analogous to the Phase-0 documentation lint and the Phase-2 kernel ro
 `SessionAlwaysRebindable`, `PlannedIsLossless`, `NoWriteAfterStaleFailover` — with no counterexample **and**
 proves the **liveness** `PROPERTY`s `MergeConverges` / `SessionEventuallyRebinds` under the declared weak
 fairness, at bounded scope for **both** the `Planned` and `Failover` branches, the run passing its vacuity
-check (no invariant trivially satisfied, no action dead), its **fairness-sensitivity** check (each liveness
-`PROPERTY` goes red with fairness removed), and its scope-2 pairwise cutoff check (the decode-time
-structural-fit fold's *accepts ⟺ in-envelope* equivalence holds under QuickCheck, with a shared-resource-modeled
-over-scope stress run and the decomposition lemma recorded as an open obligation); the in-process io-sim /
-reachability explorer over the same `Model`'s `interpret` agrees on the **safety** predicates (liveness is
-TLC-only); and both a **safety** mutation (a transition that drops the fence or decommissions before
-`drain-complete`, red in all instruments) and a **liveness** mutation (a stall that never reconverges, red only
-in TLC's `PROPERTY`) are caught. Register 1, in-process, substrate `none`.
+check — **defined** (§M.4) as the conjunction of two committed sub-checks: (a) *antecedent-reachability* —
+every implication-form invariant has its antecedent reached on some enumerated state (a data-aware
+`PlannedIsLossless` whose promoted-log clause is exercised, an over-budget path that reaches
+`NoWriteAfterStaleFailover`'s guard), and (b) *no dead action* — every declared action, **including the
+environment actions `client-write`, `replication-tick`, and `active-crash`** authored in Sprint 3.1, is
+enabled on some reachable state; an invariant whose antecedent is unreachable or whose falsifying mutant (below)
+does not exist fails vacuity — its **fairness-sensitivity** check (each liveness `PROPERTY` goes red with
+fairness removed), and its scope-2 pairwise cutoff check (the decode-time structural-fit fold's
+*accepts ⟺ in-envelope* equivalence holds under QuickCheck against an **independently-authored reference
+predicate** (§M.3) that shares no code with `StructuralFit.hs`, with committed `cover`/`checkCoverage`
+thresholds (§M.4) firing each violation class and each over-scope-2 shape at a stated minimum rate, a
+shared-resource-modeled over-scope stress run **whose shared-resource actions are non-dead and whose committed
+seeded shared-resource mutant goes red**, and the decomposition lemma recorded as an open obligation); the
+in-process io-sim / reachability explorer over the same `Model`'s `interpret` agrees on the **safety**
+predicates (liveness is TLC-only), io-sim exploring schedules **exhaustively within a committed IOSimPOR
+depth/interleaving bound recorded in the harness and ledger** (not N random seeds), labeled
+**TESTED (bounded-exhaustive schedules)**; and **every** mutant of a mechanical mutation-operator set over the
+fragment (guard negation/weakening, effect swap, dropped effect entry/`UNCHANGED`, quantifier flip, fairness
+drop, invariant-clause delete) is caught, **including a committed per-invariant mutant catalogue (§M.2) that
+names, for each of the four safety invariants, at least one seeded mutant violating exactly that invariant and
+red in all safety instruments — specifically a `verify-caught-up`-passes-while-offsets-lag mutant caught by the
+data-aware `PlannedIsLossless` and an over-budget-divergence mutant caught by `NoWriteAfterStaleFailover`** —
+each safety mutant (a transition that drops the fence or decommissions before `drain-complete`) red in all
+instruments, each fairness-drop/liveness mutant (a stall that never reconverges) red only in TLC's `PROPERTY` —
+so a single surviving mutant, or any safety invariant with no committed falsifying mutant, fails the gate.
+Register 1, in-process, substrate `none`.
 
 ## Doctrine adopted
 
@@ -70,7 +88,7 @@ in TLC's `PROPERTY`) are caught. Register 1, in-process, substrate `none`.
 - [`gateway_migration_model_doctrine.md §2` and §3](../documents/engineering/gateway_migration_model_doctrine.md#3-the-model)
   — *the two branches* and *the `Model`*: `GatewayMigration = <Planned | Failover>` is one reifiable value
   whose state variables, guarded transitions, and four named invariants (`UniqueGatewayOwner`,
-  `SessionAlwaysRebindable`, `PlannedIsLossless`, `FailoverBounded`) this phase authors in full.
+  `SessionAlwaysRebindable`, `PlannedIsLossless`, `NoWriteAfterStaleFailover`) this phase authors in full.
 - [`gateway_migration_model_doctrine.md §4`](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove)
   — *simulate and prove*: both instruments read the same `Model` — io-sim's `IOSimPOR` scheduler over the
   lifted decision core, and TLC over the `emitTLA`-rendered spec — and a validated model is green in both and
@@ -100,7 +118,11 @@ paths, not yet built.
 **Blocked by**: Phase 2 gate (the `Model`/`interpret`/`emitTLA` kernel and the in-process explorer).
 **Independent Validation**: the value typechecks against the Phase-2 `Model` EDSL and the reachability explorer
 enumerates a non-empty, constraint-bounded state space that visits **both** a `Planned` and a `Failover`
-transition; no invariant references an undeclared variable.
+transition; the explorer confirms the environment actions (`client-write`, `replication-tick`, `active-crash`)
+each fire on some reachable state — so the replication-offset/log variables carry live dynamics and are not
+inert — and confirms a reachable state where `PlannedIsLossless`'s promoted-log clause and one where
+`NoWriteAfterStaleFailover`'s divergence budget are each materially exercised (non-vacuous antecedents); no
+invariant references an undeclared variable.
 **Docs to update**: `documents/engineering/gateway_migration_model_doctrine.md` (Phase-3 status backlink),
 `DEVELOPMENT_PLAN/system_components.md` (the single formal `GatewayMigration` `Model` row).
 
@@ -114,10 +136,17 @@ four named invariants — with **no** singleton-election variable anywhere.
 
 ### Deliverables
 - The `GatewayMigration` `Model` value in the Phase-2 first-order fragment, both branches expressed as guarded
-  parameterized actions.
+  parameterized actions, **plus the environment actions `client-write` (accrues a committed write on the active
+  owner's log), `replication-tick` (advances a standby's replication offset toward the active's), and
+  `active-crash` (the fault that triggers `Failover`)** — so the replication offset/log variables are driven by
+  live transitions and neither `PlannedIsLossless` nor `NoWriteAfterStaleFailover` can hold vacuously; all
+  actions (control-plane and environment) enter the no-dead-action vacuity check.
 - The **safety** invariants encoded as boolean `Expr` (`modelInvariants`): `UniqueGatewayOwner`,
-  `SessionAlwaysRebindable`, `PlannedIsLossless` (cutover reachable only after `verify-caught-up`),
-  `NoWriteAfterStaleFailover` (capped divergence within the declared budget).
+  `SessionAlwaysRebindable`, `PlannedIsLossless` — **data-aware**: the promoted log contains every write
+  committed before cutover (cutover reachable only after `verify-caught-up` **and** the promoted offset covers
+  every committed write), so a `verify-caught-up`-passes-while-offsets-lag transition violates it —
+  `NoWriteAfterStaleFailover` (accrued divergence stays within the declared budget; an over-budget write
+  violates it).
 - The **liveness** properties encoded as `Temporal` under a named weak-fairness annotation (`modelFairness` +
   `modelProperties`): `MergeConverges` (`ownerCount ~> ownerCount = 1` after heal) and `SessionEventuallyRebinds`
   — the properties a safety invariant cannot express, per
@@ -126,7 +155,9 @@ four named invariants — with **no** singleton-election variable anywhere.
 
 ### Validation
 1. The value typechecks; the explorer visits both branches and enumerates a bounded, non-empty state space;
-   every invariant is well-formed over the declared variables.
+   every invariant is well-formed over the declared variables; the environment actions each fire and the
+   `PlannedIsLossless` promoted-log clause and `NoWriteAfterStaleFailover` divergence budget are each materially
+   exercised on some reachable state (no inert data variable).
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -140,8 +171,12 @@ paths, not yet built.
 **Blocked by**: Sprint 3.1.
 **Independent Validation**: TLC reaches every named safety invariant with no counterexample at scope 2 for
 **both** branches, **and** proves each liveness `PROPERTY` (`MergeConverges`, `SessionEventuallyRebinds`) under
-the declared weak fairness; a vacuity check confirms each invariant is non-trivially satisfied and no action is
-dead, and a **fairness-sensitivity** check confirms each liveness `PROPERTY` goes red when its fairness
+the declared weak fairness; a vacuity check — **defined** as (a) *antecedent-reachability*: every implication-form
+invariant has its antecedent reached on some enumerated state (in particular the data-aware `PlannedIsLossless`
+promoted-log clause and the `NoWriteAfterStaleFailover` over-budget path are each reachable), and (b) *no dead
+action*: every declared action **including the environment actions `client-write`, `replication-tick`,
+`active-crash`** is enabled on some reachable state — confirms each invariant is non-trivially satisfied and no
+action is dead, and a **fairness-sensitivity** check confirms each liveness `PROPERTY` goes red when its fairness
 annotation is removed (it was not vacuously true); the emitted `.tla`/`.cfg` are absent from version control (a
 `.gitignore` entry and a committed-artifact scan confirm it).
 **Docs to update**: `documents/engineering/gateway_migration_model_doctrine.md` (§4 prove row →
@@ -158,9 +193,15 @@ exhaustively model-check it at the bounded scope, proving both branches reach ev
 - The TLC harness invoking `emitTLA` → git-ignored `gen/tla/GatewayMigration.{tla,cfg}` → `tla2tools`, run
   over both the `Planned` and `Failover` branch scenarios, checking the `INVARIANT`s (safety) and the
   `PROPERTY`s (liveness, under the emitted `WF_`/`SF_` fairness).
-- A vacuity assertion (invariants are not trivially true; every declared action is enabled on some reachable
-  state), a **fairness-sensitivity** assertion (each liveness `PROPERTY` fails with fairness removed), and the
-  scope-bound `CONSTRAINT` carried through from the `Model`.
+- A vacuity assertion — (a) antecedent-reachability of every implication-form invariant (the `PlannedIsLossless`
+  promoted-log clause and the `NoWriteAfterStaleFailover` over-budget path each reached) and (b) no dead action
+  across control-plane **and** environment actions (`client-write`, `replication-tick`, `active-crash`) — a
+  **fairness-sensitivity** assertion (each liveness `PROPERTY` fails with fairness removed), and the
+  scope-bound `CONSTRAINT` carried through from the `Model` on the **safety** runs only — the **liveness**
+  `PROPERTY` runs instead finitize the model via `CONSTANTS` and finite, saturating variable domains and run
+  **`CONSTRAINT`-free**, since a state `CONSTRAINT` truncates the behaviour graph and distorts `WF`/`SF`
+  enabledness, admitting a spurious green liveness within the bound
+  ([`formal_model_doctrine.md §6`](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not)).
 - A committed-artifact scan proving no `.tla`/`.cfg` is versioned.
 
 ### Validation
@@ -179,8 +220,15 @@ built.
 **Blocked by**: Sprint 3.1, Sprint 3.2.
 **Independent Validation**: `IOSimPOR` and the in-process reachability explorer, both reading the *same*
 `Model`'s `interpret`, assert the same safety predicates the TLC invariants name and find no violation on the
-correct model; the seeded mutation (drop the fence / decommission before `drain-complete`) goes **red** in
-both TLC and io-sim.
+correct model — `IOSimPOR` exploring schedules **exhaustively within a committed depth/interleaving bound
+recorded in the harness and ledger** (bounded-exhaustive, not N random seeds); **every** mutant of a mechanical
+mutation-operator set over the fragment is caught, **including the committed per-invariant mutant catalogue**:
+for each of the four safety invariants at least one seeded mutant that violates exactly that invariant and is
+red in TLC, io-sim, and the explorer — notably a `verify-caught-up`-passes-while-offsets-lag mutant caught by
+the data-aware `PlannedIsLossless` and an over-budget-divergence mutant caught by `NoWriteAfterStaleFailover`,
+so no safety invariant can be inert; each generic safety mutant (drop the fence / decommission before
+`drain-complete`) red in TLC, io-sim, and the explorer, each fairness-drop/liveness mutant red only in TLC's
+`PROPERTY`.
 **Docs to update**: `documents/engineering/gateway_migration_model_doctrine.md` (§4 simulate row →
 tested-for-design), `documents/engineering/conformance_harness_doctrine.md` (the Register-1 explorer + io-sim
 ledger variant).
@@ -193,19 +241,34 @@ scheduler over adversarial interleavings, and demonstrate that both readings of 
 sensitivity to one seeded fault — the operational form of correspondence-by-construction.
 
 ### Deliverables
-- The `IOSimPOR` harness asserting the TLC-mirrored **safety** predicates on explored schedules for both
-  branches, labeled **TESTED (sampled schedules)** — io-sim and the explorer cover safety only; liveness is a
-  TLC-only verdict ([`formal_model_doctrine.md §3`](../documents/engineering/formal_model_doctrine.md#3-two-total-renderings)).
-- Two seeded-mutation `Model` variants: a **safety** mutant (drop the fence / decommission before
-  `drain-complete`) reaching the illegal state — red in TLC, io-sim, and the explorer — and a **liveness**
-  mutant (a stall/livelock that reaches no illegal state but never reconverges) — red only in TLC's `PROPERTY`,
-  demonstrating the liveness check catches faults safety and the safety instruments miss.
-- An assertion that the correct model is green in all instruments; the safety mutant is red in all three; the
-  liveness mutant is red in TLC and (correctly) not flagged by the safety-only instruments.
+- The `IOSimPOR` harness asserting the TLC-mirrored **safety** predicates on schedules explored
+  **bounded-exhaustively within a committed depth/interleaving bound named in the harness and ledger** (not N
+  random seeds) for both branches, labeled **TESTED (bounded-exhaustive schedules)** — io-sim and the explorer
+  cover safety only; liveness is a TLC-only verdict ([`formal_model_doctrine.md §3`](../documents/engineering/formal_model_doctrine.md#3-two-total-renderings)).
+- A **mechanical mutation set** over the `GatewayMigration` fragment, not two hand-picked strawmen: the
+  operator family (guard negation/weakening, effect swap, dropped effect entry/`UNCHANGED`, quantifier flip,
+  fairness drop, invariant-clause delete) is applied exhaustively, and **every** generated mutant must be
+  caught — each **safety** mutant (e.g. drop the fence / decommission before `drain-complete`, reaching the
+  illegal state) red in TLC, io-sim, and the explorer; each **fairness-drop/liveness** mutant (e.g. a
+  stall/livelock that reaches no illegal state but never reconverges) red only in TLC's `PROPERTY` — a single
+  surviving mutant fails the gate, demonstrating the liveness check catches faults the safety instruments miss.
+- A **committed per-invariant mutant catalogue** (§M.2), pinned before the correct `Model` is finalized: for
+  **each** of the four safety invariants (`UniqueGatewayOwner`, `SessionAlwaysRebindable`, `PlannedIsLossless`,
+  `NoWriteAfterStaleFailover`) at least one named committed mutant that violates **exactly** that invariant and
+  is red in TLC, io-sim, and the explorer — including the `verify-caught-up`-passes-while-offsets-lag mutant
+  (must go red under the data-aware `PlannedIsLossless`) and the over-budget-divergence mutant (must go red
+  under `NoWriteAfterStaleFailover`); a safety invariant with no committed falsifying mutant fails the gate, so
+  neither guarantee can pass vacuously.
+- An assertion that the correct model is green in all instruments; each safety mutant (generic and
+  per-invariant) is red in all three; the liveness mutant is red in TLC and (correctly) not flagged by the
+  safety-only instruments.
 
 ### Validation
-1. io-sim finds no safety violation on the correct model; the safety mutant is red in TLC + io-sim + explorer;
-   the liveness mutant is red in TLC's `PROPERTY` (and not spuriously flagged by the safety instruments).
+1. io-sim finds no safety violation on the correct model (schedules explored bounded-exhaustively within the
+   committed IOSimPOR bound named in the ledger); **every** mutant of the mechanical mutation set **and every
+   entry of the committed per-invariant mutant catalogue** is caught — each safety mutant red in TLC + io-sim +
+   explorer, each fairness-drop/liveness mutant red in TLC's `PROPERTY` (and not spuriously flagged by the
+   safety-only instruments); a safety invariant with no committed falsifying mutant fails the gate.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -218,10 +281,22 @@ The whole sprint (📋 Planned).
 run) — target paths, not yet built.
 **Blocked by**: Sprint 3.2.
 **Independent Validation**: a QuickCheck generator over random migration graphs shows the fold **accepts ⟺**
-the graph is pairwise (one active + one standby per DNS record), independent, and acyclic (equivalence, not just
-soundness), and the fold is total; **no** per-spec model-check runs; and at least one over-scope TLC run
-(3 clusters, chained) that **models the shared resources in** (a survivor reused across records, one route53
-zone, one Vault) stresses the cutoff's shared-resource-independence assumption and finds no counterexample.
+the graph is in-envelope, where *in-envelope* is decided by an **independently-authored naive reference
+predicate living in `test/formal/CutoffSpec.hs` that shares no code with
+`src/Amoebius/Multicluster/StructuralFit.hs`** (§M.3) — not the fold or its helpers — so the equivalence cannot
+be a tautology; the property carries committed `cover`/`checkCoverage` thresholds (§M.4) that force each
+violation class (**multi-active, cyclic, shared-DNS, cluster-reuse-across-records**) and each graph larger than
+scope 2 to be generated at a stated minimum rate, so the reject and boundary branches actually fire; **each of
+three fold-mutation checks — deleting the pairwise clause, the independence clause, or the acyclicity clause
+from the fold — turns the equivalence property red** (§M.2); the fold is total, discharged by a committed
+QuickCheck no-exception property forcing the fold to normal form over arbitrary (including malformed and
+oversized) graphs; **no** per-spec model-check runs; and at least one over-scope TLC run (3 clusters, chained)
+that **models the shared resources in** (a survivor reused across records, one route53 zone, one Vault) with
+*live contention semantics* (a rate-limited zone-repoint action and a shared-commit-log/shared-survivor
+interaction), whose shared-resource interaction actions are each non-dead (enabled on some reachable state) and
+whose **committed seeded shared-resource mutant — the shared survivor accepting both active roles concurrently,
+or the rate-limited zone dropping a repoint — the run catches red**, stresses the cutoff's
+shared-resource-independence assumption and otherwise finds no counterexample.
 **Docs to update**: `documents/engineering/gateway_migration_model_doctrine.md` (§5/§6 — the cutoff and the
 over-scope stress row), `documents/engineering/formal_model_doctrine.md` (§6 backlink — what scope 2 proves
 here).
@@ -235,22 +310,42 @@ total fold, never a per-`InForceSpec` TLC.
 
 ### Deliverables
 - The structural-fit fold rejecting any spec whose migration graph falls outside the proven envelope, tagged
-  with the illegal-state entry it forecloses.
+  with the illegal-state entry it forecloses. **`independent` is defined** (per
+  [`gateway_migration_model_doctrine.md §5`](../documents/engineering/gateway_migration_model_doctrine.md#5-one-and-done-plus-a-per-inforcespec-structural-fit))
+  as **both** graph-independence (no shared edge/cycle structure across pairs) **and resource-independence** (no
+  cluster/survivor reused as active or standby across two DNS records); the fold **rejects cluster-reuse-across-
+  records**, not only edge/cycle structure — the two engineers' readings are reconciled to this one.
 - A QuickCheck property over random migration graphs asserting **accepts ⟺ pairwise ∧ independent ∧ acyclic**
-  (equivalence), plus a corpus of in-envelope (accepted) and out-of-envelope (rejected: multi-active, cyclic,
-  shared-DNS) fixtures.
-- One over-scope (3-cluster, chained) TLC run that **models the shared resources in**, recorded as the §6
-  stress check, with the abstracted premises (real-time / clock-skew; the MinIO/Pulsar/Patroni lossless
-  delegation; shared-resource independence) named as assumptions.
+  (equivalence), decided against an **independently-authored naive reference predicate** (§M.3) sharing no code
+  with `StructuralFit.hs`, with committed `cover`/`checkCoverage` thresholds forcing each violation class
+  (multi-active, cyclic, shared-DNS, **cluster-reuse-across-records**) and each over-scope-2 graph at a stated
+  minimum rate; plus the three fold-mutation checks (delete pairwise / independence / acyclicity clause → each
+  turns the equivalence red); plus a **committed Phase-0-pinned corpus** of in-envelope (accepted) and
+  out-of-envelope fixtures, each rejected fixture asserting **which** clause it violates — multi-active,
+  cyclic, shared-DNS, and cluster-reuse-across-records — paired with an accepted positive differing only in that
+  one dimension (§M.8); and a committed no-exception totality property forcing the fold to normal form over
+  arbitrary (malformed/oversized) graphs (§M.4).
+- One over-scope (3-cluster, chained) TLC run that **models the shared resources in** with live contention
+  semantics (rate-limited zone-repoint, shared survivor / shared commit log), recorded as the §6 stress check,
+  with its shared-resource interaction actions each non-dead and one committed seeded shared-resource mutant
+  (shared survivor holding two active roles, or the rate-limited zone dropping a repoint) that the run catches
+  red — proving the stress model can detect a cutoff violation, not merely fail to express one; the abstracted
+  premises (real-time / clock-skew; the MinIO/Pulsar/Patroni lossless delegation; shared-resource independence)
+  named as assumptions.
 - The **decomposition lemma** recorded as a named, still-open obligation — that the N-instance product refines
   the 2-instance model under the fold's independence predicate — to be discharged by a machine-checked proof
   (TLAPS/Lean) or a shared-resource-modeled scope-3–4 run; until then the cutoff is logged **argued/tested**,
   never *proven* ([`gateway_migration_model_doctrine.md §5`](../documents/engineering/gateway_migration_model_doctrine.md#5-one-and-done-plus-a-per-inforcespec-structural-fit)).
 
 ### Validation
-1. The fold's **accepts ⟺ in-envelope** equivalence holds under QuickCheck and the fold is total; the
-   shared-resource-modeled over-scope run confirms the cutoff assumption; the decomposition lemma is recorded as
-   an open obligation and the cutoff is labelled argued/tested; TLC is never invoked on the per-spec decode path.
+1. The fold's **accepts ⟺ in-envelope** equivalence holds under QuickCheck against the independently-authored
+   reference predicate (no code shared with `StructuralFit.hs`), with the coverage thresholds met and each of
+   the three fold-mutation checks (pairwise / independence / acyclicity clause deleted) turning the equivalence
+   red; the committed corpus passes with each rejected fixture asserting its specific violated clause; the fold
+   is total (no-exception property to normal form over arbitrary graphs); the shared-resource-modeled over-scope
+   run has non-dead interaction actions and catches its committed seeded shared-resource mutant red while finding
+   no counterexample on the correct model; the decomposition lemma is recorded as an open obligation and the
+   cutoff is labelled argued/tested; TLC is never invoked on the per-spec decode path.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -277,7 +372,7 @@ The whole sprint (📋 Planned).
   `test/formal/*` TLC + io-sim harnesses, and `src/Amoebius/Multicluster/StructuralFit.hs` as one
   `GatewayMigration` `Model` row; retire any stale separate `CrossClusterFailover`/`SingletonElection` spec
   rows (there is one obligation, both branches, and no election model).
-- `DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md` — backlink: this design-model is the artifact
+- `DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md` — backlink: this design-model is the artifact
   whose Register-3 correspondence against the built `Multicluster/*` forest is discharged there, never here.
 
 ## Related Documents

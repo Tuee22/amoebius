@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_12_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_13_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_14_base_image_registry.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_16_retained_storage.md, DEVELOPMENT_PLAN/phase_17_vault_pki.md, DEVELOPMENT_PLAN/phase_18_platform_services.md, DEVELOPMENT_PLAN/phase_19_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_20_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_21_app_tenancy.md, DEVELOPMENT_PLAN/phase_22_pulsar_client.md, DEVELOPMENT_PLAN/phase_23_content_store_workflow.md, DEVELOPMENT_PLAN/phase_24_determinism_kernel.md, DEVELOPMENT_PLAN/phase_25_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_26_infernix_lift.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_28_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_31_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_32_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/generated_artifacts_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_12_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_14_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_15_base_image_registry.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_17_retained_storage.md, DEVELOPMENT_PLAN/phase_18_vault_pki.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_21_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_22_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, DEVELOPMENT_PLAN/phase_24_pulsar_client.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_27_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_31_determinism_kernel.md, DEVELOPMENT_PLAN/phase_32_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_33_infernix_lift.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_35_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: The rulebook for the amoebius `DEVELOPMENT_PLAN/` suite — the canonical file layout, the
@@ -54,7 +54,7 @@ ALL-CAPS exception is `README.md`). The canonical set:
 | `system_components.md` | Target component inventory: surface → owning doctrine → planned module path. |
 | `substrates.md` | Substrate registry + per-phase substrate map; sole home of generated tables. |
 | `legacy_tracking_for_deletion.md` | The migration-removal ledger (what the convergence retires, and when). |
-| `phase_NN_<slug>.md` | One document per phase, zero-padded `NN` for sort order (`phase_00_documentation_suite.md` … `phase_32_spa_live_deploy.md`). |
+| `phase_NN_<slug>.md` | One document per phase, zero-padded `NN` for sort order (`phase_00_documentation_suite.md` … `phase_37_spa_live_deploy.md`). |
 | `later_phases.md` | The in-scope, high-numbered phases not yet given their own document. |
 
 This deviates from prodbox's hyphenated names (`phase-3-gateway-dns.md`) on purpose: amoebius's
@@ -216,7 +216,7 @@ in **exactly one register** ([`conformance_harness_doctrine.md`](../documents/en
 **Register 1** (pure/golden, in-process, no cluster), **Register 2** (boundary integration with fake tools, no
 cluster), and **Register 3** (live infrastructure) — with exactly two deliberate exceptions at the two ends of
 the count: **Phase 0** (the documentation-lint gate) reaches **no** register (it validates text and the link
-graph, not amoebius behaviour), and **Phase 12** (the representational SPA phase) is the single gate that
+graph, not amoebius behaviour), and **Phase 13** (the representational SPA phase) is the single gate that
 spans **two** — Register 1 (the composition property decodes) *and* Register 2 (the PureScript demo SPA against
 a faked backend), both in-process, no cluster. The pre-cluster band (phases 1–12, substrate `none`) discharges
 Registers 1–2; the live band (phases 13–32) is Register 3. **Rendering a plan / `--dry-run` must never require
@@ -246,6 +246,25 @@ phase discharges them. This front-loading introduces no forward dependency and d
 contiguous-numbering / no-fractional-phase-id rule (§E): the design phase keeps its own integer id and its
 own single-substrate (`none`) gate.
 
+**A ✅ Done flip records its evidence.** A phase or sprint moves to ✅ Done only when its acceptance gate has
+actually run, and the flip **records — in the tracker row or the phase doc — the exact re-runnable gate
+command, the run date, the substrate, and the emitted ledger's hash.** Without them a status flip is an
+unbacked edit of a Markdown cell; the recorded command is what lets any reader re-run the gate and reproduce
+the ledger. The documentation lint ([§M](#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)) rejects a ✅ Done
+row that carries no recorded command, date, substrate, and ledger hash.
+
+**Status is single-sourced and consistent.** Status lives only in the plan (documentation_standards §1). The
+marker in a phase's README Phase-Overview row and the marker in that phase doc's `## Phase Status` line **must
+be identical**; the documentation lint checks this equality and fails on drift.
+
+**The proven/tested/assumed ledger is a committed, schema-checked artifact.** Every gate emits a ledger whose
+schema, linter, and commit status are defined in
+[`testing_doctrine.md`](../documents/engineering/testing_doctrine.md) and Phase 0. Unlike other generated
+artifacts the ledger **is committed** — the deliberate carve-out from the generated-never-committed rule
+([`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md)) — so a green
+gate's evidence is a durable, externally-checkable record rather than ephemeral output of the code under test.
+The ledger names the register it reached and marks every correctness layer outside that register UNVERIFIED.
+
 ## L. One-substrate discipline
 
 Each phase's acceptance gate requires **at most one** substrate (`none` for the pre-cluster band; else
@@ -257,13 +276,58 @@ split until each gate is single-substrate.
 **Two named forms satisfy the one-substrate rule without naming a fixed catalog member on the parent gate**, and
 both keep the discipline checkable rather than bending it:
 
-- **Deferred-to-generation** (Phase 31, `per generated test`). A gate that *emits* a test `.dhall` names the
+- **Deferred-to-generation** (Phase 36, `per generated test`). A gate that *emits* a test `.dhall` names the
   **rule** that each generated test is substrate-locked to exactly one substrate, chosen at generation time — the
   single-substrate property holds per generated artifact, not as a fixed member on the emitting gate.
 - **Parent-drives-provider** (Phase 30, `linux-cpu → provider`). The gate runs on one hardware substrate (the
   `linux-cpu` parent) and *targets* a provider it does not itself run — EKS is a **declared managed engine, not a
   detected substrate** ([`substrates.md` §2](substrates.md#2-substrate-inventory)). The single substrate the gate
   keys to is the parent's; the provider is a compute-engine axis, never a fifth substrate.
+
+## M. Gate integrity (a gate cannot be passed by a stub)
+
+A phase gate exists to prove the phase's objective was actually delivered. A gate a stub, fake, hardcoded
+happy-path, or self-fulfilling fixture can pass is not a gate. Every phase **Gate** — and every sprint
+**Validation** that feeds it — obeys the clauses below; a gate that omits an applicable clause is incomplete.
+
+1. **Oracle-pinning.** The fixtures, goldens, and expected error/locus tags a gate checks against are authored
+   and **committed in Phase 0** — extending the per-entry validation-locus ledger of the illegal-state corpus
+   to every gate — *before* the implementation exists. A golden or expected value regenerated from the
+   implementation's own output is not a test: it passes for any output, a stub's included.
+2. **Committed mutation quota.** Every gate names **at least one committed seeded mutant** — a deliberately
+   broken implementation or spec — that the gate must turn red. Mutants are drawn from a defined operator set
+   (guard negation/weakening, effect swap, dropped effect/`UNCHANGED`, quantifier flip, fairness drop,
+   invariant-clause delete, union-arm addition), not one hand-picked strawman, and are committed and re-run,
+   not run once.
+3. **Independent reference predicates.** An equivalence or exact-match check — an `accepts ⟺ in-envelope`
+   property, an expected-argv assertion, an expected-error-tag assertion — defines its reference side
+   **independently of the code under test** (a committed hand-authored table or a distinct specification),
+   never by reusing the implementation's own fold, helper, or `Step→argv` function. A check whose oracle is the
+   subject under test is a tautology.
+4. **Generator coverage.** A property-based (QuickCheck) gate carries `cover` / `classify` obligations that
+   force the illegal / reject / boundary branch to fire a stated minimum fraction of cases. A generator that
+   emits one near-constant legal value proves nothing about the reject path.
+5. **External-observer traces.** A gate that asserts *how* the binary behaved — every tool invoked by absolute
+   path, zero Helm invocations, no public-registry pull, no credential access on the render path — reads its
+   trace from an **observer at the OS boundary** (an argv-recording shim, `strace`, a CNI/containerd log),
+   never from a compliance trace the code under test emits about itself, which cannot record the calls that
+   bypass it.
+6. **Determinism honesty.** A determinism / reproducibility gate forces an **independent recomputation** on the
+   second run (cache-bypass, or a distinct content-addressed namespace) and asserts the compute path actually
+   executed. A "second run" served from a content-addressed store hit proves memoization, not determinism.
+7. **Concrete corpus.** A gate names its "representative set" **explicitly** — which capabilities, which
+   service set, which fixtures — in the phase doc. An undefined "representative set" is satisfied by one
+   hand-picked happy-path shape.
+8. **Specific-reason negatives.** A negative fixture asserts **why** it fails — its expected `dhall type`
+   error, `DecodeError` tag, or compile-fail locus — and is paired with a positive that differs only in the
+   foreclosed dimension. A negative that merely "fails" can fail for an unrelated reason (a typo, a missing
+   field) while the illegal state it targets stays representable.
+
+These clauses are what a phase's **Gate** and each sprint's **Validation** are checked against. The Phase-0
+documentation lint verifies that every gate line names its committed fixtures, its mutant(s), and its
+independent oracle; the honesty ledger ([§K](#k-honesty-proven--tested--assumed)) records the result. The
+load-bearing principle: **the party that writes the implementation must not be the sole author of the oracle it
+is checked against** — Phase 0 pins the oracle first.
 
 ---
 

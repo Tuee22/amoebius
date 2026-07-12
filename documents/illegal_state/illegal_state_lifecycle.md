@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/engineering/chaos_failover_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering the lifecycle band — the readiness
@@ -82,12 +82,15 @@ to the sanctioned `Readiness`-typed surface, not the whole `IO` monad — a raw 
 out by the [`daemon_topology_doctrine.md` §6](../engineering/daemon_topology_doctrine.md#6-the-shared-daemon-spine) ban, a
 `runtime-checked` discipline.)*
 
-**Validation-locus:** `Gate-1-editor` (the closed `Readiness` union with no `AfterDuration` arm — "wait N then
-assume ready" fails `dhall type` at authoring time) + `Gate-2-decoder` (a start-handle exists only once its
-dependency's `Ready` edge does, and the total `mkBringUpOrder` fold returns `Left` on a cycle or an undeclared
-dependency) + `live-effect` (that the observed condition actually resolves in bounded time — the port becomes
-responsive — owned by the reconciler and the chaos doctrine). Per the validation-locus axis of
-[`illegal_state_techniques.md`](./illegal_state_techniques.md), orthogonal to the foreclosure layer above.
+**Validation-locus:** `Gate-2-decoder` (the closed `Readiness` union with no `AfterDuration` arm is a Haskell
+`data` type on the Phase-10 surface, and bring-up order is *derived*, never Dhall-authored — so no `dhall
+type` fixture can exercise it and "wait N then assume ready" is a GHC compile-fail golden, not an editor-time
+`dhall type` failure, per the Gate-1-vs-Gate-2 caveat of [`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force); a
+start-handle likewise exists only once its dependency's `Ready` edge does, and the total `mkBringUpOrder` fold
+returns `Left` on a cycle or an undeclared dependency) + `live-effect` (that the observed condition actually
+resolves in bounded time — the port becomes responsive — owned by the reconciler and the chaos doctrine). Per
+the validation-locus axis of [`illegal_state_techniques.md`](./illegal_state_techniques.md), orthogonal to the
+foreclosure layer above.
 
 ### 3.26 An unverified environment promotion (promote → prod without the required evidence)
 

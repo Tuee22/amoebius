@@ -46,11 +46,47 @@ analogous to the Phase 5 decode battery and the Phase 6 property suite.
 
 **Gate:** the `fits`/`carve`/`place` capacity fold and the compute-engine/topology relation hold under
 QuickCheck — every generated positive input yields a sound headroom/placement/compatibility result and the
-folds are provably total — and the decode-foreclosed folds return a structured `Left` on each
-capacity/topology negative fixture (engine↔substrate mismatch, a reused rke2 host, host/VM/cluster overcommit,
-a store over its backing, a time-only or hot-tier-over-bookie topic, an unplaceable taint), while the positive
-`legal_multisubstrate_cluster` and `legal_managed_eks` fixtures place feasibly — a **Register-1** in-process
-check that runs on no substrate.
+folds are **provably total** (interpreted concretely in [§N](#n-gate-integrity-refinements-this-phase): compile-time exhaustiveness under
+`-Werror=incomplete-patterns` on every `Amoebius.Capacity.*` / `Amoebius.Dsl.Topology` module **and** a
+sampled QuickCheck no-crash run — both, not either) — and the decode-foreclosed folds return a structured
+`Left` on each capacity/topology negative fixture in the **representative set named in [§N](#n-gate-integrity-refinements-this-phase)** (engine↔substrate
+mismatch, a reused rke2 host, host/VM/cluster overcommit, a store over its backing, a time-only or
+hot-tier-over-bookie topic, an unplaceable taint, **plus the two elastic negatives
+`illegal_elastic_pod_exceeds_largest_candidate` → `Left Unschedulable` and
+`illegal_elastic_sum_at_max_scale_over_quota` → `Left Overcommit`**), while the positive
+`legal_multisubstrate_cluster` and `legal_managed_eks` fixtures place feasibly. Every fixture, golden, and
+expected `Left`-tag it checks against is **authored and committed in Phase 0 before the
+`Amoebius.Capacity.*` / `Amoebius.Dsl.Topology` implementation exists** (§M.1); the gate turns red under the
+**committed per-fold seeded-mutant battery named in [§N](#n-gate-integrity-refinements-this-phase)** (§M.2) and green only when an
+**implementation-independent witness validator** (§M.3, defined in Sprint 7.3) accepts every returned
+placement — a **Register-1** in-process check that runs on no substrate.
+
+<a id="n-gate-integrity-refinements"></a>
+## N. Gate-integrity refinements (this phase)
+
+This section pins the concrete interpretations the [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
+clauses require for Phase 7; it strengthens, never weakens, the Gate and sprint Validations above.
+
+- **Representative set (§M.7).** The gate's fold-negative corpus is *exactly* the eleven named fixtures:
+  `illegal_engine_substrate_mismatch`, `illegal_rke2_reused_host`, `illegal_overcommit_{host,vm,cluster}`,
+  `illegal_store_over_backing`, `illegal_topic_time_only_offload`, `illegal_hot_tier_over_bookie`,
+  `illegal_untolerated_taint`, `illegal_elastic_pod_exceeds_largest_candidate`, and
+  `illegal_elastic_sum_at_max_scale_over_quota`; the positive set is exactly `legal_multisubstrate_cluster`
+  and `legal_managed_eks`. All thirteen are committed in Phase 0 (§M.1).
+- **Committed per-fold seeded-mutant battery (§M.2).** One committed mutant per fold, each individually
+  required to turn the suite red, drawn from the operator set: `fits` (drop the `mem` axis), `carve`
+  (skip a subtraction), fixed `place` (admit a per-node aggregate overcommit), elastic `place` (return
+  `Right` unconditionally), storage `Σ ≤ backing` (weaken `≤` to always-true), each Pulsar ceiling
+  (drop the hot-tier ceiling; drop the durable-total ceiling), elementwise compatibility (admit an
+  incompatible pair), and `mkRke2` distinctness (accept a duplicate `HostId`). The two per-axis compute
+  mutants and the two eligibility mutants (taint, affinity) of Sprint 7.3 are additional and separately
+  required.
+- **Provably total (§M totality honesty).** Discharged by *both* a compile-time gate
+  (`-Werror=incomplete-patterns` / `-Werror=incomplete-uni-patterns` on every fold module, no `error`,
+  no partial `head`/`fromJust`) **and** the sampled QuickCheck no-crash run; a green sample alone does not
+  satisfy the gate.
+- **Independent witness validator (§M.3).** Defined in Sprint 7.3 Deliverables; it never calls `podFits`
+  or `place`, computing residuals directly from the generated fixture's declared allocatables.
 
 ## Doctrine adopted
 
@@ -108,8 +144,13 @@ elementwise compatibility fold, and the `mkRke2` distinctness fold over `servers
 (the property/corpus framework + validation-locus ledger).
 **Independent Validation**: a unit + property suite decodes each positive `Topology` (heterogeneous
 multi-substrate, managed EKS) and returns a structured `Left` naming the full set of incompatible nodes for a
-mismatched pair and a duplicate `HostId` for a reused host; a typed-hole check confirms `bareAppleHost` /
-`bareWindowsHost` / an even-server quorum have no constructor.
+mismatched pair and a duplicate `HostId` for a reused host; the no-inhabitant claim for `bareAppleHost` /
+`bareWindowsHost` / an even-server quorum is machine-gated by a **Phase-6-style `ghc -fno-code` expect-fail
+compile golden** — a committed source snippet that attempts each construction, wired into `dsl-spec`, that
+must fail to compile with the **specific committed expected type error** (§M.8: e.g. "No instance /
+no constructor for `bareAppleHost`", the even-quorum refinement rejection), re-checked on every run — not an
+informal typed-hole probe. The three expect-fail goldens and their expected error text are authored and
+committed in Phase 0 before `Amoebius.Dsl.Topology` exists (§M.1).
 **Docs to update**: `documents/engineering/cluster_topology_doctrine.md` (Phase-7 status backlink),
 `documents/engineering/substrate_doctrine.md` (§8 node inventory read-side), `documents/illegal_state/illegal_state_catalog.md`
 (§3.13–§3.16 per-entry layer reconciliation), `DEVELOPMENT_PLAN/system_components.md`.
@@ -134,7 +175,9 @@ heterogeneous cluster while rejecting an incompatible pairing at decode.
 
 ### Validation
 1. Each positive `Topology` decodes; a mismatched pair returns a structured `Left` listing every incompatible
-   node; a reused host returns a duplicate-`HostId` `Left`; the illegal constructors have no inhabitant.
+   node; a reused host returns a duplicate-`HostId` `Left`; the illegal constructors have no inhabitant, proven
+   by the committed `ghc -fno-code` expect-fail compile goldens ([§N](#n-gate-integrity-refinements-this-phase), §M.8) whose specific expected type errors
+   are re-checked on every `dsl-spec` run.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -149,9 +192,14 @@ workload nesting, the §4.1 static/elastic branch); `src/Amoebius/Capacity/Stora
 target paths, not yet built.
 **Blocked by**: Sprint 7.1 (the `Topology` `place` folds over); Phase 5 gate (the IR + decoder).
 **Independent Validation**: a unit + property suite runs `fits`/`carve`/`place` over generated envelopes: a
-feasible workload set yields a placement witness or a sound growth envelope; an over-committed one returns
+feasible workload set yields a placement witness or a **sound growth envelope — where "sound" is fixed
+concretely as: both §4.1 envelope conditions hold, i.e. every pod fits the largest declared candidate node
+type AND Σ(requests) at max scale ≤ the declared quota, verified against the fixture's declared candidate set
+and quota, not merely that a `Right`-valued envelope was returned**; an over-committed one returns
 `Left Overcommit`/`Left Unschedulable` naming the offending axis; the storage/Pulsar Σ folds return `Left` on
-an over-backing or un-tiered topic.
+an over-backing or un-tiered topic. The over-commit / over-backing / un-tiered negatives here assert **which
+tag and which axis** they fail on (§M.8), each paired with a positive differing only in that one axis being
+in-envelope.
 **Docs to update**: `documents/engineering/resource_capacity_doctrine.md` (Phase-7 status backlink),
 `documents/engineering/storage_lifecycle_doctrine.md` (§5.2 backing read-side),
 `documents/engineering/pulsar_client_doctrine.md` (§6 two-ceiling read-side),
@@ -181,8 +229,10 @@ only (the substrate node inventory and PV sizes are owned elsewhere).
   any `Growable` growth so growth never silently invalidates an earlier check.
 
 ### Validation
-1. A feasible input yields a witness or a sound envelope; an over-committed host/VM/cluster, an over-backing
-   store, or an un-tiered topic returns the tagged `Left` naming the offending axis; the folds never throw.
+1. A feasible input yields a witness or a sound envelope (soundness fixed as both §4.1 conditions holding
+   against the declared candidate set and quota, per this sprint's Independent Validation); an over-committed
+   host/VM/cluster, an over-backing store, or an un-tiered topic returns the tagged `Left` naming the offending
+   axis; the folds never throw.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -195,8 +245,11 @@ workload sets + the property battery) reusing the Phase-6 property harness — t
 **Blocked by**: Sprint 7.1, Sprint 7.2.
 **Independent Validation**: `cabal test dsl-spec` runs the property battery green — the fold/relation
 soundness, totality, headroom-non-negativity, carve-subtraction, elementwise-compatibility, and Pulsar
-two-ceiling properties hold over generated inputs; a seeded mutant fold (drop an axis, admit an incompatible
-pair) is caught.
+two-ceiling properties hold over generated inputs, each meeting its committed `cover`/`checkCoverage` minimum
+(≥30% rejecting, ≥30% accepting per fold; §M.4); and the **committed per-fold seeded-mutant battery of [§N](#n-gate-integrity-refinements-this-phase) — one
+mutant each for `fits`, `carve`, fixed `place`, elastic `place`, storage `Σ`, each Pulsar ceiling, elementwise
+compatibility, and `mkRke2` distinctness, plus the per-axis and per-eligibility validator mutants — turns the
+suite red individually** (§M.2), not merely one hand-picked strawman.
 **Docs to update**: `documents/engineering/resource_capacity_doctrine.md`,
 `documents/engineering/cluster_topology_doctrine.md`, `documents/engineering/testing_doctrine.md` (the
 Register-1 property register), `DEVELOPMENT_PLAN/system_components.md`.
@@ -214,21 +267,42 @@ and never claim completeness there.
 
 ### Deliverables
 - Capacity properties: `fits d c = Right h ⟹` `d + h` reconstructs `c` per axis with no underflow; `carve` is
-  total subtraction; a returned `place` witness assigns every pod to a node it `podFits` (soundness); `place`
-  may return `Left` on a packable spec but never a witness that violates an allocatable (the one-directional
-  soundness caveat); the fold re-runs consistently after a `Growable` growth.
+  total subtraction; a returned `place` witness is judged sound by an **implementation-independent witness
+  validator** (§M.3) that reads the generated fixture's declared allocatables directly and **never calls
+  `podFits` or `place`**: for every node in the returned `Placement`, **Σ(assigned pods' requests) ≤ that
+  node's declared allocatable on every axis (cpu AND mem) — the aggregate residual reading, so two 3-CPU pods
+  on one 4-CPU node is rejected, not the per-pod `podFits`-membership reading** (ambiguity resolved), and every
+  assigned pod tolerates every declared taint and satisfies its declared affinity, all computed from the fixture
+  values. `place` may return `Left` on a packable spec but never a witness the independent validator rejects
+  (the one-directional soundness caveat); the fold re-runs consistently after a `Growable` growth. This
+  validator carries **one seeded mutant per compute axis (drop cpu, drop mem) and one per eligibility clause
+  (taint, affinity)**, each individually required to turn the suite red (§M.2, [§N](#n-gate-integrity-refinements-this-phase)).
 - Equivalence (both-directions) properties for the complete checks: the storage/retention `Σ demand ≤ backing`
   fold accepts **iff** the sum is within backing, and the Pulsar two-ceiling fold accepts **iff** both ceilings
-  hold — over generated corpora, not just a fixed fixture set (the `accepts ⟺ in-envelope` strengthening).
+  hold; **the elastic `place` branch accepts iff both §4.1 envelope conditions hold (pod ≤ largest candidate
+  AND Σ-at-max-scale ≤ quota), since doctrine §4.1 states these two conditions are the complete elastic
+  schedulability story** — each over generated corpora that reach both directions, not just a fixed fixture
+  set (the `accepts ⟺ in-envelope` strengthening). Each equivalence and soundness property carries QuickCheck
+  `cover` / `checkCoverage` obligations forcing **≥30% rejecting (out-of-envelope) and ≥30% accepting
+  (in-envelope) generated inputs per fold, the suite failing when the coverage minimum is unmet** (§M.4) — so a
+  generator that emits near-constant in-envelope inputs cannot vacuously pass the reject direction. The
+  reference side of every `accepts ⟺ in-envelope` property is a **committed hand-authored envelope predicate
+  authored in Phase 0, distinct from the fold under test** (§M.1, §M.3), never the fold's own comparison.
 - Topology properties: the elementwise compatibility fold accepts a heterogeneous multi-substrate `NonEmpty
   Node` iff every pair is compatible and returns the exact incompatible-node set otherwise; `mkRke2` rejects a
   duplicate `HostId`; kind cardinality is fixed at one host regardless of `replicas`.
-- A totality guard: every property generator exercises the fold on arbitrary constructible inputs and no input
-  yields an exception, `error`, or partial match.
+- A totality guard discharged **both ways** (ambiguity resolved): (a) a compile-time exhaustiveness gate —
+  every `Amoebius.Capacity.*` / `Amoebius.Dsl.Topology` fold module compiles under
+  `-Werror=incomplete-patterns` / `-Werror=incomplete-uni-patterns` with no `error` and no partial
+  `head`/`fromJust`; **and** (b) the sampled QuickCheck run in which every property generator exercises the
+  fold on arbitrary constructible inputs and no input yields an exception, `error`, or partial match. A green
+  sample alone does not satisfy this guard.
 
 ### Validation
-1. The property battery is green; a deliberately mutated fold (an admitted overcommit, a dropped incompatible
-   pair) makes a property red — the properties have teeth.
+1. The property battery is green with every fold meeting its coverage minimum; and **each committed mutant in
+   the per-fold seeded-mutant battery ([§N](#n-gate-integrity-refinements-this-phase)) — including the storage `Σ`, both Pulsar ceilings, `carve`, elastic
+   `place`, and `mkRke2` distinctness mutants, not only the compute-axis and compatibility ones — makes a
+   property red when re-run individually** — the properties have teeth on every fold, not two.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -238,13 +312,20 @@ The whole sprint (📋 Planned).
 **Status**: Planned
 **Implementation**: `dhall/examples/{illegal_engine_substrate_mismatch,illegal_rke2_reused_host,
 illegal_overcommit_host,illegal_overcommit_vm,illegal_overcommit_cluster,illegal_store_over_backing,
-illegal_topic_time_only_offload,illegal_hot_tier_over_bookie,illegal_untolerated_taint}.dhall` (the
-decode-foreclosed fold negatives) + reuse of `legal_multisubstrate_cluster`/`legal_managed_eks`;
-`test/dsl/CapacityTopologyGate.hs` (the gate battery + validation-locus ledger) — target paths, not yet built.
+illegal_topic_time_only_offload,illegal_hot_tier_over_bookie,illegal_untolerated_taint,
+illegal_elastic_pod_exceeds_largest_candidate,illegal_elastic_sum_at_max_scale_over_quota}.dhall` (the
+decode-foreclosed fold negatives, including the two elastic-branch negatives) + reuse of
+`legal_multisubstrate_cluster`/`legal_managed_eks`; `test/dsl/CapacityTopologyGate.hs` (the gate battery +
+validation-locus ledger) — target paths, not yet built. All thirteen fixtures and their expected `Left`-tags
+are authored and committed in Phase 0 before the implementation exists (§M.1, [§N](#n-gate-integrity-refinements-this-phase)).
 **Blocked by**: Sprint 7.1, Sprint 7.2, Sprint 7.3; Phase 4 gate (the positive Gate-1 corpus).
 **Independent Validation**: the gate decodes each positive fixture to a feasible placement and returns a
-structured `Left` for each fold negative, each assertion annotated with its catalog entry (§3.13–§3.22) and
-its decode-foreclosed layer; the run emits a Register-1 proven/tested/assumed ledger.
+structured `Left` for each fold negative — **each negative asserting its specific expected `Left`-tag** (e.g.
+`illegal_elastic_pod_exceeds_largest_candidate` → `Left Unschedulable`,
+`illegal_elastic_sum_at_max_scale_over_quota` → `Left Overcommit`, `illegal_store_over_backing` →
+`Left (StorageOverBacking …)`), **not merely "some `Left`", and each paired with a positive differing only in
+the foreclosed dimension** (§M.8) — each assertion annotated with its catalog entry (§3.13–§3.22) and its
+decode-foreclosed layer; the run emits a Register-1 proven/tested/assumed ledger.
 **Docs to update**: `documents/illegal_state/illegal_state_catalog.md` (the §3.13–§3.22 decode-foreclosed
 entries → layer-2 Register-1), `documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/README.md` (flip
 the Phase-7 status when the gate passes), `DEVELOPMENT_PLAN/substrates.md` (the Phase-7 `none` gate row).
@@ -260,8 +341,13 @@ validation-locus ledger that names the honest foreclosure layer of each.
 - The fold-negative fixtures — `illegal_engine_substrate_mismatch` (§3.13), `illegal_rke2_reused_host` (§3.16
   distinctness), `illegal_overcommit_{host,vm,cluster}` (§3.17), `illegal_store_over_backing` (§3.19),
   `illegal_topic_time_only_offload` + `illegal_hot_tier_over_bookie` (§3.20), `illegal_untolerated_taint`
-  (§3.22 placeable-node existence) — each asserted to return the tagged `Left` at the fold, with the
-  type-foreclosed neighbours (§3.14/§3.15/§3.18/§3.21/§3.24) noted as already foreclosed upstream.
+  (§3.22 placeable-node existence), and the two **elastic-branch negatives**
+  `illegal_elastic_pod_exceeds_largest_candidate` (a single pod larger than the largest declared candidate node
+  type → `Left Unschedulable`) and `illegal_elastic_sum_at_max_scale_over_quota` (Σ requests at the policy's
+  max scale exceeding the declared quota → `Left Overcommit`), which foreclose a stubbed elastic `place` that
+  returns `Right` unconditionally — each asserted to return its **specific** tagged `Left` at the fold and
+  paired with a positive differing only in the foreclosed dimension, with the type-foreclosed neighbours
+  (§3.14/§3.15/§3.18/§3.21/§3.24) noted as already foreclosed upstream.
 - The positive fixtures `legal_multisubstrate_cluster` (the §3.13 heterogeneous carve-out) and
   `legal_managed_eks` (EKS first-class) asserted to decode and `place` feasibly.
 - A Register-1 validation-locus ledger mapping every entry to its catalog id and its layer (decode-foreclosed),
@@ -270,9 +356,12 @@ validation-locus ledger that names the honest foreclosure layer of each.
   soundness, not an amoebius result.
 
 ### Validation
-1. `cabal test dsl-spec` is green — every fold negative returns the tagged `Left`, both positives place
-   feasibly, the QuickCheck battery holds, and the suite is red if any capacity/topology negative decodes;
-   the validation-locus ledger is present and honestly classifies each foreclosure.
+1. `cabal test dsl-spec` is green — every one of the eleven fold negatives ([§N](#n-gate-integrity-refinements-this-phase) representative set, including
+   the two elastic negatives) returns its **specific committed** tagged `Left`, both positives place feasibly,
+   the QuickCheck battery holds at its coverage minima, and the committed per-fold seeded-mutant battery ([§N](#n-gate-integrity-refinements-this-phase))
+   turns the suite red individually; the suite is red if any capacity/topology negative decodes to `Right` or
+   to the wrong tag; the validation-locus ledger is present and honestly classifies each foreclosure, marking
+   the runtime residue UNVERIFIED.
 
 ### Remaining Work
 The whole sprint (📋 Planned).

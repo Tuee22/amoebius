@@ -1,8 +1,8 @@
-# Phase 26: infernix lift + CPU inference reproducibility
+# Phase 33: infernix lift + CPU inference reproducibility
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_24_determinism_kernel.md, DEVELOPMENT_PLAN/phase_25_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_15_base_image_registry.md, DEVELOPMENT_PLAN/phase_31_determinism_kernel.md, DEVELOPMENT_PLAN/phase_32_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md
 **Generated sections**: none
 
 > **Purpose**: Lift the sibling `infernix` inference library onto the amoebius runtime — its store onto the
@@ -18,10 +18,10 @@
 
 📋 Planned. Nothing in this phase is implemented; every sprint below is 📋 Planned and every prescriptive
 statement is design intent, never a tested amoebius result. The phase runs on the **linux-cpu** substrate in
-**Register 3** (live infrastructure) — a single-node `kind` cluster brought up by the Phase 13 midwife with the
-standard HA platform services standing (Phase 18), Vault + PKI live (Phase 17), the native CBOR Pulsar client
-(Phase 22), the three-tier content store + workflow runtime (Phase 23), the determinism kernel (Phase 24), and
-the jit-build engine resolver + `CacheBudget` cache (Phase 25) all closed. It opens only after the Phase 25
+**Register 3** (live infrastructure) — a single-node `kind` cluster brought up by the Phase 14 midwife with the
+standard HA platform services standing (Phase 19), Vault + PKI live (Phase 18), the native CBOR Pulsar client
+(Phase 24), the three-tier content store + workflow runtime (Phase 25), the determinism kernel (Phase 31), and
+the jit-build engine resolver + `CacheBudget` cache (Phase 32) all closed. It opens only after the Phase 32
 gate, because infernix re-homes onto every one of those seams rather than reimplementing them. infernix runs
 today over a Helm/WebSocket/k8s-Secret/Python-engine-fork envelope in the sibling `~/infernix`; that its
 inference orchestration, engine-pool routing, durable-context event-sourcing, and `.ready`-staged artifact
@@ -54,17 +54,17 @@ inference output — deploys here as **application-logic-only**: it is authored 
 orthogonal deployment-rules surface, and its frontend contract types are regenerated from the amoebius-composed
 Haskell ADTs via `purescript-bridge` as a build artifact that is never committed. A demo web app that *uses* an
 extension is application logic, not itself an extension, so the closed extension set stays {infernix, jitML}.
-The full behind-Keycloak/Envoy SPA composition is Phase 32; this phase deploys the demo app application-logic-only
-via the Deployment-`replicas=1` control-plane singleton (Phase 20), whose single-instance stays a k8s/etcd
+The full behind-Keycloak/Envoy SPA composition is Phase 37; this phase deploys the demo app application-logic-only
+via the Deployment-`replicas=1` control-plane singleton (Phase 22), whose single-instance stays a k8s/etcd
 property with no bespoke election.
 
 ```mermaid
 flowchart LR
-  infernix[infernix inference core lifted intact] --> store[Store seam onto the Phase 23 content store]
+  infernix[infernix inference core lifted intact] --> store[Store seam onto the Phase 25 content store]
   infernix --> pulsar[Transport seam onto the native CBOR Pulsar client]
   infernix --> vault[Creds seam onto a Vault SecretRef]
-  infernix --> engine[Engine seam onto the Phase 25 jit-build CacheBudget cache]
-  store --> decode[Pure CPU decode over the Phase 24 experimentHash kernel]
+  infernix --> engine[Engine seam onto the Phase 32 jit-build CacheBudget cache]
+  store --> decode[Pure CPU decode over the Phase 31 experimentHash kernel]
   engine --> decode
   vault --> decode
   pulsar --> decode
@@ -73,20 +73,57 @@ flowchart LR
 ```
 
 **Substrate:** linux-cpu — the whole gate runs on a single-node `kind` cluster on a linux-cpu host in
-Register 3 (live infrastructure); no accelerator is in scope (the CUDA training lift is Phase 27), so
+Register 3 (live infrastructure); no accelerator is in scope (the CUDA training lift is Phase 34), so
 cross-substrate behaviour is explicitly out of contract, and the seam re-homings themselves are
 decode/render/compose work that stays Register-1/2 validatable ahead of the live proof.
 
 **Register:** 3 — live infrastructure (§K).
 
-**Gate:** an infernix CPU-inference workflow is **reproducible on linux-cpu** — running it twice under an
-unchanged `experimentHash` produces byte-identical output, while a deliberately changed input (the pinned
-model, the request seed, or the resolved `.dhall`) yields a different `experimentHash`, occupies a distinct
-store namespace, and is allowed to differ — **and its PureScript demo web app deploys as
-application-logic-only** (authored once as logic that uses the extension; its replica count / substrate /
-inference binding a separate deployment-rules dial; its contract regenerated, never committed); the whole
-`InForceSpec` topology spins up, runs, and tears down leak-free, emitting a proven/tested/assumed ledger that
-records same-substrate reproduction as *tested* and cross-substrate bit-equality as *explicitly not asserted*.
+**Gate:** an infernix CPU-inference workflow is **reproducible on linux-cpu**, measured against a
+**Phase-0-pinned external oracle** (§M). The **representative set is named concretely and committed before the
+implementation exists** (§M.1, §M.7): the single pinned model `catalog/tinyllama-1.1b-cpu@<sha256>` named in
+`infernix/dhall/engine_catalog.dhall`, the single fixed inference request `test/fixtures/phase_33/request.cbor`,
+and the fixed request seed `0x0000000000000001` — together the "representative request". The gate has four
+independent parts:
+
+- **(a) Equivalence against the sibling oracle** (§M.3): the lifted library's output for the representative
+  request byte-matches the committed golden `test/fixtures/phase_33/sibling_golden.cbor`, which was **recorded
+  from the sibling `~/infernix` executing the same request and committed in Phase 0** — the reference side is
+  authored from the sibling, never regenerated from the amoebius implementation. Additionally the sibling
+  infernix inference test corpus `test/fixtures/phase_33/sibling_corpus/` runs green against the lifted library
+  with only adapter-seam configuration changed (no infernix inference/orchestration source edited), foreclosing
+  a from-scratch toy that satisfies only the seam shapes.
+- **(b) Determinism by independent recompute** (§M.6): the workflow is run **twice as two cache-cold
+  computations** — the harness clears (or bypasses) the `experimentHash` output namespace between runs, each run
+  emits its own compute attestation carrying a **distinct run id**, and the byte comparison is between the **two
+  independently recomputed outputs**, never between a blob and its own store hit. An **OS-boundary observer**
+  (§M.5) — the CNI/containerd log plus an argv-recording shim on the store client — confirms run 2's decode
+  compute path actually executed and did not short-circuit to a store fetch.
+- **(c) Divergence, actually executed**: a deliberately changed input (the pinned model, the request seed, or
+  the resolved `.dhall`) yields a different `experimentHash`, occupies a distinct store namespace, **and the
+  changed run actually executes the inference, stores an output in the new namespace, and that output is
+  asserted to differ byte-for-byte from the baseline output** — divergence is proven by two stored, compared
+  outputs, not by computing the divergent hash alone.
+- **(d) Functional demo app**: its PureScript demo web app deploys as **application-logic-only** (authored once
+  as logic that uses the extension; its replica count / substrate / inference binding a separate deployment-rules
+  dial; its contract regenerated, never committed) **and is functionally reachable** — fetched over a
+  cluster-internal host-only NodePort route it issues one inference request through the lifted extension and
+  renders the contract-typed result, asserted by a headless-browser (or equivalent in-cluster HTTP) check inside
+  the gate topology; this is one functional acceptance short of the full behind-Keycloak/Envoy composition
+  (Phase 37).
+
+Each **negative asserts its specific reason** (§M.8), paired with a positive differing only in the foreclosed
+dimension: the divergent-input case asserts the distinct `experimentHash` digest and distinct namespace prefix
+(not merely "output differs"); the no-URL-engine case asserts a **compile-fail at the absent `Url` engine
+constructor**. **At least one committed seeded mutant must turn the gate red** (§M.2), committed and re-run, not
+hand-picked once: the mutant `mutants/phase_33/wallclock_seed.hs` (effect swap — the pure decode reads
+`getCurrentTime` in place of the derived SplitMix seed) must fail part (b); the mutant
+`mutants/phase_33/identity_hash.hs` (dropped fold — `deriveExperimentHash` ignores the changed input) must fail
+part (c). The whole `InForceSpec` topology spins up, runs, and **tears down leak-free — defined as an empty
+postflight sweep of test-flagged resources ([`testing_doctrine.md §7`](../documents/engineering/testing_doctrine.md), the
+flag-and-elevated-sweep mechanism), not merely a successful `kind` cluster delete** — emitting a
+proven/tested/assumed ledger that records same-substrate reproduction as *tested*, the seam lift as
+*live-proven*, and cross-substrate bit-equality as *explicitly not asserted (UNVERIFIED)*.
 
 ## Doctrine adopted
 
@@ -144,13 +181,18 @@ names the section it adopts; individual sprints cite the same sections where the
 **Status**: Planned
 **Implementation**: `infernix/src/Infernix/Adapter/Store.hs`, `infernix/infernix.cabal` (library target),
 `infernix/dhall/infernix.dhall` (the config record that nests in the `InForceSpec`) — target paths, not yet built.
-**Blocked by**: Phase 23 gate (the three-tier content-addressed store the seam writes into); Phase 24 gate (the
-`ContentAddress` typeclass + `experimentHash` namespace the store keys under); Phase 20 gate (the live DSL deploy
+**Blocked by**: Phase 25 gate (the three-tier content-addressed store the seam writes into); Phase 31 gate (the
+`ContentAddress` typeclass + `experimentHash` namespace the store keys under); Phase 22 gate (the live DSL deploy
 via the Deployment-`replicas=1` singleton that schedules the lifted library).
 **Independent Validation**: with the seam in "amoebius" mode, infernix model staging writes `blobs/<sha256>` +
 canonical-CBOR `manifests/<sha256>` under the `experimentHash` namespace and writes the `.ready` sentinel
 **last**, so a half-staged model has no serveable reference; flipping the seam to "legacy" mode and back restores
-the prior store with **no infernix `.hs` source change**, proving reversibility.
+the prior store with **no infernix `.hs` source change**, proving reversibility. "infernix `.hs` source" is
+defined concretely as **every module present under `infernix/src/Infernix/` before this lift began, EXCEPT the
+newly added seam modules `Infernix.Adapter.*` and `Infernix.Inference.Deterministic`**; the frozen set is
+committed as the manifest `test/fixtures/phase_33/frozen_sources.txt` (Phase-0-pinned) and the reversibility
+check asserts a **zero diff to every file named in it** across the legacy↔amoebius toggle — the seam modules
+alone may change.
 **Docs to update**: `documents/engineering/lift_and_compose_doctrine.md`,
 `documents/engineering/app_vs_deployment_doctrine.md`,
 `documents/engineering/content_addressing_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`, this document.
@@ -174,8 +216,9 @@ first of the one-subsystem-at-a-time migration moves.
 ### Validation
 1. End-to-end stage-then-serve in "amoebius" mode: a half-downloaded model has no serveable reference; a completed
    one does, reachable only through the `.ready` sentinel.
-2. Reversibility: switching the seam to "legacy" and back changes no infernix `.hs` source and leaves both stores
-   functional.
+2. Reversibility: switching the seam to "legacy" and back changes no infernix `.hs` source — asserted as a zero
+   diff to every file in the committed `test/fixtures/phase_33/frozen_sources.txt` manifest (the pre-lift
+   `Infernix.*` modules minus the `Adapter.*`/`Inference.Deterministic` seams) — and leaves both stores functional.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -185,8 +228,8 @@ The whole sprint (📋 Planned).
 **Status**: Planned
 **Implementation**: `infernix/src/Infernix/Adapter/Pulsar.hs`, `infernix/src/Infernix/Adapter/Topology.hs`,
 `infernix/src/Infernix/Adapter/Secrets.hs` — target paths, not yet built.
-**Blocked by**: Sprint 26.1; Phase 22 gate (the native Pulsar client — capability surface, CBOR codec, dedup);
-Phase 17 gate (the root Vault + PKI and the built-in Haskell Vault client that reads a `SecretRef`).
+**Blocked by**: Sprint 26.1; Phase 24 gate (the native Pulsar client — capability surface, CBOR codec, dedup);
+Phase 18 gate (the root Vault + PKI and the built-in Haskell Vault client that reads a `SecretRef`).
 **Independent Validation**: an infernix inference request/response round-trips over the native binary Pulsar
 protocol (no WebSocket path) through the seam with a CBOR-only body; the topology seam expresses infernix's topics
 via the amoebius topology algebra; infernix's JWT-auth material resolves from a Vault `SecretRef` name with no
@@ -230,7 +273,7 @@ The whole sprint (📋 Planned).
 **Status**: Planned
 **Implementation**: `infernix/src/Infernix/Adapter/Engine.hs`, `infernix/dhall/engine_catalog.dhall` (the named
 engine identities) — target paths, not yet built.
-**Blocked by**: Sprint 26.1; Phase 25 gate (the jit-build engine resolver + the `CacheBudget`-bounded
+**Blocked by**: Sprint 26.1; Phase 32 gate (the jit-build engine resolver + the `CacheBudget`-bounded
 content-addressed engine cache infernix's engine now resolves through).
 **Independent Validation**: infernix's inference engine is named by a typed identity from the closed catalog and
 resolved on first miss into the Phase-25 `CacheBudget`-bounded cache; a second inference pod on the same node
@@ -258,7 +301,9 @@ deliberate exception to the "every service binary is baked" rule, and the last o
 1. A named engine identity resolves on first miss into the bounded cache; a second inference pod reuses it with no
    re-materialization.
 2. There is no baked engine, no image-build Python fork, and no constructor for an engine authored by download
-   URL.
+   URL — the negative asserts its **specific reason**: a fixture attempting to author an engine by `Url` is a
+   **compile-fail (or `dhall type` error) at the absent `Url` constructor**, paired with a positive that names a
+   valid catalog identity and differs only in that dimension (§M.8).
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -267,7 +312,7 @@ The whole sprint (📋 Planned).
 
 **Status**: Planned
 **Implementation**: `infernix/src/Infernix/Inference/Deterministic.hs` — target path, not yet built.
-**Blocked by**: Sprint 26.1; Sprint 26.2; Sprint 26.3; Phase 24 gate (the `ContentAddress` /
+**Blocked by**: Sprint 26.1; Sprint 26.2; Sprint 26.3; Phase 31 gate (the `ContentAddress` /
 `deriveExperimentHash` / `deriveSplitMixSeed` kernel this decode rides instead of a private determinism path).
 **Independent Validation**: a pure CPU decode stage takes a content-addressed model, a request, and a
 kernel-derived SplitMix seed and produces byte-identical output for an unchanged `experimentHash`, with all I/O at
@@ -293,8 +338,16 @@ without overclaiming cross-substrate equality.
 
 ### Validation
 1. The decode stage is pure: given the same content-addressed model, request, and derived seed it returns
-   byte-identical output, with no wall-clock, worker-id, or `/dev/urandom` read inside the stage.
-2. Any changed input (model, request seed, resolved `.dhall`) changes `experimentHash` and the store namespace.
+   byte-identical output across **two independent invocations** (no store hit reused), with no wall-clock,
+   worker-id, or `/dev/urandom` read inside the stage — the absence of ambient reads is asserted from an
+   OS-boundary observer (an `strace`/syscall filter over the decode process), not a self-reported trace (§M.5).
+   The committed seeded mutant `mutants/phase_33/wallclock_seed.hs` (effect swap: the stage reads
+   `getCurrentTime` in place of the `deriveSplitMixSeed` seed) **must turn this validation red** (§M.2).
+2. Any changed input (model, request seed, resolved `.dhall`) changes `experimentHash` and the store namespace;
+   the committed mutant `mutants/phase_33/identity_hash.hs` (`deriveExperimentHash` ignores the changed input)
+   **must turn this validation red**. The reference `experimentHash` for the representative request is a
+   Phase-0-pinned hand-authored value in `test/fixtures/phase_33/expected_hashes.txt`, computed independently of
+   the decode implementation (§M.3).
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -303,15 +356,26 @@ The whole sprint (📋 Planned).
 
 **Status**: Planned
 **Implementation**: `infernix/web/` (the lifted PureScript demo SPA shell), the `purescript-bridge` contract
-regeneration wired to the amoebius-composed Haskell ADTs, `test/dhall/phase_26_infernix_repro.dhall` (the gate
+regeneration wired to the amoebius-composed Haskell ADTs, `test/dhall/phase_33_infernix_repro.dhall` (the gate
 topology), `test/live/InfernixReproSpec.hs` — target paths, not yet built.
-**Blocked by**: Sprint 26.4; Phase 20 gate (the live DSL deploy via the Deployment-`replicas=1` singleton that
-schedules the demo app and the workflow); Phase 25 gate (the resolved engine cache the inference runs against).
-**Independent Validation**: a `.dhall` workflow runs the infernix CPU inference twice on linux-cpu and asserts
-byte-identical output under an unchanged `experimentHash`, asserts a divergent `experimentHash` and a distinct
-store namespace for any changed input, deploys the demo SPA application-logic-only (its replica count / substrate
+**Blocked by**: Sprint 26.4; Phase 22 gate (the live DSL deploy via the Deployment-`replicas=1` singleton that
+schedules the demo app and the workflow); Phase 32 gate (the resolved engine cache the inference runs against).
+**Independent Validation**: a `.dhall` workflow runs the infernix CPU inference for the representative request
+(the pinned `catalog/tinyllama-1.1b-cpu@<sha256>` model, `test/fixtures/phase_33/request.cbor`, seed
+`0x0000000000000001`) twice on linux-cpu **as two cache-cold recomputes** — the output namespace is cleared
+between runs, each run carries a distinct run id, and an OS-boundary observer (CNI/containerd log + store-client
+argv shim) confirms run 2 recomputed rather than served a store hit — and asserts the two independently produced
+outputs are byte-identical **and** byte-match the Phase-0 sibling golden `test/fixtures/phase_33/sibling_golden.cbor`
+recorded from `~/infernix`. It asserts a divergent `experimentHash` and a distinct store namespace for any
+changed input **and that the changed run actually executes, stores an output, and that output differs
+byte-for-byte from the baseline**. It deploys the demo SPA application-logic-only (its replica count / substrate
 / inference binding a separate deployment-rules record; its contract regenerated as a build artifact, never
-committed), tears down leak-free, and emits a proven/tested/assumed ledger artifact.
+committed) **and asserts the SPA is functionally reachable over the host-only NodePort route, issues one
+inference request through the lifted extension, and renders the contract-typed result** (headless-browser or
+in-cluster HTTP check). It tears down leak-free (empty postflight test-flagged-resource sweep,
+[`testing_doctrine.md §7`](../documents/engineering/testing_doctrine.md)), and emits a proven/tested/assumed
+ledger artifact. The committed seeded mutants `mutants/phase_33/wallclock_seed.hs` and
+`mutants/phase_33/identity_hash.hs` each turn the gate red when swapped in (§M.2).
 **Docs to update**: `documents/engineering/app_vs_deployment_doctrine.md`,
 `documents/engineering/lift_and_compose_doctrine.md`, `documents/engineering/content_addressing_doctrine.md`,
 `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`.
@@ -324,25 +388,50 @@ one `experimentHash`, and its PureScript demo web app deploys as application-log
 lift-and-compose re-homing and the app-vs-deployment split on live linux-cpu.
 
 ### Deliverables
-- The gate `test/dhall/phase_26_infernix_repro.dhall` topology and its `InfernixReproSpec`: spin up on the
+- The gate `test/dhall/phase_33_infernix_repro.dhall` topology and its `InfernixReproSpec`: spin up on the
   linux-cpu kind cluster against the standing Pulsar + MinIO + Vault + engine cache, run the infernix CPU
-  inference twice, store each output as a content-addressed blob under its `experimentHash` namespace, compare
-  outputs, and always tear down.
+  inference **twice as two cache-cold recomputes** (the harness clears/bypasses the `experimentHash` output
+  namespace between runs; each run emits a distinct-run-id compute attestation), store each output as a
+  content-addressed blob under its `experimentHash` namespace, compare the **two independently recomputed
+  outputs** (never a blob against its own store hit), and always tear down.
+- The **Phase-0-pinned oracle corpus** (authored and committed before the implementation exists, §M.1):
+  `test/fixtures/phase_33/sibling_golden.cbor` (the representative-request output recorded from `~/infernix`),
+  `test/fixtures/phase_33/sibling_corpus/` (the sibling inference test corpus that must run green against the
+  lifted library with only seam-config changes), `test/fixtures/phase_33/request.cbor`,
+  `test/fixtures/phase_33/expected_hashes.txt` (hand-authored reference `experimentHash` values, independent of
+  the decode code), and `test/fixtures/phase_33/frozen_sources.txt` (the pre-lift `Infernix.*` module manifest).
+- The **committed seeded mutants** `mutants/phase_33/wallclock_seed.hs` (effect swap → fails the determinism
+  check) and `mutants/phase_33/identity_hash.hs` (dropped fold → fails the divergence check), each committed and
+  re-run so the gate demonstrably goes red on them (§M.2).
 - The lifted PureScript demo web app deployed **application-logic-only** — authored once as logic that uses the
   infernix extension, with its HA replica count, substrate, and inference binding an orthogonal deployment-rules
   record, and its frontend contract regenerated from the amoebius-composed Haskell ADTs via `purescript-bridge`
-  as a build artifact that is never committed. Full behind-Keycloak/Envoy SPA composition is deferred to Phase 32.
+  as a build artifact that is never committed — and **functionally exercised**: fetched over the cluster-internal
+  host-only NodePort route, it issues one inference request through the lifted extension and renders the
+  contract-typed result, asserted by a headless-browser (or in-cluster HTTP) probe in the gate topology. Full
+  behind-Keycloak/Envoy SPA composition is deferred to Phase 37.
 - A ledger artifact recording: identity/seed totality as **proven-in-types**, same-substrate reproduction as
   **tested on linux-cpu**, cross-substrate bit-equality as **explicitly not asserted**, and the four seam
   re-homings (store, transport, secrets, engine) as **lifted and live-proven** — sibling evidence generalized,
   not a fresh amoebius result until this gate is green.
 
 ### Validation
-1. Two runs with the same `experimentHash` on linux-cpu produce byte-identical infernix output; a changed model,
-   request seed, or resolved `.dhall` produces a different `experimentHash` and a distinct store namespace.
-2. The demo SPA deploys application-logic-only — its deployment shape is a separate dial, its contract regenerated
-   and uncommitted — and the whole topology tears down leak-free and re-runs idempotently.
-3. The ledger artifact is emitted and marks no cross-substrate claim green.
+1. Two **cache-cold** runs (namespace cleared between them, each with a distinct run id, OS-boundary observer
+   confirming run 2 recomputed) with the same `experimentHash` on linux-cpu produce byte-identical infernix
+   output that also byte-matches the Phase-0 sibling golden `test/fixtures/phase_33/sibling_golden.cbor`; a
+   changed model, request seed, or resolved `.dhall` produces a different `experimentHash` and a distinct store
+   namespace **and its changed run executes, stores an output, and that output differs byte-for-byte from the
+   baseline** (divergence asserted on two compared outputs, not on the hash alone). The committed mutants
+   `wallclock_seed.hs` and `identity_hash.hs` each turn this red.
+2. The demo SPA deploys application-logic-only — its deployment shape is a separate dial, its contract
+   regenerated and uncommitted — **and is functionally reachable: over the host-only NodePort route it issues one
+   inference request through the lifted extension and renders the contract-typed result** (headless-browser/HTTP
+   probe). The whole topology **tears down leak-free — defined as an empty postflight sweep of test-flagged
+   resources (testing_doctrine §7), not a successful `kind` delete alone — and re-runs idempotently, defined as
+   re-applying the standing topology being a no-op in the Phase-15 server-side-apply sense (SSA reports zero
+   changed fields), not a second from-scratch spin-up.**
+3. The ledger artifact is emitted and marks no cross-substrate claim green (cross-substrate bit-equality stays
+   UNVERIFIED).
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -351,7 +440,7 @@ The whole sprint (📋 Planned).
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/lift_and_compose_doctrine.md` — record that the §2 infernix reuse-map row and the four
-  §3 friction re-homings (Helm → typed render is inherited from Phase 15; Pulsar WebSocket → native CBOR;
+  §3 friction re-homings (Helm → typed render is inherited from Phase 16; Pulsar WebSocket → native CBOR;
   k8s-Secret → Vault `SecretRef`; Python engine-fork/baked → jit-build cache) are realized in the
   `Infernix.Adapter.*` seams; keep §5 evidence-not-proof honesty until the gate is green.
 - `documents/engineering/app_vs_deployment_doctrine.md` — §6/§7/§8 gain a concrete amoebius reference: infernix's
@@ -365,7 +454,7 @@ The whole sprint (📋 Planned).
 
 **Cross-references to add:**
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-26 status when the gate passes; link this document.
-- `DEVELOPMENT_PLAN/substrates.md` — record Phase 26's gate substrate (linux-cpu) in the per-phase substrate map.
+- `DEVELOPMENT_PLAN/substrates.md` — record Phase 33's gate substrate (linux-cpu) in the per-phase substrate map.
 - `DEVELOPMENT_PLAN/system_components.md` — register `infernix/src/Infernix/Adapter/{Store,Pulsar,Topology,Secrets,Engine}.hs`,
   `infernix/src/Infernix/Inference/Deterministic.hs`, the demo web app + contract regen, and the
   `InfernixReproSpec` live suite as Phase-26 design-first rows.
@@ -373,7 +462,7 @@ The whole sprint (📋 Planned).
   (Helm charts, WebSocket bridge, k8s-Secret creds, baked engine venvs) this lift retires.
 
 ## Related Documents
-- [README.md](README.md) — the live tracker; Phase 26 objective, gate, and substrate
+- [README.md](README.md) — the live tracker; Phase 33 objective, gate, and substrate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (skeleton,
   sprint format, the doctrine-citation rule, the three-register + honesty + one-substrate disciplines)
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (lift-and-compose, the demo
@@ -391,9 +480,9 @@ The whole sprint (📋 Planned).
   credentials re-home onto
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — Register 3 (live), the spin-up → run →
   always-tear-down contract, and the per-run proven/tested/assumed ledger
-- [phase_24](phase_24_determinism_kernel.md) — the `experimentHash` + SplitMix determinism kernel this phase's CPU
+- [phase_31](phase_31_determinism_kernel.md) — the `experimentHash` + SplitMix determinism kernel this phase's CPU
   decode rides
-- [phase_25](phase_25_jitbuild_engine_cache.md) — the jit-build engine resolver + `CacheBudget` cache infernix's
+- [phase_32](phase_32_jitbuild_engine_cache.md) — the jit-build engine resolver + `CacheBudget` cache infernix's
   engine resolves through
-- [phase_27](phase_27_jitml_lift_cuda.md) — the jitML lift onto the same seams, the next ML extension
+- [phase_34](phase_34_jitml_lift_cuda.md) — the jitML lift onto the same seams, the next ML extension
 - [Engineering Doctrine Index](../documents/engineering/README.md) — the doctrine suite these phases adopt

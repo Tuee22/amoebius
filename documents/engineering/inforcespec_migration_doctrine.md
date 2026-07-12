@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/tenancy_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, documents/engineering/README.md, documents/engineering/tenancy_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for how an `InForceSpec` evolves between generations — an ordered,

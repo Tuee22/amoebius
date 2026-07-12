@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/deterministic_simulation_doctrine.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_14_base_image_registry.md, DEVELOPMENT_PLAN/phase_23_content_store_workflow.md, DEVELOPMENT_PLAN/phase_24_determinism_kernel.md, DEVELOPMENT_PLAN/phase_25_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_26_infernix_lift.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md, DEVELOPMENT_PLAN/phase_32_spa_live_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_15_base_image_registry.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_31_determinism_kernel.md, DEVELOPMENT_PLAN/phase_32_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_33_infernix_lift.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define amoebius's cross-project content-addressed store (blobs ← manifests ← pointers), the
@@ -126,6 +126,23 @@ checkpoint-format deferral this doctrine records for checkpoints ([§7](#7-what-
   on failure, but a manifest becomes HEAD only when its pointer CAS succeeds. The pure CAS decision is
   `applyPointerWrite` (`PointerWritten` vs `PointerConflict`); the `jitML` checkpoint format owns the retry
   harness and the typed `AdvancePredicate` that resolves a lost CAS.
+
+**The `If-Match` CAS is an assumed store premise, not a proven property — the single atomic commit point rests
+on it.** S3 conditional PUT with `If-Match` linearizes the pointer flip *only if* the object store honors the
+precondition. MinIO's conditional-write support is a recent addition, present only from the releases that
+implement it; an endpoint that predates or lacks it **silently ignores** the header and degrades the CAS to
+last-writer-wins — a torn `latest` with no error surfaced. That conditional-PUT atomicity holds under the
+distributed / erasure-set MinIO deployment is therefore an **assumed** premise (ledgered in
+[§6.1](#61-proven--tested--assumed-spelled-out), a sibling of the other runtime-checked/assumed rows), discharged by two obligations:
+
+- A **pinned MinIO version floor** that implements conditional writes is a **platform-service invariant**, owned
+  by [`platform_services_doctrine.md`](./platform_services_doctrine.md); a store below the floor is not a valid
+  commit point.
+- A **bootstrap/reconcile probe** issues a PUT carrying a deliberately-stale `If-Match` and asserts a `412
+  Precondition Failed`. If the write is instead accepted — the precondition ignored — the store is misconfigured
+  and the probe **fails closed**: it must not be used as the commit point. The criterion is explicit —
+  precondition *presence* in the request is configured, precondition *honored* by the endpoint is what the probe
+  verifies at reconcile time, and only a store that returns `412` on the stale header qualifies.
 
 **Two manifest metadata fields this round adds — both content-addressed, so both replicate.** Because the
 manifest is content-addressed, any datum recorded *in* it travels with the bytes under [§5](#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely) confluence. This round
@@ -662,6 +679,7 @@ reaches:
 | Cross-substrate bit-equality (training or inference) | **Explicitly not asserted** | Nothing — out of contract by design |
 | An imported model's pin names the *intended* model (§4.5 arm b) | **Assumed** — pin *presence* is type-foreclosed, stage-time pin *match* is decode-foreclosed (fail-closed), but "the pin denotes the intended model" is out of type reach | Nothing typed — trust in the pin author (Fork A) |
 | A family-matched, substrate-specific-weight-layout model actually **loads** on the serving substrate (§3.1) | **Not asserted** | Runtime — the decode-foreclosed family relation passes; the weight-layout load is residue, like "the staged bytes actually load" |
+| S3 conditional PUT (`If-Match`) is honored by the MinIO endpoint, so the pointer CAS is linearizable (§2.1) | **Assumed** — a pinned version floor is a platform-service invariant and a stale-`If-Match` reconcile probe asserts `412` (fail-closed); that the deployed erasure-set store honors the precondition is out of type reach | Nothing typed — a pinned version + a runtime probe, not a proof (a store that ignores the header degrades to last-writer-wins) |
 
 amoebius itself has built none of this; the proven-in-types rows are the design's *intended* totality, and the
 tested rows are evidence from sibling libraries that the design is realizable. Treat this document as a

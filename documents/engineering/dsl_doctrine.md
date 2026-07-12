@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_12_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_13_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_20_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_21_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md, documents/engineering/bootstrap_sequence_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_14_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_22_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for what the amoebius Dhall DSL is — a typed orchestration surface
@@ -51,7 +51,9 @@ in configuration that the type-checker cannot inspect. Amoebius excludes that, p
 decision: *"in general we do not want to use env vars or bash logic, we want everything to be
 dhall"*. It gets there by a hard split between two languages:
 
-- **Dhall is the data.** A Dhall expression is typed, total, side-effect-free *data*. The uploaded
+- **Dhall is the data.** A *resolved, frozen* Dhall expression is typed, total, side-effect-free *data* — the
+  effect-free claim holds for the resolved expression, not for arbitrary unresolved Dhall, whose *import
+  resolution* is itself effectful ([§4](#4-total-composability)'s import policy). The uploaded
   `InForceSpec` describes the desired world; the local `amoebius.dhall` describes the authority and
   witnesses of this binary frame. Neither carries control flow that the binary executes, subprocess strings,
   or environment lookups. Each is read, type-checked, and decoded; neither ever "runs."
@@ -169,8 +171,22 @@ delivery is **proven in hostbootstrap and inherited as evidence** — not an amo
 Total composability is stated in the original vision: *"the key to making amoebius really work well is a great
 .dhall DSL that ties everything together. total composability."* An `InForceSpec` is never one
 monolith — it is a composition built from smaller typed pieces via Dhall's native import system. Because
-every piece is typed, total, side-effect-free data ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)), the pieces nest *without limit and without
-leakage*: importing a fragment can never smuggle in an effect or a partial value.
+every *resolved, frozen* piece is typed, total, side-effect-free data ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)), the pieces nest *without limit
+and without leakage*: a frozen import can never smuggle in an effect or a partial value.
+
+**Import policy: resolve-and-freeze before decode.** Dhall *import resolution* is itself effectful — an
+`env:VAR` import reads the process environment and a remote `http(s):` import fetches over the network, both
+at decode time — so an unrestricted uploaded `InForceSpec` would make Gate-2 decode
+([§5](#5-the-illegal-state-unrepresentable-contract)) an effectful surface, colliding with the no-env-vars /
+no-`PATH` invariant ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic), owned by
+[substrate_doctrine.md](./substrate_doctrine.md)) and the no-arbitrary-URL invariant
+([illegal_state_catalog.md §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)).
+Amoebius therefore **forbids** `env:` and remote (`http(s):`) imports in any authored or uploaded spec, and
+**resolves-and-freezes** every spec to a fully-local, semantic-integrity-hashed (Dhall `sha256:…`) expression
+at `dhall update` upload time, before decode. The effect-free/total claim of
+[§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) holds for this *resolved, frozen*
+expression — never for arbitrary unresolved Dhall — and the policy is enforced at the Phase-4/5 gate
+([§5](#5-the-illegal-state-unrepresentable-contract)).
 
 Total composability runs along four concrete axes, each owned in detail by a sibling doc:
 
@@ -195,7 +211,7 @@ Total composability runs along four concrete axes, each owned in detail by a sib
   [app_vs_deployment_doctrine.md §8](./app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic),
   a demo web app is *application logic that uses* its extension — **not** itself an extension (an arbitrary
   container app is never an extension) — so it composes as an ordinary app-spec fragment, and these two demo
-  web apps are the **SPA-composition fixtures** (SPA composition itself is front-loaded to Phase 12, below).
+  web apps are the **SPA-composition fixtures** (SPA composition itself is front-loaded to Phase 13, below).
 - **Child-cluster-in-parent.** The name *amoebius* is the recursion: a cluster spawns children, which
   spawn their own. A child receives only its own scoped `InForceSpec` — *"including
   their childrens'"* but nothing about siblings — and the whole tree is rolled out from the root. The
@@ -208,11 +224,11 @@ runs a workflow, and tears down resources — the same composition, with a teard
 obligation. The testing surface is owned by the testing doctrine; it is named here only as proof that even
 *testing* is expressed in the one composable DSL rather than a parallel harness language.
 
-**SPA composition, front-loaded to Phase 12.** Composing a multi-service app together with an ML-workflow
+**SPA composition, front-loaded to Phase 13.** Composing a multi-service app together with an ML-workflow
 **demo web app** (the infernix/jitML fixtures above) as **typed Dhall fragments** — a single-page-app
 composition over this same extension seam — has its *representational / type-level* validity front-loaded to
-**Phase 12**, where it is proven at the Tier-1 design/spec layer (the same authoring-time gates of
-[§5](#5-the-illegal-state-unrepresentable-contract)); only the **live SPA deploy** stays in **Phase 32**.
+**Phase 13**, where it is proven at the Tier-1 design/spec layer (the same authoring-time gates of
+[§5](#5-the-illegal-state-unrepresentable-contract)); only the **live SPA deploy** stays in **Phase 37**.
 
 ```mermaid
 flowchart TD
@@ -392,7 +408,7 @@ the in-process `Dhall.inputFile auto` decode plus a QuickCheck exercise of the d
 integrity is therefore **discharged in-process in the front-loaded pre-cluster gates (Phases 4–7)** — the Tier-1 design/spec layer
 (dhall typecheck + decoder + QuickCheck), which needs no cluster. What stays deferred is only the **Tier-2
 runtime-enforcement residue** — that the *running* cluster enforces what the typed spec composed — owned by
-**Phase 20**. A green typecheck or decode proves the spec composes, not that the cluster enforces it.
+**Phase 22**. A green typecheck or decode proves the spec composes, not that the cluster enforces it.
 
 ### Recursion: a child's spec is a typed subtree projection
 
@@ -431,7 +447,7 @@ its building phase, not yet built.
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), a typing argument is evidence, not a
 > tested or proven result: the two gates' in-process integrity is front-loaded to the pre-cluster gates, Phases 4–7 (Tier 1), while
 > runtime enforcement — that the running cluster enforces what the spec composed — stays the Tier-2 residue
-> deferred to Phase 20.
+> deferred to Phase 22.
 
 ---
 
@@ -529,14 +545,14 @@ orchestration Dhall DSL's **in-process contract validation** — the two typed g
 [§5](#5-the-illegal-state-unrepresentable-contract) that make an illegal spec fail to type-check (Tier 1:
 dhall typecheck + decoder + QuickCheck) — is **front-loaded to the pre-cluster gates (Phases 4–7)**, while the DSL's
 **runtime-enforcement** half (the live deploy + singleton reconcile that makes the running cluster
-enforce what the spec composed, Tier 2) lands in **Phase 20**, atop the Phase 10 `dsl-step`/`chain` kernel
+enforce what the spec composed, Tier 2) lands in **Phase 22**, atop the Phase 10 `dsl-step`/`chain` kernel
 seeded from hostbootstrap. This doc never maintains a competing status ledger; it states the target shape and
 links back for status.
 
 > **Honesty.** Everything in this doctrine is Phase 0 design intent, specified before implementation. Where
 > it borrows behaviour proven in prodbox or implemented in hostbootstrap, that is *evidence from a sibling
 > system*, not proof in amoebius — which has built neither the front-loaded pre-cluster (Phases 4–7) in-process validation of
-> this contract (Tier 1: dhall typecheck + decoder + QuickCheck) nor the Phase 20 runtime enforcement (Tier 2)
+> this contract (Tier 1: dhall typecheck + decoder + QuickCheck) nor the Phase 22 runtime enforcement (Tier 2)
 > that makes the running cluster enforce what the spec composed. Read every prescriptive statement here
 > as the contract amoebius intends to satisfy, never as a tested amoebius result
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).

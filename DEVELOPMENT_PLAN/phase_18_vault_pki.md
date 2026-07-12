@@ -1,8 +1,8 @@
-# Phase 17: Root Vault + PKI + built-in Haskell Vault client
+# Phase 18: Root Vault + PKI + built-in Haskell Vault client
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_16_retained_storage.md, DEVELOPMENT_PLAN/phase_18_platform_services.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_17_retained_storage.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_27_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Stand up the root single-node password-encrypted Vault as the fail-closed secrets root, root its
@@ -14,7 +14,7 @@
 ## Phase Status
 
 📋 Planned. Specified before implementation; every sprint below is 📋 Planned and every prescriptive statement is
-design intent, never a tested amoebius result. This phase opens after the Phase 16 gate (no-provisioner retained
+design intent, never a tested amoebius result. This phase opens after the Phase 17 gate (no-provisioner retained
 storage + lossless rebind) and runs on the **linux-cpu** substrate in **Register 3** — live infrastructure: a
 single-node `kind` cluster on a linux-cpu host, its Vault rendered and applied by the Phase-15 reconciler onto
 the Phase-16 retained PV. The whole model is **proven in the sibling prodbox project** — its `vault_doctrine.md`,
@@ -37,7 +37,7 @@ Secret-mounted plaintext, no environment variable, no `PATH` lookup. A sealed, u
 secret-missing read returns a typed, fail-closed error that carries no secret material.
 
 What this phase deliberately does **not** do: the full standard-service stack that consumes these secrets (Phase
-18), the Keycloak-owned edge (Phase 19), and the parent/child unseal modes, parent secret injection, and the
+18), the Keycloak-owned edge (Phase 21), and the parent/child unseal modes, parent secret injection, and the
 cross-cluster intermediate-CA hierarchy (the amoebic-spawning/federation phases). Only the root cluster's own
 single-node Vault, its self-signed anchor, and the in-cluster read path are in scope here.
 
@@ -53,6 +53,20 @@ the Vault `pki/` engine holds a **self-signed root CA that issues** an internal 
 **built-in Haskell Vault client (no agent sidecar)** authenticates via Vault Kubernetes auth and **reads a
 `SecretRef` by name**, returning a typed fail-closed error on any sealed/missing/denied read — a **Register-3**
 live-infrastructure check.
+
+**Gate integrity ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** The
+gate's oracles are **authored and committed in Phase 0, before any `src/Amoebius/Vault/*.hs` exists** (§M.1):
+(a) a canary KV fixture `test/golden/vault/canary.json` — `SecretRef.Vault { mount="secret", path="amoebius/canary",
+field="token" }` with a fixed 32-byte value; (b) the pinned unlock-material envelope format spec
+`test/golden/vault/unlock-envelope.spec` (magic bytes, Argon2id parameters `m/t/p`, AEAD algorithm identifier, and
+field layout), hand-authored independently of `Seal.hs` (§M.3); (c) the typed-error-tag table
+`test/golden/vault/error-tags.golden` enumerating the six tags (`unavailable`/`uninitialized`/`sealed`/
+`policy-missing`/`secret-missing`/`decrypt-denied`) with, per tag, the exact redacted log line the client must emit
+(§M.3, §M.8). The **representative set (§M.7)** is exactly: this one KV `SecretRef.Vault`, one `TransitKey` unwrap,
+the self-signed root CA plus one internal leaf, and the six typed error tags — no other shapes are in gate scope.
+**External-observer traces (§M.5)** are read from a Vault **audit device** (file backend) and an argv/exec observer
+on the consumer pod, never from any log the client emits about itself. Each sprint below names **>=1 committed
+seeded mutant** (§M.2) that MUST turn the gate red, committed and re-run.
 
 ## Doctrine adopted
 
@@ -95,9 +109,9 @@ live-infrastructure check.
 **Status**: Planned
 **Implementation**: `src/Amoebius/Vault/Init.hs`, `src/Amoebius/Vault/Unseal.hs`, `src/Amoebius/Vault/Seal.hs`
 (the Argon2id-KDF → AEAD password-sealed unlock-material envelope) — target paths, not yet built.
-**Blocked by**: Phase 15 gate (the typed renderer + SSA reconciler — Vault is rendered and applied through it);
-Phase 16 gate (no-provisioner retained storage — Vault's durable KV lives on a retained PV, so a rebuild
-*unseals* rather than re-initializes); Phase 14 (the baked Vault binary in the in-cluster `distribution`
+**Blocked by**: Phase 16 gate (the typed renderer + SSA reconciler — Vault is rendered and applied through it);
+Phase 17 gate (no-provisioner retained storage — Vault's durable KV lives on a retained PV, so a rebuild
+*unseals* rather than re-initializes); Phase 15 (the baked Vault binary in the in-cluster `distribution`
 registry).
 **Independent Validation**: on an empty PV, `vault init` runs exactly once and captures password-sealed unlock
 material while **never** printing raw unseal/recovery keys or the root token; a cluster delete + recreate brings
@@ -122,17 +136,42 @@ retained PV — the prodbox root-unseal shape as **sibling evidence, not an amoe
   init and every unseal, persisted nowhere; raw keys never printed.
 - A **pluggable unlock-material backend** behind one interface — the load-bearing property is only that the
   material is password-AEAD-sealed and never plaintext at rest. **At the root Phase-17 bring-up the backend is
-  the host-side `.age` file**: MinIO does not exist until Phase 18, so a MinIO-sealed object (and equally a cloud
+  the host-side `.age` file**: MinIO does not exist until Phase 19, so a MinIO-sealed object (and equally a cloud
   KMS or TPM/YubiKey identity) is a *later* backend option, never a root-unseal prerequisite — the root Vault
   must not depend on a platform service it precedes (no Vault↔MinIO bootstrap cycle).
 - **Fail-closed ordering**: no secret-dependent workload runs before Vault reports reachable, initialized, and
   unsealed; a consumer reaching a sealed Vault fails closed.
+- **Committed seeded mutant(s) (§M.2)**, committed and re-run, each MUST turn Validation red: (i) a
+  *dropped-guard* mutant of `Unseal.hs` that re-runs `vault operator init` on rebuild instead of unsealing existing
+  data (must fail the canary-identity and already-initialized checks); (ii) an *effect-swap* mutant of `Seal.hs`
+  that seals the unlock material with raw `SHA-256(password)`-keyed obfuscation instead of the Argon2id→AEAD
+  envelope (must fail the envelope-format and wrong-password checks).
 
 ### Validation
-1. On an empty PV, run init; assert it produced password-sealed unlock material and never printed raw keys; then
-   delete + recreate the cluster and assert the bring-up **unseals** the same Vault (no re-init).
-2. Start a secret-dependent workload against a sealed Vault and assert it fails closed with no plaintext fallback.
-3. Assert the operator password is the sole human-supplied secret and is persisted nowhere.
+1. **Init-once / unseal-on-rebuild witness (forecloses wipe-and-re-init).** On an empty PV, run init; write the
+   committed canary secret `test/golden/vault/canary.json` into Vault and record (i) the canary value read back and
+   (ii) the SHA-256 digest of the at-rest unlock-material ciphertext. Then delete + recreate the cluster and assert:
+   (a) the canary reads back **byte-identical** to the committed fixture (proves the same durable data, not a fresh
+   Vault); (b) the unlock-material ciphertext digest is **unchanged** (no key regeneration); (c) a `vault operator
+   init` attempt against the recreated cluster returns **already-initialized**; and (d) the Vault audit device
+   records an **unseal** operation and **no** init operation on the rebuild.
+2. **Password-crypto witness (forecloses fake/plaintext sealing).** Assert: (a) the at-rest unlock file parses as
+   the pinned `test/golden/vault/unlock-envelope.spec` envelope with its Argon2id `m/t/p` parameters and AEAD
+   algorithm identifier matching the spec; (b) an unseal attempt with a **wrong password** fails closed and yields
+   no key material (paired positive: the correct password unseals — the two runs differ only in the password,
+   §M.8); (c) a byte-scan of the unlock file, the PV bytes, stdout/stderr, and every bring-up artifact finds **none**
+   of the raw unseal keys and **not** the root token.
+3. **Fail-closed ordering (named workload, paired positive).** Deploy the named canary consumer pod
+   (`vault-canary-consumer`, a workload whose sole readiness dependency is reading the canary `SecretRef.Vault`)
+   against a **sealed** Vault and assert it **never reports Ready**, its container surfaces the typed `sealed`
+   error (not an image-pull or unrelated failure — the same image pulls and starts, only the read fails), and no
+   plaintext value is present anywhere in its pod filesystem or env. **Paired positive (§M.8):** after unseal, the
+   **same** pod reports Ready and reads the canary value — the two runs differ only in Vault's seal state.
+4. **Password-persistence scope (disambiguated).** Assert the operator password is the sole human-supplied secret
+   and appears in **none** of the following explicitly enumerated stores: the Vault pod filesystem and mounted
+   volumes, the host filesystem under the retained-PV mount, the raw PV block bytes, every container's environment
+   block (`/proc/<pid>/environ`), the reconciler and Vault logs, and the bring-up shell history — a byte-scan for
+   the password string over exactly this set, no broader and no narrower.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -158,7 +197,7 @@ PKI) only** — public-edge TLS and the cross-cluster intermediate-CA hierarchy 
 - Internal-leaf issuance from `pki/` for in-cluster service-to-service TLS, every issued cert chaining back to the
   root anchor.
 - The **three-planes distinction** recorded and enforced: internal PKI (this phase) is not public-edge TLS
-  (ZeroSSL/route53, Phase 19) and is not the distro's own self-signed cluster CA (the chicken-and-egg floor,
+  (ZeroSSL/route53, Phase 21) and is not the distro's own self-signed cluster CA (the chicken-and-egg floor,
   [`vault_pki_doctrine.md §10`](../documents/engineering/vault_pki_doctrine.md#10-the-chicken-and-egg-floor-what-stays-outside-vault));
   the cross-cluster intermediate-CA hierarchy is deferred to federation and flagged **live-proof-pending**.
 
@@ -180,8 +219,10 @@ resolves the chain rooted here); the `SecretRef` type + decode-time validator fr
 the Dhall schema / decoder phases — an earlier-phase prereq, not restated here).
 **Independent Validation**: an in-cluster consumer authenticates to Vault with its **Kubernetes service-account
 JWT** (role bound to its namespace + service account, least-privilege policy) and resolves a
-`SecretRef.Vault { mount, path, field }` **by name**, receiving exactly the stored bytes; the consumer pod carries
-**no Vault Agent sidecar container** and mounts **no plaintext k8s Secret**; a read of a path outside policy is
+`SecretRef.Vault { mount, path, field }` **by name**, receiving exactly the stored bytes; **a Vault audit device
+(§M.5) records that this read ran under a token minted by `auth/kubernetes/login` bound to the consumer's exact
+namespace + service account** — not a pre-minted or image-baked token; the consumer pod carries **no Vault Agent
+sidecar container** and mounts **no plaintext k8s Secret**; a read of a path outside policy is
 denied; a sealed / uninitialized / policy-missing / secret-missing read returns a **typed fail-closed error** that
 carries no secret material and emits no presence oracle in its logs.
 **Docs to update**: `documents/engineering/vault_pki_doctrine.md`, `documents/engineering/testing_doctrine.md`,
@@ -209,12 +250,28 @@ through the **built-in** client, with a typed, no-leak error model. The `Prodbox
 - A **Register-3** proven/tested/assumed ledger naming the live substrate; the cross-cluster intermediate-CA
   hierarchy, parent/child unseal, and parent secret injection are explicitly left UNVERIFIED (owned by the
   federation phases), never marked green.
+- **Committed seeded mutant(s) (§M.2)**, committed and re-run, each MUST turn Validation red: (i) a
+  *dropped-effect* mutant of `Client.hs` that reads a token from a mounted file / env var instead of performing
+  `auth/kubernetes/login` (must fail the audit-device login-provenance check and the role-deletion negative);
+  (ii) a *guard-weakening* mutant of `Error.hs` that folds `secret-missing` and `sealed` into one tag or logs the
+  requested path (must fail the error-tag table and the presence-oracle checks).
 
 ### Validation
-1. A consumer authenticates via Vault Kubernetes auth and reads a `SecretRef.Vault`-named KV secret, getting
-   exactly the stored bytes; assert the pod has no agent sidecar and no plaintext Secret mount.
-2. A read of a path outside the consumer's policy is denied; a sealed / secret-missing read returns the typed
-   fail-closed error and the logs carry no secret material and no presence oracle.
+1. **K8s-auth provenance witness (forecloses image-baked token).** A consumer authenticates via Vault Kubernetes
+   auth and reads the canary `SecretRef.Vault`-named KV secret, getting **byte-identical** the value in
+   `test/golden/vault/canary.json`; the **Vault audit device** records the read ran under a token minted by
+   `auth/kubernetes/login` bound to the consumer's exact namespace + service account. Then **delete the Vault role
+   (or the service account)** and assert the same read now fails with the typed `policy-missing`/denied error —
+   proving the login actually occurs rather than a pre-minted token. Assert the pod has no agent sidecar and no
+   plaintext Secret mount (read from the argv/exec observer and the pod spec, §M.5).
+2. **Typed negatives + presence-oracle absence (disambiguated).** A read of a path outside the consumer's policy
+   is denied; each of the sealed / uninitialized / policy-missing / secret-missing reads returns **its specific
+   tag from `test/golden/vault/error-tags.golden`** (§M.8 — each negative asserts *why* it failed, paired with the
+   positive canary read that differs only in the foreclosed dimension). **Presence-oracle absence is operationally
+   defined:** the emitted log line for `secret-missing`, `policy-missing`, and `sealed` must be **byte-identical
+   except for the typed tag itself** (so log shape reveals nothing about whether a path/secret exists), and a grep
+   of the Vault audit device and the consumer's structured logs finds **none** of: the requested mount/path, the
+   resolved value, and the auth token.
 3. Emit the Register-3 ledger; assert the deferred federation surfaces are recorded UNVERIFIED, not green.
 
 ### Remaining Work
@@ -255,6 +312,15 @@ Register-3 live gate — not a substitute for it.
   daemon **never** issues from `pki/`, **never** accepts a `.dhall`, and **never** resolves a `SecretRef` while
   Vault is sealed or while its unseal freshness is unproven; a sealed→unreachable→lease-expiry→restart sequence
   leaves the consumer failed closed with a typed error, never a plaintext fallback and never a stale read.
+- **Exploration budget + coverage (§M.4, disambiguated).** The suite explores **at least 500 distinct seeds** per
+  fault family under `IOSimPOR`, and carries `cover`/`classify` obligations that FAIL the run unless each is met:
+  the **sealed** knob fires in >=25% of schedules, **unreachable** in >=25%, **lease-expiry** in >=15%, **restart**
+  in >=15%, and the specific adversarial sequence sealed→unreachable→lease-expiry→restart is exercised in >=1% —
+  so the named sequence is a *covered case*, never the entire explored set. A run whose generator fails to hit
+  these fractions is a red gate, not a pass.
+- **Committed seeded mutant (§M.2)**, committed and re-run, MUST turn the invariant red: a *dropped-guard* mutant of
+  the freshness check that permits a `SecretRef` read while the modeled Vault is sealed (must produce a
+  counterexample under the explored schedules).
 - **Deterministic replay**: every schedule is seed-addressed, so a counterexample is replayable byte-for-byte from
   its seed for debugging.
 - A **Register-2.5** proven/tested/assumed ledger (substrate `none`), stating the **honest limit** — the harness
@@ -262,10 +328,10 @@ Register-3 live gate — not a substitute for it.
   assumption is discharged only by this phase's **Sprint-17.3 Register-3 live gate**, never by simulation.
 
 ### Validation
-1. Run the real init/unseal client under `IOSim`/`IOSimPOR` against the modeled Vault under adversarial
-   sealed / unreachable / lease-expiry / restart schedules and assert the fail-closed invariant holds on every
-   explored interleaving — no PKI issuance, no `.dhall` acceptance, no `SecretRef` read while sealed or
-   freshness-unproven.
+1. Run the real init/unseal client under `IOSim`/`IOSimPOR` across **>=500 seeds per fault family** and assert the
+   fail-closed invariant holds on every explored interleaving — no PKI issuance, no `.dhall` acceptance, no
+   `SecretRef` read while sealed or freshness-unproven — **and** assert the §M.4 `cover`/`classify` fractions above
+   were met (else the run is red for insufficient coverage, not passed).
 2. Force a counterexample (e.g. a modeled-Vault fault that would tempt a stale read) and assert it is
    **deterministically replayable** from its seed.
 3. Emit the Register-2.5 ledger (substrate `none`); assert it records modeled-Vault fidelity as **assumed** and
@@ -291,7 +357,7 @@ The whole sprint (📋 Planned).
 
 **Cross-references to add:**
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-17 status when the gate passes; link this document.
-- `DEVELOPMENT_PLAN/substrates.md` — record Phase 17's gate substrate (linux-cpu) in the per-phase substrate map.
+- `DEVELOPMENT_PLAN/substrates.md` — record Phase 18's gate substrate (linux-cpu) in the per-phase substrate map.
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Vault/{Init,Unseal,Seal,Pki,Client,SecretRef,Error}.hs`
   as Phase-17 design-first rows against the component inventory.
 
@@ -309,6 +375,6 @@ The whole sprint (📋 Planned).
   init-once / unseal-on-rebuild durability
 - [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — the
   Register-2.5 `IOSim` fail-closed check the real unseal client runs against the modeled Vault before the live gate
-- [phase_15](phase_15_renderer_reconciler.md) — the typed renderer + SSA reconciler that renders and applies Vault
-- [phase_16](phase_16_retained_storage.md) — the no-provisioner retained PV Vault's durable KV lives on
-- [phase_18](phase_18_platform_services.md) — the standard-service stack that consumes these Vault secrets
+- [phase_16](phase_16_renderer_reconciler.md) — the typed renderer + SSA reconciler that renders and applies Vault
+- [phase_17](phase_17_retained_storage.md) — the no-provisioner retained PV Vault's durable KV lives on
+- [phase_19](phase_19_platform_backbone.md) — the standard-service stack that consumes these Vault secrets

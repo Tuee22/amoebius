@@ -2,11 +2,11 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_12_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_13_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_14_base_image_registry.md, DEVELOPMENT_PLAN/phase_17_vault_pki.md, DEVELOPMENT_PLAN/phase_18_platform_services.md, DEVELOPMENT_PLAN/phase_19_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_20_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_21_app_tenancy.md, DEVELOPMENT_PLAN/phase_22_pulsar_client.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_28_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_14_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_15_base_image_registry.md, DEVELOPMENT_PLAN/phase_18_vault_pki.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_21_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_22_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, DEVELOPMENT_PLAN/phase_24_pulsar_client.md, DEVELOPMENT_PLAN/phase_27_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_35_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: The plan-side substrate registry and the per-phase substrate map — which single substrate each
-> phase's acceptance gate keys to (phases 0–32), keyed to the closed substrate catalog owned by the substrate
+> phase's acceptance gate keys to (phases 0–37), keyed to the closed substrate catalog owned by the substrate
 > doctrine.
 
 ---
@@ -78,8 +78,8 @@ gates.
 | GPU axis | Apple Metal — on-host, **not containerizable** (needs unified memory); the worker is built **headless on the host, no VM** ([`apple_metal_headless_builds.md`](../documents/engineering/apple_metal_headless_builds.md)) |
 | Virtualization | Lima (Ubuntu-24.04 Linux VM) — see §3. **No macOS build VM (no Tart)**: Apple-Metal builds are headless on-host |
 | LoadBalancer | MetalLB (bare-metal / kind / rke2 lane) |
-| What it validates | The Phase 28 gate — an Apple-Silicon **host compute daemon** runs a Metal ML workload as an in-cluster Pulsar/MinIO peer over host-only NodePorts ([`substrate_doctrine.md` §5 — host worker nodes](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)) |
-| Gate phase(s) | Phase 28 — the per-phase assignment is owned by [§4](#4-per-phase-substrate-map-phases-032) |
+| What it validates | The Phase 35 gate — an Apple-Silicon **host compute daemon** runs a Metal ML workload as an in-cluster Pulsar/MinIO peer over host-only NodePorts ([`substrate_doctrine.md` §5 — host worker nodes](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)) |
+| Gate phase(s) | Phase 35 — the per-phase assignment is owned by [§4](#4-per-phase-substrate-map) |
 | Status | 📋 Planned |
 
 ### linux-cpu
@@ -92,7 +92,7 @@ gates.
 | Virtualization | none (native Linux); Incus / Colima where a nested Linux VM is wanted |
 | LoadBalancer | MetalLB |
 | What it validates | The **default validation substrate** — the bulk of the plan: bootstrap, platform services + retained storage, the DSL + control-plane singleton, the Pulsar/store/workflow runtime, CPU-inference determinism, the demo web apps (application-logic-only), multi-cluster spawn/geo-replication/failover, and SPA composition |
-| Gate phase(s) | Phases 13–26, 29, and the `linux-cpu` parent side of 30, plus 32 — the live band's default substrate; the per-phase assignment is owned by [§4](#4-per-phase-substrate-map-phases-032) |
+| Gate phase(s) | Phases 14–29, 31–33, and 37, plus the `linux-cpu` parent side of 30 — the live band's default substrate; the per-phase assignment is owned by [§4](#4-per-phase-substrate-map) |
 | Status | 📋 Planned |
 
 ### linux-cuda
@@ -104,8 +104,8 @@ gates.
 | GPU axis | NVIDIA present ⇒ **in-cluster** CUDA via the NVIDIA container runtime — the *contained-GPU* case ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained) contrast) |
 | Virtualization | none |
 | LoadBalancer | MetalLB |
-| What it validates | The Phase 27 gate — a jitML training run is bit-deterministic per its determinism contract and the HA coordinator fails over; CUDA stays confined behind a default-off cabal flag |
-| Gate phase(s) | Phase 27 — the per-phase assignment is owned by [§4](#4-per-phase-substrate-map-phases-032) |
+| What it validates | The Phase 34 gate — a jitML training run is bit-deterministic per its determinism contract and the HA coordinator fails over; CUDA stays confined behind a default-off cabal flag |
+| Gate phase(s) | Phase 34 — the per-phase assignment is owned by [§4](#4-per-phase-substrate-map) |
 | Status | 📋 Planned |
 
 ### windows
@@ -117,14 +117,14 @@ gates.
 | GPU axis | CUDA present ⇒ **on-host worker node** — CUDA does not run performantly inside WSL2 ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)) |
 | Virtualization | WSL2 (Ubuntu-24.04 Linux distro) for the Linux-host role — see §3 |
 | LoadBalancer | MetalLB (when acting as a Linux cluster host) |
-| What it validates | No phase gate in 0–12 keys its single substrate to `windows`: Windows participates either as a Linux host (via WSL2) or as the Windows-CUDA host-worker case, which shares the Phase 28 host-compute doctrine whose gate substrate is `apple`. This round elevates the Windows-CUDA host worker to a **first-class** case alongside Apple-Metal — role parity, not evidence parity ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained), `daemon_topology_doctrine.md` §4). The standalone `windows` gate is a later-phase concern (README later phases) |
-| Gate phase(s) | none in 0–32 (host-worker doctrine shared with Phase 28) |
+| What it validates | No phase gate in 0–37 keys its single substrate to `windows`: Windows participates either as a Linux host (via WSL2) or as the Windows-CUDA host-worker case, which shares the Phase 35 host-compute doctrine whose gate substrate is `apple`. This round elevates the Windows-CUDA host worker to a **first-class** case alongside Apple-Metal — role parity, not evidence parity ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained), `daemon_topology_doctrine.md` §4). The standalone `windows` gate is a later-phase concern (README later phases) |
+| Gate phase(s) | none in 0–37 (host-worker doctrine shared with Phase 35) |
 | Status | 📋 Planned |
 
 > **Honesty.** Detection and classification are seeded from the sibling `hostbootstrap` library (a closed
 > `SubstrateName` enum with finer `apple-silicon` / `linux-cpu` / `linux-gpu` / `windows-cpu` / `windows-gpu`
 > granularity that the four-name DSL catalog collapses). That seed is **evidence from a sibling**, not an
-> amoebius-built behaviour; amoebius has not built Phase 13
+> amoebius-built behaviour; amoebius has not built Phase 14
 > ([`substrate_doctrine.md` §1](../documents/engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob)).
 
 > **Why `windows` is not split into `windows-cuda` (§F, this round's addition — normative in the doctrine).**
@@ -151,7 +151,7 @@ it has no host to detect and no `LinuxHost` witness. It is the `Managed Eks` arm
 | Node capacity | From the declared **instance types**, not a physical host; folded like any other `Capacity` ([`resource_capacity_doctrine.md` §3](../documents/engineering/resource_capacity_doctrine.md)) |
 | Storage ceiling | A **cloud quota** (`CloudQuota` `StorageBacking`); "unbounded" storage/compute only via a quota-bounded `ScalingPolicy` |
 | LoadBalancer | Cloud LoadBalancer (the one substrate-driven difference, [`substrate_doctrine.md` §7](../documents/engineering/substrate_doctrine.md#7-the-loadbalancer-is-the-one-substrate-driven-platform-difference)) |
-| Gate phase(s) | 30 (the `linux-cpu` parent drives the deploy; the provider target is not a hardware substrate) — owned by [§4](#4-per-phase-substrate-map-phases-032) |
+| Gate phase(s) | 30 (the `linux-cpu` parent drives the deploy; the provider target is not a hardware substrate) — owned by [§4](#4-per-phase-substrate-map) |
 | Status | 📋 Planned |
 
 ---
@@ -172,7 +172,7 @@ Lima VM on Apple presents as `linux-cpu` to everything above it.
 | Provider / tool | Lima (`limactl`), ensured via `brew install lima` (verified no-op if present) |
 | Synthesizes | A named, project-budget-sized Ubuntu-24.04 Linux VM presenting as `linux-cpu` |
 | Seed module | `HostBootstrap.Ensure.Lima` / `HostBootstrap.Lima` (sibling `hostbootstrap`) |
-| Used by | Phase 28 (`apple`) — the binary re-invokes its own subcommands via `limactl shell <vm> -- <amoebius> <subcmd>` |
+| Used by | Phase 35 (`apple`) — the binary re-invokes its own subcommands via `limactl shell <vm> -- <amoebius> <subcmd>` |
 | Status | 📋 Planned |
 
 ### wsl2
@@ -201,13 +201,13 @@ Lima VM on Apple presents as `linux-cpu` to everything above it.
 
 ---
 
-## 4. Per-phase substrate map (phases 0–32)
+## 4. Per-phase substrate map
 
 The single substrate each phase's acceptance gate keys to. Each row matches the substrate named in that
 phase's `Phase Summary`; the README Phase overview carries the same values
-([README.md Phase overview](README.md#phase-overview)). Phases **1–12** are the pre-cluster band (substrate
-`none`, Registers 1–2); phases **13–32** are the live band (Register 3). Each row's full objective, gate, and
-sprint breakdown lives in its phase document (`phase_00_documentation_suite.md` … `phase_32_spa_live_deploy.md`).
+([README.md Phase overview](README.md#phase-overview)). Phases **1–13** are the pre-cluster band (substrate
+`none`, Registers 1–2); phases **14–37** are the live band (Register 3). Each row's full objective, gate, and
+sprint breakdown lives in its phase document (`phase_00_documentation_suite.md` … `phase_37_spa_live_deploy.md`).
 
 | Phase | Name | Substrate | Why this substrate |
 |-------|------|-----------|--------------------|
@@ -216,38 +216,43 @@ sprint breakdown lives in its phase document (`phase_00_documentation_suite.md` 
 | 2 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | `none` | Register 1: the in-process explorer + the `emitTLA` renderer + TLC on the generated `.tla` (safety `INVARIANT`s + fairness/temporal `PROPERTY`s) + the differential explorer↔TLC property; no host or cluster. |
 | 3 | Gateway-migration model (both branches) | `none` | Register 1: `emitTLA` + TLC (safety + liveness under fairness) + io-sim over the `GatewayMigration` `Model`, before any real resource. |
 | 4 | Dhall Gate-1 schema + smart-constructor prelude | `none` | Register 1: `dhall type` over the schema + corpus; authoring-time only, no binary. |
-| 5 | GADT IR + total decoder (Gate 2) | `none` | Register 1: the in-process `Dhall.inputFile` decode + total refining fold; no cluster. |
-| 6 | Illegal-state corpus + properties + validation-locus ledger | `none` | Register 1: the negative/positive corpus + QuickCheck + compile-fail goldens; no cluster. |
+| 5 | GADT IR + fail-closed decoder (Gate 2) | `none` | Register 1: the in-process `Dhall.inputFile` decode + the fail-closed refining fold; no cluster. |
+| 6 | Illegal-state corpus + validation-locus ledger | `none` | Register 1: the negative/positive corpus + QuickCheck + compile-fail goldens + the per-entry validation-locus ledger; no cluster. |
 | 7 | Capacity / topology folds | `none` | Register 1: `fits`/`carve`/`place` + topology-relation properties, in-process. |
 | 8 | Capability → provider → shape binder | `none` | Register 1: the capability→`ServiceSpec` binding checked at the type level. |
 | 9 | Pure `render` + rendered-output goldens | `none` | Register 1: `render` + byte-for-byte manifest goldens; rendering never touches live infra. |
 | 10 | chain/Step kernel + `--dry-run` plan render | `none` | Register 1: the pure `[Step]` plan + `--dry-run` golden; no effects. |
-| 11 | Boundary-integration fake-tool harness + deterministic-simulation substrate | `none` | Register 2 (fake tools) + Register 2.5 (the `io-classes` env + modeled fault-injectable substrates under `IOSim`); no cluster. |
-| 12 | SPA composition (representational) + demo-SPA local | `none` | Register 1/2: composition property + the PureScript demo SPA against a faked backend (Playwright); no cluster. |
-| 13 | Python midwife + substrate detect + single kind cluster | `linux-cpu` | The default substrate brings up an empty single-node kind cluster idempotently; substrate *detection* runs here. First live (Register 3) phase. |
-| 14 | Multi-arch base image + jit-build resolver + `distribution` registry | `linux-cpu` | The base-image build + atomic publish into the in-cluster registry, on the default substrate. |
-| 15 | Typed renderer + live SSA reconciler | `linux-cpu` | The SSA reconciler applies a rendered object set to convergence on the default substrate. |
-| 16 | No-provisioner retained storage + lossless rebind | `linux-cpu` | Retained PVs that rebind across delete/recreate; MetalLB is the bare-metal/kind LB ([`substrate_doctrine.md` §7](../documents/engineering/substrate_doctrine.md#7-the-loadbalancer-is-the-one-substrate-driven-platform-difference)). No GPU axis. |
-| 17 | Root Vault + PKI + built-in Haskell Vault client | `linux-cpu` | Vault init/unseal + PKI anchor + the Haskell Vault client, on the default substrate. |
-| 18 | Standard platform-service stack | `linux-cpu` | The full standard service set comes up HA in the readiness-DAG order; no GPU. |
-| 19 | Keycloak-owned ingress | `linux-cpu` | The single wild-ingress path through Keycloak/Envoy, on the default substrate. |
-| 20 | Live DSL deploy via the `replicas=1` singleton | `linux-cpu` | The Deployment-`replicas=1` singleton (single-instance from k8s/etcd, no election) drives a live deploy; no hardware axis. |
-| 21 | App tenancy + `TenantSpec` | `linux-cpu` | Per-app namespace + ObjectStore + Sql + tenant isolation, on the default substrate. |
-| 22 | Native Pulsar client (CBOR) | `linux-cpu` | A native-Pulsar round-trip with CBOR payloads; fully containerized, no GPU. |
-| 23 | Content store + workflow runtime (Pulsar-Failover single-writer) | `linux-cpu` | A content-addressed store + workflow + Pulsar-Failover standby takeover; no election, no GPU. |
-| 24 | Determinism kernel | `linux-cpu` | `experimentHash` + seed-derivation reproducibility on a CPU substrate; CUDA is a later phase. |
-| 25 | jit-build engine resolver + `CacheBudget` cache | `linux-cpu` | The resolve-on-miss engine cache + the `CacheBudget` fold, on the default substrate. |
-| 26 | infernix lift + CPU inference reproducibility | `linux-cpu` | A reproducible **CPU** infernix-inference workflow (same `experimentHash` ⇒ same output); no GPU. |
-| 27 | jitML lift + checkpoints + coordinator + CUDA | `linux-cuda` | The first GPU workload — bit-deterministic jitML + Pulsar-Failover trainer takeover — via the **in-cluster** NVIDIA container runtime ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)). |
-| 28 | Apple-Metal host compute daemon | `apple` | The host-worker case where hardware refuses containerization: Apple Metal needs unified memory and cannot run in a Linux VM/container. One-substrate discipline pins the gate to `apple` (Windows-CUDA shares the doctrine but is not the gate). |
-| 29 | Multi-cluster spawn + geo-replication + gateway-migration correspondence | `linux-cpu` | Parent/child kind/rke2 clusters + geo-replication + the gateway-migration (both branches) correspondence against the built modules; all Linux, no GPU. |
+| 11 | Boundary-integration fake-tool harness | `none` | Register 2: the binary runs the plan against fake `kubectl`/`docker`/`pulumi` by absolute path; recorded argv and applied bytes match the committed goldens; no cluster. |
+| 12 | Deterministic-simulation substrate | `none` | Register 2.5: the real daemon/reconciler code under `IOSim`/`IOSimPOR` against a modeled fault-injectable environment; same-seed → byte-identical trace; no cluster. |
+| 13 | SPA composition (representational) + demo-SPA local | `none` | Register 1/2: composition property + the PureScript demo SPA against a faked backend (Playwright); no cluster. |
+| 14 | Python midwife + substrate detect + single kind cluster | `linux-cpu` | The default substrate brings up an empty single-node kind cluster idempotently; substrate *detection* runs here. First live (Register 3) phase. |
+| 15 | Multi-arch base image + jit-build resolver + `distribution` registry | `linux-cpu` | The base-image build + atomic publish into the in-cluster `distribution` registry, on the default substrate. |
+| 16 | Typed renderer + live SSA reconciler | `linux-cpu` | The SSA reconciler applies a rendered object set to convergence on the default substrate. |
+| 17 | No-provisioner retained storage + lossless rebind | `linux-cpu` | Retained PVs that rebind across delete/recreate; MetalLB is the bare-metal/kind LB ([`substrate_doctrine.md` §7](../documents/engineering/substrate_doctrine.md#7-the-loadbalancer-is-the-one-substrate-driven-platform-difference)). No GPU axis. |
+| 18 | Root Vault + PKI + built-in Haskell Vault client | `linux-cpu` | Vault init/unseal + PKI anchor + the Haskell Vault client, on the default substrate. |
+| 19 | Platform backbone (MetalLB + MinIO + Pulsar HA) | `linux-cpu` | The backbone comes up HA from generated manifests + baked binaries; the `distribution` registry re-homes onto the MinIO S3 driver and a size-triggered Pulsar S3 offload fires; no GPU. |
+| 20 | Platform services-2 (Percona/Patroni + pgAdmin + observability + readiness-DAG) | `linux-cpu` | Percona/Patroni + pgAdmin + Prometheus/Grafana come up HA in the derived readiness-DAG order, on the default substrate; no GPU. |
+| 21 | Keycloak-owned ingress | `linux-cpu` | The single wild-ingress path through Keycloak/Envoy, on the default substrate. |
+| 22 | Live DSL deploy via the `replicas=1` singleton | `linux-cpu` | The Deployment-`replicas=1` singleton (single-instance from k8s/etcd, no election) drives a live deploy; no hardware axis. |
+| 23 | App tenancy + `TenantSpec` | `linux-cpu` | Per-app namespace + ObjectStore + Sql + tenant isolation, on the default substrate. |
+| 24 | Native Pulsar client (CBOR) | `linux-cpu` | A native-Pulsar round-trip with CBOR payloads; fully containerized, no GPU. |
+| 25 | Content store + workflow runtime (Pulsar-Failover single-writer) | `linux-cpu` | A content-addressed store + workflow + Pulsar-Failover standby takeover; no election, no GPU. |
+| 26 | Release lifecycle (ledger + PromotionGate + RolloutPlan) | `linux-cpu` | A live Release-ledger write + a PromotionGate refusal + a readiness-gated RolloutPlan applied in order, on the default substrate; no hardware axis. |
+| 27 | WireGuard network fabric | `linux-cpu` | The singleton reconciles raw-kernel WireGuard from Vault-KV Curve25519 keys so every cluster draws its VPN IP and the gateway-role hub is reachable; all Linux, no GPU. |
+| 28 | Multi-cluster spawn + geo-replication | `linux-cpu` | A parent spawns two children (Pulumi-from-inside, first built here) that geo-replicate a workflow; all Linux, no GPU. |
+| 29 | Gateway-migration drills + model-correspondence | `linux-cpu` | A `Planned` (RPO=0) handover + a `Failover` rebind within budget, trace-validated against the Phase-3 model; all Linux, no GPU. |
 | 30 | Provider-managed clusters + dynamic provisioning | `linux-cpu → provider` | The `linux-cpu` parent drives Pulumi; the **gate** spins up a provider (EKS) cluster and provisions a node, where the LB becomes a cloud LoadBalancer ([`substrate_doctrine.md` §7](../documents/engineering/substrate_doctrine.md#7-the-loadbalancer-is-the-one-substrate-driven-platform-difference)). |
-| 31 | Test-topology DSL + suggest-test + elevated harness | `per generated test` | `suggest-test` detects the actual substrate/resources/credentials and emits a representative test `.dhall`; the substrate is **whatever the generated test targets** — single-substrate, chosen at generation. |
-| 32 | Live SPA deploy | `linux-cpu` | Compose + deploy a multi-service SPA + an ML workflow behind Keycloak/Envoy, reachable on the default substrate; no new hardware axis. |
+| 31 | Determinism kernel | `linux-cpu` | `experimentHash` + seed-derivation reproducibility on a CPU substrate; CUDA is a later phase. |
+| 32 | jit-build engine resolver + `CacheBudget` cache | `linux-cpu` | The resolve-on-miss engine cache + the `CacheBudget` fold, on the default substrate. |
+| 33 | infernix lift + CPU inference reproducibility | `linux-cpu` | A reproducible **CPU** infernix-inference workflow (same `experimentHash` ⇒ same output); no GPU. |
+| 34 | jitML lift + checkpoints + coordinator + CUDA | `linux-cuda` | The first GPU workload — bit-deterministic jitML + Pulsar-Failover trainer takeover — via the **in-cluster** NVIDIA container runtime ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)). |
+| 35 | Apple-Metal host compute daemon | `apple` | The host-worker case where hardware refuses containerization: Apple Metal needs unified memory and cannot run in a Linux VM/container. One-substrate discipline pins the gate to `apple` (Windows-CUDA shares the doctrine but is not the gate). |
+| 36 | Test-topology DSL + suggest-test + elevated harness | `per generated test` | `suggest-test` detects the actual substrate/resources/credentials and emits a representative test `.dhall`; the substrate is **whatever the generated test targets** — single-substrate, chosen at generation. |
+| 37 | Live SPA deploy | `linux-cpu` | Compose + deploy a multi-service SPA + an ML workflow behind Keycloak/Envoy, reachable on the default substrate; no new hardware axis. |
 
 The provider/host-side details under three of these rows are owned elsewhere: the cloud-LB and provider-cluster
-provisioning behind Phase 30 by the Pulumi IaC doctrine; the host-worker wire behind Phase 28 by the
-host↔cluster comms doctrine; the in-cluster vs on-host GPU split behind Phases 27/28 by
+provisioning behind Phase 30 by the Pulumi IaC doctrine; the host-worker wire behind Phase 35 by the
+host↔cluster comms doctrine; the in-cluster vs on-host GPU split behind Phases 34/35 by
 [`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained).
 This map owns only the **one substrate per gate** assignment.
 
@@ -282,7 +287,7 @@ keeps in
 - [Cluster Topology Doctrine](../documents/engineering/cluster_topology_doctrine.md) — the declared compute-engine axis (kind/rke2/EKS) this registry keeps distinct from the detected substrate
 - [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — the fold over the per-host `Capacity` this registry declares
 - [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — §9 the LoadBalancer + single wild-ingress path, §12 substrate equivalence as a structural invariant
-- [Host ↔ Cluster Comms Doctrine](../documents/engineering/host_cluster_comms_doctrine.md) — the host-worker wire (host-only NodePorts, no mTLS) behind Phase 28
+- [Host ↔ Cluster Comms Doctrine](../documents/engineering/host_cluster_comms_doctrine.md) — the host-worker wire (host-only NodePorts, no mTLS) behind Phase 35
 - [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — the composition lift and worker-role taxonomy
 - [Pulumi IaC Doctrine](../documents/engineering/pulumi_iac_doctrine.md) — provider-cluster provisioning behind Phase 30
 - [Engineering Doctrine Index](../documents/engineering/README.md) — the doctrine the phases adopt

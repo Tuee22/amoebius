@@ -2,15 +2,13 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/deterministic_simulation_doctrine.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_12_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_12_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, documents/engineering/deterministic_simulation_doctrine.md
 **Generated sections**: none
 
-> **Purpose**: Run the real amoebius binary over the pure `[Step]` plan against fake `kubectl`/`helm`/`docker`/`pulumi`
-> that record their argv and applied-manifest bytes, asserting the exact commands and bytes byte-for-byte — the
-> Register-2 boundary that closes the pre-cluster conformance spine without ever standing up a cluster — and
-> stand up the **Register-2.5 deterministic-simulation substrate**: the `io-classes` seams and the modeled,
-> fault-injectable environment (fake Pulsar/MinIO/apiserver/route53/Vault/clock) the later live-band phases run
-> their real code against under `IOSimPOR`.
+> **Purpose**: Run the real amoebius binary over the pure `[Step]` plan against fake `kubectl`/`docker`/`pulumi`
+> (with a `helm` fake present only as a zero-invocations negative control) that record their argv and
+> applied-manifest bytes, asserting the exact commands and bytes byte-for-byte — the Register-2 boundary that
+> closes the pre-cluster conformance spine without ever standing up a cluster.
 
 ---
 
@@ -20,9 +18,11 @@
 is design intent, never a tested amoebius result. This phase opens after the Phase 10 gate (the `chain`/`Step`
 kernel + `--dry-run` plan render) and runs on **no substrate** (`none`) in **Register 2** — the boundary
 register, exercised in-process plus a handful of controlled fake tool binaries, with no apiserver, no broker,
-no cloud, and no Vault. It is the second and final register of the pre-cluster conformance harness
-([`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md): the harness is
-Registers 1 and 2; Register 3 is the acceptance gate of each *live* phase). Where a shape below is already
+no cloud, and no Vault. It is the boundary register (Register 2) of the pre-cluster conformance harness
+([`conformance_harness_doctrine.md §2`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation):
+the harness is Registers 1, 2, and 2.5; the Register-2.5 deterministic-simulation substrate is built and gated
+separately in [Phase 12](phase_12_deterministic_sim_substrate.md); Register 3 is the acceptance gate of each
+*live* phase). Where a shape below is already
 exercised in a sibling system — prodbox validating its behaviour through a single thin IO seam with subprocess
 fakes in a dedicated boundary suite, `typed-process`, and byte-for-byte dry-run goldens — that is **sibling
 evidence, not an amoebius result**.
@@ -41,7 +41,7 @@ posture is strict: mocking happens **only** at the subprocess boundary; the plan
 test stays pure and untouched. The harness also proves the cross-cutting no-`PATH` invariant at the boundary —
 the binary invokes each fake by the exact absolute path it was handed and never resolves a tool against the
 host's `PATH`. What is *not* here: the live SSA reconciler and the real tool invocations against a real cluster
-(Phase 15), and the runtime-enforcement claim that the cluster admits what the fakes accepted (Phase 20) — the
+(Phase 16), and the runtime-enforcement claim that the cluster admits what the fakes accepted (Phase 22) — the
 Tier-2 residue this register leaves UNVERIFIED by construction.
 
 **Substrate:** none — no host, no cluster; the gate is an in-process `cabal test boundary-spec` battery driving
@@ -50,11 +50,22 @@ consumes.
 
 **Register:** 2 — boundary integration with fake tools, no cluster (§K).
 
-**Gate:** `cabal test boundary-spec` is green — the real amoebius binary runs the Phase-10 `[Step]` plan against
-fake `kubectl`/`helm`/`docker`/`pulumi` invoked by absolute path, the recorded argv sequence equals the expected
-command list and the recorded applied-manifest bytes equal the Phase-9/10 render/plan goldens byte-for-byte, and
-the suite is red if any command or byte diverges or if the binary ever resolves a tool against `PATH` — a
-**Register-2** boundary check that runs on no substrate.
+**Gate:** `cabal test boundary-spec` is green — the real amoebius binary runs the **representative plan corpus**
+(Sprint 11.3, §M-7: a committed `[Step]` plan containing **at least one step for each tool amoebius actually
+invokes** — `kubectl`, `docker`, `pulumi` — over the Phase-10 fixtures, while the `helm` fake is a **negative
+control that must record zero invocations** (amoebius renders and applies its own typed manifests and never
+shells to Helm)) against the fakes invoked by absolute path; the recorded
+argv sequence equals the **committed, hand-authored expected-argv transcript** (`test/boundary/golden/argv/`,
+Phase-0-pinned per §M-1/§M-3 — authored independently of the executor, no function reachable from the executor
+computes it) and the recorded applied-manifest bytes equal the Phase-9/10 render/plan goldens byte-for-byte, and
+**each of the four tool transcripts is non-empty** (a zero-invocation transcript for any named tool is red).
+The gate is not passed by assertion logic alone: it names **committed seeded mutants** (§M-2) that MUST turn the
+suite red — an executor argv mutant (drop a flag / reorder argv / swap a subcommand) and a byte mutant (one
+flipped manifest byte) — re-run each gate run, not once. The no-`PATH` invariant is proven by an **OS-boundary
+observer** (§M-5): the fakes' parent directory is removed from `PATH` and a hostile **decoy directory** holding
+same-named sabotage executables is placed **first** on `PATH`; the run is red if any decoy sabotage-marker
+appears (a `PATH` lookup would have executed the decoy, not the handed absolute path). A **Register-2** boundary
+check that runs on no substrate.
 
 ## Doctrine adopted
 
@@ -72,7 +83,7 @@ the suite is red if any command or byte diverges or if the binary ever resolves 
   load-bearing invariant (§3), *rendering a plan MUST NOT require, contact, or depend on live infrastructure*:
   the plan and manifest bytes the fakes receive were rendered in Register 1 with no cluster, and the fake-apply
   adds no infrastructure dependency. Prerequisite checks (a cluster is reachable, credentials are present) belong
-  on the live *apply* path (Phase 15), never here.
+  on the live *apply* path (Phase 16), never here.
 - [`conformance_harness_doctrine.md §4`](../documents/engineering/conformance_harness_doctrine.md) — the spine
   (§4), *decode → validate → render → plan → dry-run → fake apply*: this phase implements **step 5, the fake
   apply** — the binary runs the plan against fake tools and the recorded commands and applied bytes are asserted
@@ -96,8 +107,13 @@ path over the `[Step]`/effect data), a `boundary-spec` test-suite stanza in `amo
 harness executes); Phase 5's real `amoebius` cabal package + `dsl-spec` skeleton; Phase 1's recorded
 `typed-process` pin under GHC 9.12.4.
 **Independent Validation**: `cabal build` and `cabal test boundary-spec` (zero tests) succeed on the pinned
-toolchain; a source gate confirms `Exec/Tool.hs` is the **sole** subprocess-invocation site — no other
-`System.Process`/`createProcess`/`readProcess` call exists outside the seam.
+toolchain; a source gate confirms `Exec/Tool.hs` is the **sole** subprocess-invocation site. The gate's scope is
+all of `src/`; it is red if any subprocess-spawning primitive appears outside `Exec/Tool.hs` — the enumerated
+token set (the one interpretation, closing the "sole site" vs. literal-token divergence) is: `System.Process`
+(`createProcess`/`readProcess`/`callProcess`/`spawnProcess`/`readCreateProcess`/`callCommand`), `typed-process`
+(`runProcess`/`readProcess`/`startProcess`/`withProcessWait`), `System.Posix.Process`
+(`executeFile`/`forkProcess`/`createSession`), and any raw FFI `c_exec*`/`system` import. The gate is red if the
+enumerated set is empty (no primitive was searched for), guarding against a vacuous scope.
 **Docs to update**: `DEVELOPMENT_PLAN/system_components.md` (register the exec seam + `boundary-spec` suite),
 this document.
 
@@ -157,15 +173,30 @@ The whole sprint (📋 Planned).
 ## Sprint 11.3: The boundary battery — exact commands + applied bytes + no-`PATH` — the gate 📋
 
 **Status**: Planned
-**Implementation**: `test/boundary/BoundarySpec.hs`; the expected argv lists and applied-manifest bytes reuse
-the Phase-10 `--dry-run` plan goldens and the Phase-9 `render` goldens — target paths, not yet built.
+**Implementation**: `test/boundary/BoundarySpec.hs`; the applied-manifest bytes reuse the Phase-9 `render`
+goldens; the **expected-argv transcripts are a separate committed hand-authored oracle** (`test/boundary/golden/argv/`),
+NOT derived from the Phase-10 plan golden by any executor-reachable function — target paths, not yet built.
 **Blocked by**: Sprint 11.2, Sprint 11.1; Phase 10 gate (the `[Step]` plan + `--dry-run` goldens); Phase 9 gate
 (the `render` manifest goldens — the applied bytes asserted here).
-**Independent Validation**: `cabal test boundary-spec` is green — the real binary runs the plan against the
-fakes; the recorded argv sequence equals the expected command list and the recorded applied-manifest bytes equal
-the Phase-9/10 goldens byte-for-byte; the binary is shown to invoke each fake by the exact absolute path handed
-to it and never to resolve a tool against `PATH`; the suite is red if any command, any byte, or the invocation
-path diverges.
+**Representative plan corpus (§M-7):** the exercised plan is named explicitly here — a committed `[Step]` fixture
+containing **at least one step routed to each tool amoebius actually invokes** (`kubectl` apply, `docker`
+build/push, `pulumi` up), so every real boundary surface is driven, not just `kubectl`; the `helm` fake is
+present only as a **negative control asserted to record zero invocations** (amoebius never shells to Helm).
+**Independent Validation**: `cabal test boundary-spec` is green — the real binary runs the representative corpus
+against the fakes; the recorded argv sequence equals the **committed hand-authored expected-argv transcript**
+(§M-3: authored at fixture-authoring time from the spec, never by the executor's own `Step→argv` fold or any
+function reachable from it — a source gate rejects any import of executor argv-building code into the oracle);
+the recorded applied-manifest bytes equal the Phase-9/10 goldens byte-for-byte; **each of the four tool
+transcripts is asserted non-empty** (§M-7 — a tool the binary never routed through leaves an empty transcript
+and the suite is red, foreclosing a `kubectl`-only executor). The no-`PATH` invariant is detected by the
+**hostile decoy-`PATH` arrangement** (the one interpretation, §M-5, resolving the detection-mechanism
+ambiguity): the run executes with the fakes' directory absent from `PATH` and a decoy directory containing
+same-named executables that write a distinct sabotage-marker placed first on `PATH`; the suite is red if any
+sabotage-marker is observed (proving `PATH` was consulted) or if any fake's transcript argv[0] differs from the
+handed absolute path. **Committed seeded mutants (§M-2), re-run every gate run, that MUST turn the suite red**:
+(a) an executor argv mutant — drop a flag / reorder two argv elements / swap a subcommand; (b) a byte mutant —
+one flipped byte in a `render` golden; (c) a `PATH`-resolution mutant — the seam resolving by bare tool name.
+The suite failing on each is a demonstrated negative control, not merely assertion logic.
 **Docs to update**: `DEVELOPMENT_PLAN/README.md` (flip the Phase-11 status when the gate passes),
 `documents/engineering/testing_doctrine.md`, `documents/engineering/conformance_harness_doctrine.md`.
 
@@ -178,60 +209,30 @@ step), [`§5`](../documents/engineering/conformance_harness_doctrine.md) (honest
 exact commands and applied bytes, and prove at the boundary that every tool was invoked by absolute path
 (the cross-cutting no-`PATH` invariant, [README.md](README.md)) — then emit a Register-2
 proven/tested/assumed ledger led by a Tier-2-UNVERIFIED banner (no cluster admitted anything; runtime
-enforcement is owned by [Phase 20](phase_20_live_dsl_singleton.md)).
+enforcement is owned by [Phase 22](phase_22_live_dsl_singleton.md)).
 
 ### Deliverables
-- `test/boundary/BoundarySpec.hs` asserting: the recorded argv stream equals the expected command list; the
-  applied-manifest bytes equal the Phase-9/10 goldens byte-for-byte (the same rendered value the `--dry-run`
-  previews, per [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md));
-  and each fake was invoked by its exact absolute path with no `PATH` fallback.
+- The committed **representative plan corpus** — a `[Step]` fixture with at least one step per tool — and the
+  committed **hand-authored expected-argv transcripts** (`test/boundary/golden/argv/`, Phase-0-pinned per §M-1,
+  authored independently of the executor per §M-3).
+- The committed **seeded mutants** named in the Gate (argv mutant, byte mutant, `PATH`-resolution mutant) with a
+  harness that re-runs each and asserts `boundary-spec` red (§M-2).
+- `test/boundary/BoundarySpec.hs` asserting: the recorded argv stream equals the committed hand-authored
+  expected-argv transcript; the applied-manifest bytes equal the Phase-9/10 goldens byte-for-byte (the same
+  rendered value the `--dry-run` previews, per
+  [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md)); each of the
+  four tool transcripts is non-empty; and each fake was invoked by its exact absolute path under the hostile
+  decoy-`PATH` arrangement with no decoy sabotage-marker observed.
 - A Register-2 ledger led by a Tier-2-UNVERIFIED banner: the binary emits the exact commands and applied bytes,
   but no runtime-enforcement claim is made — a skipped-but-applicable Runtime move stays UNVERIFIED, never green.
 
 ### Validation
-1. `cabal test boundary-spec` is green — commands and applied bytes match the goldens exactly, invocation is by
-   absolute path, and the suite is red on any command/byte/path divergence.
-
-### Remaining Work
-The whole sprint (📋 Planned).
-
-## Sprint 11.4: The `io-classes` seams + the modeled deterministic-simulation environment (Register 2.5) 📋
-
-**Status**: Planned
-**Implementation**: `src/Amoebius/Sim/Env.hs` (the typed effect interface — publish/consume, put/get-blob,
-apply-object, write-DNS, vault-op, now/delay — polymorphic over an `io-classes` monad `m`),
-`src/Amoebius/Sim/Fakes/{Pulsar,MinIO,ApiServer,Route53,Vault,Clock}.hs` (the in-`IOSim` modeled substrates with
-a typed fault model), and a `sim-spec` test-suite stanza — target paths, not yet built.
-**Blocked by**: Sprint 11.1 (the single IO seam this generalizes into a typed effect interface); Phase 1's
-recorded `io-sim`/`io-classes` pin under GHC 9.12.4.
-**Independent Validation**: a toy reconcile loop written against the `Env` interface runs under both `m = IO`
-(no-op real clients) and `m = IOSim s` (the modeled substrates); an `IOSimPOR` run injects a
-partition/redelivery schedule and the discovered interleaving is **deterministically replayable** (the same
-seed reproduces the same trace byte-for-byte); a source gate confirms concurrency-touching code is polymorphic
-in `m` (no bare `IO`, no `forkIO`).
-**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (Phase-11 status backlink),
-`documents/engineering/testing_doctrine.md` (the Register-2.5 substrate), `DEVELOPMENT_PLAN/system_components.md`.
-
-### Objective
-Adopt [`deterministic_simulation_doctrine.md §2/§3`](../documents/engineering/deterministic_simulation_doctrine.md#2-the-io-classes-environment-abstraction--build-it-pure-lift-it-whole):
-build the `io-classes` effect interface and the modeled, fault-injectable environment so that the *real*
-daemon/reconciler code — written once, polymorphic over `m` — runs as the production daemon (`m = IO`) and as a
-deterministic model under test (`m = IOSim s`) from one source, per the "build it pure; lift it whole" ladder
-([`chaos_failover_doctrine.md §10`](../documents/engineering/chaos_failover_doctrine.md#10-simulate--the-pure-program-lifted-io-sim)).
-
-### Deliverables
-- The typed `Env m` effect interface and its two interpreters (real clients under `IO`; the modeled substrates
-  under `IOSim s`), reusing the `MonadTime`/`MonadTimer` clock and the seed seams the determinism kernel
-  ([phase_24](phase_24_determinism_kernel.md)) also uses — one determinism substrate, two uses.
-- The modeled Pulsar/MinIO/apiserver/route53/Vault/clock, each with the typed fault model (delay, reorder,
-  duplicate, partition, crash) named in
-  [`deterministic_simulation_doctrine.md §3`](../documents/engineering/deterministic_simulation_doctrine.md#3-the-simulated-environment-and-its-fault-model).
-- A demo `IOSimPOR` run of a toy reconcile loop showing a partition/redelivery schedule is deterministically
-  replayable, wired as the `sim-spec` skeleton the live-band phases extend.
-
-### Validation
-1. The toy loop runs under both interpreters; the `IOSimPOR` partition/redelivery run replays identically under
-   the same seed; the `m`-polymorphism source gate is green.
+1. `cabal test boundary-spec` is green — commands match the committed hand-authored argv transcript, applied
+   bytes match the Phase-9/10 goldens exactly, all four tool transcripts are non-empty, and invocation is by
+   absolute path under the hostile decoy-`PATH` arrangement.
+2. Demonstrated negative controls (§M-2): each committed seeded mutant — argv mutant, byte mutant,
+   `PATH`-resolution mutant — is re-run and turns `boundary-spec` red. A green run against any mutant fails the
+   gate.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -261,12 +262,12 @@ The whole sprint (📋 Planned).
   here), §4 the per-run proven/tested/assumed ledger
 - [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — §2 the registers for
   pre-cluster validation, §3 the load-bearing invariant, §4 the spine (fake-apply + simulate steps), §5 the honesty limit
-- [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — the Register-2.5 io-classes environment substrate built in Sprint 11.4 and extended by the live-band phases
+- [phase_12](phase_12_deterministic_sim_substrate.md) — the deterministic-simulation substrate (the `io-classes` environment + the modeled fault-injectable Pulsar/MinIO/apiserver/route53/Vault/clock) that this boundary harness unblocks and that the live-band phases extend
 - [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — why the applied
   bytes equal the `--dry-run` bytes and are never committed
 - [phase_09](phase_09_render_manifest_goldens.md) — the `render` manifest goldens = the applied bytes asserted here
 - [phase_10](phase_10_chain_kernel_dryrun.md) — the `chain`/`Step` kernel + `--dry-run` plan this harness executes
-- [phase_12](phase_12_spa_composition_representational.md) — the companion Register-1/2 phase (the demo SPA run
+- [phase_13](phase_13_spa_composition_representational.md) — the companion Register-1/2 phase (the demo SPA run
   locally against a faked backend)
-- [phase_15](phase_15_renderer_reconciler.md) — the live SSA reconciler that replaces the fakes with real tools
-- [phase_20](phase_20_live_dsl_singleton.md) — the Tier-2 runtime-enforcement half this register leaves UNVERIFIED
+- [phase_16](phase_16_renderer_reconciler.md) — the live SSA reconciler that replaces the fakes with real tools
+- [phase_22](phase_22_live_dsl_singleton.md) — the Tier-2 runtime-enforcement half this register leaves UNVERIFIED

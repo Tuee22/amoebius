@@ -1,8 +1,8 @@
-# Phase 12: SPA composition (representational) + demo-SPA local
+# Phase 13: SPA composition (representational) + demo-SPA local
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_32_spa_live_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/tenancy_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/tenancy_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Prove — in-process, before any cluster exists — that a multi-service app spec composes with an
@@ -22,7 +22,7 @@ against a faked backend (Register 2). Where a shape below is already exercised i
 `infernix` and `jitML` `web/` PureScript demo SPAs, their `purescript-bridge` contract generation, and the
 prodbox pure/no-process suite — that is **sibling evidence, not an amoebius result**. This is the
 **representational** half of SPA composition; the **live** SPA deploy behind Keycloak/Envoy on `linux-cpu`
-stays [Phase 32](phase_32_spa_live_deploy.md).
+stays [Phase 37](phase_37_spa_live_deploy.md).
 
 ## Phase Summary
 
@@ -36,24 +36,67 @@ Gate 1 + Gate 2, and the lifted PureScript demo SPA whose contract types are **r
 Haskell ADTs via `purescript-bridge`** (a build artifact, never committed) and driven end to end against a
 faked backend under Playwright. What is *not* here: the live deploy onto a cluster, the Keycloak/Envoy edge,
 the typed reconciler applying manifests, and any inference on a real substrate — all of that is
-[Phase 32](phase_32_spa_live_deploy.md). This phase front-loads exactly the parts of SPA composition that a
+[Phase 37](phase_37_spa_live_deploy.md). This phase front-loads exactly the parts of SPA composition that a
 pure decode and a locally-served browser run can settle.
 
 **Substrate:** none — no host, no cluster; the gate is an in-process `cabal test` composition battery
 (Register 1) plus a locally-served demo SPA driven under Playwright against a faked backend (Register 2),
 analogous to the Phase-11 boundary fake-tool harness. The inference/training substrate is structurally absent
-from the SPA surface — it is a deployment rule bound only at [Phase 32](phase_32_spa_live_deploy.md).
+from the SPA surface — it is a deployment rule bound only at [Phase 37](phase_37_spa_live_deploy.md).
 
 **Register:** 1/2 — the single deliberate two-register gate: Register 1 (the composition property decodes) + Register 2 (the PureScript demo SPA against a faked backend), both in-process, no cluster (§K).
 
-**Gate:** two in-process registers pass together — **(Register 1)** a multi-service app-spec fixture composes
-with an infernix/jitML ML-workflow demo fragment into one well-typed Dhall value that decodes through Gate 1
+**Gate:** two in-process registers pass together over the **representative set pinned in [§N](#n-representative-set-oracle-pins-and-seeded-mutants)** — **(Register 1)**
+each of the two committed positive app-spec fixtures (`spa_chatbot.dhall` composing infernix,
+`spa_rl_gaming.dhall` composing jitML) composes into one well-typed Dhall value that decodes through Gate 1
 (`dhall type`) + Gate 2 (the total decoder), `prop_spaCompositionDecodes` holds over generated app+fragment
-pairs, and every ill-composed SPA fixture fails `dhall type` or decode-rejects; **(Register 2)** the lifted
-PureScript demo SPA, its contract types regenerated from the composed Haskell ADTs via `purescript-bridge`
-(never committed), runs locally against a faked backend and is driven end to end under Playwright — all on no
-substrate, with the run emitting a proven/tested/assumed ledger that marks the live SPA deploy
-([Phase 32](phase_32_spa_live_deploy.md)) UNVERIFIED.
+pairs **at the [§N](#n-representative-set-oracle-pins-and-seeded-mutants) coverage thresholds**, and every committed `illegal_spa_compose_*` fixture from the [§N](#n-representative-set-oracle-pins-and-seeded-mutants) catalog
+fails at its **Phase-0-pinned tagged reason** (its recorded `dhall type` error locus or `DecodeError` tag), not
+merely "fails"; **(Register 2)** both lifted PureScript demo SPAs (the infernix chat shell *and* the jitML
+RL-gaming shell), their contract types regenerated from the composed Haskell ADTs via `purescript-bridge`
+(never committed), run locally against a faked backend whose every recorded request/response is decoded/encoded
+through the composed ADTs' own serialization instances, and are each driven end to end under Playwright — all on
+no substrate, with the run emitting a proven/tested/assumed ledger that marks the live SPA deploy
+([Phase 37](phase_37_spa_live_deploy.md)) UNVERIFIED. The gate is red unless the committed seeded mutants named
+in [§N](#n-representative-set-oracle-pins-and-seeded-mutants) (one per register) go red: a composed-ADT field-rename mutant must break the Register-1 round-trip
+battery, the golden, and the Register-2 `spago` build; and a seeded ill-composing generator mutant must make
+`prop_spaCompositionDecodes` fail. All goldens, positive/negative fixtures, expected-error tags, and mutants are
+authored and committed in Phase 0 before the implementation exists; a golden regenerated from the generator is
+not a test.
+
+## N. Representative set, oracle pins, and seeded mutants
+
+This section fixes the one shared interpretation of the gate's "representative set", coverage bounds, committed
+oracles, and mutants, so two engineers implement the same gate (§M clauses 1–8). All artifacts named here are
+authored and committed in Phase 0, before `Amoebius.Spa.*` exists.
+
+- **Representative positive set (Register 1):** exactly two committed composing fixtures —
+  `dhall/examples/spa_chatbot.dhall` (a multi-service surface using `ObjectStore` + `Sql` + `MessageBus` +
+  `Identity` + `Edge`, composing the **infernix** demo fragment) and `dhall/examples/spa_rl_gaming.dhall`
+  (composing the **jitML** demo fragment) — plus their intermediate `spa_compose_*` composition fixtures.
+- **Representative negative catalog (Register 1):** at least six committed `illegal_spa_compose_*.dhall`
+  fixtures, one per foreclosed dimension, each paired with a positive differing only in that dimension: (a) a
+  product literal (`minio`) smuggled onto the app surface; (b) a deployment dial (`replicas`) added; (c) a
+  substrate name (`linux-cpu`) named; (d) a workflow fragment whose capability needs do not compose with the
+  surface; (e) a `SecretRef` to an undeclared secret; (f) a demo fragment nested under the wrong capability arm.
+  Each fixture's expected failure — its `dhall type` error locus or Gate-2 `DecodeError` tag — is recorded in a
+  committed `spa_negatives.expected` table in Phase 0; the gate asserts the *tag*, not merely non-zero exit.
+- **Generator coverage thresholds (Register 1, §M-4):** `prop_spaCompositionDecodes` carries QuickCheck `cover`
+  obligations that fail the run if unmet: each of the five capability arms
+  (`ObjectStore`/`Sql`/`MessageBus`/`Identity`/`Edge`) appears in ≥ 20% of generated surfaces, both the infernix
+  and jitML fragment shapes are generated (each ≥ 20%), and multi-service surfaces (≥ 2 distinct capability
+  arms) constitute ≥ 50% of cases.
+- **Independent round-trip oracle (Registers 1→2, §M-3):** a committed cross-language battery encodes
+  QuickCheck-generated composed-ADT values with the Haskell serialization instances and decodes them via the
+  generated PureScript types under `node`, red on any composed app/workflow ADT type absent from the emitted
+  module — an oracle independent of the byte-for-byte golden and of the SUT's own emitter.
+- **Committed seeded mutants (§M-2), each committed and re-run, drawn from the operator set:**
+  - **M-comp** (union-arm addition): a generator variant emitting a workflow fragment whose capability need is
+    unsatisfiable on the surface — `prop_spaCompositionDecodes` MUST go red.
+  - **M-field** (field rename on a composed ADT): renaming one composed-ADT field MUST break the Register-1
+    round-trip battery, change the Register-1 golden, and break the Register-2 `spago` build of both shells.
+  - **M-neg** (invariant-clause delete): removing the product-literal rejection MUST let
+    `illegal_spa_compose_minio.dhall` decode and turn the negative suite red.
 
 ## Doctrine adopted
 
@@ -82,7 +125,7 @@ substrate, with the run emitting a proven/tested/assumed ledger that marks the l
 - [`testing_doctrine.md §2 — Three registers`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing):
   this phase's gate reaches Registers 1 and 2 and emits a per-run proven/tested/assumed ledger whose acceptance
   token reads *spec-composition proven* / *tested (local browser)*, never *runtime proven*, with the live
-  deploy marked UNVERIFIED (owned by [Phase 32](phase_32_spa_live_deploy.md)).
+  deploy marked UNVERIFIED (owned by [Phase 37](phase_37_spa_live_deploy.md)).
 - [`dsl_doctrine.md §5 — the illegal-state-unrepresentable contract`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
   the two typed gates — Gate 1 (Dhall typechecker) + Gate 2 (in-process `Dhall.inputFile auto` decoder) — that
   the composed SPA value passes; `prop_spaCompositionDecodes` establishes that composition preserves
@@ -139,9 +182,17 @@ built)
 **Blocked by**: Sprint 12.1; Phase 5 (the total Gate-2 `Dhall.inputFile auto` decoder the composed value
 decodes through); Phase 6 (the illegal-state corpus + QuickCheck harness the `prop_*` properties live in)
 **Independent Validation**: `prop_spaCompositionDecodes` is green over generated app-spec + demo-fragment
-pairs; each positive `dhall/examples/spa_compose_*.dhall` decodes through Gate 1 + Gate 2 with the library
-`.dhall` nested inside the SPA spec; each ill-composed `illegal_spa_compose_*.dhall` fails at its tagged gate;
-a grep of either SPA surface for `cuda` / `metal` / `linux-cpu` returns nothing.
+pairs **at the [§N](#n-representative-set-oracle-pins-and-seeded-mutants) generator-coverage thresholds** (the QuickCheck `cover` obligations — each capability arm
+≥ 20%, both infernix and jitML fragment shapes present, multi-service surfaces ≥ 50% — fail the run if unmet, so
+a near-constant generator re-decoding the worked example is rejected); each positive `dhall/examples/spa_compose_*.dhall`
+decodes through Gate 1 + Gate 2 with the library `.dhall` nested inside the SPA spec; each of the **six [§N](#n-representative-set-oracle-pins-and-seeded-mutants)-catalog**
+ill-composed `illegal_spa_compose_*.dhall` fixtures fails at the **exact `dhall type` error locus or Gate-2
+`DecodeError` tag recorded for it in the Phase-0-committed `spa_negatives.expected` table** (asserting *why* it
+fails, each paired with a positive differing only in the foreclosed dimension), not merely a non-zero exit; the
+committed seeded mutant **M-comp** (a generator variant emitting an unsatisfiable-capability fragment) MUST turn
+`prop_spaCompositionDecodes` red and the committed **M-neg** (product-literal rejection deleted) MUST let
+`illegal_spa_compose_minio.dhall` decode and turn the negative suite red — a green run under either mutant fails
+the gate; a grep of either SPA surface for `cuda` / `metal` / `linux-cpu` returns nothing.
 **Docs to update**: `documents/engineering/app_vs_deployment_doctrine.md`,
 `documents/engineering/lift_and_compose_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
@@ -158,16 +209,25 @@ one decoding value.
   application logic).
 - The worked `dhall/examples/spa_chatbot.dhall` composing the infernix demo fragment and
   `dhall/examples/spa_rl_gaming.dhall` composing the jitML demo fragment — each naming *that* it uses the
-  library, neither naming a substrate; plus `illegal_spa_compose_*` negatives (a fragment whose capability
-  needs do not compose; a product literal smuggled onto the app surface).
+  library, neither naming a substrate; plus the **six [§N](#n-representative-set-oracle-pins-and-seeded-mutants)-catalog** `illegal_spa_compose_*` negatives (product
+  literal; `replicas` dial; substrate name; non-composing capability need; undeclared `SecretRef`; wrong-arm
+  nesting), and the committed Phase-0 `spa_negatives.expected` table pinning each negative's expected `dhall type`
+  error locus / Gate-2 `DecodeError` tag.
 - A `prop_spaCompositionDecodes` QuickCheck property (an app spec + an ML-workflow demo fragment always
-  compose to a value that decodes through Gate 1 + Gate 2), labelled **TESTED (sampled)**.
+  compose to a value that decodes through Gate 1 + Gate 2), labelled **TESTED (sampled)**, carrying the [§N](#n-representative-set-oracle-pins-and-seeded-mutants)
+  `cover`/`classify` obligations (a run failing those thresholds fails the gate).
+- The committed seeded mutants **M-comp** (unsatisfiable-capability generator variant) and **M-neg**
+  (product-literal rejection deleted), each committed and re-run, that the suite MUST turn red.
 
 ### Validation
-1. The positive `spa_compose_*` fixtures compose and decode (Gate 1 + Gate 2 green); each `illegal_spa_compose_*`
-   fixture fails at its tagged gate; the suite is red if any ill-composed SPA decodes.
-2. `prop_spaCompositionDecodes` is green — the representational composition is proven at the spec/code layer,
-   with the live deploy left to [Phase 32](phase_32_spa_live_deploy.md).
+1. The positive `spa_compose_*` fixtures compose and decode (Gate 1 + Gate 2 green); each of the six [§N](#n-representative-set-oracle-pins-and-seeded-mutants)-catalog
+   `illegal_spa_compose_*` fixtures fails at the **exact error locus / `DecodeError` tag recorded for it in the
+   Phase-0 `spa_negatives.expected` table** (not merely a non-zero exit), each paired with a positive differing
+   only in the foreclosed dimension; the suite is red if any ill-composed SPA decodes.
+2. `prop_spaCompositionDecodes` is green at the [§N](#n-representative-set-oracle-pins-and-seeded-mutants) `cover` thresholds (a run below them fails), and both committed
+   mutants go red — **M-comp** turns the property red and **M-neg** turns the negative suite red; a green run
+   under either mutant fails the gate. The representational composition is proven at the spec/code layer, with the
+   live deploy left to [Phase 37](phase_37_spa_live_deploy.md).
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -181,8 +241,16 @@ not yet built). The emitted `*.purs` contract is a **generated artifact and is n
 **Blocked by**: Sprint 12.2 (the composed Haskell app/workflow ADTs the contract reflects)
 **Independent Validation**: `Amoebius.Spa.Contract` emits the PureScript contract types deterministically from
 the composed ADTs; a Register-1 golden pins the emitted contract byte-for-byte; a repository check finds **no**
-committed `*.purs` contract; the `spago` build of the lifted demo SPA type-checks against the freshly-generated
-contract.
+committed `*.purs` contract; the `spago` build of each lifted demo SPA type-checks against the freshly-generated
+contract, where **"against" means the shell's exercised modules `import` the generated contract module and
+reference its types** (verified by a check that removing the generated module from the build makes `spago` fail —
+mere presence in the source tree is insufficient). Because a golden regenerated from the emitter passes for any
+output, an **independent round-trip battery** ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)) — QuickCheck-generated composed-ADT values encoded with the
+Haskell serialization instances and decoded via the generated PureScript types under `node` — is red on any
+composed app/workflow ADT type absent from the emitted module; and the committed seeded mutant **M-field**
+(renaming one composed-ADT field) MUST break the round-trip battery, change the byte-for-byte golden, AND break
+the `spago` build of both shells — a green build under M-field fails the gate, proving the shells consume the
+generated types.
 **Docs to update**: `documents/engineering/generated_artifacts_doctrine.md`,
 `documents/engineering/lift_and_compose_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`
 
@@ -196,15 +264,23 @@ from the composed types.
 ### Deliverables
 - An `Amoebius.Spa.Contract` renderer that emits the PureScript contract types from the composed app/workflow
   ADTs, stamped generated ("do not edit by hand; edit the source and re-emit").
-- The lifted infernix/jitML PureScript demo-SPA shells under `web/`, building with `spago` against the
-  generated contract rather than a hand-maintained one.
+- The lifted infernix/jitML PureScript demo-SPA shells under `web/`, whose exercised modules `import` and
+  reference the generated contract's types (not a hand-maintained one), building with `spago`.
 - A Register-1 golden pinning the emitted `*.purs` byte-for-byte as a fixture of the renderer, with **no**
   generated contract committed to the repository.
+- The **independent cross-language round-trip battery** ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)) that encodes QuickCheck-generated composed-ADT
+  values with the Haskell instances and decodes them via the generated PureScript types under `node`, covering
+  every composed app/workflow ADT type — an oracle independent of the golden and the emitter.
+- The committed seeded mutant **M-field** (Phase-0), whose field rename MUST break the golden, the round-trip
+  battery, and the `spago` build of both shells.
 
 ### Validation
-1. The generator emits the contract deterministically; the golden matches byte-for-byte; the repository holds
-   no committed `*.purs` contract.
-2. The `spago` build of the demo SPA type-checks against the freshly-generated contract.
+1. The generator emits the contract deterministically; the golden (Phase-0-authored) matches byte-for-byte; the
+   repository holds no committed `*.purs` contract; the independent round-trip battery ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)) is green over every
+   composed ADT type and red on any absent type.
+2. The `spago` build of **each** demo SPA type-checks against the freshly-generated contract via `import`ing and
+   referencing its types (removing the generated module fails the build); the committed mutant **M-field** MUST
+   break the golden, the round-trip battery, and both `spago` builds — a green result under M-field fails the gate.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -216,11 +292,20 @@ The whole sprint (📋 Planned).
 demo SPA served locally) (target paths; not yet built)
 **Blocked by**: Sprint 12.2; Sprint 12.3; Phase 11 (the boundary fake-tool / faked-backend harness this reuses
 for the local backend)
-**Independent Validation**: the lifted PureScript demo SPA is served locally, wired to a **faked backend** (a
-fake inference/API endpoint that records its calls), and driven end to end under **Playwright** — a chat turn
-renders and the faked inference round-trip is asserted, with no cluster and no live infrastructure; the
-composite gate ledger records `prop_spaCompositionDecodes` (Register 1) and the Playwright run (Register 2) as
-green and the live SPA deploy ([Phase 32](phase_32_spa_live_deploy.md)) as UNVERIFIED.
+**Independent Validation**: **both** lifted PureScript demo SPAs are driven end to end under **Playwright** —
+the infernix chat shell (a chat turn) *and* the jitML RL-gaming shell (one RL-gaming interaction turn); "end to
+end" is fixed as: the SPA loads, issues a real request over the wire to the local faked backend, and renders the
+response the backend returned (not a hardcoded DOM update). The faked backend (reusing the Phase-11 fake-tool
+seam) **decodes every recorded request and encodes every response through the composed Haskell ADTs' own
+serialization instances — the same source the Sprint-12.3 contract generator consumes — and is red on any
+payload that does not conform** (this ties the browser wire traffic to the composed ADTs, foreclosing an SPA and
+fake that agree only with each other). Call recording is read from an **OS-boundary observer** (the faked
+backend's argv/HTTP-access log at the process boundary), never a self-emitted compliance trace from the SPA. The
+committed seeded mutant **M-field** ([§N](#n-representative-set-oracle-pins-and-seeded-mutants) — a composed-ADT field rename, regenerating the contract) MUST turn the
+Playwright run red (the wire payload no longer conforms) or break the `spago` build, proving the exercised
+browser path consumes the generated types. No cluster and no live infrastructure. The composite gate ledger
+records `prop_spaCompositionDecodes` (Register 1) and both Playwright runs (Register 2) as green and the live SPA
+deploy ([Phase 37](phase_37_spa_live_deploy.md)) as UNVERIFIED.
 **Docs to update**: `documents/engineering/conformance_harness_doctrine.md`,
 `documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/README.md`
 
@@ -231,17 +316,26 @@ serve the lifted demo SPA locally against a faked backend, drive it end to end u
 emit the composite proven/tested/assumed ledger for both halves of the gate — never a runtime claim.
 
 ### Deliverables
-- A `test/spa/DemoSpaLocalSpec.hs` that serves the demo SPA locally, stands up a faked backend recording its
-  argv/calls (reusing the Phase-11 fake-tool seam), and drives the SPA under Playwright — asserting a chat turn
-  renders and the faked inference call round-trips.
+- A `test/spa/DemoSpaLocalSpec.hs` that serves **both** demo SPAs locally, stands up a faked backend that
+  records its calls at the OS boundary (argv/HTTP-access log, reusing the Phase-11 fake-tool seam) **and
+  decodes/encodes every request/response through the composed Haskell ADTs' serialization instances, red on any
+  non-conforming payload**, and drives each SPA under Playwright — asserting for the infernix shell that a chat
+  turn renders the backend-returned response, and for the jitML shell that one RL-gaming interaction turn renders
+  its backend-returned response, each backend call round-tripping through the composed ADTs.
+- The committed seeded mutant **M-field** ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)) wired into this gate: with the composed-ADT field renamed and the
+  contract regenerated, the Playwright run MUST go red (payload non-conformance) or the `spago` build MUST fail —
+  a green run under M-field fails the gate.
 - A composite gate ledger recording: the SPA composition + `prop_spaCompositionDecodes` as **proven for the
   spec composition** (Register 1), the local browser run as **tested (local, faked backend)** (Register 2), and
   the live SPA deploy, the Keycloak/Envoy edge, and any real inference as **explicitly UNVERIFIED** (owned by
-  [Phase 32](phase_32_spa_live_deploy.md)).
+  [Phase 37](phase_37_spa_live_deploy.md)).
 
 ### Validation
-1. The demo SPA is driven end to end under Playwright against the faked backend; the asserted chat turn renders
-   and the faked inference round-trip is recorded — no cluster, no live infra.
+1. **Both** demo SPAs (infernix chat, jitML RL-gaming) are driven end to end under Playwright against the faked
+   backend; each asserted turn renders the **backend-returned** response (loaded over the wire, not a hardcoded
+   DOM update); every recorded request/response decodes/encodes through the composed ADTs' serialization
+   instances (red on non-conformance); the calls are read from the OS-boundary observer log — no cluster, no live
+   infra. The committed mutant **M-field** MUST turn this run red (or break the `spago` build).
 2. The composite ledger is emitted, marking Registers 1–2 green and the live deploy UNVERIFIED; it is
    structurally insufficient to advance any production `PromotionGate`.
 
@@ -292,4 +386,4 @@ The whole sprint (📋 Planned).
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — §2 the three registers and the per-run ledger
 - [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — §5 the two typed gates the composed SPA decodes through
 - [phase_11](phase_11_boundary_fake_tool_harness.md) — the boundary fake-tool / faked-backend harness this phase reuses
-- [phase_32](phase_32_spa_live_deploy.md) — the live SPA deploy; its representational composition is proven here
+- [phase_37](phase_37_spa_live_deploy.md) — the live SPA deploy; its representational composition is proven here

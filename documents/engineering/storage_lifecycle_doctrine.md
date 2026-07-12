@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_16_retained_storage.md, DEVELOPMENT_PLAN/phase_17_vault_pki.md, DEVELOPMENT_PLAN/phase_18_platform_services.md, DEVELOPMENT_PLAN/phase_19_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_31_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_17_retained_storage.md, DEVELOPMENT_PLAN/phase_18_vault_pki.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_21_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define amoebius's durable-storage contract — the single `no-provisioner` retained PV model,
@@ -54,8 +54,12 @@ Every amoebius cluster has exactly one StorageClass, and it is inert:
 - **`provisioner: kubernetes.io/no-provisioner`** — there is no controller standing by to mint a volume
   when a claim appears. A PVC binds only to a PV that **already exists** because amoebius placed it there.
 - **`reclaimPolicy: Retain`** — when a PVC is deleted (e.g. by a cluster teardown), its PV is **not**
-  deleted and its backing bytes are **not** wiped. The PV drops to `Released` and waits to be re-bound.
-  Retain is the mechanical heart of durability; nothing else in this doc works without it.
+  deleted and its backing bytes are **not** wiped. Kubernetes moves the PV to `Released` while retaining
+  the `claimRef` of the now-deleted PVC, including that claim's `uid`. A `Released` PV carrying a stale
+  `claimRef.uid` does **not** auto-rebind: the controller will not bind a freshly created PVC to it while
+  the old `uid` is present. Retain therefore preserves the *bytes*; it does not by itself deliver rebind.
+  Rebind is reconstructed by amoebius re-creating a fresh, `uid`-less pre-bound PV ([§6](#6-the-lossless-teardown-guarantee-deterministic-rebind)) that points at those
+  preserved bytes. Retain is the mechanical heart of durability; nothing else in this doc works without it.
 - **`volumeBindingMode: WaitForFirstConsumer`** — binding is deferred until the consuming Pod is scheduled,
   so a host-backed PV binds against the node the Pod actually landed on, not a node chosen blind.
 - **Every other StorageClass is removed**, and any default annotation on a competing class is stripped, so
@@ -104,11 +108,13 @@ Rebinding can only be deterministic if both ends of the bind are computed from s
 identity, never assigned by a race. So amoebius names every PV from `(namespace, statefulset, ordinal)` and
 pins each PV to its claim *before the claim exists*.
 
-- **Naming convention**: every PV is named on the deterministic scheme
+- **Naming convention**: every PV is named on the deterministic scheme whose **logical identity** is
   **`<namespace>/<statefulset>/pv_<integer>`**, where the integer is the StatefulSet ordinal the volume
-  serves. The name is a pure function of identity; it carries no node id, no cluster id, no timestamp, and
-  no allocation counter, so the *same* StatefulSet ordinal computes the *same* PV name on every cluster and
-  every rebuild.
+  serves. That triple is the logical key, not the object's `metadata.name`: a PV `metadata.name` is an
+  RFC-1123 subdomain and admits neither `/` nor `_`, so the logical key is rendered to a legal slug of the
+  form **`<namespace>-<statefulset>-pv-<n>`**. The slug is a pure function of identity; it carries no node
+  id, no cluster id, no timestamp, and no allocation counter, so the *same* StatefulSet ordinal computes the
+  *same* PV name on every cluster and every rebuild.
 - **Explicit `claimRef`**. Each PV carries a `claimRef` naming the exact `(namespace, PVC-name)` it serves, so the
   pairing is fixed by amoebius rather than discovered by whichever unbound claim the scheduler happens to
   match first. A `volumeClaimTemplate` claim and its `claimRef`-pinned PV are two halves of one identity.
@@ -120,7 +126,7 @@ pins each PV to its claim *before the claim exists*.
 ```mermaid
 flowchart TD
   sts[StatefulSet volumeClaimTemplate] -->|renders one PVC per ordinal| pvc[PVC data-statefulset-ordinal]
-  ident[Identity: namespace, statefulset, ordinal] -->|pure function| pvname[PV name namespace/statefulset/pv_integer]
+  ident[Identity: namespace, statefulset, ordinal] -->|pure function| pvname[Logical key namespace/statefulset/pv_integer rendered to legal name namespace-statefulset-pv-n]
   ident -->|pure function| claimref[claimRef: namespace, PVC name]
   pvname -->|carries| pv[Retained PV]
   claimref -->|carries| pv
@@ -194,17 +200,25 @@ StorageBacking = HostDisk Capacity | Ebs Capacity | CloudQuota Quota
 ## 6. The lossless-teardown guarantee: deterministic rebind
 
 Because the PV name and `claimRef` are pure functions of identity ([§4](#4-deterministic-pv-naming-and-the-explicit-bind)), and because Retain
-keeps the volume alive after the claim is gone ([§2](#2-one-storage-class-and-it-provisions-nothing)), a destroyed-then-recreated cluster recomputes the
-*same* claims, which match the *same* still-living volumes. Nothing is restored from a backup; the original
-bytes were never released. That is the lossless-teardown guarantee: clusters can be torn down and spun
-back up ephemerally with zero data loss because of the no-provisioner PVC/PV policy, which guarantees
-identical rebinding.
+preserves the backing bytes after the claim is gone ([§2](#2-one-storage-class-and-it-provisions-nothing)), a destroyed-then-recreated cluster recomputes
+the *same* claims over the *same* preserved bytes. What a teardown preserves is the **backing store** — the
+EBS volume or the host path — not necessarily the PV API object. A `Retain` PV left `Released` in a
+surviving cluster keeps the deleted claim's `claimRef.uid` and will not rebind a freshly created PVC; and a
+`kind delete cluster` destroys etcd and every PV object outright, leaving only the backing bytes. Amoebius
+therefore reconstructs the bind by **re-creating a fresh PV object** whose `claimRef` names
+`(namespace, PVC-name)` but carries **no `uid` and no `resourceVersion`** — the deterministic, `uid`-less
+pre-bind — pointing at the preserved bytes; a recreated PVC then binds to that fresh PV. Nothing is restored
+from a backup; the original bytes were never released. That is the lossless-teardown guarantee: clusters can
+be torn down and spun back up ephemerally with zero data loss because of the no-provisioner PVC/PV policy,
+which guarantees identical rebinding by fresh-PV recreate, not by a lingering `Released` PV.
 
 ```mermaid
 flowchart TD
-  run1[Cluster running, PVC bound to PV] -->|cluster delete: claims released, Retain keeps PV| retained[PV Released, bytes intact, EBS/host path preserved]
-  retained -->|cluster recreate: same StatefulSet recomputes same PVC| pvc2[Identical PVC, same name and namespace]
-  pvc2 -->|claimRef and PV name match by identity| rebind[Re-bind to the same retained PV]
+  run1[Cluster running, PVC bound to PV] -->|cluster delete: Retain preserves backing bytes| retained[Backing store preserved: EBS volume or host path. PV object may be gone kind delete cluster or Released with stale claimRef.uid]
+  retained -->|cluster recreate: amoebius makes a fresh uid-less pre-bound PV over the preserved bytes| freshpv[Fresh PV, claimRef namespace and PVC name, no uid, no resourceVersion]
+  retained -->|same StatefulSet recomputes same PVC| pvc2[Identical PVC, same name and namespace]
+  freshpv -->|claimRef and PV name match by identity| rebind[Recreated PVC binds to the fresh PV]
+  pvc2 --> rebind
   rebind -->|same bytes, no restore| run2[Cluster running again on original data]
 ```
 
@@ -214,11 +228,14 @@ prodbox rebinding rules):
 1. The PVC name and namespace are unchanged across rebuild — guaranteed because both derive from the
    StatefulSet identity ([§3](#3-pvcs-are-born-only-from-statefulsets)), not from operator input.
 2. The PV name and `claimRef` are recomputed deterministically from `(namespace, statefulset, ordinal)` ([§4](#4-deterministic-pv-naming-and-the-explicit-bind)).
-3. The backing store is still present: the EBS volume was not deleted, or the host path still exists on its
+3. The pre-bound PV is re-created as a **fresh object with a `uid`-less `claimRef`** (no `uid`, no
+   `resourceVersion`), so the recreated PVC binds; a leftover `Released` PV carrying the old claim's stale
+   `claimRef.uid` does not auto-rebind and would block rather than deliver the bind.
+4. The backing store is still present: the EBS volume was not deleted, or the host path still exists on its
    node.
-4. A **host-backed** ordinal re-schedules to the **same node** its node-affinity-pinned PV lives on; a
+5. A **host-backed** ordinal re-schedules to the **same node** its node-affinity-pinned PV lives on; a
    provider/EBS ordinal may land on any node because the volume re-attaches ([§5.1](#51-storage-is-independent-of-the-node-lifecycle)).
-5. Any secret that must match the preserved data (e.g. a Patroni role password against a preserved
+6. Any secret that must match the preserved data (e.g. a Patroni role password against a preserved
    `pg_authid`) re-attaches to the same material — owned by [vault_pki_doctrine.md](./vault_pki_doctrine.md);
    a mismatch must surface as a loud failure, never a silent data reset.
 

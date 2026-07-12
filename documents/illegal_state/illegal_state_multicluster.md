@@ -58,10 +58,10 @@ single-cluster-by-arity non-goal in its own subsection), cross-referencing
 the consistency boundary). **Technique:** [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)
 (the relation/collection is over one cluster's `NonEmpty Node`; a second `Topology` has no place in the fold's
 arity). **Layer:** type-foreclosed uninhabitable-by-arity; runtime-checked residue lives only in the deferred geo-replication
-enaction (Phase 29).
+enaction (Phase 28).
 **Validation-locus:** `Gate-1-editor` (the `place` arity admits exactly one `Topology` — the "no arm" fold shape
 has no way to name a second cluster, rejected at authoring by `dhall type`); `live-effect` (the only residue is
-the deferred geo-replication enaction, Phase 29).
+the deferred geo-replication enaction, Phase 28).
 
 ### 3.35 A stretched host worker with no declared networking capability
 

@@ -102,9 +102,13 @@ unrepresentable, and the schedulability existence fold ([§3.5](#35-undeployable
 [`platform_services_doctrine.md` §9](../engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) (the derivation rule). **Technique:**
 [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (the node inventory is the single owner of what taints exist) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a `Toleration` handle exists only
 once its taint edge does). **Layer:** type-foreclosed uninhabitable.
-**Validation-locus:** `Gate-1-editor` (the `Toleration` handle exports no hand-author constructor, so a
-free-text toleration fails `dhall type` before any binary runs) + `rendered-output-golden` (the derived
-toleration must appear correctly in the emitted pod spec, exactly as a golden test checks the derived
+**Validation-locus:** `Gate-1-editor` (the Dhall workload record carries **no** hand-authorable toleration
+field at all — a toleration is not a spellable input but a projection from a declared node taint in the
+Haskell render layer, so a free-text toleration is unwritable at authoring) + `Gate-2-decoder` (the
+`Toleration` handle's constructor opacity is Haskell module-opacity, which Dhall cannot provide — Dhall has no
+opaque types ([`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)) — so the projection-only discipline's full teeth land
+at the GADT decoder) + `rendered-output-golden` (the derived toleration must appear correctly in the emitted
+pod spec, exactly as a golden test checks the derived
 NetworkPolicy, [§3.6](./illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other)).
 
 ### 3.27 A schedulable-in-aggregate but unplaceable workload (atomic-pod / GPU bin-packing)
@@ -120,8 +124,11 @@ generalization of [§3.5](#35-undeployable-pods-taints-tolerations--affinity): �
 matching affinity + tolerating taints exists*; this entry adds *with enough allocatable room, given everything
 else placed*. amoebius makes the cluster check a **placement**, not a sum: for a **fixed** node set the decode
 computes a concrete pod→node witness by bin-pack (`place`) and rejects `Left Unschedulable` if none exists; for
-an **elastic** (autoscaled / `Managed Eks`) set it checks a growth envelope — every pod fits the largest
-candidate instance and Σ-at-max-scale ≤ quota — that the autoscaler can always satisfy. The old aggregate-sum
+an **elastic** (autoscaled / `Managed Eks`) set it checks a **sound growth envelope over the declared instance
+shape** — every pod fits the largest candidate instance, and the worst-case *instance count* (not merely
+Σ-at-max-scale demand — atomic pods fragment, N pods each needing their own instance can exceed `Σ Demand`)
+stays ≤ quota — sound but **not** a completeness guarantee: it never admits a spec the autoscaler cannot grow
+to satisfy, though it may reject a packable one. The old aggregate-sum
 ([§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)) does not catch this;
 the placement does. **Owner:** [`resource_capacity_doctrine.md` §4.1](../engineering/resource_capacity_doctrine.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope)
 (the `place` witness/envelope; `Capacity` is *allocatable*, cpu/mem divisible; there is **no** per-pod `gpu` axis

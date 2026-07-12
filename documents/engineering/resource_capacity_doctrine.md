@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_25_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_32_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the amoebius capacity model — the `Capacity` / `Demand` / `Budget`
@@ -256,10 +256,20 @@ not a packing. `place` selects on the topology's budget shape ([§6](#6-growable
   1. **per-pod-fits-an-instance** — every pod `podFits` the *largest* instance type in the `ScalingPolicy`
      candidate set ([§6](#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)); a pod larger than any candidate is unplaceable at *any* scale →
      `Left Unschedulable`.
-  2. **aggregate-≤-quota** — the summed `Demand` at maximum scale ≤ the quota cap → else `Left Overcommit`.
-  If both hold, every pod fits *some* candidate instance and the total stays under quota, so the autoscaler can
-  always grow to place a pending pod. These two conditions are the *complete* schedulability story for the
-  elastic case, and the fold re-runs against the grown node set when the policy fires.
+  2. **worst-case-instance-count-≤-quota** — the quota bounds the *instances* the pods can force, **not** the
+     summed demand. Because pods are **atomic and cannot straddle instances**, `Σ Demand ≤ quota` is not
+     sufficient: N pods that each require their own instance — anti-affinity spreading one pod per node, or a pod
+     exceeding half an instance so only one packs — demand up to N × instance capacity, which can far exceed
+     `Σ Demand`. The sound bound folds the worst-case instance count — at most one instance per pod, tightened
+     where multi-pod packing onto a candidate is provable — against the quota, else `Left Overcommit`.
+  If both hold, every pod fits *some* candidate instance and the worst-case instance count stays under quota, so
+  the autoscaler can always grow to place a pending pod. This is a **sound growth envelope over the declared
+  instance shape, not a completeness guarantee**: like the fixed bin-pack
+  ([§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed)) it
+  may reject a spec a cleverer packer could fit, but it never admits one the autoscaler cannot grow to satisfy —
+  the atomic-pod fragmentation gap (`Σ Demand` fits the quota yet the forced instance count does not) is closed by
+  the instance-count term above, not left as a runtime surprise. The fold re-runs against the grown node set when
+  the policy fires.
 - **Hybrid** (a fixed floor with elastic headroom — e.g. `Rke2` fixed servers + `Autoscaled` agents):
   witness-bin-pack the workloads pinned to the fixed floor (notably host-backed StatefulSet ordinals, whose
   node affinity already pins them, [storage_lifecycle_doctrine.md §4](./storage_lifecycle_doctrine.md#4-deterministic-pv-naming-and-the-explicit-bind));
@@ -479,7 +489,7 @@ forecloses. The **reason** a cluster is the fold boundary — the phantom cluste
 `FabricMember` — is owned by [single_logical_data_plane_doctrine.md §1](./single_logical_data_plane_doctrine.md#1-why-this-doctrine-exists-two-ways-to-say-run-this-elsewhere)
 and [§3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe); this
 subsection consumes that WHY, it does not restate it. The only runtime-checked residue is the deferred geo-replication
-enaction (Phase 29). A **stretched cluster** does not breach this arity: it is **one** `Topology` whose nodes span
+enaction (Phase 28). A **stretched cluster** does not breach this arity: it is **one** `Topology` whose nodes span
 two `Site`s, folded **once** ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)).
 
 ### 9.2 Monitoring cost folds through the standard machinery, and the forest has no parent-rollup budget
@@ -513,7 +523,7 @@ improvement.
 This document is normative capacity doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the capacity/topology
 type discipline lands in **Phases 4 and 7** (the negative `.dhall` gate and the capacity/topology fold), with runtime realization of
-the storage/pulsar folds in **Phases 16 and 22**, the host/VM cross-check in **Phase 28**, and the `ScalingPolicy`
+the storage/pulsar folds in **Phases 16 and 22**, the host/VM cross-check in **Phase 35**, and the `ScalingPolicy`
 enaction in **Phase 30**. This doc never maintains a competing status ledger; it states the target shape and
 links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 

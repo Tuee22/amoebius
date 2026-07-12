@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Stand up the pure, total `render :: ServiceSpec -> [K8sObject]` and lock its emitted object
@@ -22,7 +22,7 @@ and pins byte-for-byte dry-run goldens over a pure, no-process suite), that is *
 amoebius result**. This phase deliberately builds **only the pure `render` half** of the manifest doctrine;
 the server-side-apply reconciler that *runs* `render` on a live cluster — driven by the control-plane
 singleton, a Kubernetes Deployment `replicas=1` whose single-instance guarantee is delegated to k8s/etcd with
-no bespoke election — is deferred to the live band ([Phase 15](phase_15_renderer_reconciler.md)).
+no bespoke election — is deferred to the live band ([Phase 16](phase_16_renderer_reconciler.md)).
 
 ## Phase Summary
 
@@ -36,7 +36,7 @@ is a *value* the suite inspects end to end. The battery does two things: it pins
 drift), and it asserts the **rendered-output-golden illegal states** directly on the emitted objects — an
 unsafe manifest is not a value `render` can return, so a golden test over the output proves the property with
 no cluster. What is *not* here: the SSA/ApplySet apply-and-prune reconciler, wait-for-ready, drift-heal, the
-release ledger, and any live convergence — all deferred to [Phase 15](phase_15_renderer_reconciler.md); and
+release ledger, and any live convergence — all deferred to [Phase 16](phase_16_renderer_reconciler.md); and
 the `chain`/`[Step]` `--dry-run` plan render, which is [Phase 10](phase_10_chain_kernel_dryrun.md). This phase
 locks the **render** step of the pre-cluster spine.
 
@@ -45,21 +45,40 @@ analogous to the Phase-5 decode battery and the Phase-4 `dhall type` corpus.
 
 **Register:** 1 — pure/golden, in-process, no cluster (§K).
 
-**Gate:** `cabal test render-golden` is green — the pure, total `render :: ServiceSpec -> [K8sObject]` emits,
-for a representative service set, an object set a **byte-for-byte** golden pins exactly, and the three
-rendered-output-golden illegal-state properties hold on the emitted objects (every pod carries a hardened
-`securityContext`; no backdoor/insecure ingress is emitted; every NetworkPolicy is default-deny plus
-graph-derived-allow) — a **Register-1** in-process check that runs on no substrate and contacts no
-infrastructure.
+**Gate:** `cabal test render-golden` is green against Phase-0-pinned oracles — the pure, total
+`render :: ServiceSpec -> [K8sObject]` emits, **for the concrete corpus** (the full Phase-8 binder output set:
+every capability arm × both deployment shapes {`SingleNode`, `Distributed`}, enumerated explicitly in Sprint 9.3's
+Deliverables and jointly covering every `K8sObject` sum variant at least once), an object set the
+**byte-for-byte** goldens pin exactly, and the three rendered-output-golden illegal-state properties hold
+**non-vacuously** on the emitted objects. The goldens are authored and **committed in Phase 0** under
+`test/manifest/golden/<service-id>.json` *before* `render` exists, under a single pinned **canonical Aeson
+encoding** (object keys lexicographically sorted, two-space indent, trailing LF, exactly one golden file per
+service keyed by `ServiceSpec` id — so "drifts by a single byte" is unambiguous), and are **never regenerated
+from the renderer's own output** (a golden regenerated from `render` is not a test). The three properties, with
+their predicates fixed: **(a)** every emitted pod carries a hardened `securityContext` *and* every container
+declares non-zero cpu/ram requests+limits; **(b)** no backdoor/insecure ingress — concretely, no `Service` of
+type `NodePort`/`LoadBalancer` outside the single declared edge service, every `HTTPRoute` parented to the
+Keycloak-owned `Gateway`, and no bare `Ingress` kind anywhere; **(c)** every NetworkPolicy is default-deny plus
+allow edges that **exactly equal** (set equality — no missing edge, no extra edge) the edge set an
+**independent, test-side re-derivation from the declared dependency graph** produces, the reference side
+authored by hand/spec in Phase 0 and *not* by reusing `render`'s own connectivity fold. Non-vacuity is enforced
+by the shape-completeness and non-zero-count assertions and by the three committed seeded mutants named in
+Sprint 9.3, each of which must turn the relevant **property** (not merely the byte diff) red. A **Register-1**
+in-process check that runs on no substrate and contacts no infrastructure; it still emits the
+proven/tested/assumed ledger, marking runtime enforcement UNVERIFIED (owned by the live band).
 
 ## Doctrine adopted
 
+- [`namespace_layout_doctrine.md §2`](../documents/engineering/namespace_layout_doctrine.md#2-one-namespace-per-platform-capability--the-derived-set)
+  — **one namespace per platform capability, derived never authored.** The render-golden battery asserts every
+  emitted object lands in its doctrine-**derived** namespace and that a free-text or cross-capability namespace
+  is not a value `render` can emit — the rendered-output enactment that gates the namespace-layout foreclosure.
 - [`manifest_generation_doctrine.md §2`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects)
   — **the typed manifest model: `render` is a pure, total function to objects.** Adopt the pure, total,
   cluster-free `render :: ServiceSpec -> [K8sObject]` whose output is a value amoebius inspects before any
   object reaches a cluster; the record *is* the manifest, serialized via Aeson, with no intermediate template
   and no `values.yaml`. **Only the pure-render half is adopted here**; the apply/reconcile engine of that
-  doctrine's §5 is the live-band [Phase 15](phase_15_renderer_reconciler.md) residue.
+  doctrine's §5 is the live-band [Phase 16](phase_16_renderer_reconciler.md) residue.
 - [`manifest_generation_doctrine.md §3`](../documents/engineering/manifest_generation_doctrine.md#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)
   — **best practice by construction: an unsafe manifest is not constructible.** The renderer emits a hardened
   `securityContext` on every pod, least-privilege per-workload RBAC, default-deny-plus-derived-allow
@@ -138,10 +157,15 @@ The whole sprint (📋 Planned).
 **Implementation**: `src/Amoebius/Manifest/Render.hs` (`render :: ServiceSpec -> [K8sObject]`, pure and
 total) and its per-shape helpers — target paths, not yet built.
 **Blocked by**: Sprint 9.1.
-**Independent Validation**: a `-Wall` + partiality grep confirms no `error`/`undefined`/partial head is
-reachable from `render`, and no I/O import is in its transitive surface — `render` is pure, total, and
-cluster-free; a QuickCheck property asserts the by-construction invariants hold on the emitted `[K8sObject]`
-for arbitrary legal `ServiceSpec` values.
+**Independent Validation**: totality is established by compiling `render` and its transitive closure under
+`-Werror=incomplete-patterns` and `-Werror=incomplete-uni-patterns` (a partiality grep does not establish
+reachability or totality and is not sufficient), plus an **import-graph check** that no `IO`,
+`unsafePerformIO`, or partial-`Prelude` name (`head`/`fromJust`/`!!`/`error`/`undefined`) appears in `render`'s
+transitive module surface. A QuickCheck property asserts the by-construction invariants hold on the emitted
+`[K8sObject]` for arbitrary legal `ServiceSpec` values, and its generator is **not** near-constant: it carries
+`cover`/`checkCoverage` obligations (coverage failure is a hard test failure) forcing each capability arm, both
+deployment shapes {`SingleNode`, `Distributed`}, and every `K8sObject` sum variant to appear at a stated
+minimum frequency — so the property demonstrably exercises the whole spec surface, not one happy-path shape.
 **Docs to update**: `documents/engineering/manifest_generation_doctrine.md` (backlink §3 to the Phase-9 pure
 renderer; keep the SSA reconciler half as the live-band residue), `documents/engineering/platform_services_doctrine.md`
 (the rendering enactment of the §9/§10 rules), `DEVELOPMENT_PLAN/system_components.md`.
@@ -159,13 +183,16 @@ cpu/ram requests+limits, and Vault-coordinate Secret references.
   best-practice-by-construction objects; the cluster renderer is the fold of every service's `render` over
   the decoded spec, connectivity derived from the declared dependency graph.
 - An in-file honesty note: this is the render half only — the SSA/ApplySet apply, prune, wait-for-ready, and
-  release ledger are the live-band [Phase 15](phase_15_renderer_reconciler.md) reconciler, run by the
+  release ledger are the live-band [Phase 16](phase_16_renderer_reconciler.md) reconciler, run by the
   Deployment-`replicas=1` singleton (single-instance delegated to k8s/etcd, no bespoke election).
 
 ### Validation
-1. The partiality/purity gate reports no partial call and no I/O reachable from `render`; a QuickCheck
-   property over arbitrary legal `ServiceSpec` values confirms every emitted pod is hardened, every
-   NetworkPolicy is default-deny + derived-allow, and every container declares cpu/ram.
+1. The `-Werror=incomplete-patterns`/`-Werror=incomplete-uni-patterns` compile and the import-graph check
+   report no partial call and no `IO`/`unsafePerformIO`/partial-`Prelude` name reachable from `render`; a
+   QuickCheck property over arbitrary legal `ServiceSpec` values — with `cover`/`checkCoverage` obligations
+   (hard-failing) that force each capability arm, both shapes, and every `K8sObject` variant to fire at its
+   stated minimum — confirms every emitted pod is hardened, every NetworkPolicy is default-deny + derived-allow,
+   and every container declares cpu/ram.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -173,13 +200,21 @@ The whole sprint (📋 Planned).
 ## Sprint 9.3: The rendered-output golden battery (`render-golden`) — the gate 📋
 
 **Status**: Planned
-**Implementation**: `test/manifest/RenderGoldenSpec.hs`, `test/manifest/golden/*.json` (the committed golden
-fixtures), and a representative `ServiceSpec` corpus reusing the Phase-8 binder outputs — target paths, not
-yet built.
+**Implementation**: `test/manifest/RenderGoldenSpec.hs`, `test/manifest/golden/<service-id>.json` (the
+Phase-0-committed golden fixtures, one per service, under the canonical Aeson encoding), the independent
+test-side allow-edge oracle `test/manifest/DepGraphOracle.hs` (a hand-authored re-derivation of allow edges
+from the declared dependency graph, not a call into `render`), and the **concrete corpus** — the full Phase-8
+binder output set: every capability arm × both deployment shapes {`SingleNode`, `Distributed`}, jointly
+covering every `K8sObject` sum variant at least once — target paths, not yet built.
 **Blocked by**: Sprint 9.2; Phase 8 gate (the `ServiceSpec` corpus the goldens render from).
 **Independent Validation**: `cabal test render-golden` is green — the emitted `[K8sObject]` matches its
-byte-for-byte golden and every rendered-output-golden illegal-state property holds; the suite goes **red** if
-the renderer's output drifts by a single byte or if any emitted object violates a by-construction invariant.
+Phase-0-committed byte-for-byte golden under the canonical encoding and every rendered-output-golden
+illegal-state property holds non-vacuously; the suite goes **red** if the renderer's output drifts by a single
+byte or if any emitted object violates a by-construction invariant. The NetworkPolicy property checks allow-edge
+**set equality** against the independent `DepGraphOracle` re-derivation (authored in Phase 0, never `render`'s
+own fold), so an extra allow edge for an undeclared dependency is caught. The three committed seeded mutants
+(below) are re-run each build and each must go red via the *property* assertion it targets, with that mutant's
+golden regenerated to match its (illegal) output so the byte diff alone cannot be what fails.
 **Docs to update**: `documents/engineering/conformance_harness_doctrine.md` (record the rendered-output-golden
 locus realized in Register 1), `documents/illegal_state/illegal_state_catalog.md` (annotate §3.6/§3.7/§3.11
 with realized foreclosure layer = rendered-output-golden, Register 1),
@@ -196,17 +231,34 @@ and blocking/underived-NetworkPolicy ([`§3.6`](../documents/illegal_state/illeg
 states — directly on the emitted objects, all without a cluster.
 
 ### Deliverables
-- `test/manifest/RenderGoldenSpec.hs` pinning the emitted object set byte-for-byte against
-  `test/manifest/golden/*.json` for a representative service set, plus assertions that each emitted pod
-  carries a hardened `securityContext`, no `Service`/route emits a backdoor or insecure ingress path, and
-  every NetworkPolicy is default-deny with only graph-derived allow edges.
+- `test/manifest/RenderGoldenSpec.hs` pinning the emitted object set byte-for-byte against the
+  Phase-0-committed `test/manifest/golden/<service-id>.json` (canonical Aeson encoding) for **the concrete
+  corpus** (every capability arm × {`SingleNode`, `Distributed`}), plus, per service, **shape-completeness**
+  assertions (each workload capability renders ≥1 `Deployment`/`StatefulSet`, its `ServiceAccount`/`Role`/
+  `RoleBinding` triple, ≥1 `NetworkPolicy`, cpu/ram on every container) and **corpus-wide non-zero counts**
+  (total pods > 0, total NetworkPolicies > 0) so no property holds vacuously over an empty object set; plus the
+  three fixed-predicate safety assertions — every emitted pod carries a hardened `securityContext`; no `Service`
+  of type `NodePort`/`LoadBalancer` outside the single declared edge, every `HTTPRoute` parented to the
+  Keycloak-owned `Gateway`, no bare `Ingress` kind; and every NetworkPolicy default-deny with allow edges set-
+  equal to the independent `DepGraphOracle` re-derivation.
+- **Three committed seeded mutants** (operator: invariant-clause delete / union-arm addition / guard weakening),
+  each committed and re-run and each of which must turn its *targeted property* (not the byte diff) red — its
+  golden regenerated to the mutant's output so only the property can fail: **M1** a pod rendered without the
+  hardened `securityContext` (kills property a); **M2** a wild `NodePort` route / a `Keycloak`-skipping
+  `HTTPRoute` (kills property b); **M3** an allow edge emitted for a dependency absent from the declared graph
+  (kills property c's set-equality against `DepGraphOracle`).
 - A Register-1 proven/tested/assumed ledger led by a runtime-UNVERIFIED banner: the emitted objects are
   proven safe *as values* in-process; no claim is made that a live cluster enforces them (deferred to the
   live band). The golden fixtures are test artifacts, never committed deployment manifests.
 
 ### Validation
-1. `cabal test render-golden` is green — output matches the byte-for-byte golden and every rendered-output
-   invariant holds; a seeded mutation to the renderer or to an emitted object turns the suite red.
+1. `cabal test render-golden` is green — output matches the Phase-0-committed byte-for-byte goldens (canonical
+   encoding) across the concrete corpus, shape-completeness and corpus-wide non-zero counts hold (no vacuous
+   universal), and every rendered-output invariant holds — the NetworkPolicy check by allow-edge set equality
+   against the independent `DepGraphOracle`. Each of the three committed seeded mutants (M1 unhardened pod, M2
+   wild/Keycloak-skipping route, M3 undeclared allow edge), with its golden regenerated to its own output, must
+   turn the corresponding **property assertion** red — so a mutant is caught by a safety property, not merely by
+   the byte diff.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -216,7 +268,7 @@ The whole sprint (📋 Planned).
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/manifest_generation_doctrine.md` — backlink §2/§3 to the Phase-9 pure renderer and
   rendered-output goldens; keep §5's SSA/ApplySet apply-and-prune reconciler explicitly as the live-band
-  [Phase 15](phase_15_renderer_reconciler.md) residue, run by the Deployment-`replicas=1` singleton (no
+  [Phase 16](phase_16_renderer_reconciler.md) residue, run by the Deployment-`replicas=1` singleton (no
   election).
 - `documents/engineering/conformance_harness_doctrine.md` — record the rendered-output-golden validation
   locus this phase realizes as the **render** step of the pre-cluster spine, in Register 1.
@@ -250,4 +302,4 @@ The whole sprint (📋 Planned).
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — §2 Register 1, §4 the per-run ledger
 - [phase_08](phase_08_capability_binder.md) — the capability→provider→shape binder producing the `ServiceSpec`
 - [phase_10](phase_10_chain_kernel_dryrun.md) — the `chain`/`[Step]` `--dry-run` plan render deferred from here
-- [phase_15](phase_15_renderer_reconciler.md) — the live SSA/ApplySet reconciler that applies `render`'s output
+- [phase_16](phase_16_renderer_reconciler.md) — the live SSA/ApplySet reconciler that applies `render`'s output

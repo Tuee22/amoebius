@@ -1,8 +1,8 @@
-# Phase 21: App tenancy + `TenantSpec`
+# Phase 23: App tenancy + `TenantSpec`
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_20_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_22_pulsar_client.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_22_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_24_pulsar_client.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Realize an app's tenant slice live — its own namespace, the `<app>/<bucket>` ObjectStore prefix,
@@ -14,7 +14,7 @@
 ## Phase Status
 
 📋 Planned. Specified before implementation; every sprint below is 📋 Planned and every prescriptive statement
-is design intent, never a tested amoebius result. This phase opens after the Phase 20 gate (the live DSL deploy
+is design intent, never a tested amoebius result. This phase opens after the Phase 22 gate (the live DSL deploy
 via the Deployment-`replicas=1` control-plane singleton, no election) and runs on the **linux-cpu** substrate in
 **Register 3** — live infrastructure: the single-node `kind` cluster whose platform stack, root Vault, and
 Keycloak-owned edge were stood up in Phases 17–20. The tenant-axis type discipline it rests on — the phantom
@@ -53,10 +53,19 @@ linux-cuda, or windows substrate is touched.
 **Gate:** on a single-node linux-cpu cluster a `.dhall` app spec is decoded and reconciled by the
 Deployment-`replicas=1` singleton (no election) so the app receives its own **namespace**, its declared
 `ObjectStore` buckets rendered under the **`<app>/<bucket>`** MinIO prefix, and a one-member in-namespace Patroni
-**`Sql`** database, all converging to ready with a leak-free teardown; and, as a live regression guard, a
-well-typed fixture whose `RoleBinding` names a **foreign tenant's** resource **fails at Gate 1 / Gate 2 before
-any binary acts** — a **Register-3** live-infrastructure check (the author-time foreclosure itself was already
-proven in-process in the pre-cluster band).
+**`Sql`** database, all converging to ready and — under the **tenant `t1`'s own derived credentials** (never
+admin/root) — reachable via an authenticated data round-trip (object PUT then GET on `<t1>/<bucket>`, a
+Vault read of `secret/tenants/<t1>/…`), with a **provider-inventory-diff** teardown (pre-run vs post-run set
+equality across k8s, MinIO, Vault, Pulsar, Keycloak, independent of harness tagging); and, as a live regression
+guard, each of the three Phase-0-committed negative fixtures (`illegal_cross_tenant_ref`,
+`illegal_cross_tenant_user`, `illegal_handauthored_grant`) **fails at Gate 1 / Gate 2 before any binary acts**
+**carrying its committed expected reason tag** (`CrossTenantRef{enclosing=t1, foreign=t2}`, `TwoTenantUser`,
+`HandAuthoredGrant`) matched against the Phase-0 hand-authored expected-tag table, **each paired with its
+byte-identical positive twin** (differing only in the foreign id corrected to `t1`) that must decode and deploy;
+and the committed seeded mutant of the tenant-unification fold (guard-negation: the `RoleBinding`
+resource-tenant vs enclosing-tenant equality inverted) is re-run and **must turn the gate red** — a
+**Register-3** live-infrastructure check (the author-time foreclosure itself was already proven in-process in
+the pre-cluster band).
 
 ## Doctrine adopted
 
@@ -111,8 +120,8 @@ proven in-process in the pre-cluster band).
 **Implementation**: `src/Amoebius/App/Tenancy.hs` (the per-app namespace + tenant-tagged resource projection: the
 `<app>/<bucket>` `ObjectStore` resources against the canonical MinIO provider, and a one-member in-namespace
 Patroni `Sql` instance) — target path, not yet built.
-**Blocked by**: Phase 20 gate (the live DSL deploy via the `replicas=1` singleton — the deploy path this
-projection is reconciled onto); Phase 18 (the standard MinIO + Patroni platform services this binds to, an
+**Blocked by**: Phase 22 gate (the live DSL deploy via the `replicas=1` singleton — the deploy path this
+projection is reconciled onto); Phase 19 (the standard MinIO + Patroni platform services this binds to, an
 external earlier-phase prereq).
 **Independent Validation**: decoding a trivial app `.dhall` yields exactly one namespace, the declared
 `ObjectStore` buckets each rendered under the `<app>/<bucket>` MinIO prefix, and one one-member Patroni `Sql`
@@ -140,9 +149,17 @@ providers by the `replicas=1` singleton.
 
 ### Validation
 1. A trivial app `.dhall` decodes and the singleton reconciles its namespace, `<app>/<bucket>` `ObjectStore`
-   bucket, and one-member Patroni `Sql` database to ready on the linux-cpu cluster; a re-run is a no-op.
-2. The app-surface bytes are unchanged when the bound shape changes (single-node vs distributed), confirming the
-   app travels and only the binding varies; the `Sql` is a Patroni cluster and no bare `postgres` Pod appears.
+   bucket, and one-member Patroni `Sql` database to ready on the linux-cpu cluster; **a re-run is a no-op,
+   defined observationally as: zero mutating (non-GET/-WATCH) apiserver calls attributable to the singleton in
+   the kube-apiserver audit log during the second reconcile, AND every reconciled object's `resourceVersion`
+   unchanged between the two runs** — an exit-0 or still-ready check alone does not satisfy this. The audit log
+   is the OS-boundary observer (§M.5); a self-emitted "no changes" reconcile log does not count.
+2. The **decoded app IR and the rendered app-owned object manifests** (namespace, `<app>/<bucket>` bucket
+   resource, `Sql` StatefulSet/manifest — the compared bytes are these, not the app `.dhall` source text which
+   is trivially unchanged) are **byte-identical** when the bound shape is switched single-node vs distributed;
+   the distributed shape is exercised **render-only** (the manifests are produced and compared without a live
+   distributed deploy, since the phase substrate is single-node `kind`), confirming the app travels and only the
+   binding varies; the `Sql` is a Patroni cluster and no bare `postgres` Pod appears in the live namespace.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -188,9 +205,20 @@ in the pre-cluster band; here it becomes a live regression guard.
 ### Validation
 1. `project` over a two-tenant root spec returns only the requested tenant's subtree; no field yields a
    sibling-tenant or cluster-scoped branch.
-2. A well-typed fixture naming a foreign tenant's bucket/topic/secret in a `RoleBinding` is rejected at Gate 1 or
-   Gate 2 (annotated with its layer), and an attempt to place one user in two tenants does not type — the suite
-   is red if any such fixture decodes.
+2. **One committed negative fixture per resource-reference arm the unification fold checks — `Ref` to a foreign
+   tenant's bucket, topic, AND secret (three fixtures, not one of any kind)** — is rejected at Gate 1 or Gate 2,
+   and the returned structured error **carries the committed reason tag `CrossTenantRef{enclosing=t1,
+   foreign=t2}`** (or, on the static-phantom arm, the `dhall type` error locus), which the test asserts equal to
+   the value in the **Phase-0-committed hand-authored expected-tag table** (`test/fixtures/phase21/expected_tags.dhall`) —
+   the reference side authored independently of the fold, never read back from the fold's own output (§M.3, §M.8).
+   **Each negative ships a minimal positive twin, byte-identical except the foreign tenant id corrected to the
+   enclosing `t1`, that must decode successfully** — so a rejection is attributable to cross-tenancy alone and
+   not an unrelated field/typo. An attempt to place one user in two tenants likewise returns the `TwoTenantUser`
+   tag. The suite is red if any negative decodes, if any positive twin fails, **or if any negative fails
+   carrying a tag other than its committed one**. The value-level unification fold additionally carries a
+   QuickCheck `cover` obligation forcing the cross-tenant-reject branch to fire in **≥ 20%** of generated
+   `RoleBinding` cases (§M.4), and the committed guard-negation mutant of the fold (Sprint 21.4) is run here and
+   must turn this suite red.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -201,8 +229,8 @@ The whole sprint (📋 Planned).
 **Implementation**: `src/Amoebius/Tenancy/Rbac.hs` (the total
 `render :: TenantSpec t → [ KeycloakRole | VaultPolicy | PulsarAcl | MinioPolicy | NetworkPolicy ]` derivation)
 — target path, not yet built.
-**Blocked by**: Sprint 21.1, Sprint 21.2; Phase 17 (the root Vault + built-in client that hosts the derived
-per-tenant policies) and Phase 19 (the Keycloak-owned edge whose realms these roles populate) — external
+**Blocked by**: Sprint 21.1, Sprint 21.2; Phase 18 (the root Vault + built-in client that hosts the derived
+per-tenant policies) and Phase 21 (the Keycloak-owned edge whose realms these roles populate) — external
 earlier-phase prereqs.
 **Independent Validation**: the total `render` emits, for a two-tenant fixture, a per-tenant Vault policy over
 `secret/tenants/<t>/…`, a MinIO bucket policy on `<t>/<bucket>` (which — the app being its own data-tenant —
@@ -235,9 +263,14 @@ author-time foreclosure of Sprint 21.2.
 ### Validation
 1. `render` over a two-tenant fixture emits the four provider policy sets plus the derived NetworkPolicy, each
    scoped to its own `<t>`; an assertion confirms no arm of the app/tenant surface can hand-author any of them.
-2. On the live cluster a tenant-`t1` principal is **refused** a read of a `<t2>` bucket / topic / secret path by
-   the derived provider policy; the residue (derivation fidelity) is recorded as runtime-checked, never marked
-   green as a type result.
+2. On the live cluster, **under tenant `t1`'s own derived credentials (never admin/root)**, every cross-tenant
+   refusal is **paired with a same-credential same-tenant success** so refusal is not merely deny-all: the `t1`
+   principal is **refused** a read of a `<t2>` bucket / topic / secret path AND **succeeds** at the matching
+   same-tenant operation — an object PUT-then-GET round-trip on `<t1>/<bucket>`, a produce-then-consume on
+   `persistent://<t1>/…`, and a read of `secret/tenants/<t1>/…`. The representative set is exactly these three
+   provider pairs (MinIO object, Pulsar topic, Vault secret path) named here. A gate in which the same-tenant
+   probe also fails (a deny-all policy) does **not** pass. The residue (derivation fidelity) is recorded as
+   runtime-checked, never marked green as a type result.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -269,20 +302,45 @@ fails before any binary acts.
 ### Deliverables
 - A positive gate `.dhall` (`tenant_app`) composing the platform spec + a tenant app (Sprints 21.1–21.3) that
   the singleton reconciles to ready and then tears down leak-free, authored as a test-topology `.dhall` with a
-  teardown obligation and a postflight sweep.
-- Negative gate fixtures — re-run as a live regression guard — `illegal_cross_tenant_ref` (a `RoleBinding`
-  naming a `Ref t' ≠ t` resource, catalog §4.2), `illegal_cross_tenant_user` (a `UserSpec` in two tenants), and
+  teardown obligation and a **full pre-run-vs-post-run provider-inventory diff** (asserting set equality across
+  k8s, MinIO, Vault, Pulsar, Keycloak, independent of test-owned tagging) — never a tag-scoped sweep alone.
+- Negative gate fixtures — re-run as a live regression guard, **authored and committed in Phase 0 before the
+  implementation** (§M.1) — `illegal_cross_tenant_ref` (three arms: a `RoleBinding` naming a `Ref t' ≠ t`
+  bucket, topic, and secret, catalog §4.2), `illegal_cross_tenant_user` (a `UserSpec` in two tenants), and
   `illegal_handauthored_grant` (a hand-authored provider policy, catalog §3.45) — each asserted to fail at
-  Gate 1 or Gate 2, annotated with its foreclosure layer.
+  Gate 1 or Gate 2, annotated with its foreclosure layer, and each **carrying its committed expected reason
+  tag**. Each negative ships its **minimal byte-identical positive twin** (foreign id corrected to `t1`) that
+  must decode and deploy.
+- The **Phase-0-committed independent oracle** `test/fixtures/phase21/expected_tags.dhall` — a hand-authored
+  table mapping each negative fixture to its expected reason tag (`CrossTenantRef{enclosing, foreign}`,
+  `TwoTenantUser`, `HandAuthoredGrant`), authored independently of the `project`/unification fold, never
+  regenerated from it (§M.3).
+- At least one **committed seeded mutant** (§M.2), drawn from the defined operator set: the guard-negation
+  mutant `mutants/phase21/fold_tenant_eq_inverted` of the tenant-unification fold (the `RoleBinding`
+  resource-tenant vs enclosing-tenant equality inverted, so a cross-tenant ref decodes clean), committed and
+  re-run by the gate, which **must** turn the negative suite and the gate red.
 - A **Register-3** proven/tested/assumed ledger recording the live-realization result (namespace + bucket + Sql
   converged, cross-tenant read refused by the derived policy) and explicitly marking the deferred surfaces — the
   tenant-admin scope-narrowed `dhall update` surface, the own-child-cluster hardening dial, and the `render`
   derivation-fidelity residue — as UNVERIFIED, never green.
 
 ### Validation
-1. The positive `.dhall` brings the tenant app up on the linux-cpu cluster, its `<app>/<bucket>` `ObjectStore`
-   and in-namespace `Sql` are reachable, and teardown leaves no leaked resource (postflight sweep empty).
-2. Every illegal `.dhall` fixture is rejected before any binary acts; the Register-3 ledger is present and
+1. The positive `.dhall` brings the tenant app up on the linux-cpu cluster; **reachability is defined as an
+   authenticated tenant-credential data round-trip under `t1`'s own derived credentials** (never admin/root,
+   never endpoint-liveness or an admin listing): an object PUT-then-GET on `<app>/<bucket>` and an in-namespace
+   `Sql` connect-write-read under the derived `SecretRef` credential must all succeed. Teardown then uses a
+   **full provider-inventory diff — pre-run snapshot vs post-run snapshot, asserting set equality — in every
+   provider the phase touches (k8s namespaces + PVs, MinIO buckets + bucket policies, Vault policies under
+   `secret/tenants/`, Pulsar tenants + namespaces, Keycloak realms), independent of the harness's own
+   test-owned tagging**; a tag-scoped sweep alone does not satisfy this (§M.5). Any resource present post-run
+   and absent pre-run fails the gate.
+2. Every illegal `.dhall` fixture is rejected before any binary acts **carrying its committed expected reason
+   tag** (`CrossTenantRef{enclosing=t1, foreign=t2}` for `illegal_cross_tenant_ref`, `TwoTenantUser` for
+   `illegal_cross_tenant_user`, `HandAuthoredGrant` for `illegal_handauthored_grant`) matched against the
+   Phase-0 hand-authored expected-tag table `test/fixtures/phase21/expected_tags.dhall`, **each paired with its
+   byte-identical positive twin** (foreign id corrected to `t1`) that decodes and deploys — a rejection carrying
+   the wrong tag, or a positive twin that fails, fails the gate. The committed guard-negation mutant of the
+   tenant-unification fold is re-run and **must turn the gate red**. The Register-3 ledger is present and
    honestly classifies each foreclosure and each deferred residue (no runtime-checked claim reported as proven).
 
 ### Remaining Work
@@ -308,7 +366,7 @@ The whole sprint (📋 Planned).
 
 **Cross-references to add:**
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-21 status when the gate passes; link this document.
-- `DEVELOPMENT_PLAN/substrates.md` — record Phase 21's gate substrate (linux-cpu) in the per-phase substrate map.
+- `DEVELOPMENT_PLAN/substrates.md` — record Phase 23's gate substrate (linux-cpu) in the per-phase substrate map.
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/App/Tenancy.hs` and
   `src/Amoebius/Tenancy/{Types,Project,Rbac}.hs` (with `dhall/amoebius/Tenant.dhall`) as Phase-21 design-first
   rows against the component inventory.
@@ -329,4 +387,4 @@ The whole sprint (📋 Planned).
   tenant credentials and the derived per-tenant Vault policy
 - [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — the Deployment-`replicas=1`
   control-plane singleton (no election) that reconciles this projection
-- [phase_20](phase_20_live_dsl_singleton.md) — the live DSL deploy via the `replicas=1` singleton this phase builds on
+- [phase_22](phase_22_live_dsl_singleton.md) — the live DSL deploy via the `replicas=1` singleton this phase builds on

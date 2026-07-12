@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, documents/engineering/README.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the Kubernetes namespace partition — one namespace per platform
@@ -187,7 +187,7 @@ gates, and remaining work live only in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md); this doc states the target shape and links
 back for status. Every statement here is **design intent** — amoebius is greenfield and has built none of this.
 The sibling **prodbox** project is *evidence* that namespaces render from typed records — its
-[/home/matthewnowak/prodbox/src/Prodbox/Lib/Storage.hs](file:///home/matthewnowak/prodbox/src/Prodbox/Lib/Storage.hs)
+`prodbox/src/Prodbox/Lib/Storage.hs` (sibling source)
 renders `Namespace` objects from a typed spec — but that is **sibling evidence, not an amoebius result**, and
 prodbox partitions its own way. Per
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline),

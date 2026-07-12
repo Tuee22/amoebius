@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/deterministic_simulation_doctrine.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_12_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_14_base_image_registry.md, DEVELOPMENT_PLAN/phase_15_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_16_retained_storage.md, DEVELOPMENT_PLAN/phase_18_platform_services.md, DEVELOPMENT_PLAN/phase_23_content_store_workflow.md, DEVELOPMENT_PLAN/phase_25_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_26_infernix_lift.md, DEVELOPMENT_PLAN/phase_27_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_31_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_32_spa_live_deploy.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/engineering/bootstrap_sequence_doctrine.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_15_base_image_registry.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_17_retained_storage.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_32_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_33_infernix_lift.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md
 **Generated sections**: none
 
 > **Purpose**: Define amoebius testing as a self-tearing-down `InForceSpec` topology — spin up resources, run a
@@ -43,7 +43,7 @@ Three consequences fall straight out of "a test is a spec":
   a *test* rather than a deployment is the chaos schedule and the always-teardown contract of [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).
 
 > **Honesty.** Test-as-an-`InForceSpec`-topology, `suggest-test`, flagged credentials, and the elevated
-> storage-deleting harness are **Phase 31** in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
+> storage-deleting harness are **Phase 36** in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
 > and are **not started**. This document generalizes patterns *proven in the sibling prodbox project*
 > (`prodbox/documents/engineering/unit_testing_policy.md`,
 > `prodbox/documents/engineering/integration_fixture_doctrine.md`) into amoebius *design intent*. Per
@@ -160,6 +160,17 @@ machine-visible by emitting a ledger.
   *artifact* — that a topology run produces, as a first-class output beside its pass/fail, a record of which
   correctness layers it actually reached and at what strength. The artifact is the deliverable: it is the
   run's record of *what is known and how it is known*.
+- **The ledger has a fixed, committed, lint-checked schema.** The artifact is a structured record —
+  `{phase, gate_command, register, substrate, date, layers: [{name, status ∈ proven | tested | assumed | UNVERIFIED}], ledger_hash}` —
+  and, unlike other generated artifacts, it **is committed**: the deliberate carve-out from the
+  generated-never-committed rule ([generated_artifacts_doctrine.md §3](./generated_artifacts_doctrine.md#3-the-rule)),
+  because an uncommitted ledger emitted by the code under test is not durable evidence. A `ledger_lint` — a
+  sibling of the Phase-0 documentation lint
+  ([development_plan_standards.md §M](../../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub))
+  — checks it mechanically: the `register` and `substrate` fields must equal the phase's tracker row; every
+  correctness layer outside the gate's register is a mandatory **UNVERIFIED** row; and a design-proof
+  (substrate `none`) ledger's acceptance token reads *proven-for-the-model*, never *runtime proven*. A ledger
+  is evidence because it is committed and externally checked, not because the code under test emitted it.
 - **Skipping an applicable move marks that layer UNVERIFIED — never green.** This is the cardinal honesty
   rule, stated by the plan and inherited from the chaos doctrine: if a test move *applies* to a layer and
   the run does not perform it, the ledger records that layer as **UNVERIFIED**, not as silently passing. A
@@ -170,7 +181,9 @@ machine-visible by emitting a ledger.
   artifact is not only a record for the operator — it is the *input* a release `PromotionGate` reads to
   decide whether an environment pointer may advance. Advancing an `Environment` pointer (dev/staging → prod)
   **requires** the `Release`'s test-topology ledger to reach that environment's required evidence strength:
-  **Prod requires the Runtime/chaos layer proven**, not merely a green Decision layer. It follows directly
+  **Prod requires the Runtime/chaos layer *tested*** — live fault injection is *tested* (the faults chosen),
+  never *proven* ([chaos_failover_doctrine.md §12](./chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)) —
+  not merely a green Decision layer. It follows directly
   from the UNVERIFIED rule above that a **skipped-but-applicable layer BLOCKS prod promotion** — a layer
   recorded UNVERIFIED gives the advance constructor no evidence witness to consume, so promote-unverified→prod
   is **type-foreclosed unrepresentable** (mirroring the sibling infernix `.ready`-gated `ArtifactRef` idiom —
@@ -178,7 +191,7 @@ machine-visible by emitting a ledger.
   and the required-evidence-strength-per-environment mapping are **owned by**
   [release_lifecycle_doctrine.md §4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable); this doc owns only the ledger the gate
   reads. *(Design intent: the release lifecycle is Phase-0 reference doctrine and this ledger harness is
-  Phase 31 / not started — read as a specification to be validated, never a proven amoebius result.)*
+  Phase 36 / not started — read as a specification to be validated, never a proven amoebius result.)*
 - **A Tier-1-only in-process ledger is structurally insufficient to advance a production `PromotionGate`.**
   The front-loaded pre-cluster formal-validation track
   ([../../DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md](../../DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md))
@@ -188,7 +201,9 @@ machine-visible by emitting a ledger.
   leaves the **Runtime/chaos (Tier-2) layer UNVERIFIED by construction**, because a run that injected no fault
   against a live cluster performed no applicable Runtime move. By the UNVERIFIED rule above, such a
   Tier-1-only ledger is therefore **structurally insufficient to advance a production `PromotionGate`** —
-  prod requires the Runtime/chaos layer *proven*, and an in-process ledger carries no Runtime witness for the
+  prod requires the Runtime/chaos layer *tested* (its highest achievable strength; live injection is never
+  *proven*, [chaos_failover_doctrine.md §12](./chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)),
+  and an in-process ledger carries no Runtime witness for the
   advance constructor to consume, so "we validated the DSL in-process" cannot mean "the cluster enforces it."
   The two-tier split (Tier-1 design-time integrity vs. Tier-2 runtime-enforcement / runtime fidelity) — and the
   Tier-1/Tier-2 vocabulary itself — is owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)
@@ -335,7 +350,7 @@ exception to this doc). This doc owns the **exception mechanism**:
 
 > **Honesty.** The flag-and-elevated-sweep mechanism above is a *design resolution* of an explicitly open
 > question in the vision, not a built or tested amoebius capability. Treat
-> the leak-free guarantee as a specification to be validated, never as a proven result. Delivery (Phase 31)
+> the leak-free guarantee as a specification to be validated, never as a proven result. Delivery (Phase 36)
 > is tracked in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -395,8 +410,8 @@ To keep the SSoT boundaries crisp:
 This document is normative testing doctrine only. Delivery sequencing, completion status, validation gates,
 and remaining work — the test-topology DSL, `suggest-test`, flagged credentials, the elevated
 storage-deleting harness, and the per-run ledger artifact — are owned by
-[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (Phase 31; with the cross-cluster
-failover proof artifacts in Phase 29). This doc never maintains a competing status ledger; it states the
+[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (Phase 36; with the cross-cluster
+failover proof artifacts in Phase 28). This doc never maintains a competing status ledger; it states the
 target shape and links back for status. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline),
 no statement here is a proven amoebius result: the model generalizes patterns proven in prodbox into
 amoebius design intent.

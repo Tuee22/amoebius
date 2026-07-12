@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_28_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_21_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_35_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define exactly how the host amoebius binary and any host-level worker daemons talk to the
@@ -31,6 +31,16 @@ Anything that is neither of these is *wild*, and wild traffic has no host-specia
 LoadBalancer → Envoy → Keycloak like everyone else. The carve-out is acceptable **precisely because** it is
 unreachable off the host; the moment such an access point were exposed to LAN or WAN it would become a
 backdoor around Keycloak, which the DSL makes unrepresentable ([§7](#7-what-the-dsl-makes-unrepresentable-here)).
+
+**Channel 2's host-only reach is configured, not a NodePort default.** No Kubernetes distro binds NodePorts to
+loopback by default — kube-proxy's `--nodeport-addresses` defaults to empty, which publishes every NodePort on
+all node interfaces — so channel 2's "available only from the host" property must be *explicitly established*:
+kube-proxy `--nodeport-addresses=127.0.0.1/8`, or an equivalent host-firewall rule restricting the NodePort
+range to loopback. That binding is the mechanism that produces the host-only property; absent it the socket is
+reachable from LAN/WAN. The security argument therefore rests on that explicit loopback/firewall binding and on
+what actually requires privilege — opening a TCP connection to `127.0.0.1:<nodeport>` needs none, whereas reading
+the daemon's channel-2 credentials (the sudo host-daemon's kubeconfig / injected secrets) is root-gated — **not**
+on any assumption that a loopback NodePort is unreachable by an unprivileged local process.
 
 These two channels and the "coordination *is* Pulsar + MinIO" rule ([§3](#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)) govern the **workload plane** only; the operator admin control plane (Vault init/unseal, delivering a new `.dhall`) rides a distinct privileged REST channel owned by [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api).
 
@@ -77,7 +87,7 @@ This takes option (c)'s security goal — *no malicious network traffic can use 
 achieves it by **network restriction** instead of by crypto or by a single bottlenecking socket, while
 keeping option (b)'s bandwidth headroom (a real socket per stream) without paying (b)'s mTLS tax.
 
-> **Honesty.** This is a *resolved design decision* for Phase 28, argued from the threat model and bandwidth
+> **Honesty.** This is a *resolved design decision* for Phase 35, argued from the threat model and bandwidth
 > economics below — **not** a tested or proven amoebius result. The loopback-NodePort pattern has a sibling
 > precedent in prodbox ([§6](#6-the-host-only-restriction-in-practice-and-its-sibling-precedent)), which is evidence from another system, not proof here. Status and gates live
 > only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
@@ -268,7 +278,7 @@ the comms-relevant requirement each substrate must satisfy:
 - **This generalizes a pattern proven in the sibling prodbox project**, where in-cluster Harbor is reached
   by host-origin clients at `127.0.0.1:30080` over a NodePort bound to loopback (prodbox CLAUDE.md,
   "Substrate Equivalence"). That is **evidence from another system, not proof in amoebius** — amoebius has
-  not yet built Phase 28. It is precedent for *feasibility*, not a tested amoebius guarantee.
+  not yet built Phase 35. It is precedent for *feasibility*, not a tested amoebius guarantee.
 - **The DSL never lets a substrate "fix" a missing piece by widening exposure.** If a substrate's node
   networking makes the loopback binding awkward, the resolution is to extend that substrate's installer to
   honor the host-only contract — not to publish the port wider. Substrate equivalence is structural
@@ -329,7 +339,7 @@ secrets-by-name, never the method.
 
 This document is normative host↔cluster comms doctrine only. Delivery sequencing, completion status, and
 validation gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) — host
-compute daemons (the Apple-Metal / Windows-CUDA Pulsar+MinIO peers) land in **Phase 28**. This doc never
+compute daemons (the Apple-Metal / Windows-CUDA Pulsar+MinIO peers) land in **Phase 35**. This doc never
 maintains a competing status ledger; it states the target shape and links back for status.
 
 ---

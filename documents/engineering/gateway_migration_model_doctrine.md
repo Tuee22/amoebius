@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: documents/engineering/tla_modelling_assumptions.md
-**Referenced by**: documents/engineering/deterministic_simulation_doctrine.md, DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the *one* protocol amoebius proves itself — the cross-cluster **gateway migration**, covering **both** branches of `GatewayMigration = <Planned | Failover>` — expressed as a reifiable `Model` ([formal_model_doctrine.md](./formal_model_doctrine.md)), **simulated** with io-sim and **proven** with TLC, and reduced to every `InForceSpec` by a decode-time structural-fit fold rather than any per-spec model-check.
@@ -121,9 +121,35 @@ The protocol is proven **once**, at design time, over the bounded `Model`. TLC i
 path. What runs per-`InForceSpec` is a fast, total **decode-time structural-fit fold** that rejects any spec
 whose migration graph falls outside the proven envelope.
 
-The envelope is bought by the DSL shape: `GatewayFailover { active, standby, dnsRecord, hubRole }` is
-**pairwise** (one active + one standby per DNS record), and the decoder enforces **independence and acyclicity**
-of the migration graph. An N-cluster forest then reduces to a set of independent 2-cluster instances, so a
+The envelope is bought by the DSL shape: `GatewayFailover { active, standby, dnsRecord, hubRole }` is the
+per-migration record the decoder folds into a migration graph, which the fold then bounds on two axes — graph
+**shape** and a declared **parameter envelope**.
+
+**The migration graph, precisely.** Each `InForceSpec` decodes to a directed labelled graph *G = (V, E)*: the
+**vertices** *V* are the forest's clusters, and each **edge** is one migration — a directed edge from the
+`active` cluster to the `standby` cluster labelled `(active, standby, dnsRecord, hubRole)`, carrying the DNS
+record it repoints and the hub role it moves. The fold accepts *G* only when it is:
+
+- **pairwise** — each `dnsRecord` labels **at most one** edge (one active + one standby per record);
+- **acyclic** — the directed edge relation has no cycle (no chain of hand-offs loops back onto a cluster);
+- **independent** — defined on the **label projection, not on the vertices**: two edges are independent iff
+  their `dnsRecord`s differ *and* no reachable interleaving of their transitions requires one vertex to hold the
+  wild-ingress role for two records at once. Independence is therefore **not** vertex-disjointness — a single
+  survivor cluster may legitimately be the `standby` of two edges (the shared-survivor stress case,
+  [§6](#6-modelling-bounds-and-honesty)) — but such a shared vertex is admitted only where the parameter
+  envelope below serializes its promotions per record and the shared-resource premise (the honest limit) holds.
+
+**The parameter envelope, not only the graph shape.** Graph shape alone does not carry the scope-2 proof: that
+proof was discharged over specific `CONSTANTS` — a declared per-branch **data-loss budget**, a bounded **TTL
+regime**, and the replication-**offset**/log domains the state variables range over — and an accepted instance
+whose parameters fall outside those constants is **not** covered by it even when its graph is
+pairwise/acyclic/independent. The fold therefore checks each instance against a declared **parameter envelope**
+as well as the graph: every edge's `Failover` data-loss budget lies within the proven cap, its `dnsRecord` TTL
+lies within the modelled TTL regime, and its clusters' offset/log domains instantiate (lie within) the model's
+`CONSTANTS`. A spec that fits the graph but exceeds the parameter envelope is rejected, so the scope-2 proof's
+parameter side-conditions transfer to every accepted instance rather than being silently assumed.
+
+An N-cluster forest that passes both checks then reduces to a set of independent 2-cluster instances, so a
 green model-check at scope 2 is **an argued cutoff, stress-tested** — covering every spec the decoder accepts —
 the reduction
 [formal_model_doctrine.md §6](./formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not)
@@ -160,7 +186,7 @@ Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the
   **shared-resource independence** the scope-2 cutoff assumes ([§5](#5-one-and-done-plus-a-per-inforcespec-structural-fit)).
 - **Correspondence is by construction; runtime fidelity is bridged, not only sampled.** Because `interpret` and
   `emitTLA` render one `Model`, there is no separate variable→module correspondence table to complete later —
-  the inversion the superseded doc left "empty and UNVERIFIED until Phase 29" is dissolved. The residual
+  the inversion the superseded doc left "empty and UNVERIFIED until Phase 28" is dissolved. The residual
   **runtime-fidelity** obligation (that the effectful daemon only takes transitions the `Model` sanctions) is
   discharged in two stages, not one: **trace validation**
   ([formal_model_doctrine.md §8](./formal_model_doctrine.md#8-trace-validation-the-earlier-codemodel-bridge)) —

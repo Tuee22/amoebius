@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, documents/engineering/dsl_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/resource_capacity_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: The holding pen for the in-scope, high-numbered phases that are real commitments but do not
@@ -11,7 +11,7 @@
 
 ---
 
-Phases 0–32 each own a dedicated `phase_NN_<slug>.md`. Everything past Phase 32 is *in scope* but not yet
+Phases 0–32 each own a dedicated `phase_NN_<slug>.md`. Everything past Phase 37 is *in scope* but not yet
 detailed: the README phase index lists it as the single row **`33+ — Later phases`**. This document is that
 row, expanded into a candidate pool.
 
@@ -29,7 +29,7 @@ the suite:
   *ordering hints only*; the real id is assigned at promotion.
 - **No forward dependencies.** A later phase consumes earlier phases; nothing in Phases 0–32 is allowed to
   declare a `Blocked by` that points here ([§E](development_plan_standards.md)). These candidates sit strictly
-  *after* the live-SPA-deploy gate of Phase 32.
+  *after* the live-SPA-deploy gate of Phase 37.
 - **One substrate per gate.** Each candidate names at most one provisional acceptance substrate; a candidate
   that would need more than one is split before promotion ([§L](development_plan_standards.md)).
 
@@ -72,8 +72,8 @@ etcd, a diff is typed)](../documents/engineering/manifest_generation_doctrine.md
 already frames the diff as a *typed* value; this candidate extends that diff to classify schema-affecting and
 immutable-field changes so a change that would otherwise drop rows cannot be applied as a silent replace. The
 database half adds the migration ordering and idempotence on top of the per-consumer Postgres model. It is a
-later phase because it presupposes a working app-with-Postgres deployment from Phase 21 and the storage-safety
-guarantees from Phase 31 (durable bytes are not destroyed under normal credentials) — a schema migration must
+later phase because it presupposes a working app-with-Postgres deployment from Phase 23 and the storage-safety
+guarantees from Phase 36 (durable bytes are not destroyed under normal credentials) — a schema migration must
 move data *without* representing destruction.
 
 **Folded into the release lifecycle (forward pointer).** The migration half of this candidate is now positioned
@@ -176,13 +176,13 @@ while Lean/Agda offers a fuller metatheory; the verdict picks the tool the two p
 adoption is out of scope by design.
 
 The "one base container with everything" packaging question is sometimes mistaken for deferred work. It is
-**not**. It is **resolved and adopted in Phase 14**: every third-party service binary (the registry, MinIO,
+**not**. It is **resolved and adopted in Phase 15**: every third-party service binary (the registry, MinIO,
 Vault, Pulsar, Postgres tooling, a Temurin JRE for the JVM services, …) is baked into the multi-arch base
 container, and clusters pull images only from the in-cluster `distribution` registry — never from a public
 registry. That is the standing doctrine,
 [`image_build_doctrine.md` §2 — the single distribution rule (bake the binaries, build the amoebius image,
 pull only in-cluster)](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster),
-delivered by [phase_14_base_image_registry.md](phase_14_base_image_registry.md) and
+delivered by [phase_15_base_image_registry.md](phase_15_base_image_registry.md) and
 recorded as resolved in the README "Later phases" note. It is named here only to close the question: do not
 re-open it as a candidate phase.
 
@@ -196,8 +196,8 @@ two hosts, multi-node rke2 with fewer hosts than nodes), unbounded storage, un-t
 policy-less capacity growth — is **not** a new phase. It is **folded into Phases 4 and 7** as a spec-layer type
 discipline (with its acceptance fixtures in the same gate), because it is pure
 type-checking with no forward dependency (§E one-canonical-phase). Its **runtime** residues distribute to the
-phases that already own each substrate: the Pulsar two-ceiling offload to Phase 22, the Lima `LinuxHost`
-witness + host/VM capacity cross-check to Phase 28, live multi-node rke2/kind topology to Phase 29, and the
+phases that already own each substrate: the Pulsar two-ceiling offload to Phase 24, the Lima `LinuxHost`
+witness + host/VM capacity cross-check to Phase 35, live multi-node rke2/kind topology to Phase 28, and the
 `Managed EKS` arm + `ScalingPolicy` enaction + cloud quota to Phase 30. So there is **zero phase renumber**:
 the discipline is owned by two new doctrines
 ([`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md),
@@ -217,14 +217,14 @@ phase.
 - [system_components.md](system_components.md) — target component inventory a promoted candidate adds to
 - [substrates.md](substrates.md) — substrate registry; each candidate's provisional substrate is recorded here
   at promotion
-- [phase_14_base_image_registry.md](phase_14_base_image_registry.md) — where the "one
+- [phase_15_base_image_registry.md](phase_15_base_image_registry.md) — where the "one
   base container with everything" question is resolved (not deferred)
 - [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — §8 the extension-DSL forward pointer, §9 the
   deferred GHC 9.14.1 toolchain bump
 - [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — §6 the typed
   reconcile state model the manifest-change correctness candidate extends
 - [Image Build Doctrine](../documents/engineering/image_build_doctrine.md) — §2 the baked-binary base
-  container (Phase 14, resolved)
+  container (Phase 15, resolved)
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — §1 the substrate-is-a-fact model the
   niche-substrate candidate probes
 - [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — §9 the single

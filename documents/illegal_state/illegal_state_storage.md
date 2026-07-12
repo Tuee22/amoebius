@@ -54,9 +54,11 @@ objects that bind only if their sizes, access modes, and selectors happen to mat
 hangs in `Pending` forever. amoebius removes the independence: there is no way to declare a claim *without*
 its exactly-matching PV ([§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)). The mismatched pair has no inhabitant. **Owner:**
 [`storage_lifecycle_doctrine.md`](../engineering/storage_lifecycle_doctrine.md). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction).
-**Validation-locus:** `Gate-1-editor` (the mismatched claim/PV pair has no inhabitant — the required
-exactly-matching PV field fails `dhall type` at authoring) + `live-effect` residue (that the running PVC
-actually binds its PV at reconcile, owned by the runtime-enforcement proof).
+**Validation-locus:** `Gate-2-decoder` (the exactly-matching-PV pairing is a Haskell smart-constructor / GADT
+discipline whose teeth Dhall cannot hold — Dhall has no opaque types to hide the raw claim and PV record
+constructors ([`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), so the mismatched pair is a compile-fail
+golden pinned at Phase 6, not a `dhall type` failure at authoring) + `live-effect` residue (that the running
+PVC actually binds its PV at reconcile, owned by the runtime-enforcement proof).
 
 ### 3.18 Unbounded storage anywhere
 

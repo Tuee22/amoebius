@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/deterministic_simulation_doctrine.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/tla_modelling_assumptions.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_29_multicluster_gateway_migration.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/tla_modelling_assumptions.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for how amoebius expresses a concurrent protocol as **one reifiable Haskell `Model` value** from which both the runtime decision function (`interpret`) and the TLA+ specification (`emitTLA`) are total renderings — so the model↔code correspondence holds *by construction*, and the `.tla`/`.cfg` are **generated, never-committed** artifacts.
@@ -161,8 +161,15 @@ mistranslated quantifier, a dropped `UNCHANGED`, a mis-ordered primed assignment
 semantics) would silently make TLC check a different protocol than the daemon runs. Round-tripping one `ToyModel`
 plus one seeded mutation is thin coverage for a property this load-bearing. The operational form of "faithful
 denotation" is therefore a **differential property test**: a generator over the `Model` fragment produces random
-small models, and the explorer and TLC are run on each with the verdict and reachable-state count asserted
-identical (a divergence shrinks to a minimal offending model). This is the single most valuable place in the
+small models, and the explorer and TLC are run on each under a **pinned convention** — the explorer mirrors
+TLC's `CONSTRAINT` semantics (a boundary state that violates the constraint is counted and its invariants
+checked but is **not** expanded), `CHECK_DEADLOCK` is set explicitly on both sides, and the test asserts the two
+produce identical **canonical state-fingerprint *sets*** — not merely equal cardinality, which equal counts
+alone do not establish (equal count + equal verdict is not equal state set) — alongside the same verdict,
+shrinking any divergence to a minimal offending model. This differential faithfulness claim is **scoped to the
+safety sub-fragment**: the generator exercises `emitTLA`'s `Init`/`Next`/`INVARIANT`/`CONSTRAINT` rendering, and
+the explorer checks no liveness, so the `modelFairness`/`modelProperties` (`WF`/`SF`/`PROPERTY`) rendering is
+**not** covered by this test and rests on the `emitTLA` golden and the TLC-only liveness runs instead. This is the single most valuable place in the
 kernel for a **proof assistant**: a machine-checked meta-theorem that each `Expr`/`Temporal` constructor's
 `interpret`-denotation equals the TLA+ denotation `emitTLA` targets would upgrade faithfulness from
 *tested* to *proven*. That meta-theorem, and the fold-closure proofs the confluence ledger requires
@@ -199,7 +206,15 @@ Per the honesty discipline ([documentation_standards.md §6](../documentation_st
   `modelProperties` liveness goal holds on the model **under the `modelFairness` assumptions** — which are
   themselves an *assumed* premise (a real system starves an action if a scheduler is adversarial), recorded like
   the R8 synchrony premise ([chaos_failover_doctrine.md §13](./chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need)),
-  never proven. A liveness green is credible only with a **fairness-sensitivity check**: the property must go
+  never proven. A liveness `PROPERTY` is furthermore **not** checked under a state `CONSTRAINT`: a `CONSTRAINT`
+  truncates the behaviour graph at the bound and distorts `WF`/`SF` enabledness, so a continuously-enabled action
+  can be cut off at the boundary and TLC report a *spurious* green liveness **within** the bound — a distortion
+  the "not a general-scope proof" bullet below (which speaks only to what lies *beyond* the bound) does not
+  cover. Amoebius therefore **finitizes** every liveness run — bounding the state space through `CONSTANTS` and
+  finite, saturating variable domains rather than a state `CONSTRAINT` — so `PROPERTY` checking runs
+  **`CONSTRAINT`-free**; where a run instead retains a `CONSTRAINT`, TLC's constraint-truncation semantics is
+  recorded as an explicit *assumed* premise, and which of the two a run uses is stated. A liveness green is
+  credible only with a **fairness-sensitivity check**: the property must go
   **red** when the fairness assumption is removed (otherwise it was vacuously true and the fairness annotation
   was load-bearing on nothing). The in-process explorer does not check liveness at all ([§3](#3-two-total-renderings)),
   so a liveness verdict is TLC-only and carries no explorer cross-check.

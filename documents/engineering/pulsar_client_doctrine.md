@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_22_pulsar_client.md, DEVELOPMENT_PLAN/phase_23_content_store_workflow.md, DEVELOPMENT_PLAN/phase_26_infernix_lift.md, DEVELOPMENT_PLAN/phase_28_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_24_pulsar_client.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/phase_33_infernix_lift.md, DEVELOPMENT_PLAN/phase_35_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define `amoebius-pulsar` — the one native-protocol Haskell Pulsar client (forked from
@@ -39,7 +39,7 @@ Both transports are deleted. One native client replaces both, with four concrete
 
 > **Honesty (per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).** "Performance via the
 > native protocol" is the **design rationale** — base64 elimination, persistent producers, no process hop —
-> not a benchmarked amoebius result. amoebius has not yet built Phase 22. The WebSocket costs above are read
+> not a benchmarked amoebius result. amoebius has not yet built Phase 24. The WebSocket costs above are read
 > off the infernix/jitML source as *sibling evidence*; the amoebius speedup is expected, not measured.
 
 The no-WebSockets rule is a **locked invariant**, recorded as a standard-service fact in
@@ -74,7 +74,7 @@ It deliberately does **not** own, and only references:
 | Intra-cluster HA correctness (delegated to brokers/bookies) | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
 
 Phase order and status are owned only by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
-(the client lands in **Phase 22**); this doc states the target shape and links back, never a status ledger.
+(the client lands in **Phase 24**); this doc states the target shape and links back, never a status ledger.
 
 ---
 
@@ -205,7 +205,7 @@ Forking — rather than depending on the published package — is the honest cho
 
 > **Honesty.** Treat supernova as a *starting point with sibling provenance*, not a proven foundation.
 > Every capability in [§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek) is "supernova demonstrates it" or "the protocol provides it" — neither is an
-> amoebius test result. Hardening, reconnection semantics, and the dedup proof are Phase 22 work tracked in
+> amoebius test result. Hardening, reconnection semantics, and the dedup proof are Phase 24 work tracked in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -432,16 +432,21 @@ content-address to their owner in [content_addressing_doctrine.md](./content_add
 
 ## 7. Delivery: at-least-once with broker-side dedup (the robust default)
 
-amoebius defaults to **at-least-once delivery, made effectively-once by broker-side
-deduplication** — and it puts the dedup in the *broker*, not the client, on purpose. A producer may retry; a
-consumer may be redelivered a message after a crash; the broker collapses the duplicates so idempotent
-state stays correct.
+amoebius defaults to **at-least-once delivery, made effectively-once** — and that guarantee is split across
+**two distinct mechanisms on two distinct paths**, not folded into one. A **producer resend** — the same
+`(producer_name, sequence_id)` re-published after a retry, on the PRODUCE path — is collapsed **broker-side**
+at ingest. A **consumer redelivery** — an un-acked message re-pushed to a consumer after a crash or
+rebalance — is a *different* duplicate on the CONSUME path: the broker does **not** dedup it, and it is
+collapsed instead by `ACK` plus the application's **work-id-keyed idempotent log-fold**. Broker dedup keys on
+`(producer_name, sequence_id)` on the produce path only; it does **not** absorb consumer-side redelivery. The
+two are not interchangeable, and this section keeps them separate.
 
 ### Why at-least-once is the floor
 
 At-least-once is the honest guarantee a durable log can give cheaply: a consumer `ACK`s only after it has
-processed, and an un-acked message is redelivered after a crash or rebalance. The cost is duplicates — which
-dedup absorbs.
+processed, and an un-acked message is redelivered after a crash or rebalance. The cost is **consumer-side**
+duplicates — absorbed by the application's work-id-keyed idempotent log-fold, **not** by broker dedup (which
+collapses only producer resends, [below](#why-dedup-lives-broker-side)).
 
 ### Why dedup lives broker-side
 
@@ -457,9 +462,20 @@ pairs and **rejects duplicates** at ingest. The contract has two halves:
    context-scoped producer; a one-off key gets a per-message producer name so its hash can't collapse a
    later legitimate message).
 
-Broker-side is the **robust default** rather than client-side memoization because it survives the things
-that break client memory: a restarted producer replica, a second coordinator elected after failover, a
-consumer rebuild from seek ([§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)). The dedup state is the broker's, so it outlives any single process.
+Broker-side is the **robust default** for **producer resends** rather than client-side memoization because it
+survives the things that break producer-local memory: a restarted producer replica, a second coordinator
+elected after failover. The dedup cursor is the broker's, so it outlives any single *producer* process — but
+its retention is **bounded**, not eternal, and it does not extend to a seek/replay (that is the assumed
+premise below, and the reason the seek-rebuild case falls to the application fold, not the broker).
+
+> **Assumed premise (a named *assumed* physics, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), sibling to the R8
+> synchrony premise in [chaos_failover_doctrine.md §13](./chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need)).** Broker dedup state has a **bounded
+> retention**: the `(producer_name, sequence_id)` cursor is persisted only via periodic snapshots and is
+> **evicted after a producer-inactivity timeout** (Pulsar default ~6h). So a `SEEK`/replay or geo-replication
+> catch-up ([§5](#5-the-capability-surface-lookup--produce--consume--subscribe--seek)) that **re-publishes derived events past that window is not collapsed by the broker** — a
+> producer key the broker has already forgotten re-produces as new. Effective-once across that boundary
+> therefore rests on the **work-id-keyed idempotent log-fold at the application**, never on broker dedup. This
+> is a *monitored assumption* (a retention/timeout bound), not a proven amoebius guarantee.
 
 ### The native protocol makes this clean
 
@@ -505,7 +521,7 @@ itself is not this doc's claim.
 | infernix dedup wiring | namespace dedup policy + `(producer_name, sequence_id)` + `initialSequenceId` URL workaround | broker-side dedup with `sequence_id` as a native field ([§7](#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default)) |
 
 infernix and jitML remain **ML extension libraries**; they stop shipping their own transports and consume
-`amoebius-pulsar` instead — one subsystem at a time, per the Phase 26 migration in
+`amoebius-pulsar` instead — one subsystem at a time, per the Phase 33 migration in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -514,7 +530,7 @@ infernix and jitML remain **ML extension libraries**; they stop shipping their o
 
 This document is normative client doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the native client,
-the topology algebra, and the round-trip gate land in **Phase 22**, and the infernix/jitML migration onto it
+the topology algebra, and the round-trip gate land in **Phase 24**, and the infernix/jitML migration onto it
 is **Phases 26 (infernix) and 27 (jitML)**. This doc never maintains a competing status ledger.
 
 ---
