@@ -1,0 +1,3 @@
+# daemon-substrate is its own repository (github.com/Tuee22/daemon-substrate);
+# keep it from being re-embedded as a gitlink by a broad `git add`.
+/daemon-substrate/
