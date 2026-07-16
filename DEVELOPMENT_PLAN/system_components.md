@@ -249,15 +249,17 @@ Every byte of its checkpoint is a Vault-Transit-enveloped object in MinIO, owned
 [`pulumi_iac_doctrine.md` §2 — The backend: every byte of state is a Vault-enveloped object in MinIO](../documents/engineering/pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio).
 What it provisions — provider clusters, node groups, per-PV EBS sized to its PVC — is owned by
 [`pulumi_iac_doctrine.md` §4 — What Pulumi provisions (the resource catalog)](../documents/engineering/pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog).
-The engine and EBS programs land with provider clusters in Phase 30; multi-cluster child-spawn keying
-(Phase 28 — see [phase_28_multicluster_spawn_georepl.md](phase_28_multicluster_spawn_georepl.md)) reuses the same backend.
+The in-cluster engine seam and encrypted backend first land with multi-cluster child spawning in Phase 28
+([phase_28_multicluster_spawn_georepl.md](phase_28_multicluster_spawn_georepl.md)); the provider-cluster,
+node-group, and EBS programs extend them in Phase 30.
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
 |---|---|---|---|
-| In-cluster Pulumi engine seam (under the singleton) | [pulumi_iac §1](../documents/engineering/pulumi_iac_doctrine.md#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster) | `amoebius-pulumi/src/Amoebius/Pulumi/Engine.hs` (PLANNED) | [phase_30_provider_clusters.md](phase_30_provider_clusters.md) |
-| Vault-enveloped MinIO state backend | [pulumi_iac §2](../documents/engineering/pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio) | `src/Amoebius/Pulumi/Backend/EncryptedMinio.hs` (PLANNED) | [phase_30_provider_clusters.md](phase_30_provider_clusters.md) |
+| In-cluster Pulumi engine seam (under the singleton) | [pulumi_iac §1](../documents/engineering/pulumi_iac_doctrine.md#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster) | `amoebius-pulumi/src/Amoebius/Pulumi/Engine.hs` (PLANNED) | [phase_28_multicluster_spawn_georepl.md](phase_28_multicluster_spawn_georepl.md) |
+| Vault-enveloped MinIO state backend | [pulumi_iac §2](../documents/engineering/pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio) | `src/Amoebius/Pulumi/Backend/EncryptedMinio.hs` (PLANNED) | [phase_28_multicluster_spawn_georepl.md](phase_28_multicluster_spawn_georepl.md) |
 | Resource provisioning (provider cluster, node groups, EBS, teardown) | [pulumi_iac §4](../documents/engineering/pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog) | `amoebius-pulumi/src/Amoebius/Pulumi/{Ebs,NodeGroup,Teardown}.hs`, `src/Amoebius/Pulumi/Provider/Eks.hs` (PLANNED) | [phase_30_provider_clusters.md](phase_30_provider_clusters.md) |
 | EBS create-vs-delete credential model | [pulumi_iac §6 — The EBS create-vs-delete credential model](../documents/engineering/pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model) | `src/Amoebius/Pulumi/Credential.hs` (PLANNED) | [phase_30_provider_clusters.md](phase_30_provider_clusters.md) |
+| Static-only EBS CSI attachment + PV renderer | [storage_lifecycle §5.1](../documents/engineering/storage_lifecycle_doctrine.md#51-storage-is-independent-of-the-node-lifecycle), [pulumi_iac §6](../documents/engineering/pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model) | `src/Amoebius/Storage/EbsCsi.hs` (PLANNED) | [phase_30_provider_clusters.md](phase_30_provider_clusters.md) |
 
 ---
 

@@ -45,7 +45,7 @@ non-confluent bucket — is precisely the boundary hand-off the [Phase 29](phase
 gateway-migration runtime consumes.
 
 This phase consumes earlier phases and does not re-implement them: Phase 14's `pb` bootstrap of a `kind`/`rke2`
-cluster, Phase 18's root Vault/PKI trust anchor, Phase 19's platform services (MinIO, Pulsar, Patroni Postgres),
+cluster, Phase 18's root Vault/PKI trust anchor, Phases 19–20's platform services (MinIO, Pulsar, Patroni Postgres),
 Phase 22's live DSL deploy via the `replicas=1` singleton, Phase 24's native Pulsar client, and Phase 25's
 content-addressed store + workflow runtime. A **stretched cluster is not geo-replication**: one etcd, one
 boundary, one `Topology` whose nodes merely span network `Site`s owes no R9 budget and no Second-Axis obligation
@@ -73,8 +73,8 @@ golden, [§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-
 and active-active wiring on a non-confluent invariant **refused**; the gate turns red on **at least one
 committed seeded mutant** ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists): the `classifier-default-confluent` and `project-identity` mutants); teardown is
 **leak-free by the OS-boundary observer of [§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists)** (`pulumi stack ls` and kubeconfig-context enumeration, read
-outside the forest, report zero surviving child stacks and zero surviving child clusters, retained
-`no-provisioner` PVs exempt); and the run emits a **machine-derived** proven/tested/assumed ledger ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists)) that
+outside the forest, report zero surviving child stacks and zero surviving child clusters, retained backing
+stores exempt); and the run emits a **machine-derived** proven/tested/assumed ledger ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists)) that
 marks the spawn and geo-replication *tested* (drilled) on the linux-cpu runtime — never *proven* — the
 projection type-safety *proven-for-the-model* (a decode/type result), and every layer outside Register 3
 UNVERIFIED.
@@ -107,7 +107,7 @@ the following named, committed artifacts so no self-authored harness or post-hoc
 - **External-observer teardown check.** "Tears down leak-free" is scoped for Phase 28 (the flagged-credential +
   postflight tag-sweep machinery of testing_doctrine §6–§7 is Phase 36) to: after teardown, an **OS-boundary
   observer** — `pulumi stack ls` and kubeconfig-context enumeration, read outside the forest — reports zero
-  surviving child stacks and zero surviving child clusters, while the retained `no-provisioner` PVs the gate
+  surviving child stacks and zero surviving child clusters, while the retained backing stores the gate
   deliberately preserves are explicitly exempt (named in the fixture as the retained set).
 - **Machine-derived ledger + validator.** The ledger is generated from the run record (spawn stack IDs, the
   delivered-subtree inspection result, the emitted confluence classes, the idempotent-write golden result, the
@@ -203,7 +203,7 @@ managed-resource registry entry so teardown is a reconcile, not a state machine.
    exists; the committed `project-identity` mutant ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists)) makes a sibling branch appear in a child's delivered
    spec and the runtime subtree-inspection assertion goes red; mode (b) bricks with the parent sealed and
    unseals with it available; cross-child Transit decrypt fails; a graceful child teardown leaves zero surviving
-   stacks by the OS-boundary observer, retained PVs exempt.
+   stacks by the OS-boundary observer, retained backing stores exempt.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -214,7 +214,7 @@ The whole sprint (📋 Planned).
 **Implementation**: `src/Amoebius/Multicluster/GeoReplication.hs`, `src/Amoebius/Multicluster/ConfluenceClass.hs`
 — target paths, not yet built.
 **Blocked by**: Sprint 28.1; Phase 24 (native Pulsar client, CBOR); Phase 25 (content-addressed store + workflow
-runtime); Phase 19 (MinIO + Patroni Postgres).
+runtime); Phase 19 (MinIO); Phase 20 (Patroni Postgres).
 **Independent Validation**: two sibling children replicate a `command → event* → result` workflow over
 native-protocol Pulsar geo-replication, write-once content-addressed MinIO blobs, and Patroni Postgres; a
 duplicate cross-cluster write is shown idempotent against the committed content-addressed golden; every crossing
@@ -251,7 +251,7 @@ Pulsar log cross freely, while the gateway authority and any CAS "latest" pointe
    and the classifier refuses active-active on a non-confluent invariant; the committed
    `classifier-default-confluent` mutant ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists)) — which flips the unclassified default to confluent — wrongly
    admits the unclassified fixture and the classification oracle goes red; the forest tears down leak-free by
-   the OS-boundary observer of [§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists), retained `no-provisioner` PVs exempt.
+   the OS-boundary observer of [§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists), retained backing stores exempt.
 
 ### Remaining Work
 The whole sprint (📋 Planned).

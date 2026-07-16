@@ -14,8 +14,9 @@
 📋 Planned. Specified before implementation; every sprint below is 📋 Planned and every prescriptive statement
 is design intent, never a tested amoebius result. This phase opens after the Phase 21 gate (Keycloak-owned
 ingress) and runs on the **linux-cpu** substrate in **Register 3** — live infrastructure: the single-node
-`kind` cluster of Phases 13–19, its standard platform-service stack (Phase 19) already reconciled by the
-Phase-15 typed renderer + SSA reconciler onto the Phase-16 retained storage. The control-plane singleton
+`kind` cluster after Phases 14–21, with the full standing shape assembled by the registry/base-image work
+(Phase 15), Vault/PKI (Phase 18), platform services (Phases 19–20), and Keycloak-owned edge (Phase 21), all
+applied through the Phase-16 typed renderer + SSA reconciler onto Phase-17 retained storage. The control-plane singleton
 role generalizes the prodbox root single-node control-plane behaviour and rides the shared daemon spine
 proven in prodbox — but that is **sibling evidence, not an amoebius result**; amoebius has not yet built any
 sprint here, and single-instance is a k8s/etcd property with nothing for amoebius to prove.
@@ -31,7 +32,7 @@ authored and proven **in-process, with no cluster**. Phase 22 adds the runtime r
 **control-plane singleton** deployed as a Kubernetes **Deployment with `replicas=1`** — exactly one brain per
 cluster, holding total cluster + secret authority — that decodes the already-proven `InForceSpec` and runs the
 idempotent `discover → diff → enact → re-observe` reconcile loop driving a **real** linux-cpu cluster toward
-it, applying the standard platform stack plus a trivial app through the Phase-15 reconciler to convergence with
+it, applying the standard platform stack plus a trivial app through the Phase-16 reconciler to convergence with
 a leak-free teardown.
 
 Single-instance of that singleton is **delegated to k8s/etcd**: the Deployment controller and etcd guarantee
@@ -45,7 +46,7 @@ fails to type-check or decode — but that type/decode result was **already prov
 here it is a live guard, not the proof. Full app tenancy (own namespace, `<app>/<bucket>` ObjectStore,
 in-namespace Sql) is deliberately deferred to Phase 23; the app here is trivial.
 
-**Substrate:** linux-cpu — the single-node `kind` cluster from Phases 13–19; no apple, linux-cuda, or windows
+**Substrate:** linux-cpu — the single-node `kind` cluster from Phases 14–21; no apple, linux-cuda, or windows
 substrate is exercised by this phase's gate.
 
 **Register:** 3 — live infrastructure (§K).
@@ -59,8 +60,8 @@ Gate 2 — a **Register-3** live-infrastructure check.
 **Gate-integrity clauses (§M).** The gate is hardened as follows and passes only when every clause below holds:
 
 - **Attribution via an OS-boundary observer (§M.5, forecloses the decorative-singleton cheat).** The gate
-  harness (`test/integration/Phase20Gate.hs`) runs under a kubeconfig whose RBAC (a committed
-  `test/fixtures/phase20/harness-rbac.yaml`) grants it exactly: `create`/`get`/`delete` on the singleton's own
+  harness (`test/integration/Phase22Gate.hs`) runs under a kubeconfig whose RBAC (a committed
+  `test/fixtures/phase22/harness-rbac.yaml`) grants it exactly: `create`/`get`/`delete` on the singleton's own
   `Deployment`, `ServiceAccount`, and `RoleBinding`, and cluster-wide read-only (`get`/`list`/`watch`) —
   **and no write verb on any platform/app object kind**. Every platform-service and trivial-app object mutation
   observed in the gate window is read from the **apiserver audit log** (the OS-boundary observer — never a
@@ -68,13 +69,14 @@ Gate 2 — a **Register-3** live-infrastructure check.
   `user.extra.authentication.kubernetes.io/…` MUST resolve to the singleton pod's in-cluster ServiceAccount;
   the audit log MUST record **zero** platform/app-object writes attributed to the harness principal. A run in
   which the harness principal issued any platform/app write, or in which the singleton SA issued none, fails.
-- **Concrete representative set (§M.7).** "the standard platform-service stack" is exactly the Phase-18
-  backbone: **MetalLB, MinIO (distributed), Pulsar (broker+bookie), Prometheus+Grafana, the Percona operator,
-  and the named per-consumer Patroni Postgres clusters with pgAdmin**; the "trivial app" is exactly the
+- **Concrete representative set (§M.7).** The Phase-19/20 service set reconciled by this fixture is exactly:
+  stack: **MetalLB, the `distribution` registry re-homed onto MinIO's S3 driver, MinIO (distributed), Pulsar
+  (broker+bookie), Prometheus+Grafana, the Percona operator, and the named per-consumer Patroni Postgres
+  clusters with pgAdmin**; the "trivial app" is exactly the
   single-service Deployment+Service+HTTPRoute of `dhall/examples/platform_plus_trivial_app.dhall`. No other
   service set satisfies the gate.
 - **Phase-0-pinned oracle (§M.1).** The positive fixture `dhall/examples/platform_plus_trivial_app.dhall`, the
-  expected per-pass enact sets (`test/fixtures/phase20/expected-enact-pass1.json`,
+  expected per-pass enact sets (`test/fixtures/phase22/expected-enact-pass1.json`,
   `…/expected-enact-pass2.json`), the perturbation target list (`…/perturb-targets.txt`), and the negative
   corpus's expected Gate-1/Gate-2 rejection-tag table (`…/negative-expected-tags.tsv`, hand-authored,
   independent of the singleton's own decoder output — §M.3) are all **committed in Phase 0 before
@@ -82,7 +84,7 @@ Gate 2 — a **Register-3** live-infrastructure check.
 - **Committed seeded mutant (§M.2).** The gate names **≥1 committed seeded mutant** that MUST turn it red:
   the **dropped-effect** mutant `Reconcile.hs::enact` that returns success without issuing the SSA patch (so
   the perturbed platform component is never restored) — committed under
-  `test/fixtures/phase20/mutants/enact-noop.patch` and re-run each gate, asserted red because pass-1 restores
+  `test/fixtures/phase22/mutants/enact-noop.patch` and re-run each gate, asserted red because pass-1 restores
   nothing. A second **effect-swap** mutant (the harness principal, not the singleton SA, issues the writes)
   MUST also go red via the attribution clause above.
 
@@ -116,13 +118,13 @@ Gate 2 — a **Register-3** live-infrastructure check.
 
 ## Sprints
 
-## Sprint 20.1: The control-plane singleton — a Deployment replicas=1, single-instance from k8s/etcd 📋
+## Sprint 22.1: The control-plane singleton — a Deployment replicas=1, single-instance from k8s/etcd 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/ControlPlane/Singleton.hs` (the in-cluster singleton role + the shared
 daemon spine); `src/Amoebius/ControlPlane/Reconcile.hs` (the `discover → diff → enact → re-observe` loop
-wrapping the Phase-15 typed reconciler); the singleton's own generated `Deployment replicas=1` manifest,
-rendered and applied by the Phase-15 reconciler (no Helm) — target paths, not yet built.
+wrapping the Phase-16 typed reconciler); the singleton's own generated `Deployment replicas=1` manifest,
+rendered and applied by the Phase-16 reconciler (no Helm) — target paths, not yet built.
 **Blocked by**: Phase 16 gate (the typed renderer + SSA reconciler — the singleton is itself a rendered,
 applied object); Phase 18 gate (root Vault — the singleton is the in-cluster principal that operates Vault);
 Phase 14 gate (the `kind` cluster + the host-daemon→singleton handoff the midwife begins).
@@ -149,13 +151,13 @@ in-cluster control-plane singleton as a Deployment-`replicas=1` role that holds 
 authority and runs the reconcile loop, with single-instance delegated to k8s/etcd and no amoebius election.
 
 ### Deliverables
-- A control-plane singleton deployed as a **generated typed `Deployment replicas=1`** by the Phase-15
+- A control-plane singleton deployed as a **generated typed `Deployment replicas=1`** by the Phase-16
   reconciler, **stateless** (no PVC; its durable `InForceSpec` state is the Vault-Transit-enveloped MinIO
   object), running the shared daemon spine (`load → prereq → acquire → ready → serve → drain → exit`, no
   `forkIO`, structured JSON logs, no env / `PATH`).
 - The `discover → diff → enact → re-observe` reconcile loop that decodes the `InForceSpec` in-process
   (Phase-5 decoder), binds capabilities (Phase-8 binder), and applies the resulting manifests through the
-  Phase-15 typed reconciler — idempotently, driven only by observed cluster state.
+  Phase-16 typed reconciler — idempotently, driven only by observed cluster state.
 - Single-instance **delegated to k8s/etcd**: the Deployment controller keeps one pod; a Kubernetes `Lease` (the
   etcd-backed client-go leader-election object) is the sole mechanism where strict at-most-one-writer must
   survive a rolling update or partition — **no bespoke election, no signed commit log, no standby population**.
@@ -183,30 +185,31 @@ authority and runs the reconcile loop, with single-instance delegated to k8s/etc
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 20.2: Live reconcile of the platform + a trivial app from one `.dhall` 📋
+## Sprint 22.2: Live reconcile of the platform + a trivial app from one `.dhall` 📋
 
 **Status**: Planned
 **Implementation**: `dhall/examples/platform_plus_trivial_app.dhall` (the positive deploy fixture);
 `src/Amoebius/ControlPlane/Deploy.hs` (the singleton's platform + trivial-app reconcile entry) — target paths,
 not yet built.
-**Blocked by**: Sprint 20.1 (the running singleton + reconcile loop); Phase 19 gate (the standard
-platform-service stack the `.dhall` deploys); Phase 5 (the Gate-2 decoder producing the in-memory IR the loop
-consumes).
+**Blocked by**: Sprint 22.1 (the running singleton + reconcile loop); Phase 19 and Phase 20 gates (the service
+set the `.dhall` deploys); Phase 21 gate (the Keycloak-owned edge through which the app is validated); Phase 5
+(the Gate-2 decoder producing the in-memory IR the loop consumes).
 **Independent Validation**: one `.dhall` decodes through `Dhall.inputFile auto` to its IR and the singleton
 reconciles the standard platform stack plus a trivial single-service app to ready on the linux-cpu cluster.
-**Because Phases 13–19 leave the platform pre-converged, the harness first perturbs it (§M.6, forecloses the
+**Because Phases 14–21 leave the platform and edge pre-converged, the harness first perturbs the Phase-19/20
+service set (§M.6, forecloses the
 pre-converged-ride cheat):** before the first pass it deletes the named components in
-`test/fixtures/phase20/perturb-targets.txt` (at minimum one platform `Deployment` and its `Service` — e.g. the
+`test/fixtures/phase22/perturb-targets.txt` (at minimum one platform `Deployment` and its `Service` — e.g. the
 Prometheus `Deployment`+`Service`), then asserts **per-pass enact records read from the apiserver audit log
 (§M.5), not the singleton's self-report:** the **first** pass's created/patched set is **non-empty** and
 matches `expected-enact-pass1.json` (it restores the deleted components to Ready), and the **second**
 invocation's enact set is **empty** and matches `expected-enact-pass2.json` — a `no-op` meaning **zero mutating
 writes under the singleton field manager in the audit log**, not merely unchanged end-state readiness. A
 teardown then leaves **no leaked resources**: the postflight sweep is scoped explicitly to **this run's
-provisioned objects, identified by the run-unique label `amoebius.dev/phase20-run=<run-id>` the singleton
-stamps on every object it creates** (Phase-31 flag-at-creation machinery is not assumed; this label set is
+provisioned objects, identified by the run-unique label `amoebius.dev/phase22-run=<run-id>` the singleton
+stamps on every object it creates** (Phase-36 flag-at-creation machinery is not assumed; this label set is
 authored here), and the sweep is empty over that label set; separately, every platform component perturbed by
-the harness is asserted back at Ready so the shared Phase-18 stack is left as found.
+the harness is asserted back at Ready so the shared Phase-19/20 stack is left as found.
 **Docs to update**: `documents/engineering/dsl_doctrine.md`,
 `documents/engineering/manifest_generation_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -218,8 +221,8 @@ admits what the decoder blessed. The type/decode integrity itself was proven in-
 band; here it is exercised, not re-established.
 
 ### Deliverables
-- A positive deploy `.dhall` composing the standard platform-service stack (Phase 19) and a **trivial**
-  single-service app — deliberately narrower than the Phase-21 tenancy projection (no per-app namespace,
+- A positive deploy `.dhall` composing the standard platform-service stack (Phases 19–20) and a **trivial**
+  single-service app — deliberately narrower than the Phase-23 tenancy projection (no per-app namespace,
   ObjectStore, or in-namespace Sql fanout).
 - The singleton's live reconcile of that spec: decode → capability-bind → render → SSA-apply → wait-to-ready,
   each edge a witnessed condition — **the witness for each apply/ready edge is externally observable apiserver
@@ -228,12 +231,13 @@ band; here it is exercised, not re-established.
   under the audit-log no-op definition above.
 - A leak-free teardown obligation carried by the deploy fixture — a test-topology `.dhall` whose postflight
   sweep asserts every provisioned object (the run-unique-labelled set defined in Independent Validation) was
-  reclaimed, while the pre-existing Phase-18 platform stack is restored to Ready rather than swept.
+  reclaimed, while the pre-existing Phase-19/20 service set and Phase-21 edge are restored to Ready rather than
+  swept.
 
 ### Validation
 1. After the harness perturbs the named platform components, the `.dhall` reconcile's first pass restores them
    and brings the platform + trivial app up on the linux-cpu cluster (first-pass audit-log enact set non-empty,
-   matching `expected-enact-pass1.json`); the app is reachable through the Phase-19 Keycloak-owned edge; a
+   matching `expected-enact-pass1.json`); the app is reachable through the Phase-21 Keycloak-owned edge; a
    re-run is a no-op (second-pass audit-log enact set empty, matching `expected-enact-pass2.json`).
 2. Teardown leaves no leaked resources (the postflight sweep over the run-unique label set is empty and the
    perturbed platform components are back at Ready); the apiserver audit log records that **every** platform/app
@@ -242,17 +246,17 @@ band; here it is exercised, not re-established.
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 20.3: Phase gate harness — live deploy + the pre-cluster negative corpus as a live regression guard 📋
+## Sprint 22.3: Phase gate harness — live deploy + the pre-cluster negative corpus as a live regression guard 📋
 
 **Status**: Planned
-**Implementation**: `test/integration/Phase20Gate.hs` (linux-cpu spin-up / reconcile / teardown + the negative
+**Implementation**: `test/integration/Phase22Gate.hs` (linux-cpu spin-up / reconcile / teardown + the negative
 regression assertions); the reused Phase-6 negative corpus under `dhall/examples/illegal_*.dhall` (re-run, not
 re-authored) — target paths, not yet built.
-**Blocked by**: Sprint 20.1, Sprint 20.2; Phase 6 (the pre-cluster illegal-state negative corpus +
+**Blocked by**: Sprint 22.1, Sprint 22.2; Phase 6 (the pre-cluster illegal-state negative corpus +
 validation-locus ledger, already proven in Registers 1–2); Phase 21 gate (the Keycloak-owned edge the deployed
 app must route through).
 **Independent Validation**: the harness deploys the platform + trivial app from one `.dhall` on linux-cpu
-(under the perturbation + attribution regime of the Gate-integrity clauses and Sprint 20.2) and tears down
+(under the perturbation + attribution regime of the Gate-integrity clauses and Sprint 22.2) and tears down
 leak-free, then re-runs each Phase-6 negative fixture against the live deploy path and asserts each still
 **fails at Gate 1 or Gate 2**, and each positive fixture still decodes; the run emits a **Register-3**
 proven/tested/assumed ledger naming the live substrate. **"The live deploy path" is pinned to the identical
@@ -260,13 +264,13 @@ entry point the positive fixture used (§M.3, forecloses the host-side re-run ch
 is submitted through the exact same singleton spec-ingestion/`Deploy.hs` entry the positive gate fixture flowed
 through (not a separate host-side CorpusSpec decoder), and each yields a **structured Gate-1 (`dhall type`
 error) or Gate-2 (`DecodeError` tag) rejection whose emitted tag equals the Phase-0-committed expected tag for
-that fixture in `test/fixtures/phase20/negative-expected-tags.tsv` (§M.8)** — a bare "it failed" does not
+that fixture in `test/fixtures/phase22/negative-expected-tags.tsv` (§M.8)** — a bare "it failed" does not
 satisfy this. **"No fixture reaches the apiserver" is proven, not assumed (§M.5):** across the entire negative
 corpus run the apiserver audit log shows **zero** platform/app-object writes, and a full-cluster
 `resourceVersion` snapshot taken before and after the corpus run is equal — cluster state is byte-for-byte
 unchanged.
 **Docs to update**: `DEVELOPMENT_PLAN/substrates.md`, `documents/engineering/testing_doctrine.md`,
-`DEVELOPMENT_PLAN/README.md` (flip the Phase-20 status when the gate passes).
+`DEVELOPMENT_PLAN/README.md` (flip the Phase-22 status when the gate passes).
 
 ### Objective
 Adopt [`dsl_doctrine.md §5`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
@@ -277,23 +281,23 @@ against the live path, and the positive fixtures still decode. That type/decode 
 the pre-cluster band; here the guard confirms the live deploy path never admits an illegal spec.
 
 ### Deliverables
-- The positive gate: the Sprint-20.2 platform + trivial-app deploy driven to ready by the singleton and torn
+- The positive gate: the Sprint-22.2 platform + trivial-app deploy driven to ready by the singleton and torn
   down leak-free, expressed as a test-topology `.dhall` with a teardown obligation.
 - The negative regression guard: the Phase-6 corpus (a bad PVC↔PV pairing, a Keycloak-bypassing open ingress, a
   product named in application logic, and the capacity/topology/bounded-storage set) **re-run** against the
   live deploy path (the same singleton `Deploy.hs` entry the positive fixture used), each asserted to fail at
   Gate 1 or Gate 2 **with its specific foreclosure tag matching the Phase-0-committed hand-authored oracle
-  `test/fixtures/phase20/negative-expected-tags.tsv`** (each row: fixture → expected `dhall type` error or
+  `test/fixtures/phase22/negative-expected-tags.tsv`** (each row: fixture → expected `dhall type` error or
   `DecodeError` tag, authored independently of the singleton's decoder — §M.3/§M.8), and each paired with a
   positive that differs only in the foreclosed dimension — **never re-establishing** the type discipline, only
   guarding that the deploy path inherits it.
-- **Committed seeded mutants (§M.2):** at least `test/fixtures/phase20/mutants/enact-noop.patch` (the
+- **Committed seeded mutants (§M.2):** at least `test/fixtures/phase22/mutants/enact-noop.patch` (the
   dropped-effect `Reconcile.hs::enact`, red because the perturbed component is never restored) and an
   attribution mutant (harness principal issues the writes, red because the audit clause detects a non-singleton
   writer) — both committed and re-run each gate, each asserted to turn the gate red.
 - The **Phase-0-pinned oracle bundle** committed before any implementation exists:
   `dhall/examples/platform_plus_trivial_app.dhall`, `expected-enact-pass1.json`, `expected-enact-pass2.json`,
-  `perturb-targets.txt`, `negative-expected-tags.tsv`, and `harness-rbac.yaml` (under `test/fixtures/phase20/`).
+  `perturb-targets.txt`, `negative-expected-tags.tsv`, and `harness-rbac.yaml` (under `test/fixtures/phase22/`).
 - A **Register-3** proven/tested/assumed ledger recording the live-enforcement result (the apiserver admitted
   the rendered manifests) and marking the deferred surfaces — full app tenancy (Phase 23), and the
   cross-cluster gateway-migration correspondence (the multi-cluster phase) — as UNVERIFIED, never green.
@@ -327,11 +331,11 @@ The whole sprint (📋 Planned).
   and gateway-migration correspondence UNVERIFIED).
 
 **Cross-references to add:**
-- `DEVELOPMENT_PLAN/README.md` — flip the Phase-20 status when the gate passes; link this document.
-- `DEVELOPMENT_PLAN/substrates.md` — confirm the Phase-20 linux-cpu gate row (the replicas=1 singleton, no
+- `DEVELOPMENT_PLAN/README.md` — flip the Phase-22 status when the gate passes; link this document.
+- `DEVELOPMENT_PLAN/substrates.md` — confirm the Phase-22 linux-cpu gate row (the replicas=1 singleton, no
   election).
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/ControlPlane/{Singleton,Reconcile,Deploy}.hs`
-  as Phase-20 design-first rows, and re-anchor the in-cluster-singleton row to the current
+  as Phase-22 design-first rows, and re-anchor the in-cluster-singleton row to the current
   `#3-the-control-plane-singleton` (no election).
 
 ## Related Documents

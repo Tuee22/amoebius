@@ -74,7 +74,7 @@ Concretely (DEVELOPMENT_PLAN cross-cutting invariants):
   "mock 3-replica" pattern collapses to a `replicas=n` value.
 
 > **Honesty.** The HA-always model is *specified* here and inherited from prodbox where parts of it are
-> proven; in amoebius it is design intent for Phase 19, not a tested amoebius result. Status and gates live
+> proven; in amoebius it is design intent delivered across Phase 15 and Phases 18–21, not a tested amoebius result. Status and gates live
 > only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and
 > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)).
@@ -116,8 +116,9 @@ standard HA service:
 - **Pulumi state backend** with Vault-envelope encryption — [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md).
 - **App buckets** named `<app>/<bucket>` — [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md) and the DSL.
 
-Its on-disk durability — the `no-provisioner` retained PV that survives cluster delete/recreate and
-rebinds deterministically — is owned entirely by [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md).
+Its on-disk durability — retained backing that survives cluster delete/recreate and is exposed again through
+a freshly rendered `no-provisioner` PV binding — is owned entirely by
+[storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md).
 MinIO runs HA (distributed). The one path by which something *outside* the cluster reaches MinIO — a host
 compute daemon as a MinIO peer over a host-only NodePort — is the carve-out in [§9](#9-the-loadbalancer-and-the-single-wild-ingress-path), owned by
 [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md).
@@ -218,7 +219,7 @@ independent version and lifecycle, and clean per-namespace teardown.
 - **Canonical consumers.** Keycloak is the proven prodbox consumer; other standard services that need a
   relational database each get their own Patroni cluster + pgAdmin. (The registry does **not** —
   `distribution` needs no database, [§3](#3-the-registry--the-single-image-source) — which is one fewer Patroni consumer than prodbox's Harbor.) The
-  authoritative list of which standard services take a database is a Phase 19 delivery detail tracked in
+  authoritative list of which standard services take a database is a Phase 20 delivery detail tracked in
   [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), not frozen here.
 - **Storage is not owned here.** Retained PVs, the `<namespace>/<statefulset>/pv_<integer>` naming, sizing,
   and deterministic rebind are owned by [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md).
@@ -403,7 +404,7 @@ host tooling that brings these services up is discovered lazily through the subs
 invoked by full path — there is no `PATH`-based discovery anywhere in the bring-up sequence.
 
 > **Honesty.** Where this section generalizes a behaviour proven in prodbox, that proof is *evidence from a
-> sibling system*, not proof in amoebius — which has not yet built Phase 19. Read every prescriptive
+> sibling system*, not proof in amoebius — which has not yet built the Phase-15 / Phases-18–21 service set. Read every prescriptive
 > statement here as design intent, never as a tested amoebius result.
 
 ---
@@ -412,7 +413,8 @@ invoked by full path — there is no `PATH`-based discovery anywhere in the brin
 
 This document is normative platform-services doctrine only. Delivery sequencing, completion status,
 validation gates, and remaining work are owned by
-[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (platform services land in **Phase 19**).
+[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (the full service set lands across
+**Phase 15 and Phases 18–21**).
 This doc never maintains a competing status ledger; it states the target shape and links back for status.
 
 ---

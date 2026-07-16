@@ -171,8 +171,9 @@ workload as Pulsar/MinIO clients. It is a **deployment rule**, not app logic
   node to lose on teardown.*
 - **"Delete everything except storage" is the only expressible teardown.** The reusable deprovision type has
   **no storage arm at all**, so "auto-delete durable storage on teardown" is type-foreclosed uninhabitable on the
-  normal path; the sole deleter of durable data remains the elevated test harness, on test-flagged resources
-  only ([storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md),
+  normal path; within amoebius automation the sole deleter of durable backing is the elevated test harness,
+  and only for test-owned resources. Production reclaim remains an external human break-glass action
+  ([storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md),
   [testing_doctrine.md](./testing_doctrine.md)). The credential/`Retain` mechanics are owned there and by
   [pulumi_iac_doctrine.md §6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model); this doc only requires the storage-arm-free shape.
 

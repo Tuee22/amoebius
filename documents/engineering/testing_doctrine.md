@@ -7,7 +7,8 @@
 
 > **Purpose**: Define amoebius testing as a self-tearing-down `InForceSpec` topology — spin up resources, run a
 > workflow, **always** tear down — plus the `suggest-test` generator, flagged test credentials, the
-> elevated harness as the sole deleter of durable storage, and the per-run proven/tested/assumed ledger
+> elevated harness as the sole automated deleter of test-owned durable storage, and the per-run
+> proven/tested/assumed ledger
 > artifact.
 
 ---
@@ -134,8 +135,8 @@ flowchart TD
   run -->|workflow failure| down
   up -->|setup failure| down
   spec -->|Ctrl-C / abort| down
-  down -->|postflight sweep empty| ledger["emit per-run ledger artifact (proven / tested / assumed)"]
-  down -->|sweep non-empty| fail["hard failure: leak list in the record"]
+  down -->|flagged sweep + independent inventory diff empty| ledger["emit per-run ledger artifact (proven / tested / assumed)"]
+  down -->|sweep or inventory diff non-empty| fail["hard failure: leak list in the record"]
 ```
 
 The "no explicit list of tests" principle is what makes this a *contract* rather
@@ -272,8 +273,8 @@ Three boundaries keep `suggest-test` honest and within doctrine:
 ## 6. Flagged test credentials
 
 Per the original vision, the credentials used for testing (e.g. AWS deployments) need to be
-specifically flagged, as is done in `~/prodbox`. A test must be able to do things
-production must not — most sharply, *delete durable storage* ([§7](#7-the-elevated-harness-is-the-sole-deleter-of-durable-storage-leak-free-cycles)) — so the authority to do them must be a
+specifically flagged, as is done in `~/prodbox`. Automated tests must be able to do things normal production
+automation must not — most sharply, *delete test-owned durable storage* ([§7](#7-the-elevated-harness-is-the-sole-automated-deleter-of-test-owned-durable-storage-leak-free-cycles)) — so the authority to do them must be a
 **separate, marked** credential, never the everyday one acting in a test role.
 
 amoebius adopts the prodbox `aws_admin_for_test_simulation` pattern, generalized:
@@ -285,7 +286,7 @@ amoebius adopts the prodbox `aws_admin_for_test_simulation` pattern, generalized
 - **Test-generated resources carry a test flag.** All test-generated resources carry a flag for the harness
   to see, and these get deleted by the elevated test credentials. Every
   resource a topology allocates is tagged test-owned at creation, so the harness can later find *exactly*
-  what it created and reclaim it without guessing — the basis of the leak-free sweep in [§7](#7-the-elevated-harness-is-the-sole-deleter-of-durable-storage-leak-free-cycles).
+  what it created and reclaim it without guessing — the basis of the leak-free sweep in [§7](#7-the-elevated-harness-is-the-sole-automated-deleter-of-test-owned-durable-storage-leak-free-cycles).
 - **The flagged credential is still a secret-by-name.** The credential's *material* lives in Vault and is
   referenced from Dhall by name only, exactly as in [§5](#5-suggest-test-detect-the-world-emit-a-representative-test-dhall) — flagging changes *which* credential a test uses and
   *what it is allowed to do*, not *where the secret lives*. The vaulting and injection are owned by
@@ -305,21 +306,23 @@ amoebius adopts the prodbox `aws_admin_for_test_simulation` pattern, generalized
   the topology type, so it inherits the same illegal-state-unrepresentable guarantee as any production `.dhall`
   ([§1](#1-a-test-is-an-amoebius-spec)).
 
-The **create-vs-delete credential model** — whether normal-operation credentials are scoped to *create* but
-not *delete* cloud storage, and how the elevated test credential is scoped to delete — is an open design
-question and is **owned by** [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md).
-This doc records only the testing-side requirement: the *destroy* authority over durable storage is withheld
-from normal operation and granted only to the flagged elevated harness.
+The resolved **create-vs-delete credential model** — normal-operation credentials may create but not delete
+cloud storage, while the elevated test credential may delete only test-flagged backing — is **owned by**
+[pulumi_iac_doctrine.md §6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model). This doc
+records only the testing-side requirement: the *destroy* authority over durable storage is withheld from
+normal operation and granted only to the flagged elevated harness.
 
 ---
 
-## 7. The elevated harness is the sole deleter of durable storage; leak-free cycles
+## 7. The elevated harness is the sole automated deleter of test-owned durable storage; leak-free cycles
 
 The elevated-harness exception resolves a real tension. On one side, amoebius **forbids deleting durable data
 under normal operation** — clusters are ephemeral, their storage is not, and an accidental delete loses
 data the next bring-up needs. On the other side, **leak-free test cycles must
 delete the storage they create**, or every run silts up the substrate forever. amoebius
-reconciles the two by making harness deletion the **one** sanctioned exception.
+reconciles the two by making harness deletion the **one** sanctioned automated exception.
+This exception is test-scoped: it grants no authority over production backing. Any production break-glass
+reclaim is a human-operated external action owned by the storage/migration boundary, not this testing system.
 
 The cardinal "no normal-operation deletion of durable data" rule, the retained `no-provisioner` PV model,
 and the deterministic rebind it protects are **owned by**
@@ -327,26 +330,30 @@ and the deterministic rebind it protects are **owned by**
 exception to this doc). This doc owns the **exception mechanism**:
 
 - **One deleter, one credential.** Only the **elevated test harness**, holding the flagged delete-capable
-  credential of [§6](#6-flagged-test-credentials), may destroy durable storage — and only storage flagged test-owned. No normal-operation
-  code path, and no non-harness test code path, can delete a retained PV or its backing bytes. The DSL
-  surface exposes no "delete this durable volume" primitive at all; deletion is an *act of the harness*, not
-  a value in a `.dhall`.
+  credential of [§6](#6-flagged-test-credentials), may destroy durable backing — and only backing flagged
+  test-owned. No normal-operation code path, and no non-harness test code path, can destroy those backing
+  bytes. PVC/PV API objects may disappear with ordinary cluster lifecycle; they are bindings, not the durable
+  data protected here. The DSL surface exposes no "delete this durable volume" primitive at all; deletion is
+  an *act of the harness*, not a value in a `.dhall`.
 - **Flag, then sweep.** A leak-free cycle is: tag every allocated resource test-owned at creation ([§6](#6-flagged-test-credentials)); run
   the workflow; then have the elevated harness **sweep** for test-flagged resources and destroy exactly
   those. The sweep is scoped by the flag, so it can never reach a production volume — it is structurally
   incapable of deleting something it did not create.
-- **A non-empty postflight sweep is a hard failure.** After teardown, the harness asserts the test-flagged
-  resource set is **empty**. A leftover test-flagged resource is a leak, and a leak is a test failure with
-  the leak list in the record — never a tolerated remnant. (This generalizes prodbox's postflight
-  tag-sweep assertion: a non-empty sweep fails the run.) The honest counterpart, also inherited from
-  prodbox, is that a *retained, by-design* resource is **not** a leak — only an *unflagged-or-unswept*
-  remnant of a test is.
-- **Pulumi mechanics are owned elsewhere.** Whether Pulumi *itself* destroys under the elevated credential,
-  or the harness manually deletes the flagged resources and then destroys the Pulumi backend after a final
-  sweep, is an open question and is **owned by**
-  [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). This doc fixes only the invariant both must satisfy:
+- **Leak detection is broader than the deletion scope.** The flag bounds what the elevated harness may
+  destroy; it is not the oracle for whether teardown leaked. An observer outside the typed allocation path
+  snapshots the applicable substrate inventories before and after the run: Kubernetes API objects; one
+  allocation-level record per retained host backing under `${RETAINED_ROOT}`, read outside node containers;
+  and provider resources through a read-only cloud inventory. Equality is checked over those inventories, so
+  an untagged resource or backing left after its PVC/PV objects disappear still fails.
+- **A non-empty postflight inventory diff is a hard failure.** After teardown, the harness asserts both that
+  the test-flagged sweep is empty and that the independent pre/post substrate inventory diff is empty. Any new
+  survivor is a leak, recorded with its boundary and identity — never a tolerated remnant. A retained,
+  by-design resource already present in both snapshots is not a leak.
+- **Pulumi mechanics are owned elsewhere.** The chosen sequence — the harness deletes the test-flagged durable
+  backing under elevated authority, verifies absence independently, then prunes the corresponding
+  durable-class checkpoint entry — is owned by [pulumi_iac_doctrine.md §6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model), not restated here. This doc fixes the invariant it must satisfy:
   the durable-data destroy capability is exercised solely by the flagged elevated harness, solely on
-  test-flagged resources, and the cycle ends with an empty sweep.
+  test-flagged resources, and the cycle ends with an empty flagged sweep and independent inventory diff.
 
 > **Honesty.** The flag-and-elevated-sweep mechanism above is a *design resolution* of an explicitly open
 > question in the vision, not a built or tested amoebius capability. Treat
@@ -411,7 +418,7 @@ This document is normative testing doctrine only. Delivery sequencing, completio
 and remaining work — the test-topology DSL, `suggest-test`, flagged credentials, the elevated
 storage-deleting harness, and the per-run ledger artifact — are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (Phase 36; with the cross-cluster
-failover proof artifacts in Phase 28). This doc never maintains a competing status ledger; it states the
+failover proof artifacts in Phase 29). This doc never maintains a competing status ledger; it states the
 target shape and links back for status. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline),
 no statement here is a proven amoebius result: the model generalizes patterns proven in prodbox into
 amoebius design intent.

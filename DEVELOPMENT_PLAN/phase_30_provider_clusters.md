@@ -8,8 +8,8 @@
 > **Purpose**: Extend amoebius's reach from self-managed `kind`/`rke2` children to provider-managed clusters
 > (EKS) provisioned by encrypted-MinIO-backed Pulumi under the Deployment-`replicas=1` singleton, standing up a
 > stateless hostless in-cluster daemon, dynamic node provisioning by a declared rule, and per-PV EBS decoupled
-> from the node lifecycle — gated live on linux-cpu by spinning a provider cluster up, provisioning a node, and
-> tearing down leak-free.
+> from the node lifecycle and reattached through a static-only AWS EBS CSI path — gated live on linux-cpu by
+> spinning a provider cluster up, provisioning a node, and tearing down leak-free.
 
 ---
 
@@ -40,18 +40,25 @@ whose single-instance is a k8s/etcd property, never a bespoke amoebius election 
 Vault-Transit-enveloped object in MinIO. There is no laptop `pulumi up`, no plaintext state, and no
 `PULUMI_*`/`AWS_*`/`PATH` env side-channel: the `pulumi` binary and cloud plugin are discovered lazily by full
 path. Second, a **stateless in-cluster daemon (no host)**: a provider child has no host access and therefore no
-host worker daemons, running only the one in-cluster singleton role and converging the same standard HA
-platform-service stack (Phase 19) from typed manifests — not a thinner cluster. Third, **dynamic node
+host worker daemons, running only the one in-cluster singleton role and converging the same full standard
+cluster shape assembled across Phase 15 and Phases 18–21 from typed manifests — not a thinner cluster. Third,
+**dynamic node
 provisioning by logic**: the node set is itself declarative and reactive, grown and shrunk by load, spot-cost,
 and workflow completion as *just another reconcile* (Phase 16) over the desired node set in the `.dhall`.
 Fourth, **per-PV EBS decoupled from the node lifecycle under a create-vs-delete credential model**: each PV's
 EBS volume is sized 1:1 to its PVC, carried in its own durable Pulumi state flagged `protect`/`Retain` so a
 normal per-run teardown never includes it, while the operational credential is *denied* `ec2:DeleteVolume` so
-accidental durable-data destruction is unauthorized at the cloud API, not merely discouraged.
+accidental durable-data destruction is unauthorized at the cloud API, not merely discouraged. Pulumi creates
+the durable EBS volume; it does **not** delegate provisioning to Kubernetes. The typed manifest reconciler
+installs the upstream AWS EBS CSI controller/node components from binaries baked into the amoebius base image
+(no Helm and no public image pull), omits the external provisioner, and renders a fresh static PV with
+`spec.csi.driver: ebs.csi.aws.com`, `volumeHandle: <Pulumi EBS volume ID>`, and matching Availability-Zone
+affinity. The cluster's sole StorageClass remains `kubernetes.io/no-provisioner`.
 
-This phase consumes — and does not re-implement — the Phase 17/17/18 storage/Vault/platform substrate, the
-Phase 16 typed SSA reconciler, the Phase 22 Deployment-`replicas=1` singleton live-deploy path, and the Phase
-29 amoebic-spawn machinery (the encrypted MinIO backend + per-child Vault-envelope). Provider-cluster spawn is
+This phase consumes — and does not re-implement — Phase 15's base image + registry; Phases 17–21's retained
+storage, Vault/PKI, platform services, and Keycloak-owned ingress; the Phase 16 typed SSA reconciler; the Phase 22
+Deployment-`replicas=1` singleton live-deploy path; and the Phase 28 amoebic-spawn machinery (the encrypted
+MinIO backend + per-child Vault-envelope). Provider-cluster spawn is
 the *cloud-keyed* sibling of Phase 28's *SSH-keyed* self-managed spawn over the same backend and the same
 bring-up → init → reconcile → teardown lifecycle vocabulary. The `Managed Eks` arm carries **no** `LinuxHost`
 witness; that type-level foreclosure lands in the pre-cluster band (the Dhall Gate-1 schema in Phase 4, the
@@ -65,7 +72,7 @@ flowchart LR
   parent --> backend[Vault-Transit-enveloped Pulumi checkpoint in MinIO]
   eks --> daemon[Stateless in-cluster singleton, no host, standard HA platform services]
   daemon --> nodes[Dynamic node provisioning by load, spot cost, workflow completion]
-  daemon --> ebs[Per-PV EBS: one per PV, sized to PVC, protect and Retain, node-decoupled]
+  daemon --> ebs[Per-PV EBS: Pulumi-created durable volume, static EBS CSI PV, protect and Retain]
   nodes --> gate[Gate: spin provider cluster, provision a node, tear per-run stack down leak-free]
 ```
 
@@ -79,12 +86,18 @@ them down; no register-1/2 in-process check discharges it.
 **Gate:** an `InForceSpec` that, from a **linux-cpu** parent, **spins up a provider-managed EKS cluster** via
 the encrypted-MinIO-backed Pulumi deploy issued by the Deployment-`replicas=1` singleton (no bespoke election),
 brings up its stateless hostless in-cluster daemon, **dynamically provisions an extra node by evaluating a
-declared signal rule** (not by an operator hand-editing the target) and observes it join, then **tears the
+declared signal rule** (not by an operator hand-editing the target) and observes it join, then re-runs the same
+desired state against the still-standing provider stack and verifies a zero-mutation no-op before **tearing the
 per-run cluster stack down leak-free** — VPC, control plane, node group, and the provisioned node all destroyed
-with no orphans, idempotently on re-run, with any durable per-PV EBS correctly **retained** (a retained durable
-volume is not a leak — it is its class behaving correctly). The run emits a proven/tested/assumed ledger
-artifact. The elevated-harness reclamation of durable test-flagged EBS that makes a *full* leak-free test
-*cycle* possible is Phase 36 work, deferred and never depended on here.
+with no orphans, with any durable per-PV EBS correctly **retained** (a retained durable volume is not a leak —
+it is its class behaving correctly). Before teardown, the gate writes a run-unique marker through the claim
+bound to the static EBS CSI PV over the retained EBS backing and records the EBS identity and Availability
+Zone. A second full spin-up
+→ run → teardown cycle from the post-teardown **provider-stack-absent state, with durable EBS retained**, uses
+the same declared Availability Zone, recreates the static PV over the same `volumeHandle`, reattaches that EBS,
+and reads the marker byte-for-byte; it is expected to issue create/delete calls and is not a no-op. Each cycle
+emits a proven/tested/assumed ledger artifact. The elevated-harness reclamation of durable test-flagged EBS
+that makes a *full* leak-free test *cycle* possible is Phase 36 work, deferred and never depended on here.
 
 **Leak-free is defined by an independent OS-boundary observer, never by the implementation's own evidence**
 (§M.5). "No orphans / leak-free" means: after teardown, an **independent read-only cloud-API sweep** — direct
@@ -93,15 +106,21 @@ AWS `Describe*` queries under a distinct read-only audit credential, scoped to t
 registry's own `discover` — returns **zero** ephemeral-class resources (VPC, EKS control plane, node group,
 provisioned node, and any provider-spawned ELB/ENI/CloudWatch-log-group/IAM-role bearing the tag), with the
 retained durable per-PV EBS the **sole** permitted survivor by class; a non-empty sweep fails the run and its
-leak list is recorded in the ledger. "Idempotently on re-run / converges as a no-op" means the OS-boundary
-cloud-API audit trail (a CloudTrail-equivalent mutating-call log, external to the reconciler) records **zero
-mutating** create/modify/delete calls on run 2 — not exit 0, not the reconciler's self-reported empty diff.
+leak list is recorded in the ledger. "Converges as a no-op" applies only to the second reconcile against the
+still-standing stack: the OS-boundary cloud-API audit trail (a CloudTrail-equivalent mutating-call log, external
+to the reconciler) records **zero mutating** create/modify/delete calls during that reconcile — not exit 0, not
+the reconciler's self-reported empty diff. A repeated full cycle starts from provider-stack-absent state with
+durable EBS retained, is expected to create and delete ephemeral resources again, and demonstrates repeatability
+by reaching the same empty ephemeral-resource sweep.
 
 **Representative set (§M.7):** the gate corpus is exactly the committed topology
 `test/dhall/phase_30_provider_provision.dhall` — one `Managed Eks` control plane, one base managed node group
-(size 1), one dynamically provisioned extra node driven by a workflow-completion `ScalingPolicy`, one per-PV EBS
-volume (durable class) attached to a single-replica StatefulSet claim `<ns>/sts0/pv_0`, and the operational
-create-only credential. **Committed mutation quota (§M.2):** the gate re-runs, and requires red from, at least
+(size 1), one dynamically provisioned extra node driven by a workflow-completion `ScalingPolicy`, one declared
+Availability Zone shared by that node group and one per-PV EBS volume (durable class) attached to a
+single-replica StatefulSet claim `<ns>/sts0/pv_0` through a static
+`ebs.csi.aws.com` PV whose `volumeHandle` is that Pulumi-created volume ID, a run-unique marker written through
+that claim, and the operational create-only credential. **Committed mutation quota (§M.2):** the gate re-runs,
+and requires red from, at least
 the committed seeded mutants named per sprint below — minimally the teardown-skips-tag-sweep mutant
 (`mut-30.5-skip-sweep`, an orphan ELB left untagged-for-destroy that the registry `discover` cannot see but the
 independent sweep must catch) and the signal-ignoring node-provisioner mutant (`mut-30.4-ignore-signal`). All
@@ -148,8 +167,15 @@ under test (§M.3).
 - [`storage_lifecycle_doctrine.md §5.1`](../documents/engineering/storage_lifecycle_doctrine.md#51-storage-is-independent-of-the-node-lifecycle)
   and [`§7 / §7.1`](../documents/engineering/storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation)
   — *storage is independent of the node lifecycle* / *deleting durable data is forbidden under normal
-  operation; the elevated test harness is the single exception*: per-PV EBS survives node replacement and is
-  destroyed only by the Phase 36 elevated harness, never by a routine teardown.
+  operation*: per-PV EBS survives node replacement and reattaches through a statically rendered EBS CSI PV
+  rather than dynamic provisioning. Within amoebius automation, only the Phase 36 elevated harness may destroy
+  a test-owned volume; production reclaim is an external operator break-glass action against an exact
+  `ReclaimEligible` target, never a routine teardown.
+- [`image_build_doctrine.md §2`](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)
+  with [`§7`](../documents/engineering/image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)
+  — *third-party binaries are baked; workloads pull only in-cluster*: the upstream AWS EBS CSI
+  controller/node implementation and required sidecars are consumed as baked binaries under typed manifests,
+  never as a public image or Helm chart.
 - [`resource_capacity_doctrine.md §6`](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)
   — *`Growable` / `ScalingPolicy`: the escape valve amoebius owns*: dynamic node provisioning is the runtime
   enaction of a typed `ScalingPolicy` whose cloud quota is the outer ceiling, so a bounded budget grows only
@@ -194,7 +220,7 @@ object, generalizing Phase 28's SSH-keyed self-managed spawn to a cloud-keyed pr
 ### Deliverables
 
 - An `Amoebius.Pulumi.Engine` seam that runs the Pulumi engine **only** under the in-cluster singleton (Phase
-  20), whose single-instance is a k8s/etcd property; there is no host-shell entrypoint that can `pulumi up` a
+  22), whose single-instance is a k8s/etcd property; there is no host-shell entrypoint that can `pulumi up` a
   provider cluster.
 - An `Amoebius.Pulumi.Backend.EncryptedMinio` backend: the checkpoint is one opaque object in the cluster's
   MinIO, sealed with a Vault-Transit envelope; the plaintext data key never lands on disk, and a
@@ -246,9 +272,10 @@ The whole sprint (📋 Planned).
 **Implementation**: `amoebius-runtime/src/Amoebius/Daemon/InClusterSingleton.hs` (provider-child singleton
 wiring), `amoebius-runtime/src/Amoebius/Cluster/ProviderBringUp.hs` (init-follows-readiness for a provider
 child) (target paths; not yet built)
-**Blocked by**: Sprint 30.1; Phase 19 gate (the standard HA platform-service stack + typed manifests); Phase 16
-gate (the typed renderer + live SSA reconciler that converges them); Phase 22 gate (the Deployment-`replicas=1`
-singleton) — external earlier-phase prerequisites.
+**Blocked by**: Sprint 30.1; Phase 15 and Phases 17–21 gates (the base image/registry, retained storage,
+Vault/PKI, standard HA services, and Keycloak-owned ingress); Phase 16 gate (the typed renderer + live SSA
+reconciler that converges them); Phase 22 gate (the Deployment-`replicas=1` singleton) — external earlier-phase
+prerequisites.
 **Independent Validation**: a freshly provisioned EKS child converges the standard HA platform-service stack
 from typed manifests (no Helm, no public-registry pulls), reachable and HA, with wild ingress only via
 Keycloak; the cluster runs **no** host worker daemon and advertises **no** host substrate; re-running bring-up
@@ -312,15 +339,23 @@ The whole sprint (📋 Planned).
 **Status**: Planned
 **Implementation**: `amoebius-pulumi/src/Amoebius/Pulumi/Ebs.hs` (per-PV durable EBS program, own state,
 `protect`/`Retain`), `amoebius-pulumi/src/Amoebius/Pulumi/Credential.hs` (operational create-only vs elevated
-delete IAM policy split) (target paths; not yet built)
+delete IAM policy split), `src/Amoebius/Storage/EbsCsi.hs` (typed static-only EBS CSI controller/node + PV
+renderer; no external provisioner), `docker/base/Dockerfile`,
+`src/Amoebius/Image/BakeInventory.hs`, `test/fixtures/phase30/ebs_csi_bake_expected.dhall` (the Phase-0-pinned
+provider-driver binary/version oracle) (target paths; not yet built)
 **Blocked by**: Sprint 30.1; Phase 17 gate (`no-provisioner` retained PVs + lossless rebind — the storage
-substrate the EBS backs) — external earlier-phase prerequisite.
+substrate the EBS backs); Phase 15 gate (the multi-arch baked-binary supply chain this sprint extends with
+provider-only CSI binaries) — external earlier-phase prerequisites.
 **Independent Validation**: a per-PV EBS volume is created sized 1:1 to its PVC in **separate** durable state
 from the ephemeral cluster stack; a `pulumi destroy` of the cluster stack leaves the EBS **intact**
-(`protect`/`Retain`); a simulated `ec2:DeleteVolume` under the operational credential is **denied** at the
-policy layer; the next bring-up re-attaches the same volume to the same claim.
+(`protect`/`Retain`); a real `ec2:DeleteVolume` call under the operational credential is **denied** at the
+cloud API; the baked/rendered AWS EBS CSI controller and node components become Ready without an external
+provisioner, and the next bring-up re-creates a static `ebs.csi.aws.com` PV whose `volumeHandle` is the same
+Pulumi EBS ID and re-attaches it to the same claim.
 **Docs to update**: `documents/engineering/pulumi_iac_doctrine.md` (§6, §3),
-`documents/engineering/storage_lifecycle_doctrine.md` (per-PV EBS sizing 1:1 + node-vs-storage decoupling).
+`documents/engineering/storage_lifecycle_doctrine.md` (per-PV EBS sizing 1:1 + node-vs-storage decoupling),
+`documents/engineering/image_build_doctrine.md` (the provider-only EBS CSI binaries in the base-image supply
+chain).
 
 ### Objective
 
@@ -329,7 +364,10 @@ and the per-class state/credential pinning in [`§3 — State lifetime matches r
 make durable storage **structurally** outside the ephemeral destroy set and the authority to delete it
 **structurally** withheld from normal operation, so "ephemeral cluster, durable data" cannot collapse on a
 routine teardown and accidental durable-data destruction is *unauthorized at the cloud API*, not merely
-discouraged ([`storage_lifecycle_doctrine.md §5.1`](../documents/engineering/storage_lifecycle_doctrine.md#51-storage-is-independent-of-the-node-lifecycle)).
+discouraged. Complete the path from Pulumi-created volume to mounted claim explicitly: consume the upstream
+AWS EBS CSI implementation from the amoebius base image and render static PVs over known volume IDs, rather
+than building an amoebius attach controller or enabling dynamic provisioning
+([`storage_lifecycle_doctrine.md §5.1`](../documents/engineering/storage_lifecycle_doctrine.md#51-storage-is-independent-of-the-node-lifecycle)).
 
 ### Deliverables
 
@@ -338,15 +376,27 @@ discouraged ([`storage_lifecycle_doctrine.md §5.1`](../documents/engineering/st
   stack — so a normal `pulumi destroy` of the cluster never includes it.
 - Node-vs-storage decoupling: a destroyed/replaced EC2 node detaches its EBS and the volume survives; the next
   bring-up re-attaches the same volume to the same `<namespace>/<statefulset>/pv_<integer>` claim.
+- A static-only `Amoebius.Storage.EbsCsi` path: the upstream AWS EBS CSI controller/node binaries and required
+  sidecars are baked into the amoebius base image and installed from typed manifests (no Helm/public image
+  pull), version-pinned by the Phase-0 fixture `test/fixtures/phase30/ebs_csi_bake_expected.dhall`; no
+  external-provisioner container is installed; each fresh PV names
+  `spec.csi.driver: ebs.csi.aws.com`, the Pulumi-created EBS ID as `volumeHandle`, and node affinity for the
+  volume's Availability Zone. The only StorageClass remains `kubernetes.io/no-provisioner`.
 - An `Amoebius.Pulumi.Credential` split: the operational credential is granted `ec2:CreateVolume` (plus the
-  per-run cluster create/delete it needs) but **denied `ec2:DeleteVolume`** on durable retained volumes; the
-  delete authority lives only with the elevated test credential, exercised in Phase 36 — referenced, not invoked
-  here.
+  per-run cluster create/delete it needs) but **denied `ec2:DeleteVolume`** on durable retained volumes. The
+  only automated delete authority is the elevated test credential, limited to test-owned volumes and exercised
+  in Phase 36 — referenced, not invoked here. Production reclaim uses a separate human-operated external
+  break-glass credential against an exact `ReclaimEligible` target; it is not a spec or reconciler capability.
+  The distinct CSI runtime identity is attach-only (`Describe*`/`AttachVolume`/`DetachVolume`) and is denied
+  both `CreateVolume` and `DeleteVolume`.
 
 ### Validation
 
-1. Create a per-PV EBS, then `pulumi destroy` the cluster stack; assert the EBS survives (it is in separate,
-   `protect`ed durable state) and re-attaches on the next bring-up with identical bytes.
+1. Create a per-PV EBS, render a static PV whose CSI `volumeHandle` is that exact EBS ID and whose zone
+   affinity matches the volume, and write a marker through the bound claim. Then `pulumi destroy` the cluster
+   stack; assert the EBS survives (it is in separate, `protect`ed durable state) and re-attaches through a
+   freshly rendered static PV on the next bring-up with identical bytes. The EBS CSI controller/node
+   components must be observed Ready before the bind.
 2. Policy test at the cloud API, not in-process: "denied" means a **real `ec2:DeleteVolume` API call** issued
    under the operational credential against a **live dummy test-flagged EBS volume** returns an
    `AccessDenied`/`UnauthorizedOperation` response from AWS (the volume survives the attempt) — explicitly
@@ -360,14 +410,24 @@ discouraged ([`storage_lifecycle_doctrine.md §5.1`](../documents/engineering/st
    delete would succeed.
 3. Assert EBS size equals its PVC request exactly (1:1), and that the volume's state object is a distinct
    checkpoint object from the ephemeral cluster stack's checkpoint (asserted by distinct MinIO object key, read
-   from the store, not from the program that wrote it).
+   from the store, not from the program that wrote it). Assert the cluster still has exactly one StorageClass,
+   `kubernetes.io/no-provisioner`; the EBS CSI install contains no external-provisioner; and an independent
+   cloud audit records no `CreateVolume` call under the CSI runtime identity. The provider-driver extension to
+   `BakeInventory` is checked against the independently authored
+   `test/fixtures/phase30/ebs_csi_bake_expected.dhall`, and each pinned controller/node/sidecar binary executes
+   by absolute path with its expected version on both base-image architectures. The committed seeded mutant
+   `mut-30.3-enable-dynamic-provisioner` (adds the external-provisioner plus an
+   `ebs.csi.aws.com` provisioning StorageClass) MUST go red on the object-set and cloud-audit assertions.
 
 > **Honesty.** The create-vs-delete credential split is a **design resolution of an explicitly open question**;
 > the operational-vs-elevated *credential class* is proven in prodbox, but EBS-in-prodbox is CSI-driver-created,
 > **not** Pulumi-tracked — so amoebius's Pulumi-tracked durable-EBS model is *new design, not inherited proof*.
+> Amoebius consumes the upstream AWS EBS CSI implementation only for static attach/mount; its baked-binary,
+> generated-manifest, no-external-provisioner realization is also new and untested here.
 > The leak-free *reclamation* of durable test-flagged EBS by the elevated harness is Phase 36
 > ([`storage_lifecycle_doctrine.md §7.1`](../documents/engineering/storage_lifecycle_doctrine.md#71-the-single-exception-the-elevated-test-harness));
-> this sprint builds only the create-only guard and the `protect`/`Retain` separation.
+> this sprint builds the create-only guard, the `protect`/`Retain` separation, and the static attachment path;
+> it does not exercise durable backing reclamation.
 
 ### Remaining Work
 
@@ -454,10 +514,12 @@ The whole sprint (📋 Planned).
 subset) (target paths; not yet built)
 **Blocked by**: Sprint 30.1, Sprint 30.2, Sprint 30.3, Sprint 30.4.
 **Independent Validation**: the gate `InForceSpec` spins up a provider (EKS) cluster from a linux-cpu parent,
-brings up its stateless in-cluster daemon, dynamically provisions an extra node and observes it join, then tears
-the per-run cluster stack down leak-free (VPC + control plane + node group + provisioned node all destroyed, no
-orphans), idempotently on re-run, with any durable per-PV EBS correctly retained; each run emits a
-proven/tested/assumed ledger artifact.
+brings up its stateless in-cluster daemon, dynamically provisions an extra node and observes it join, verifies a
+no-op reconcile while the stack is still standing, then tears the per-run cluster stack down leak-free (VPC +
+control plane + node group + provisioned node all destroyed, no orphans), with any durable per-PV EBS correctly
+retained; a second full cycle from provider-stack-absent state in the retained EBS's declared Availability Zone
+recreates a static CSI PV over the same `volumeHandle`, reattaches the volume, and reads a run-unique marker
+byte-for-byte before also finishing leak-free, and each cycle emits a proven/tested/assumed ledger artifact.
 **Docs to update**: `documents/engineering/pulumi_iac_doctrine.md` (§3, §8),
 `documents/engineering/cluster_lifecycle_doctrine.md` (§9), `documents/engineering/testing_doctrine.md` (the
 per-run ledger; durable-EBS reclamation deferred to Phase 36), `DEVELOPMENT_PLAN/README.md`.
@@ -468,30 +530,40 @@ Adopt [`pulumi_iac_doctrine.md §3 — State lifetime matches resource lifetime,
 and [`§8 — deploys are enacted by the reconciler`](../documents/engineering/pulumi_iac_doctrine.md#8-how-deploys-are-enacted-the-reconciler-referenced-not-restated),
 with [`cluster_lifecycle_doctrine.md §9 — bring-up and teardown are a reconciler, not a state machine`](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine):
 assemble the phase gate — a single `.dhall` that brings a provider cluster up, provisions a node, and tears the
-**per-run/ephemeral class** down leak-free via one `reconcileAbsent` over the owned subset, with `Unreachable →
-refuse` and a tag-sweep backstop, while the durable EBS class is correctly left retained.
+**ephemeral class used by this per-run gate** down leak-free via one `reconcileAbsent` over the owned subset,
+with `Unreachable → refuse` and a tag-sweep backstop, while the durable EBS class is correctly left retained.
 
 ### Deliverables
 
 - The gate `test/dhall/phase_30_provider_provision.dhall`: spin up the EKS provider cluster (Sprint 30.1),
   converge its stateless daemon (Sprint 30.2), provision an extra node by a declared rule and observe it join
-  (Sprint 30.4), then always tear down the per-run cluster + node.
+  (Sprint 30.4), bind the Pulumi-created EBS through Sprint 30.3's static CSI PV and write a run-unique marker
+  through the retained-EBS claim, verify a no-op reconcile against the still-standing stack, then always tear
+  down the per-run cluster + node; the repeated full cycle constrains the recreated node group to the recorded
+  EBS Availability Zone, re-renders a PV over the same `volumeHandle`, and verifies the marker after
+  reattachment.
 - An `Amoebius.Pulumi.Teardown` step: one `reconcileAbsent` over the **ephemeral** registry subset (VPC, EKS
   control plane, node group, dynamically provisioned node) — *Present → destroy → re-observe; Absent → skip;
   Unreachable → refuse* — leaving the durable EBS class (Sprint 30.3) untouched and retained.
 - A per-run proven/tested/assumed ledger recording: provider bring-up + node join as **tested on the EKS
   provider target from a linux-cpu parent**; per-run teardown leak-freedom as **tested**; durable EBS retention
   as **correct-by-class**; and the elevated-harness durable-EBS *reclamation* as **explicitly deferred to Phase
-  31, not asserted here**.
+  36, not asserted here**.
 
 ### Validation
 
 1. Run the gate end-to-end over the committed representative set
    `test/dhall/phase_30_provider_provision.dhall` (named in the Gate above): assert the provider cluster comes
-   up, the in-cluster daemon converges, the extra node is provisioned by signal and joins, then the per-run
-   stack tears down. "No orphaned VPC, control plane, node group, or node" is discharged **only** by the
-   independent read-only cloud-API tag-sweep observer defined in the Gate (direct AWS `Describe*` queries under a
-   distinct read-only audit credential, scoped to the run's `amoebius:test-run=<run-id>` tag — explicitly **not**
+   up, the in-cluster daemon converges, and the extra node is provisioned by signal and joins. Write a fresh
+   run-unique marker through `<ns>/sts0/pv_0` after asserting its static PV uses
+   `driver: ebs.csi.aws.com`, `volumeHandle: <that EBS volume ID>`, and matching zone affinity; record the EBS
+   volume ID and Availability Zone, then re-run the reconcile against that still-standing stack and assert
+   that the OS-boundary cloud-API audit trail records
+   **zero mutating** create/modify/delete calls (§M.5/§M.6), not exit 0 or a self-reported empty diff. Then tear
+   the per-run stack down. "No orphaned VPC, control plane, node group, or node" is discharged
+   **only** by the independent read-only cloud-API tag-sweep observer defined in the Gate (direct AWS
+   `Describe*` queries under a distinct read-only audit credential, scoped to the run's
+   `amoebius:test-run=<run-id>` tag — explicitly **not**
    the Pulumi post-destroy checkpoint and **not** the registry's own `discover`, both of which the teardown
    itself just drove and which cannot see provider-spawned out-of-registry orphans). The sweep MUST return zero
    ephemeral-class resources; retained durable EBS is the sole permitted survivor by class; a non-empty sweep
@@ -499,10 +571,11 @@ refuse` and a tag-sweep backstop, while the durable EBS class is correctly left 
    (teardown that leaves one provider-spawned ELB behind, invisible to the registry `discover`) MUST go **red**
    on this sweep (§M.2) — a run that asserts leak-freedom from the emptied checkpoint alone would pass it, and is
    thereby foreclosed.
-2. Re-run the gate and assert idempotent bring-up and leak-free teardown, where **idempotent / no-op** means the
-   OS-boundary cloud-API audit trail records **zero mutating** create/modify/delete calls on run 2 (§M.5/§M.6),
-   not exit 0 or a self-reported empty diff; assert any durable EBS is retained (present in the post-run sweep as
-   the permitted survivor) and re-attaches with identical bytes on a subsequent bring-up.
+2. From the provider-stack-absent state left by Validation 1, with the durable EBS retained, run a second full
+   spin-up → run → teardown cycle. Constrain the recreated node group to the recorded EBS Availability Zone,
+   re-render the static PV with the same EBS volume ID as its CSI `volumeHandle`, reattach it, and read the
+   run-unique marker byte-for-byte before teardown. Expected ephemeral-resource create/delete calls are
+   permitted; the cycle must again finish with an empty ephemeral-resource sweep.
 3. Assert the run emits a proven/tested/assumed ledger per
    [`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed),
    recording the independent-sweep leak result (and any leak list), the signal-driven scale correlation, and the
@@ -533,17 +606,22 @@ The whole sprint (📋 Planned).
 - `documents/engineering/daemon_topology_doctrine.md` — record that the Pulumi engine and the provider-child
   daemon run under the Deployment-`replicas=1` singleton (§3.1), single-instance a k8s/etcd property, with no
   bespoke election anywhere in this phase.
-- `documents/engineering/storage_lifecycle_doctrine.md` — record the per-PV EBS sizing (1:1) and node-vs-storage
-  decoupling realized in `Amoebius.Pulumi.Ebs`, with durable-EBS reclamation deferred to Phase 36.
+- `documents/engineering/storage_lifecycle_doctrine.md` — record the per-PV EBS sizing (1:1), static CSI
+  `volumeHandle` bind, and node-vs-storage decoupling realized by `Amoebius.Pulumi.Ebs` +
+  `Amoebius.Storage.EbsCsi`, with durable-EBS reclamation deferred to Phase 36.
+- `documents/engineering/image_build_doctrine.md` — record the upstream AWS EBS CSI controller/node
+  implementation and required sidecars in the baked provider-infrastructure inventory; no public image or
+  Helm path is introduced.
 - `documents/engineering/substrate_doctrine.md` — record that `pulumi` + the cloud plugin conform to the
   no-env/no-`PATH` lazy-tool-ensure contract on the linux-cpu parent.
 - `documents/engineering/testing_doctrine.md` — record the Phase 30 per-run ledger artifact and the explicit
   deferral of elevated durable-EBS reclamation to Phase 36.
 
 **Cross-references to add:**
-- `DEVELOPMENT_PLAN/system_components.md` — register the `amoebius-pulumi` package (Engine, EncryptedMinio
-  backend, Provider/Eks, Ebs, Credential, NodeGroup, Teardown) and the `amoebius-runtime` provider-child daemon
-  + NodeProvisioner modules, each mapped to its owning doctrine, as Phase-30 design-first rows.
+- `DEVELOPMENT_PLAN/system_components.md` — map the reused `amoebius-pulumi` Engine and EncryptedMinio backend
+  to their first delivery in Phase 28; register Provider/Eks, Ebs, Credential, NodeGroup, Teardown,
+  `Amoebius.Storage.EbsCsi`, and the `amoebius-runtime` provider-child daemon + NodeProvisioner modules as
+  Phase-30 design-first rows, each mapped to its owning doctrine.
 - `DEVELOPMENT_PLAN/substrates.md` — record the Phase 30 → `linux-cpu` (parent) row with the `provider` (EKS)
   deploy target annotated as a target class, not a fifth hardware substrate.
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase 30 row's status once the gate passes; link this document.

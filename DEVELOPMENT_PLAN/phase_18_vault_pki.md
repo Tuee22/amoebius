@@ -16,8 +16,8 @@
 📋 Planned. Specified before implementation; every sprint below is 📋 Planned and every prescriptive statement is
 design intent, never a tested amoebius result. This phase opens after the Phase 17 gate (no-provisioner retained
 storage + lossless rebind) and runs on the **linux-cpu** substrate in **Register 3** — live infrastructure: a
-single-node `kind` cluster on a linux-cpu host, its Vault rendered and applied by the Phase-15 reconciler onto
-the Phase-16 retained PV. The whole model is **proven in the sibling prodbox project** — its `vault_doctrine.md`,
+single-node `kind` cluster on a linux-cpu host, its Vault rendered and applied by the Phase-16 reconciler onto
+the Phase-17 retained PV. The whole model is **proven in the sibling prodbox project** — its `vault_doctrine.md`,
 `cluster_federation_doctrine.md`, and `Prodbox.Vault.Client` are the realized version of most of this — but that
 is **sibling evidence, not an amoebius result**; amoebius has not yet built any of these sprints.
 
@@ -36,8 +36,8 @@ Kubernetes service-account JWT and resolves a `SecretRef` by name — **no Hashi
 Secret-mounted plaintext, no environment variable, no `PATH` lookup. A sealed, uninitialized, policy-missing, or
 secret-missing read returns a typed, fail-closed error that carries no secret material.
 
-What this phase deliberately does **not** do: the full standard-service stack that consumes these secrets (Phase
-18), the Keycloak-owned edge (Phase 21), and the parent/child unseal modes, parent secret injection, and the
+What this phase deliberately does **not** do: the full standard-service stack that consumes these secrets
+(Phases 19–20), the Keycloak-owned edge (Phase 21), and the parent/child unseal modes, parent secret injection, and the
 cross-cluster intermediate-CA hierarchy (the amoebic-spawning/federation phases). Only the root cluster's own
 single-node Vault, its self-signed anchor, and the in-cluster read path are in scope here.
 
@@ -86,7 +86,7 @@ seeded mutant** (§M.2) that MUST turn the gate red, committed and re-run.
 - [`vault_pki_doctrine.md §8`](../documents/engineering/vault_pki_doctrine.md#8-the-root-cluster-owns-the-pki-trust-anchor)
   — *the root cluster owns the PKI trust anchor*: exactly one self-signed root of trust, the Vault `pki/` root CA,
   with internal certs chaining to it; this phase builds **plane 1 (internal PKI) only** — public-edge TLS (Phase
-  19) and the cross-cluster intermediate-CA hierarchy (federation) are deferred and **live-proof-pending even in
+  21) and the cross-cluster intermediate-CA hierarchy (federation) are deferred and **live-proof-pending even in
   prodbox**.
 - [`vault_pki_doctrine.md §9`](../documents/engineering/vault_pki_doctrine.md#9-in-cluster-consumers-authenticate-to-vault-directly)
   and [`§3`](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value) —
@@ -104,7 +104,7 @@ seeded mutant** (§M.2) that MUST turn the gate red, committed and re-run.
 
 ## Sprints
 
-## Sprint 17.1: Root single-node password-encrypted Vault — init-once / unseal-on-rebuild 📋
+## Sprint 18.1: Root single-node password-encrypted Vault — init-once / unseal-on-rebuild 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Vault/Init.hs`, `src/Amoebius/Vault/Unseal.hs`, `src/Amoebius/Vault/Seal.hs`
@@ -128,14 +128,14 @@ single-node, password-encrypted, human-gated, fail-closed secrets root, init-onc
 retained PV — the prodbox root-unseal shape as **sibling evidence, not an amoebius result**.
 
 ### Deliverables
-- Root Vault in **Shamir seal mode**, rendered and reconciled onto the Phase-16 retained PV; first-ever `vault
+- Root Vault in **Shamir seal mode**, rendered and reconciled onto the Phase-17 retained PV; first-ever `vault
   init` runs only when the PV is empty, and every later bring-up redeploys against existing data and only unseals.
 - **Password-sealed unlock material**: the first init's unseal/recovery keys + initial root token captured once
   and immediately sealed under the operator's password with a real KDF (**Argon2id**) feeding an AEAD
   (ChaCha20-Poly1305 / AES-256-GCM) — **never raw SHA-256**; the password memorized, entered at the prompt on
   init and every unseal, persisted nowhere; raw keys never printed.
 - A **pluggable unlock-material backend** behind one interface — the load-bearing property is only that the
-  material is password-AEAD-sealed and never plaintext at rest. **At the root Phase-17 bring-up the backend is
+  material is password-AEAD-sealed and never plaintext at rest. **At the root Phase-18 bring-up the backend is
   the host-side `.age` file**: MinIO does not exist until Phase 19, so a MinIO-sealed object (and equally a cloud
   KMS or TPM/YubiKey identity) is a *later* backend option, never a root-unseal prerequisite — the root Vault
   must not depend on a platform service it precedes (no Vault↔MinIO bootstrap cycle).
@@ -176,12 +176,12 @@ retained PV — the prodbox root-unseal shape as **sibling evidence, not an amoe
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 17.2: The self-signed PKI trust anchor issues 📋
+## Sprint 18.2: The self-signed PKI trust anchor issues 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Vault/Pki.hs` (the `pki/` root-CA mount + internal leaf issuance) — target path,
 not yet built.
-**Blocked by**: Sprint 17.1 (a live, unsealed Vault is a precondition for enabling `pki/` and issuing).
+**Blocked by**: Sprint 18.1 (a live, unsealed Vault is a precondition for enabling `pki/` and issuing).
 **Independent Validation**: the Vault `pki/` engine holds a self-signed **root CA**; an internal leaf certificate
 issued from `pki/` **chains to that root CA**; while Vault is sealed, no certificate issues.
 **Docs to update**: `documents/engineering/vault_pki_doctrine.md`, `documents/engineering/platform_services_doctrine.md`,
@@ -209,12 +209,12 @@ PKI) only** — public-edge TLS and the cross-cluster intermediate-CA hierarchy 
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 17.3: Built-in Haskell Vault client (no agent sidecar) reads a `SecretRef` by name — the gate 📋
+## Sprint 18.3: Built-in Haskell Vault client (no agent sidecar) reads a `SecretRef` by name — the gate 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Vault/Client.hs` (the client linked into the amoebius binary), `src/Amoebius/Vault/SecretRef.hs`
 (the `SecretRef` resolver), `src/Amoebius/Vault/Error.hs` (the typed fail-closed error) — target paths, not yet built.
-**Blocked by**: Sprint 17.1 (a live, unsealed Vault to read from); Sprint 17.2 (a workload verifying a peer cert
+**Blocked by**: Sprint 18.1 (a live, unsealed Vault to read from); Sprint 18.2 (a workload verifying a peer cert
 resolves the chain rooted here); the `SecretRef` type + decode-time validator from the pre-cluster band (owned by
 the Dhall schema / decoder phases — an earlier-phase prereq, not restated here).
 **Independent Validation**: an in-cluster consumer authenticates to Vault with its **Kubernetes service-account
@@ -226,7 +226,7 @@ sidecar container** and mounts **no plaintext k8s Secret**; a read of a path out
 denied; a sealed / uninitialized / policy-missing / secret-missing read returns a **typed fail-closed error** that
 carries no secret material and emits no presence oracle in its logs.
 **Docs to update**: `documents/engineering/vault_pki_doctrine.md`, `documents/engineering/testing_doctrine.md`,
-`DEVELOPMENT_PLAN/README.md` (flip the Phase-17 status when the gate passes), `DEVELOPMENT_PLAN/system_components.md`.
+`DEVELOPMENT_PLAN/README.md` (flip the Phase-18 status when the gate passes), `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 Adopt [`vault_pki_doctrine.md §9`](../documents/engineering/vault_pki_doctrine.md#9-in-cluster-consumers-authenticate-to-vault-directly),
@@ -277,16 +277,16 @@ through the **built-in** client, with a typed, no-leak error model. The `Prodbox
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 17.4: Register-2.5 fail-closed Vault unseal under simulated faults 📋
+## Sprint 18.4: Register-2.5 fail-closed Vault unseal under simulated faults 📋
 
 **Status**: Planned
 **Implementation**: `test/Amoebius/Sim/Vault/UnsealFailClosedSpec.hs` (the `IOSim`/`IOSimPOR` driver that runs the
 **real** `src/Amoebius/Vault/{Init,Unseal,Seal,Client}.hs` against the modeled Vault) — target path, not yet built.
-**Blocked by**: Sprint 17.1 (the real init/unseal/seal client under test), Sprint 17.3 (the real `SecretRef`
-resolver + typed error under test); Phase 11 Sprint 11.4 (`src/Amoebius/Sim/Env.hs` + `src/Amoebius/Sim/Fakes/*` —
+**Blocked by**: Sprint 18.1 (the real init/unseal/seal client under test), Sprint 18.3 (the real `SecretRef`
+resolver + typed error under test); Phase 12 Sprint 12.2 (`src/Amoebius/Sim/Env.hs` + `src/Amoebius/Sim/Fakes/*` —
 the modeled fault-injectable Vault with the sealed / unreachable / lease-expiry knobs the schedules drive).
 **Independent Validation**: the **real** Vault init/unseal client code — written against `io-classes`, unchanged
-from the live path — runs under `IOSim`/`IOSimPOR` against the Phase-11.4 modeled Vault with injected **sealed /
+from the live path — runs under `IOSim`/`IOSimPOR` against the Sprint 12.2 modeled Vault with injected **sealed /
 unreachable / lease-expiry / restart** faults, and under adversarial schedules the **fail-closed invariant** holds:
 the daemon **never** proceeds — never issues from `pki/`, never accepts a `.dhall`, never reads a `SecretRef` —
 while Vault is sealed or its freshness is unproven; every failing schedule is **deterministically replayable** from
@@ -300,12 +300,12 @@ re-adopt [`vault_pki_doctrine.md §2`](../documents/engineering/vault_pki_doctri
 prove the **fail-closed secrets-root invariant in simulation** — run the real init/unseal client against the
 modeled fault-injectable Vault under `IOSim`/`IOSimPOR` and assert that no adversarial fault schedule (sealed,
 unreachable, lease-expiry, restart) ever lets the daemon proceed while Vault is sealed or its freshness is
-unproven. This is a **Register-2.5** deterministic-simulation check, run in-process **before** the Sprint-17.3
+unproven. This is a **Register-2.5** deterministic-simulation check, run in-process **before** the Sprint-18.3
 Register-3 live gate — not a substitute for it.
 
 ### Deliverables
 - An `IOSim`/`IOSimPOR` harness running the **real** `src/Amoebius/Vault/{Init,Unseal,Seal,Client}.hs` code
-  (`io-classes`-written, byte-for-byte the live path — no simulation-only fork) against the **Phase-11.4 modeled
+  (`io-classes`-written, byte-for-byte the live path — no simulation-only fork) against the **Sprint 12.2 modeled
   Vault** (`src/Amoebius/Sim/Fakes/*`) with its fault knobs — **sealed**, **unreachable**, **lease-expiry**, and
   **restart** — driven by the scheduler.
 - The **fail-closed invariant** asserted under **adversarial schedules**: across the explored interleavings the
@@ -325,7 +325,7 @@ Register-3 live gate — not a substitute for it.
   its seed for debugging.
 - A **Register-2.5** proven/tested/assumed ledger (substrate `none`), stating the **honest limit** — the harness
   proves the *client's* fail-closed logic against a **modeled** Vault whose fidelity is **assumed**; that fidelity
-  assumption is discharged only by this phase's **Sprint-17.3 Register-3 live gate**, never by simulation.
+  assumption is discharged only by this phase's **Sprint-18.3 Register-3 live gate**, never by simulation.
 
 ### Validation
 1. Run the real init/unseal client under `IOSim`/`IOSimPOR` across **>=500 seeds per fault family** and assert the
@@ -335,7 +335,7 @@ Register-3 live gate — not a substitute for it.
 2. Force a counterexample (e.g. a modeled-Vault fault that would tempt a stale read) and assert it is
    **deterministically replayable** from its seed.
 3. Emit the Register-2.5 ledger (substrate `none`); assert it records modeled-Vault fidelity as **assumed** and
-   names the Sprint-17.3 Register-3 live gate as the discharge, never marking the live invariant green from
+   names the Sprint-18.3 Register-3 live gate as the discharge, never marking the live invariant green from
    simulation.
 
 ### Remaining Work
@@ -356,10 +356,10 @@ The whole sprint (📋 Planned).
   surfaces UNVERIFIED).
 
 **Cross-references to add:**
-- `DEVELOPMENT_PLAN/README.md` — flip the Phase-17 status when the gate passes; link this document.
+- `DEVELOPMENT_PLAN/README.md` — flip the Phase-18 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — record Phase 18's gate substrate (linux-cpu) in the per-phase substrate map.
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Vault/{Init,Unseal,Seal,Pki,Client,SecretRef,Error}.hs`
-  as Phase-17 design-first rows against the component inventory.
+  as Phase-18 design-first rows against the component inventory.
 
 ## Related Documents
 - [README.md](README.md) — the live tracker and phase order this document serves
@@ -371,8 +371,8 @@ The whole sprint (📋 Planned).
   contract, PKI trust anchor, in-cluster-auth, and error model adopted here
 - [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — the Vault-ready bring-up
   ordering edge this phase installs
-- [Storage Lifecycle Doctrine](../documents/engineering/storage_lifecycle_doctrine.md) — the retained Vault PV and
-  init-once / unseal-on-rebuild durability
+- [Storage Lifecycle Doctrine](../documents/engineering/storage_lifecycle_doctrine.md) — the retained Vault
+  backing, deterministic PV rebind, and init-once / unseal-on-rebuild durability
 - [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — the
   Register-2.5 `IOSim` fail-closed check the real unseal client runs against the modeled Vault before the live gate
 - [phase_16](phase_16_renderer_reconciler.md) — the typed renderer + SSA reconciler that renders and applies Vault

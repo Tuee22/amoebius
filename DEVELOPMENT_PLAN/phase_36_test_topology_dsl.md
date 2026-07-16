@@ -7,7 +7,7 @@
 
 > **Purpose**: Deliver amoebius testing as a self-tearing-down `.dhall` topology — the always-teardown
 > test-topology type, the `suggest-test` generator, flagged test credentials, and the elevated harness as the
-> sole deleter of test-flagged durable storage — gated live by a generated, reviewed test that runs a
+> sole automated deleter of test-owned durable storage — gated live by a generated, reviewed test that runs a
 > delegated-failover simulation on one named substrate and tears down leak-free.
 
 ---
@@ -39,9 +39,12 @@ then writes a representative test `.dhall` sized to the detected capacity and au
 *proposal* the operator reviews, never a self-certifying pass. **Flagged test credentials** are a distinct,
 marked identity holding the elevated authority a running cluster must never hold, and every resource a
 topology allocates is tagged test-owned at creation. **The elevated harness** is the *one* actor permitted to
-destroy durable storage, and only storage flagged test-owned, via a flag-then-sweep cycle whose non-empty
-postflight sweep is a hard failure. The **per-run ledger artifact** records which correctness layers each run
-actually reached and at what strength.
+destroy durable storage **within test automation**, and only storage flagged test-owned, via a flag-then-sweep
+cycle. Leak detection is
+independent of that deletion flag: pre/post inventories cover Kubernetes objects, retained host-backing
+allocations under `${RETAINED_ROOT}`, and any cloud resources, so a non-empty diff is a hard failure even when
+the survivor is untagged or its PV object is gone. The **per-run ledger artifact** records which correctness
+layers each run actually reached and at what strength.
 
 The failover simulation these topologies schedule is deliberately a **delegated** failover, not a bespoke
 election: the chaos schedule kills the active worker and observes a name-ordered standby take over the
@@ -51,7 +54,7 @@ needed). There is no elected singleton, no ranked-failover election, and no stan
 anywhere in this phase — the harness only *schedules* the intra-cluster failover the earlier phases already
 delegate, and tears the result down. This phase consumes and does not re-implement the live DSL deploy via
 the `replicas=1` singleton (Phase 22), the native Pulsar client and Pulsar-`Failover` worker takeover
-(Phases 22–23), the retained `no-provisioner` PV model (Phase 17), substrate detection (Phase 14),
+(Phases 24–25), the retained `no-provisioner` PV model (Phase 17), substrate detection (Phase 14),
 Vault secret-by-name injection (Phase 18), and the leak-free provider teardown (Phase 30).
 
 ```mermaid
@@ -64,8 +67,9 @@ flowchart LR
   kill --> takeover[Pulsar promotes the name-ordered standby: no amoebius election]
   takeover --> down[Mandatory idempotent teardown on every exit]
   down --> sweep[Elevated harness sweeps test-flagged resources]
-  sweep --> empty[Postflight sweep empty plus per-run ledger]
-  sweep --> leak[Non-empty sweep is a hard failure with the leak list]
+  sweep --> inventory[Independent API, host-backing, cloud pre/post inventory diff]
+  inventory --> empty[Diff empty plus per-run ledger]
+  inventory --> leak[Non-empty diff is a hard failure with the leak list]
 ```
 
 **Substrate:** per generated test — each emitted test `.dhall` is substrate-locked to exactly one substrate
@@ -75,7 +79,7 @@ failover simulation needs no accelerator, while the harness itself is substrate-
 **Register:** 3 — live infrastructure; the substrate is chosen per generated test (§K).
 
 **Gate:** a generated test `.dhall` — produced by executing `amoebius suggest-test` for real on the gate host
-(real Phase-13 host classification; the SSH/AWS credential probe run for real, or its layer explicitly
+(real Phase-14 host classification; the SSH/AWS credential probe run for real, or its layer explicitly
 recorded UNVERIFIED in the ledger) and then reviewed by an operator — runs a **failover simulation** on its
 single named substrate (the active worker is killed and a name-ordered standby takes over the Pulsar
 `Exclusive`/`Failover` subscription — single-writer delegated to Pulsar, never a bespoke amoebius election),
@@ -88,17 +92,25 @@ The gate is checked against these committed, Phase-0-pinned criteria (see
 
 1. **Leak-freedom by implementation-independent inventory diff, not tag query.** Leak-freedom is asserted by a
    substrate-scope enumeration performed by an observer outside the typed allocation path: a pre-run
-   enumeration of the substrate scope (the `kind` namespace via `kubectl get all,pv,pvc` on the gate run, plus
-   the AWS account/region via `aws resourcegroupstaggingapi get-resources` for any cloud side-allocation) must
+   enumeration of the substrate scope (the `kind` API inventory via `kubectl get all,pv,pvc`; one
+   allocation-level record for every retained backing under host `${RETAINED_ROOT}`, read from outside all node
+   containers and keyed by relative backing identity/kind plus observed allocation extent where available,
+   rather than mutable payload contents; plus the AWS account/region through a Phase-0-pinned exhaustive set
+   of service-native read-only `List*`/`Describe*` calls for every cloud resource type the representative set
+   can allocate, with AWS Resource Explorer `tag:none` as an additional untagged-resource cross-check) must
    equal the postflight enumeration of that same scope — not merely an empty query for the harness's own
-   test-owned tag. A non-empty diff is a hard failure with the leak list.
+   test-owned tag. `resourcegroupstaggingapi get-resources` may enrich tagged-resource metadata but cannot be
+   the leak oracle because it omits untagged resources. A non-empty diff is a hard failure with the leak list.
 2. **Committed seeded mutant that must go red (Cheat-1 operator: dropped effect).** The committed mutant
    `test/mutants/phase_36_leak_untyped.dhall` creates one resource (a `ConfigMap` and a backing PVC)
    *outside* the typed allocation call — hence never test-owned-tagged — and the gate run over that mutant
    MUST fail on the inventory diff (the untagged resource surfaces as a leak), proving the sweep is not the
-   circular tag-query of Cheat 1. A second committed mutant `test/mutants/phase_36_ledger_all_tested.dhall`
-   (invariant-clause delete: an emitter hardcoding every applicable move as tested) MUST fail the
-   expected-ledger match of criterion 4.
+   circular tag-query of Cheat 1. The committed
+   `test/mutants/phase_36_leak_host_backing.dhall` removes its PVC/PV API bindings but deliberately leaves the
+   newly allocated marker-bearing host backing under `${RETAINED_ROOT}`; it MUST fail the host-allocation
+   inventory diff, proving API-object cleanup cannot hide leaked durable bytes. A third committed mutant
+   `test/mutants/phase_36_ledger_all_tested.dhall` (invariant-clause delete: an emitter hardcoding every
+   applicable move as tested) MUST fail the expected-ledger match of criterion 4.
 3. **suggest-test provenance is falsifiable, not narrative.** The per-run record captures the raw
    `suggest-test` emitted `.dhall` (pre-review), the reviewed `.dhall`, and their textual diff; the pre-review
    emitted output MUST itself type-check as a `TestTopology` and carry the delegated-failover chaos schedule.
@@ -119,29 +131,38 @@ The gate is checked against these committed, Phase-0-pinned criteria (see
 ## N. Gate integrity: the concrete representative set, committed oracles, and register binding
 
 **Representative set (concrete, not "sized to capacity" hand-waving).** The canonical gate run stands up, on
-the `linux-cpu` single-node `kind` cluster, at minimum: the pre-standing Phase-18 HA Pulsar and MinIO on
-retained (Phase-16) storage; **at least one newly-allocated retained `no-provisioner` PV** (so the sole-deleter
-rule of Sprint 31.4 is exercised against a resource this phase created); **one control-plane workload as a
+the `linux-cpu` single-node `kind` cluster, at minimum: the pre-standing Phase-19 HA Pulsar and MinIO on
+retained Phase-17 storage; **at least one newly-allocated retained `no-provisioner` PV** (so the sole-deleter
+rule of Sprint 36.4 is exercised against a resource this phase created); **one control-plane workload as a
 Deployment `replicas=1`**; and **at least two Pulsar `Failover`-subscription consumer pods** (an active worker
 plus one name-ordered standby) so the failover has a real standby to promote. A run standing up fewer than
 these does not satisfy the gate. Each such resource is enumerated by the criterion-1 observer both pre- and
-post-run.
+post-run at every applicable boundary: Kubernetes API objects through `kubectl`, retained host-backing
+allocations through the external `${RETAINED_ROOT}` observer, and provider resources through the read-only
+cloud inventory.
 
 **Committed, Phase-0-pinned oracles and mutants (authored before any implementation exists).**
 - `test/golden/phase_36_ledger.json` — the externally hand-authored expected ledger of Gate criterion 4;
   authored independently of `src/Amoebius/Test/Ledger.hs`, it fixes the derived applicable-move set and the
   UNVERIFIED entry for the topology's declared-but-unfaulted invariant.
+- `test/golden/phase_36_cloud_inventory.json` — the hand-authored cloud resource-type/API inventory for the
+  representative set (the required service-native `List*`/`Describe*` calls, including regional and global
+  resources, plus the Resource Explorer view/query requirements for `tag:none`); it is independent of the
+  allocator and prevents the leak observer from silently omitting an untagged resource class.
 - `test/mutants/phase_36_leak_untyped.dhall` — the Cheat-1 seeded mutant (dropped-effect operator: a resource
   allocated outside the typed path) that MUST turn the inventory-diff red.
+- `test/mutants/phase_36_leak_host_backing.dhall` — a backing-leak mutant that removes the PVC/PV API objects
+  but leaves a marker-bearing retained allocation under `${RETAINED_ROOT}`; the host-allocation inventory diff
+  MUST turn red.
 - `test/mutants/phase_36_ledger_all_tested.dhall` — the Cheat-2 seeded mutant (invariant-clause-delete
   operator: an emitter marking every applicable move tested) that MUST fail the expected-ledger match.
 - `test/dhall/phase_36_review_allowlist.json` — the committed allowlist bounding which fields operator review
   may edit, making emitted→reviewed provenance falsifiable.
 
-**Register binding for all sprint validations.** Every Sprint 31.1–31.5 Independent Validation and Validation
+**Register binding for all sprint validations.** Every Sprint 36.1–36.5 Independent Validation and Validation
 below is discharged in the register named on the criterion. Where a criterion names Register 2 (Phase-11 fake
 tools / fixed fake inputs), it is a type-level or pure-function check and its live layer is recorded UNVERIFIED
-in the ledger; the leak-free teardown, the live identity-boundary denial (Sprint 31.4), and the failover
+in the ledger; the leak-free teardown, the live identity-boundary denial (Sprint 36.4), and the failover
 simulation of the Gate are discharged only in **Register 3** on the `linux-cpu` `kind` cluster. No validation
 may silently choose its own world: the register is stated on each, and a Register-2 discharge never counts as
 the Register-3 gate obligation.
@@ -153,28 +174,28 @@ the Register-3 gate obligation.
   illegal-state-unrepresentable contract, and runs the real platform, differing from a production deployment
   only by a chaos schedule and the always-teardown contract.
 - [`testing_doctrine.md §3`](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down)
-  — *the test-topology contract: spin up → run → always tear down*: Sprint 31.1 realizes the four-clause
+  — *the test-topology contract: spin up → run → always tear down*: Sprint 36.1 realizes the four-clause
   contract — explicit visible resource ownership, teardown on every exit, idempotent destroy, and "a cleanup
   failure is a real failure" — as a property of the topology *type*.
 - [`app_vs_deployment_doctrine.md §3`](../documents/engineering/app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)
   — *the deployment-rules surface*: the chaos/failover schedule lives on the deployment-rules layer so the app
   under test is none the wiser, keeping application logic and deployment rules separate DSL surfaces.
 - [`testing_doctrine.md §5`](../documents/engineering/testing_doctrine.md#5-suggest-test-detect-the-world-emit-a-representative-test-dhall)
-  — *`suggest-test`: detect the world, emit a representative test `.dhall`*: Sprint 31.2 builds the generator
+  — *`suggest-test`: detect the world, emit a representative test `.dhall`*: Sprint 36.2 builds the generator
   that detects substrate + inspects credential authority/quotas and emits a representative, capacity-sized
   test `.dhall`; where the doctrine's prose still says "leadership election", amoebius delegates single-instance
   to k8s/etcd and worker takeover to Pulsar, so the emitted chaos schedule injects a *delegated* failover, not
   a bespoke election.
 - [`testing_doctrine.md §6`](../documents/engineering/testing_doctrine.md#6-flagged-test-credentials)
-  — *flagged test credentials*: Sprint 31.3 establishes the distinct flagged test-simulation identity (the
+  — *flagged test credentials*: Sprint 36.3 establishes the distinct flagged test-simulation identity (the
   prodbox `aws_admin_for_test_simulation` pattern, generalized) and the test-owned tagging of every allocated
   resource, with the credential's material still a secret-by-name in Vault
   ([`vault_pki_doctrine.md §3`](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)
   — the `SecretRef` contract, a name never a value).
-- [`testing_doctrine.md §7`](../documents/engineering/testing_doctrine.md#7-the-elevated-harness-is-the-sole-deleter-of-durable-storage-leak-free-cycles)
-  — *the elevated harness is the sole deleter of durable storage; leak-free cycles*: Sprint 31.4 implements
-  one-deleter/one-credential, flag-then-sweep, and the non-empty-postflight-sweep hard failure — the single
-  sanctioned exception delegated by
+- [`testing_doctrine.md §7`](../documents/engineering/testing_doctrine.md#7-the-elevated-harness-is-the-sole-automated-deleter-of-test-owned-durable-storage-leak-free-cycles)
+  — *the elevated harness is the sole automated deleter of test-owned durable storage; leak-free cycles*:
+  Sprint 36.4 implements one-deleter/one-credential, flag-then-sweep, and the independent postflight-inventory
+  hard failure — the single automated test exception delegated by
   [`storage_lifecycle_doctrine.md §7.1`](../documents/engineering/storage_lifecycle_doctrine.md#71-the-single-exception-the-elevated-test-harness)
   (the single exception, the elevated test harness) to the no-normal-operation-deletion rule of that doc's §7.
 - [`daemon_topology_doctrine.md §3.1`](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)
@@ -183,7 +204,7 @@ the Register-3 gate obligation.
   failover the topologies inject is the Pulsar `Exclusive`/`Failover` subscription takeover, and the singleton
   they deploy under is a `replicas=1` Deployment; nothing in this phase runs an election of any kind.
 - [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
-  — *no skips, fail fast, and the per-run ledger artifact*: Sprint 31.5 emits the per-run
+  — *no skips, fail fast, and the per-run ledger artifact*: Sprint 36.5 emits the per-run
   proven/tested/assumed ledger as a first-class output beside pass/fail, fails fast on missing prerequisites,
   and records an applicable-but-unperformed move as UNVERIFIED. The ledger *grammar* — the Extract → Model →
   Inject moves and the proven/tested/assumed strengths — is owned by
@@ -198,7 +219,7 @@ the Register-3 gate obligation.
 
 ## Sprints
 
-## Sprint 31.1: The test-topology type — a deployment-rules layer that always tears down 📋
+## Sprint 36.1: The test-topology type — a deployment-rules layer that always tears down 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Test/Topology.hs`, `dhall/test/Topology.dhall` (the `TestTopology` Dhall
@@ -252,12 +273,12 @@ none the wiser ([`app_vs_deployment_doctrine.md §3`](../documents/engineering/a
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 31.2: `suggest-test` — detect substrate + credential authority, emit a representative test `.dhall` 📋
+## Sprint 36.2: `suggest-test` — detect substrate + credential authority, emit a representative test `.dhall` 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Test/SuggestTest.hs`, `app/Amoebius/Command/SuggestTest.hs` (the
 `amoebius suggest-test` subcommand) (target paths; not yet built)
-**Blocked by**: Sprint 31.1 (the `TestTopology` type it emits values of); Phase 14 gate (substrate
+**Blocked by**: Sprint 36.1 (the `TestTopology` type it emits values of); Phase 14 gate (substrate
 detection — the pure host classification and the full-path substrate probe)
 **Independent Validation** (Register 2 — pure, over Phase-11 fake tools; its live probe layer recorded
 UNVERIFIED in the ledger, with the real-probe discharge deferred to the Register-3 Gate): against a fixed fake
@@ -299,15 +320,15 @@ the emitted chaos schedule injects a *delegated* failover.
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 31.3: Flagged test credentials + test-owned resource tagging 📋
+## Sprint 36.3: Flagged test credentials + test-owned resource tagging 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Test/Credentials.hs`, `dhall/test/TestCredential.dhall` (the flagged
 test-simulation identity type + the test-owned tag) (target paths; not yet built)
-**Blocked by**: Sprint 31.1 (the topology whose allocations get tagged); Phase 18 gate (root Vault +
+**Blocked by**: Sprint 36.1 (the topology whose allocations get tagged); Phase 18 gate (root Vault +
 secret-by-name injection)
 **Independent Validation** (Register 2 — type-level, over Phase-11 fake tools; this sprint pins the
-*representability* boundary, while the *live* identity-boundary denial is Sprint 31.4's Register-3 obligation):
+*representability* boundary, while the *live* identity-boundary denial is Sprint 36.4's Register-3 obligation):
 a topology run under the flagged identity tags every allocated resource test-owned at creation; a topology that
 attempts to run a workload under the everyday (non-flagged) credential, or to allocate a resource without the
 test-owned tag, is rejected **at type-check with a Dhall type error at the credential/tag field** (its specific
@@ -346,74 +367,92 @@ requirement of the create-vs-delete model owned by
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 31.4: The elevated harness as sole storage deleter + leak-free sweep 📋
+## Sprint 36.4: The elevated harness as sole automated deleter of test-owned storage + leak-free sweep 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Test/Harness.hs`, `src/Amoebius/Test/Sweep.hs` (the elevated harness + the
-test-flag postflight sweep) (target paths; not yet built)
-**Blocked by**: Sprint 31.1 (the teardown the sweep follows); Sprint 31.3 (the test-owned flag the sweep is
+**Implementation**: `src/Amoebius/Test/Harness.hs`, `src/Amoebius/Test/Sweep.hs` (the elevated harness +
+test-flag reclaim + independent Kubernetes/host/cloud postflight inventory) (target paths; not yet built)
+**Blocked by**: Sprint 36.1 (the teardown the sweep follows); Sprint 36.3 (the test-owned flag the sweep is
 scoped by); Phase 17 gate (the retained `no-provisioner` PV model the rule protects); Phase 30 gate (the
 leak-free provider teardown this harness extends to test cycles)
-**Independent Validation** (Register 3, live `kind` cluster): only the elevated harness, holding the flagged
-delete-capable credential, can destroy durable storage, and only storage flagged test-owned; a
-no-normal-operation-deletion attempt against a retained PV is denied at the **live identity boundary** — a
-Kubernetes RBAC / AWS IAM denial observed at the API/OS boundary (a `403 Forbidden` / `AccessDenied` returned
-to the everyday credential), per testing_doctrine §6's "not a convention" requirement, never an in-process
-typed refusal over a credential that could in fact delete; the postflight leak check is the implementation-
-independent inventory diff of Gate criterion 1 (pre-run vs post-run `kubectl`/`aws` enumeration of the
-substrate scope), so a leftover surfaces even when untagged, and a retained-by-design resource enumerated in
+**Independent Validation** (Register 3, live `kind` cluster): within automated test workflows, only the
+elevated harness, holding the flagged delete-capable credential, can destroy durable **backing**, and only
+backing flagged test-owned. The validation
+separates two boundaries that must not be conflated: PVC/PV API objects are bindings and may be deleted by the
+scoped lifecycle reconciler while the backing remains; an unrelated everyday workload identity receives a
+Kubernetes RBAC `403` for a targeted PV-object delete, but that RBAC fact is not the durable-data guarantee.
+The guarantee is proved at the backing boundary: a host `${RETAINED_ROOT}` reclaim under the normal OS
+identity is denied with `EACCES`/`EPERM`, and an AWS `ec2:DeleteVolume` under the operational identity is
+denied with `AccessDenied`, while the elevated harness can perform the same substrate-specific backing-delete
+operation on the same test-flagged target. The postflight leak check is the implementation-independent
+inventory diff of Gate criterion 1 (pre-run vs post-run Kubernetes API, host retained-allocation, and cloud
+enumerations), so a leftover surfaces even when untagged, and a retained-by-design resource enumerated in
 *both* the pre- and post-run scope is *not* reported as a leak.
 **Docs to update**: `documents/engineering/testing_doctrine.md`, `documents/engineering/storage_lifecycle_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
-Adopt [`testing_doctrine.md §7 — the elevated harness is the sole deleter of durable storage; leak-free cycles`](../documents/engineering/testing_doctrine.md#7-the-elevated-harness-is-the-sole-deleter-of-durable-storage-leak-free-cycles),
+Adopt [`testing_doctrine.md §7 — the elevated harness is the sole automated deleter of test-owned durable storage; leak-free cycles`](../documents/engineering/testing_doctrine.md#7-the-elevated-harness-is-the-sole-automated-deleter-of-test-owned-durable-storage-leak-free-cycles),
 the named exception delegated by
 [`storage_lifecycle_doctrine.md §7.1 — the single exception: the elevated test harness`](../documents/engineering/storage_lifecycle_doctrine.md#71-the-single-exception-the-elevated-test-harness):
-make the elevated harness the *one* actor that may destroy durable storage — and only storage flagged
-test-owned — via a flag-then-sweep cycle. The DSL surface exposes no "delete this durable volume" primitive at
-all; deletion is an act of the harness, not a value in a `.dhall`. A non-empty postflight sweep is a hard
-failure, generalizing the prodbox postflight tag-sweep assertion.
+make the elevated harness the *one automated* actor that may destroy durable storage — and only storage
+flagged test-owned — via a flag-then-sweep cycle. The DSL surface exposes no "delete this durable volume"
+primitive at all; deletion is an act of the harness, not a value in a `.dhall`. A non-empty flagged sweep or independent
+postflight inventory diff is a hard failure, strengthening the prodbox postflight tag-sweep pattern so
+untagged and backing-only leaks are visible.
 
 ### Deliverables
-- A delete path reachable only by the elevated harness under the flagged credential of Sprint 31.3, scoped to
-  test-owned resources, with no normal-operation or non-harness test code path able to delete a retained PV or
-  its backing bytes.
+- A delete path reachable only by the elevated harness under the flagged credential of Sprint 36.3, scoped to
+  test-owned resources, with no normal-operation or non-harness test code path able to destroy retained
+  backing bytes; PVC/PV API objects may still disappear through ordinary cluster lifecycle.
 - A postflight sweep that, after teardown, asserts leak-freedom by the implementation-independent inventory
-  diff of Gate criterion 1 — a substrate-scope enumeration (`kubectl get all,pv,pvc`; `aws
-  resourcegroupstaggingapi get-resources`) taken pre- and post-run and compared, not merely a query for the
-  harness's own test-owned tag — surfacing any resource present post-run but absent pre-run as a leak (with the
-  leak list in the record) while correctly *not* flagging a retained, by-design resource present in both
-  enumerations. The committed seeded mutant `test/mutants/phase_36_leak_untyped.dhall` (a resource allocated
-  outside the typed path) is the standing red-test proving this is not the circular tag query.
-- The elevated reclaim path as the sole gate for any durable-data destruction, including the retire-old leg of
-  a verified `create-new → migrate → retire-old` storage shrink
-  ([`storage_lifecycle_doctrine.md §8`](../documents/engineering/storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction)),
-  so no `.dhall` value can ever denote "discard these bytes."
+  diff of Gate criterion 1 — a substrate-scope enumeration (`kubectl get all,pv,pvc`; the external
+  `${RETAINED_ROOT}` allocation inventory; the Phase-0-pinned service-native AWS `List*`/`Describe*` inventory
+  plus Resource Explorer `tag:none`) taken pre- and post-run and compared, not merely a query for the harness's
+  own test-owned tag — surfacing any resource present post-run but absent pre-run as a leak (with the leak list
+  in the record) while correctly *not* flagging a retained, by-design resource present in both enumerations.
+  The Resource Groups Tagging API is metadata-only here because it does not return untagged resources. The
+  committed seeded mutants
+  `test/mutants/phase_36_leak_untyped.dhall` (an API resource allocated outside the typed path) and
+  `test/mutants/phase_36_leak_host_backing.dhall` (API bindings removed, host backing left behind) are the
+  standing red-tests proving this is neither the circular tag query nor an API-object-only check.
+- An explicit scope boundary: this harness reclaims **test-owned** backing only. Production
+  `create-new → verified-migrate → retire-old` emits `ReclaimEligible` and leaves physical deletion to an
+  external privileged operator action
+  ([`storage_lifecycle_doctrine.md §8`](../documents/engineering/storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction));
+  Phase 36 neither holds nor tests authority over production backing.
 
 ### Validation
-1. A normal-operation attempt to delete a retained PV is denied at the live identity boundary — the everyday
-   credential receives a Kubernetes RBAC `403` / AWS IAM `AccessDenied` observed at the API/OS boundary, not an
-   in-process typed guard; the same delete under the elevated harness on a test-flagged volume succeeds. The
-   positive and negative differ *only* in the credential identity (the foreclosed dimension), same target
-   volume, same call site.
-2. Leak detection uses the Gate-criterion-1 inventory diff, not a test-owned tag query: the committed seeded
+1. **Binding-object boundary:** a targeted `kubectl delete pv` from an unrelated everyday workload identity
+   receives a live Kubernetes RBAC `403`, while the scoped lifecycle reconciler may delete the test PV/PVC API
+   bindings during teardown. In both cases the external host-backing inventory and marker bytes remain
+   unchanged. This validates least-privilege Kubernetes object access without pretending the PV object is the
+   durable data.
+2. **Backing boundary:** under the normal identity, the substrate-specific backing-delete operation is denied
+   at the real external boundary — host `${RETAINED_ROOT}` reclaim returns `EACCES`/`EPERM`, and cloud
+   `ec2:DeleteVolume` returns AWS `AccessDenied`; no in-process typed refusal counts. Under the elevated
+   harness, the same operation against the same test-flagged target succeeds. Each negative/positive pair
+   differs only in credential identity; host and EBS pairs are evaluated separately rather than treating a PV
+   API delete as equivalent to deleting backing bytes.
+3. Leak detection uses the Gate-criterion-1 inventory diff, not a test-owned tag query: the committed seeded
    mutant `test/mutants/phase_36_leak_untyped.dhall` — a resource allocated *outside* the typed path, hence
    never tagged — MUST fail the run as a leak (proving the sweep is not circular), while a clean run's pre-/
-   post-run enumeration diff is empty.
-3. A retained-by-design (unflagged) volume present in *both* the pre-run and post-run enumeration is not
+   post-run enumeration diff is empty. The committed
+   `test/mutants/phase_36_leak_host_backing.dhall`, which removes API bindings but leaves the new host backing,
+   MUST also fail on the `${RETAINED_ROOT}` allocation diff.
+4. A retained-by-design (unflagged) volume present in *both* the pre-run and post-run enumeration is not
    reported as a leak; a resource absent pre-run but present post-run is.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 31.5: The per-run ledger artifact + the delegated-failover gate topology 📋
+## Sprint 36.5: The per-run ledger artifact + the delegated-failover gate topology 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Test/Ledger.hs` (the proven/tested/assumed artifact emitter),
 `test/dhall/phase_36_failover.dhall` (the gate topology), `test/live/FailoverGateSpec.hs` (target paths; not
 yet built)
-**Blocked by**: Sprint 31.1 (the topology runner); Sprint 31.2 (`suggest-test` produces the gate topology);
-Sprint 31.4 (the leak-free sweep the gate asserts empty); Phase 25 gate (the Pulsar-`Failover` worker takeover
+**Blocked by**: Sprint 36.1 (the topology runner); Sprint 36.2 (`suggest-test` produces the gate topology);
+Sprint 36.4 (the leak-free sweep the gate asserts empty); Phase 25 gate (the Pulsar-`Failover` worker takeover
 the fault injects)
 **Independent Validation** (Register 3, live `kind` cluster): a test `.dhall` emitted by executing `amoebius
 suggest-test` for real on the gate host runs a single-substrate failover simulation (kill the active worker;
@@ -455,7 +494,7 @@ injects is delegated to Pulsar (Phase 25), never a bespoke amoebius election.
   asserts the fresh emit type-checks as a `TestTopology`, carries the delegated-failover schedule, and differs
   from the committed reviewed file only within the allowlist `test/dhall/phase_36_review_allowlist.json`. The
   topology injects an intra-cluster Pulsar-delegated failover on one named substrate, tears down leak-free
-  (Sprint 31.4), and emits the ledger marking the Runtime-layer move tested-on-that-substrate.
+  (Sprint 36.4), and emits the ledger marking the Runtime-layer move tested-on-that-substrate.
 
 ### Validation
 1. The gate topology — captured as the raw `suggest-test` emitted `.dhall` (pre-review), the reviewed `.dhall`,
@@ -476,7 +515,7 @@ injects is delegated to Pulsar (Phase 25), never a bespoke amoebius election.
 > asynchronous cross-cluster gateway-migration obligation (both Planned and Failover branches) is the one
 > formal simulation/proof, owned by
 > [`chaos_failover_doctrine.md §16`](../documents/engineering/chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
-> and delivered in Phase 28, not here. The delegated-failover shape is proven in the sibling `infernix`
+> and delivered by Phase 29's gateway-migration drills, not here. The delegated-failover shape is proven in the sibling `infernix`
 > ML-workflow runtime — sibling evidence, not an amoebius result.
 
 ### Remaining Work
@@ -490,19 +529,21 @@ The whole sprint (📋 Planned).
   the ledger emitter); status of those realizations lives here in the plan, never as doctrine status. Reconcile
   the §5 "leadership election" prose with the delegated-failover posture (single-instance a k8s/etcd property;
   worker takeover a Pulsar subscription).
-- `documents/engineering/storage_lifecycle_doctrine.md` — §7.1 (and the §8 verified-shrink retire-old leg) gain
-  the realized elevated-reclaim owner (`src/Amoebius/Test/Sweep.hs`, `src/Amoebius/Test/Harness.hs`) as the
-  concrete holder of the delegated durable-storage destroy exception.
+- `documents/engineering/storage_lifecycle_doctrine.md` — §7.1 gains the realized automated test-reclaim owner
+  (`src/Amoebius/Test/Sweep.hs`, `src/Amoebius/Test/Harness.hs`); §8 remains explicitly outside this harness,
+  with production backing deletion an external privileged operator action.
 - `documents/engineering/pulumi_iac_doctrine.md` — §6's create-vs-delete credential model gains the testing-side
-  realization: the flagged test-simulation identity is the sole holder of the durable-storage destroy authority.
+  realization: the flagged test-simulation identity is the sole automated holder of destroy authority for
+  test-owned durable storage. Production backing is outside this harness and remains reclaimable only by the
+  external human-operated break-glass path.
 - `documents/engineering/chaos_failover_doctrine.md` — record the §12 per-run proven/tested/assumed ledger for
   the intra-cluster failover injection, and that the §16 cross-cluster (gateway-migration) obligation stays in
-  Phase 28.
+  Phase 29.
 
 **Cross-references to add:**
-- `DEVELOPMENT_PLAN/README.md` — flip the Phase-31 status when the gate passes; link this document.
+- `DEVELOPMENT_PLAN/README.md` — flip the Phase-36 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/system_components.md` — add the `Amoebius/Test/*` modules (`Topology`, `Runner`,
-  `SuggestTest`, `Credentials`, `Harness`, `Sweep`, `Ledger`) to the component inventory as Phase-31
+  `SuggestTest`, `Credentials`, `Harness`, `Sweep`, `Ledger`) to the component inventory as Phase-36
   design-first rows, mapped to the owning testing and storage-lifecycle doctrines.
 - `DEVELOPMENT_PLAN/substrates.md` — record the Phase 36 "per generated test" substrate posture (each generated
   test substrate-locked; the canonical gate run on `linux-cpu`) in the per-phase substrate map.
@@ -527,6 +568,7 @@ The whole sprint (📋 Planned).
 - [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — single-instance delegated
   to k8s/etcd and worker takeover delegated to Pulsar, never a bespoke election
 - [phase_25](phase_25_content_store_workflow.md) — the Pulsar-`Failover` worker takeover this phase's gate injects
-- [phase_28](phase_28_multicluster_spawn_georepl.md) — the cross-cluster gateway-migration obligation, distinct from this phase's intra-cluster failover
+- [phase_29](phase_29_gateway_migration_drills.md) — the cross-cluster gateway-migration obligation, distinct
+  from this phase's intra-cluster failover
 - [phase_30](phase_30_provider_clusters.md) — the leak-free provider teardown this harness extends to test cycles
 - [Engineering Doctrine Index](../documents/engineering/README.md) — the doctrine suite these phases adopt

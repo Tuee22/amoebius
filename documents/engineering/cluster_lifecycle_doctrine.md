@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_17_retained_storage.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_17_retained_storage.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for amoebius cluster bring-up and teardown across kind / rke2 / provider clusters — bootstrap, recursive **amoebic spawning**, graceful teardown-with-cleanup versus chaos-failover, push-back on an unsatisfiable root `InForceSpec`, dynamic node provisioning, and ephemeral spin-up/down with deterministic rebind.
@@ -88,8 +88,8 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
   readiness-edge rule (a condition never a duration; the bootstrap tier's `discover`/`RuntimeWitness` gates)
   is owned by [readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md).
 - **Bring-up is itself a reconcile.** "Come up" is not a one-shot script; it is the [§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) reconciler driving
-  the world toward the `.dhall`. Re-running it is a no-op when already converged — that is the Phase 14
-  acceptance shape.
+  the world toward the `.dhall`. Host-level idempotent cluster bring-up is first accepted in Phase 14; the
+  Phase-16 SSA reconciler, driven from the `.dhall` by the Phase-22 singleton, owns in-cluster convergence.
 - **A stretched rke2 agent joins only once it is reachable.** Growing a cluster with a **stretched** agent —
   a full member node whose declared network-locality `Site` differs from the control-plane servers' `Site`
   ([substrate_doctrine.md §8.3](./substrate_doctrine.md#83-site-the-declared-network-locality-axis-cluster-nodes-and-host-worker-hosts)) —
@@ -233,7 +233,9 @@ released, the cluster (driven by its control-plane singleton, [§9](#9-how-bring
 3. **Deregisters from geo-replication and hands off the gateway** cleanly, so siblings take over the wild
    ingress (which Keycloak owns, [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)) and
    DNS repoints in an orderly way rather than as an emergency.
-4. **Releases compute — and only compute.** Durable storage is **preserved, never deleted** ([§7](#7-ephemeral-spin-updown-with-deterministic-rebind);
+4. **Releases ephemeral cluster resources, never durable backing.** Compute, control-plane infrastructure,
+   and cluster-local API objects are removed; durable backing is **preserved, never deleted by routine
+   teardown** ([§7](#7-ephemeral-spin-updown-with-deterministic-rebind);
    [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md)).
 
 **Chaos-failover, concretely.** A chaos-failover is what happens when the lead *vanishes* — no
@@ -299,23 +301,28 @@ flowchart TD
 
 ## 7. Ephemeral spin-up/down with deterministic rebind
 
-A cluster can be torn down and spun back up *ephemerally with zero data loss*, because the only durable
-state lives on retained PVs that rebind identically. (Shorthand: clusters are cattle; their storage is
-not.)
+Ephemeral is a **replaceability property**, not a scheduling policy: it imposes neither a TTL nor mandatory
+production teardown. A cluster's compute, control-plane infrastructure, and cluster-local API objects can be
+gracefully reconciled absent and reconstructed. The rebuilt cluster converges toward the persistent root
+`InForceSpec` and reattaches retained backing through deterministically recreated PV bindings. This graceful
+round-trip has zero durable-byte loss when the backing remains attachable and the deterministic-rebind
+preconditions hold. (Shorthand: clusters are cattle; their storage is not.)
 
 - **Deterministic rebind is owned elsewhere — referenced, not restated.** The mechanism that guarantees a
   rebuilt cluster reattaches the *same* data is the `no-provisioner` retained-PV policy
   (`<namespace>/<statefulset>/pv_<integer>`, sized, host/EBS-bound), owned in full by
   [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md). This doc owns only the *lifecycle
   consequence*: spin-down then spin-up converges to the identical shape **and** the identical bytes.
-- **Teardown frees compute, never storage.** This is the critical caveat: the
+- **Teardown removes ephemeral infrastructure, never durable backing.** This is the critical caveat: the
   durable storage **must remain** or a later spin-up fails. So a graceful teardown ([§5](#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction)) releases compute
-  and **leaves the PVs intact**. The default posture is *"durable storage exists forever"*; deleting it is
-  forbidden under normal credentials and performed only by the elevated test harness for leak-free test
-  cycles — that storage-deletion safety model is owned by
+  and **leaves the durable backing intact**; cluster-local PV API objects may disappear and are freshly
+  rendered on the next bring-up. The default posture is *"durable storage exists forever"*; deleting it is
+  forbidden under normal credentials. Automated test-owned reclamation uses the elevated harness; any
+  deliberate production reclaim is a separate, human-operated external break-glass action. That
+  storage-deletion safety model is owned by
   [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) and
   [testing_doctrine.md](./testing_doctrine.md).
-- **This is what makes [§3](#3-amoebic-spawning--the-recursive-forest) and [§5](#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction) compose.** A child destroyed and later spun back up rebinds to the same shape and
+- **This is what makes [§3](#3-amoebic-spawning--the-recursive-forest) and [§5](#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction) compose.** A child gracefully torn down and later spun back up rebinds to the same shape and
   the same data; a cluster torn down to free compute returns lossless. Fungibility
   ([platform_services_doctrine.md §1](./platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster)) plus durable rebind is the
   precondition for ephemeral teardown being *safe*, not just *possible*.
@@ -376,12 +383,17 @@ sibling's** reconciler-with-predicates doctrine
   the declared `Site` and the fabric wiring are owned by
   [substrate §8.3](./substrate_doctrine.md#83-site-the-declared-network-locality-axis-cluster-nodes-and-host-worker-hosts)
   and the network-fabric doctrine, while this reconcile loop only classifies reachability.
-- **A managed-resource registry, not ad-hoc cleanup.** The set of things the system can create — clusters,
-  children, dynamic nodes, Pulumi stacks, retained PVs — is a **single pure list of typed managed
-  resources**, each carrying its own `discover` and `destroy`. *Totality:* no code path may create a
-  resource that is not in the registry with both, so "a creatable-but-unobservable resource" is
-  unrepresentable. Teardown is then **one reconciler over the owned subset** (`reconcileAbsent`): for each
-  resource, *Present → destroy → re-observe; Absent → skip; Unreachable → refuse.*
+- **A lifetime-aware managed-resource registry, not ad-hoc cleanup.** The set of things the system can
+  create — clusters, children, dynamic nodes, Pulumi stacks, retained-PV API bindings, and durable backing
+  stores — is a **single pure list of typed managed resources**. Each entry carries lifecycle metadata from
+  its owning doctrine, `discover`, and its permitted absence action; a retained-PV API object and its backing
+  store are separate resources. *Totality:* no code path may create a resource that is not in the registry
+  with those operations, so "a creatable-but-unobservable resource" is unrepresentable. Ordinary teardown
+  runs `reconcileAbsent` only over the owned **ephemeral** subset: *Present → destroy → re-observe; Absent →
+  skip; Unreachable → refuse.* The lifetime and credential rules consumed here are owned by
+  [pulumi_iac_doctrine.md §3](./pulumi_iac_doctrine.md#3-state-lifetime-matches-resource-lifetime-per-class),
+  [storage_lifecycle_doctrine.md §7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation),
+  and [testing_doctrine.md §7](./testing_doctrine.md#7-the-elevated-harness-is-the-sole-automated-deleter-of-test-owned-durable-storage-leak-free-cycles).
 - **Why not a global state machine.** The authoritative state lives in **external systems** — the kube API,
   the cloud API, MinIO — that this program cannot refresh transactionally. Any in-memory cross-product
   model goes stale the moment an eventually-consistent API answers, and crash recovery forces a re-discover
@@ -403,12 +415,12 @@ sibling's** reconciler-with-predicates doctrine
 This document is normative cluster-lifecycle doctrine only. Delivery sequencing, completion status,
 validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
-only (the plan is authoritative): bootstrap + a single kind cluster land in **Phase 14**; platform services
-+ retained storage + root Vault/PKI in **Phases 16–18**; the control-plane singleton in **Phase 22**; **amoebic
-spawning, geo-replication, gateway failover + route53 repoint, the teardown-with-cleanup-vs-chaos-failover
-distinction, and push-back-on-unsatisfiable-`.dhall`** in **Phase 28**; provider-managed clusters + dynamic
-node provisioning in **Phase 30**; and the storage-lifecycle safety that makes teardown leak-free in
-**Phase 36**. This doc states the target shape and links back for status.
+only (the plan is authoritative): bootstrap + a single kind cluster land in **Phase 14**; the baked image in
+**Phase 15**; the SSA reconciler in **Phase 16**; retained storage in **Phase 17**; root Vault/PKI in
+**Phase 18**; platform services in **Phases 19–20**; the control-plane singleton in **Phase 22**; amoebic
+spawning + geo-replication in **Phase 28**; gateway failover + Route53 repoint in **Phase 29**;
+provider-managed clusters + dynamic node provisioning in **Phase 30**; and the test-only teardown safety
+harness in **Phase 36**. This doc states the target shape and links back for status.
 
 ---
 

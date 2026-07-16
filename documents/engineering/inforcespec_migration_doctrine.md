@@ -35,13 +35,15 @@ The rule this doctrine states: **a migration is the typed diff between the in-fo
 newly-uploaded one, delivered through `dhall update` and realized by the ordinary reconcile — not a new
 operation — and the only verbs it may author over an existing durable coordinate live in a closed
 `StorageMutation = Retain | Offload | Grow | Shrink` union with no `Delete`/`Drop`/`Erase`/`Truncate` arm.**
-`Shrink` is *defined* as create-new → verified-migrate → retire-old; the retire-old reclaim is an
-elevated-harness act, never a spec verb; and sanctioned sharing is an append-only, revocable capability edge,
-never a re-tag.
+`Shrink` is *defined* as create-new → verified-migrate → retire-old; `retire-old` detaches the old coordinate
+from active use and records it `ReclaimEligible`, but deleting its backing is an external privileged operator
+act, never a spec verb or test-harness action; and sanctioned sharing is an append-only, revocable capability
+edge, never a re-tag.
 
 What it forecloses: the migration surface can no longer express an in-place truncation, an immediate
 destructive drop, or any spec-level reclaim of durable storage. Reclaim of a retired volume is deferred to a
-deliberate, privileged, runtime-checked action ([§4](#4-shrink-is-create-new--verified-migrate--retire-old-the-reclaim-is-an-elevated-harness-act)). The residual honesty ([§8](#8-the-honest-limit)) is that a
+deliberate, external privileged operator action
+([§4](#4-shrink-is-create-new--verified-migrate--retire-old-backing-reclaim-is-external-and-privileged)). The residual honesty ([§8](#8-the-honest-limit)) is that a
 type cannot prove a live box still holds its disk, nor that a verified copy's bytes match — those remain
 runtime-checked.
 
@@ -69,7 +71,7 @@ There is no bespoke "migrate" verb bolted onto the control plane.
   a migration is undone by advancing the environment pointer back to the prior `releaseHash` and letting the
   reconciler converge — it finds data intact because no phase destroyed anything unverified ([§6](#6-migration-rolloutphases-expand--migrate--contract)).
 
-This doctrine owns the two guarantees that ride on the diff — **no destruction of durable data** ([§3](#3-the-dsl-exposes-no-destructive-verb--the-closed-storagemutation-union), [§4](#4-shrink-is-create-new--verified-migrate--retire-old-the-reclaim-is-an-elevated-harness-act), [§5](#5-the-decode-time-no-orphan-fold)) and **no
+This doctrine owns the two guarantees that ride on the diff — **no destruction of durable data** ([§3](#3-the-dsl-exposes-no-destructive-verb--the-closed-storagemutation-union), [§4](#4-shrink-is-create-new--verified-migrate--retire-old-backing-reclaim-is-external-and-privileged), [§5](#5-the-decode-time-no-orphan-fold)) and **no
 re-tag sharing** ([§7](#7-sanctioned-sharing-is-an-append-only-revocable-capability-edge)) — and defers the diff/apply machinery itself to release_lifecycle and
 manifest_generation.
 
@@ -102,7 +104,7 @@ data StorageMutation
   still holds every original byte — so it needs no migration pipeline
   ([storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction)).
 - **`Shrink` is the only hard arm, and it is not truncation.** `Shrink` is *defined* as the
-  create-new → verified-migrate → retire-old pipeline of [§4](#4-shrink-is-create-new--verified-migrate--retire-old-the-reclaim-is-an-elevated-harness-act), so even reducing an effective size never
+  create-new → verified-migrate → retire-old pipeline of [§4](#4-shrink-is-create-new--verified-migrate--retire-old-backing-reclaim-is-external-and-privileged), so even reducing an effective size never
   denotes discarding bytes.
 
 The general "the right verb simply has no constructor" idiom is the closed-union / GADT-indexed-transition
@@ -112,7 +114,7 @@ this section records the migration-specific instance.
 
 ---
 
-## 4. `Shrink` is create-new → verified-migrate → retire-old; the reclaim is an elevated-harness act
+## 4. `Shrink` is create-new → verified-migrate → retire-old; backing reclaim is external and privileged
 
 The `Shrink` arm ([§3](#3-the-dsl-exposes-no-destructive-verb--the-closed-storagemutation-union)) realizes a smaller effective size without ever representing data destruction. The
 `.dhall` value the operator writes denotes the *target smaller size*; the reconciler provisions a new,
@@ -121,14 +123,14 @@ old one. No `.dhall` value ever denotes "discard these bytes." This is the verif
 [storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction),
 referenced here, not restated.
 
-- **The retire-old reclaim is an elevated-harness act, never a spec verb.** The final reclaim of the
-  now-orphaned old coordinate is itself a durable-data deletion, so it inherits
+- **`Retire-old` marks eligibility; it does not delete backing.** After the copy verifies, the reconciler
+  detaches the old coordinate from active use and records an immutable `ReclaimEligible` artifact naming the
+  old backing, verification evidence, and replacement coordinate. The final physical reclaim is itself a
+  durable-data deletion, so it inherits
   [storage_lifecycle_doctrine.md §7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation):
-  under normal operation it is forbidden, and the only actor permitted to perform it is the **elevated
-  harness**, the sole deleter of durable storage, on resources it flagged — the same path
-  [storage_lifecycle_doctrine.md §7.1](./storage_lifecycle_doctrine.md#71-the-single-exception-the-elevated-test-harness)
-  and [testing_doctrine.md](./testing_doctrine.md) own. The reclaim is **not** an arm the migration spec can
-  author.
+  no normal credential, migration reconciler, `.dhall` value, or elevated **test** harness may delete a
+  production backing. A human operator may later perform an audited external break-glass reclaim against the
+  exact `ReclaimEligible` target. Until that happens, the retired backing remains intact.
 - **A failed verification retires nothing.** A `Shrink` that cannot verify its copy leaves *both* coordinates
   intact and fails loud; it never trades the old bytes for an unverified new home.
 - **A rename is a move over a fixed identity, never a delete-then-create.** A coordinate's identity is a total
@@ -136,11 +138,11 @@ referenced here, not restated.
   that preserves the bytes under a stable identity — it cannot degrade to a destroy-then-recreate that loses
   data.
 
-The open question of **whether the destructive reclaim credential lives outside the spec entirely (an
-elevated action) or as a privileged, auditable spec arm**, and the concrete create-vs-delete credential model
-that backs it, are owned by
-[pulumi_iac_doctrine.md §6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model) — this
-doctrine records only that no *ordinary* migration verb may reclaim durable storage.
+The destructive production-reclaim credential is deliberately **outside the spec and every reconciler**.
+Its concrete create-vs-delete authority split is owned by
+[pulumi_iac_doctrine.md §6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model): only a
+human-operated, audited external break-glass action may reclaim the exact backing named by an immutable
+`ReclaimEligible` artifact.
 
 ---
 
@@ -178,7 +180,7 @@ The per-subsystem shapes:
 |---|---|
 | DB schema | create-new → verified-migrate → retire-old |
 | Topic retention shrink | offload-before-shrink |
-| PV shrink | new-volume → copy → verify → (elevated) retire |
+| PV shrink | new-volume → copy → verify → `ReclaimEligible` → external privileged reclaim |
 | Rename | dual-name → copy-verify → drop-alias |
 | Reader cutover | Pulsar subscription cutover, or Gateway-API `HTTPRoute` weight shift |
 
@@ -241,11 +243,13 @@ The no-destruction guarantee is honest about the layer it reaches, per
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline):
 
 - **A type cannot prove a live box still has its disk**, nor that a verified copy's bytes match the original.
-  The verified-migrate step and the retire-old reclaim are therefore **runtime-checked** residue, not
-  type-foreclosed guarantees — the type removes the destructive *verb*, but the physical preservation of bytes
-  is observed at runtime.
-- **The retire-old reclaim is an elevated, flagged, runtime-checked action** ([§4](#4-shrink-is-create-new--verified-migrate--retire-old-the-reclaim-is-an-elevated-harness-act)), performed only by the
-  elevated harness on flagged resources, never by an ordinary migration verb.
+  The verified-migrate step and emission of `ReclaimEligible` are therefore **runtime-checked** residue, not
+  type-foreclosed guarantees — the type removes the destructive *verb*, but copy equivalence and the
+  non-destructive retirement transition are observed at runtime.
+- **The retire-old transition is runtime-checked but non-destructive**
+  ([§4](#4-shrink-is-create-new--verified-migrate--retire-old-backing-reclaim-is-external-and-privileged)):
+  it emits `ReclaimEligible` only after verification. Actual production-backing deletion is a separate,
+  external privileged operator act, never an ordinary migration verb and never the test harness.
 - **The orphan check is a hybrid decode+runtime gate.** The structural half of [§5](#5-the-decode-time-no-orphan-fold) is decode-foreclosed, but
   determining whether a dropped coordinate still holds live data may require consulting live retained-state —
   that half is runtime-checked and labelled honestly, never reported as a compile-time impossibility.
@@ -264,7 +268,7 @@ This document is normative `InForceSpec`-migration doctrine only. It states the 
 is a typed diff whose verb surface admits no destruction, whose `Shrink` is a verified pipeline, whose orphan
 check is decode-time, and whose sharing is an append-only revocable edge. Every statement here is **design
 intent**, not a built or tested amoebius capability. Delivery sequencing, completion status, and validation
-gates — including the DB schema-migration `RolloutPhase` (the promoted Phase-34 candidate that
+gates — including the DB schema-migration `RolloutPhase` (delivered in Phase 26 and
 [release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)
 homes), the verified-shrink migration
 ([storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction)),
@@ -278,13 +282,13 @@ competing status ledger; it links back for status.
 ## Cross-references
 
 - [Engineering Doctrine Index](./README.md)
-- [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — [§7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation) the durable-data-deletion prohibition, [§7.1](./storage_lifecycle_doctrine.md#71-the-single-exception-the-elevated-test-harness) the elevated harness as sole deleter, [§8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction) the verified-shrink mechanism the `Shrink` arm reduces to
+- [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — [§7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation) the durable-data-deletion prohibition, [§7.1](./storage_lifecycle_doctrine.md#71-the-single-exception-the-elevated-test-harness) the sole automated test-owned deletion exception, [§8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction) the verified-shrink and external-reclaim boundary the `Shrink` arm reduces to
 - [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — [§5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply) the readiness-gated `RolloutPlan`/`RolloutPhase` a migration composes with; [§2](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash) the immutable ledger that makes rollback free; [§4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable) the `PromotionGate`
 - [Tenancy Doctrine](./tenancy_doctrine.md) — [§3](./tenancy_doctrine.md#3-what-a-tenant-is) the immutable `TenantId` that travels with the bytes, [§5](./tenancy_doctrine.md#5-rbac-is-derived-never-authored) derived-not-authored grants, [§7](./tenancy_doctrine.md#7-two-isolation-layers-and-the-honest-limit) the two isolation layers and the honest limit
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§3.8](../illegal_state/illegal_state_security.md#38-cross-tenant-references-and-literal-secrets) / [§3.10](../illegal_state/illegal_state_security.md#310-a-child-spec-that-reaches-beyond-its-own-subtree) cross-tenant and cross-subtree references, [§4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) the phantom-tag / no-`Ref t1 → Ref t2` technique
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — [§6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed) the ordinary reconcile (`desired = render(spec)`, the diff is typed) a migration is realized by
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the `ModelArtifact` a cross-app grant may share
-- [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — [§6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model) the create-vs-delete credential model behind the elevated reclaim
-- [Testing Doctrine](./testing_doctrine.md) — the elevated harness that performs the retire-old reclaim on flagged resources
+- [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — [§6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model) the normal-operation create-vs-delete boundary; production break-glass reclaim remains outside amoebius automation
+- [Testing Doctrine](./testing_doctrine.md) — the elevated harness deletes test-owned backing only; it never performs production retire-old reclaim
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

@@ -15,6 +15,13 @@ separate products: **prodbox** (root control-plane behaviour), **infernix** + **
 each shipping a demo web app that is amoebius's application-logic demonstrator), and **hostbootstrap**
 (bootstrap + DSL core).
 
+Every amoebius-managed Kubernetes cluster — root, child, self-managed, or provider-managed — has
+**ephemeral infrastructure** and independently retained durable backing. Ephemeral means replaceable, not
+TTL-bound or automatically torn down: a rebuilt cluster reconciles toward the persistent root `InForceSpec`
+and reattaches retained backing
+([cluster lifecycle](./documents/engineering/cluster_lifecycle_doctrine.md),
+[storage lifecycle](./documents/engineering/storage_lifecycle_doctrine.md)).
+
 ## Where to start
 
 - **The plan:** [`DEVELOPMENT_PLAN/README.md`](./DEVELOPMENT_PLAN/README.md) — the single, authoritative,

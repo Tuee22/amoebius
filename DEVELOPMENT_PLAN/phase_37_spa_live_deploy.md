@@ -5,7 +5,7 @@
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md
 **Generated sections**: none
 
-> **Purpose**: Deploy the Phase-12 decode-proven SPA composition live on `linux-cpu` — a multi-service app
+> **Purpose**: Deploy the Phase-13 decode-proven SPA composition live on `linux-cpu` — a multi-service app
 > plus an ML-workflow demo app, reachable behind the Keycloak/Envoy edge, with a real inference request
 > round-tripping through the composed infernix workflow and a leak-free teardown.
 
@@ -16,8 +16,8 @@
 📋 Planned. This is the **live** half of SPA composition, opened only after every live-band build phase it
 consumes has closed; nothing here is implemented, every sprint below is 📋 Planned, and every prescriptive
 statement is design intent, never a tested amoebius result. The phase runs on the **linux-cpu** substrate in
-**Register 3** (live infrastructure) — a single-node `kind` cluster brought up by the Phase-13 midwife with
-the standard HA platform stack (Phase 19), Keycloak-owned ingress (Phase 21), the live DSL deploy via the
+**Register 3** (live infrastructure) — a single-node `kind` cluster brought up by the Phase-14 midwife with
+the standard HA platform stack (Phases 19–20), Keycloak-owned ingress (Phase 21), the live DSL deploy via the
 Deployment-`replicas=1` singleton (Phase 22), app tenancy (Phase 23), the content store + workflow runtime
 (Phase 25), the jit-build engine cache (Phase 32), and the infernix CPU-inference lift (Phase 33) all already
 standing. It re-implements none of them; it composes them. The SPA app-spec type, the ML-workflow composition,
@@ -38,7 +38,7 @@ rendered as an Envoy/Gateway-API route gated by the Identity-owned (Keycloak) wi
 for an unauthenticated backdoor; the rendered manifests and the emitted HTTPRoute are generated from the Haskell
 source of truth and **never committed**. The load-bearing new result is a **real inference round-trip**: an
 inference request reaches the deployed SPA, is served by the composed infernix chatbot workflow on the
-Phase-23 runtime with the inference engine **jit-resolved on first miss into the Phase-25 CacheBudget-bounded
+Phase-25 runtime with the inference engine **jit-resolved on first miss into the Phase-32 CacheBudget-bounded
 content-addressed cache** (never baked, never URL-fetched), and returns to the caller. The jitML RL-gaming demo
 composes and type-checks as a second worked composition, but running its workflow on a CUDA/Apple-Metal substrate
 is out of contract here — the inference/training substrate is exactly the deployment dial this phase keeps
@@ -48,12 +48,12 @@ leak-free, emitting a per-run proven/tested/assumed ledger.
 This phase adds **no** new capability, provider, reconciler, or election. The control-plane singleton stays a
 `replicas=1` Deployment whose single-instance is a k8s/etcd property and whose only durable state is the
 Vault-enveloped MinIO bucket; the workflow workers stay unelected; no geo-replication and no cross-cluster
-gateway migration is claimed here (those are Phase 28). It proves that the established live surfaces compose
+gateway migration is claimed here (geo-replication is Phase 28; gateway migration is Phase 29). It proves that the established live surfaces compose
 end to end for a spec-driven single-page app.
 
 ```mermaid
 flowchart LR
-  spa[Phase-12 decode-proven SPA .dhall: capability needs plus nested infernix workflow] --> compose[Compose with linux-cpu deployment-rules layer: replicas, provider plus shape, inference substrate]
+  spa[Phase-13 decode-proven SPA .dhall: capability needs plus nested infernix workflow] --> compose[Compose with linux-cpu deployment-rules layer: replicas, provider plus shape, inference substrate]
   compose --> apply[Typed SSA reconciler applies under the replicas=1 singleton onto the HA stack]
   apply --> edge[Edge publish renders an HTTPRoute gated by Keycloak over Envoy Gateway API]
   edge --> infer[Inference request round-trips through the composed infernix workflow: engine jit-resolved into the CacheBudget cache]
@@ -73,25 +73,26 @@ a multi-service UI surface against capability needs (`ObjectStore` / `Sql` / `Me
 and composing the infernix chatbot demo app's ML workflow, composed with a `linux-cpu` deployment-rules layer,
 deploys via the typed reconciler under the `replicas=1` singleton onto the standard HA stack, its UI is reachable
 only through the Keycloak/Envoy edge, an inference request round-trips through the composed infernix workflow with
-the engine jit-resolved into the CacheBudget cache, the topology tears down leak-free (postflight sweep empty) and
-re-runs idempotently, and each run emits a proven/tested/assumed ledger recording the composition as *tested on
+the engine jit-resolved into the CacheBudget cache, the topology tears down leak-free (Phase-36 test-owned sweep
+plus independent substrate inventory diff empty after the test-owned cache entry is reclaimed) and re-runs idempotently, and
+each run emits a proven/tested/assumed ledger recording the composition as *tested on
 linux-cpu* and recording that no GPU/Apple-Metal ML-workflow claim and no geo-replication claim was made.
 
 The gate runs over the **representative set pinned in [§N](#n-representative-set-oracle-pins-and-seeded-mutants)**
 and is **red unless every committed seeded mutant named in [§N](#n-representative-set-oracle-pins-and-seeded-mutants) goes red**. Three load-bearing observables are
 pinned so no stub, canned handler, or alternate exposure passes: (a) the inference round-trip counts **only** when
-the returned bytes **byte-match the Phase-0-committed Phase-26 reproducible golden**
-(`spa_gate/infernix_cpu_response.cbor`, authored from Phase-26's reproducible CPU output for the fixed
+the returned bytes **byte-match the Phase-0-committed Phase-33 reproducible golden**
+(`spa_gate/infernix_cpu_response.cbor`, authored from Phase-33's reproducible CPU output for the fixed
 `spa_gate/prompt.json`, never regenerated from the deployed workflow) for the run's unchanged `experimentHash`
-`H_spa`, **and** the run's canonical-CBOR manifest + `.ready` sentinel appear in the Phase-23 content store under
+`H_spa`, **and** the run's canonical-CBOR manifest + `.ready` sentinel appear in the Phase-25 content store under
 that `experimentHash` namespace; (b) the engine is proven jit-resolved by a **cache-empty preflight** plus a
-**first-miss materialization event** whose postflight content-addressed entry hashes to the Phase-25 catalog
+**first-miss materialization event** whose postflight content-addressed entry hashes to the Phase-32 catalog
 identity `spa_gate/engine_identity.txt` within `CacheBudget`, with the deployed images carrying no engine layer;
 (c) the UI is reachable **only** through the Keycloak edge, proven by a live exposure sweep matching the
 hand-authored `spa_gate/expected_exposures.txt` and a refused pod-IP/Service bypass. The exposure sweep, the
 pod-IP-bypass refusal, the first-miss materialization, the zero-election audit, and the postflight inventory diff
 are all read from **OS-boundary observers** (the live k8s API server and its audit log, a foreign-pod CNI probe,
-the on-disk Phase-25 store, a containerd image inspection), never a self-emitted compliance trace, per [§N](#n-representative-set-oracle-pins-and-seeded-mutants).
+the on-disk Phase-32 store, a containerd image inspection), never a self-emitted compliance trace, per [§N](#n-representative-set-oracle-pins-and-seeded-mutants).
 
 ## N. Representative set, oracle pins, and seeded mutants
 
@@ -101,16 +102,16 @@ artifacts named here are authored and committed **in Phase 0**, before `Amoebius
 `SpaGateSpec` exist; an oracle regenerated from the deployed implementation is not a test.
 
 - **Representative set (explicit, §M-7):** the gate exercises exactly the composing fixture
-  `dhall/examples/spa_chatbot.dhall` (the Phase-12 infernix multi-service surface: `ObjectStore` + `Sql` +
+  `dhall/examples/spa_chatbot.dhall` (the Phase-13 infernix multi-service surface: `ObjectStore` + `Sql` +
   `MessageBus` + `Identity` + `Edge`) composed with **two** committed deployment-rules layers —
   `spa_chatbot_deploy_linux_cpu.dhall` at `replicas=1` and `spa_chatbot_deploy_linux_cpu_r3.dhall` at a distinct
   replica count — plus `dhall/examples/spa_rl_gaming.dhall` (jitML) as the type-check-only second composition and
   the gate topology `phase_37_spa_live.dhall`. No other surface satisfies "representative".
 - **Committed oracle pins (Phase 0, §M-1 / §M-3):**
-  - `spa_gate/infernix_cpu_response.cbor` — the expected inference response, **byte-identical to Phase-26's
+  - `spa_gate/infernix_cpu_response.cbor` — the expected inference response, **byte-identical to Phase-33's
     reproducible CPU output** for the fixed prompt `spa_gate/prompt.json` at pinned `experimentHash` `H_spa`;
-    authored from the Phase-26 reproducible build, independent of the deployed workflow's emitter.
-  - `spa_gate/engine_identity.txt` — the expected named Phase-25 catalog engine identity (content hash) the
+    authored from the Phase-33 reproducible build, independent of the deployed workflow's emitter.
+  - `spa_gate/engine_identity.txt` — the expected named Phase-32 catalog engine identity (content hash) the
     resolver must materialize; authored from the catalog, independent of the resolver's runtime output.
   - `spa_gate/expected_exposures.txt` — a hand-authored table naming the single permitted wild exposure (the
     Keycloak-fronted `HTTPRoute` name) and asserting no other `Service`/`NodePort`/`Ingress`/`LoadBalancer` in the
@@ -124,7 +125,7 @@ artifacts named here are authored and committed **in Phase 0**, before `Amoebius
     bypass is driven from a **foreign pod via a CNI probe** and must be refused by the derived `NetworkPolicy`.
   - The no-baked-engine check reads from a **containerd image inspection** of the deployed app/workflow images
     (no engine layer) and the registry-pull log (no engine blob pulled at deploy).
-  - The first-miss materialization and cache reuse read from the **on-disk Phase-25 content-addressed store**
+  - The first-miss materialization and cache reuse read from the **on-disk Phase-32 content-addressed store**
     (a preflight showing no entry for `H_spa`'s engine identity; a postflight entry whose hash equals
     `engine_identity.txt` within `CacheBudget`), not a workflow self-report.
 - **Determinism honesty (§M-6):** cache **reuse** and output **determinism** are distinct claims. Reuse is proven
@@ -135,7 +136,7 @@ artifacts named here are authored and committed **in Phase 0**, before `Amoebius
   bytes.
 - **Committed seeded mutants (§M-2), each committed and re-run, from the operator set:**
   - **M-canned** (effect swap): replace the workflow inference call with a canned non-empty handler — the
-    byte-match against `infernix_cpu_response.cbor` and the Phase-23 manifest/`.ready` assertion MUST go red.
+    byte-match against `infernix_cpu_response.cbor` and the Phase-25 manifest/`.ready` assertion MUST go red.
   - **M-baked** (dropped effect): bake the engine into the app/workflow image and skip the resolver — the
     cache-empty preflight + first-miss materialization assertion and the containerd no-engine-layer check MUST go
     red.
@@ -195,21 +196,21 @@ adopts; individual sprints cite the same sections where they build on them.
 
 ## Sprints
 
-## Sprint 32.1: The SPA deployment-rules layer + live apply via the typed reconciler under the `replicas=1` singleton 📋
+## Sprint 37.1: The SPA deployment-rules layer + live apply via the typed reconciler under the `replicas=1` singleton 📋
 
 **Status**: Planned
 **Implementation**: `amoebius-spa/src/Amoebius/Spa/Deploy.hs`,
 `amoebius-spa/dhall/examples/spa_chatbot_deploy_linux_cpu.dhall` (target paths; not yet built); consumes the
-Phase-12 `Amoebius.Spa.Spec` + `dhall/amoebius/Spa.dhall`, the Phase-15 SSA reconciler, and the Phase-20
+Phase-13 `Amoebius.Spa.Spec` + `dhall/amoebius/Spa.dhall`, the Phase-16 SSA reconciler, and the Phase-22
 `replicas=1` singleton, re-implementing none of them.
 **Blocked by**: Phase 13 (the decode-proven SPA spec `Amoebius.Spa.Spec` + `dhall/amoebius/Spa.dhall` +
 `prop_spaCompositionDecodes` this deploys); Phase 8 (the capability → provider → shape binder the SPA's needs
-resolve against); Phase 16 (the typed SSA reconciler); Phase 19 (the standard HA platform stack); Phase 22 (the
+resolve against); Phase 16 (the typed SSA reconciler); Phases 19–20 (the standard HA platform stack); Phase 22 (the
 live DSL deploy via the Deployment-`replicas=1` singleton); Phase 23 (the app-tenancy namespace + `<app>/<bucket>`
 ObjectStore the SPA deploys into) — all external earlier-phase prerequisites.
 **Independent Validation**: a deployment-rules `.dhall` keyed by the SPA app name binds replica counts, the
 capability provider+shape bindings (canonical providers; single-node shapes on a small cluster), and the
-inference substrate (`linux-cpu`); composed with the **byte-identical** Phase-12 SPA spec it deploys via the
+inference substrate (`linux-cpu`); composed with the **byte-identical** Phase-13 SPA spec it deploys via the
 typed reconciler onto the HA stack, a re-run is a no-op (owned field manager, ApplySet prune, wait), and a second
 deployment-rules layer at a different replica count composes with the *same* SPA spec — the SPA app-spec normal
 form (its hash) unchanged across both.
@@ -220,7 +221,7 @@ form (its hash) unchanged across both.
 Adopt [`app_vs_deployment_doctrine.md §3 — the deployment-rules surface`](../documents/engineering/app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)
 with the binding model of [`service_capability_doctrine.md §4 — capability → provider → shape`](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding)
 and [`daemon_topology_doctrine.md §3.1 — exactly one pod is a k8s/etcd property`](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election):
-author the `linux-cpu` deployment-rules layer that runs the byte-identical Phase-12 SPA spec, and apply it live
+author the `linux-cpu` deployment-rules layer that runs the byte-identical Phase-13 SPA spec, and apply it live
 through the typed reconciler under the `replicas=1` singleton — none of it touching the SPA app surface.
 
 ### Deliverables
@@ -228,8 +229,8 @@ through the typed reconciler under the `replicas=1` singleton — none of it tou
   the replica count on the unchanged HA chart (HA even at `replicas=1`), the capability provider+shape bindings
   (canonical providers by default; single-node shapes on a small cluster), and the inference-substrate binding
   set to `linux-cpu`.
-- The composition of that layer with the byte-identical Phase-12 SPA spec, rendered by the typed reconciler
-  (owned field manager, ApplySet prune, wait) into the Phase-21 tenant namespace + `<app>/<bucket>` ObjectStore,
+- The composition of that layer with the byte-identical Phase-13 SPA spec, rendered by the typed reconciler
+  (owned field manager, ApplySet prune, wait) into the Phase-23 tenant namespace + `<app>/<bucket>` ObjectStore,
   applied under the Deployment-`replicas=1` singleton — the singleton stateless (no PVC), its durable state the
   Vault-enveloped MinIO bucket, and its single-instance a k8s/etcd property.
 - A demonstration that a second deployment-rules layer at a different replica count composes with the *same* SPA
@@ -241,7 +242,7 @@ through the typed reconciler under the `replicas=1` singleton — none of it tou
    replica count in the tenant namespace; a **second reconcile while the topology is still deployed** is a no-op,
    defined concretely as an **empty ApplySet prune set** and **zero SSA managed-field mutations** — every owned
    object's `resourceVersion` unchanged across the second apply, as reported by the owned field manager against
-   the live k8s API server (not a reconciler self-report). Full teardown→re-spin idempotence is the separate 32.4
+   the live k8s API server (not a reconciler self-report). Full teardown→re-spin idempotence is the separate 37.4
    claim.
 2. Changing the replica count or the inference-substrate binding changes no SPA `.dhall` or `.hs` source — the
    SPA app-spec normal-form hash is byte-identical across `spa_chatbot_deploy_linux_cpu.dhall` and
@@ -256,19 +257,19 @@ through the typed reconciler under the `replicas=1` singleton — none of it tou
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 32.2: The SPA behind Keycloak/Envoy — Edge publishes, Identity gates (live) 📋
+## Sprint 37.2: The SPA behind Keycloak/Envoy — Edge publishes, Identity gates (live) 📋
 
 **Status**: Planned
 **Implementation**: `amoebius-spa/src/Amoebius/Spa/Edge.hs`,
-`amoebius-spa/test/live/SpaEdgeSpec.hs` (target paths; not yet built); consumes the Phase-19
+`amoebius-spa/test/live/SpaEdgeSpec.hs` (target paths; not yet built); consumes the Phase-21
 `Amoebius.Platform.Keycloak` + `Amoebius.Platform.Edge` plumbing and the Phase-8 capability binding,
 re-implementing neither. The emitted HTTPRoute is a **generated artifact and is not committed**.
-**Blocked by**: Sprint 32.1; Phase 21 (Keycloak owns all wild ingress via Envoy/Gateway API — the wild-ingress
+**Blocked by**: Sprint 37.1; Phase 21 (Keycloak owns all wild ingress via Envoy/Gateway API — the wild-ingress
 door this route rides).
 **Independent Validation**: the SPA's `Edge` publish renders a live Envoy/Gateway-API `HTTPRoute` gated by
 Keycloak; a request without a valid session is refused at the edge and an authenticated session **reaches the SPA
 UI**, where "reaches the UI" is defined as a **driven browser interaction (Playwright-style) through a real
-Keycloak session that loads the served PureScript bundle** — the bundle bytes hashing to the Phase-12 Register-1
+Keycloak session that loads the served PureScript bundle** — the bundle bytes hashing to the Phase-13 Register-1
 golden bundle hash — and completes one UI interaction, **not** a bare HTTP 200. A **live exposure sweep** over the
 tenant namespace, read from the k8s API server, matches the hand-authored `spa_gate/expected_exposures.txt` ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)):
 the sole wild exposure is the Keycloak-fronted `HTTPRoute`, and a **direct pod-IP/Service request bypassing Envoy,
@@ -291,7 +292,7 @@ unauthenticated backdoor.
 
 ### Deliverables
 - An `Amoebius.Spa.Edge` rendering that turns the SPA's `Edge` publish declaration into a live Envoy/Gateway-API
-  `HTTPRoute` fronted by Keycloak (consuming the Phase-19 `Platform.Keycloak` / `Platform.Edge` plumbing), with
+  `HTTPRoute` fronted by Keycloak (consuming the Phase-21 `Platform.Keycloak` / `Platform.Edge` plumbing), with
   the `Identity` auth rule bound to that route — the SPA declares *what to publish*, never *whether* wild traffic
   reaches it.
 - The SPA's east-west reachability derived from its declared capability dependencies, so it can reach exactly the
@@ -304,7 +305,7 @@ unauthenticated backdoor.
 ### Validation
 1. The chatbot SPA's published surface renders a live `HTTPRoute` gated by Keycloak; a request without a valid
    session is refused at the edge and an authenticated session reaches the UI **via a driven Playwright
-   interaction serving the Phase-12-golden PureScript bundle bytes** (not a bare 200). The API-server exposure
+   interaction serving the Phase-13-golden PureScript bundle bytes** (not a bare 200). The API-server exposure
    sweep matches `spa_gate/expected_exposures.txt` — the Keycloak `HTTPRoute` is the sole wild exposure — and a
    foreign-pod pod-IP/Service bypass is refused by the derived `NetworkPolicy`; **M-openedge** and **M-nopolicy**
    ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)) MUST turn these red.
@@ -316,23 +317,23 @@ unauthenticated backdoor.
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 32.3: The composed ML-workflow inference round-trip — live infernix on linux-cpu 📋
+## Sprint 37.3: The composed ML-workflow inference round-trip — live infernix on linux-cpu 📋
 
 **Status**: Planned
 **Implementation**: `amoebius-spa/test/live/SpaInferenceSpec.hs` (target path; not yet built); consumes the
-Phase-23 content store + workflow runtime, the Phase-26 infernix CPU-inference lift, and the Phase-25 jit-build
+Phase-25 content store + workflow runtime, the Phase-33 infernix CPU-inference lift, and the Phase-32 jit-build
 engine cache, re-implementing none of them.
-**Blocked by**: Sprint 32.1; Phase 25 (the content store + orchestrator/worker workflow runtime the inference
+**Blocked by**: Sprint 37.1; Phase 25 (the content store + orchestrator/worker workflow runtime the inference
 request round-trips over); Phase 33 (the infernix CPU-inference lift + its demo web app); Phase 32 (the
 jit-build engine resolver + CacheBudget content-addressed cache the engine materializes into); Phase 34 (the
 jitML lift whose RL-gaming demo composes and type-checks as the second worked composition).
 **Independent Validation**: an inference request reaches the deployed SPA and round-trips through the composed
-infernix chatbot workflow on the Phase-23 runtime, and the response **byte-matches the Phase-0-committed Phase-26
+infernix chatbot workflow on the Phase-25 runtime, and the response **byte-matches the Phase-0-committed Phase-33
 reproducible golden `spa_gate/infernix_cpu_response.cbor`** for the fixed `spa_gate/prompt.json` at unchanged
-`experimentHash` `H_spa`, **and** the run's canonical-CBOR manifest + `.ready` sentinel appear in the Phase-23
+`experimentHash` `H_spa`, **and** the run's canonical-CBOR manifest + `.ready` sentinel appear in the Phase-25
 content store under that `experimentHash` namespace — pinning the bytes to infernix output, not a canned handler.
 The engine is proven jit-resolved on first miss, **not** baked or pre-warmed, by three OS-boundary reads ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)): a
-**preflight** showing the Phase-25 content-addressed store holds **no entry** for `H_spa`'s engine identity; a
+**preflight** showing the Phase-32 content-addressed store holds **no entry** for `H_spa`'s engine identity; a
 **first-miss materialization event** whose postflight entry hashes to `spa_gate/engine_identity.txt` within
 `CacheBudget`; and a **containerd image inspection** confirming the deployed app/workflow images carry **no engine
 layer**. A same-namespace **second request is served from the cache with no new materialization event** (reuse,
@@ -356,12 +357,12 @@ without being run.
 
 ### Deliverables
 - A live inference round-trip: a request reaches the deployed chatbot SPA, is served by the composed infernix
-  workflow on the Phase-23 orchestrator/worker runtime (unelected workers; single-writer delegated to the Pulsar
+  workflow on the Phase-25 orchestrator/worker runtime (unelected workers; single-writer delegated to the Pulsar
   subscription), and the response returns to the caller.
 - The inference engine backing the round-trip resolved as a **named catalog identity on first miss** into the
-  Phase-25 CacheBudget-bounded content-addressed cache (`CacheBudget ≤` host storage) — never baked into the base
+  Phase-32 CacheBudget-bounded content-addressed cache (`CacheBudget ≤` host storage) — never baked into the base
   image, never fetched by arbitrary URL — and reused from cache by a second request, keyed to the `linux-cpu`
-  substrate selection of the deployment-rules layer (Sprint 32.1).
+  substrate selection of the deployment-rules layer (Sprint 37.1).
 - The jitML RL-gaming demo SPA composed and type-checked against the same SPA spec (the "any combination" claim),
   with an explicit note that *running* its workflow on a GPU/Apple-Metal substrate is out of contract for this
   single-substrate gate — the substrate is a deployment dial, not an app edit.
@@ -369,7 +370,7 @@ without being run.
 ### Validation
 1. An inference request round-trips through the composed infernix workflow and the response **byte-matches
    `spa_gate/infernix_cpu_response.cbor` at `experimentHash` `H_spa`**, with the run's manifest + `.ready` sentinel
-   present in the Phase-23 store; a cache-empty **preflight** and a **first-miss materialization** to
+   present in the Phase-25 store; a cache-empty **preflight** and a **first-miss materialization** to
    `spa_gate/engine_identity.txt` (within `CacheBudget`) plus a **containerd no-engine-layer** inspection prove
    jit-resolution; a same-namespace second request reuses the cache with **no new materialization event**; and a
    **distinct-namespace cold-cache third run recomputes to the same golden** (§M-6). **M-canned** and **M-baked**
@@ -380,26 +381,27 @@ without being run.
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 32.4: The live SPA gate — deployed, reachable, inference round-trips, leak-free teardown 📋
+## Sprint 37.4: The live SPA gate — deployed, reachable, inference round-trips, leak-free teardown 📋
 
 **Status**: Planned
 **Implementation**: `amoebius-spa/dhall/test/phase_37_spa_live.dhall` (the gate topology),
 `amoebius-spa/test/live/SpaGateSpec.hs` (target paths; not yet built).
-**Blocked by**: Sprint 32.2 (the live Keycloak/Envoy edge the gate reaches through); Sprint 32.3 (the composed
+**Blocked by**: Sprint 37.2 (the live Keycloak/Envoy edge the gate reaches through); Sprint 37.3 (the composed
 inference round-trip the gate exercises); Phase 14 / Phase 17 (the cluster-lifecycle + retained-storage teardown
 the InForceSpec drives).
 **Independent Validation**: a gate `InForceSpec` over the **[§N](#n-representative-set-oracle-pins-and-seeded-mutants) representative set** composes the multi-service SPA
 + the infernix demo app's ML workflow with the `linux-cpu` deployment-rules layer, deploys via the typed
 reconciler under the `replicas=1` singleton, reaches the SPA UI through the Keycloak/Envoy edge (a driven
-Playwright interaction serving the Phase-12-golden bundle, with the API-server exposure sweep matching
+Playwright interaction serving the Phase-13-golden bundle, with the API-server exposure sweep matching
 `spa_gate/expected_exposures.txt` and the pod-IP bypass refused), round-trips an inference request whose response
 **byte-matches `spa_gate/infernix_cpu_response.cbor`** with the engine proven first-miss-materialized ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)), and
 tears the deployment down **leak-free**. "Leak-free (postflight sweep empty)" is defined as the union of (a) the
-**Phase-31 tag-scoped sweep** AND (b) a **full preflight→postflight substrate inventory diff** (tenant namespaces,
-PVs/PVCs, CRs, MinIO buckets, `kind` containers) read from the k8s API server and host, which MUST be empty
-**except for the single documented retained-by-design item**: the materialized `CacheBudget` engine entry on the
-host cache, asserted present-and-within-budget, never counted as a leak; any retained PV, orphaned namespace, or
-leftover `kind` container fails the gate. The gate is **red unless the committed seeded mutants of [§N](#n-representative-set-oracle-pins-and-seeded-mutants)
+**Phase-36 test-owned sweep** AND (b) a **full preflight→postflight substrate inventory diff** (tenant namespaces,
+PVs/PVCs, CRs, MinIO buckets, allocation-level retained host backing under `${RETAINED_ROOT}`, host-cache
+allocations, `kind` containers) read from the k8s API server and host, which MUST be empty. The materialized
+`CacheBudget` engine entry is asserted present-and-within-budget before teardown, then reclaimed as test-owned
+by the elevated harness; any surviving cache entry, newly allocated retained backing, PV/PVC binding, orphaned
+namespace, or leftover `kind` container fails the gate. The gate is **red unless the committed seeded mutants of [§N](#n-representative-set-oracle-pins-and-seeded-mutants)
 (M-canned, M-baked, M-openedge, M-nopolicy, M-election) each go red**. The run re-runs idempotently and emits a
 per-run proven/tested/assumed ledger that marks no GPU/Apple-Metal ML-workflow claim and no geo-replication claim
 green.
@@ -423,7 +425,7 @@ deployed, reachable behind Keycloak/Envoy, its inference round-tripped, and torn
   an explicit note that *running* its workflow on a GPU/Apple-Metal substrate is out of contract for this
   single-substrate gate.
 - The **Phase-0-committed [§N](#n-representative-set-oracle-pins-and-seeded-mutants) oracle set and mutant set** the gate checks against: `spa_gate/prompt.json`,
-  `spa_gate/infernix_cpu_response.cbor` (the Phase-26 reproducible golden), `spa_gate/engine_identity.txt`,
+  `spa_gate/infernix_cpu_response.cbor` (the Phase-33 reproducible golden), `spa_gate/engine_identity.txt`,
   `spa_gate/expected_exposures.txt`, `spa_gate/spa_edge_negatives.expected`, the backdoor negative
   `illegal_spa_open_edge.dhall`, and the committed seeded mutants M-canned, M-baked, M-openedge, M-nopolicy, and
   M-election — all authored and committed before `SpaGateSpec` exists.
@@ -438,9 +440,10 @@ deployed, reachable behind Keycloak/Envoy, its inference round-tripped, and torn
    pod-IP bypass — and an inference request is served by the composed infernix workflow whose response
    **byte-matches `spa_gate/infernix_cpu_response.cbor`** with the engine first-miss-materialized to
    `spa_gate/engine_identity.txt` ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)).
-2. The RL-gaming SPA composes and type-checks; the topology tears down leak-free — the Phase-31 tag-scoped sweep
-   **and** the preflight→postflight substrate inventory diff are empty save the documented retained `CacheBudget`
-   engine entry — and a second reconcile-while-deployed is a no-op (empty ApplySet prune, zero SSA field
+2. The RL-gaming SPA composes and type-checks; the topology tears down leak-free — the Phase-36 test-owned sweep
+   **and** the preflight→postflight substrate inventory diff are empty, including retained-host-backing and
+   host-cache allocation inventories after the observed `CacheBudget` engine entry is reclaimed — and a second
+   reconcile-while-deployed is a no-op (empty ApplySet prune, zero SSA field
    mutations). All committed [§N](#n-representative-set-oracle-pins-and-seeded-mutants) mutants (M-canned, M-baked, M-openedge, M-nopolicy, M-election) go red.
 3. The run emits a proven/tested/assumed ledger; it marks no GPU-substrate or geo-replication claim green, and
    skipping an applicable move marks that layer UNVERIFIED, never green.
@@ -449,8 +452,8 @@ deployed, reachable behind Keycloak/Envoy, its inference round-tripped, and torn
 > [Phase 13](phase_13_spa_composition_representational.md); the representational battery and the local
 > Playwright run are that phase's result, not this one's. The infernix/jitML demo web apps and their inference
 > runtimes are proven over WebSockets in the siblings — **sibling evidence, not an amoebius result** — this phase
-> deploys them live under the amoebius edge and runtime for the first time. No cross-cluster gateway migration and
-> no geo-replication is claimed here; those are Phase 28.
+> deploys them live under the amoebius edge and runtime for the first time. No cross-cluster gateway migration
+> and no geo-replication is claimed here; geo-replication is Phase 28 and gateway migration is Phase 29.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -470,15 +473,15 @@ The whole sprint (📋 Planned).
   on first miss into the CacheBudget-bounded content-addressed cache and reused, never baked or URL-fetched.
 - `documents/engineering/platform_services_doctrine.md` — note the SPA's published surface as a live consumer of
   the §9 single wild-ingress path (Keycloak over Envoy/Gateway API) on the §2 HA-always charts.
-- `documents/engineering/testing_doctrine.md` — record the Phase-32 gate `InForceSpec` as a worked Register-3
+- `documents/engineering/testing_doctrine.md` — record the Phase-37 gate `InForceSpec` as a worked Register-3
   spin-up/run-workflow/tear-down composition test emitting a per-run proven/tested/assumed ledger.
 
 **Cross-references to add:**
-- `DEVELOPMENT_PLAN/README.md` — flip the Phase-32 status when the gate passes; link this document.
+- `DEVELOPMENT_PLAN/README.md` — flip the Phase-37 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — record Phase 37's gate substrate (`linux-cpu`) in the per-phase substrate map.
 - `DEVELOPMENT_PLAN/system_components.md` — register `amoebius-spa/src/Amoebius/Spa/{Deploy,Edge}.hs` and the
-  Phase-32 live gate topology, mapped to the owning app-vs-deployment and service-capability doctrines, as
-  Phase-32 design-first rows.
+  Phase-37 live gate topology, mapped to the owning app-vs-deployment and service-capability doctrines, as
+  Phase-37 design-first rows.
 
 ## Related Documents
 - [README.md](README.md) — the live tracker; Phase 37 objective, gate, and substrate

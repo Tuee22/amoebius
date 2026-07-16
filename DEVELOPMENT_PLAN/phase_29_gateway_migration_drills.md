@@ -255,7 +255,8 @@ with an explicit operator override the only escape.
 
 ### Deliverables
 - A `gracefulTeardown` reconcile: idempotent drain/flush/handoff ordering timed to a synchronization event,
-  releasing compute and preserving retained PVs so a later spin-up rebinds the same bytes.
+  releasing compute while preserving retained backing so a later spin-up recreates PV bindings over the same
+  bytes.
 - A `satisfiability` check over the root `InForceSpec` using each container's declared CPU/RAM: if the surviving
   forest can no longer satisfy the spec without cluster C, push back naming the loss and the `.dhall` failback,
   with the same fail-closed `Unreachable → refuse` posture as the reconciler.
@@ -263,8 +264,9 @@ with an explicit operator override the only escape.
   with "cannot observe" never collapsed to "absent."
 
 ### Validation
-1. A graceful child teardown loses nothing (rides a sync event, preserves PVs) and a later spin-up rebinds the
-   identical shape and bytes; a teardown of a load-bearing cluster pushes back and aborts by default, and the
+1. A graceful child teardown loses nothing (rides a sync event, preserves backing while PV API objects may
+   disappear) and a later spin-up recreates the identical shape over the same bytes; a teardown of a
+   load-bearing cluster pushes back and aborts by default, and the
    explicit override falls to the declared failback; a graceful teardown and a chaos-failover are observably
    distinct — lossless-by-construction vs bounded-by-budget — and the code reports which guarantee held.
 

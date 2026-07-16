@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_17_retained_storage.md, DEVELOPMENT_PLAN/phase_18_vault_pki.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_21_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_17_retained_storage.md, DEVELOPMENT_PLAN/phase_18_vault_pki.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_21_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define amoebius's durable-storage contract — the single `no-provisioner` retained PV model,
@@ -14,24 +14,29 @@
 
 ## 1. Cluster and storage have independent lifetimes
 
-An amoebius cluster is **ephemeral**: it can be torn down to free compute, brought back up on a different
-substrate, or killed by a chaos move, and none of that loses committed data. Amoebius guarantees this by
-giving storage a lifetime independent of the cluster that mounts it. (Shorthand: clusters are cattle;
-storage is not.)
+[cluster_lifecycle_doctrine.md §7](./cluster_lifecycle_doctrine.md#7-ephemeral-spin-updown-with-deterministic-rebind)
+defines cluster infrastructure as ephemeral. This doctrine owns the storage consequence: durable backing has
+a lifetime independent of the cluster that mounts it. A graceful teardown is lossless only when the retained
+backing remains attachable and the deterministic-rebind preconditions in
+[§6](#6-the-lossless-teardown-guarantee-deterministic-rebind) hold. Chaos-failover is a separate lifecycle
+event bounded by its declared data-loss budget, and a move to a substrate that cannot attach the same backing
+is outside the lossless-rebind guarantee. (Shorthand: clusters are cattle; storage is not.)
 
-Concretely: clusters are ephemeral but their storage is not, and need to
-be explicitly deleted… they don't get deleted automatically with the rest of the cluster, so that they
-automatically rebind. A cluster destroy releases the claims; it never reclaims the volumes. The next
-bring-up re-creates the exact same claims, which re-bind to the exact same volumes, which still hold the
-exact same data. That round-trip — *delete the cluster, recreate it, find the data unchanged* — is the
-**lossless-teardown guarantee**, and [§6](#6-the-lossless-teardown-guarantee-deterministic-rebind) cashes out exactly when it holds.
+Routine cluster teardown releases compute and claims but never reclaims durable backing. A full cluster
+deletion also removes the apiserver/etcd and the cluster's PVC/PV API objects; the next bring-up renders fresh
+PV objects whose pre-bound `claimRef` omits `uid` and `resourceVersion`, plus fresh claims with the same
+identities over the same retained backing bytes. Routine teardown never deletes that backing. Automated
+test-owned reclamation is the privileged exception in
+[§7.1](#71-the-single-exception-the-elevated-test-harness). That round-trip — *delete the cluster, recreate it,
+find the data unchanged* — is the **lossless-teardown guarantee** defined precisely in
+[§6](#6-the-lossless-teardown-guarantee-deterministic-rebind).
 
 This doctrine is the SSoT for *how durable bytes live and rebind*. It does **not** own which services
 produce those bytes (that is [platform_services_doctrine.md](./platform_services_doctrine.md)), the cluster
 teardown order that releases them ([cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md)), the
 cloud-provider IaC that materializes EBS volumes ([pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md)), or
-the one elevated path allowed to delete storage ([testing_doctrine.md](./testing_doctrine.md)). It owns the
-volume model and the rebind contract, and references the rest.
+the automated test-owned deletion path ([testing_doctrine.md](./testing_doctrine.md)). It owns the volume
+model and the rebind contract, and references the rest.
 
 This model **generalizes** the single-node, host-path-only retained-storage scheme proven in the sibling
 prodbox project (`prodbox/documents/engineering/storage_lifecycle_doctrine.md`) and lifts it to amoebius's
@@ -53,12 +58,14 @@ Every amoebius cluster has exactly one StorageClass, and it is inert:
 
 - **`provisioner: kubernetes.io/no-provisioner`** — there is no controller standing by to mint a volume
   when a claim appears. A PVC binds only to a PV that **already exists** because amoebius placed it there.
-- **`reclaimPolicy: Retain`** — when a PVC is deleted (e.g. by a cluster teardown), its PV is **not**
-  deleted and its backing bytes are **not** wiped. Kubernetes moves the PV to `Released` while retaining
-  the `claimRef` of the now-deleted PVC, including that claim's `uid`. A `Released` PV carrying a stale
+- **`reclaimPolicy: Retain`** — when a PVC is deleted while the apiserver remains live (for example, during
+  workload teardown or the intermediate rebind check), its PV is **not** deleted and its backing bytes are
+  **not** wiped. Kubernetes moves the PV to `Released` while retaining the `claimRef` of the now-deleted PVC,
+  including that claim's `uid`. A `Released` PV carrying a stale
   `claimRef.uid` does **not** auto-rebind: the controller will not bind a freshly created PVC to it while
   the old `uid` is present. Retain therefore preserves the *bytes*; it does not by itself deliver rebind.
-  Rebind is reconstructed by amoebius re-creating a fresh, `uid`-less pre-bound PV ([§6](#6-the-lossless-teardown-guarantee-deterministic-rebind)) that points at those
+  Rebind is reconstructed by amoebius re-creating a fresh pre-bound PV whose `claimRef` omits `uid` and
+  `resourceVersion` ([§6](#6-the-lossless-teardown-guarantee-deterministic-rebind)) and points at those
   preserved bytes. Retain is the mechanical heart of durability; nothing else in this doc works without it.
 - **`volumeBindingMode: WaitForFirstConsumer`** — binding is deferred until the consuming Pod is scheduled,
   so a host-backed PV binds against the node the Pod actually landed on, not a node chosen blind.
@@ -151,8 +158,8 @@ all become guesswork. amoebius makes the declared size a **hard ceiling**, not a
   Delivery tracked in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 - **One EBS drive per PV on provider substrates**. amoebius never carves many claims
   out of one shared cloud volume; the PV ↔ PVC ↔ EBS-volume mapping is 1:1:1, each EBS sized to exactly the
-  paired PVC. The provider plumbing that materializes those EBS volumes — and the credential model that
-  lets normal operation *create* but not *delete* them — is owned by
+  paired PVC. Pulumi materializes the volume; Kubernetes does not dynamically provision it. The provider
+  plumbing and credential model that let normal operation *create* but not *delete* EBS are owned by
   [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md); this doc owns only the 1:1:1 sizing invariant.
 
 ### 5.1 Storage is independent of the node lifecycle
@@ -161,8 +168,13 @@ A volume must outlive the node it was mounted on, or "ephemeral cluster, durable
 moment a node is replaced. amoebius requires the two backings to deliver that independence in their own way:
 
 - **Provider/EBS:** the PV is **not tied to the lifecycle of the EKS node / EC2 instance** that mounts it.
-  When a node is terminated, the EBS volume **detaches and survives**; the
-  replacement node re-attaches the same volume to the same claim. Node churn is invisible to the data.
+  When a node is terminated, the EBS volume **detaches and survives**; the replacement node re-attaches the
+  same volume to the same claim. Attachment is explicit and static: amoebius consumes the upstream AWS EBS
+  CSI controller/node implementation from its baked base image, renders no external provisioner, keeps the
+  sole StorageClass at `kubernetes.io/no-provisioner`, and creates each fresh PV with
+  `spec.csi.driver: ebs.csi.aws.com`, the Pulumi-created EBS ID as `volumeHandle`, and node affinity for the
+  EBS Availability Zone. Node churn is invisible to the data, and cluster rebuild recreates only the PV
+  binding plus the ephemeral CSI control components — never the durable volume.
 - **Host-backed:** the bytes live in the host's retained storage root, not in the container or the kubelet's
   ephemeral scratch. A Pod reschedule re-mounts the same host path; the node-affinity pin ([§4](#4-deterministic-pv-naming-and-the-explicit-bind)) keeps the
   ordinal landing where its bytes are.
@@ -208,9 +220,10 @@ surviving cluster keeps the deleted claim's `claimRef.uid` and will not rebind a
 therefore reconstructs the bind by **re-creating a fresh PV object** whose `claimRef` names
 `(namespace, PVC-name)` but carries **no `uid` and no `resourceVersion`** — the deterministic, `uid`-less
 pre-bind — pointing at the preserved bytes; a recreated PVC then binds to that fresh PV. Nothing is restored
-from a backup; the original bytes were never released. That is the lossless-teardown guarantee: clusters can
-be torn down and spun back up ephemerally with zero data loss because of the no-provisioner PVC/PV policy,
-which guarantees identical rebinding by fresh-PV recreate, not by a lingering `Released` PV.
+from a backup; the original backing bytes were never deleted. That is the lossless-teardown guarantee:
+clusters can be gracefully torn down and reconstructed with zero durable-byte loss because of the
+no-provisioner PVC/PV policy, which guarantees identical rebinding by fresh-PV recreate, not by a lingering
+`Released` PV.
 
 ```mermaid
 flowchart TD
@@ -257,11 +270,13 @@ normal circumstances." amoebius takes the strong reading: **forbid it.**
 - **Default posture: durable storage exists until explicitly destroyed.** The original vision names the
   default as "all durable storage must exist forever"; amoebius softens "forever" only to "until a
   deliberate, privileged deletion," never to "until the next teardown."
-- **No normal-operation code path deletes a retained PV or its bytes.** Cluster delete releases claims and
-  leaves volumes Retained ([§2](#2-one-storage-class-and-it-provisions-nothing), [§6](#6-the-lossless-teardown-guarantee-deterministic-rebind)). `chart`/app delete removes the PVC/PV *objects* it owns but never the
-  backing bytes on a retained volume. The DSL surface exposes **no** "delete this durable volume"
-  primitive; a `.dhall` value cannot denote "destroy these bytes." This is the storage-side reading of the
-  illegal-state contract owned by [dsl_doctrine.md](./dsl_doctrine.md) /
+- **No normal-operation code path destroys retained backing bytes.** Cluster deletion may remove the
+  claim/PV API objects but leaves the durable backing intact
+  ([§2](#2-one-storage-class-and-it-provisions-nothing),
+  [§6](#6-the-lossless-teardown-guarantee-deterministic-rebind)). `chart`/app delete removes the PVC/PV
+  *objects* it owns but never the backing bytes on a retained volume. The DSL surface exposes **no** "delete
+  this durable volume" primitive; a `.dhall` value cannot denote "destroy these bytes." This is the
+  storage-side reading of the illegal-state contract owned by [dsl_doctrine.md](./dsl_doctrine.md) /
   [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md).
 - **Teardown pushes back rather than deletes.** When tearing down a cluster would strand or endanger durable
   state, the safe-teardown path warns and falls back to the `.dhall` failback instead of silently
@@ -271,16 +286,16 @@ normal circumstances." amoebius takes the strong reading: **forbid it.**
   normal-operation credentials can *create* EBS but not *delete* it, so "accidentally delete durable
   storage" is unauthorized at the cloud API, not merely discouraged. The exact create-vs-delete credential
   model (and whether Pulumi creates under one credential set and the harness destroys under another) is
-  resolved by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) §6 (three locked decisions: durable-class
+  resolved by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) §6 (four locked decisions: durable-class
   EBS carried outside the ephemeral cluster stack; normal-operation credentials create-but-not-delete; only
-  the elevated in-memory test credential deletes test-flagged volumes); this doc records only the
-  requirement that the destroy capability be withheld from normal operation.
+  the elevated in-memory test credential deletes test-flagged volumes; static CSI attaches the
+  Pulumi-created ID without dynamic provisioning); this doc records only the requirement that the destroy
+  capability be withheld from normal operation.
 
 ### 7.1 The single exception: the elevated test harness
 
 Leak-free test cycles *must* delete the storage they create, or every test run would silt up the substrate
-forever. amoebius resolves the tension by making harness deletion the **one** sanctioned
-path:
+forever. Within amoebius automation, harness deletion is the **one** sanctioned path:
 
 - Only the **elevated test harness**, holding privileged delete credentials, may destroy durable storage,
   and only storage it flagged as test-owned.
@@ -288,6 +303,11 @@ path:
   topology are owned by [testing_doctrine.md](./testing_doctrine.md). This doc owns only the boundary:
   **normal operation cannot delete durable data; the elevated harness is the sole actor that can, on
   test-flagged resources.**
+
+A deliberate privileged operator action is outside normal operation and outside the automated `.dhall`
+surface. A human may perform an audited external break-glass reclaim, but that is not an amoebius automation
+path; routine cluster credentials, reconcilers, and the elevated **test** harness never gain authority to
+delete production backing.
 
 ### 7.2 amoebius' own control-plane state is the MinIO bucket, not a PVC
 
@@ -332,17 +352,18 @@ amoebius's design position: **a shrink is never an in-place truncation; it is a 
 - **Shrink is expressed as create-new → verified-migrate → retire-old**, never as "represent a smaller
   volume holding the same data." The DSL value the operator writes denotes the *target smaller size*; the
   reconciler realizes it by provisioning a new, correctly-sized retained volume, copying the live bytes,
-  **verifying the copy**, and only then retiring the old volume. No `.dhall` value ever denotes "discard
-  these bytes," so destruction stays unrepresentable even while the effective size goes down.
-- **The retire-old step is itself a durable-data deletion** and therefore inherits [§7](#7-deleting-durable-data-is-forbidden-under-normal-operation): under normal
-  operation it is forbidden, and the actual reclaim of the now-orphaned old volume is gated to the same
-  elevated path that the test harness uses (or to a deliberate, privileged operator action). A shrink that
-  cannot verify its copy leaves *both* volumes intact and fails loud — it never trades the old bytes for an
-  unverified new home.
+  **verifying the copy**, and only then detaching the old volume from active use and recording an immutable
+  `ReclaimEligible` artifact. No `.dhall` value ever denotes "discard these bytes," so destruction stays
+  unrepresentable even while the effective size goes down.
+- **`Retire-old` does not itself delete backing.** Actual reclaim of the now-orphaned old volume is an external
+  privileged operator action under [§7](#7-deleting-durable-data-is-forbidden-under-normal-operation), outside
+  amoebius automation and outside the elevated test harness. Until that break-glass action occurs, the old
+  backing remains intact. A shrink that cannot verify its copy emits no `ReclaimEligible` artifact, leaves
+  *both* volumes intact, and fails loud — it never trades the old bytes for an unverified new home.
 
 > **Honesty.** This is a *design resolution* of an explicitly open question, not a built or tested
-> amoebius capability. The mechanism above (especially the verified-migrate gate and the elevated reclaim of
-> the retired volume) is design intent; treat it as a specification to be validated, never as a proven
+> amoebius capability. The mechanism above (especially the verified-migrate gate, `ReclaimEligible` artifact,
+> and external break-glass boundary) is design intent; treat it as a specification to be validated, never as a proven
 > result. Delivery is tracked in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---

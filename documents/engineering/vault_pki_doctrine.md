@@ -38,7 +38,7 @@ This document owns six things:
 It does **not** own: the DSL-surface rule that secrets are names not values
 ([dsl_doctrine.md §6](./dsl_doctrine.md#6-secrets-are-names-never-values)); the fact that Vault is one
 of the nine standard services ([platform_services_doctrine.md §5](./platform_services_doctrine.md#5-vault--the-secrets-root-reference-only));
-the durable Vault PV and init-once/unseal-on-rebuild *storage* mechanics
+the retained Vault backing, deterministic PV rebind, and init-once/unseal-on-rebuild *storage* mechanics
 ([storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md)); the cluster bring-up/spawn/teardown
 *lifecycle verbs* ([cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md)); the Pulumi
 MinIO-backend Vault-envelope encryption ([pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md)); or the
@@ -242,13 +242,14 @@ platform-service ordering edge — **Vault initialized and unsealed before any s
 This section owns the Vault-init contract those two point at.
 
 - **Init-once / unseal-on-rebuild.** The cluster is ephemeral; its storage is not. `vault init` runs
-  **exactly once, ever** — the first time the durable Vault PV is empty. Every later bring-up redeploys
-  Vault against the existing data and only **unseals** it: no re-init, no key regeneration. A cluster
-  rebuild is *not* a fresh Vault. This is the Vault face of the deterministic-rebind guarantee owned by
+  **exactly once, ever** — the first time the retained Vault backing contains no initialized Vault data. Every
+  later bring-up redeploys Vault against the existing data and only **unseals** it: no re-init, no key
+  regeneration. A cluster rebuild is *not* a fresh Vault. This is the Vault face of the deterministic-rebind
+  guarantee owned by
   [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) and
   [cluster_lifecycle_doctrine.md §7](./cluster_lifecycle_doctrine.md#7-ephemeral-spin-updown-with-deterministic-rebind):
-  because the retained PV survives teardown and rebinds identically, a Vault KV object is as durable
-  across rebuilds as any other retained byte.
+  because the retained backing survives teardown and a fresh PV object rebinds it identically, a Vault KV
+  object is as durable across rebuilds as any other retained byte.
 - **Delivering the `InForceSpec` is a fail-closed handoff.** Once unsealed, the cluster receives its
   in-force configuration. The configuration's *at-rest* protection — a Vault-Transit envelope over the MinIO
   backend — is owned by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) and the content store
@@ -545,7 +546,8 @@ generalization of prodbox's `vault_doctrine.md §17`. The **only** data that may
    [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api) the admin-plane reach class), so there is no separate admin-transport
    cert for this list to enumerate. The rke2 *node-join token*, by contrast, is **not** floor material: it is a
    Vault-owned, rotatable KV `SecretRef` ([§3.1](#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken)).
-2. **The Vault PV binding itself** — owned by [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md).
+2. **The retained Vault backing and its deterministic PV binding** — owned by
+   [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md).
 3. **Root cluster only:** the operator's memorized unseal password — the sole ephemeral secret ([§5](#5-the-root-cluster-single-node-password-encrypted-unseal)).
    The password-AEAD-sealed unlock material it decrypts is not a Vault-owned object; it is what
    *unseals* Vault, and its body is password-sealed regardless of where the ciphertext rests.
@@ -604,7 +606,7 @@ states the target shape and links back for status.
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — single-node-root bootstrap, amoebic spawning, and the child unseal lifecycle
 - [Platform Services Doctrine](./platform_services_doctrine.md) — Vault as a standard HA platform service and the Vault-ready ordering edge
 - [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers) [§4 init-follows-readiness / fail-closed](#4-init-follows-readiness-fail-closed-vault-init) is the event-driven resolution of the readiness race, not a wait around it
-- [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — the retained Vault PV and init-once / unseal-on-rebuild durability
+- [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — the retained Vault backing, deterministic PV rebind, and init-once / unseal-on-rebuild durability
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — Vault-Transit-envelope encryption of the MinIO Pulumi backend and the public-edge ZeroSSL/route53 path
 - [Content Addressing & Determinism](./content_addressing_doctrine.md) — the content-addressed model store the Tier-2 staging credentials write to ([§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss))
 - [Network Fabric Doctrine](./network_fabric_doctrine.md) — the Curve25519 WireGuard peer keys in the same parent-custody KV secret family as the `Rke2NodeToken` ([§3.1](#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken))
