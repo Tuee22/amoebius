@@ -57,7 +57,7 @@ control that must record zero invocations** (amoebius renders and applies its ow
 shells to Helm)) against the fakes invoked by absolute path; the recorded
 argv sequence equals the **committed, hand-authored expected-argv transcript** (`test/boundary/golden/argv/`,
 Phase-0-pinned per §M-1/§M-3 — authored independently of the executor, no function reachable from the executor
-computes it) and the recorded applied-manifest bytes equal the Phase-9/10 render/plan goldens byte-for-byte, and
+computes it) and the recorded applied-manifest bytes equal the Phase-9/10 `renderAll`/plan goldens byte-for-byte, and
 **each of the four tool transcripts is non-empty** (a zero-invocation transcript for any named tool is red).
 The gate is not passed by assertion logic alone: it names **committed seeded mutants** (§M-2) that MUST turn the
 suite red — an executor argv mutant (drop a flag / reorder argv / swap a subcommand) and a byte mutant (one
@@ -85,7 +85,9 @@ check that runs on no substrate.
   adds no infrastructure dependency. Prerequisite checks (a cluster is reachable, credentials are present) belong
   on the live *apply* path (Phase 16), never here.
 - [`conformance_harness_doctrine.md §4`](../documents/engineering/conformance_harness_doctrine.md) — the spine
-  (§4), *decode → validate → render → plan → dry-run → fake apply*: this phase implements **step 5, the fake
+  (§4), *decode → bind/expand → `planInfrastructure` → (infrastructure-plan golden | authenticated-
+  materialization fixture → provision → `renderAll`) → plan → dry-run → fake apply*: this phase implements the
+  **fake
   apply** — the binary runs the plan against fake tools and the recorded commands and applied bytes are asserted
   — closing the pre-cluster spine that Phases 4–10 built in Register 1.
 - [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
@@ -173,11 +175,11 @@ The whole sprint (📋 Planned).
 ## Sprint 11.3: The boundary battery — exact commands + applied bytes + no-`PATH` — the gate 📋
 
 **Status**: Planned
-**Implementation**: `test/boundary/BoundarySpec.hs`; the applied-manifest bytes reuse the Phase-9 `render`
+**Implementation**: `test/boundary/BoundarySpec.hs`; the applied-manifest bytes reuse the Phase-9 `renderAll`
 goldens; the **expected-argv transcripts are a separate committed hand-authored oracle** (`test/boundary/golden/argv/`),
 NOT derived from the Phase-10 plan golden by any executor-reachable function — target paths, not yet built.
 **Blocked by**: Sprint 11.2, Sprint 11.1; Phase 10 gate (the `[Step]` plan + `--dry-run` goldens); Phase 9 gate
-(the `render` manifest goldens — the applied bytes asserted here).
+(the `renderAll` manifest goldens — the applied bytes asserted here).
 **Representative plan corpus (§M-7):** the exercised plan is named explicitly here — a committed `[Step]` fixture
 containing **at least one step routed to each tool amoebius actually invokes** (`kubectl` apply, `docker`
 build/push, `pulumi` up), so every real boundary surface is driven, not just `kubectl`; the `helm` fake is
@@ -195,7 +197,7 @@ same-named executables that write a distinct sabotage-marker placed first on `PA
 sabotage-marker is observed (proving `PATH` was consulted) or if any fake's transcript argv[0] differs from the
 handed absolute path. **Committed seeded mutants (§M-2), re-run every gate run, that MUST turn the suite red**:
 (a) an executor argv mutant — drop a flag / reorder two argv elements / swap a subcommand; (b) a byte mutant —
-one flipped byte in a `render` golden; (c) a `PATH`-resolution mutant — the seam resolving by bare tool name.
+one flipped byte in a `renderAll` golden; (c) a `PATH`-resolution mutant — the seam resolving by bare tool name.
 The suite failing on each is a demonstrated negative control, not merely assertion logic.
 **Docs to update**: `DEVELOPMENT_PLAN/README.md` (flip the Phase-11 status when the gate passes),
 `documents/engineering/testing_doctrine.md`, `documents/engineering/conformance_harness_doctrine.md`.
@@ -265,7 +267,7 @@ The whole sprint (📋 Planned).
 - [phase_12](phase_12_deterministic_sim_substrate.md) — the deterministic-simulation substrate (the `io-classes` environment + the modeled fault-injectable Pulsar/MinIO/apiserver/route53/Vault/clock) that this boundary harness unblocks and that the live-band phases extend
 - [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — why the applied
   bytes equal the `--dry-run` bytes and are never committed
-- [phase_09](phase_09_render_manifest_goldens.md) — the `render` manifest goldens = the applied bytes asserted here
+- [phase_09](phase_09_render_manifest_goldens.md) — the `renderAll` manifest goldens = the applied bytes asserted here
 - [phase_10](phase_10_chain_kernel_dryrun.md) — the `chain`/`Step` kernel + `--dry-run` plan this harness executes
 - [phase_13](phase_13_spa_composition_representational.md) — the companion Register-1/2 phase (the demo SPA run
   locally against a faked backend)

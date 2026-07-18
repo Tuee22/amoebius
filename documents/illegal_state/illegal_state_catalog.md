@@ -89,7 +89,12 @@ real-resource phases).
 flowchart TD
   spec[InForceSpec Dhall value] -->|Dhall type-check: spec composes, PROVEN at spec layer| decode[Decode to GADT-indexed Haskell types]
   decode -->|smart constructors and indices reject illegal values, PROVEN at code layer| ir[Coherent in-memory cluster IR]
-  ir -->|interpret to typed manifests and cluster config, NOT proven by the type-check| render[Rendered manifests]
+  ir -->|bind provider/shape and fully expand| bound[BoundDeployment]
+  bound -->|pure provision: placement, storage, capability folds; structured Left on failure| provisioned[Opaque ProvisionedSpec]
+  provisioned -->|pure dry-run needs no live target| render[Rendered manifests from checked service projections]
+  provisioned -->|live reconcile| preflight{Observed supply still satisfies whole deployment?}
+  preflight -->|yes: opaque validated target| render
+  preflight -->|no: zero writes| refuse[Refuse reconcile]
   render -->|apply, schedule, reconcile, NOT proven here| live[Running cluster]
   live -->|runtime enforcement proof owned by| chaos[chaos_failover_doctrine.md]
 ```
@@ -122,11 +127,12 @@ entry: the **failure** (how it goes wrong in raw k8s), the **owning doctrine** (
 
 **The validation-locus axis.** Orthogonal to *which foreclosure layer* catches a state (type-reject vs
 decode-reject vs runtime-check — [`illegal_state_techniques.md`](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)) is *where in the toolchain* the failure surfaces. Every
-sub-catalog entry carries a **Validation-locus** tag drawn from four values, defined in
+sub-catalog entry carries a **Validation-locus** tag drawn from five values, defined in
 [`illegal_state_techniques.md`](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force): `Gate-1-editor` (fails `dhall type` at authoring time),
-`Gate-2-decoder` (the total decoder returns `Left`), `rendered-output-golden` (caught by a golden test on
-the *rendered* manifest, no cluster required), and `live-effect` (only observable at reconcile/runtime — the
-residue Register 3 owns). Most entries name a primary locus plus a live-effect residue.
+`Gate-2-decoder` (the total decoder returns `Left`), `provision-seal` (post-bind Phase-8 provision returns a
+`ProvisionError` before any `ProvisionedSpec` exists), `rendered-output-golden` (caught by a golden test on the
+*rendered* manifest, no cluster required), and `live-effect` (only observable at reconcile/runtime — the residue
+Register 3 owns). Most entries name a primary locus plus a live-effect residue.
 
 ### Storage — [`illegal_state_storage.md`](./illegal_state_storage.md)
 
@@ -152,10 +158,10 @@ residue Register 3 owns). Most entries name a primary locus plus a live-effect r
 - [§3.5](./illegal_state_capacity.md#35-undeployable-pods-taints-tolerations--affinity) — Undeployable pods (taints, tolerations & affinity)
 - [§3.17](./illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded) — An over-committed deploy or workload (host / VM / cluster capacity exceeded)
 - [§3.22](./illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration) — A hand-authored (un-derived) toleration
-- [§3.27](./illegal_state_capacity.md#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing) — A schedulable-in-aggregate but unplaceable workload (atomic-pod / GPU bin-packing)
+- [§3.27](./illegal_state_capacity.md#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing) — A deployment that fits in aggregate but has no resource-capable placement
 - [§3.28](./illegal_state_capacity.md#328-two-accelerator-owners-on-one-node-or-a-fractional-accelerator-claim) — Two accelerator owners on one node, or a fractional accelerator claim
 - [§3.29](./illegal_state_capacity.md#329-a-host-worker-whose-demand-overflows-its-physical-host) — A host worker whose Demand overflows its physical host
-- [§3.30](./illegal_state_capacity.md#330-a-served-model-whose-vram-footprint-exceeds-node-vram) — A served model whose VRAM footprint exceeds node VRAM
+- [§3.30](./illegal_state_capacity.md#330-a-served-model-whose-vram-footprint-exceeds-node-vram) — An accelerator memory envelope that cannot fit the selected devices or unified-memory pool
 
 ### Security, ingress & secrets — [`illegal_state_security.md`](./illegal_state_security.md)
 
@@ -166,7 +172,7 @@ residue Register 3 owns). Most entries name a primary locus plus a live-effect r
 - [§3.8](./illegal_state_security.md#38-cross-tenant-references-and-literal-secrets) — Cross-tenant references and literal secrets
 - [§3.9](./illegal_state_security.md#39-a-plaintext-spec-at-rest) — A plaintext spec at rest
 - [§3.10](./illegal_state_security.md#310-a-child-spec-that-reaches-beyond-its-own-subtree) — A child spec that reaches beyond its own subtree
-- [§3.11](./illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext) — An unsafe workload (no resource limits, no hardened securityContext)
+- [§3.11](./illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext) — An unsafe or incompletely provisioned workload
 - [§3.40](./illegal_state_security.md#340-a-secure-gateway-reach-collapsing-into-wild-ingress) — A secure-gateway reach collapsing into wild ingress
 - [§3.42](./illegal_state_security.md#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness) — An admin mutation without a root-token capability + an unsealed-Vault witness
 - [§3.45](./illegal_state_security.md#345-a-cross-tenant-or-hand-authored-rbac-binding) — A cross-tenant or hand-authored RBAC binding

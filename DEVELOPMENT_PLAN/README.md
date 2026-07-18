@@ -45,7 +45,7 @@ These rules are absolute and govern all work:
    against a modeled fault-injectable environment, no cluster;
    [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md)), and
    **Register 3** (live infrastructure). The **pre-cluster band (phases 1–13, substrate `none`)** discharges
-   Registers 1–2 — the DSL's illegal-state-unrepresentable discipline, the pure `render`/plan/`--dry-run`, the
+   Registers 1–2 — the DSL's illegal-state-unrepresentable discipline, the pure `renderAll`/plan/`--dry-run`, the
    SPA composition, and the gateway-migration design invariants (both `Planned` and `Failover` branches) — via
    Dhall typecheck + Haskell decoder + QuickCheck + generated-TLA+/TLC + io-sim, **before any phase provisions
    a real resource**. Rendering a plan must never require live infrastructure. Front-loading a *design* proof
@@ -73,9 +73,10 @@ This is a large body of work spanning many small, individually-gated phases; tha
   Dhall schema, and the PureScript frontend contracts are rendered from a Haskell source of truth and never
   committed; only the source is versioned
   ([`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md)).
-- **The control-plane singleton is a Deployment `replicas=1`.** Single-instance is **delegated to k8s/etcd** (a
-  k8s `Lease` if a hard lock is ever needed) — **no bespoke election**; the singleton is stateless (no PVC), its
-  durable state exclusively the Vault-enveloped MinIO bucket
+- **The control-plane singleton is a Deployment `replicas=1`.** Single-writer authority is **delegated to
+  k8s/etcd through the mandatory reconciler `Lease`** — **no bespoke election**; the singleton is stateless (no PVC), its
+  durable state exclusively the Vault-enveloped MinIO bucket. The singleton still has a complete pod/rollout
+  envelope, and its exact five-kind control-plane state is a budgeted/admitted object-store producer
   ([`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton)).
 - **Cluster infrastructure is ephemeral; durable backing is retained independently.** Root, child,
   self-managed, and provider-managed cluster infrastructure may be replaced; production does not acquire a
@@ -90,15 +91,26 @@ This is a large body of work spanning many small, individually-gated phases; tha
   decode-time structural-fit fold, never a per-spec model-check
   ([`gateway_migration_model_doctrine.md`](../documents/engineering/gateway_migration_model_doctrine.md)).
   Intra-cluster consensus is delegated to MinIO/Pulsar/Patroni/etcd and not re-proven.
-- **Resource demand never exceeds capacity.** A workload / VM / compute-engine whose summed cpu/mem/storage
-  demand exceeds its host or cluster capacity is decode-rejected — a total fold over per-host/per-node
-  declared `Capacity`.
 - **No unbounded storage, anywhere.** Storage is host-bounded or cloud-quota-bounded; every Pulsar topic carries
   a bounded retention + a **size-triggered** S3 offload; "unbounded" is representable only behind a quota-capped
-  `ScalingPolicy`.
+  `ScalingPolicy`. OCI content/snapshots, BuildKit cache/scratch, enforceable etcd
+  DB/WAL/snapshot/defrag transitions, Events/Leases/API objects and AtomicWriter files, ZooKeeper metadata,
+  Patroni data/WAL/recovery, registry partial uploads/rehome, Pulumi checkpoints/plugins/workspace, release and
+  control-plane state, Prometheus TSDB compaction/query work, Vault Raft/audit storage, object-store
+  parity/healing space, and failed-write orphans all have typed source operands, named owners, attached
+  `StorageBudgetId`s where applicable, and finite GC/retention/rotation bounds.
 - **ML engines/models/kernels are jit-resolved into a bounded cache, never baked or URL-fetched.** Each asset
-  is a **named catalog identity** the shared `jit-build` resolver materializes on first miss into a
-  `CacheBudget`-bounded content-addressed cache (`CacheBudget ≤` host storage) — no arbitrary-`Url` arm
+  is a **named catalog identity** the shared `jit-build` resolver materializes on first miss through one
+  per-node cache-owner execution unit. Catalog-owned resident and peak-temporary bytes plus finite first-miss
+  concurrency derive a private peak bounded by
+  `ProvisionedCacheDemand.derivedPeak ≤ CacheBudget ≤ emptyDir.sizeLimit`; the owner's explicit
+  `ephemeral-storage` request reserves that volume
+  bound plus writable/log headroom. CPU is throttled at its finite limit, memory is bounded reactively by the
+  kernel, and Kubernetes measures local ephemeral use and evicts after a limit breach rather than providing
+  synchronous `ENOSPC`. The cache owner's private admission guard prevents materialization beyond the
+  provisioned peak, while the layout-routed filesystem carve supplies the hard physical bound. Those storage
+  proofs are one node-ephemeral debit, and clients receive typed handles rather than a writable host path.
+  There is no arbitrary-`Url` arm
   ([`content_addressing_doctrine.md §4.5`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 - **The compute engine matches its substrate, and topology matches its hosts.** rke2/kind need a Linux host
   (a Lima/WSL2 VM on apple/windows); multi-node kind is a single host; multi-node rke2 is one Linux host per
@@ -108,8 +120,70 @@ This is a large body of work spanning many small, individually-gated phases; tha
 - **Secrets never live in Dhall** — only names. Parents inject secrets into a child's Vault.
 - **Standard platform services on every cluster** (below), **HA always** (the chart is HA even at `replicas=1`).
 - **Only `no-provisioner` retained PVs** (`<namespace>/<statefulset>/pv_<integer>`, sized, host/EBS-bound) for
-  platform-service and workload durable storage; the control plane itself holds no PVC.
-- **Containers always declare cpu/ram.**
+  platform-service and workload durable storage; every volume pins block/filesystem presentation, required
+  usable bytes, and a backing-rounded raw allocation. One PVC/PV/EBS is 1:1:1 by identity, not by pretending
+  filesystem-usable bytes equal a provider's whole-GiB raw volume. The control plane itself holds no PVC.
+- **Every resource provision is explicit, pure first, and impossible targets have no deployable value.**
+  Dhall/ClusterIR carries structural demand—not precomputed Kubernetes numbers—for every app, init,
+  controller/operator child, webhook/gateway, build/Pulumi/copy/schema/ACME Job, host process, engine process,
+  and network-fabric role. Binding source-expands all runnable members into stable identity/revision-keyed
+  `BoundExecutionUnit`s. `planInfrastructure` derives—not accepts—the matching demand and either proves the
+  declared target already materialized or returns one non-renderable `ProvisionedInfrastructurePlan` whose
+  `ProvisionedProviderActionBatch` owns the closed cloud-provider/SSH-host actions and the one Pulumi graph.
+  Fresh validation joins that batch to a `ValidatedInfrastructureActionBatch` and fresh plan/action tokens;
+  only their CAS enaction and receipt-bound provider/host readback can construct `ProvisionContext`. The only
+  deployable representation is then the opaque whole-deployment `ProvisionedSpec` returned by
+  `provision :: ProvisionContext -> Topology -> BoundDeployment -> Either ProvisionError ProvisionedSpec`;
+  a CPU-, memory-, disk-, slot-, device-, or VRAM-incompatible workload/topology pair returns `Left` and
+  cannot call deployment-global `renderAll`.
+
+  - **CPU and memory:** every container declares non-zero request/limit operands; every host process declares
+    reservation/ceiling plus an enforceable Linux-cgroup, Windows-Job, or finite Apple-supervisor policy.
+    Pod overhead, tmpfs/accessor residency, working sets, controller children, old/new/surge/terminating
+    overlap, Job waves/terminal retention, host launch/drain overlap, and the scheduler/singleton themselves
+    are derived and fitted before any projection. Kubernetes requests/limits or host controls are exact
+    private witness projections, never defaults.
+  - **Storage:** each container declares finite logical `ephemeral-storage` request/limit; every disk-backed
+    `emptyDir`, cache, scratch, writable root, log, mapped file, pull/import workspace, and failure residue has
+    an explicit bound, identity, lifetime, and physical route. An in-cluster cache is an explicit
+    `CacheBudget` nested inside `emptyDir.sizeLimit`; the Pod request covers it plus writable/log headroom and
+    the envelope is charged once. Kubelet and CRI runtime-metadata components derive from Pod structure,
+    resolve through `KubeletNodefs | CriRuntimeRoot` and the selected
+    `Unified | SplitRuntime | SplitImage` layout, then group aliased backing debits once. OCI content and
+    snapshots deduplicate by allocation-domain-scoped identity; missing-pull workspace uses the bounded
+    concurrency high-water and remains charged after failures until observed cleanup. Durable volumes,
+    object-store extents, host caches, VM/root disks, filesystem overhead, allocation quanta, recovery,
+    replacement, and retained artifacts each name their backing/quota and old+new high-water. A
+    `PhysicalDiskPartition` proves the unit-safe physical equation
+    `systemReserve raw debit + Σ unique VM provisionedBytes + Σ unique other raw parent debits ≤
+    allocatableRawBytes`; each VM separately proves its guest-system and layout usable-byte debits fit its
+    `requiredUsableBytes`. Provider-node recipes make the same unit boundary explicit:
+    `InstanceStore.provisionedRawBytes` is SKU-pinned raw supply, while `systemReserve` and layout `carves` are
+    `ProviderUsableDiskCarveTemplate.requiredUsableBytes`; an `EphemeralRootEbs` arm instead derives its
+    allocation-rounded raw request from those usable demands. Private `ProvisionedPerInstanceDiskTemplate`
+    derives presentation-pinned `mountedUsableBytes` from either raw source before proving the usable nested
+    fit, so no raw provider byte count pays a usable filesystem carve directly.
+  - **Multiplicity, slots, and live races:** controller kind fixes its legal shape—Deployment
+    `Once | Replicated` with Recreate/nonzero-progress RollingUpdate; StatefulSet serial partition-zero or
+    staged OnDelete; DaemonSet fixed/elastic per-node targets with staged OnDelete or exactly one positive
+    Surge/Unavailable; finite Job completions/parallelism/backoff/retention; or HostProcess
+    `Once | PerNode` with arm-specific replacement. Planned slots are not Pod UIDs. The live inventory keeps
+    every UID/process plus Pod/CNI slots and identity-keyed CSI attachments distinct. The same-binary
+    `amoebius-capacity` scheduler authenticates a sealed prior+desired child template, re-folds the static,
+    foreign, resident, whole-ledger, and candidate resource algebra under one aggregate CAS, then alone binds
+    the Pod. Terminating/replacement UIDs cannot become free through a replica scalar.
+  - **Accelerators and accelerator memory:** CUDA/Metal demand is a closed owner arm with exact
+    source/workload identities, finite coexistence epochs, placement/shards, and release policy. CUDA
+    provisioning selects matching topology/device identities, gives one owner the full generic GPU offering,
+    and fits each derived epoch against per-device **net allocatable VRAM** (raw minus mandatory reserve) plus
+    freshly observed free memory; different Pod owners cannot share the device. Metal epoch bytes debit Apple
+    unified host memory. CUDA serial OnDelete and Metal host replacement require fresh device/process/memory
+    release evidence before the next owner can start; a cluster without the required accelerator family or
+    sufficient VRAM cannot produce `ProvisionedSpec`.
+
+  Static engine processes are named `EngineSystemReserve` components, and BuildKit/buildx, the scheduler,
+  singleton Lease, admission gateways, observers, and the topology-derived network fabric all carry the same
+  explicit compute/storage/slot cost rather than hiding as overhead.
 - **Keycloak owns all wild ingress** via the LB + Gateway API; the sole exception is host-origin, localhost-only traffic (host-only NodePorts).
 - **Pulsar payloads are exclusively CBOR** (canonical where content-addressed) — a non-CBOR application payload
   (JSON/base64/protobuf/raw) is unrepresentable; the protocol framing stays protobuf.
@@ -181,37 +255,37 @@ ordered by substrate; phases **38+** are the backlog.
 | 4 | Dhall Gate-1 schema + smart-constructor prelude | none | 1 | `dhall type` accepts the positive corpus and rejects each Gate-1-class negative at its committed expected error (no binary; no open escape arm) | 📋 Planned | [phase_04](phase_04_dhall_gate1_schema.md) |
 | 5 | GADT IR + fail-closed decoder (Gate 2) | none | 1 | `cabal test dsl-spec` green — each positive decodes; each Gate-2 negative returns a structured `Left` with its expected tag; the decode path is checked non-partial + fail-closed (exception-catch wrapper) | 📋 Planned | [phase_05](phase_05_gadt_decoder_gate2.md) |
 | 6 | Illegal-state corpus + validation-locus ledger | none | 1 | every negative fixture is rejected at its tagged locus (Gate-1 / Gate-2 / compile-fail); QuickCheck green with coverage floors; the per-entry validation-locus ledger is emitted | 📋 Planned | [phase_06](phase_06_illegal_state_corpus.md) |
-| 7 | Capacity / topology folds | none | 1 | `fits`/`carve`/`place` (sound pod→node witness) + topology QuickCheck properties hold; the decode-foreclosed folds reject each capacity/topology negative | 📋 Planned | [phase_07](phase_07_capacity_topology_folds.md) |
-| 8 | Capability → provider → shape binder | none | 1 | a capability need decodes to a `ServiceSpec` at the type level; a product-named app fails Gate 1 at its committed locus | 📋 Planned | [phase_08](phase_08_capability_binder.md) |
-| 9 | Pure `render` + rendered-output goldens | none | 1 | `render :: ServiceSpec -> [K8sObject]` byte-for-byte golden-locked against committed goldens; the rendered-output illegal states (hardened context, no backdoor ingress, derived NetworkPolicy) hold; a seeded mutant turns it red | 📋 Planned | [phase_09](phase_09_render_manifest_goldens.md) |
+| 7 | Capacity / topology folds | none | 1 | `fits`/`carve`/`place` produce a sound whole-deployment witness across CPU/memory, pod/CNI/CSI slots, mapped/API/etcd state, logical and physical ephemeral/image storage, durable/object/database/migration storage, all controller/gateway/executor units, provider quotas, accelerator availability, and net allocatable VRAM; every one-short axis rejects | 📋 Planned | [phase_07](phase_07_capacity_topology_folds.md) |
+| 8 | Capability → provider → shape binder | none | 1 | capability/provider shapes fully expand; exact demand first passes the conditional infrastructure planner/materialization boundary, then the whole deployment can become an opaque `ProvisionedSpec`; a product-named app fails Gate 1 and a CUDA-requiring workload paired with a non-CUDA topology returns its committed `ProvisionError` at the post-bind provision seal | 📋 Planned | [phase_08](phase_08_capability_binder.md) |
+| 9 | Pure `renderAll` + rendered-output goldens | none | 1 | `renderAll :: ProvisionedSpec -> [K8sObject]` is byte-for-byte golden-locked; it total-maps Phase 8's unique identity-keyed render-source set, and every workload, webhook/gateway/Job, mapped source, CR child, volume/migration, etcd control, and accelerator field is an exact opaque-witness projection | 📋 Planned | [phase_09](phase_09_render_manifest_goldens.md) |
 | 10 | chain/Step kernel + `--dry-run` plan render | none | 1 | `chain :: cfg -> [Step]` renders a byte-for-byte `--dry-run` plan with no effects (zero `stepRun`, external-observer verified); the pure descent is golden-locked | 📋 Planned | [phase_10](phase_10_chain_kernel_dryrun.md) |
 | 11 | Boundary-integration fake-tool harness | none | 2 | the binary runs the plan against fake `kubectl`/`docker`/`pulumi` by absolute path (the `helm` fake a zero-invocations negative); recorded argv == the committed hand-authored transcript and applied bytes == the goldens; committed argv/byte/PATH mutants turn it red | 📋 Planned | [phase_11](phase_11_boundary_fake_tool_harness.md) |
 | 12 | Deterministic-simulation substrate | none | 2 | the real daemon/reconciler code under `IOSim`/`IOSimPOR` replays a committed fault/partition/redelivery schedule; same-seed → byte-identical trace (a distinct seed must differ); a committed fault-mutant turns the invariant red; modeled-env fidelity marked assumed | 📋 Planned | [phase_12](phase_12_deterministic_sim_substrate.md) |
 | 13 | SPA composition (representational) + demo-SPA local | none | 1/2 | `prop_spaCompositionDecodes` holds over generated pairs (coverage floors); the PureScript demo SPA runs locally against a faked backend (Playwright), the contract from a committed golden | 📋 Planned | [phase_13](phase_13_spa_composition_representational.md) |
-| 14 | Python midwife + substrate detect + single kind cluster | linux-cpu | 3 | `pb bootstrap --distro=kind` brings up an empty single-node kind cluster; re-run is a no-op; every external invocation went through an absolute path; the gate deletes the cluster and verifies no cluster, node container, or kubeconfig context remains (OS-boundary observer) | 📋 Planned | [phase_14](phase_14_midwife_bootstrap_kind.md) |
-| 15 | Multi-arch base image + jit-build resolver + `distribution` registry | linux-cpu | 3 | the multi-arch base image (service binaries + resolver/toolchain, amoebius binary alone) publishes atomically into the in-cluster `distribution` registry; no public-registry pulls | 📋 Planned | [phase_15](phase_15_base_image_registry.md) |
-| 16 | Typed renderer + live SSA reconciler | linux-cpu | 3 | a `render`ed object set is applied by the SSA reconciler (owned field manager, `force`, ApplySet prune, wait) to convergence; re-run is a no-op | 📋 Planned | [phase_16](phase_16_renderer_reconciler.md) |
-| 17 | No-provisioner retained storage + lossless rebind | linux-cpu | 3 | storage rebinds after a real cluster delete+recreate with no data loss (fresh uid-less-`claimRef` PV over preserved bytes; OS-boundary observer confirms real teardown) | 📋 Planned | [phase_17](phase_17_retained_storage.md) |
-| 18 | Root Vault + PKI + built-in Haskell Vault client | linux-cpu | 3 | the root password-encrypted Vault inits + unseals fail-closed; the PKI anchor issues; the built-in Haskell client reads a `SecretRef` | 📋 Planned | [phase_18](phase_18_vault_pki.md) |
-| 19 | Platform backbone (MetalLB + MinIO + Pulsar HA) | linux-cpu | 3 | the backbone comes up HA from generated manifests + baked binaries, no public pull; the `distribution` registry re-homes onto the MinIO S3 driver; a size-triggered Pulsar S3 offload fires and the hot tier never exceeds its cap | 📋 Planned | [phase_19](phase_19_platform_backbone.md) |
-| 20 | Platform services-2 (Percona/Patroni + pgAdmin + observability + readiness-DAG) | linux-cpu | 3 | Percona/Patroni (mandated `synchronous_mode`) + pgAdmin + Prometheus/Grafana come up HA; the whole stack comes up in the derived readiness-DAG order (external-observer trace; a hardcoded sequence is a caught mutant) | 📋 Planned | [phase_20](phase_20_platform_services_2.md) |
-| 21 | Keycloak-owned ingress | linux-cpu | 3 | every wild route is reachable only through Keycloak/Envoy; a workload cannot publish its own wild ingress | 📋 Planned | [phase_21](phase_21_keycloak_ingress.md) |
-| 22 | Live DSL deploy via the `replicas=1` singleton | linux-cpu | 3 | a `.dhall` deploys the platform + a trivial app via the Deployment-`replicas=1` singleton (`strategy: Recreate` + Lease, no election); the Phase-6 negative corpus still fails against the live spec-ingestion path | 📋 Planned | [phase_22](phase_22_live_dsl_singleton.md) |
-| 23 | App tenancy + `TenantSpec` | linux-cpu | 3 | an app gets its own namespace, `<app>/<bucket>` ObjectStore, and in-namespace Sql; a spec cannot name a foreign tenant's resource | 📋 Planned | [phase_23](phase_23_app_tenancy.md) |
-| 24 | Native Pulsar client (CBOR) | linux-cpu | 3 | a command→event round-trips over native-protocol Pulsar with broker-side (produce-path) dedup; a CBOR payload round-trips byte-for-byte; a non-CBOR fixture fails type-check | 📋 Planned | [phase_24](phase_24_pulsar_client.md) |
-| 25 | Content store + workflow runtime (Pulsar-Failover single-writer) | linux-cpu | 3 | a workflow stores/fetches a content-addressed artifact by manifest SHA; killing the active worker triggers Pulsar-Failover takeover with no double-applied fenced effect; leak-free teardown | 📋 Planned | [phase_25](phase_25_content_store_workflow.md) |
-| 26 | Release lifecycle (ledger + PromotionGate + RolloutPlan) | linux-cpu | 3 | a live Release-ledger write emits a `releaseHash`; the PromotionGate refuses an under-verified→prod promotion (committed fixture); a satisfied gate advances the ETag-CAS pointer; a readiness-gated RolloutPlan (incl. a DB schema-migration phase) applies in order; a mutant admitting a bad promotion turns it red | 📋 Planned | [phase_26](phase_26_release_lifecycle.md) |
-| 27 | WireGuard network fabric | linux-cpu | 3 | the singleton renders each peer config from Vault-KV Curve25519 keys (SecretRef names only) and reconciles raw-kernel WireGuard so every cluster draws its VPN IP and the gateway-role hub is reachable (external-observer probe); a committed golden pins the config; a rotated/missing key mutant turns it red | 📋 Planned | [phase_27](phase_27_network_fabric_wireguard.md) |
-| 28 | Multi-cluster spawn + geo-replication | linux-cpu | 3 | a parent spawns two children (Pulumi-from-inside first built here) that geo-replicate a workflow; each child receives `project(subtree)` (compile-fail corpus); leak-free teardown | 📋 Planned | [phase_28](phase_28_multicluster_spawn_georepl.md) |
-| 29 | Gateway-migration drills + model-correspondence | linux-cpu | 3 | a `Planned` handover is RPO=0 (external out-of-forest write-journal oracle, ≥8 acked-but-un-replicated writes at quiesce) and a `Failover` rebinds within the Phase-0-committed `DataLossBudget`; trace-validated against the Phase-3 model; committed `verify-caught-up`-stub / `promote-before-fence` mutants turn it red | 📋 Planned | [phase_29](phase_29_gateway_migration_drills.md) |
-| 30 | Provider-managed clusters + dynamic provisioning | linux-cpu → provider | 3 | spin a provider (EKS) cluster from a parent (reusing the Phase-28 Pulumi engine), dynamically provision a node by a declared rule, refuse growth past the quota cap, prove durable EBS survives cluster replacement and rebinds through a fresh static CSI PV, then tear down with the ephemeral-resource sweep empty (tag-sweep backstop) | 📋 Planned | [phase_30](phase_30_provider_clusters.md) |
-| 31 | Determinism kernel | linux-cpu | 3 | `experimentHash = sha256(dhall‖substrate)` + SplitMix seed derivation reproduce byte-identical output on the same substrate (independent recompute, cache-bypassed); a changed input changes the hash | 📋 Planned | [phase_31](phase_31_determinism_kernel.md) |
-| 32 | jit-build engine resolver + `CacheBudget` cache | linux-cpu | 3 | a named engine identity resolves on first miss into the `CacheBudget`-bounded content-addressed cache; a second pod reuses it; budget-pressure eviction keeps Σ≤budget; over-budget is decode-rejected | 📋 Planned | [phase_32](phase_32_jitbuild_engine_cache.md) |
-| 33 | infernix lift + CPU inference reproducibility | linux-cpu | 3 | an infernix CPU-inference workflow is reproducible (same `experimentHash`, independent recompute ⇒ same output); its demo web app deploys as application-logic-only | 📋 Planned | [phase_33](phase_33_infernix_lift.md) |
-| 34 | jitML lift + checkpoints + coordinator + CUDA | linux-cuda | 3 | a jitML run is bit-deterministic per contract; the single-writer trainer fails over via a Pulsar Failover subscription (no election, no torn `latest`); its demo web app deploys as application-logic-only | 📋 Planned | [phase_34](phase_34_jitml_lift_cuda.md) |
-| 35 | Apple-Metal host compute daemon | apple | 3 | an Apple-Silicon host daemon runs a Metal ML workload as a cluster Pulsar/MinIO peer over a host-only NodePort | 📋 Planned | [phase_35](phase_35_apple_metal_host_daemon.md) |
-| 36 | Test-topology DSL + suggest-test + elevated harness | per generated test | 3 | a generated test `.dhall` runs a failover simulation on its single substrate and tears down leak-free: the test-owned sweep is empty and the pre/post Kubernetes, retained-host-backing, and cloud inventory delta is empty | 📋 Planned | [phase_36](phase_36_test_topology_dsl.md) |
-| 37 | Live SPA deploy | linux-cpu | 3 | an SPA `.dhall` composes a multi-service app + an ML-workflow demo app, deployed and reachable behind Keycloak/Envoy; an inference request round-trips through the composed workflow | 📋 Planned | [phase_37](phase_37_spa_live_deploy.md) |
+| 14 | Python midwife + substrate detect + single kind cluster | linux-cpu | 3 | `pb bootstrap --distro=kind` admits engine CPU/memory, pod/CNI/CSI slots, mapped/API/etcd logical+physical state, presentation-aware disk, kubelet aliases, and inner/outer OCI content/snapshots; re-run is a no-op; teardown is leak-free | 📋 Planned | [phase_14](phase_14_midwife_bootstrap_kind.md) |
+| 15 | Multi-arch base image + jit-build resolver + `distribution` registry | linux-cpu | 3 | a snapshot-bound host envelope admits buildx CPU/memory/scratch/cache/concurrency before execution; the resulting multi-arch base image publishes atomically into the in-cluster registry with no public-registry pulls | 📋 Planned | [phase_15](phase_15_base_image_registry.md) |
+| 16 | Typed renderer + live SSA reconciler | linux-cpu | 3 | before any write, one live snapshot admits the complete transition across CPU/memory, pod/CNI/CSI slots, mapped/API/etcd state, filesystem/content/snapshots, object/durable/migration backings, controller/webhook/gateway/executor overlap, and accelerator/net-free-VRAM; mismatch writes nothing | 📋 Planned | [phase_16](phase_16_renderer_reconciler.md) |
+| 17 | No-provisioner retained storage + lossless rebind | linux-cpu | 3 | required usable bytes pass through filesystem overhead/backing quantum before uniform PVC/PV render; verified shrink reserves old+new+workspace and its copy Job, and raw/usable caps rebind after cluster replacement with no data loss | 📋 Planned | [phase_17](phase_17_retained_storage.md) |
+| 18 | Root Vault + PKI + built-in Haskell Vault client | linux-cpu | 3 | bounded Vault populations derive Raft WAL/snapshot/compaction/recovery and rotated-audit storage before init; the root Vault unseals fail-closed, the PKI anchor issues, and the built-in client reads a `SecretRef` | 📋 Planned | [phase_18](phase_18_vault_pki.md) |
+| 19 | Platform backbone (MetalLB + MinIO + Pulsar HA) | linux-cpu | 3 | BookKeeper and explicit ZooKeeper recovery plus six-arm MinIO producer geometry fit; the registry rehome reserves source+target+workspace/Job and verifies every old digest before cutover; size-triggered offload passes | 📋 Planned | [phase_19](phase_19_platform_backbone.md) |
+| 20 | Platform services-2 (Percona/Patroni + pgAdmin + observability + readiness-DAG) | linux-cpu | 3 | each SQL consumer provisions Patroni children/webhook/gateway plus data/WAL/recovery storage; monitoring work derives Prometheus/proxy compute and rounded TSDB compaction/query capacity; live children match | 📋 Planned | [phase_20](phase_20_platform_services_2.md) |
+| 21 | Keycloak-owned ingress | linux-cpu | 3 | Envoy controller/children, Keycloak, ACME Job/Vault delta, and Keycloak Patroni DB provision before effects; every wild route is reachable only through Keycloak/Envoy | 📋 Planned | [phase_21](phase_21_keycloak_ingress.md) |
+| 22 | Live DSL deploy via the `replicas=1` singleton | linux-cpu | 3 | the singleton/trivial app/gateway have complete envelopes and the exact five-kind control-plane-state producer fits before `.dhall` persistence or reconcile; `Recreate` + the mandatory Lease supplies single-writer authority | 📋 Planned | [phase_22](phase_22_live_dsl_singleton.md) |
+| 23 | App tenancy + `TenantSpec` | linux-cpu | 3 | the app pod, object producer/gateway, and distinct Patroni SQL provision fit before its namespace/bucket/database; a spec cannot name a foreign tenant's resource | 📋 Planned | [phase_23](phase_23_app_tenancy.md) |
+| 24 | Native Pulsar client (CBOR) | linux-cpu | 3 | embedded client buffers/sessions are debited to the consumer and the gate runner has a complete envelope; command→event/dedup/CBOR checks pass and non-CBOR fails type-check | 📋 Planned | [phase_24](phase_24_pulsar_client.md) |
+| 25 | Content store + workflow runtime (Pulsar-Failover single-writer) | linux-cpu | 3 | one orchestrator + three workers, gateway/collector, takeover overlap, and the closed Content producer fit before the artifact/failover workflow; no double-applied fenced effect | 📋 Planned | [phase_25](phase_25_content_store_workflow.md) |
+| 26 | Release lifecycle (ledger + PromotionGate + RolloutPlan) | linux-cpu | 3 | exact release/pointer Content objects and gateway fit before writes; schema migration reserves executor + table/index/temp/WAL old+new high-water; verified CAS/promotion/rollout passes and bad promotion fails | 📋 Planned | [phase_26](phase_26_release_lifecycle.md) |
+| 27 | WireGuard network fabric | linux-cpu | 3 | the topology-derived peer/rate/queue/log cost fits each node before raw-kernel mutation; the singleton renders peers from Vault key names, reconciles WireGuard, and externally proves hub reachability and zero-effect overdraw | 📋 Planned | [phase_27](phase_27_network_fabric_wireguard.md) |
+| 28 | Multi-cluster spawn + geo-replication | linux-cpu | 3 | checkpoint objects/gateway and bounded Pulumi executor Jobs/plugins/workspace plus both child supplies fit the parent before either stack mutates; two projected children geo-replicate a workflow and tear down leak-free | 📋 Planned | [phase_28](phase_28_multicluster_spawn_georepl.md) |
+| 29 | Gateway-migration drills + model-correspondence | linux-cpu | 3 | source+overlap+target edge/fabric, Pulumi/checkpoint, non-idle workflow, API/etcd, and external-journal harness fit before handoff; `Planned` proves RPO=0 and `Failover` stays within the pinned budget and Phase-3 trace | 📋 Planned | [phase_29](phase_29_gateway_migration_drills.md) |
+| 30 | Provider-managed clusters + dynamic provisioning | linux-cpu → provider | 3 | spin EKS for an authored cloud-account identity from complete node classes with pod/CSI slot policies, raw `InstanceStore.provisionedRawBytes` or rounded root-EBS requests, usable system/layout carves with private mounted-usable fit, content/snapshot geometry, and all independent provider-quota fields; materialize and probe exact launch-template filesystems, refuse incompatible/over-quota growth before mutation, prove rounded durable EBS rebind, then sweep only ephemeral cluster resources to zero while retained durable EBS remains for Phase-36 privileged reclamation | 📋 Planned | [phase_30](phase_30_provider_clusters.md) |
+| 31 | Determinism kernel | linux-cpu | 3 | each fresh workflow run, gateway/collector, topic/store state, API/etcd transition, and host observer provision before serial-after-gone execution; independent cache-bypassed recompute is byte-identical and a changed input changes the hash | 📋 Planned | [phase_31](phase_31_determinism_kernel.md) |
+| 32 | jit-build engine resolver + `CacheBudget` cache | linux-cpu | 3 | catalog resident/temp operands and finite first-miss concurrency derive each cache owner's private peak; it fits budget/volume/pod request, serves typed handles, and rejects deletion/conflict/concurrent overflow | 📋 Planned | [phase_32](phase_32_jitbuild_engine_cache.md) |
+| 33 | infernix lift + CPU inference reproducibility | linux-cpu | 3 | a finite inference work budget derives workflow/cache/SPA/build/registry/harness and cold-run overlap before effects; independent same-hash CPU recompute matches and the application-logic-only demo deploys | 📋 Planned | [phase_33](phase_33_infernix_lift.md) |
+| 34 | jitML lift + checkpoints + coordinator + CUDA | linux-cuda | 3 | observed CUDA family/count and per-device allocatable/free VRAM after mandatory reserve must satisfy the pure envelope; the named owner container receives the exact whole-device claim and pod affinity before effects; raw-fits/net-fails writes nothing | 📋 Planned | [phase_34](phase_34_jitml_lift_cuda.md) |
+| 35 | Apple-Metal host compute daemon | apple | 3 | physical CPU/unified memory/storage fit system reserve + a presentation/quantum-derived Lima disk + Metal worker + host cache; outputs route through the provisioned mutation gateway, raw MinIO stays unexposed, and every high-water is read back | 📋 Planned | [phase_35](phase_35_apple_metal_host_daemon.md) |
+| 36 | Test-topology DSL + suggest-test + elevated harness | per generated test | 3 | a generated test provisions all observed compute/storage/accelerator/quota classes plus closed registry-publication, Pulumi/checkpoint, and old+new migration/copy-Job branches, then tears down with every applicable resource-class delta empty | 📋 Planned | [phase_36](phase_36_test_topology_dsl.md) |
+| 37 | Live SPA deploy | linux-cpu | 3 | the full app/rollout, surviving platform/workflow/cache, cold-tenant rematerialization, object/topic/database, image, slot, and API/etcd transition provisions before apply; the composed inference path round-trips behind Keycloak/Envoy | 📋 Planned | [phase_37](phase_37_spa_live_deploy.md) |
 | 38+ | Later phases | varies | — | each high-numbered in-scope phase gets its own gate when reached (GHC 9.14 bump, schema-migration automation, the Haskell extension DSL + AST checker + JIT, niche substrates incl. Windows-CUDA) | 📋 Planned | [later_phases](later_phases.md) |
 
 The detailed objective, sprint breakdown, doctrine adoptions, and gate for each phase live in that phase's

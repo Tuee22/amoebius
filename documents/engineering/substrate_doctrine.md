@@ -79,8 +79,11 @@ WSL2) or as the on-host CUDA worker case ([§5](#5-host-worker-nodes-substrate-s
 Detection separates cleanly into **what was observed** (impure: read the platform, probe for a GPU) and
 **what that means** (pure: classify). The classification is a total function so it is unit-testable
 without touching a host, and the only `IO` **feeding the classifier** is the three reads (OS, arch,
-GPU-presence). On a positive GPU probe the detector performs two further reads — device count and per-device
-VRAM — but those populate the per-host `Capacity`, not the substrate class (below).
+GPU-presence). Capacity inventory performs additional reads that do not affect this classification: kubelet
+allocatable, the runtime-discovered `nodefs`/`imagefs`/`containerfs` identities and capacities, containerd
+content/snapshot roots, mount/device/quota identity, and—on a positive GPU probe—stable device
+identity/profile, per-device raw-total/current-free VRAM, and the endpoint-validated peer/NVLink graph. Those
+populate the per-host `Capacity`, not the substrate class (below).
 
 In the `hostbootstrap` seed (`HostBootstrap.Substrate`), this is `classify :: osName -> rawArch -> gpu ->
 Either String Substrate` wrapped by `detect :: IO (Either String Substrate)`:
@@ -90,13 +93,16 @@ Either String Substrate` wrapped by `detect :: IO (Either String Substrate)`:
   anything else is a hard `Left` (unsupported architecture), not a guess.
 - **GPU presence** is an NVIDIA probe (`hasNvidiaGpu`): the kernel markers `/proc/driver/nvidia/version`
   and `/dev/nvidiactl` first, then `nvidia-smi -L` as the fallback. On a positive probe the detector reads
-  two further quantities off the same accelerator — the **device count** and the **per-device VRAM** — by
-  invoking `nvidia-smi` (`--query-gpu=count,memory.total`) **by absolute path** per the no-env / no-`PATH`
-  contract ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)), never a bare name. These feed
-  the per-host accelerator/`vram` `Capacity` the node inventory declares
+  each device's UUID/profile, `memory.total`, and `memory.free` by invoking `nvidia-smi`
+  (`--query-gpu=uuid,name,memory.total,memory.free`) **by absolute path** per the no-env / no-`PATH` contract
+  ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)), never a bare name. Row count is device
+  count. The same absolute executable runs `nvidia-smi topo -m` and the peer-access matrix query; the parser
+  maps matrix indices back to UUIDs and emits only endpoint-resolved
+  `PciePeerAccess | NvLink` edges. Unknown endpoints, asymmetric/conflicting rows, or an unavailable topology
+  query fail closed when a declared demand requires that relation. These observations cross-check the per-host accelerator/`vram` `Capacity` the node inventory declares
   ([§8](#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints)), so accelerator **count** and
-  **VRAM** are *declared-at-decode and cross-checked-at-runtime* against the real probe, not unchecked
-  runtime-checked.
+  **net allocatable VRAM** are *declared-at-decode and cross-checked-at-runtime*, while current free VRAM
+  constrains each live admission. Neither a raw product label nor `memory.total` is treated as spendable.
 
 Two classification rules are load-bearing and stated as hard failures, not warnings:
 
@@ -428,18 +434,57 @@ that the rest of amoebius reads. It is the **single owner** (an ownership index,
 *which hosts/substrates exist*, *how much each host advertises*, and *which taints a node carries*. Three
 consumers read it, and each is a foreclosure that depends on there being exactly one such list.
 
-- **Per-host `Capacity` (allocatable).** Each host entry advertises a declared `Capacity` (cpu/mem/storage/gpu,
-  and — on a discrete-accelerator host — a separate `vram`; the accelerator-memory shape is
-  [§8.2](#82-accelerator-memory-vram-unified-on-apple-discrete-on-cudawindows) and the physical-host total
-  behind a host worker is [§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)),
-  and it is the **allocatable** (schedulable) capacity — the raw hardware total with kube/system-reserved and
+- **Per-host/node `Capacity` (allocatable).** Each inventory entry advertises declared CPU, memory,
+  logical pod-local ephemeral storage, and a closed `KubeletFilesystemLayout` with named physical backing(s):
+  `Unified` means `nodefs=imagefs=containerfs`; `SplitRuntime` means separate nodefs and
+  `imagefs=containerfs`; `SplitImage` means separate imagefs and `containerfs=nodefs`. The inventory also pins
+  `NodeImageStorageModelVersion`, `KubeletRuntimeMetadataModelVersion`, and finite
+  `CpuOvercommitPolicy = NoCpuOvercommit | BoundedCpuOvercommit RatioAtLeastOne` used to bound summed rendered
+  CPU limits. The runtime-metadata model is part of `NodeCapacity.localStorage`: it is the authoritative
+  kubelet/CRI versioned supply-side model under which provisioning derives sandbox, pod-directory, runtime,
+  CNI, volume, and mount components for each planned slot and distinct live Pod UID. The model assigns each
+  component a closed kubelet-nodefs or CRI-runtime-root role; the layout resolves that role to its actual
+  backing. It is not a pod-authored byte reserve or route.
+  Every elastic `PerInstanceNodeLocalStorageTemplate` pins the same field, which becomes the materialized
+  node's model and must match the live kubelet/CRI observation after that node joins.
+  A Kubernetes node carries
+  `None | CudaOffering { devices : NonEmpty AcceleratorDevice, links : List AcceleratorLink }`; a physical host additionally admits
+  `AppleMetalOffering MetalProfile`. CUDA devices carry stable identity/profile plus per-device
+  raw/reserved/net-allocatable VRAM plus the endpoint-validated peer/NVLink graph, while
+  `currentFreeVram : Residual Bytes` (including `Zero`) is observed for live admission; the Apple
+  offering carries no separate memory pool because its demand is charged to physical-host memory. The
+  accelerator-memory shape is
+  [§8.2](#82-accelerator-memory-vram-unified-on-apple-discrete-on-cudawindows); the physical-host total behind
+  a host worker is [§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand).
+  Kubernetes image bytes are not part of a pod's logical `ephemeral-storage` request, but they do consume the
+  layout's physical filesystem. The platform-selected OCI index/manifest/config/compressed-layer objects are
+  deduplicated by digest, snapshotter bytes by chain id, and pull/import workspace by the declared concurrency
+  policy; writable layers are routed to imagefs for `SplitRuntime` and nodefs otherwise. Per-Pod CRI components
+  follow the model-selected runtime role: on `SplitRuntime` the persistent CRI root resolves to
+  `containerfs=imagefs`, while kubelet/CNI/pod-directory components resolve to nodefs. `Unified` and
+  `SplitImage` resolve containerfs to nodefs. Distinct components whose roles alias are summed, then the one
+  physical backing is checked once. A node-level ownership witness proves the Pod metadata model and image
+  storage model partition runtime component ids exactly and disjointly. Each advertised quantity is the
+  **allocatable** (schedulable) capacity — the raw hardware total with kube/system-reserved and
   the eviction threshold already netted out — **not** the raw figure, so the fold never trusts more than the
   scheduler can hand out. This is the number the capacity fold ([resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting))
   packs a workload/VM/engine `Demand` against, and the number the detection classifier ([§2](#2-detection-a-pure-classification-over-three-reads)) cross-checks against
   reality at runtime — *allocatable against allocatable* (the declared value is a ceiling the fold trusts; a
   host whose real allocatable is smaller than its declaration
   refuses, [resource_capacity_doctrine.md §8](./resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-at-decode-cross-checked-at-runtime)). Detection reads the *real*
-  numbers; the inventory *declares* them; the fold trusts the declaration and the reconcile checks it.
+  numbers; the inventory *declares* them; the fold trusts the declaration and the reconcile checks it. The
+  CPU-overcommit arm is declared policy rather than a probed hardware fact, but its ratio is finite and enters
+  the same pure fold.
+- **The declared filesystem layout is an observed fact, not two labels over one disk.** At bootstrap and every
+  live preflight, the inventory records the kubelet/CRI-reported layout together with each role's mount id,
+  device/filesystem id, project/quota id where used, allocatable bytes, containerd content root, snapshotter
+  root, configured pull concurrency, the active `KubeletRuntimeMetadataModelVersion`, its component→role
+  catalog, and the disjoint Pod-metadata/image-model ownership domains. Only the aliases
+  required by the selected constructor are legal.
+  An unexpected alias, swapped root, unknown capacity, untracked extra mount below `/var/lib/kubelet`,
+  `/var/log`, or the runtime root, or a hard-cap probe that escapes its carve is
+  `FilesystemLayoutMismatch`, never spare capacity. Current v1 containerd engines can witness only `Unified`
+  or `SplitRuntime`; `SplitImage` requires a runtime/feature witness that containerd cannot provide.
 - **A closed `NodeTaintKind` set.** Taints are not free strings — the set of taint kinds a node may carry is a
   **closed union** owned here, exactly as the substrate catalog and `HostTool` enum are closed ([§1](#1-the-substrate-is-a-fact-about-the-host-not-a-knob), [§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)). This
   is what lets a **`Toleration` be *derived*, never hand-authored**: the platform derives a workload's
@@ -447,6 +492,30 @@ consumers read it, and each is a foreclosure that depends on there being exactly
   so "a toleration for a taint no node declares" is unrepresentable and "a taint no workload tolerates" leaves
   the schedulability existence fold with no landable node
   ([illegal_state_catalog.md §3.5, §3.22](../illegal_state/illegal_state_capacity.md#35-undeployable-pods-taints-tolerations--affinity)).
+
+  ```text
+  NodeTaintKind =
+    < ControlPlane
+    | ManagedCapacity
+    >
+
+  NodeTaint =
+    { kind   : NodeTaintKind
+    , key    : KubernetesTaintKey
+    , value  : KubernetesTaintValue
+    , effect : < NoSchedule >
+    }
+
+  nodeTaint ControlPlane =
+    { kind = ControlPlane, key = platform control-plane key, value = "true", effect = NoSchedule }
+  nodeTaint ManagedCapacity =
+    { kind = ManagedCapacity, key = "amoebius.dev/managed-capacity",
+      value = "reserved", effect = NoSchedule }
+  ```
+
+  The constructors, keys, values, and effects are a single mapping. In particular, `ManagedCapacity` is not a
+  second scheduler-local string: the capacity scheduler's taint projection, its derived toleration, admission
+  rule, and live Node readback all carry this exact `NodeTaint` value.
 - **The `LinuxHost` witnesses and substrate tags the topology relation reads.** The declared compute-engine
   axis ([cluster_topology_doctrine.md](./cluster_topology_doctrine.md)) pairs an engine with a node only when
   the relation permits it, and it reads *this* inventory for "what substrates exist" — so the compatibility
@@ -455,8 +524,9 @@ consumers read it, and each is a foreclosure that depends on there being exactly
   cluster on those hosts must interpose a Lima/WSL2 Linux VM.
 
 This document owns the inventory *record*, the closed `NodeTaintKind` set, and the per-host `Capacity`
-*declaration* — including the **physical-host total** behind a host worker ([§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)),
-the unified-vs-discrete **`vram`** shape ([§8.2](#82-accelerator-memory-vram-unified-on-apple-discrete-on-cudawindows)),
+*declaration* — including the **physical-host total and disjoint disk-pool partition** behind a host worker
+([§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)),
+the unified-vs-discrete accelerator-device/**`vram`** shape ([§8.2](#82-accelerator-memory-vram-unified-on-apple-discrete-on-cudawindows)),
 and the declared **`Site`** ([§8.3](#83-site-the-declared-network-locality-axis-cluster-nodes-and-host-worker-hosts));
 it does **not** own the capacity arithmetic ([resource_capacity_doctrine.md](./resource_capacity_doctrine.md)),
 the compute-engine relation ([cluster_topology_doctrine.md](./cluster_topology_doctrine.md)), or the
@@ -469,39 +539,72 @@ The per-host `Capacity` above is the number the **in-cluster** bin-pack trusts, 
 `LinuxHost` it describes is the Lima/WSL2 **VM's** kube-allocatable ([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)).
 A host that *also* runs a **host worker** ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained))
 needs a second, larger declaration: the **physical-host total** — the whole bare machine's allocatable
-cpu/mem — against which the host-tier fold packs *both* the VM's carve *and* the host worker's `Demand`. This
+CPU, memory, and local storage — against which the host-tier fold packs *both* the VM's carve and the host
+worker's `Demand`. Local storage is partitioned by identity into disjoint top-level pools: system reserve, VM
+  disk backings, retained-PV backing, host-shared/build cache, purpose-tagged
+  `HostWorkerLocal`/`BuildScratch`/`ToolInstall` pools, and, on direct Linux, separate kubelet pod-ephemeral and
+  image storage **only when the selected layout actually separates their backing**. `Unified` has one nodefs
+  carve; `SplitRuntime`/`SplitImage` have distinct nodefs/imagefs carves, with containerfs an alias rather than
+  a third pool. Each typed logical backing id resolves to exactly one correctly tagged physical carve.
+  For Lima/WSL2, guest layout filesystem carves are sub-budgets of the VM disk
+  (`guest OS/system reserve + Σ unique layout usable parent debits ≤ VM requiredUsableBytes`); presentation
+  and allocation geometry then derive the VM's raw `provisionedBytes`, which is charged once to physical
+storage. `PhysicalDiskPartition.allocatableRawBytes` is the finite raw physical boundary after unmanaged-host
+reserve and before every amoebius child carve, including `systemReserve`. The top-level proof is therefore
+`systemReserve raw debit + Σ unique VM provisionedBytes + Σ unique direct-node/retained/cache/host-storage
+raw parent debits ≤ allocatableRawBytes`. A parent-indexed `NamedDiskCarve PhysicalRawExtent` contributes a
+private raw parent debit; a `NamedDiskCarve VmGuestUsableExtent` contributes only to the separate nested VM
+usable-byte proof and cannot enter the physical sum. No child may be deducted once to manufacture the
+boundary and again in that sum. The same physical byte cannot appear in two top-level pools, and every child
+carve must fit its correctly typed parent boundary. This
 inventory declares that physical-host total as a distinct per-host figure, and the host binary's **own**
 footprint is **netted into system-reserved** on it (exactly as kube/system-reserved is netted out of the VM's
 allocatable), so the physical-host fold stays two-claimant — VM carve + worker `Demand` ≤ physical-host
 allocatable — and the host binary is never a third un-owned claimant. This doc owns the **declaration** of the
-physical-host total and the system-reserved netting; the **fold arithmetic** (a decode-foreclosed `Left Overcommit` at
-decode) is [resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)'s,
+physical-host total and the system-reserved netting; the **fold arithmetic** (a checked `Left Overcommit` at
+the post-bind provision seal) is [resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)'s,
 and the host-worker `Demand` it consumes is declared by
 [platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram).
 
-### 8.2 Accelerator memory (`vram`): unified on apple, discrete on cuda/windows
+<a id="82-accelerator-memory-vram-unified-on-apple-discrete-on-cudawindows"></a>
+
+### 8.2 Accelerator memory (`vram`): unified on apple, per-device on cuda/windows
 
 A worker that serves models needs an **accelerator-memory** figure, and the **shape** of that figure is
 substrate-specific — a fact this inventory declares so the capacity fold downstream stays branch-free:
 
 - **apple (Metal, unified memory).** GPU and CPU share **one** pool, so the per-host `Capacity` declares
-  **no separate `vram`**: the accelerator worker's memory demand simply *is* its `mem` demand, netted from the
-  single physical-host `mem` ([§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)).
+  an `AppleMetalOffering` with a compatible `MetalProfile` but **no separate `vram`**. Downstream
+  provisioning derives every allowed coexistence epoch of the identity-complete `MetalOwnerDemand`; each
+  epoch's co-resident components are debited from the same physical-host `mem` as the VM, the worker's
+  non-accelerator runtime memory, and system reserve
+  ([§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)). It is a distinct
+  demand field for explanation and validation, never a second supply pool.
   An `apple` host declaring a separate `vram` Capacity is an **uninhabitable per-host `Capacity` shape —
   type-foreclosed** (there is no unified-pool `vram` field to fill; the constructor does not exist).
 - **linux-cuda / windows (CUDA, discrete memory).** The accelerator carries its own memory, not contended
-  with the WSL2/Lima VM, so the per-host `Capacity` declares host `mem` **plus** a separate **`vram`** total.
+  with the WSL2/Lima VM, so the per-host `Capacity` declares host `mem` plus a **non-empty device vector**.
+  Every device entry carries a stable UUID/profile, `rawVram`, a non-optional
+  `driverRuntimeReserve`, and `allocatableVram`, with
+  `driverRuntimeReserve + allocatableVram ≤ rawVram`. The reserve covers driver/runtime/allocator and
+  profile-specific safety headroom; it cannot be zeroed by omitting the field. Only `allocatableVram` enters
+  the pure fold. Total allocatable VRAM is derived, never the only schedulability fact: two 24-GiB devices do
+  not satisfy one 40-GiB `Unsharded` residency. A `CudaOwnerDemand` spanning devices must carry structural
+  `ReplicatedPerDevice` or explicit `Sharded` placement whose complete epoch assignment fits each device and
+  the requested interconnect.
 
-This inventory is the **sole owner** of the per-host `vram` **number** and of the unified-vs-discrete
-`Capacity` **shape**. It does **not** own the fold that spends `vram`: the accelerator worker carves its node
-`vram` among the models it serves as a `Σ served-model VRAM ≤ node vram` sub-budget, and *that* arithmetic —
-with the per-served-model VRAM footprint that is its left operand — is owned downstream
+This inventory is the **sole owner** of the per-host accelerator device vector/per-device `vram` **numbers**
+and of the unified-vs-discrete `Capacity` **shape**. It does **not** own the fold that spends `vram` or host
+memory: identity-complete `CudaOwnerDemand`/`MetalOwnerDemand` source and workload maps, structural
+residencies, exact policy-class domains, and every derived coexistence epoch are owned downstream
 ([resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)),
-reading this declared number, never restating it. Like the base allocatable, the declared accelerator
 **count** and **`vram`** are **cross-checked at runtime** against the [§2](#2-detection-a-pure-classification-over-three-reads)
-`nvidia-smi` probe: a host over-declaring accelerators or VRAM beyond what the probe reports **refuses**
+`nvidia-smi` probe: a host over-declaring device count/profile, raw VRAM, or allocatable VRAM after its
+mandatory reserve **refuses**
 (`discover = Mismatch → refuse`, [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)),
-keeping these axes declared-at-decode / cross-checked-at-runtime.
+keeping these axes declared-at-decode / cross-checked-at-runtime. The probe's `memory.free` is a separate,
+time-varying live-admission operand: desired demand must fit the declared residual and observed
+free-at-admission; unexplained use fails closed instead of being silently subtracted from the reserve.
 
 ### 8.3 `Site`: the declared network-locality axis (cluster nodes and host-worker hosts)
 

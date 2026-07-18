@@ -35,10 +35,15 @@ Three consequences fall straight out of "a test is a spec":
   a **mandatory teardown**. That chaos injection lives in deployment rules, never in application logic — the
   app under test does not know it is being tested — per
   [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md).
-- **A test cannot represent an illegal cluster.** Because the test reuses the production DSL, a test
-  `.dhall` that tried to mis-bind a PVC to no PV, open a backdoor ingress, or place a CUDA workload on a
-  GPU-less substrate would fail to type-check before it ever ran — the same contract owned by
-  [dsl_doctrine.md](./dsl_doctrine.md) / [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md).
+- **A test cannot reach execution with an illegal cluster.** Because the test reuses the production DSL and
+  conditional post-bind infrastructure/materialization/provision boundary, a `.dhall` value that mis-binds a
+  PVC, opens a backdoor ingress, or pairs a
+  CUDA workload with a GPU-less substrate is rejected at its declared Gate-1, Gate-2, or `provision-seal`
+  locus before it runs. The CUDA pairing is a structured `ProvisionError` at the provision seal, not a claim
+  that value arithmetic fails Dhall
+  type-checking — the contract is owned by [dsl_doctrine.md](./dsl_doctrine.md),
+  [resource_capacity_doctrine.md](./resource_capacity_doctrine.md), and
+  [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md).
 - **The test runs the real thing.** There is no parallel mock cluster. A test stands up real platform
   services (or a representative subset) and runs a real workflow against them; the only thing that makes it
   a *test* rather than a deployment is the chaos schedule and the always-teardown contract of [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).
@@ -230,32 +235,53 @@ amoebius can simply *look at*. amoebius already detects what a host is and what 
 
 Per the original vision, `suggest-test`:
 
-1. **Detects the current substrate** — including compute, memory, and storage available — using the same
-   pure substrate classification owned by [substrate_doctrine.md](./substrate_doctrine.md) (detection is a
-   fact about the host, never a knob).
+1. **Detects the current substrate and its complete supply** — allocatable CPU, memory, and logical pod-local
+   ephemeral storage; nodefs/imagefs/containerfs identities and capacities plus **all** current OCI content
+   objects and committed/active snapshots; disjoint presented durable and
+   native-host-cache backings; accelerator family, whole-device
+   count, per-device raw/reserved/net-allocatable and current-free VRAM or Apple unified memory; and any
+   provider candidate-node shapes — using the same
+   pure substrate classification and inventory owned by
+   [substrate_doctrine.md](./substrate_doctrine.md) (detection is a fact about the host, never a knob).
 2. **Takes SSH and AWS credentials and inspects what they can do** — the machine resources and the
    *permissions and quotas* associated with those credentials. It probes capability (whether these credentials
    can create EBS or a hosted zone, and how much) so the emitted test is *sized to what is actually reachable*, not a
    guess.
-3. **Writes a test `.dhall`** that (a) spins up a **representative set of resources** scaled to the detected
-   compute/memory/storage and the credential's authority, and (b) **simulates HA failovers and substrate quorum failovers (etcd/Patroni)** as appropriate to the substrate.
+3. **Writes a test `.dhall`** that (a) spins up a **representative set of resources** whose fully expanded
+   CPU, memory, pod-ephemeral/catalog-cache, platform-selected OCI-content/snapshot/import workspace,
+   presentation-rounded durable/native-host-cache, accelerator/VRAM, and distinct provider compute/
+   node-root/durable-quota envelope
+   provisions inside the detected supply and credential authority, and (b) schedules the appropriate
+   **delegated HA and substrate-quorum failovers** for that topology.
 
 ```mermaid
 flowchart TD
-  host["host substrate (pure classification): compute, memory, storage"] -->|feeds| gen["suggest-test generator"]
-  creds["SSH + AWS credentials: inspect permissions + quotas"] -->|feeds| gen
-  gen -->|sizes a representative topology| res["resource set scaled to detected capacity + authority"]
-  gen -->|adds chaos schedule| chaos["HA failover + leadership-election simulation"]
+  host["host inventory: CPU, memory, logical ephemeral, filesystem layout/content/snapshots, presented durable/native cache, accelerator memory"] -->|feeds| gen["suggest-test generator"]
+  creds["SSH + AWS credentials: inspect permissions, candidate shapes, and quotas"] -->|feeds| gen
+  gen -->|sizes a representative topology| res["complete resource envelope within detected capacity + authority"]
+  gen -->|adds chaos schedule| chaos["delegated HA + substrate-quorum failover simulation"]
   res -->|emit| out["test .dhall (operator reviews; obeys §3 teardown contract)"]
   chaos -->|emit| out
 ```
 
-Three boundaries keep `suggest-test` honest and within doctrine:
+Four boundaries keep `suggest-test` honest and within doctrine:
 
 - **The output is a proposal, not an oracle.** `suggest-test` emits a *starting-point* test `.dhall` the
   operator reads, edits, and runs — it is a generator of representative topologies, never a self-certifying
   pass. The emitted topology is an ordinary test spec and inherits [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down) (always tears down) and [§8](#8-one-substrate-per-validation) (one
   substrate) unconditionally.
+- **The proposal still passes the ordinary staged seal.** After provider shapes, replicas, sidecars, and the
+  standard platform graph expand, `planInfrastructure` derives demand from that exact `BoundDeployment` and
+  the declared supply or forest budget. `NoInfrastructureRequired` must witness the explicit
+  `ObservedInfrastructureMaterialization.AlreadyMaterialized` arm. Otherwise one
+  `ProvisionedInfrastructurePlan` owns one `ProvisionedProviderActionBatch`: its closed cloud-provider/SSH-host
+  actions, entire Pulumi graph, checkpoints, dependencies, bounded concurrency, and
+  cloud-quota/SSH-child-budget partition. Snapshot validation returns the matching
+  `ValidatedInfrastructureActionBatch`; plan/action-token CAS may enact only that batch, and receipt-bound
+  provider/host readback constructs `ProvisionContext`. Only then may
+  `provision` construct the opaque whole-deployment `ProvisionedSpec` for `renderAll`. An overcommitted axis,
+  a CUDA demand with no CUDA offering, or an observed inventory/quota smaller than declared rejects before
+  its corresponding mutation; generation is not an admission bypass.
 - **It inspects credentials but never embeds them.** Although it *reads* SSH/AWS credentials to learn their
   authority, the test `.dhall` it writes references those credentials **by name only** — secrets never live
   in Dhall; the parent injects them into the child's Vault. The `SecretRef`-by-name contract and the

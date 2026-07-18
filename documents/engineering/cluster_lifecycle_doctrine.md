@@ -18,7 +18,7 @@ There are exactly **two** kinds of cluster amoebius drives, and they share **one
 |---|---|---|
 | Host binary present? | **Yes** — the binary lives on the host and owns bring-up | **No** — there is no direct host access |
 | How it comes up | the midwife CLI on the host → `bootstrap --distro={kind,rke2}` ([§2](#2-bring-up-and-bootstrap)) | Provisioned **via cloud keys over the API, from inside an existing amoebius cluster** (Pulumi) |
-| Host-level worker daemons | Supported (e.g. Apple-Metal inference) | **Not** supported — no host, no Apple substrate; only the in-cluster singleton daemon |
+| Host-level worker daemons | Supported (e.g. Apple-Metal inference) | **Not** supported — no host or Apple substrate; the child still runs distinct in-cluster singleton and capacity-scheduler roles |
 | Typical role | Any tier, including the **root** (an admin's laptop kind, or a single-node rke2) | A **child** spawned by a parent; never the root |
 
 The shared shape is what lets the rest of this document treat "a cluster" uniformly: a child spawned on
@@ -287,12 +287,14 @@ flowchart TD
   *failback* it will fall to. It does not just succeed-and-break.
 - **An explicit override exists.** There is an override command to proceed anyway, accepting the named
   degradation. The override is deliberate and explicit — never the default.
-- **The thresholds are declarative.** Factors like **compute and storage capacity** are `.dhall`-
-  configurable and govern *whether* push-back fires. Because every container
-  declares explicit CPU and RAM ([platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)),
-  the capacity arithmetic — "does the surviving forest have room for what C was running?" — is sound rather
-  than guesswork; that arithmetic is the same [§4.6](../illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) capacity-accounting fold owned by
-  [resource_capacity_doctrine.md](./resource_capacity_doctrine.md).
+- **The thresholds are declarative.** CPU, memory, pod-ephemeral storage (including nested in-cluster cache),
+  durable/native-host-cache backing,
+  accelerator family/count, and accelerator memory are `.dhall`-configurable and govern *whether* push-back
+  fires. Because every execution unit carries a complete resource envelope
+  ([platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)),
+  the question “does the surviving forest have a resource-capable placement for what C was running?” is
+  answered by the same post-bind placement, named-pool, finite-limit/physical-peak, and accelerator folds owned by
+  [resource_capacity_doctrine.md](./resource_capacity_doctrine.md), rather than by a CPU/RAM sum or guesswork.
 - **Same fail-closed posture as the reconciler.** Refusing-by-default on an unsatisfiable spec is the
   lifecycle analogue of the [§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) `Unreachable → refuse` rule: a state the system cannot safely reach is
   refused, and only an explicit operator override overrides it.
@@ -342,10 +344,31 @@ conditions:
 This lives on the **deployment-rules** surface, orthogonal to application logic
 ([app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md)): an app never asks for nodes; the
 deployment rules decide the cluster's elastic shape. That elastic shape is a typed **`ScalingPolicy`**
-(capacity thresholds + instance price-shopping, bounded by a quota) — the escape valve that lets a bounded
+(capacity thresholds + price-shopping across named candidate classes, bounded by a quota). Every candidate
+declares the exact `ProviderNodeClass { name, sku, allocatable, quotaVcpu, zones, price, baseCount, maxCount }`
+shape. Its `allocatable` is the complete
+`ProviderNodeCapacityTemplate { allocatableCpu, allocatableMemory, podSlots, cniSlots, attachableVolumes, localDisks,
+cpuOvercommit, localStorage, accelerator }`; `localStorage` retains
+`{ podEphemeralAllocatable, filesystems, imageStorageModel, imagePullConcurrency }`, and each `localDisks`
+entry is a `PerInstanceDiskTemplate` with either
+`InstanceStore { skuDevice, provisionedRawBytes, presentation }` raw supply or
+`EphemeralRootEbs { policy }`, plus a `ProviderUsableDiskCarveTemplate` system reserve and non-empty usable
+carves. For each selected instance, private provisioning derives `ProvisionedPerInstanceDiskTemplate`:
+instance-store `provisionedRawBytes` is checked against the SKU raw device, while an ephemeral-root policy
+derives its provider-rounded raw request from the usable demand; the presentation model then derives
+`mountedUsableBytes` and proves the system reserve plus unique layout-carve `requiredUsableBytes` fit it.
+Raw supply and usable carve bytes never enter the same sum. The managed target
+also supplies the `CloudAccountId` that exact-joins the shared provider ledger and the complete
+`ProviderQuota { maxInstances, maxVcpu, acceleratorCaps, nodeRootStorage, durable }`.
+Before growth, every atomic pending envelope must fit a compatible candidate and the worst-case instance count,
+provider vCPU, accelerator allocation, node-root EBS bytes/count, and durable bytes/count must remain within
+their distinct quota fields; pod/CNI and driver-indexed CSI attachment slots must also fit. A missing or
+mismatched account key, unknown quota field, or one-short slot/quota observation makes growth refuse
+before mutation. This is the escape valve that lets a bounded
 budget grow, owned by [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns); "unbounded" node or
 storage growth is representable **only** through such a policy. The provider-side mechanics — provisioning EC2/managed
-nodes via Pulsar-driven Pulumi, and per-PV EBS sized to exactly match its PVC and **decoupled from the
+nodes via Pulsar-driven Pulumi, and one provider-rounded per-PV EBS whose raw size matches the private PVC/PV
+provision (identity/cardinality 1:1:1, not logical-byte equality) and is **decoupled from the
 EC2/node lifecycle** so storage outlives the node — are owned by
 [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) and
 [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md). Mechanically, **node provisioning is just
@@ -429,13 +452,19 @@ harness in **Phase 36**. This doc states the target shape and links back for sta
 A multi-node `rke2` cluster does not come up by a bespoke bring-up script — it comes up the same way
 everything else in this doctrine does: as a **reconcile** ([§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)) that drives the live node set toward a
 **declared, typed server/agent topology**. That topology — the closed `Rke2Servers` union
-`< Single | Ha3 | Ha5 >` (the only legal odd etcd quorums {1,3,5}) plus `agents : List LinuxHost` — is owned
+`< Single | Ha3 | Ha5 >` (the only legal odd etcd quorums {1,3,5}) plus
+`agents : Fixed [Rke2AgentNode] | Autoscaled { floor : [Rke2AgentNode], policy : ScalingPolicy }` — is owned
 by [cluster_topology_doctrine.md §2/§4](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm); this doc owns only the lifecycle
 verbs that stand it up. There is no rke2 state machine, exactly as there is no lifecycle state machine ([§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)).
 
+This section is normative design, not a delivered live claim. Phases 4–7 own the pure node/reserve/template
+model; live multi-node rke2 host admission, snapshot-bound join, and enforcement remain an explicitly
+unassigned Phase-N gate. Phase 28's acceptance forest uses child `kind` clusters only.
+
 - **Root = the zero-secret degenerate.** The root cluster is
-  `{ servers = Rke2Servers.Single host, agents = [] }` — the single-node rke2 of [§2](#2-bring-up-and-bootstrap). One server, an empty
-  agent list, no join token minted, no SSH key required: the same **zero-secret** bring-up [§2](#2-bring-up-and-bootstrap) already depends
+  `{ servers = Rke2Servers.Single { host, capacity, systemReserve }, agents = Fixed [] }` — the target
+  single-node rke2 shape of [§2](#2-bring-up-and-bootstrap). One server, an empty
+  fixed agent pool, no join token minted, no SSH key required: the same **zero-secret** bring-up [§2](#2-bring-up-and-bootstrap) already depends
   on. Every larger cluster is this base plus a reconcile that adds nodes; the base is not a special case but
   the `Single`/`[]` corner of the general shape.
 - **First server: `etcd cluster-init`, then mint the token.** On an empty control plane the reconcile's
@@ -461,7 +490,8 @@ verbs that stand it up. There is no rke2 state machine, exactly as there is no l
 - **Two enactors, one reconciler tier — tier (b).** The rke2 host rollout is the **checkpoint-free
   tag-discovery HOST reconciler** — tier **(b)** of the reconciler taxonomy (create→tag→join-fabric→drain-by-tag),
   whose home is the spot-fleet reconciler in [pulumi_iac_doctrine.md §0](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision). It has
-  **two enactors**: the **sudo host daemon** installs the *root* server on the host; the **elected in-cluster
+  **two enactors**: the **sudo host daemon** installs the *root* server on the host; the
+  Deployment-`replicas=1` **in-cluster
   singleton** rolls out *child* servers and agents **over SSH** (the singleton's total cluster + secret
   authority is owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md)). It is **not** the
   tier-(a) Pulumi-checkpointed cloud reconciler and **not** the tier-(c) SSA reconciler.
@@ -473,14 +503,16 @@ verbs that stand it up. There is no rke2 state machine, exactly as there is no l
 - **A quorum change is a deliberate re-provision, never autoscale.** Changing the server arm
   (`Single`→`Ha3`, `Ha3`→`Ha5`) is a **declared topology change** reconciled toward — a deliberate
   re-provision, **never** triggered by a `ScalingPolicy`. The `ScalingPolicy` escape valve ([§8](#8-dynamic-node-provisioning);
-  [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)) grows the **`agents` list only**; it
+  [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)) exists only in
+  `Rke2AgentPool.Autoscaled` and grows the **agent pool beyond its declared floor within its finite quota**; it
   can never mint or drop an etcd voter. A 0- or 2-server (no-quorum / split-brain) control plane has no
   constructor at all — **type-foreclosed unrepresentable** via the closed `Rke2Servers` union
   ([cluster_topology_doctrine.md §2/§4](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm);
-  [illegal_state_catalog.md §3.24](../illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)). Host distinctness across `servers ∪ agents`
+  [illegal_state_catalog.md §3.24](../illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)). Host distinctness across `servers ∪ agentFloor`
   is the **decode-foreclosed** `mkRke2` decode fold, likewise owned by cluster_topology.
 - **The server/agent axis is orthogonal.** Whether a host is a server or an agent is **DECLARED**, and it is
-  independent of the **DETECTED** substrate and the **ELECTED** daemon role — orthogonal typed axes
+  independent of the **DETECTED** substrate and the selected runtime role (singleton, capacity scheduler, or
+  worker) — orthogonal typed axes
   ([daemon_topology_doctrine.md](./daemon_topology_doctrine.md)), never fused: an rke2 server can run on any
   substrate, and the singleton's single-instance is delegated to k8s/etcd independently of a node's server/agent role.
 

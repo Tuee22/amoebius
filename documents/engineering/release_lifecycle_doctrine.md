@@ -43,7 +43,9 @@ elsewhere. There is nothing to install, nothing to poll, and nothing to reconcil
   the ETag-CAS pointer history ([§3](#3-environment-and-the-etag-cas-promotion-pointer)): a content-addressed, append-only record of every generation ever built
   and every promotion ever made. There is no polling loop to trust — the desired state is
   `render(release)`, recomputed from a value, exactly as the manifest reconciler recomputes desired from
-  `render(InForceSpec)` ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)).
+  the pure `bind/expand → plan/resolve infrastructure → provision → renderAll` result for the authenticated
+  materialization
+  ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)).
 - **The environment axis is orthogonal, not a new machine.** Dev/staging/prod is one of amoebius's four
   independent typed dimensions (substrate detected; daemon-role elected; rke2 server/agent declared;
   environment declared) — it rides the same reconciler, never a bespoke delivery engine.
@@ -105,6 +107,15 @@ data Release = Release
   ([content_addressing_doctrine.md §2](./content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers)).
   This is why "no release store to desync" holds: unlike Helm's mutable, gzip-blob release Secret, an
   amoebius `Release` cannot be half-written or edited out from under a pointer.
+- **The ledger and pointers are an admitted `Content` producer, not free MinIO bytes.** Binding derives exact
+  store/tenant/bucket/full-key identities for every release blob, manifest, ledger entry, and the `Dev`,
+  `Staging`, and `Prod` pointer old/new/CAS versions. They form an `ObjectStoreDemand` under the `Content` arm
+  of the six-arm `ObjectStoreProducerDemand`, with a required `StorageBudgetId`, structural retention,
+  concurrent-write and failed-write/orphan bounds, and an `ObjectStoreMutationAdmission` writer. The
+  source↔producer equality check, object geometry/quota, and sole gateway's complete pod envelope must
+  provision against the fresh live snapshot before the first ledger PUT or pointer CAS. A missing release/
+  pointer object, one-byte-short backing, or gateway shortage yields zero writes; a failed CAS leaves all
+  successfully written immutable objects charged until observed GC.
 
 > **Layer.** The immutability and self-naming are **runtime-checked residue** enforced by the
 > content-addressed write protocol (a blob at a hash either is the bytes that hash to it, or the write is
@@ -230,8 +241,13 @@ amoebius already owns — it introduces **no new reconciler**:
 newtype RolloutPlan = RolloutPlan [RolloutPhase]   -- ordered; each phase gates the next on readiness
 data RolloutPhase = RolloutPhase
   { phaseObjects :: [K8sObject]   -- the desired slice this phase applies
+  , phaseWork    :: ProvisionedRolloutWork
   , phaseGate    :: ReadinessGate -- what "this phase is done" means, observed from live state
   }
+
+data ProvisionedRolloutWork       -- private constructors only
+  = ApplyEpoch ProvisionedApplyEpoch
+  | SchemaEpoch ProvisionedSchemaMigration
 ```
 
 - **Enacted by reconciler tier (c) — the in-cluster SSA/ApplySet reconciler.** A `RolloutPlan` is applied by
@@ -245,13 +261,20 @@ data RolloutPhase = RolloutPhase
 - **DB-schema migration is a `RolloutPhase`.** A schema change is not a side channel — it is an ordered phase
   obeying **`create-new → verified-migrate → retire-old`**, the exact shape
   [storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction)
-  requires so that **no `.dhall` value ever denotes "discard these bytes"**: the migrate phase provisions the
-  new schema/columns, migrates and **verifies** the copy, and only a later phase retires the old — with the
-  retire step inheriting the durable-data-deletion prohibition. This is the delivery home of the promoted
-  **Phase-34** candidate ("DB schema-migration automation + manifest-change correctness semantics",
-  [DEVELOPMENT_PLAN/later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md)): the schema-migration engine is a
+  requires so that **no `.dhall` value ever denotes "discard these bytes"**. Binding constructs a
+  `SchemaMigrationDemand` from exact old/new relation/index identities, database/workspace backings, and a
+  versioned concurrency/cost model. Provisioning derives the complete executor `PodResourceEnvelope`,
+  old+new table/index extents, temporary sort/copy workspace, and WAL high-water and fits them—plus rollout
+  overlap—before a DDL statement. The migrate phase uses only the private `ProvisionedSchemaMigration`,
+  migrates and **verifies** the copy, and only a later phase retires the old — with the
+  retire step inheriting the durable-data-deletion prohibition. This is the delivery home of the schema-migration
+  half of **Phase 26** (release lifecycle); the remaining manifest-change-correctness hardening stays in
+  [DEVELOPMENT_PLAN/later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md). The schema-migration engine is a
   `RolloutPhase`, and the manifest-change-correctness half hardens the typed diff of
   [manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed).
+  A failed executor/verification leaves the old schema/data active and every new/temp/WAL byte charged; a
+  topology where steady old/new fit but the transition Job or backing high-water is one unit short cannot
+  construct `SchemaEpoch`.
 - **Canary is a Gateway-API weight shift, not a mesh.** A canary phase shifts traffic by adjusting
   Gateway-API `HTTPRoute` `backendRefs` **weights** on the Envoy edge amoebius already renders and
   Keycloak-fronts — the *one* traffic-split feature amoebius needs, and precisely the mechanism
@@ -273,7 +296,7 @@ data RolloutPhase = RolloutPhase
 > so a `RolloutPhase` applies **rendered objects**, never a `helm install`. The pattern is borrowed; the Helm
 > is dropped.
 
-> **Layer / honesty.** The `RolloutPlan` is **Phase-N design intent** enacted by the Phase-15 SSA reconciler,
+> **Layer / honesty.** The `RolloutPlan` is **Phase-26 design intent** enacted by the Phase-16 SSA reconciler,
 > which is itself unbuilt. Ordering, readiness-gating, canary weights, and rollback are real, documented
 > Kubernetes / Gateway-API mechanisms; *that amoebius wires them into this plan type* is specified here and
 > unproven until the phase lands.
@@ -286,7 +309,7 @@ jitML's `src/JitML/Cluster/Helm.hs` defines exactly this shape — a `HelmPhase`
 proven in a sibling** (but bound to Helm, which amoebius drops). jitML's `src/JitML/Bootstrap.hs` splits its
 rollout in two around the Postgres schema grant (`livePreGrantSubprocessesForPort → postgresSchemaGrantIO →
 livePostGrantSubprocessesForPort`), which is **the schema-migration-as-a-phase shape, LIVE in a sibling** and
-the concrete evidence behind the promoted Phase-34 candidate. By contrast, hostbootstrap's only delivery gate
+the concrete evidence behind the Phase-26 rollout shape. By contrast, hostbootstrap's only delivery gate
 is the build-time `check-code`, with no rollout-phase or promotion concept at all. All sibling evidence, not
 amoebius results.
 
@@ -315,10 +338,9 @@ elsewhere:
 completion status, and validation gates are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the environment/promotion values compose with the SSA reconciler landing in
-**Phase 16** and the test-topology / evidence-ledger work in **Phase 36**; the **DB schema-migration
-`RolloutPhase` + manifest-change correctness** is the promoted **Phase-34** candidate
-([DEVELOPMENT_PLAN/later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md)), and the generic third-party
-extension mechanism remains at Phase-35. This doc states the target shape and links back for status.
+**Phase 16** and the test-topology / evidence-ledger work in **Phase 36**; the DB-schema-migration
+`RolloutPhase` lands in **Phase 26**, while the remaining manifest-change-correctness hardening and the generic
+third-party extension mechanism remain in [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md). This doc states the target shape and links back for status.
 
 ---
 
@@ -339,12 +361,12 @@ extension mechanism remains at Phase-35. This doc states the target shape and li
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) the control-plane singleton that runs promote/rollout; the host daemon that builds
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — reconciler tiers (a) cloud-IaC and (b) the tag-discovery host reconciler, distinct from tier (c)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
-- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — the promoted Phase-34 schema-migration candidate this doctrine homes
+- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — the remaining manifest-change-correctness hardening after Phase 26 homes the schema-migration rollout
 - [Documentation Standards](../documentation_standards.md)
 
 > **Honesty.** Everything here is Phase-0 **reference-only design intent**. The `Release` ledger, the
 > `Environment` promotion pointer, the `PromotionGate`, and the `RolloutPlan`/`RolloutPhase` are **unbuilt in
-> amoebius** and compose primitives that are themselves Phase-15-and-later. The shapes are **generalized from
+> amoebius** and compose primitives that are themselves Phase-16-and-later. The shapes are **generalized from
 > siblings** — jitML's phased readiness-gated rollout and its pre/post-grant schema phase, infernix's
 > `.ready`-gated artifact, the content store's ETag-CAS `trial` pointer — each of which is **sibling evidence,
 > not proof in amoebius**. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every

@@ -174,6 +174,8 @@ failure-detection budget plus a DNS-propagation budget. A spec whose `rto < dnsT
 that sum) is statically unsatisfiable — a survivor cannot be rebindable within the RTO if clients cannot even
 re-resolve within it — and the decoder rejects it at Gate 2, the same shape as the capacity fold, before any
 live signal is consulted (the illegal state is [illegal_state_multicluster.md](../illegal_state/illegal_state_multicluster.md)).
+It shares the capacity fold's *total checked-rejection* technique, not its locus: this local scalar relation is
+Gate 2, whereas whole-deployment capacity is post-bind `provision-seal`.
 This complements the `lagBound` feasibility push-back above, which needs a monitored signal; the
 `rto ≥ dnsTtl + headroom` relation needs none. The premise that clients and resolvers actually **honor the
 record TTL** — JVM/OS resolver caches, clamping resolvers, and pinned connections can all exceed it — is a

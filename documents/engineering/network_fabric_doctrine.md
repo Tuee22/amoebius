@@ -61,7 +61,7 @@ Harbor/Helm of networking: the duplicated-control-plane pattern amoebius rejects
 | Netmaker brings | amoebius already owns |
 |---|---|
 | Its own control server | The control-plane singleton ([daemon_topology_doctrine.md](./daemon_topology_doctrine.md)) |
-| Its own DB (a desired-state store) | `render(InForceSpec)` — **no external release store** ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)) |
+| Its own DB (a desired-state store) | Pure `bind/expand → plan/resolve infrastructure → provision → renderAll` from `InForceSpec` plus authenticated materialization — **no external desired-state store** ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)) |
 | Its own MQTT broker to push peer changes | Pulsar — the one coordination plane ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)) |
 | Its own PKI / mTLS | The Vault forest CA + secrets model ([vault_pki_doctrine.md](./vault_pki_doctrine.md)) |
 | Its own node/peer inventory | The typed node inventory ([substrate_doctrine.md](./substrate_doctrine.md)) + the Dhall spec |
@@ -97,6 +97,12 @@ WireGuard fits the amoebius disciplines cleanly because it is a *primitive*, not
   kubelet↔apiserver span is a rendered peer like any other, so the render fold stays *total* over it (a
   decode-foreclosed decode fact), never a side channel. The obligation is **stretch-gated**: a co-located node draws no
   such peer.
+- **The kernel fabric is provisioned, not free.** The exact rendered node/peer graph plus a finite packet-rate,
+  queue-byte, and rotated-log policy feeds the versioned `NetworkFabricSystemDemand` cost model
+  ([resource_capacity_doctrine.md §3.1](./resource_capacity_doctrine.md#31-the-systematic-provision-matrix)).
+  Its private result reserves per-node kernel/listener CPU and memory and layout-routed nodefs bytes once before
+  pod placement. An unlimited queue/rate, omitted peer, or node without residual capacity returns `Left`
+  before `wg set`; live enactment is snapshot-bound and reads back rate/queue/log enforcement.
 - **Distribution is a reconcile, not an agent.** The singleton reconciles the interface the same way it
   reconciles everything else ([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)):
   `discover` (`wg show`) → diff against `render(inventory)` → enact (`wg set`). No Netmaker agent, no side
@@ -237,13 +243,14 @@ workload certs consumed directly** (the reserved "any mesh" CA clause, [§3](#3-
 |-------------------|------------------------------|
 | Raw-WireGuard-over-Netmaker; the fabric primitive amoebius configures directly | — |
 | Rendered peer config, `wg`-reconcile distribution, disjoint-namespace VPN-IP allocation | The `render()` discipline → [manifest_generation_doctrine.md](./manifest_generation_doctrine.md); the reconcile shape → [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) |
+| Exact peer/rate/queue/log operands | Per-node derived capacity arithmetic and private witness → [resource_capacity_doctrine.md §3.1](./resource_capacity_doctrine.md#31-the-systematic-provision-matrix) |
 | The hub = gateway-role topology; the fabric moves with the gateway | Gateway ownership + its migration (planned or forced) → [gateway_migration_doctrine.md](./gateway_migration_doctrine.md); the forced-failover proof → [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
 | The service-mesh (Linkerd) verdict + Gateway-API-weights-for-migration | The Gateway-API / Envoy edge → [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path); the migration that shifts the weights → [gateway_migration_doctrine.md](./gateway_migration_doctrine.md) |
 | That WireGuard peer keys are a Vault KV secret class (not PKI certs) | The Vault secret model + the reserved "any mesh" CA clause → [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | The fabric that makes the localhost→fabric generalization safe | The channel-2 rule generalization itself → [host_cluster_comms_doctrine.md §5](./host_cluster_comms_doctrine.md#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary) |
 
 > **Deferred, not delivered here:** the cross-cluster **broker↔broker** geo-replication render obligation is
-> named in-scope ([§1](#1-why-this-doctrine-exists-the-inter-cluster-wire-is-an-open-gap)) but is Phase-29 design intent — the disjoint-per-cluster addressing exists, the
+> named in-scope ([§1](#1-why-this-doctrine-exists-the-inter-cluster-wire-is-an-open-gap)) but is Phase-28 design intent — the disjoint-per-cluster addressing exists, the
 > per-peer `render()` does not. The two spans this doc actually delivers are the attach (K1) and
 > stretched-control-plane (K2) obligations.
 
@@ -253,9 +260,10 @@ workload certs consumed directly** (the reserved "any mesh" CA clause, [§3](#3-
 
 This document is normative network-fabric doctrine only. Delivery sequencing, completion status, and
 validation gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). For
-orientation only: the fabric is promoted from the provisional Phase 36 "WireGuard / Linkerd vs Envoy"
+orientation only: the fabric was promoted from the former later-phase candidate into Phase 27; the old
+"WireGuard / Linkerd vs Envoy"
 candidate into a first-class phase (the network fabric is now *load-bearing* for the attach topology, not the
-"redundant, do not adopt" default the Phase-36 framing assumed when it measured only against north-south
+"redundant, do not adopt" default that candidate assumed when it measured only against north-south
 ingress); the Linkerd half collapses to the written verdict in [§6](#6-the-service-mesh-verdict-no-linkerd-for-v1).
 
 > **Honesty.** Everything here is Phase 0 **design intent**. A WireGuard fabric, its rendered-config

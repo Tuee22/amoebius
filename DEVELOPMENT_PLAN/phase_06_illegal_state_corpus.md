@@ -33,10 +33,14 @@ negative must fail to compile under a pinned `ghc -fno-code` expect-fail golden.
 property suite that establishes closure, round-trip, fold-totality, and composition-preservation over the
 smart-constructor vocabulary, sampled where the domain is infinite and exhausted where it is finite (the three
 `Rke2Servers` arms). It then emits the **per-entry validation-locus ledger**: a map from every catalog entry
-to the one truth-maker locus that settles it — `Gate-1-editor`, `Gate-2-decoder`, `rendered-output-golden`,
-or `live-effect` — asserting that the two Register-1 loci actually carry a rejecting fixture here and recording
-the other two as deferred to their owning phase. What is *not* here: the capacity/topology decode-folds and
-their negatives (Phase 7), the rendered-output goldens the `rendered-output-golden` locus points at (Phase 9),
+to the one truth-maker locus that settles it — `Gate-1-editor`, `Gate-2-decoder`, `provision-seal`,
+`rendered-output-golden`, or `live-effect` — asserting that the Gate-1/Gate-2 loci owned here carry rejecting fixtures
+and recording later loci as deferred to their owning phase. Deferred ownership is an orthogonal registry
+field; `provision-seal` is the distinct post-bind Phase-8 locus where whole-deployment capacity, topology,
+storage, and target compatibility return `ProvisionError`. Phase 7 builds/proves those pure folds and Phase 8
+invokes them after capability/provider expansion. What is *not* here: those
+capacity/topology/provisioning folds and their negatives (Phases 7–8), the rendered-output goldens the
+`rendered-output-golden` locus points at (Phase 9),
 the representational SPA-composition corpus (Phase 13), and every `live-effect` residue (the live band).
 
 **Substrate:** `none` — no host, no cluster; the gate is an in-process `cabal test` + `dhall type` +
@@ -52,13 +56,21 @@ golden, and each GADT-index negative fails to compile under the pinned `ghc -fno
 GHC **type** error (not a scope/parse error) pinned to a committed expected-error-locus golden — the suite is
 red if any illegal fixture is admitted at or past its locus; QuickCheck is green under `checkCoverage`
 (closure / round-trip / fold-totality / composition-preservation) with the coverage minima of Sprint 6.3 met;
-and the per-entry validation-locus ledger (`Gate-1-editor` / `Gate-2-decoder` / `rendered-output-golden` /
-`live-effect` / `deferred-to-Phase-7`) is emitted with every catalog entry mapped to its truth-maker locus and
-that map **reconciled against the catalog's own committed per-entry `**Validation-locus:**` tags** (the
-independent oracle of §3), red on any divergence — a **Register-1** in-process check that runs on no substrate.
+and the per-entry validation-locus ledger (`Gate-1-editor` / `Gate-2-decoder` / `provision-seal` /
+`rendered-output-golden` / `live-effect`) is emitted with every catalog entry mapped to its truth-maker locus and a separate
+`owner_phase` / `case_family` disposition, with both **reconciled against the catalog-reconciled committed
+`locus_registry.tsv`** (the independent oracle of §3), red on any divergence — a **Register-1** in-process
+check that runs on no substrate.
 
-**Gate integrity (§M).** This gate satisfies the eight §M clauses through the following committed apparatus,
-all authored and committed in Phase 0 **before** the corpus implementation exists (§1 oracle-pinning):
+**Gate integrity (§M).** This gate satisfies the eight §M clauses through the following committed apparatus.
+The existing fixture/error oracles are Phase-0-pinned; the owner/family catalog enrichment identified below
+must be hand-authored and committed at the start of Phase 6, before the corpus/ledger implementation that
+consumes it (§1 oracle-pinning):
+
+> **Planning-status note:** the catalog currently carries `**Validation-locus:**` tags only.
+> `**Delivery-owner:**` and `**Case-family:**` do not exist yet; adding them to every catalog entry, extending
+> the documentation lint to require/reconcile them, and pinning the resulting registry before the emitter is
+> implemented are explicit Phase-6 deliverables below. No check in this plan assumes those tags already exist.
 
 - **Oracle-pinning (§1) + specific-reason negatives (§8).** Each negative fixture ships a committed expected-failure
   golden authored by hand, not regenerated from the implementation: `dhall/examples/goldens/<name>.typeerr`
@@ -67,15 +79,21 @@ all authored and committed in Phase 0 **before** the corpus implementation exist
   `test/dsl/compilefail/<name>.expected` (the expected GHC type-error class + locus) for each compile-fail golden.
   The suite asserts the observed failure **equals** its golden, not merely that some failure occurred.
 - **Independent reference predicate (§3).** The validation-locus reference side is the catalog's committed
-  per-entry `**Validation-locus:**` tags in `documents/illegal_state/illegal_state_*.md` (reconciled by the
-  Phase-0 lint into `dhall/examples/locus_registry.tsv`), authored independently of `ValidationLocusLedger.hs`;
-  the coverage assertion reads that registry, never the emitter's own classification.
+  per-entry `**Validation-locus:**`, `**Delivery-owner:**`, and `**Case-family:**` tags in
+  `documents/illegal_state/illegal_state_*.md` once this phase adds the latter two, reconciled by the
+  Phase-0 documentation lint (extended here) into
+  `dhall/examples/locus_registry.tsv`. Those catalog tags are authored independently of
+  `ValidationLocusLedger.hs`; the coverage assertion reads that registry, never the emitter's own
+  classification or a hard-coded section-number range.
 - **Committed mutation quota (§2).** Four committed seeded mutants (from the §M operator set) MUST turn the gate
   red, re-run each gate run: (a) a **union-arm-addition** schema mutant admitting a product-named capability →
-  `CorpusSpec` red; (b) a **dropped-fold** decoder mutant deleting the rke2 host-distinctness check → the §3.16
-  Gate-2 negative admitted → `CorpusSpec` red; (c) a **guard-weakening** GADT-index mutant widening one index →
-  a compile-fail golden compiles → `compile_fail.sh` red; (d) a **broken-smart-constructor / partialized-fold**
-  mutant → each of the four QuickCheck properties red. The gate is itself red if any mutant survives.
+  `CorpusSpec` red; (b) a **dropped-resource-normalization guard** decoder mutant that admits a zero/incomplete
+  resource declaration or discards one normalized resource field → the corresponding Gate-2 negative or
+  positive-field traversal turns `CorpusSpec` red; (c) a **guard-weakening** GADT-index mutant widening one
+  index → a compile-fail golden compiles → `compile_fail.sh` red; (d) a **broken-smart-constructor /
+  partialized-fold** mutant → each of the four QuickCheck properties red. Phase-7/8 fold mutants remain owned
+  by those phases; Phase 6 cannot execute a fold that has not landed. The gate is itself red if any mutant
+  survives.
 - **Generator coverage (§4).** Sprint 6.3's `checkCoverage` minima (below) force the nontrivial reject/boundary
   arms to fire.
 - **Concrete corpus (§7).** The representative set is enumerated explicitly in the Sprint 6.1/6.2 Deliverables
@@ -97,6 +115,11 @@ all authored and committed in Phase 0 **before** the corpus implementation exist
   the **two typed gates** — Gate 1 (the Dhall typechecker) and Gate 2 (the in-process `Dhall.inputFile auto`
   decoder). This phase exercises both against the exhaustive negative corpus and pins the type-foreclosed
   residue with the compile-fail golden that gives the GADT indices their teeth.
+- [`resource_capacity_doctrine.md §3/§4`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget):
+  the complete resource envelope and opaque post-bind checked boundary. This phase exhausts the resource
+  **shape/normalization** cases its predecessors own (including the missing-envelope §3.11 negative) and
+  derives every later capacity, storage, accelerator, VRAM, and missing-capability deferral from registry
+  ownership tags; it never claims those Phase-7/8 folds have run early.
 - [`testing_doctrine.md §2 — three registers`](../documents/engineering/testing_doctrine.md) — **Register 1**
   (pure/golden, in-process, no cluster): the register this phase's gate reaches; and
   [`§4 — the per-run ledger`](../documents/engineering/testing_doctrine.md) — the proven/tested/assumed ledger
@@ -116,16 +139,20 @@ all authored and committed in Phase 0 **before** the corpus implementation exist
 positive + Gate-1 corpus and the Phase-5 Gate-2 set to one fixture per Register-1-settleable catalog entry);
 `test/dsl/CorpusSpec.hs` (per-case exhaustive, tagged by locus) — target paths, not yet built.
 **Blocked by**: Phase 5 gate (the total decoder + GADT-indexed IR); Phase 4 gate (the Gate-1 schema + positive
-corpus). External prerequisite: the `dhall` CLI and the Phase-1 `allow-newer`/pin.
-**Independent Validation**: every Gate-1-tagged negative fails `dhall type` **with the error matching its
-committed `<name>.typeerr` golden** (naming the foreclosing union/field), and its legal near-miss twin passes
-`dhall type`; every Gate-2-tagged negative passes `dhall type` and then decodes to a `Left DecodeError` **whose
-tag equals its committed `<name>.tag` golden**, and its legal twin decodes; every positive fixture decodes; the
-coverage note maps each fixture to its catalog entry and layer and is reconciled against the committed
-`locus_registry.tsv`; the committed union-arm-addition schema mutant (a) and the dropped-fold decoder mutant
-(b) each turn `CorpusSpec` red when re-applied; and `CorpusSpec` is red if any illegal fixture is admitted at or
-past its tagged locus, if any twin fails, or if any observed error diverges from its golden.
-**Docs to update**: `documents/illegal_state/illegal_state_catalog.md` (per-entry gate-case backlink),
+corpus). The catalog-tag/registry oracle is the first deliverable of this sprint and must be committed before
+`CorpusSpec.hs` is implemented. External prerequisite: the `dhall` CLI and the Phase-1 `allow-newer`/pin.
+**Independent Validation**: every Phase-4/5/6-owned Gate-1 negative fails `dhall type` **with the error
+matching its committed `<name>.typeerr` golden** (naming the foreclosing union/field), and its legal near-miss
+twin passes `dhall type`; every Phase-4/5/6-owned Gate-2 negative passes `dhall type` and then decodes to a
+`Left DecodeError` **whose tag equals its committed `<name>.tag` golden**, and its legal twin decodes; every
+positive fixture decodes; the coverage note maps each fixture to its catalog entry and layer and is reconciled
+against the committed `locus_registry.tsv`; every Phase-7/8-owned provisioning row is present in the derived
+deferred set with the exact owner; the committed union-arm-addition schema mutant (a) and
+resource-normalization decoder mutant (b) each turn `CorpusSpec` red when re-applied; and `CorpusSpec` is red
+if any illegal fixture is admitted at or past its tagged locus, if any twin fails, or if any observed error
+diverges from its golden.
+**Docs to update**: `documents/illegal_state/illegal_state_*.md` (add per-entry `Delivery-owner` /
+`Case-family` tags and gate-case backlinks),
 `DEVELOPMENT_PLAN/system_components.md` (corpus inventory), this document.
 
 ### Objective
@@ -135,20 +162,46 @@ by the locus that rejects each fixture** — Gate-1 negatives that must fail `dh
 must pass `dhall type` and decode-reject — never billing a Gate-2-only foreclosure as a Gate-1 failure.
 
 ### Deliverables
+- A one-time catalog enrichment across every `documents/illegal_state/illegal_state_*.md` entry: retain the
+  existing `**Validation-locus:**` tag and add required `**Delivery-owner:**` and `**Case-family:**` tags. The
+  documentation lint is extended to reject a missing/duplicate/unknown tag and to emit/reconcile
+  `locus_registry.tsv`. This oracle is committed before the fixtures/harness are implemented. It is planned
+  Phase-6 work, not a claim about the catalog's current shape.
 - Positive fixtures (`legal_multisubstrate_cluster`, `legal_managed_eks`, `trivial_app`, a deployment-rules
-  fixture) that decode, carried forward from Phase 4/5.
-- Gate-1 negatives (`illegal_gate1_*`, must fail `dhall type`): product-named capability (§3.12), insecure /
-  backdoor ingress arm (§3.7), unbounded storage backing / un-tiered topic (§3.18/§3.20), growth with no
-  scaling policy (§3.21), even/zero-server rke2 control plane (§3.24), non-CBOR payload (§3.23), and a
-  substrate/topology arm the union does not offer (§3.14/§3.15).
-- Gate-2 negatives (`illegal_decode_*`, must pass `dhall type`, then decode-reject): rke2 host-distinctness /
-  reused host (§3.16). The **complete, enumerated** Gate-2 fixture set owed by this phase is exactly the catalog
-  entries whose committed `**Validation-locus:**` tag is `Gate-2-decoder` **and** which are NOT on the explicit
-  `deferred-to-Phase-7` list below — the set is fixed by the committed `locus_registry.tsv`, not by the
-  implementer's reading of "whose fold is present". The capacity/topology aggregate negatives
-  (§3.13/§3.17–§3.19) are the enumerated `deferred-to-Phase-7` set: they are named here explicitly, carry no
-  fixture in this phase, and MUST be marked `deferred-to-Phase-7` in the ledger (never reclassified to
-  `live-effect` or `rendered-output-golden`) — deferral to [Phase 7](phase_07_capacity_topology_folds.md).
+  fixture) that decode with complete normalized resource envelopes and target capacities, carried forward
+  from Phase 4/5.
+- Gate-1 negatives (`illegal_gate1_*`, must fail `dhall type`) are **exactly** the rows enumerated by
+  `locus_registry.tsv` with `validation_locus = Gate-1-editor` and
+  `owner_phase ∈ { Phase-4, Phase-5, Phase-6 }`. Required members
+  include product-named capability (§3.12), insecure/backdoor ingress (§3.7), a workload missing its complete
+  `ResourceEnvelope` (§3.11; the Phase-4 `illegal_missing_resource_envelope` case), unbounded storage /
+  un-tiered topic (§3.18/§3.20), growth with no scaling policy (§3.21), even/zero-server rke2 control plane
+  (§3.24), the produce-side non-CBOR shape (§3.23), and a substrate/topology arm the union does not offer
+  (§3.14/§3.15). The registry, not this prose list, is the exact enumeration.
+- Gate-2 negatives (`illegal_decode_*`, must pass `dhall type`, then decode-reject) are **exactly** registry
+  rows with `validation_locus = Gate-2-decoder` whose
+  `owner_phase ∈ { Phase-4, Phase-5, Phase-6 }`; these exercise the Phase-5
+  structural decoder, normalized resource/capacity representation, ownership indices, and compile-fail
+  boundary already available to this phase. Required execution-normalization cases cover every
+  controller-kind/cardinality/policy/resource mismatch, including raw Deployment
+  `RollingUpdate { maxSurge = 0, maxUnavailable = 0 }` returning the pinned
+  `UnspellableCombination` tag, paired with independently exercised `{ 1, 0 }` and `{ 0, 1 }` positives.
+  DaemonSet both-positive, StatefulSet unsupported feature/nonzero-partition, Job missing terminal retention,
+  CUDA rolling, and Metal/host-policy mismatches each have a minimally differing legal controller twin.
+- **Provisioning-deferred negatives are selected by tags, never section-number ranges.** A registry row with
+  `validation_locus = provision-seal`, an `owner_phase` of `Phase-7` or `Phase-8`, and a `case_family` of
+  `topology`, `capacity`, `storage`, `cache`, `accelerator`, or `capability-provision` carries no rejecting
+  fixture in Phase 6 and is ledgered with that owner. The generated selection must include every current
+  aggregate and atomic fit case: engine/substrate incompatibility and host reuse; host/VM/cluster and
+  elastic-quota overcommit; pod ephemeral-storage and finite-limit/physical-peak overflow;
+  durable/native-cache-pool and
+  in-cluster-cache-nesting violations; Pulsar two-ceiling overflow; affinity/taint unplaceability; CUDA
+  requested on a CPU-only target;
+  whole-device-count shortage; accelerator source/workload or policy-domain mismatch; invalid residency/shard
+  structure; a policy-permitted coexistence epoch whose co-resident per-device aggregate exceeds net
+  allocatable VRAM; and provider-expanded resource demand. Phase 7 owns the pure folds and Phase 8 owns the end-to-end post-bind
+  `ProvisionContext → Topology → BoundDeployment → Either ProvisionError ProvisionedSpec` boundary. Adding a new catalog row with
+  those tags automatically adds it to the deferred set; no phase-doc range edit is required.
 - **Near-miss twinning (forecloses wrong-reason negatives, §8).** Each Gate-1 negative is a **single-construct
   mutation** of a named committed legal fixture (its `legal_*` twin, differing only in the one foreclosed
   dimension), and that twin MUST pass `dhall type`; the negative's `dhall type` error MUST equal the committed
@@ -157,17 +210,19 @@ must pass `dhall type` and decode-reject — never billing a Gate-2-only foreclo
   single-field mutation of a legal twin that decodes, and asserts its committed expected `DecodeError` tag.
 - **Per-Register-1-locus fixtures (disambiguation).** A catalog entry carrying more than one Register-1 locus
   (e.g. §3.16 = `Gate-1-editor` cardinality sub-part + `Gate-2-decoder` distinctness fold) owes **one fixture
-  per Register-1 locus it carries**, each rejected at its own locus — not one fixture total. The ledger's
+  row per Register-1 locus it carries**, each rejected at its own locus — not one row total. The ledger's
   single "truth-maker locus" per entry is the earliest-sufficient among the loci it carries (§8 tie-break:
-  `Gate-1-editor` < `Gate-2-decoder`), but the corpus still supplies every Register-1 sub-fixture.
+  `Gate-1-editor` < `Gate-2-decoder`), but delivery follows each row's owner: Phase 6 supplies only rows owned
+  by Phases 4–6, while Phase-7/8-owned subcases remain visibly deferred to those phases.
 
 ### Validation
 1. Every negative fixture is rejected at its tagged locus (Gate 1 / Gate 2) with its observed failure matching
    its committed expected-error golden (`<name>.typeerr` / `<name>.tag`) and its legal near-miss twin passing;
    the suite is red if any illegal fixture is admitted, if any twin fails, or if any observed error diverges
    from its golden; every positive fixture decodes; the coverage note maps each fixture to a catalog entry and
-   is reconciled against the committed `locus_registry.tsv`; and the committed seeded mutants (a) and (b) each
-   turn `CorpusSpec` red.
+   is reconciled against the committed `locus_registry.tsv`; every Phase-7/8-owned provisioning row is present
+   in the derived deferred set with the right owner; and the committed seeded mutants (a) and (b) each turn
+   `CorpusSpec` red.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -270,16 +325,16 @@ part of `dsl-spec`) — target paths, not yet built. The emitted ledger artifact
 output and is **never committed** ([`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md)).
 **Blocked by**: Sprint 6.1, Sprint 6.2, Sprint 6.3.
 **Independent Validation**: the emitter maps every catalog entry to exactly one truth-maker locus
-(`Gate-1-editor` / `Gate-2-decoder` / `rendered-output-golden` / `live-effect` / `deferred-to-Phase-7`), and the
-coverage assertion **reconciles that map against the catalog's committed per-entry `**Validation-locus:**` tags
-(the independent oracle in `documents/illegal_state/illegal_state_*.md`, lint-reconciled into the committed
-`dhall/examples/locus_registry.tsv`)** — it is red on ANY entry whose emitter locus differs from the registry
-tag, so the emitter cannot itself decide which class owes a fixture. It is further red unless: every entry the
-registry tags `Gate-1-editor` or `Gate-2-decoder` (and NOT on the enumerated `deferred-to-Phase-7` list) has a
-**passing rejecting fixture present in this phase**; every `rendered-output-golden` entry names Phase 9 and
-every `live-effect` entry names the live band as deferred; and every §3.13/§3.17–§3.19 entry is marked
-`deferred-to-Phase-7` (never reclassified to `live-effect`/`rendered-output-golden`). The registry is
-Phase-0-committed and independent of `ValidationLocusLedger.hs`.
+(`Gate-1-editor` / `Gate-2-decoder` / `provision-seal` / `rendered-output-golden` / `live-effect`) plus a separate disposition
+(`discharged-here` or `deferred : owner_phase`), and the coverage assertion **reconciles both against the
+committed `dhall/examples/locus_registry.tsv`**. That registry is lint-derived after this phase adds
+`**Delivery-owner:**` and `**Case-family:**` beside every existing `**Validation-locus:**`; it is red on ANY
+locus, owner, or family divergence, so the emitter cannot decide which class owes a fixture. It is further red
+unless every Phase-4/5/6-owned `Gate-1-editor` or `Gate-2-decoder` row has a passing rejecting fixture here;
+every `rendered-output-golden` row names Phase 9; every `live-effect` row names the live band; and every
+Phase-7/8-owned `provision-seal` topology/capacity/storage/cache/accelerator/capability-provision row is deferred to its
+registry owner without being reclassified. The enriched catalog and registry are committed before
+`ValidationLocusLedger.hs` and remain independent of it.
 **Docs to update**: `documents/illegal_state/illegal_state_catalog.md` (per-entry realized-locus annotation),
 `documents/engineering/testing_doctrine.md` (the validation-locus ledger variant),
 `DEVELOPMENT_PLAN/README.md` (flip the Phase-6 status when the gate passes).
@@ -289,34 +344,43 @@ Adopt [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md) 
 [`illegal_state_catalog.md §6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force):
 emit the per-entry validation-locus ledger — the honest map from every catalog entry to the one locus that
 settles it — and gate on it, so no entry is silently unvalidated and no deferred entry is silently claimed.
-The two Register-1 loci (`Gate-1-editor`, `Gate-2-decoder`) are discharged here; `rendered-output-golden` is
-recorded as owned by [Phase 9](phase_09_render_manifest_goldens.md) and `live-effect` by the live band.
+The truth-maker locus and delivery ownership stay separate: Register-1 rows owned by Phases 4–6 are discharged
+here; whole-deployment fold/provision rows carry the distinct `provision-seal` locus and are deferred to
+Phase 7 or 8; `rendered-output-golden` is owned by
+[Phase 9](phase_09_render_manifest_goldens.md), and `live-effect` by the live band.
 
 ### Deliverables
+- Consumption of the Sprint-6.1-committed catalog enrichment and `locus_registry.tsv`; Sprint 6.4 does not
+  regenerate or reinterpret their owner/family classification from the emitter.
 - A ledger emitter that classifies each catalog entry into its earliest-sufficient truth-maker locus:
   `Gate-1-editor` (fails `dhall type`, authoring-time), `Gate-2-decoder` (compile-fail golden or decode
-  `Left`), `rendered-output-golden` (settled on emitted bytes in Phase 9), `live-effect` (settled only by a
-  running cluster, deferred to Register 3), or `deferred-to-Phase-7` (a `Gate-2-decoder`-tagged capacity/
-  topology aggregate whose fold lands in Phase 7 — §3.13/§3.17–§3.19). Tie-break for a multi-locus entry: the
-  earliest-sufficient Register-1 locus (`Gate-1-editor` < `Gate-2-decoder`), but every Register-1 sub-fixture
-  the entry carries is still supplied by Sprint 6.1 (§3.16 → both a Gate-1 and a Gate-2 fixture).
+  `Left`), `provision-seal` (post-bind `ProvisionError` before `ProvisionedSpec`), `rendered-output-golden`
+  (settled on emitted bytes in Phase 9), `live-effect` (settled only by a
+  running cluster, deferred to Register 3). A separate disposition records `discharged-here` or
+  `deferred : owner_phase`; ownership never changes the recorded locus. Tie-break for a multi-locus entry:
+  the earliest-sufficient Register-1 locus
+  (`Gate-1-editor` < `Gate-2-decoder` < `provision-seal` < `rendered-output-golden`), while each sub-case retains
+  its own registry row so one entry can owe fixtures at more than one locus or phase.
 - The committed independent oracle: `dhall/examples/locus_registry.tsv`, reconciled by the Phase-0 lint from
-  the catalog's per-entry `**Validation-locus:**` tags, authored independently of the emitter. The enumerated
-  `deferred-to-Phase-7` set (§3.13, §3.17, §3.18, §3.19) is listed literally in this phase doc and in the
-  registry.
+  the catalog's per-entry `**Validation-locus:**` plus the Phase-6-added `**Delivery-owner:**` and
+  `**Case-family:**` tags, with columns at minimum `entry`, `subcase`, `validation_locus`, `owner_phase`, and
+  `case_family`. The
+  provisioning-deferred set is a query over those committed rows (`owner_phase ∈ {Phase-7, Phase-8}` plus the
+  provisioning case families), not a duplicated literal section-number list.
 - A coverage assertion that **reconciles the emitter's locus for every entry against the registry** and goes
-  red on any divergence, then requires: every non-deferred `Gate-1-editor` / `Gate-2-decoder` entry has its
-  rejecting fixture present and passing here; every `rendered-output-golden` / `live-effect` / `deferred-to-
-  Phase-7` entry is marked deferred with its owning phase. The emitted ledger leads with a Register-1-only,
+  red on any locus/owner/family divergence, then requires every Phase-4/5/6-owned `Gate-1-editor` /
+  `Gate-2-decoder` row to have its rejecting fixture present and passing here, and every later-owned row to be
+  marked deferred with its exact owner. The emitted ledger leads with a Register-1-only,
   Tier-2-UNVERIFIED banner.
 
 ### Validation
 1. The ledger emits with every catalog entry mapped to exactly one locus, that map reconciled against the
    committed `locus_registry.tsv` (red on any emitter-vs-registry divergence); the coverage assertion is green —
-   every non-deferred Register-1 locus carries a passing rejecting fixture and every deferred locus
-   (`rendered-output-golden` → Phase 9, `live-effect` → live band, `deferred-to-Phase-7` → Phase 7 for
-   §3.13/§3.17–§3.19) names its owning phase; the suite is red if any entry is unmapped, misclassified relative
-   to the registry, or any deferred entry is claimed settled here.
+   every Phase-4/5/6-owned Register-1 row carries a passing rejecting fixture and every deferred row names its
+   registry owner (`provision-seal` rows → Phase 7 or Phase 8,
+   `rendered-output-golden` → Phase 9, `live-effect` → live band); the suite is red if any entry/subcase is
+   unmapped, misclassified relative to the registry, selected by a stale hard-coded range, or claimed settled
+   before its owner phase.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -324,9 +388,13 @@ The whole sprint (📋 Planned).
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
-- `documents/illegal_state/illegal_state_catalog.md` — annotate each entry with its realized validation locus
-  (`Gate-1-editor` / `Gate-2-decoder` → Register-1, discharged here; `rendered-output-golden` → Phase 9;
-  `live-effect` → the live band), and confirm the §5 coverage matrix is exhausted for the Register-1 band.
+- `documents/illegal_state/illegal_state_*.md` — annotate every themed entry with committed
+  `**Delivery-owner:**` and `**Case-family:**` tags alongside its existing validation locus
+  (`Gate-1-editor` / `Gate-2-decoder` / `provision-seal` →
+  Register 1, discharged here only when `owner_phase ∈ {Phase-4, Phase-5, Phase-6}`; Phase-7/8
+  `provision-seal` rows
+  remain deferred; `rendered-output-golden` → Phase 9; `live-effect` → the live band), and confirm the §5
+  coverage matrix is exhausted for the Register-1 rows this phase owns.
 - `documents/engineering/dsl_doctrine.md` — backlink §5's two gates to the exhaustive Phase-6 corpus and the
   compile-fail golden that pins the type-foreclosed layer.
 - `documents/engineering/testing_doctrine.md` — record the validation-locus ledger variant and the
@@ -354,6 +422,9 @@ The whole sprint (📋 Planned).
   §5 the honesty limit (a green Register-1 corpus is not a live-effect claim)
 - [phase_04](phase_04_dhall_gate1_schema.md) — Gate 1, the Dhall schema + positive corpus this phase extends
 - [phase_05](phase_05_gadt_decoder_gate2.md) — Gate 2, the GADT-indexed IR + decoder this corpus rides atop
-- [phase_07](phase_07_capacity_topology_folds.md) — the capacity/topology fold negatives deferred from here
+- [phase_07](phase_07_capacity_topology_folds.md) — the pure capacity/topology/storage fold negatives selected
+  from the registry as deferred from here
+- [phase_08](phase_08_capability_binder.md) — the post-bind provisioning/capability negatives selected from the
+  registry as deferred from here
 - [phase_09](phase_09_render_manifest_goldens.md) — the `rendered-output-golden` locus this ledger points at
 - [phase_22](phase_22_live_dsl_singleton.md) — the live band where the `live-effect` locus is discharged

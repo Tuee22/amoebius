@@ -23,8 +23,9 @@ It owns nothing of the catalog's framing.
   that the cluster enforces it) are owned by
   [`illegal_state_catalog.md`](./illegal_state_catalog.md) — referenced, not restated.
 - The **seven typing techniques**, the **coverage matrix**, the **three foreclosure layers**, and the new
-  **validation-locus axis** (`Gate-1-editor` / `Gate-2-decoder` / `rendered-output-golden` / `live-effect`,
-  orthogonal to the foreclosure layer) are owned by
+  **validation-locus axis** (`Gate-1-editor` / `Gate-2-decoder` / `provision-seal` /
+  `rendered-output-golden` / `live-effect`, orthogonal to the foreclosure layer; `provision-seal` is post-bind
+  Phase-8 provision returning a `ProvisionError` before any `ProvisionedSpec` exists) are owned by
   [`illegal_state_techniques.md`](./illegal_state_techniques.md) — referenced, not restated.
 - The *normative rule* behind each entry lives in that entry's owning doctrine (readiness/ordering, release
   lifecycle, monitoring, …). This doc names the owner and never restates its content.
@@ -126,8 +127,9 @@ extension has no inhabitant. Every renderable surface carries a mandatory `Acces
 arm — the same `ExposeToWild`-only-Keycloak discipline as [§3.7](./illegal_state_security.md#37-accidental-insecure--backdoor-ingress) —
 so an unauthenticated monitoring surface is uninhabitable (`AccessScope` is `AdminGlobal`, the single admin
 identity, or `UserScoped`, a Keycloak-backed app-logic filter). Coverage of the derived rules/panels across a
-workflow's topics, non-vacuousness of the SLO bounds, and feasibility (freshness ≥ scrape interval, Σ rule cost
-≤ the `Observability` workload's `Capacity`) are total decode-time folds. **Owner:**
+workflow's topics and non-vacuousness of the SLO bounds are total decoder folds; whole-deployment feasibility
+(freshness ≥ scrape interval, Σ rule cost ≤ the `Observability` workload's `Capacity`) is a post-bind provision
+fold. **Owner:**
 [`monitoring_doctrine.md`](../engineering/monitoring_doctrine.md) (the obligation types, derivation, access model, and
 parent-monitoring posture) + [`pulsar_client_doctrine.md` §6](../engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra) (the
 `validateTopology` fold that carries it). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (the mandatory
@@ -142,8 +144,9 @@ data — owned by [`chaos_failover_doctrine.md`](../engineering/chaos_failover_d
 
 **Validation-locus:** `Gate-1-editor` (the mandatory `monitor` / `liveness` / `extMonitoring` fields, the
 `NonEmpty` `extMonitoring` list, and the absent `Off`/`Public` arms fail `dhall type` at authoring time) +
-`Gate-2-decoder` (the coverage, non-vacuousness, and feasibility Σ folds and the `routes[].workflow`-vs-`name`
-reconciliation return `Left` at decode) + `rendered-output-golden` (that the emitted monitoring surface renders
+`Gate-2-decoder` (the coverage and non-vacuousness folds and the `routes[].workflow`-vs-`name` reconciliation
+return `Left` at decode) + `provision-seal` (the monitoring feasibility Σ fold returns a `ProvisionError`
+after binding and before any `ProvisionedSpec` exists) + `rendered-output-golden` (that the emitted monitoring surface renders
 behind the Keycloak-owned edge with no `Public` listener — the no-backdoor-ingress analog of
 [§3.7](./illegal_state_security.md#37-accidental-insecure--backdoor-ingress), caught by a golden test on the rendered manifest rather than a
 cluster) + `live-effect` (that the SLO is actually met, the alert fires, the named `/metrics` series exists, and

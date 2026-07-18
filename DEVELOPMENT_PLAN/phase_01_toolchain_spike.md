@@ -15,8 +15,8 @@
 📋 Planned. Every sprint below is 📋 Planned and every prescriptive statement is design intent, never a tested
 amoebius result. This phase opens after the Phase 0 documentation lint passes and runs on **no substrate**
 (`none`): it stands up no host and no cluster, resolving and building only Hackage packages on the developer
-toolchain. It is a de-risking pre-flight for the whole pre-cluster band (Phases 2–12), whose in-process
-integrity checks all rest on the dependencies probed here.
+toolchain. It is a de-risking pre-flight for the whole pre-cluster band after this phase (Phases 2–13), whose
+in-process integrity checks all rest on the dependencies probed here.
 
 ## Phase Summary
 
@@ -94,9 +94,10 @@ schedule and its expected terminal state, and the seeded mutant `probe/mutants/d
   building and running in-process with no cluster, no credentials, and no broker.
 - [`dsl_doctrine.md §9 — Toolchain note`](../documents/engineering/dsl_doctrine.md#9-toolchain-note), read
   with [§5's Gate 2](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
-  the in-process `dhall` decoder — the whole "if it decodes, it is deployable" claim — needs `allow-newer`
-  against the pinned GHC; this phase is where that exact set is proven or the blocker recorded, before any
-  later phase promises an executable Gate 2.
+  the in-process `dhall` decoder — the Gate-2 structural leg of the later
+  `decode → bind/expand → plan/resolve infrastructure → provision → ProvisionedSpec → renderAll` contract — needs `allow-newer` against the
+  pinned GHC; this phase is where that exact set is proven or the blocker recorded, before any later phase
+  promises an executable Gate 2.
 - [`gateway_migration_model_doctrine.md §4 — Simulate and prove`](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove):
   amoebius's **one** formal obligation drives the gateway-migration `Model` (both `Planned` and `Failover`
   branches) against `io-classes`/`IOSimPOR`'s deterministic scheduler; this phase de-risks that build
@@ -160,8 +161,8 @@ recorded with the verbatim failing output and one failing transcript per remedia
 ### Objective
 Adopt [`dsl_doctrine.md §9 — Toolchain note`](../documents/engineering/dsl_doctrine.md#9-toolchain-note) with
 its [§5 Gate 2](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract): prove
-the in-process `dhall` decoder — the entire "if it decodes, it is deployable" Gate-2 claim — is buildable on
-the pin before Phase 5 promises an executable decoder. `dhall` historically lags new GHC releases, so
+the in-process `dhall` decoder — the structural Gate-2 leg that must precede Phase-8 bind/provision — is
+buildable on the pin before Phase 5 promises an executable decoder. `dhall` historically lags new GHC releases, so
 `allow-newer` alone may be insufficient and a source patch or fork may be required.
 
 ### Deliverables

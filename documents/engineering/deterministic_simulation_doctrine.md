@@ -29,7 +29,7 @@ The industry answer to "make the rare interleaving deterministically reproducibl
 `io-sim` was built to be for Haskell (IOG / Well-Typed's `ouroboros-network`). amoebius is unusually
 well-positioned to adopt it: the shared daemon spine already forbids `forkIO` and mandates structured
 `withAsync`/`bracket` ([daemon_topology_doctrine.md §6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine)),
-so the shapes lift cleanly; `render`/`chain` are already pure, so the only effectful surface is a thin,
+so the shapes lift cleanly; `renderAll`/`chain` are already pure, so the only effectful surface is a thin,
 well-typed seam. This doctrine adopts DST for that surface. It **does not** re-open the concentration principle
 ([chaos_failover_doctrine.md §6](./chaos_failover_doctrine.md#6-the-concentration-principle--where-the-obligation-lives)):
 DST does not re-prove etcd/MinIO/Pulsar/Patroni consensus — it validates **amoebius's own code** that composes
@@ -91,7 +91,10 @@ The register *definitions* are owned by [testing_doctrine.md §2](./testing_doct
 this doctrine owns the **shape** of the deterministic-simulation register and how it extends the pre-cluster
 spine ([conformance_harness_doctrine.md §4](./conformance_harness_doctrine.md#4-the-spine-decode--validate--render--plan--dry-run)).
 
-- **Register 1 — pure/golden.** Decode → render → plan → dry-run; the formal `Model` explorer + TLC. No effects.
+- **Register 1 — pure/golden.** Decode → bind/expand → `planInfrastructure` → either golden-lock the
+  non-renderable infrastructure batch or supply its authenticated materialization fixture → provision →
+  `renderAll` → plan → dry-run; the formal
+  `Model` explorer + TLC. No effects.
 - **Register 2 — boundary integration with fakes.** The real binary over the `[Step]` plan against fake
   subprocess tools recording argv+bytes ([phase_11](../../DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md)).
 - **Register 2.5 — deterministic simulation (this doctrine).** The real daemon/reconciler code under

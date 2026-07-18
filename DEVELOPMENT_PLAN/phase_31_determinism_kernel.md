@@ -78,10 +78,10 @@ performed **out-of-band by the harness** on blobs it fetched itself, never infer
 success`/`If-None-Match` response on a second PUT (§M.6):
 
 1. **Same-hash reproduction (fresh recompute, not a store hit, §M.6):** the gate workload runs twice under an
-   unchanged `experimentHash`; run 2 executes in a fresh pod against a **run-isolated staging namespace** with
-   the output blob/manifest key **provably absent** until after the pure stage completes and writes, and the
-   harness asserts — from the OS-boundary observer (§M.5) — that the compute path executed on run 2 before any
-   read of the output key. The two independently-recomputed outputs are byte-for-byte equal.
+   unchanged `experimentHash`; each fresh Pod writes a distinct `<experimentHash>/<runId>` staging prefix whose
+   output blob/manifest key is **provably absent**, and run 2 cannot read run 1's retained prefix until its pure
+   stage completes and writes. The harness asserts that boundary from the OS observer (§M.5), retains both exact
+   output object identities through its out-of-band fetch/compare, and requires byte-for-byte equality.
 2. **Seed-sensitivity (§M.1, forecloses a constant-output stub):** two runs identical **except** for the
    `masterSeed` (and, in a second pair, except for the `streamIndex`) produce **different** output bytes on the
    stored blobs. A run whose output is invariant under a changed seed FAILS the gate.
@@ -108,9 +108,99 @@ seeded stage, one `masterSeed`); its three committed negative siblings differing
 — `..._flipped_metric.dhall` (resolved-`.dhall` change), `..._alt_seed.dhall` (changed `masterSeed`),
 `..._alt_input.dhall` (changed pinned input); the committed hand-authored expected fingerprint schema
 `test/golden/phase_31_substrate_fingerprint.schema.json` (§M.3); and the committed mutant
-`test/mutants/Determinism_const_output.hs` (§M.2). These four `.dhall` fixtures, the schema, and the mutant are
-the phase's explicit representative set; no golden output bytes are pre-committed (they are substrate-specific),
+`test/mutants/Determinism_const_output.hs` (§M.2), plus the independently authored
+`test/golden/phase_31_resource_shape.json` and resource mutants under `test/mutants/phase_31/`. These four
+`.dhall` fixtures, the schema, resource witness, and mutants are the phase's explicit representative set; no golden output bytes are pre-committed (they are substrate-specific),
 so the byte-equality legs compare **two fresh runs against each other**, never against a regenerated golden.
+
+## Complete resource provision for the live recomputes
+
+This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
+[`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting);
+test-run composites must flatten to canonical execution atoms before either fresh run starts.
+
+The three kernel functions are pure and allocate no deployment unit. The live proof does introduce compute
+Pods, so the gate's `BoundDeployment` contains an identity-keyed `DeterminismRunDemand` for every baseline,
+seed/input variant, and fingerprint-control run. Each run carries a complete `PodResourceEnvelope`: every
+container has a selected-platform `ImageArtifact`, lifecycle, CPU/memory/ephemeral-storage requests and
+limits, runtime working set, read-only or bounded-writable rootfs, and log headroom; the Pod carries bounded
+disk/memory `emptyDir`s, derived ConfigMap/Secret/projected/service-account-token
+`KubeletMappedFileDemand`s, any durable claim with its presentation/backing/attachment class, `cache = None`,
+exact byte-free `PodRuntimeMetadataSource` network-attachment identities and container-to-volume mount
+identities, and `accelerator = None`. The content-store and Pulsar clients are libraries inside that compute container;
+their request/response buffers, CBOR staging, retry state, and output-upload workspace are charged to its
+memory and pod-local ephemeral fields rather than represented as client Pods.
+Each fresh compute/control run is structurally a finite Job body with explicit completions, parallelism,
+backoff, replacement-on-Failed, and terminal retention; it carries no Deployment rollout fields. The inherited
+Phase-25 standing orchestrator/workers/gateway retain their Deployment bodies and the collector its Job body.
+Each run demand is also an exact Phase-25 `WorkflowRuntimeDemand` projection, never a lone free compute Pod:
+it retains the orchestrator, configured active/standby workers (the active run worker is fresh), sole content-
+mutation gateway and collector/verification Job with complete envelopes. Its source-equal command/event topics,
+subscriptions, client concurrency, cursor/backlog/retention/hot-ledger/offload and exact output gateway/object
+extents merge into Pulsar/BookKeeper/MinIO capacity before publish. No broker or standing gateway Pod makes a
+new workflow's messages/storage free.
+
+Once `provision` expands each run and workflow `BoundExecutionUnit`, it derives one
+`KubeletRuntimeMetadataShape` per planned Pod slot from that Pod's exact runtime-metadata source and complete
+container/volume graph under the selected node's pinned `kubeletMetadataModel`; live normalization derives the
+observed form under the authenticated Pod UID plus owner/source witness. The private fold derives every
+component's bytes and `KubeletNodefs | CriRuntimeRoot` role, resolves it through the selected filesystem
+layout, and groups aliases by physical carve once. SplitRuntime charges kubelet components to nodefs and CRI
+components to imagefs/containerfs; Unified and SplitImage sum forced aliases before one backing check. No
+physical runtime-metadata debit is repeated as logical Pod ephemeral storage.
+
+Pure provision emits one `ProvisionedNodeRuntimeStorageAccounting` per node for every planned epoch
+fingerprint; live preflight emits the observed-inventory-fingerprint form. Its planned-slot/observed-UID domain equals the assigned
+Pods exactly, qualified Pod metadata and image-model component keys form a disjoint exhaustive partition, and
+the combined backing map debits each carve once. The largest simultaneous scope retains all rows; role,
+backing, scope/domain, ownership, and alias witnesses are checked independently of the content hash.
+
+The fixture's finite Job actions are serialized by snapshot-bound preflight: the next run receives no apply
+capability until the predecessor Pod UID's absence/release witness is fresh. This is staged live evidence, not
+an invented cross-kind rollout constructor. Both `<experimentHash>/<runId>` output object sets remain charged
+in the exact object-store producer demand through the out-of-band comparison. Each run's Pod/image/snapshot/
+writable/log/mapped extents and pod/IP slot remain charged until the API and node observer report that Pod
+gone. Only then can the next fresh runtime consume its active-worker/Job slots. If a
+future fixture permits one terminating predecessor to overlap its successor, binding must instead enumerate
+that old+new epoch and provision two complete envelopes and two pod/IP slots. Each unique CSI PVC spends one
+driver attachment slot; the current network-store fixture declares no PVC and therefore spends zero CSI
+slots, never an implicit unlimited value. The host gate harness/argv observer has its own finite
+`HostResourceEnvelope` (executable digest, CPU/memory, capture/log/scratch bytes on a named backing, no cache
+or accelerator); the absolute-path substrate-fingerprint probes and `strace` execute within that envelope,
+not in sidecar Pods or as resource-free subprocesses.
+
+After controller expansion, the binder serializes exhaustive `desiredObjects` for all rendered and derived
+Kubernetes objects, not selected kinds; live preflight separately joins observed survivors with
+old/new/apply-before-prune.
+`EtcdLogicalDemand { desiredObjects, churn, model }` includes revisions, Leases and Events; only private
+`ProvisionedEtcdLogicalDemand.derivedPeak <= backendQuotaBytes` may continue. Physical capacity separately fits
+backend-at-quota plus WALs, retained/saving snapshots and defrag old+new workspace. Live object/quota/backend
+readback must equal the witness. One-byte logical/physical shortages and `drop_api_object_demand.dhall`,
+`drop_etcd_churn.dhall` or `drop_etcd_model.dhall` reject before apply.
+
+Pure `provision` seals the desired/prior planned epochs and their planned node aggregates. Snapshot-bound live
+preflight then joins the exact survivor/reservation inventory, constructs the observed-UID node aggregates,
+and refuses any mismatch before the first Pod or store mutation.
+The private projections alone render the Pod resources, image digest, volume limits, mapped payloads,
+placement and storage objects. Live readback must match the projection exactly: container resources and image
+ID, Pod overhead, `emptyDir.sizeLimit`, mapped-file payload/accounting, writable/log high-water, placement,
+observed-Pod-UID runtime-metadata component/role/backing rows and node scope aggregate, Pod/IP and CSI-slot use, workflow
+orchestrator/standby/gateway/collector envelopes, Pulsar topic/backlog/offload,
+and object-store resident/transient extents. The Phase-0 negative bundle lowers CPU,
+memory, logical ephemeral, every routed physical backing, runtime-metadata shape/component/role and grouped backing,
+image/pull workspace, pod/IP slots, CSI slots (on a
+matched PVC-bearing fixture), each resident output object and object-store workspace, or host-harness CPU,
+memory, capture/log/scratch, plus each workflow/topic/gateway/collector axis by one
+unit/byte and expects a tagged pre-effect `Left`. The committed
+`test/mutants/phase_31/drop_run_resource_envelope.dhall`, `drop_host_harness_envelope.dhall`, and
+`early_fresh_run.dhall` mutants respectively omit one run's Pod row, omit the probe/harness host row, and
+launch the successor before the predecessor is observed gone. All must turn the resource gate red even if the
+output bytes happen to match; `drop_workflow_gateway_collector.dhall` separately omits one Phase-25 runtime/
+mutation unit and must also fail. Dropping the largest simultaneous metadata row, changing/omitting the selected
+node's pinned model, dropping/swapping a role, mismatching the planned/observed domain, overlapping/leaking
+qualified Pod/image ownership, double-debiting an alias, or shortening either SplitRuntime backing by one byte
+must fail before a Pod effect as well.
 
 ## Doctrine adopted
 
@@ -144,7 +234,7 @@ names the section it implements; individual sprints cite the same sections where
 
 ## Sprints
 
-## Sprint 24.1: `ContentAddress` typeclass kernel primitive 📋
+## Sprint 31.1: `ContentAddress` typeclass kernel primitive 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Kernel/ContentAddress.hs` (target path; not yet built)
@@ -196,11 +286,11 @@ lift Phase 25's concrete blob/manifest key renderers into a kernel-level `Conten
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 24.2: `experimentHash` identity over the live substrate fingerprint 📋
+## Sprint 31.2: `experimentHash` identity over the live substrate fingerprint 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Kernel/ExperimentHash.hs` (target path; not yet built)
-**Blocked by**: Sprint 24.1; Phase 14 gate (substrate detection — the linux-cpu substrate fingerprint gathered
+**Blocked by**: Sprint 31.1; Phase 14 gate (substrate detection — the linux-cpu substrate fingerprint gathered
 by full-path probes); Phase 4 gate (the resolved-`.dhall` normal form)
 **Independent Validation**: unit tests prove `experimentHash` is a pure function of `(resolved-dhall,
 substrate-fingerprint)` and re-derives identically across re-evaluation. The substrate fingerprint conforms to
@@ -218,7 +308,7 @@ same host MUST fold to the identical digest.
 ### Objective
 Adopt [`content_addressing_doctrine.md §3 — experimentHash: identity is what was requested ‖ where it ran`](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran):
 implement the run identity that folds the resolved program and the substrate fingerprint into one digest,
-consuming the Phase-4 normal form and the Phase-13 full-path substrate probe, per the substrate doctrine's
+consuming the Phase-4 normal form and the Phase-14 full-path substrate probe, per the substrate doctrine's
 no-env/no-`PATH` contract.
 
 ### Deliverables
@@ -247,7 +337,7 @@ no-env/no-`PATH` contract.
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 24.3: SplitMix seed derivation, worker-count-independent 📋
+## Sprint 31.3: SplitMix seed derivation, worker-count-independent 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Kernel/Rng.hs` (target path; not yet built)
@@ -284,17 +374,20 @@ per-stream seed reachable only through one total function.
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 24.4: The live same-substrate reproducibility gate 📋
+## Sprint 31.4: The live same-substrate reproducibility gate 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Kernel/Determinism.hs`, `test/dhall/phase_31_determinism_repro.dhall`, `test/live/DeterminismReproSpec.hs` (target paths; not yet built)
-**Blocked by**: Sprint 24.1; Sprint 24.2; Sprint 24.3; Phase 25 gate (the content store + workflow runtime the
+**Implementation**: `src/Amoebius/Kernel/Determinism.hs`, `test/dhall/phase_31_determinism_repro.dhall`,
+`test/live/DeterminismReproSpec.hs`, and `test/live/DeterminismRuntimeStorageSpec.hs` (planned-slot→observed-UID
+join, component role/layout backing, scope/domain/ownership/grouping, reservation/observed no-double-debit,
+SplitRuntime one-byte-short and alias controls) (target paths; not yet built)
+**Blocked by**: Sprint 31.1; Sprint 31.2; Sprint 31.3; Phase 25 gate (the content store + workflow runtime the
 gate workload runs on); Phase 14 gate (the live single-node `kind` cluster and the substrate fingerprint)
 **Independent Validation**: a `.dhall` workflow runs a minimal seeded compute stage twice on linux-cpu. Run 2
-is an **independent fresh recomputation** (§M.6), not a store hit: it executes in a fresh pod against a
-run-isolated staging namespace with the output key provably absent until the stage completes and writes, and
-the harness asserts — from the OS-boundary observer (§M.5), an argv/exec shim or `strace` on the compute pod —
-that the pure stage actually executed on run 2 before any read of the output key. The harness fetches both
+is an **independent fresh recomputation** (§M.6), not a store hit: each fresh Pod has a distinct
+`<experimentHash>/<runId>` staging prefix with an absent output key, run 2 cannot read run 1's retained prefix
+until its stage completes and writes, and the harness asserts that boundary from an OS observer (§M.5), an
+argv/exec shim or `strace` on the compute Pod. The harness retains and fetches both exact object sets and
 blobs itself and does an **out-of-band byte comparison**; a `412`/`If-None-Match` result on the second PUT is
 never read as equality. It then asserts (a) byte-identical output under an unchanged `experimentHash`; (b)
 seed-sensitivity and input-sensitivity per the committed `..._alt_seed.dhall` and `..._alt_input.dhall`
@@ -316,7 +409,7 @@ reproducibility as the phase gate without overclaiming cross-substrate equality.
 ### Deliverables
 - A pure seeded compute stage (`Determinism.hs`) taking a content-addressed input, a request, and a derived
   SplitMix seed, with all I/O at the interpreter boundary.
-- The gate `.dhall` (`test/dhall/phase_31_determinism_repro.dhall`) that spins up the Phase-23 workflow, runs
+- The gate `.dhall` (`test/dhall/phase_31_determinism_repro.dhall`) that spins up the Phase-25 workflow, runs
   the stage twice, stores each output as a content-addressed blob under its `experimentHash` namespace, tears
   down, and compares outputs.
 - A ledger artifact recording: identity/seed totality as **proven-in-types**, same-substrate reproduction as
@@ -329,10 +422,10 @@ reproducibility as the phase gate without overclaiming cross-substrate equality.
   `strace`) that witnesses run 2's fresh compute and the fresh-pod output-key absence (§M.5, §M.6).
 
 ### Validation
-1. Two runs with the same `experimentHash` on linux-cpu produce byte-identical output, where run 2 is a fresh
-   recomputation in a fresh pod against a run-isolated staging namespace (output key provably absent until the
-   stage writes) and the OS-boundary observer (§M.5) confirms the stage executed on run 2 before any read of the
-   output key. The comparison is an **out-of-band harness byte compare** of both fetched blobs — never a `412`
+1. Two runs with the same `experimentHash` on linux-cpu produce byte-identical output, where both fresh Pods
+   write distinct `<experimentHash>/<runId>` prefixes with initially absent keys and run 2 cannot read run 1's
+   retained prefix until its stage writes. The OS-boundary observer (§M.5) confirms that boundary. The
+   comparison is an **out-of-band harness byte compare** of both retained/fetched blobs — never a `412`
    on the second PUT, which proves store dedup, not reproduction (§M.6).
 2. Output is a genuine function of the machinery: the `..._alt_seed.dhall` run and the `..._alt_input.dhall` run
    each produce **different** output bytes from the base run (asserted on the stored blobs). A stage whose output
@@ -362,11 +455,11 @@ The whole sprint (📋 Planned).
   `experimentHash` is first exercised here, gathered by full-path probes with no env/`PATH` read.
 
 **Cross-references to add:**
-- `DEVELOPMENT_PLAN/README.md` — flip the Phase-24 status when the gate passes; link this document.
+- `DEVELOPMENT_PLAN/README.md` — flip the Phase-31 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — record Phase 31's gate substrate (linux-cpu) in the per-phase substrate map.
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Kernel/ContentAddress.hs`,
   `src/Amoebius/Kernel/ExperimentHash.hs`, `src/Amoebius/Kernel/Rng.hs`, `src/Amoebius/Kernel/Determinism.hs`,
-  and the `DeterminismReproSpec` live suite as Phase-24 design-first rows.
+  and the `DeterminismReproSpec` live suite as Phase-31 design-first rows.
 
 ## Related Documents
 - [README.md](README.md) — the live tracker and phase ordering this document sits under

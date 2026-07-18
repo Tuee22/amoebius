@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, documents/README.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, documents/README.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: The mechanism slice of the illegal-state catalog — the seven reusable typing techniques that
@@ -56,9 +56,11 @@ added for the capacity / topology / bounded-storage block ([§3.13](./illegal_st
 ### 4.1 PVC↔PV binding by construction
 
 *Principle:* don't declare two things and hope they match — declare **one** thing that emits the matched
-pair. *Mechanism:* a single `BoundVolume` smart constructor takes one size (a refined non-zero quantity)
-and emits *both* the StatefulSet claim request *and* the exactly-matching `no-provisioner` PV, sharing size
-and access mode, named `<namespace>/<statefulset>/pv_<integer>`. There is no constructor for a bare PVC and
+pair. *Mechanism:* a single `BoundVolume` smart constructor takes one private `ProvisionedVolumeDemand`,
+already derived from required usable bytes through presentation overhead and backing allocation
+minimum/quantum, and emits *both* the StatefulSet claim request and the exactly-matching `no-provisioner` PV.
+They share its backing-rounded `provisionedBytes`, presentation/access mode, and deterministic
+`<namespace>/<statefulset>/pv_<integer>` identity. There is no constructor for a bare PVC and
 none for a free-floating PV, so [§3.1](./illegal_state_storage.md#31-bad--illegal-durable-storage) and [§3.2](./illegal_state_storage.md#32-pvcs-that-dont-bind-pvs) have no inhabitants. The *binding* is the value. The retain,
 sizing, and deterministic-rebind rules are owned by
 [`storage_lifecycle_doctrine.md`](../engineering/storage_lifecycle_doctrine.md); this doc owns only the
@@ -117,32 +119,68 @@ technique* — names are derived, never asserted.
 
 ### 4.6 Capacity accounting — placement witness (compute) and summed demand within capacity (storage), checked
 
-*Principle:* an aggregate `Σ demand ≤ Σ capacity` is **necessary but not sufficient** for compute — pods are
-**atomic and cannot straddle nodes**, so a set can fit in aggregate yet leave a single pod that fits no node
-(3×4-CPU nodes admit a 5-CPU pod by the sum; it is `Pending` forever). So the compute check is a **placement**,
-not a sum, while genuinely divisible storage/retention stays a `Σ`. *Mechanism:* two shapes selected by
-topology ([`resource_capacity_doctrine.md §4.1`](../engineering/resource_capacity_doctrine.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope)):
-a **fixed** node set → a first-fit-decreasing **witness bin-pack** honoring per-node allocatable, affinity/taints
-(`podFits`), and anti-affinity, returning a concrete `Placement` or `Left Unschedulable`; an **elastic** node
-set → a **sound growth envelope** (each pod fits the largest candidate instance; the worst-case *instance
-count* — atomic-pod fragmentation, N pods each forcing their own instance, not merely Σ at max scale — stays ≤
-quota) that never admits a spec the autoscaler cannot grow to satisfy, sound-not-complete like the bin-pack.
-Single-owner *carves* below the cluster (VM out of host) stay pure subtractions;
-storage is `Σ(sizes) ≤ backing`. It nests — host → VM → guest, **host → host-worker** (a native accelerator
-subprocess folded against its physical-host `Capacity`, [§3.29](./illegal_state_capacity.md#329-a-host-worker-whose-demand-overflows-its-physical-host)),
-cluster → workload, and **accelerator-worker → served-model** (a `Σ served-model VRAM ≤ node vram` sub-budget the
-wholesale accelerator owner carves, [§3.30](./illegal_state_capacity.md#330-a-served-model-whose-vram-footprint-exceeds-node-vram)) — and **re-runs** after any
-[§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) `Growable` policy grows the
-bound. Distinct from [§4.4](#44-ownership-indices--single-owner-ssot-structurally) (which checks
-single-ownership, not arithmetic). **Honesty:** this technique is **irreducibly decode-foreclosed** — Dhall has no
-dependent arithmetic, so both "a feasible packing exists" and `Σ ≤ cap` are *checked rejections of a
-constructible value*, never an absence of inhabitants; any entry claiming a capacity/storage/retention check is
-type-foreclosed is dishonest. The compute bin-pack is additionally **sound-not-complete** (NP-hard, so a heuristic
-that may false-reject a packable spec but never admits an unplaceable one); the storage `Σ` carries no such
-caveat. The model (`Capacity`/`Demand`/`Budget`, `podFits`/`place`, the static-vs-elastic branch, the
-`StorageBudget` and `Growable` unions, the two-ceiling Pulsar fold, and the declared-vs-probed *allocatable*
-cross-check) is owned by [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md); this doc owns only
-the *technique*. Forecloses [§3.17](./illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)–[§3.21](./illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy), [§3.27](./illegal_state_capacity.md#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing), and this round's [§3.29](./illegal_state_capacity.md#329-a-host-worker-whose-demand-overflows-its-physical-host)–[§3.30](./illegal_state_capacity.md#330-a-served-model-whose-vram-footprint-exceeds-node-vram) (the host→host-worker and accelerator-worker→served-model arms).
+*Principle:* every provision axis keeps the arithmetic and placement semantics of the physical thing it
+represents; there is no misleading scalar called merely “resources” or “storage.” An aggregate
+`Σ demand ≤ Σ capacity` is **necessary but not sufficient** for atomic workloads — pods cannot straddle nodes,
+and an unsharded accelerator demand cannot straddle arbitrary devices. A cluster of 4-CPU nodes does not fit a
+5-CPU pod; two 24-GiB GPUs do not fit an unsharded 40-GiB demand. Conversely, genuinely shared byte pools are
+checked by sums, but only after every consumer is assigned to the named physical pool it actually debits.
+
+*Mechanism:* the final check runs after capability/provider/shape expansion and before rendering. It consumes
+the entire bound deployment and target inventory, and success alone constructs a private
+`ProvisionedSpec`; `renderAll` cannot accept a raw or merely bound spec.
+
+- **Pod reservation and placement:** the effective pod request covers CPU, memory, and pod
+  `ephemeral-storage`, including init-container maxima and declared pod overhead. A **fixed** node set produces
+  a concrete pod/owner→node witness honoring allocatable resources, affinity/taints, anti-affinity, and
+  accelerator capability. An **elastic** set proves that every atomic workload fits at least one compatible
+  candidate class and that the worst-case instance count stays within quota.
+- **Finite limits and physical peaks:** memory and pod-ephemeral limits are folded separately from scheduler
+  requests. This prevents a requests-only proof from claiming physical sufficiency. Memory remains a reactive
+  kernel boundary; pod ephemeral storage remains a kubelet measurement/eviction boundary, while owner
+  admission and routed backing capacity provide hard materialization/physical bounds.
+- **Storage pools:** disk-backed pod volumes, OCI content/snapshots, native host-worker cache, durable claims,
+  and system/VM reserve are assigned to typed pool/backing identities. A closed kubelet layout routes pod/image
+  operands to the real nodefs/imagefs identities; only its required aliases are legal. Consumers of one pool
+  sum together; declared disjoint pools must carve within the physical disk. The in-cluster cache owner proves
+  `ProvisionedCacheDemand.derivedPeak ≤ CacheBudget ≤ emptyDir.sizeLimit`, while its disk-backed volume bounds plus writable/log
+  headroom fit `ownerPod.ephemeralStorage.request ≤ ownerPod.ephemeralStorage.limit`; that pod envelope is
+  charged once to node ephemeral storage, never another pool sum. Durable cloud backing remains distinct from
+  node-root or instance-ephemeral storage. Logical durable demand is not compared directly to a disk:
+  BookKeeper write-quorum/recovery and MinIO erasure/healing/metadata geometry, bounded in-flight/orphan
+  exposure, filesystem presentation overhead, backing/provider allocation quantum, and uniform
+  claim-template rounding first produce per-backing raw claims with witnessed usable capacity. Fault cases are
+  derived exhaustively from finite policy bounds, not caller-selected.
+- **Host/engine/fabric work:** image builds declare CPU/memory reservation+ceiling, scratch, cache, and
+  concurrency; engine reserve is the sum of required named static processes plus enforceable
+  backend/max-WAL/snapshot-save/defrag and Event/audit/runtime-log retention; the exact peer graph and finite
+  traffic/queue policy derive network CPU/memory/log demand. None is an invisible host allowance.
+- **Monitoring/registry/Vault:** complete source operands derive Prometheus CPU/memory and TSDB storage,
+  registry resident/upload/failed-partial peaks, and Vault Raft/audit peaks. Fixed resources or caller-authored
+  aggregates cannot bypass those costs.
+- **Accelerators:** demand and offering form an explicit relation over family/profile and whole-device count.
+  CUDA demand on a target with no compatible CUDA offering returns `Left MissingCapability Cuda`; there is no
+  implicit CPU fallback. CUDA memory is placed against a concrete per-device raw/reserved/net-allocatable
+  VRAM vector (and live current-free residual) plus any explicit
+  supported sharding plan. Apple Metal debits the same physical unified-memory pool as the VM and host worker.
+- **Nesting:** the same discipline composes physical host → VM + host workers + cache/system reserve,
+  VM → guest node allocatable, cluster → workloads, accelerator owner → serving/training/JIT envelopes, and
+  storage backing → claims. It re-runs after any `Growable` policy changes a bound.
+
+The two topology shapes are specified by
+[`resource_capacity_doctrine.md §4.1`](../engineering/resource_capacity_doctrine.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope).
+Distinct from [§4.4](#44-ownership-indices--single-owner-ssot-structurally), which proves ownership rather than
+fit. **Honesty:** this technique is **irreducibly decode-foreclosed** — Dhall has no dependent arithmetic, so
+“a feasible placement exists,” device placement, and every `Σ ≤ cap` are checked rejections of constructible
+values, never an absence of inhabitants. The fixed placement heuristic and elastic envelope may conservatively
+reject a feasible deployment but must never admit an infeasible one. The model
+(`ResourceEnvelope`/`Capacity`, `podFits`/`place`, named storage pools/backings, accelerator offerings,
+per-device memory, `ProvisionedSpec`, `Growable`, and the declared-vs-observed pre-mutation cross-check) is
+owned by [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md); this document owns
+only the technique. It forecloses
+[§3.17](./illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)–[§3.21](./illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy),
+[§3.27](./illegal_state_capacity.md#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing),
+and [§3.29](./illegal_state_capacity.md#329-a-host-worker-whose-demand-overflows-its-physical-host)–[§3.30](./illegal_state_capacity.md#330-a-served-model-whose-vram-footprint-exceeds-node-vram).
 
 ### 4.7 Compatibility / topology relations by construction over a collection
 
@@ -164,7 +202,9 @@ the engine↔substrate check, owned by
 [`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) and
 [`service_capability_doctrine.md`](../engineering/service_capability_doctrine.md). And the rke2 **server/agent** inventory
 ([§3.24](./illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain), [§3.16](./illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused)) is this same collection shape with a *closed-cardinality* server set (`Rke2Servers`, type-foreclosed)
-plus a variable `agents` list whose host-distinctness runs over `servers ∪ agents` (a decode-foreclosed fold).
+plus `Rke2AgentPool = Fixed [LinuxHost] | Autoscaled { floor, policy }`; host-distinctness runs over
+`servers ∪ agentFloor` (a decode-foreclosed fold), while future autoscaled nodes are covered by compatible
+candidate templates and a finite quota rather than fictitious concrete host identities.
 This round extends the same **relation-over-a-collection** shape to two further collections. **(i)** The
 **wholesale accelerator owner** is a per-node ownership index ([§4.4](#44-ownership-indices--single-owner-ssot-structurally))
 over the node's accelerators, so two owners on one node or a per-pod fractional claim has no inhabitant
@@ -198,13 +238,13 @@ Forecloses [§3.13](./illegal_state_topology.md#313-a-compute-engine-incompatibl
 | 3.8 Cross-tenant refs / literal secrets | 4.2 phantom tenant tags + capabilities | [vault_pki](../engineering/vault_pki_doctrine.md) |
 | 3.9 Plaintext spec at rest | 4.5 envelope handle (+ runtime decrypt-in-process) | [vault_pki §4](../engineering/vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init), [pulumi_iac §2](../engineering/pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio) |
 | 3.10 Child spec beyond its subtree | 4.2 subtree/tenant tags + 4.4 ownership indices | [cluster_lifecycle §3](../engineering/cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest), [dsl_doctrine](../engineering/dsl_doctrine.md), [vault_pki §6](../engineering/vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes) |
-| 3.11 Unsafe workload (no limits / securityContext) | 4.1 required-field-by-construction | [manifest_generation](../engineering/manifest_generation_doctrine.md), [platform_services §10](../engineering/platform_services_doctrine.md#10-every-container-declares-cpu-and-ram) |
+| 3.11 Unsafe/incompletely provisioned workload | 4.1 required envelope + private provisioned-render boundary | [manifest_generation](../engineering/manifest_generation_doctrine.md), [platform_services §10](../engineering/platform_services_doctrine.md#10-every-container-declares-cpu-and-ram), [resource_capacity](../engineering/resource_capacity_doctrine.md) |
 | 3.12 App names a product not a capability | 4.2 closed capability union | [service_capability](../engineering/service_capability_doctrine.md) |
 | 3.13 Engine incompatible w/ substrates; managed provider first-class | 4.7 relation-over-collection + 4.2 closed union + 4.4 node inventory | [cluster_topology](../engineering/cluster_topology_doctrine.md) |
 | 3.14 rke2/kind on a host with no Linux node / no VM | 4.3 `LinuxHost` witness | [cluster_topology](../engineering/cluster_topology_doctrine.md), [substrate §4](../engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux) |
 | 3.15 Multi-node kind not on a single host | 4.1 one `host` field | [cluster_topology](../engineering/cluster_topology_doctrine.md) |
 | 3.16 Multi-node rke2 w/ fewer hosts than nodes / host reused | 4.1 `node==host` + 4.4 distinctness fold | [cluster_topology](../engineering/cluster_topology_doctrine.md) |
-| 3.17 Over-committed host / VM / cluster (aggregate Σ) | 4.6 capacity fold (Σ demand ≤ capacity) | [resource_capacity](../engineering/resource_capacity_doctrine.md) |
+| 3.17 Over-committed host / VM / cluster / storage pool | 4.6 reservation + finite-limit/physical-peak + named-pool folds | [resource_capacity](../engineering/resource_capacity_doctrine.md) |
 | 3.18 Unbounded storage anywhere | 4.2 closed `StorageBacking` + 4.6 aggregate | [storage_lifecycle §5.2](../engineering/storage_lifecycle_doctrine.md#52-the-storage-backing-is-bounded--the-closed-storagebacking-union), [resource_capacity](../engineering/resource_capacity_doctrine.md) |
 | 3.19 App consuming more storage than backing (MinIO & Pulsar) | 4.6 cumulative fold + 4.2 Growable gate | [resource_capacity](../engineering/resource_capacity_doctrine.md), [content_addressing](../engineering/content_addressing_doctrine.md), [pulsar_client](../engineering/pulsar_client_doctrine.md) |
 | 3.20 Pulsar topic w/o bounded/tiered/retained policy | 4.1 mandatory RetentionPolicy + size offload + 4.6 room-fit | [pulsar_client §6](../engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra), [resource_capacity](../engineering/resource_capacity_doctrine.md) |
@@ -214,10 +254,10 @@ Forecloses [§3.13](./illegal_state_topology.md#313-a-compute-engine-incompatibl
 | 3.24 Even/zero-server rke2 control plane (no etcd quorum) | 4.2 closed `Rke2Servers` union (no even/zero arm) | [cluster_topology](../engineering/cluster_topology_doctrine.md) |
 | 3.25 ML asset fetched/built at startup; unready or unlanded model | 4.2 closed `EngineRuntime` (no `Url` arm) + 4.3 `.ready`-gated `ArtifactRef` + 4.7 model↔engine relation | [content_addressing](../engineering/content_addressing_doctrine.md), [service_capability](../engineering/service_capability_doctrine.md) |
 | 3.26 Unverified environment promotion (promote→prod) | 4.3 evidence-gated `PromotionGate` handle | [release_lifecycle](../engineering/release_lifecycle_doctrine.md) |
-| 3.27 Schedulable-in-aggregate but unplaceable pod (atomic-pod placement; wholesale-per-node accelerators) | 4.6 placement fold (witness bin-pack / growth envelope) | [resource_capacity §4.1](../engineering/resource_capacity_doctrine.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope), [cluster_topology](../engineering/cluster_topology_doctrine.md) |
-| 3.28 Two accelerator owners on one node / fractional accelerator claim | 4.4 per-node ownership index + 4.2 closed worker-kind union | [daemon_topology](../engineering/daemon_topology_doctrine.md), [resource_capacity](../engineering/resource_capacity_doctrine.md) |
-| 3.29 Host worker Demand overflowing its physical host | 4.6 host→host-worker capacity fold | [resource_capacity](../engineering/resource_capacity_doctrine.md), [substrate](../engineering/substrate_doctrine.md), [platform_services §10](../engineering/platform_services_doctrine.md#10-every-container-declares-cpu-and-ram) |
-| 3.30 Served model VRAM footprint exceeding node VRAM | 4.6 accelerator-worker→served-model Σ + 4.2 unified-vs-discrete Capacity | [substrate](../engineering/substrate_doctrine.md), [resource_capacity](../engineering/resource_capacity_doctrine.md), [service_capability](../engineering/service_capability_doctrine.md) |
+| 3.27 Aggregate-fit deployment with no capable placement | 4.6 pod/device witness or candidate growth envelope | [resource_capacity §4.1](../engineering/resource_capacity_doctrine.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope), [cluster_topology](../engineering/cluster_topology_doctrine.md) |
+| 3.28 Two accelerator owners / ordinary or fractional claim | 4.4 per-node ownership index + derived whole-device projection | [daemon_topology](../engineering/daemon_topology_doctrine.md), [resource_capacity](../engineering/resource_capacity_doctrine.md) |
+| 3.29 Host worker/VM/cache demand overflowing its physical host | 4.6 physical-host carve across CPU/memory/unified-memory/storage | [resource_capacity](../engineering/resource_capacity_doctrine.md), [substrate](../engineering/substrate_doctrine.md), [platform_services §10](../engineering/platform_services_doctrine.md#10-every-container-declares-cpu-and-ram) |
+| 3.30 Accelerator memory envelope cannot fit devices/unified memory | 4.6 per-device/sharding placement + aggregate/unified-memory debit | [substrate](../engineering/substrate_doctrine.md), [resource_capacity](../engineering/resource_capacity_doctrine.md), [service_capability](../engineering/service_capability_doctrine.md) |
 | 3.31 Capacity/workload fold spanning two clusters | 4.7 single-`Topology` arity (no cross-cluster fold) | [resource_capacity](../engineering/resource_capacity_doctrine.md), [single_logical_data_plane](../engineering/single_logical_data_plane_doctrine.md) |
 | 3.32 Continuous run w/o cadence / feed w/o bounded retention | 4.2 closed `TrainBudget`/`Feed` unions + 4.6 retention room-fit | [content_addressing](../engineering/content_addressing_doctrine.md), [resource_capacity](../engineering/resource_capacity_doctrine.md), [pulsar_client §6](../engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra) |
 | 3.33 Non-deterministic multi-partition training feed | 4.2 merge-witness union + 4.3 `Feed` handle gating | [content_addressing](../engineering/content_addressing_doctrine.md), [pulsar_client §6](../engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra) |
@@ -250,10 +290,14 @@ are three layers, and a conformant claim names which one it is reaching:
 1. **`type-foreclosed` — uninhabitable by type.** The illegal value has *no constructor* — the strongest layer. A cross-tenant
    reference ([§3.8](./illegal_state_security.md#38-cross-tenant-references-and-literal-secrets)) and a bare PVC ([§3.2](./illegal_state_storage.md#32-pvcs-that-dont-bind-pvs)) are meant to live here. The "proof" is type-inhabitance, checked
    by Dhall + GHC at the spec/code layer.
-2. **`decode-foreclosed` — rejected by total decode-time check.** A looser type *can* hold the value, but a **total** smart
-   constructor or fold rejects it during decode (e.g. a value-level ownership double-claim, [§4.4](#44-ownership-indices--single-owner-ssot-structurally); a size
-   that fails its refinement). This is still a *spec-layer* guarantee — the spec never reaches the
-   interpreter — but it is a *checked rejection*, not an absence of inhabitants. Call it that.
+2. **`decode-foreclosed` — rejected by a total pure construction check before effects.** This historical
+   layer name covers constructible values rejected by a **total** smart constructor or fold: some checks run
+   in the Gate-2 decoder, while whole-deployment/resource checks run only after bind/expand at the
+   `provision-seal` locus. A value-level ownership double-claim ([§4.4](#44-ownership-indices--single-owner-ssot-structurally))
+   or a size refinement may be local to Gate 2; `Σ demand ≤ capacity` is not. This remains a *spec-layer*
+   guarantee — the value never reaches the interpreter — but it is a *checked rejection*, not an absence of
+   inhabitants. Always name the concrete validation locus so “decode-foreclosed” is never misread as
+   "`Dhall.inputFile` performed whole-deployment provisioning."
 3. **`runtime-checked` — enforced only at reconcile/runtime.** Some invariants (whether the LB actually comes up, whether the pod
    actually schedules, whether two clusters converge after a partition) cannot be settled by inspecting the
    spec at all. These are **not** in this catalog's promise; their verification is owned by
@@ -261,7 +305,8 @@ are three layers, and a conformant claim names which one it is reaching:
 
 **The two-tier mapping.** Layers 1–2 (`type-foreclosed` + `decode-foreclosed`) are the **Tier-1** design-time /
 in-process integrity band — the spec composes and the type discipline holds in the abstract — validated
-**in-process in the pre-cluster gates (Phases 4–7)** (Dhall Gate 1 `dhall type`, the Haskell decoder Gate 2, and QuickCheck). Layer 3
+**in-process in the pre-cluster gates (Phases 4–9)** (Dhall Gate 1, Haskell decoder Gate 2, QuickCheck,
+bind/expand, the opaque provision seal, and `renderAll` goldens). Layer 3
 (`runtime-checked`) is **Tier-2** runtime-enforcement integrity — that the running cluster enforces what the spec
 composed — and stays **deferred and UNVERIFIED** until its live real-resource phase (owned by
 [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the testing doctrine).
@@ -274,18 +319,22 @@ union's constructors, and the full "no illegal constructor" teeth land only at t
 (illegal already at the Dhall layer) and *Gate-2-must-fail-decode* (well-typed Dhall the decoder rejects), and never
 bill a Gate-2-only foreclosure as a Gate-1 type-check failure.
 
-Worked example of the discipline: **every container declares cpu/ram**
+Worked example of the discipline: **every execution unit declares a complete resource envelope**
 ([`platform_services_doctrine.md` §10](../engineering/platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)). As specified, a workload value
-*requires* a `Resources` field whose cpu and ram are refined non-zero quantities — type- or decode-foreclosed: a
-container with no resources is unrepresentable / rejected at decode. What the catalog does **not** claim is
-that the *running* pod's cgroup limits are honored by the kernel — that is runtime-checked, and amoebius does not
-assert it here. Stating the layer is what separates "illegal state is impossible" as an unqualified claim from
-a defensible boundary.
+*requires* a `ResourceEnvelope`: refined non-zero CPU, memory, and pod-ephemeral requests/limits for every
+container; explicit size bounds and single-debit nesting for disk-backed in-cluster scratch/cache; typed
+durable/native-host-cache backing; and an
+accelerator family/count/memory envelope where applicable. Missing fields fail Gate 1; incompatibility with
+the selected target fails at the post-bind `provision-seal` locus; only the resulting private `ProvisionedSpec`
+may render. What the catalog does **not** claim is that the running kernel, kubelet, device plugin, storage
+driver, or cloud quota honors those declarations — that is runtime-checked. Stating the layer is what
+separates “illegal state is impossible” as an unqualified claim from a defensible boundary.
 
-Second worked example, the one the [§3.13](./illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](./illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration) block turns on: **capacity sums are the canonical decode-foreclosed
-case, and saying otherwise is dishonest.** `Σ demand ≤ capacity` ([§3.17](./illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)), `Σ(PV caps) ≤ backing` ([§3.18](./illegal_state_storage.md#318-unbounded-storage-anywhere)),
-the store-size fold ([§3.19](./illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)), the Pulsar room-fit ([§3.20](./illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)), and the rke2 host-distinctness check ([§3.16](./illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused)) are
-all **total decode-time rejections of constructible values** — because capacity is a *value*, not a type
+Second worked example, the one the [§3.13](./illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](./illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration) block turns on: **capacity sums/placements are the canonical checked-rejection case, at the post-bind
+`provision-seal` locus, and saying they are uninhabitable or caught by `Dhall.inputFile` is dishonest.**
+`Σ demand ≤ capacity` ([§3.17](./illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)), final physical `Σ(PV caps) ≤ backing` ([§3.18](./illegal_state_storage.md#318-unbounded-storage-anywhere)),
+the logical→physical store placement ([§3.19](./illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)), the Pulsar room-fit ([§3.20](./illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)), and the rke2 host-distinctness check ([§3.16](./illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused)) are
+all **total pure provisioning rejections of constructible values** — because capacity is a *value*, not a type
 index, and Dhall has no dependent arithmetic to make `Σ ≤ cap` a statement about inhabitance ([§4.6](#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)). By
 contrast, the type-foreclosed "no constructor" examples are the topology *witnesses* ([§3.14](./illegal_state_topology.md#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm) `LinuxHost`, [§3.15](./illegal_state_topology.md#315-a-multi-node-kind-cluster-not-on-a-single-linux-host)
 one-host `Kind`), the *derived* toleration ([§3.22](./illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration)), the mandatory-shape unions ([§3.20](./illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle) non-optional
@@ -298,7 +347,7 @@ growing capacity, and the cloud honoring the quota — are always runtime-checke
 [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the testing doctrine, never asserted here.
 
 > **Honesty.** amoebius has built no phase yet. Every `type-foreclosed` and `decode-foreclosed` claim above is the *intended*
-> **Tier-1** (design-time / in-process) property of the type discipline — targeted for in-process validation in the **pre-cluster gates (Phases 4–7)**,
+> **Tier-1** (design-time / in-process) property of the type discipline — targeted for in-process validation in the **pre-cluster gates (Phases 4–9)**,
 > not a tested result; the **Tier-2** `runtime-checked` residue is explicitly deferred to its live phase. Where a technique
 > generalizes a behaviour proven in prodbox (single-owner SSoT, Keycloak-owns-ingress), that proof is
 > evidence from a sibling system, not proof in amoebius.
@@ -306,7 +355,8 @@ growing capacity, and the cloud honoring the quota — are always runtime-checke
 ### 6.1 The validation-locus axis — where each illegal state is caught (orthogonal to the foreclosure layer)
 
 The three foreclosure **layers** above classify *what kind of proof* forecloses an illegal state: type-inhabitance
-(`type-foreclosed`), a total decode-time rejection (`decode-foreclosed`), or reconcile/runtime enforcement
+(`type-foreclosed`), a total pure pre-effect rejection (`decode-foreclosed`, whose concrete locus may be
+Gate 2 or the provision seal), or reconcile/runtime enforcement
 (`runtime-checked`). A **second, orthogonal axis** — the **validation-locus** — classifies *where in the pipeline*
 the illegal state is actually caught, i.e. the concrete gate at which a test would observe the rejection. The two
 axes are independent: the *layer* answers "by what kind of check," the *locus* answers "at which stage a fixture
@@ -315,7 +365,7 @@ residue** — the physical fact the spec-layer check structurally cannot settle.
 [`illegal_state_catalog.md`](./illegal_state_catalog.md) carries a **`Validation-locus:`** line naming its loci,
 derived from — but not identical to — its `Layer:` tag.
 
-The four loci:
+The five loci:
 
 1. **`Gate-1-editor` — fails `dhall type` at authoring time.** The illegal spec is rejected by the Dhall
    type-checker *in the editor*, before any binary runs. This is where the **closed-union / no-arm**, **required-field**,
@@ -326,22 +376,29 @@ The four loci:
    It is the editor-time face of the `type-foreclosed` layer — subject to the Gate-1-vs-Gate-2 caveat above (Dhall
    has no opaque types, so a foreclosure that *reads* as type-level may only fully bite at Gate 2).
 2. **`Gate-2-decoder` — the total decoder returns `Left`.** Well-typed Dhall the Haskell **GADT** decoder or a
-   **total fold** rejects at `Dhall.inputFile` time: the phantom-index / GADT constructor-gating whose teeth Dhall
+   local smart constructor rejects at `Dhall.inputFile` time: the phantom-index / GADT constructor-gating whose teeth Dhall
    cannot express ([§4.1](#41-pvcpv-binding-by-construction)–[§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)),
-   the **ownership-fold** double-/missing-owner rejection ([§4.4](#44-ownership-indices--single-owner-ssot-structurally)),
-   and every **capacity / placement / retention fold** ([§4.6](#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)).
+   local refinements, and decoder-local ownership rejection
+   ([§4.4](#44-ownership-indices--single-owner-ssot-structurally)).
    It is the decoder-time face of `decode-foreclosed`, and — because Dhall exposes constructors — also where the
    residual teeth of the [§4.1](#41-pvcpv-binding-by-construction)–[§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
    `type-foreclosed` foreclosures actually land.
-3. **`rendered-output-golden` — caught by a golden test on the rendered manifest, not a cluster.** Some invariants are
-   properties of the **emitted objects**, observable after decode-and-render but before any apply: that every generated
-   workload carries the **hardened securityContext** ([§3.11](./illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)),
+3. **`provision-seal` — post-bind whole-deployment provisioning returns `Left`.** Gate 2 has already produced
+   decoded, unprovisioned declarations. Phase 8 expands the complete source set and `provision` runs every
+   capacity, placement, storage/retention, provider-quota, accelerator-count, and net-VRAM fold against the
+   exact target inventory. Failure returns `ProvisionError`; success alone constructs the opaque
+   `ProvisionedSpec`. This is the concrete locus for the whole-deployment face of `decode-foreclosed`.
+4. **`rendered-output-golden` — caught by a golden test on the rendered manifest, not a cluster.** Some invariants are
+   properties of the **emitted objects**, observable after
+   decode→bind/expand→plan/resolve-infrastructure→provision→renderAll but before any apply: that every generated
+   workload carries the **hardened securityContext and exact checked resource projection**
+   ([§3.11](./illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)),
    that the **NetworkPolicy set derived** from the declared dependency graph matches those edges
    ([§3.6](./illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other)), that **no emitted object opens a backdoor wild
    ingress** ([§3.7](./illegal_state_security.md#37-accidental-insecure--backdoor-ingress)). These are verified by a **golden test over the rendered
    manifest** — the "the generator only ever produces safe objects" claim, checked against the output artifact, never
    against a running cluster.
-4. **`live-effect` — observable only at reconcile/runtime.** The `runtime-checked` residue: whether the LB comes up,
+5. **`live-effect` — observable only at reconcile/runtime.** The `runtime-checked` residue: whether the LB comes up,
    the pod schedules, etcd forms and holds quorum, the Lima/WSL2 VM interposes, the autoscaler grows, the broker
    offloads to S3, the `drain-complete` edge is truthfully observed. **Not** in this catalog's promise; owned by
    [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the testing doctrine.
@@ -349,10 +406,12 @@ The four loci:
 Because the axes are orthogonal, a single entry commonly names several loci at once — e.g.
 [§3.43](./illegal_state_lifecycle.md#343-an-unmonitored-workflow-or-extension-or-an-unauthenticated-monitoring-surface) is `Gate-1-editor` (the mandatory
 monitor field, the absent `Off`/`Public` arms), `Gate-2-decoder` (the coverage / feasibility folds),
+`provision-seal` (whole-deployment resource feasibility),
 `rendered-output-golden` (the derived rules/panels in the emitted objects), and `live-effect` (that the alert actually
 fires) — and the foreclosure *layer* of each part is stated separately in the entry. The loci also map loosely onto
-the two-tier band: `Gate-1-editor`, `Gate-2-decoder`, and `rendered-output-golden` are **Tier-1** design-time /
-in-process gates (validated in the **pre-cluster band, Phases 4–7**), while `live-effect` is the **Tier-2** runtime-enforcement residue
+the two-tier band: `Gate-1-editor`, `Gate-2-decoder`, `provision-seal`, and `rendered-output-golden` are
+**Tier-1** design-time / in-process gates (validated in the **pre-cluster band, Phases 4–9**), while
+`live-effect` is the **Tier-2** runtime-enforcement residue
 deferred to its live phase.
 
 ### 6.2 The enumeration limit — the catalog is enumerated, not proven exhaustive
@@ -378,7 +437,8 @@ about the running cluster ([§2](./illegal_state_catalog.md#2-the-load-bearing-l
 - [The Illegal-State Catalog](./illegal_state_catalog.md) — the enumerated `### 3.x` illegal-state entries, the catalog index, and the load-bearing honesty limit ([§1](./illegal_state_catalog.md#1-illegal-states-fail-to-type-check)–[§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)) this doc's techniques foreclose
 - [DSL Doctrine](../engineering/dsl_doctrine.md) — the DSL surface and the contract ("a valid spec cannot represent illegal state") these techniques implement
 - [Storage Lifecycle Doctrine](../engineering/storage_lifecycle_doctrine.md) — PVC↔PV binding, sizing, retained PVs ([§4.1](#41-pvcpv-binding-by-construction))
-- [Platform Services Doctrine](../engineering/platform_services_doctrine.md) — gateway / ingress / NetworkPolicy / cpu-ram, the derived-toleration rule
+- [Platform Services Doctrine](../engineering/platform_services_doctrine.md) — gateway / ingress /
+  NetworkPolicy, complete execution-unit resource envelopes, and the derived-toleration rule
 - [Vault / PKI Doctrine](../engineering/vault_pki_doctrine.md) — `SecretRef`-by-name, parent→child injection, tenant trust tree ([§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable))
 - [Substrate Doctrine](../engineering/substrate_doctrine.md) — the node inventory / taints the [§4.4](#44-ownership-indices--single-owner-ssot-structurally)/[§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) folds read
 - [Resource Capacity Doctrine](../engineering/resource_capacity_doctrine.md) — the [§4.6](#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) capacity / placement folds

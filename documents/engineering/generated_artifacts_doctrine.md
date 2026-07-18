@@ -34,11 +34,11 @@ Each generated artifact names its typed source of truth and the pure renderer th
 
 | Generated artifact | Source of truth (committed) | Renderer | Owning doctrine |
 |---|---|---|---|
-| Kubernetes objects (Deployment/Service/RBAC/NetworkPolicy/HTTPRoute/…) | the typed `ServiceSpec` / `InForceSpec` | `render :: ServiceSpec -> [K8sObject]` (pure, total) | [manifest_generation_doctrine.md](./manifest_generation_doctrine.md) |
+| Kubernetes objects (Deployment/Service/RBAC/NetworkPolicy/HTTPRoute/…) | the opaque post-bind, capacity/capability-checked whole-deployment `ProvisionedSpec` derived from `InForceSpec` + target inventory | `renderAll :: ProvisionedSpec -> [K8sObject]` (pure, total; private service/global projections merge by object identity) | [manifest_generation_doctrine.md](./manifest_generation_doctrine.md) |
 | TLA+ `.tla` + `.cfg` | the reifiable Haskell `Model` | `emitTLA :: Model -> (Tla, Cfg)` | [formal_model_doctrine.md](./formal_model_doctrine.md) |
 | The Dhall schema (types the DSL is authored against) | the Haskell DSL ADTs | schema reflected from the types (the hostbootstrap `reflectedSchema` / prodbox `SchemaDhall` pattern) | [dsl_doctrine.md](./dsl_doctrine.md) |
 | PureScript frontend contract types | the Haskell app/workflow ADTs | `purescript-bridge` contract generation | [lift_and_compose_doctrine.md](./lift_and_compose_doctrine.md) |
-| The reconcile plan / `--dry-run` preview | the `chain :: cfg -> [Step]` value | `renderChainPlan` | [manifest_generation_doctrine.md](./manifest_generation_doctrine.md) |
+| The reconcile plan / `--dry-run` preview | the `chain :: cfg -> [Step]` value whose amoebius config contains the whole opaque `ProvisionedSpec` | `renderChainPlan` | [manifest_generation_doctrine.md](./manifest_generation_doctrine.md) |
 
 The common shape: a **pure, total function** from a committed typed value to text-or-objects. Because the
 renderer is pure, the artifact is a deterministic function of the source, and regenerating is free.
@@ -91,7 +91,7 @@ The rule is about *rendered* artifacts, not all non-Haskell files. The committed
   hand-written example. These are *inputs* an operator writes, not renderings of a Haskell value, so they are
   source and are committed. (The Dhall *schema* an `InForceSpec` is type-checked against is generated; the
   `InForceSpec` itself is authored.)
-- **Haskell source** — the DSL types, the `render`/`emitTLA`/`chain` functions, the `Model` values.
+- **Haskell source** — the DSL types, the `renderAll`/`emitTLA`/`chain` functions, the `Model` values.
 - **Documentation** — this doctrine suite.
 
 The line: if a human authors it, it is committed source; if a pure function renders it from committed source, it

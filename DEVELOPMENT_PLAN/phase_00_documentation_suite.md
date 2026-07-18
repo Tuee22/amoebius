@@ -31,8 +31,8 @@ tracker, and the target architecture/inventory/substrate documents — so every 
 name when it schedules adoption work.
 
 The suite is written to the reversed intent that governs the whole plan. The control-plane singleton is a
-Kubernetes Deployment with `replicas=1` whose single-instance is **delegated to k8s/etcd** (a k8s `Lease` if a
-hard lock is ever needed) — there is no bespoke election and no standby pod, and its durable state is the
+Kubernetes Deployment with `replicas=1` whose single-writer authority is **delegated to k8s/etcd through the
+mandatory reconciler `Lease`** — there is no bespoke election and no standby pod, and its durable state is the
 Vault-enveloped MinIO bucket, not a PVC. ML engines, models, and kernels are **named catalog identities**
 jit-resolved on first miss into a `CacheBudget`-bounded content-addressed cache — never baked, never
 URL-fetched. amoebius's one formal proof obligation is the **cross-cluster gateway migration**, both the
@@ -93,7 +93,9 @@ name.
   is versioned.
 - [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton) —
   *The control-plane singleton*: a Deployment `replicas=1`, stateless (no PVC), single-instance delegated to
-  k8s/etcd (§3.1, no bespoke election), durable state the Vault-enveloped MinIO bucket.
+  k8s/etcd through the mandatory reconciler Lease (§3.1, no bespoke election), durable state the
+  Vault-enveloped MinIO bucket; §3.3 separately owns the same-binary capacity-scheduler role with no singleton
+  or secret authority.
 - [`content_addressing_doctrine.md §4.5`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) —
   *The ML-asset lifecycle*: each engine/model/kernel is a named catalog identity the shared `jit-build` resolver
   materializes on first miss into a `CacheBudget`-bounded content-addressed cache — never baked, never
@@ -267,8 +269,8 @@ bootstrap reference (not restate) the capability and Pulsar surfaces from Sprint
 ### Objective
 
 Adopt [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton) —
-*The control-plane singleton* (Deployment `replicas=1`, single-instance delegated to k8s/etcd, no election, no
-PVC) — and
+*The control-plane singleton* (Deployment `replicas=1`, mandatory Lease, no bespoke election, no PVC) — plus
+§3.3's separate same-binary capacity-scheduler role — and
 [`content_addressing_doctrine.md §4.5`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) —
 *The ML-asset lifecycle*: write the secrets/IaC and runtime/transport/determinism layers. The bootstrap doctrine
 records that the pre-binary **midwife is a Python `pb` CLI** (two modes: midwife and admin-REST client), not a
@@ -278,8 +280,8 @@ jit-resolved-cache intent.
 ### Deliverables
 
 - `vault_pki_doctrine.md`, `pulumi_iac_doctrine.md` (in-cluster-only Pulumi, MinIO+Vault-envelope backend).
-- `daemon_topology_doctrine.md` (the three contexts; the `replicas=1` singleton delegated to k8s/etcd, no
-  bespoke election; worker roles), `host_cluster_comms_doctrine.md`, `bootstrap_sequence_doctrine.md` (the `pb`
+- `daemon_topology_doctrine.md` (the three contexts; the `replicas=1` singleton under its mandatory Lease, no
+  bespoke election; separate capacity-scheduler and worker roles), `host_cluster_comms_doctrine.md`, `bootstrap_sequence_doctrine.md` (the `pb`
   midwife + admin-REST client), `network_fabric_doctrine.md`.
 - `pulsar_client_doctrine.md` (native protocol, CBOR-only payloads), `content_addressing_doctrine.md`
   (three-tier store, `experimentHash`, the jit-resolved `CacheBudget`-bounded engine cache),

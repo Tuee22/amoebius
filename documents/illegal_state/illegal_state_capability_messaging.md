@@ -22,8 +22,9 @@ The **catalog index** (the enumerated list of every illegal state) and the **hon
 type-check proves the specification composes, never that the running cluster enforces it) are owned by
 [`illegal_state_catalog.md`](./illegal_state_catalog.md) — referenced here, not restated. The **seven typing
 techniques**, the **coverage matrix**, the **three foreclosure layers**, and the orthogonal
-**validation-locus axis** (`Gate-1-editor` / `Gate-2-decoder` / `rendered-output-golden` / `live-effect`)
-are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md) — likewise referenced, not
+**validation-locus axis** (`Gate-1-editor` / `Gate-2-decoder` / `provision-seal` /
+`rendered-output-golden` / `live-effect`; `provision-seal` is post-bind Phase-8 provision returning a
+`ProvisionError` before any `ProvisionedSpec` exists) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md) — likewise referenced, not
 restated. Each entry below names its owning doctrine, which remains the SSoT for the normative rule.
 
 Everything below is **design intent** for the type discipline: a type-check proves the spec composes into

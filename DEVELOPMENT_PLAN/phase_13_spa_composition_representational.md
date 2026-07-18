@@ -133,7 +133,7 @@ authored and committed in Phase 0, before `Amoebius.Spa.*` exists.
 
 ## Sprints
 
-## Sprint 12.1: The SPA app-spec type — a multi-service surface of capability needs 📋
+## Sprint 13.1: The SPA app-spec type — a multi-service surface of capability needs 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Spa/Spec.hs`, `dhall/amoebius/Spa.dhall`, `dhall/examples/spa_chatbot.dhall`
@@ -173,13 +173,13 @@ against `Identity`, published UI against `Edge` — and never names a product or
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 12.2: Compose an ML-workflow demo fragment as shared-library use — `prop_spaCompositionDecodes` 📋
+## Sprint 13.2: Compose an ML-workflow demo fragment as shared-library use — `prop_spaCompositionDecodes` 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Spa/Workflow.hs`, `dhall/examples/spa_chatbot.dhall` (uses infernix),
 `dhall/examples/spa_rl_gaming.dhall` (uses jitML), `test/dsl/SpaCompositionSpec.hs` (target paths; not yet
 built)
-**Blocked by**: Sprint 12.1; Phase 5 (the total Gate-2 `Dhall.inputFile auto` decoder the composed value
+**Blocked by**: Sprint 13.1; Phase 5 (the total Gate-2 `Dhall.inputFile auto` decoder the composed value
 decodes through); Phase 6 (the illegal-state corpus + QuickCheck harness the `prop_*` properties live in)
 **Independent Validation**: `prop_spaCompositionDecodes` is green over generated app-spec + demo-fragment
 pairs **at the [§N](#n-representative-set-oracle-pins-and-seeded-mutants) generator-coverage thresholds** (the QuickCheck `cover` obligations — each capability arm
@@ -232,13 +232,13 @@ one decoding value.
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 12.3: `purescript-bridge` contract generation from the composed ADTs (never committed) 📋
+## Sprint 13.3: `purescript-bridge` contract generation from the composed ADTs (never committed) 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Spa/Contract.hs` (the `purescript-bridge` generator over the composed ADTs),
 `web/` (the lifted infernix/jitML PureScript demo-SPA shells), `test/spa/ContractGoldenSpec.hs` (target paths;
 not yet built). The emitted `*.purs` contract is a **generated artifact and is not committed**.
-**Blocked by**: Sprint 12.2 (the composed Haskell app/workflow ADTs the contract reflects)
+**Blocked by**: Sprint 13.2 (the composed Haskell app/workflow ADTs the contract reflects)
 **Independent Validation**: `Amoebius.Spa.Contract` emits the PureScript contract types deterministically from
 the composed ADTs; a Register-1 golden pins the emitted contract byte-for-byte; a repository check finds **no**
 committed `*.purs` contract; the `spago` build of each lifted demo SPA type-checks against the freshly-generated
@@ -285,12 +285,12 @@ from the composed types.
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 12.4: The demo-SPA-local gate — Playwright against a faked backend + the ledger 📋
+## Sprint 13.4: The demo-SPA-local gate — Playwright against a faked backend + the ledger 📋
 
 **Status**: Planned
 **Implementation**: `test/spa/DemoSpaLocalSpec.hs` (the Register-2 driver + faked-backend fixture), `web/` (the
 demo SPA served locally) (target paths; not yet built)
-**Blocked by**: Sprint 12.2; Sprint 12.3; Phase 11 (the boundary fake-tool / faked-backend harness this reuses
+**Blocked by**: Sprint 13.2; Sprint 13.3; Phase 11 (the boundary fake-tool / faked-backend harness this reuses
 for the local backend)
 **Independent Validation**: **both** lifted PureScript demo SPAs are driven end to end under **Playwright** —
 the infernix chat shell (a chat turn) *and* the jitML RL-gaming shell (one RL-gaming interaction turn); "end to
@@ -359,11 +359,11 @@ The whole sprint (📋 Planned).
   they emit (live deploy UNVERIFIED).
 
 **Cross-references to add:**
-- `DEVELOPMENT_PLAN/README.md` — flip the Phase-12 status when the gate passes; link this document.
-- `DEVELOPMENT_PLAN/substrates.md` — the Phase-12 `none` gate row.
+- `DEVELOPMENT_PLAN/README.md` — flip the Phase-13 status when the gate passes; link this document.
+- `DEVELOPMENT_PLAN/substrates.md` — the Phase-13 `none` gate row.
 - `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/Spa/{Spec,Workflow,Contract}.hs`, the
   `dhall/amoebius/Spa.dhall` type, the `dhall/examples/spa_*` fixtures, and the `web/` demo-SPA shells as
-  Phase-12 design-first rows.
+  Phase-13 design-first rows.
 
 ## Related Documents
 - [README.md](README.md) — the live tracker and phase order this document serves

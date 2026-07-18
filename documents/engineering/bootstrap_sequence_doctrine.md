@@ -40,10 +40,12 @@ them**, and *who may touch the cluster's control surface* differs across them:
 - **Bootstrap régime — the host binary drives.** Before an in-cluster brain exists, the sudo host daemon is
   the only actor that can stand the cluster up. It talks to `kube-apiserver` directly over the distro's
   default mTLS — **channel 1** of [`host_cluster_comms_doctrine.md` §4](./host_cluster_comms_doctrine.md#4-channel-1--the-host-binary--kube-apiserver-via-distro-mtls)
-  — to install the distro, apply the platform manifests, and bring up the in-cluster singleton. It is the
+  — to install the distro, acquire the mandatory reconciler Lease under its bootstrap-holder identity, apply
+  the capacity-scheduler cutover and platform manifests, and bring up the in-cluster singleton. It is the
   *midwife*, acting on behalf of the future singleton ([`daemon_topology_doctrine.md` §2](./daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)).
 - **Steady-state régime — the singleton drives.** Once the platform services **and** the
-  control-plane singleton are up and reachable, the host binary **defers**. From that instant — *even before
+  control-plane singleton are up, the bootstrap holder has been observed released, and the singleton is the
+  observed holder of that same mandatory Lease, the host binary **defers**. From that instant — *even before
   Vault is initialised* — every operator interaction flows through the **admin control plane**
   ([§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)): the operator CLI → the amoebius NodePort
   REST service → the singleton. **Channel 1 is bootstrap-only**; the host binary does not resume direct
@@ -56,11 +58,17 @@ interactions occur through the [amoebius] NodePort."* The one-way handoff is [§
 ```mermaid
 flowchart TD
   pb[pb midwife CLI, Python: toolchain, build, exec binary] --> hb[Host binary / sudo host daemon]
-  hb -->|channel 1: distro mTLS, BOOTSTRAP ONLY| api[kube-apiserver: install distro + apply platform manifests]
-  api --> svc[Platform services up in the readiness DAG order]
-  svc --> singleton[In-cluster singleton pod up: Deployment replicas 1]
-  singleton -->|exposes| rest[amoebius NodePort REST admin API]
-  singleton -.->|HANDOFF: /readyz Serving edge observed| hb
+  hb -->|channel 1: distro mTLS, BOOTSTRAP ONLY| api[kube-apiserver reachable]
+  api --> lease[Bootstrap host holds mandatory reconciler Lease]
+  lease --> sched[BootstrapCapacitySchedulerReady: exact config and root, no managed taint]
+  sched --> addons[Patch bootstrap add-ons; old UIDs absent, replacements reservation-joined]
+  addons --> managed[ManagedCapacityReady: taint, admission, exclusive Binding authority]
+  managed --> svc[Platform services up in readiness-DAG order]
+  svc --> singleton[Singleton Pod prerequisites complete; not Serving while host holds Lease]
+  singleton --> release[Host drains, releases Lease, and observes holder absence]
+  release --> acquire[Authenticated singleton Pod UID acquires the same Lease]
+  acquire -->|exposes /readyz| rest[amoebius NodePort REST admin API]
+  rest -.->|HANDOFF: Lease holder plus Serving edge observed| hb
   cli[Operator CLI] -->|vault init/unseal, then dhall update| rest
   rest --> reconcile[Singleton reconciles the cluster toward its InForceSpec]
 ```
@@ -79,24 +87,52 @@ The ordered steps, each gated on the prior step's readiness:
 2. **The host daemon brings up the distro** — the zero-secret single-node root (`kind`, or
    `Rke2Servers.Single`) — and waits on `discover = Present` for `kube-apiserver` (a successful mTLS call,
    not a timer; [`readiness_ordering_doctrine.md` §5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers)).
-3. **Platform services come up** in the derived bring-up DAG order — registry → …, LB → edge, everything
+3. **The host becomes the bootstrap reconciler holder.** The cold-start capability can create only the
+   derived control-plane Namespace and deployment-global mandatory Kubernetes `Lease`, then acquire that
+   Lease under the exact bootstrap-host identity. No scheduler, platform, or workload mutation capability
+   exists until the held identity/resourceVersion is read back. Namespace/Lease creation,
+   bounded renewals, release, and the later singleton acquisition are all included in the provisioned
+   API/etcd/churn demand; failure or ambiguous ownership refuses mutation.
+4. **The capacity scheduler reaches bootstrap readiness.** A scheduler-system-only capability creates the
+   derived `amoebius-capacity-scheduler` namespace, its exact `ResourceQuota pods=1`, scheduler
+   Deployment/config/root/CRD, and restricted add-on-cutover RBAC. The sole default-scheduled scheduler Pod has
+   unique-node affinity, a static reservation, and the preloaded amoebius image, so it does not wait on the
+   registry unit it must cut over. A fresh readback of its exact active generation, config
+   digest, root resourceVersion, and Pod readiness mints `BootstrapCapacitySchedulerReady`. The managed taint
+   and general workload authority do not exist yet.
+5. **Every pre-existing bootstrap add-on is cut over.** The bootstrap-readiness token can patch only the
+   finite observed add-on/controller set (including distro add-ons and any pre-SSA bootstrap registry units)
+   to `schedulerName=amoebius-capacity`. Bootstrap waits until each old default-scheduled UID is absent with
+   its release partition observed and each replacement UID is reservation-joined and Ready. No general
+   workload action is available during this interval.
+6. **Full managed-capacity authority becomes Ready.** Only after the cutover equality witness exists does
+   bootstrap install the managed-node taint, identity admission, and full exclusive Binding RBAC, revoke the
+   restricted cutover capability, and independently read back the exact writer domain.
+   `ManagedCapacityReady` is the sole continuation for platform/workload controllers; the scheduler Pod is now
+   the only default-scheduler exception.
+7. **Platform services come up** in the derived bring-up DAG order — MinIO → registry, LB → edge, everything
    Vault-sealed for now ([`platform_services_doctrine.md` §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering)),
-   applied by the tier-(c) SSA reconciler once the apiserver answers
+   applied by the tier-(c) SSA reconciler only from `ManagedCapacityReady`
    ([`manifest_generation_doctrine.md` §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)).
-4. **The control-plane singleton pod comes up** ([`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton))
-   and **exposes the admin REST service** ([§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)). This is the **handoff point** ([§4](#4-the-host-daemon--singleton-handoff)).
-5. **The operator initialises/unseals Vault through the admin REST** — `vault init/unseal`, authenticated by
+8. **The control-plane singleton Pod completes prerequisites while the host still holds the Lease**
+   ([`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)). It may not
+   mutate cluster state or report `/readyz` Serving yet. The host then quiesces its effect loop, proves no
+   in-flight action capability remains, releases the Lease, and freshly observes its holder absent/released.
+   Only then may the authenticated singleton Pod UID acquire that same Lease. Its held-Lease readback plus
+   `/readyz` Serving edge is the **handoff point** ([§4](#4-the-host-daemon--singleton-handoff)) and exposes the
+   admin REST service ([§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)).
+9. **The operator initialises/unseals Vault through the admin REST** — `vault init/unseal`, authenticated by
    the operator password; init-once / unseal-on-rebuild ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init),
    [§5](./vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal)). No secret consumer ran before this — Vault fails closed until unsealed.
-6. **The operator delivers the `InForceSpec`** — `dhall update` (requires an **unsealed Vault + root token**,
-   [§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)) — the spec delivery of
-   [`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init). The singleton decrypts it in-process and reconciles the cluster toward it.
+10. **The operator delivers the `InForceSpec`** — `dhall update` (requires an **unsealed Vault + root token**,
+    [§5](#5-the-admin-control-plane-the-cli--the-singleton-rest-api)) — the spec delivery of
+    [`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init). The singleton decrypts it in-process and reconciles the cluster toward it.
 
 This is the **root** bootstrap; a *child* cluster is spawned by a parent (the Pulumi handoff,
 [`cluster_lifecycle_doctrine.md` §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)),
 which injects the child's scoped `InForceSpec` + secrets rather than prompting a human. This ordered sequence **retires
 the open question** [`cluster_lifecycle_doctrine.md` §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap)
-recorded (bootstrap config / first-manifest delivery): the first manifest is delivered by step 6's `dhall
+recorded (bootstrap config / first-manifest delivery): the first operator-supplied manifest is delivered by step 10's `dhall
 update`, and the transient bootstrap config is the binary-sibling `amoebius.dhall` the midwife establishes.
 
 ---
@@ -105,11 +141,21 @@ update`, and the transient bootstrap config is the binary-sibling `amoebius.dhal
 
 The handoff is **one-way, observed-gated, and transfers control-surface authority only**:
 
-- **The trigger is an edge, never a delay.** The host daemon hands off once it observes the singleton
-  **`/readyz` (a `Serving` edge)** — the gate owned by [`readiness_ordering_doctrine.md` §5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers).
-  Never "sleep, then assume the pod is up." Single-instance of the singleton is a k8s/etcd property
-  ([`daemon_topology_doctrine.md` §3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)),
-  so there is no election commit to await.
+- **The trigger is a Lease-holder transition plus a Serving edge, never a delay.** The host initially owns the
+  deployment-global mandatory reconciler `Lease` as the authenticated bootstrap holder. It may create the
+  singleton Deployment while holding it, but the Pod cannot mutate or report ready. Handoff requires this
+  exact sequence: stop minting new host action capabilities; drain every in-flight action; release the Lease;
+  freshly observe the bootstrap holder absent/released at a new resourceVersion; observe the authenticated
+  singleton Pod UID acquire that same Lease; then observe singleton **`/readyz` (`Serving`)**. These are the
+  gates owned by [`readiness_ordering_doctrine.md` §5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers).
+  Never "sleep, then assume the pod is up." Kubernetes/etcd supplies Lease exclusion; there is no amoebius
+  election commit or second coordination protocol.
+- **No overlap, no ownership gap disguised as success.** Audit/watch history must show at most one holder at
+  every observed resourceVersion, zero cluster mutations by the waiting singleton, and zero host mutations
+  after release. A timeout, watch gap, unknown holder, stale Pod UID, reacquisition by the bootstrap identity,
+  or concurrent renewal leaves handoff incomplete and `/readyz` false. Lease object bytes, creation,
+  renewals, release, singleton acquisition, retries, and replacement-Pod churn are part of the provisioned
+  API/etcd capacity rather than an uncharged control-plane side effect.
 - **What transfers: the cluster control surface.** After handoff, amoebius-level control (Vault
   init/unseal, spec delivery, reconcile triggers) is the **singleton's** sole authority
   ([`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)),
@@ -121,7 +167,10 @@ The handoff is **one-way, observed-gated, and transfers control-surface authorit
   "Midwife then defers" is about the *control* surface, not the host daemon's whole existence.
 - **Re-running is a no-op.** Because bring-up is a reconcile
   ([`cluster_lifecycle_doctrine.md` §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)),
-  a crashed bootstrap re-runs and converges; a handoff already done is observed and skipped.
+  a crash before release re-enters as the bootstrap holder and re-observes its exact state; a crash after
+  singleton acquisition sees the in-cluster holder and cannot reacquire. A handoff already done is observed
+  and skipped. Race tests must cover simultaneous acquire, stale resourceVersion, lost release response,
+  bootstrap crash before/after release, singleton crash before/after acquire, and replacement-Pod UID churn.
 
 ---
 
@@ -150,9 +199,10 @@ second binary.
     [`vault_pki_doctrine.md` §3](./vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)). `dhall
     update` then **actively proves each named secret before admitting the upload, and rejects fail-fast
     otherwise**: the secret must exist in Vault, and its *capability* must hold against what the spec demands —
-    an SSH key must connect to each static host the spec names and that host's declared cpu/mem/storage must
-    match detection; an AWS credential must carry the IAM permissions and the service quota to provision what
-    the spec declares. An absent secret, an SSH key that cannot connect, a host short of its declared resources,
+    an SSH key must connect to each static host the spec names and that host's declared CPU, memory,
+    pod-ephemeral/durable/native-cache pools, accelerator device vector, and per-device memory must match
+    observation; an AWS credential must carry the IAM permissions and the compute/storage/accelerator quotas
+    to provision what the spec declares. An absent secret, an SSH key that cannot connect, a host short of its declared resources,
     or a cloud credential lacking permission or quota is **rejected at upload, before any reconcile**. This is a
     **runtime-checked** admission gate — it reaches real hosts and cloud APIs — honest about its layer: a name's
     *existence* is a decode-time check, but a name's *capability* is proven live at `dhall update`. In tests

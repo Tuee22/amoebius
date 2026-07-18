@@ -28,7 +28,7 @@ Amoebius forecloses the drift by removing the second source of truth. **The prot
 reifiable Haskell value — the `Model` — and both the running decision function and the TLA+ specification are
 total functions of that one value.** This is the same move the rest of the system already makes: hostbootstrap's
 plan is the data (`chain :: cfg -> [Step]`, rendered to both a `--dry-run` preview and live execution), and a
-Kubernetes manifest is a typed record rendered by `render` ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)).
+Kubernetes manifest is a typed record rendered by `renderAll` ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)).
 Here the *model* is the data, TLA+ is one rendering, and the runtime step is another.
 
 What this forecloses: a model that asserts a property the code does not have, and code that takes a transition

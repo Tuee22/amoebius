@@ -2,12 +2,12 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_15_base_image_registry.md, DEVELOPMENT_PLAN/phase_18_vault_pki.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_21_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_15_base_image_registry.md, DEVELOPMENT_PLAN/phase_18_vault_pki.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_21_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define the fixed set of standard services every amoebius cluster runs (the concrete providers
 > behind the capabilities of [service_capability_doctrine.md](./service_capability_doctrine.md)), how each is
-> deployed (HA-always, image-from-the-in-cluster-registry, cpu/ram-declared), and the single Keycloak-owned
+> deployed (HA-always, image-from-the-in-cluster-registry, complete resource envelopes), and the single Keycloak-owned
 > wild-ingress path.
 
 ---
@@ -156,6 +156,13 @@ everything here is forward design, not inherited-proven behaviour.
   correctness obligation to Pulsar's brokers/bookies rather than re-proving it — the only proof obligation
   that concentrates on amoebius is the asynchronous cross-cluster boundary (the "Second Axis" in
   [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)).
+- **The metadata store is explicit, not broker overhead.** The canonical v1 provider is
+  Pulsar + ZooKeeper + BookKeeper. Its pure `PulsarMetadataStoreDemand = ZooKeeper` carries exact
+  persistent/session-ephemeral znode identities, transaction/session/watch bounds, every member's complete
+  pod envelope and retained volume, log/snapshot retention, and failure recovery bound. The pinned model
+  derives per-member steady/recovery bytes and must provision before brokers start. A topology whose
+  brokers/bookies/offload fit but ZooKeeper CPU, memory, ephemeral storage, pod/CSI slots, or one retained
+  backing does not is undeployable; BookKeeper or MinIO storage cannot be silently reused.
 - **Host compute daemons join as Pulsar peers** over host-only NodePorts (no mTLS) — [§9](#9-the-loadbalancer-and-the-single-wild-ingress-path) and
   [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md).
 
@@ -223,6 +230,69 @@ independent version and lifecycle, and clean per-namespace teardown.
   [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), not frozen here.
 - **Storage is not owned here.** Retained PVs, the `<namespace>/<statefulset>/pv_<integer>` naming, sizing,
   and deterministic rebind are owned by [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md).
+- **Capacity remains per consumer.** Binding constructs one `PatroniSqlDemand` for each consuming capability:
+  the operator/controller and validating-webhook child envelopes, finite data/WAL/checkpoint/failover-replay
+  inputs, required `StorageBudgetId`, declared volume presentation/backing, bounded SQL writer admission and
+  its proxy envelope, and rollout/recovery overlap. Only the private
+  `ProvisionedPatroniSql` renders the CR and quota boundary. Adding Keycloak or an app therefore adds a real
+  database compute/storage demand; it cannot reuse Grafana's or another consumer's capacity witness.
+
+### Tenant policy persistence is one provider-indexed transaction
+
+Tenant RBAC starts with `deriveTenantPolicies :: TenantSpec -> TenantPolicyDerivation`, the pure intermediate
+owned by [tenancy_doctrine.md §5](./tenancy_doctrine.md#5-rbac-is-derived-never-authored), never with a direct
+renderer. Its closed provider index has six arms, each with a canonical payload, exact target, persistence
+projection, and apply intent:
+
+| Provider | Policy payload | Resource-bearing persistence |
+|---|---|---|
+| Keycloak | realms, roles, client scopes, route-auth rules | Keycloak schema/index rows and WAL |
+| Vault | policies and auth bindings | persisted versions, Raft logs, snapshots |
+| Pulsar | tenants, namespaces, ACLs | ZooKeeper entries, transaction logs, snapshots |
+| MinIO | IAM, service accounts, bucket policies | dynamic system metadata under budget/geometry/model |
+| Kubernetes API | generated RBAC and NetworkPolicy objects | serialized API objects, etcd revisions and Events |
+| Postgres | tenant database roles and grants | Postgres schema/index rows and WAL |
+
+Keycloak and Postgres remain distinct provider/persistence arms even when both ultimately use Patroni. MinIO
+policy records are storage-system metadata, not application objects and not another arm of
+`ObjectStoreProducerDemand`. The canonical demand shapes are defined by
+[resource_capacity_doctrine.md §5.1](./resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry).
+
+All output/action/executor/MinIO-metadata identities are qualified by `TenantId`, and each nested source tenant
+must equal its outer key. The planner accepts a possibly empty desired tenant map and diffs the exact
+`desired ∪ observed` domain. An observed-only row retains source, target, action, and executor provenance and
+produces authenticated deletes. Deleting the final tenant and the exact empty no-op are therefore representable;
+a non-empty desired collection is not an invariant.
+
+Observed executors are one global target-keyed inventory, not copied inside every tenant. The plural binder
+resolves abstract `< Dedicated | SharedControlPlaneRole >` attachments and coalesces complete execution deltas by
+resolved target across the entire transaction. It sums all members before replacing a shared base once;
+dedicated targets are unique. Per-tenant executor copies, uncoalesced deltas, or a repeated base debit reject.
+
+Every action has optional old and desired provider targets. A target change retains both target-keyed physical
+high-waters: old and new Keycloak/Postgres databases and WAL, Vault backings, Pulsar metadata stores, MinIO
+stores/budgets/geometries/models, Kubernetes clusters/namespaces/etcd models, executor epochs, and failed or
+rollback residents. Desired absence alone never releases the old side.
+
+For MinIO, the global key is `(store,budget,geometry,model)`, and dynamic entry ids remain tenant-qualified.
+Concurrent old and new groups are resolved only against retained MinIO backings. One physical fold per store
+adds `metadataReservePerDrive` once per resident store and every dynamic group once. Observed readback carries
+the metadata model and separates static reserve from dynamic per-drive bytes, so a model mismatch,
+static-per-tenant debit, or dynamic ownership hole/overlap cannot normalize. `ProviderObjectQuota` remains a
+different, unsupported supply arm.
+
+Whole-deployment provision seals a private provider-indexed `ProvisionedTenantPolicyAction` for every operation,
+including tenant/source, payload digest, old and desired target, persistence high-water, provisioned executor,
+retention, and cleanup predicate. Only the matching provider enactor plus the fresh fingerprint-equal
+`ValidatedLiveTarget` may act. Read-only provider observers and post-action readback must prove the desired
+state or authenticated delete absence and then prove old-target cleanup before capacity is released. Failed
+apply retains old/new/action/rollback/executor residents. Raw derivations, binder-stage targets, and prior
+`Provisioned*` records are not enactor inputs.
+
+Phase 23 owns provider administrative apply/readback for all six arms. In particular, its Pulsar adapter applies
+and observes tenant/namespace/ACL policy but does not use an application client. Phase 24, after the native
+`amoebius-pulsar` client exists, owns the authenticated produce/consume round-trip gate. Administrative policy
+convergence in Phase 23 must not be reported as proof of the Phase-24 data path.
 
 ---
 
@@ -282,56 +352,103 @@ free-text toleration is how a pod ends up unschedulable (it tolerates a taint no
 tolerate the taint it must). So amoebius does not let an operator *write* a toleration at all. A workload's
 tolerations are **generated** from the declared node taints — the closed `NodeTaintKind` set and per-node
 taints owned by the node inventory ([substrate_doctrine.md §8](./substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints))
-— so a `Toleration` handle exists only once its taint edge does. Consequently the decode rejects a workload
+— so a `Toleration` handle exists only once its taint edge does. Consequently post-bind provisioning rejects a workload
 unless **there exists** a node satisfying its affinity **and** tolerating all its taints: a schedulability
 *existence fold* over the single node inventory, never a `Pending` pod. This subsection is the SSoT for the
 derivation rule that [illegal_state_catalog.md §3.5](../illegal_state/illegal_state_capacity.md#35-undeployable-pods-taints-tolerations--affinity) / [§3.22](../illegal_state/illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration) turns into a
-compile/decode-time impossibility (type-foreclosed for the derived-toleration shape, decode-foreclosed for the existence fold).
+compile/provision boundary (type-foreclosed for the derived-toleration shape; checked at `provision-seal` for
+the target-relative existence fold).
+
+`ManagedCapacity` is the authority-bearing member of that closed taint set. Its toleration is an inseparable
+projection with `schedulerName = amoebius-capacity`: no constructor can render the toleration while leaving the
+Pod on `default-scheduler`. The only exception is the capacity scheduler's own bootstrap Pod, which is
+structurally separate, uniquely node-affined, statically debited, and isolated in
+`amoebius-capacity-scheduler` under exact `ResourceQuota pods=1`. Existing distro/bootstrap add-ons are allowed
+to use `default-scheduler` only before cutover and while the managed taint is absent. They are then patched to
+the custom scheduler and their old UIDs are observed absent/released and replacements reservation-joined
+before full managed-node authority can become Ready. A hand-authored toleration, a managed-capacity Pod with
+another scheduler, or a second default-scheduler exception is rejected before Pod creation.
 
 ---
 
-## 10. Every container declares CPU and RAM
+<a id="10-every-container-declares-cpu-and-ram"></a>
+## 10. Every execution unit declares its complete resource envelope
 
-No pod is exempt — and neither is any host-level worker: **every container — platform service and
-app alike — and every host-level worker subprocess declares explicit CPU and RAM**
-(DEVELOPMENT_PLAN cross-cutting invariants). Cashing that out:
+No pod is exempt — including init containers, controllers, operator installs, admission gateways/webhooks,
+copy/schema/Pulumi/ACME Jobs, and platform services — and
+neither is any host-level worker. Every execution unit carries the pure `ResourceEnvelope` owned by
+[resource_capacity_doctrine.md §3](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget);
+the Kubernetes resource map is derived from that value after the whole deployment has passed `provision`.
 
-- The scheduler can place HA replicas across nodes deterministically.
-- Dynamic node provisioning can reason about real capacity (load / spot cost / workflow completion) — see
-  [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md).
-- A runaway workload cannot starve the platform out from under itself.
+For every rendered container:
 
-amoebius requires explicit CPU and RAM **requests and limits** on every container the chart layer renders —
-the `Resources = { requests, limits }` pair whose shape is owned by
-[resource_capacity_doctrine.md §3](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget).
-The two are read at *different* layers: **`requests`** is the scheduling number — it is what the placement fold
-sums against allocatable capacity, because it is what the scheduler reserves — while **`limits`** is the runtime
-cgroup ceiling (throttle/OOM), a runtime-checked enforcement fact, never summed by the fold. Both are mandatory, with
-`requests ≤ limits` per axis. (There is no per-pod GPU axis here: accelerators are owned *wholesale per node*,
-not requested/limited per container — see the accelerator model in
-[resource_capacity_doctrine.md](./resource_capacity_doctrine.md) and the separate VRAM note below.) Whether this
-requirement is lifted into the Dhall type layer (so an under-declared workload is *unrepresentable*, not merely
-rejected at render time) is catalogued by
-[illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md), which is the SSoT for which platform invariants are
-type-enforced.
+- CPU, memory, and `ephemeral-storage` **requests and limits** are explicit refined non-zero quantities with
+  `requests ≤ limits`.
+- Disk-backed pod-local cache/scratch is a bounded ephemeral volume. Every container's private writable-layer
+  and log allowances fit that container's own ephemeral request/limit; shared disk-volume bounds plus the
+  lifecycle-effective private allowance fit the effective pod request/limit. A memory-backed `emptyDir` instead
+  names access modes and stage-local/pod-lifetime persistence. The lifecycle fold assigns one request carrier
+  per resident volume/concurrency epoch and proves unique resident volumes + live working sets fit the
+  effective pod request/limit; possible charged accessors' limits cover writable volumes. The effective pod
+  memory/ephemeral envelope is charged once, never with a second volume debit. For the
+  per-node in-cluster cache owner,
+  `ProvisionedCacheDemand.derivedPeak ≤ CacheBudget ≤ emptyDir.sizeLimit` and
+  `Σ disk-backed volume sizeLimits + lifecycle-effective private allowances ≤
+  effectivePod.ephemeralStorage.request ≤ effectivePod.ephemeralStorage.limit`; these are nested proofs on one
+  debit, not separate cache and ephemeral consumers.
+- ConfigMap, Secret, downward-API, projected, and service-account-token mounts are not free files. Binding
+  derives their `KubeletMappedFileDemand` from the same serialized API-object source, applies the pinned
+  AtomicWriter old+new/symlink/metadata model, and routes that mapped-file component to kubelet-nodefs
+  ephemeral storage or memory.
+  Each `PodRuntimeMetadataSource` additionally preserves exact network-attachment and container/volume-mount
+  identities without accepting authored bytes. After kind-indexed Deployment/StatefulSet/DaemonSet/Job or
+  host-process expansion, provisioning derives one planned-slot metadata demand per
+  `MaterializedExecutionInstance`, while live validation derives a separate Pod-UID-indexed observed demand.
+  Sandbox/pod-directory/CNI/volume/mount components use `KubeletNodefs`; CRI runtime components use
+  `CriRuntimeRoot`. The selected `Unified | SplitRuntime | SplitImage` resolver maps those roles to physical
+  backing ids, groups aliased components once, combines them with the node image model under a disjoint
+  ownership witness, and fits the largest simultaneous node aggregate. It never routes one combined metadata
+  scalar blindly to nodefs. Each live pod also
+  consumes one pod/CNI slot and one driver-scoped attach slot per unique mounted CSI PVC.
+- Every container image is content-digested and carries per-OS/arch index/manifest/config/compressed-layer
+  stored bytes, snapshot chain/unpacked bytes, and bounded import workspace. After placement, content objects
+  and snapshots are deduplicated in their respective identity domains, the enforced pull policy determines
+  workspace peak, and the closed kubelet layout routes the selected-platform peak with writable/log/volume
+  bytes to each real nodefs/imagefs backing; image bytes are not disguised as a second pod request.
+- Durable bytes are not hidden in the container envelope: every persistent claim is a separate, explicit
+  `DeclaredVolumeDemand` whose geometry, presentation, and backing allocation derive a private hard cap.
+- Accelerator access is never an ambient device mount. A model/job capability can declare an
+  appropriate pod/host accelerator demand, but provisioning routes it through exactly one typed per-node
+  accelerator owner; ordinary workload pods cannot author a device claim. Each `CudaOwnerDemand` or
+  `MetalOwnerDemand` has an exact source inventory and equal-keyed workload map, exact class domains in both
+  coexistence bounds, structural residency placement/shards, and no authored owner-total or favorable epoch.
+  Provisioning derives every permitted coexistence epoch and, for CUDA, aggregates all co-resident residency
+  components per device against net allocatable VRAM. On `linux-cuda`, only the demand's
+  exactly-once named owner container receives the equal integer extended-resource request/limit, while its pod
+  receives required accelerator-profile affinity; only that private claim/affinity projection renders.
 
-**Host-level worker subprocesses declare cpu/mem too — the host-worker `Demand` source.** This round extends
-the per-declaration rule past the container boundary. A host-level accelerator worker — the Apple-Metal or
-Windows-CUDA native subprocess that reaches the cluster only over a host-only NodePort, owned by
-[daemon_topology_doctrine.md](./daemon_topology_doctrine.md) and [substrate_doctrine.md](./substrate_doctrine.md)
-— is **not** a pod and never enters the cluster's allocatable bin-pack, yet it too declares explicit cpu/mem. That
-declaration is the single host-worker `Demand` source (there was none before): it is the operand the host →
-host-worker capacity fold in [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) consumes, checking the
-worker's `Demand` — alongside the co-resident WSL2/Lima VM carve — against its declared physical-host `Capacity`.
-Accelerator (VRAM) demand is handled separately and is not part of this cpu/mem atom. As with containers, this doc
-supplies only the declaration; the host-tier fold that packs it is owned there.
+The pure provisioner derives the effective pod request/ceiling from every app/sidecar/ordinary-init/
+restartable-init-sidecar container and pod overhead using the pinned Kubernetes scheduling semantics. It then
+proves both request placement and the finite-limit/physical-peak fit for memory, ephemeral storage, cache,
+durable storage, accelerator devices, and every derived residency/coexistence epoch, charging an in-cluster cache once through its owner's
+ephemeral limit. The ephemeral limit is a kubelet measurement/eviction boundary, not a synchronous quota;
+the cache owner's private admission guard and the layout-routed backing enforce the hard
+materialization/physical bounds. A
+manifest cannot introduce a resource field that was absent from that proof, and it cannot omit one the proof
+carried.
 
-This doc owns only the **per-container and per-host-worker declaration** — the atom. The **aggregate** — that a cluster's workloads
-admit a feasible placement of their `requests` against the cluster's allocatable `Capacity` (and, nested, that
-an engine/VM does not exceed its host) — is owned by [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) (the
-[§4.6](../illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) capacity-accounting fold, [illegal_state_catalog.md §3.17](../illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)/[§3.27](../illegal_state/illegal_state_capacity.md#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing)), which *reads*
-these per-container declarations. There is no second capacity fold here: this doc supplies the atoms (the
-`requests`), the capacity doctrine packs them.
+**Host-level worker subprocesses declare the corresponding host envelope.** An Apple-Metal or Windows-CUDA
+native worker is not a pod, but it still declares CPU, memory, scratch/cache storage, accelerator family/device
+ownership, and an identity-complete `CudaOwnerDemand` or `MetalOwnerDemand`. CUDA epochs debit discrete
+per-device net VRAM; Metal epochs debit unified host memory. That envelope is the operand the host → host-worker fold consumes
+alongside the co-resident WSL2/Lima VM carve against physical-host capacity. Its enforcement witness is
+substrate-indexed: Linux cgroup v2, Windows Job Object, or a finite Apple supervisor policy. The Apple arm is
+reactive sampling plus termination and is never described as an instantaneous hard CPU/RSS quota; a workload
+that requires stronger enforcement than its selected host can supply returns `UnsupportedEnforcement`.
+
+This doc owns only the **per-execution-unit declarations** — the atoms. The whole-deployment derivation,
+placement/capability witness, disjoint storage-pool arithmetic, and opaque `ProvisionedSpec` boundary are owned
+by [resource_capacity_doctrine.md](./resource_capacity_doctrine.md). There is no second capacity fold here.
 
 ---
 
@@ -346,6 +463,14 @@ prose sequence an installer is trusted to honour. The catalog turns a duration-g
 into a foreclosed illegal state at
 [illegal_state_catalog.md §3.41](../illegal_state/illegal_state_lifecycle.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race).
 
+- **`ManagedCapacityReady` before every general/reconciler-owned platform-service Pod** — bootstrap first observes
+  `BootstrapCapacitySchedulerReady` for the exact scheduler generation/config/root while the managed taint is
+  still absent. Its restricted cutover capability patches every pre-existing bootstrap add-on to
+  `amoebius-capacity` and waits for old UID absence/release plus replacement reservation joins. Only then are
+  the managed-node taint, identity admission, and exclusive Binding RBAC installed and independently read back
+  as `ManagedCapacityReady`. No platform-service controller is applied from the general plan before that full
+  witness exists. The finite pre-SSA Phase-15 registry/proxy units are bootstrap inputs, not an exception for
+  new workloads: they must be included in the cutover domain and become custom-scheduled before this witness.
 - **LoadBalancer before the Envoy/Gateway edge** — the Gateway needs an LB address to publish a listener.
 - **MinIO before the registry** — the `distribution` registry stores its blobs via MinIO's S3 API
   ([§3](#3-the-registry--the-single-image-source), [§4](#4-minio--the-object-substrate)), so MinIO must be serving before the registry is ready. MinIO runs from
@@ -362,11 +487,15 @@ into a foreclosed illegal state at
 
 ```mermaid
 flowchart TD
-  lb[LoadBalancer] -->|provides listener address| edge[Envoy and Gateway API]
-  minio[MinIO up: S3 on retained PVs] -->|registry stores its blobs via MinIO S3| reg[Registry up and responsive]
+  scheduler[ManagedCapacityReady: exact scheduler and writer authority] --> lb[LoadBalancer]
+  scheduler --> minio[MinIO up: S3 on retained PVs]
+  scheduler --> operator[Percona operator]
+  scheduler --> vault[Vault initialized and unsealed]
+  lb -->|provides listener address| edge[Envoy and Gateway API]
+  minio -->|registry stores its blobs via MinIO S3| reg[Registry up and responsive]
   reg -->|amoebius-built app and workload image pulls resolve here| apppulls[Later app-image pulls]
-  operator[Percona operator] -->|reconciles| pg[Per-service Patroni clusters]
-  vault[Vault initialized and unsealed] -->|secrets resolve, else fail closed| secretdeps[Secret-dependent workloads]
+  operator -->|reconciles| pg[Per-service Patroni clusters]
+  vault -->|secrets resolve, else fail closed| secretdeps[Secret-dependent workloads]
   edge -->|authenticated by| keycloak[Keycloak admits wild traffic]
 ```
 
@@ -423,11 +552,14 @@ This doc never maintains a competing status ledger; it states the target shape a
 
 - [Engineering Doctrine Index](./README.md)
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md)
-- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the aggregate cpu/ram capacity fold over the per-container atoms
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — whole-deployment provisioning across
+  CPU/memory/ephemeral and durable storage/cache/accelerator/VRAM over the per-execution-unit atoms
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md)
 - [Image Build Doctrine](./image_build_doctrine.md)
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md)
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md)
+- [Tenancy Doctrine](./tenancy_doctrine.md) — the provider-indexed whole-deployment policy transaction and the
+  Phase-23 administrative-policy / Phase-24 Pulsar data-path boundary
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)

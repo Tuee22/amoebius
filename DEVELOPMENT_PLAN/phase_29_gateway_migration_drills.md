@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Discharge the Register-3 residue of amoebius's one proof obligation — drive the built
@@ -56,7 +56,7 @@ structural-fit fold, Phase 21's Keycloak-owned wild ingress, Phase 27's WireGuar
 obligation and is out of scope here.
 
 **Substrate:** linux-cpu — the gate drives the migration over the parent and both child clusters that Phase 28
-spins up as `kind`/`rke2` clusters on a single linux-cpu host; no accelerator and no provider cluster is in
+spins up as `kind` clusters on a single linux-cpu host; no accelerator and no provider cluster is in
 scope (provider-managed clusters are [Phase 30](phase_30_provider_clusters.md)). Partition tolerance is
 exercised by killing a sibling on the same host — not a property a single root cluster exercises.
 
@@ -88,6 +88,59 @@ against the live forest; the forest tears down leak-free by the OS-boundary rout
 and the modeled safety/liveness as *proven-for-the-model at scope 2* (a Phase-3 design result, never a runtime
 guarantee); layers outside Register 3 stay marked UNVERIFIED, and — as a Register-3 live-band gate — the runtime
 layer is marked *tested*, never *proven*.
+
+### Resource-provisioning contract
+
+This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
+[`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting).
+`GatewayMigrationTransitionDemand` is only a phase-local source composite: binding must exhaustively flatten it
+to the canonical identity-keyed execution set and storage/system demands before either migration arm may run.
+
+The runtime executes inside the Phase-22 singleton, whose complete pod envelope is expanded for migration-plan
+evaluation, replication-watermark watches, DNS/fabric mutation serialization, source-proxy control, and
+readiness/drain buffers; it is not a free second controller. Every transition epoch also retains both
+clusters' Phase-21 edge controllers, operator-derived data-plane children, admission webhooks/gateways, and
+rollout operands; the source transparent proxy and target serving path coexist through the full DNS drain
+window. The Phase-27 `NetworkFabricSystemDemand` is derived for the source, overlap, and target peer/hub
+graphs, including kernel/listener CPU and memory, queues, and rotated nodefs logs. The route53 repoint retains
+the Phase-28 in-cluster `PulumiExecutionDemand`, exact executor-Job envelopes, plugin/workspace volumes,
+checkpoint producer/admission gateway, and old/new checkpoint revisions. A `Planned` or `Failover` branch that
+fits only by deleting the old gateway, proxy, peer graph, Pulumi executor, or checkpoint state before external
+observation returns a structured pre-effect rejection.
+
+The non-idle drill workload is provisioned too. Its source-equal Phase-24/25 client/workflow projection carries
+every traffic-generator, active/standby worker, content mutation gateway, collector/verifier, topic/subscription,
+BookKeeper/ZooKeeper/offload, MinIO object, and Patroni data/WAL/recovery demand. Every pod has a complete
+image/CPU/memory/ephemeral/local-volume envelope and consumes pod/CNI and unique CSI-attachment slots; this
+linux-cpu phase declares `accelerator = None`. The fault injector, out-of-forest write journal, trace
+collector, and OS-boundary verifier form an identity-keyed host harness with an executable digest, finite
+CPU/memory reservation and ceiling, bounded capture/log/scratch bytes on named host backings, finite
+concurrency and retention, and no cache or accelerator. The journal's maximum acknowledged-write count and
+record size derive its peak; “outside the forest” is an independence property, not an unbounded-storage
+exception.
+
+The exact post-controller-expansion `desiredObjects` map exhaustively includes every desired and surviving
+Kubernetes object, including Namespaces, service accounts/RBAC, Secrets/ConfigMaps, workloads and generated
+ReplicaSets/children, Services/EndpointSlices, policies, claims/volumes, Jobs, status/apply objects, and Leases.
+Each identity has a `KubernetesApiObjectDemand`. Binding combines that complete map with bounded
+revision/Event/Lease `churn` and a pinned storage `model` as
+`EtcdLogicalDemand { desiredObjects, churn, model }`; its private
+`ProvisionedEtcdLogicalDemand.derivedPeak` must fit `ControlPlaneStorageDemand.etcd.backendQuotaBytes` before
+the separate backend-at-quota, WAL, snapshot, and serialized-defrag peak fits the control-plane backing.
+Provisioning uses one read-only snapshot across every parent/child node, backing, object store, database,
+provider account, and host-harness carve; only private projections mint the single-use mutation capability.
+Live readback normalizes the old/overlap/new gateway and fabric epochs, Pulumi/checkpoint state,
+workflow/store/database high-water, exhaustive API identities/churn/model, physical etcd state, and harness
+process/backing use.
+
+The committed resource corpus makes each execution envelope, pod/CNI/CSI slot, CPU, memory, logical ephemeral
+and routed physical byte, image/workspace object, durable/object/database extent, Pulumi plugin/checkpoint
+operand, API object/churn/model term, etcd logical/physical byte, network queue/log term, and host-harness
+operand one unit short in isolation and expects zero migration/cloud/store effects. Dropped-envelope mutants
+remove the source proxy, target edge child, overlap peer graph, Pulumi executor, checkpoint admission gateway,
+workflow collector, API object, etcd churn/model, or external journal; each must turn the gate red even if the
+RPO/RTO assertions would otherwise pass.
 
 ## N. Gate-integrity oracles (committed in Phase 0, before the runtime exists)
 
@@ -257,16 +310,25 @@ with an explicit operator override the only escape.
 - A `gracefulTeardown` reconcile: idempotent drain/flush/handoff ordering timed to a synchronization event,
   releasing compute while preserving retained backing so a later spin-up recreates PV bindings over the same
   bytes.
-- A `satisfiability` check over the root `InForceSpec` using each container's declared CPU/RAM: if the surviving
-  forest can no longer satisfy the spec without cluster C, push back naming the loss and the `.dhall` failback,
-  with the same fail-closed `Unreachable → refuse` posture as the reconciler.
+- A `satisfiability` check over the root `InForceSpec` using every execution unit's complete
+  `ResourceEnvelope`: CPU requests/limits, memory requests/limits, pod-local ephemeral-storage
+  requests/limits, durable-volume backing, bounded cache carve, and any identity-complete accelerator-owner
+  source/workload maps, structural residency/shards, policy-class domains, and every derived coexistence
+  epoch's device-count/per-device net-VRAM or Metal shared-memory requirement. Teardown may proceed only when the surviving forest can re-run
+  `provision` for the unchanged desired spec and construct a fresh opaque `ProvisionedSpec` with placement,
+  storage, and capability witnesses; otherwise it pushes back before releasing any resource, naming the
+  exhausted axis/capability and the `.dhall` failback, with the same fail-closed `Unreachable → refuse` posture
+  as the reconciler.
 - A managed-resource registry entry per cluster/child/node/stack/PV so teardown is one `reconcileAbsent` loop
   with "cannot observe" never collapsed to "absent."
 
 ### Validation
 1. A graceful child teardown loses nothing (rides a sync event, preserves backing while PV API objects may
    disappear) and a later spin-up recreates the identical shape over the same bytes; a teardown of a
-   load-bearing cluster pushes back and aborts by default, and the
+   load-bearing cluster whose removal breaks any CPU, memory, ephemeral-storage, durable-storage, cache,
+   accelerator owner-map/domain, device-count, residency/shard, coexistence-epoch, per-device net-VRAM, or
+   Metal shared-memory witness pushes back **before the first teardown effect** and
+   aborts by default, and the
    explicit override falls to the declared failback; a graceful teardown and a chaos-failover are observably
    distinct — lossless-by-construction vs bounded-by-budget — and the code reports which guarantee held.
 

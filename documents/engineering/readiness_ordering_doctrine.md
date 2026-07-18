@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for how amoebius sequences bring-up — a dependent starts on a
@@ -89,6 +89,14 @@ data Readiness
   | Condition  ResourceCond     -- a live object reaches Ready / Available / rollout-complete / CR-status-healthy
   | Unsealed   VaultHandle      -- Vault reports reachable, initialized, and unsealed
   | Committed  ReadyWitness      -- a staged artifact's `.ready` sentinel / a commit-log edge exists
+  | BootstrapCapacitySchedulerReady CapacitySchedulerBootstrapWitness
+                                 -- exact active config/root + restricted add-on-cutover authority; no managed taint yet
+  | ManagedCapacityReady ManagedCapacityAuthorityWitness
+                                 -- add-ons joined, managed taint/admission/exclusive Binding authority read back
+  | ReconcilerLeaseReleased ReconcilerLeaseReleaseWitness
+                                 -- prior holder is absent/released at a fresh resourceVersion
+  | ReconcilerLeaseHeld ReconcilerLeaseHolderWitness
+                                 -- exact authenticated holder owns the mandatory Lease at a fresh resourceVersion
 ```
 
 This is the same **no-illegal-arm** idiom the catalog uses for
@@ -130,8 +138,9 @@ and a toleration is *projected* from a node taint, never typed
   "a handle exists only once its edge does" discipline that already gates a `.ready`-sentinel `ArtifactRef`
   and an evidence-gated `PromotionGate`. A "start B before A is ready" edge has no constructor.
 - **The DAG is total and acyclic by decode.** The platform's hard ordering edges — LoadBalancer → edge,
-  MinIO → registry, registry → app-image pulls, Percona operator → Postgres consumers, Vault-unsealed → secret-dependent startup,
-  Keycloak → wild traffic — are the *derived* readiness DAG owned by
+  scheduler bootstrap → add-on cutover → managed authority → platform Pods, LoadBalancer → edge, MinIO →
+  registry, registry → app-image pulls, Percona operator → Postgres consumers, Vault-unsealed →
+  secret-dependent startup, Keycloak → wild traffic — are the *derived* readiness DAG owned by
   [`platform_services_doctrine.md` §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering),
   not a prose ordering an installer is trusted to honour. A total `mkBringUpOrder` fold rejects a **cycle** or
   an **undeclared dependency** at decode — `decode-foreclosed`, the same shape as `mkRke2`'s host-distinctness
@@ -167,14 +176,30 @@ observe. The rule holds anyway, using the two primitives the host tier *does* ha
   step **refuses fast** when its socket witness is absent — no cluster touched, no timer burned.
 
 The **host-daemon → in-cluster-singleton handoff** — the open bootstrap-sequencing question the vision pairs
-with this one — is gated the same way: the host daemon hands off once the singleton reports ready over its
-`/readyz` (a `Serving` edge), **never** on a fixed delay after launching the pod (and never on an
+with this one — is gated the same way, but `/readyz` is the final edge rather than the whole proof. The host
+first applies the singleton while it still holds the mandatory reconciler Lease; the Pod may finish local
+prerequisites but cannot mutate or report ready. The host drains its mutation loop, releases the Lease, and a
+fresh apiserver observation must yield `ReconcilerLeaseReleased` for that exact holder/resourceVersion before
+the singleton may acquire it. Only `ReconcilerLeaseHeld` for the authenticated singleton Pod UID can mint its
+`Serving /readyz` edge and retire the host's direct-apiserver channel. This is **never** a fixed delay after
+launching the pod (and never an
 "election" edge — the singleton runs no election; its single-instance is delegated to k8s/etcd,
 [`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)). Vault init is the canonical worked example:
 **no secret consumer runs before Vault reports reachable, initialized, and unsealed; a consumer that reaches
 a sealed Vault fails closed rather than racing it**
 ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init)) —
 `Unsealed` is a condition, and fail-closed is the event-driven resolution of the race, not a wait around it.
+
+The capacity scheduler has a similarly explicit two-witness cutover. First, bootstrap installs the scheduler
+Deployment/config/root in its dedicated namespace and observes `BootstrapCapacitySchedulerReady` for the
+exact generation and digest. At this stage the managed taint and general workload admission are absent; the
+only continuation is the restricted cutover capability for the finite, observed bootstrap add-on set. That
+capability patches each controller to `schedulerName=amoebius-capacity`, then waits for every old UID to be
+absent with its release partition observed and every replacement UID to be reservation-joined and Ready.
+Only after that edge may bootstrap install the managed-node taint, identity admission, and exclusive Binding
+RBAC. An independent readback of the exact writer domain then mints `ManagedCapacityReady`, the sole start
+handle for general platform/workload controllers. Crashes or watch gaps re-enter observation at the last
+confirmed edge; they never infer either witness from elapsed time.
 
 ---
 
@@ -207,6 +232,8 @@ discipline once; each site keeps its own SSoT and is cited, never restated:
 | Instance | What it gates | Layer | Owned by |
 |---|---|---|---|
 | Derived bring-up DAG | platform-service bring-up order | `decode-foreclosed` (order) + `type-foreclosed` (edge shape) | [platform_services §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering) |
+| `BootstrapCapacitySchedulerReady` → add-on cutover → `ManagedCapacityReady` | any general Pod vs an unready scheduler or competing default-scheduler writers | `runtime-checked` readback on a typed, staged continuation | [resource_capacity_doctrine](./resource_capacity_doctrine.md), [bootstrap_sequence_doctrine §3](./bootstrap_sequence_doctrine.md#3-the-ordered-bootstrap-sequence) |
+| bootstrap-holder release → singleton-holder acquire | two reconciler writers during handoff | `runtime-checked` Kubernetes Lease/resourceVersion edges; no bespoke election | [bootstrap_sequence_doctrine §4](./bootstrap_sequence_doctrine.md#4-the-host-daemon--singleton-handoff) |
 | Vault ready-before-consumer / fail-closed | a secret consumer vs a sealed Vault | `runtime-checked` (fail-closed); the `Unsealed` edge is [§3](#3-readiness-is-a-condition-never-a-duration) | [vault_pki §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) |
 | `FabricMember c` reachability | a workload bound to a store it cannot reach | `type-foreclosed` (static reach is a *type*, not a probe) | [single_logical_data_plane §3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe) |
 | `.ready` sentinel / `ArtifactRef` | serving a half-staged model | `type-foreclosed` (no handle without the sentinel edge) | [content_addressing §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) |
@@ -225,8 +252,8 @@ This document is normative readiness-ordering doctrine only. Delivery sequencing
 validation gates, and remaining work are owned by
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the **bootstrap-tier** rule — `discover`/`RuntimeWitness` gates, no timers,
-the host-daemon→singleton handoff — rides **Phases 10 and 13** with the `chain`/`Step` kernel and idempotent kind
-bring-up; the **typed `Readiness` gate** and the [§3.41](../illegal_state/illegal_state_lifecycle.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race)
+the two-stage scheduler cutover, and the bootstrap-holder→singleton-holder Lease handoff — is exercised by
+**Phases 14, 16, and 22**; the **typed `Readiness` gate** and the [§3.41](../illegal_state/illegal_state_lifecycle.md#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race)
 catalog foreclosure land in **Phase 22** with the orchestration DSL and the control-plane singleton. This doc
 states the target shape and links back for status.
 

@@ -5,7 +5,10 @@
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_27_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Turn the pre-cluster-proven DSL into a live deploy — the Deployment-`replicas=1` control-plane singleton decodes one `.dhall` and reconciles the platform plus a trivial app onto a real cluster, with single-instance delegated to k8s/etcd and no amoebius election.
+> **Purpose**: Turn the pre-cluster-proven DSL into a live deploy — hand the mandatory reconciler Lease from
+> the observed bootstrap host to the Deployment-`replicas=1` control-plane singleton, then have that singleton
+> decode one `.dhall` and reconcile the platform plus a trivial app onto a real cluster, with single-writer
+> exclusion delegated to k8s/etcd and no amoebius election.
 
 ---
 
@@ -19,7 +22,9 @@ ingress) and runs on the **linux-cpu** substrate in **Register 3** — live infr
 applied through the Phase-16 typed renderer + SSA reconciler onto Phase-17 retained storage. The control-plane singleton
 role generalizes the prodbox root single-node control-plane behaviour and rides the shared daemon spine
 proven in prodbox — but that is **sibling evidence, not an amoebius result**; amoebius has not yet built any
-sprint here, and single-instance is a k8s/etcd property with nothing for amoebius to prove.
+sprint here. Kubernetes/etcd supplies Lease exclusion; amoebius must still prove its bootstrap-host-holder →
+observed release and holder absence on the same still-present Lease → singleton-holder handoff never
+authorizes overlapping writers.
 
 ## Phase Summary
 
@@ -27,17 +32,19 @@ This phase makes the DSL **run live**. Its design half is already discharged in 
 (Registers 1–2, substrate `none`): the two typed gates — Gate 1, the Dhall typechecker (Phase 4), and Gate 2,
 the in-process `Dhall.inputFile auto` decoder (Phase 5) — the illegal-state corpus and its per-entry
 validation-locus ledger (Phase 6), the capacity/topology folds (Phase 7), the capability→provider→shape
-binder (Phase 8), the pure `render` goldens (Phase 9), and the `chain`/`--dry-run` plan (Phase 10) were all
+binder and opaque provision seal (Phase 8), the pure `renderAll` goldens (Phase 9), and the
+`chain`/`--dry-run` plan (Phase 10) were all
 authored and proven **in-process, with no cluster**. Phase 22 adds the runtime residue: the in-cluster
-**control-plane singleton** deployed as a Kubernetes **Deployment with `replicas=1`** — exactly one brain per
-cluster, holding total cluster + secret authority — that decodes the already-proven `InForceSpec` and runs the
+**control-plane singleton** deployed as a Kubernetes **Deployment with `replicas=1`** — exactly one Lease-held
+authority at a time, despite possible replacement-Pod overlap, holding total cluster + secret authority — that decodes the already-proven `InForceSpec` and runs the
 idempotent `discover → diff → enact → re-observe` reconcile loop driving a **real** linux-cpu cluster toward
 it, applying the standard platform stack plus a trivial app through the Phase-16 reconciler to convergence with
 a leak-free teardown.
 
-Single-instance of that singleton is **delegated to k8s/etcd**: the Deployment controller and etcd guarantee
-convergence to one running pod and reschedule it on node loss, and where strict at-most-one-writer must survive
-a rolling update or partition the mechanism is a Kubernetes `Lease` (the etcd-backed client-go leader-election
+Single-writer authority for that singleton is **delegated to k8s/etcd**: the Deployment controller converges
+to desired `replicas=1` and reschedules on node loss, but update/replacement may transiently expose distinct old,
+terminating, and replacement Pod UIDs. Strict at-most-one-writer is therefore a Kubernetes `Lease` (the
+etcd-backed client-go leader-election
 object) — **never a bespoke amoebius election, no ranked-failover rule, no warm-standby candidate population,
 no signed-commit-log protocol**. The singleton is **stateless at the pod level** — it holds no PVC; its
 durable state is exclusively the Vault-enveloped MinIO bucket — so a lost pod loses nothing. As a regression
@@ -46,16 +53,28 @@ fails to type-check or decode — but that type/decode result was **already prov
 here it is a live guard, not the proof. Full app tenancy (own namespace, `<app>/<bucket>` ObjectStore,
 in-namespace Sql) is deliberately deferred to Phase 23; the app here is trivial.
 
+The initial ownership transition is explicit. Phase 16 acquired the deployment-global mandatory reconciler
+Lease under the bootstrap-host holder before any host-driven apply and kept renewing it through Phases 17–21.
+In this phase the host applies the singleton Deployment while retaining that Lease; the new Pod may load and
+finish prerequisites but cannot mutate or advertise `/readyz`. The host then stops minting actions, drains
+in-flight effects, releases the Lease, and freshly observes its holder absent/released. Only the authenticated
+singleton Pod UID may acquire the same object. Its held-Lease readback plus `/readyz` Serving condition retires
+the host's direct-apiserver authority. Lost responses, stale resourceVersions, watch gaps, or replacement-Pod
+UID changes fail closed and re-observe; they never infer handoff from time.
+
 **Substrate:** linux-cpu — the single-node `kind` cluster from Phases 14–21; no apple, linux-cuda, or windows
 substrate is exercised by this phase's gate.
 
 **Register:** 3 — live infrastructure (§K).
 
 **Gate:** on a single-node linux-cpu `kind` cluster, one `.dhall` decodes and the **Deployment-`replicas=1`
-control-plane singleton** — single-instance delegated to k8s/etcd, with **no amoebius election** — reconciles
+control-plane singleton** — single-writer authority delegated to k8s/etcd, with **no amoebius election** — reconciles
 the standard platform-service stack plus a trivial app to convergence and tears down leak-free, while the
 pre-cluster (Phase-6) negative corpus, re-run against the same live deploy path, still fails at Gate 1 or
-Gate 2 — a **Register-3** live-infrastructure check.
+Gate 2 — a **Register-3** live-infrastructure check. Before the singleton's first mutation, the gate observes
+the exact bootstrap-host holder drain and release, holder absence at a fresh resourceVersion, then acquisition
+by the authenticated singleton Pod UID; the apiserver audit/watch history admits no overlapping holder or
+mutation authority.
 
 **Gate-integrity clauses (§M).** The gate is hardened as follows and passes only when every clause below holds:
 
@@ -69,10 +88,15 @@ Gate 2 — a **Register-3** live-infrastructure check.
   `user.extra.authentication.kubernetes.io/…` MUST resolve to the singleton pod's in-cluster ServiceAccount;
   the audit log MUST record **zero** platform/app-object writes attributed to the harness principal. A run in
   which the harness principal issued any platform/app write, or in which the singleton SA issued none, fails.
+- **History capacity is a gate precondition, not assumed retention.** Before the first platform/app mutation,
+  the harness reads the Phase-14 `ControlPlaneStorageDemand` enforcement and proves Event/audit retention
+  covers the complete declared gate observation window and that its rotated-byte peak remains inside
+  `EngineSystemReserve`. A too-short history or over-carve configuration refuses before the positive run;
+  absence of an audit record can therefore never be explained away as retention loss.
 - **Concrete representative set (§M.7).** The Phase-19/20 service set reconciled by this fixture is exactly:
   stack: **MetalLB, the `distribution` registry re-homed onto MinIO's S3 driver, MinIO (distributed), Pulsar
-  (broker+bookie), Prometheus+Grafana, the Percona operator, and the named per-consumer Patroni Postgres
-  clusters with pgAdmin**; the "trivial app" is exactly the
+  (broker + ZooKeeper metadata store + BookKeeper bookies), Prometheus+Grafana, the Percona operator, and the
+  named per-consumer Patroni Postgres clusters with pgAdmin**; the "trivial app" is exactly the
   single-service Deployment+Service+HTTPRoute of `dhall/examples/platform_plus_trivial_app.dhall`. No other
   service set satisfies the gate.
 - **Phase-0-pinned oracle (§M.1).** The positive fixture `dhall/examples/platform_plus_trivial_app.dhall`, the
@@ -88,6 +112,89 @@ Gate 2 — a **Register-3** live-infrastructure check.
   nothing. A second **effect-swap** mutant (the harness principal, not the singleton SA, issues the writes)
   MUST also go red via the attribution clause above.
 
+### Resource-provisioning contract
+
+This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
+[`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting);
+the singleton receives no bootstrap exception from those folds.
+
+The singleton is itself part of `BoundDeployment`, never a resource-free bootstrap exception. Its pure demand
+contains a complete `PodResourceEnvelope`: the singleton image and exact OCI/import footprint; CPU, memory,
+and ephemeral-storage requests and limits for decode, bind, whole-deployment provision, discovery, diff, SSA
+serialization, Lease renewal, watch/list buffering, and health/metrics service; runtime memory working set;
+writable-root and bounded structured-log headroom; projected `InForceSpec`/ConfigMap/Secret/downward-API/
+service-account-token bytes; any disk- or memory-backed `emptyDir`; exact byte-free
+`PodRuntimeMetadataSource` network-attachment identities and container-to-volume mount identities; no PVC, no
+cache, and `accelerator = None`. The singleton's `BoundExecutionBody` is structurally a Deployment with
+`ReplicaCardinality = Once`, never a separate replica operand, and its only legal controller policy is
+`DeploymentRolloutPolicy.Recreate`. The mandatory Lease supplies writer exclusion; it does not make a
+RollingUpdate safe or erase the capacity of a manually deleted/evicted terminator plus replacement.
+`provision`, not binding, expands that symbolic unit into identity-keyed planned slots and every reachable
+old/zero-live/new transition, while live admission retains every distinct observed Pod UID until its
+resource-indexed release. Rendered `replicas=1` is a projection of that witness, not permission to debit one
+Pod during actual replacement overlap.
+
+The mandatory `ProvisionedMandatoryReconcilerLease` is a deployment-global render source, not optional
+singleton decoration. Its closed authority transition is `BootstrapHostHolder → SameLeaseUnheld →
+InClusterSingletonHolder PodUid`; there is no direct first-to-third continuation and no anonymous holder.
+Provisioning includes the Lease object bytes, exact bootstrap and singleton RBAC subjects, duration/deadline/
+retry policy, maximum bootstrap renewals, release update on the still-present object, singleton acquisition/renewals, lost-
+response retries, and replacement-Pod holder churn in `EtcdLogicalDemand`. Live preflight joins holder identity
+and Lease resourceVersion into `ObservedInventory`/`ValidatedLiveTarget`. A missing Lease, unknown holder,
+stale resourceVersion, concurrent holder, or singleton UID unequal to the authenticated execution identity has
+no mutation continuation.
+
+For every planned singleton, trivial-app, gateway, or other Pod slot, provision combines the exact
+runtime-metadata source with its container/volume graph and the selected node's pinned `kubeletMetadataModel`
+to derive one `KubeletRuntimeMetadataShape`; live discovery constructs the corresponding observed demand under
+the actual `PodUid` plus its authenticated owner/source witness, never under the planned slot id. The private
+provisioner derives every metadata component's bytes and `KubeletNodefs | CriRuntimeRoot` role, resolves that
+role through the selected `Unified | SplitRuntime | SplitImage` layout, and groups aliases by physical carve
+once. SplitRuntime therefore debits kubelet components to nodefs and CRI components to
+imagefs/containerfs; Unified and SplitImage sum their forced aliases before one backing check. No physical
+runtime-metadata debit is repeated as logical Pod ephemeral storage.
+
+Pure provision emits one node-level `ProvisionedNodeRuntimeStorageAccounting` row per planned epoch; live
+preflight emits the observed-inventory-scope form. Its accounting-id domain exactly equals assigned planned slots
+or eligible observed Pod UIDs, its qualified Pod component keys are disjoint from and exhaustive with the node
+image-model component keys, and its final backing map combines metadata and image demand once per physical
+carve. The largest simultaneous scope retains every sandbox, Pod-directory, runtime-state, CNI-state,
+volume-metadata, and mount-metadata component; a role drop/swap, domain mismatch, ownership hole/overlap, or
+alias double debit refuses before mutation.
+
+Durable singleton state is a closed `ControlPlaneState` arm of the six-arm `ObjectStoreProducerDemand` union
+(`AppBucket | Content | Registry | PulsarOffload | PulumiCheckpoint | ControlPlaneState`), with the canonical
+pure `ControlPlaneStateObjectDemand`. It names one `StorageBudgetId`; exact full store/tenant/bucket/key
+identities for `InForceSpecSnapshot`, `ManagedResourceRegistry`, `ReconcileJournal`, `ValidationLedger`, and
+content-addressed `JobCompletion`;
+maximum canonical bytes per entry; retained-version count; serial update concurrency; finite failed-write and
+orphan-GC horizons; model version; and `ObjectStoreMutationAdmission`. The private provisioned peak retains
+resident, future-resident, transient, and failed-write extents. State mutations route only through the
+resource-bearing object-write admission gateway; the singleton has no direct S3 PUT credential, and a failed
+CAS remains charged until external inventory observes deletion.
+
+The fixture's trivial app also carries its own complete Pod envelope in a Deployment-indexed
+`BoundExecutionBody` with `ReplicaCardinality` and `DeploymentRolloutPolicy` even though its tenant fanout is deferred;
+deferral of ObjectStore/Sql tenancy is not a resource exemption. Pure whole-deployment provision binds the
+singleton execution, trivial app, admission gateway, every desired producer instance
+across the closed six-arm union, service demands, namespace quotas, Pod/attachment slots, storage models, and
+the exhaustive desired/prior object identity map. Live preflight then joins observed current/old/terminating
+state and constructs the apply-action map before it creates the singleton Deployment or writes state. Every identity has a
+`KubernetesApiObjectDemand`; bounded revision/Lease/Event `churn` and the pinned `model` form
+`EtcdLogicalDemand { desiredObjects, churn, model }`. Only private
+`ProvisionedEtcdLogicalDemand.derivedPeak <= ControlPlaneStorageDemand.etcd.backendQuotaBytes` may continue;
+then the backend-at-quota plus WAL/snapshot/serialized-defrag peak must fit its physical backing. Only the private
+provisioned projection reaches `renderAll`.
+After enact, live Deployment/Pod requests, limits, images, local storage, projected files, observed-Pod-UID
+runtime-metadata component/role/backing rows and scope-indexed node aggregate, rollout epoch, and
+the exact MinIO object inventory normalize back to that value; an unmodeled pod, state key, revision, or byte
+is `UnknownCommitment`. Exact-fit/one-short fixtures cover every envelope field and each state-object,
+retention, concurrent/failure, budget, admission, API-object/revision/Event, and etcd term. Mutants dropping
+Lease/API-client work, the terminating old Pod, one of the five state kinds, a failed CAS extent, or the
+admission-gateway envelope, plus mutants dropping one desired API object, churn operand, or etcd model, must
+refuse before the first apiserver or object-store mutation.
+
 ## Doctrine adopted
 
 - [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton)
@@ -95,14 +202,18 @@ Gate 2 — a **Register-3** live-infrastructure check.
   and its secrets. Per [§3.1](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)
   ("exactly one pod" is a k8s/etcd property, not an amoebius election), the singleton is a **Deployment
   `replicas=1`**, **stateless** at the pod level (no PVC; durable state exclusively the Vault-enveloped MinIO
-  bucket), and single-instance is **delegated to k8s/etcd** — a `Lease` where a hard lock is needed, never a
-  bespoke election. This phase delivers that role live; prodbox's root single-node control-plane behaviour is
+  bucket), and single-writer authority is **delegated to k8s/etcd** through the mandatory `Lease`, never a
+  bespoke election. This phase also performs the one-way authority handoff from the observed Phase-16
+  bootstrap-host holder through fresh release and observed holder absence on that same Lease object to the authenticated singleton Pod holder; Kubernetes
+  supplies exclusion, while amoebius proves it never mints overlapping mutation capabilities. This phase
+  delivers that role live; prodbox's root single-node control-plane behaviour is
   **sibling evidence, not an amoebius result**.
 - [`daemon_topology_doctrine.md §5`](../documents/engineering/daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected)
   — *single-instance and coordination — delegated, not elected*: amoebius builds no ranked-failover rule, no
   signed-commit-log election, and no warm-standby candidate population; re-deriving consensus etcd already
   provides would add a second coordination plane to prove correct and deadlock at cold-start. This phase honors
-  that posture — the only intra-cluster single-writer machinery is the Deployment plus an optional `Lease`.
+  that posture — the only intra-cluster single-writer machinery is the Deployment plus its mandatory `Lease`;
+  the typed bootstrap release/acquire sequence is a client protocol around that Lease, not another election.
 - [`daemon_topology_doctrine.md §6`](../documents/engineering/daemon_topology_doctrine.md#6-the-shared-daemon-spine)
   — *the shared daemon spine*: the singleton runs the `load → prereq → acquire → ready → serve → drain → exit`
   lifecycle (nested `bracket`/`withAsync`, no `forkIO`), serves `/healthz` / `/readyz` / `/metrics`, logs
@@ -110,11 +221,13 @@ Gate 2 — a **Register-3** live-infrastructure check.
   never a `threadDelay` or filesystem marker. The spine is **proven in prodbox** — inherited design intent, not
   a tested amoebius result.
 - [`dsl_doctrine.md §5`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
-  — *the illegal-state-unrepresentable contract* and its **two typed gates** (Gate 1, the Dhall typechecker;
-  Gate 2, the in-process Haskell decoder): "if it decodes, it is deployable" was discharged in-process in the
-  pre-cluster band. This phase runs the **runtime residue** — the same two gates guard the **live** deploy
-  path, and the decoded IR is what the singleton reconciles — proving the apiserver actually admits what the
-  decoder blessed, without re-establishing the type discipline itself.
+  — *the illegal-state-unrepresentable contract*: Gate 1, Gate 2, bind/expand, the Phase-8 provision seal,
+  and Phase-9 `renderAll` were discharged in-process in the pre-cluster band. This phase runs the **runtime
+  residue** — the live path must follow decoded IR → bind/expand → `planInfrastructure` → explicit
+  already-materialized observation (or validated/CAS-enacted batch and receipt) → `ProvisionContext` →
+  `provision` → opaque `ProvisionedSpec` → `renderAll`; an incompatible target returns `Left` before effects.
+  The live gate proves the apiserver
+  admits the sealed desired objects without re-establishing the pure contract itself.
 
 ## Sprints
 
@@ -123,19 +236,24 @@ Gate 2 — a **Register-3** live-infrastructure check.
 **Status**: Planned
 **Implementation**: `src/Amoebius/ControlPlane/Singleton.hs` (the in-cluster singleton role + the shared
 daemon spine); `src/Amoebius/ControlPlane/Reconcile.hs` (the `discover → diff → enact → re-observe` loop
-wrapping the Phase-16 typed reconciler); the singleton's own generated `Deployment replicas=1` manifest,
+wrapping the Phase-16 typed reconciler and its observed-Pod/runtime-storage normalization);
+`src/Amoebius/ControlPlane/AuthorityHandoff.hs` (bootstrap-holder drain/release/readback and singleton acquire);
+`src/Amoebius/Capacity/RuntimeStorage.hs` (shared component-role/layout and scope-indexed node-accounting fold);
+the singleton's own generated `Deployment replicas=1` manifest,
 rendered and applied by the Phase-16 reconciler (no Helm) — target paths, not yet built.
-**Blocked by**: Phase 16 gate (the typed renderer + SSA reconciler — the singleton is itself a rendered,
-applied object); Phase 18 gate (root Vault — the singleton is the in-cluster principal that operates Vault);
+**Blocked by**: Phase 16 gate (the typed renderer + SSA reconciler and observed bootstrap-host Lease holder —
+the singleton is itself a rendered, applied object); Phase 18 gate (root Vault — the singleton is the in-cluster principal that operates Vault);
 Phase 14 gate (the `kind` cluster + the host-daemon→singleton handoff the midwife begins).
 **Independent Validation**: on the single-node linux-cpu cluster the singleton manifest is a **Deployment with
-`replicas=1`** carrying **no PVC**; the pod comes up, runs the daemon spine, and serves `/healthz` / `/readyz`
-/ `/metrics`; deleting the pod causes k8s to reschedule exactly one replacement (never two live) with no data
+`replicas=1`** carrying **no PVC**; the Pod comes up, runs the daemon spine, and serves `/healthz` / `/readyz`
+/ `/metrics`; deleting the Pod causes Kubernetes to converge a replacement with no data
 loss; the manifest contains **no amoebius election controller, no ranked-failover config, and no standby
-pod**. **"Never two live" is observed concretely (§M.5):** a `kubectl get pods -l <singleton-selector> --watch`
-stream (or an equivalent apiserver watch — the OS-boundary observer, not the singleton's own log) is recorded
-across the full delete→reschedule window, and the count of pods in phase `Running` with `Ready=True` for the
-singleton selector MUST never exceed 1 at any sampled point. **"No data loss" names the durable state
+Pod**. **"At most one writer" is observed concretely (§M.5):** an apiserver watch records every Pod UID,
+owner chain, protected source annotation, phase, and Lease transition across the full delete→reschedule window;
+at every resource version at most one authenticated UID holds the Lease, while every simultaneously present or
+reserved UID remains in the capacity ledger. Initial bring-up must additionally show bootstrap holder →
+quiesced/released → fresh same-Lease holder absence → authenticated singleton Pod UID holder, with no host mutation after release
+and no singleton mutation before acquire. **"No data loss" names the durable state
 probed:** before the delete the singleton's `InForceSpec` object is written to the Vault-Transit-enveloped
 MinIO bucket; after the replacement reports `/readyz` ready it reads that object back and the decrypted bytes
 are byte-identical to the pre-delete write (a stateless pod losing its durable MinIO state would fail this).
@@ -148,26 +266,52 @@ Adopt [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topolo
 [`§5`](../documents/engineering/daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected),
 and [`§6`](../documents/engineering/daemon_topology_doctrine.md#6-the-shared-daemon-spine): deliver the
 in-cluster control-plane singleton as a Deployment-`replicas=1` role that holds total cluster + secret
-authority and runs the reconcile loop, with single-instance delegated to k8s/etcd and no amoebius election.
+authority and runs the reconcile loop, with single-writer authority delegated to k8s/etcd, an observed
+bootstrap-host-to-singleton Lease handoff, and no amoebius election.
 
 ### Deliverables
 - A control-plane singleton deployed as a **generated typed `Deployment replicas=1`** by the Phase-16
   reconciler, **stateless** (no PVC; its durable `InForceSpec` state is the Vault-Transit-enveloped MinIO
   object), running the shared daemon spine (`load → prereq → acquire → ready → serve → drain → exit`, no
   `forkIO`, structured JSON logs, no env / `PATH`).
+- Its complete symbolic `BoundExecutionUnit`, including
+  Deployment-indexed `ReplicaCardinality = Once` and the sole legal
+  `DeploymentRolloutPolicy.Recreate`, image/import bytes, CPU/memory/
+  ephemeral requests and limits, working set, writable/log headroom, projected files, Lease/API-client work,
+  exact runtime-metadata network/mount identities, component roles/layout backings, planned/observed node
+  aggregate witnesses, and provision-derived old/new/surge/terminating instances;
+  the private provisioned value, not the authored demand, is the only manifest-renderer input.
+- A `ControlPlaneStateObjectDemand` for the exact five durable state kinds, carrying its `StorageBudgetId`,
+  version/failure/orphan bounds, and mutation admission, merged through the closed six-arm object-producer
+  inventory before a state write can occur. The sole gateway has its own complete Pod envelope.
 - The `discover → diff → enact → re-observe` reconcile loop that decodes the `InForceSpec` in-process
   (Phase-5 decoder), binds capabilities (Phase-8 binder), and applies the resulting manifests through the
   Phase-16 typed reconciler — idempotently, driven only by observed cluster state.
-- Single-instance **delegated to k8s/etcd**: the Deployment controller keeps one pod; a Kubernetes `Lease` (the
+- Single-writer authority **delegated to k8s/etcd**: the Deployment controller converges desired `replicas=1`
+  while old/terminating/replacement UIDs may overlap; a Kubernetes `Lease` (the
   etcd-backed client-go leader-election object) is the sole mechanism where strict at-most-one-writer must
-  survive a rolling update or partition — **no bespoke election, no signed commit log, no standby population**.
+  survive deletion/eviction replacement or partition — **no bespoke election, no signed commit log, no
+  standby population**.
+- A closed initial `AuthorityHandoff`: while holding the exact Lease the Phase-16 host applies the singleton
+  Deployment; the waiting Pod can complete prerequisites but receives no mutation capability and keeps
+  `/readyz` false. The host stops action issuance, drains in-flight work, executes the typed
+  `BootstrapHeld → ReleasedForHandoff` release by expected-resourceVersion CAS, and observes its holder absent
+  on the same object UID at the successor version. Only the typed `ReleasedForHandoff → SingletonHeld`
+  handoff action may then install the exact authenticated singleton Pod UID and mint reconcile/Serving
+  authority after successor readback. Each action CAS-consumes a fresh snapshot-bound token and reserves its
+  exact one-update/one-revision etcd debit; a stale CAS, timeout, or lost response retains the debit and
+  re-observes with no authority. Holder identity/object UID/resourceVersion and every observation enter the
+  fingerprint; unknown or changed state restarts the read-only prefix.
 - Secret authority fused to the role (operates root Vault as the single in-cluster writer) and the admin-REST
   control surface stub through which the operator `pb` client later drives the cluster.
 
 ### Validation
-1. The singleton manifest is a `Deployment replicas=1` with no PVC; the pod runs the spine and reports
-   `/readyz` ready; a pod delete reschedules exactly one replacement (Ready-pod cardinality never exceeds 1
-   across the watched reschedule window) with the MinIO-held `InForceSpec` read back byte-identical afterward.
+1. The singleton manifest is a `Deployment replicas=1` with no PVC. During initial handoff, assert the Pod
+   remains non-Serving and performs zero mutations while the bootstrap host holds the Lease; then observe host
+   quiescence, release, fresh holder absence, exact singleton UID acquisition, and only then `/readyz`. A Pod
+   delete converges a replacement, and the apiserver watch proves at most one
+   authenticated Pod UID holds the Lease at each resource version while all present/reserved UIDs remain
+   capacity-debited, with the MinIO-held `InForceSpec` read back byte-identical afterward.
 2. The reconcile loop runs one idempotent pass to convergence from a decoded spec and a re-run is a no-op,
    where **"no-op" is defined observably (§M.6) as: the second pass's apiserver audit log records zero mutating
    writes (`create`/`update`/`patch`/`delete`) under the singleton field manager** — unchanged end-state
@@ -175,12 +319,27 @@ authority and runs the reconcile loop, with single-instance delegated to k8s/etc
    skipped/memoized short-circuit), the second pass executes with any reconcile result cache bypassed and its
    `discover` step is observed to have re-read live cluster state before concluding the empty diff. The
    codebase contains no election/ranked-failover module and no standby pod is ever scheduled.
+3. Make each singleton CPU, memory, ephemeral, image/import, writable/log, projected-file, runtime-metadata,
+   pod-slot, Deployment-cardinality, and Deployment-rollout operand one unit short; change the pinned metadata
+   model; drop/swap a component role; mismatch the planned-slot/observed-UID domain; overlap/leak qualified
+   Pod/image ownership; double-debit an alias; make either SplitRuntime nodefs or imagefs/containerfs one byte
+   short; or drop the largest simultaneous metadata row. Separately make each control-plane-state resident/version/failure/budget term
+   short or omit one state kind/admission envelope. Every negative rejects before Deployment creation or MinIO
+   mutation. For the exact-fit twin, live Pod/Deployment and exact object-key readback equal the provisioned
+   projection, including the replacement-Pod transition epoch.
+4. Inject simultaneous acquire, stale-resourceVersion release, lost release/acquire response, watch gap,
+   bootstrap crash before and after release, singleton crash before and after acquire, and replacement-Pod UID
+   churn. Every trace either reaches one authenticated singleton holder or refuses with no overlapping
+   mutation; audit history shows zero host writes after observed release and zero singleton writes before
+   observed acquire. Assert every attempted Release/Handoff consumes its fresh token, every present-state
+   mutation uses the exact expected resourceVersion, and a lost/ambiguous response remains charged one etcd
+   update/revision until successor or no-write readback. Drop one Lease object/RBAC/churn operand or mutate
+   only the holder UID and require preflight refusal before any other effect.
 
-> **Honesty.** This sprint delivers the singleton *role* and reconcile *loop*. Single-instance
-> ("never two simultaneous active singletons") is **not an amoebius proof obligation** — it is a k8s/etcd
-> property ([daemon_topology_doctrine.md §3.1](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election));
-> the one amoebius simulation/proof obligation is the cross-cluster gateway migration, owned and gated in the
-> multi-cluster phase, never asserted here.
+> **Honesty.** Kubernetes/etcd, not amoebius, supplies the exclusion property behind "never two simultaneous
+> Lease holders" ([daemon_topology_doctrine.md §3.1](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)). Amoebius's obligation here is narrower and
+> real: it must not authorize either client on an unknown/stale transition and must observe bootstrap release
+> before enabling the singleton. Cross-cluster gateway migration remains owned by the multi-cluster phase.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -215,20 +374,31 @@ the harness is asserted back at Ready so the shared Phase-19/20 stack is left as
 
 ### Objective
 Adopt [`dsl_doctrine.md §5`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
-at the runtime layer: the two typed gates guard the **live** deploy, and the decoded IR is what the singleton
-reconciles onto a real cluster — proving "if it decodes, it is deployable" holds live, that the apiserver
-admits what the decoder blessed. The type/decode integrity itself was proven in-process in the pre-cluster
-band; here it is exercised, not re-established.
+at the runtime layer: the two typed gates guard the **live** deploy, but decoded IR is never reconciled
+directly. The singleton must bind/expand it, derive the conditional infrastructure result, authenticate the
+already-materialized target (or receipt-bound enacted result), construct `ProvisionContext`, and successfully
+`provision` the exact target into an opaque
+`ProvisionedSpec`, and call deployment-level `renderAll`; any capacity or compatibility failure stops before
+effects. This gate proves the apiserver admits what the complete pure pipeline sealed. The pure integrity
+itself was proven in-process in the pre-cluster band; here it is exercised, not re-established.
 
 ### Deliverables
 - A positive deploy `.dhall` composing the standard platform-service stack (Phases 19–20) and a **trivial**
   single-service app — deliberately narrower than the Phase-23 tenancy projection (no per-app namespace,
-  ObjectStore, or in-namespace Sql fanout).
-- The singleton's live reconcile of that spec: decode → capability-bind → render → SSA-apply → wait-to-ready,
-  each edge a witnessed condition — **the witness for each apply/ready edge is externally observable apiserver
+  ObjectStore, or in-namespace Sql fanout), but still carrying a complete app Pod/rollout envelope.
+- The singleton's live reconcile of that spec: decode → capability-bind/expand → `planInfrastructure` →
+  materialization observation/receipt → `ProvisionContext` → whole-deployment provision →
+  observed-inventory preflight → `renderAll` → SSA-apply → wait-to-ready, each edge a witnessed condition — **the
+  witness for each apply/ready edge is externally observable apiserver
   evidence (the object's live `status`/managed-fields and the audit-log write record), never a log line or
   metric the singleton emits about itself (§M.5)** — with a re-run proven idempotent (no drift, no re-apply)
   under the audit-log no-op definition above.
+- A hard effect boundary: pure whole-deployment provision includes the singleton, mutation-admission gateway,
+  every desired Pod/controller child and producer, durable claims, Pod/CSI slots, and planned transition peaks.
+  Snapshot-bound preflight then joins every observed/reserved/terminating/terminal-retained identity and builds
+  the observed node runtime/image-storage aggregate before minting `ValidatedLiveTarget`. Any
+  `Left ProvisionError` or live-preflight refusal exits before state PUT or SSA apply; no renderer accepts raw
+  `InForceSpec`/`BoundDeployment` values.
 - A leak-free teardown obligation carried by the deploy fixture — a test-topology `.dhall` whose postflight
   sweep asserts every provisioned object (the run-unique-labelled set defined in Independent Validation) was
   reclaimed, while the pre-existing Phase-19/20 service set and Phase-21 edge are restored to Ready rather than
@@ -242,6 +412,11 @@ band; here it is exercised, not re-established.
 2. Teardown leaves no leaked resources (the postflight sweep over the run-unique label set is empty and the
    perturbed platform components are back at Ready); the apiserver audit log records that **every** platform/app
    write was issued by the singleton's in-cluster ServiceAccount and none by the harness principal.
+3. A committed provision-bypass mutant that renders the raw bound spec, and omission mutants that drop the
+   singleton, trivial-app, or gateway envelope, a present producer instance, or a union match branch must turn
+   the gate red before apply. The positive run compares normalized live requests/limits/images/local storage,
+   controller children, claims, and object keys with the opaque provisioned deployment rather than merely
+   checking `Ready`.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -250,7 +425,10 @@ The whole sprint (📋 Planned).
 
 **Status**: Planned
 **Implementation**: `test/integration/Phase22Gate.hs` (linux-cpu spin-up / reconcile / teardown + the negative
-regression assertions); the reused Phase-6 negative corpus under `dhall/examples/illegal_*.dhall` (re-run, not
+regression assertions); `test/integration/Phase22RuntimeStorage.hs` (planned-slot→observed-Pod-UID readback,
+SplitRuntime backing boundaries, node scope/domain/ownership equality, reservation/observed no-double-debit,
+and alias controls); the reused Phase-6
+negative corpus under `dhall/examples/illegal_*.dhall` (re-run, not
 re-authored) — target paths, not yet built.
 **Blocked by**: Sprint 22.1, Sprint 22.2; Phase 6 (the pre-cluster illegal-state negative corpus +
 validation-locus ledger, already proven in Registers 1–2); Phase 21 gate (the Keycloak-owned edge the deployed
@@ -301,6 +479,11 @@ the pre-cluster band; here the guard confirms the live deploy path never admits 
 - A **Register-3** proven/tested/assumed ledger recording the live-enforcement result (the apiserver admitted
   the rendered manifests) and marking the deferred surfaces — full app tenancy (Phase 23), and the
   cross-cluster gateway-migration correspondence (the multi-cluster phase) — as UNVERIFIED, never green.
+- The committed resource-boundary corpus: one exact-fit topology plus one-short and omission cases for the
+  singleton envelope, rollout overlap, runtime component roles/layout backings and scope-indexed node
+  domain/ownership/grouping, admission gateway, and all five `ControlPlaneState` entry kinds and
+  their `StorageBudgetId`/retention/failure terms. Each negative also asserts zero audit writes and zero MinIO
+  mutation.
 
 ### Validation
 1. After perturbation, the positive `.dhall` restores and brings the platform + trivial app up (first-pass
@@ -312,6 +495,9 @@ the pre-cluster band; here the guard confirms the live deploy path never admits 
    the apiserver audit log shows zero writes and the pre/post full-cluster `resourceVersion` snapshot is equal
    across the corpus run; the positive fixtures decode; and the ledger honestly classifies each foreclosure (no
    runtime-checked or deferred claim — tenancy, gateway-migration — is reported as proven).
+3. Run the resource-boundary and provision-bypass mutants through that same singleton entry. Assert each
+   returns its specific `ProvisionError` before effects, while the exact-fit twin's live normalized
+   Pod/controller/object-store projection is equal to the private provisioned value.
 
 ### Remaining Work
 The whole sprint (📋 Planned).

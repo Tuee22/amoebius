@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: documents/engineering/content_addressing_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering durable storage, bounded backing, and
@@ -22,14 +22,15 @@ stay stable. It is not self-contained framing — it owns only the deep treatmen
   [`illegal_state_catalog.md`](./illegal_state_catalog.md) — referenced here, not restated.
 - The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three-layer foreclosure**
   ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the orthogonal question of *where* each state is caught —
-  `Gate-1-editor`, `Gate-2-decoder`, `rendered-output-golden`, `live-effect`) are owned by
+  `Gate-1-editor`, `Gate-2-decoder`, `provision-seal` (post-bind Phase-8 provision returns a `ProvisionError`
+  before any `ProvisionedSpec` exists), `rendered-output-golden`, `live-effect`) are owned by
   [`illegal_state_techniques.md`](./illegal_state_techniques.md) — referenced here, not restated.
 
 Everything below is **design intent** (per [`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
 a type-check proves the spec composes into something internally coherent; it does **not** prove the running
 cluster's PVC is bound, its disk is unfilled, or its bookies are healthy. Each entry names a **Layer** (the
 foreclosure layer, from [`illegal_state_techniques.md`](./illegal_state_techniques.md) §6) and a
-**Validation-locus** (the new orthogonal axis — where authoring/decoding/rendering/runtime catches it).
+**Validation-locus** (the new orthogonal axis — where authoring/decoding/provisioning/rendering/runtime catches it).
 
 ---
 
@@ -65,27 +66,36 @@ PVC actually binds its PV at reconcile, owned by the runtime-enforcement proof).
 Raw k8s lets a volume grow until it fills the disk; "unbounded" is the default. amoebius admits storage that
 is **either** host-level (bounded by a physical disk) **or** cloud (bounded by a quota) — the closed
 `StorageBacking` union has **no unbounded arm**, so unbounded storage has no syntax, and the aggregate
-`Σ(sizes) ≤ backing` fold bounds the total. **Owner:**
+`Σ(PV provisionedBytes) ≤ backing` fold bounds the final raw claim plan. Logical BookKeeper/MinIO demand is
+first expanded through replication/erasure/recovery/healing/orphan headroom, then
+`VolumePresentation` overhead, backing/provider minimum+quantum, and uniform StatefulSet claim rounding; a
+logical-byte sum is not that plan. **Owner:**
 [`storage_lifecycle_doctrine.md` §5.2](../engineering/storage_lifecycle_doctrine.md#52-the-storage-backing-is-bounded--the-closed-storagebacking-union) (the union shape) +
 [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the aggregate). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (closed `StorageBacking` union — type-foreclosed) + [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) (aggregate backing fold — decode-foreclosed). **Layer:** decode-foreclosed aggregate;
 the union shape is type-foreclosed.
 **Validation-locus:** `Gate-1-editor` (the closed `StorageBacking` union with no unbounded arm fails
-`dhall type` at authoring) + `Gate-2-decoder` (the aggregate `Σ(sizes) ≤ backing` fold returns `Left` in the
-total decoder).
+`dhall type` at authoring) + `provision-seal` (the post-bind aggregate `Σ(sizes) ≤ backing` fold returns a
+`ProvisionError` before any `ProvisionedSpec` exists).
 
 ### 3.19 An application consuming more storage than its backing (MinIO and Pulsar)
 
-Even with each volume bounded, the *sum* of an app's object usage and a topic's retained bytes can exceed the
-backing. amoebius folds cumulative store size against the selected `StorageBacking` for **both** MinIO
-(`<app>/<bucket>` buckets) and Pulsar (retained topic bytes); "unbounded" is representable only through a
+Even with each volume bounded, an app's logical object usage or a topic's retained hot bytes can expand past
+the physical backing. amoebius derives **per-bookie** BookKeeper write-quorum/recovery demand and
+**per-drive** MinIO erasure/healing/metadata usable demand, includes bounded concurrent writes and failed-write
+orphans until a positive GC horizon, applies block/filesystem overhead and backing/provider allocation
+quantum, and rounds each StatefulSet claim-template group to its maximum provisioned size before folding raw
+claims against `StorageBacking`. Provider S3 uses its explicitly declared
+logical/billed quota instead of invented internal geometry. "Unbounded" is representable only through a
 `Growable` scaling policy whose ceiling is itself a quota ([§3.21](#321-capacity-growth-without-an-amoebius-owned-scaling-policy)). **Owner:**
 [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) +
 [`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) (the MinIO store) +
 [`pulsar_client_doctrine.md`](../engineering/pulsar_client_doctrine.md) (topic retention). **Technique:** [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
-(cumulative-size ≤ backing fold) + [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (the `Growable` arm gates unboundedness). **Layer:** decode-foreclosed.
-**Validation-locus:** `Gate-2-decoder` (the cumulative-size ≤ backing fold over MinIO buckets and retained
-Pulsar bytes returns `Left` in the total decoder) + `Gate-1-editor` (the `Growable` arm that gates
+(logical→physical per-backing placement fold) + [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (the `Growable` arm gates unboundedness). **Layer:** decode-foreclosed.
+**Validation-locus:** `provision-seal` (logical-fit/usable-or-raw overflow, dropped recovery/healing scenario,
+orphan horizon, presentation/quantum, and uniform-claim-skew cases return a `ProvisionError` after binding and
+before any `ProvisionedSpec` exists) +
+`Gate-1-editor` (the `Growable` arm that gates
 unboundedness is a closed union checked at authoring).
 
 ### 3.20 A Pulsar topic without a bounded / tiered / retained lifecycle
@@ -95,7 +105,8 @@ tier — so if ingest outpaces the offload lag, BookKeeper fills, bookies go rea
 the broker) goes **unavailable**. amoebius makes a topic's `RetentionPolicy` a **mandatory, non-optional**
 field with a **mandatory size-triggered S3 offload** (time may offload *sooner* for cost but is never the
 sole trigger — a time-only policy is uninhabitable), and folds two ceilings: the hot-tier cap **plus
-headroom** against the BookKeeper backing (the availability fit) and the retained total against the offload
+required open-ledger/in-flight/deletion headroom** through BookKeeper write-quorum placement and every derived
+re-replication scenario against each bookie backing (the availability fit), and the retained total against the offload
 target (the durability fit). A mandatory backlog quota is the runtime fail-safe. **Owner:**
 [`pulsar_client_doctrine.md` §6](../engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra) (the policy
 shape) + [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the two-ceiling fold).
@@ -103,8 +114,9 @@ shape) + [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doct
 (retention-budget room-fit). **Layer:** type-foreclosed for the mandatory shape; decode-foreclosed for both room-fits; runtime-checked residue
 — the burst back-pressure actually holding.
 **Validation-locus:** `Gate-1-editor` (the mandatory `RetentionPolicy` with a mandatory size-triggered
-offload — no forever-local / time-only arm — fails `dhall type` at authoring) + `Gate-2-decoder` (both
-room-fit ceilings, the availability fit and the durability fit, are total decoder folds) + `live-effect`
+offload — no forever-local / time-only arm — fails `dhall type` at authoring) + `provision-seal` (both
+room-fit ceilings, the availability fit and the durability fit, are post-bind provision folds that return a
+`ProvisionError` before any `ProvisionedSpec` exists) + `live-effect`
 residue (the burst back-pressure and backlog quota actually holding at runtime).
 
 ### 3.21 Capacity growth without an amoebius-owned scaling policy

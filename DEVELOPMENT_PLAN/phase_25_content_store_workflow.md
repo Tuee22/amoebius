@@ -33,11 +33,25 @@ composed pieces on one substrate. First, the **three-tier content-addressed MinI
 self-naming `blobs/<sha256>` and canonical-CBOR `manifests/<sha256>` under `If-None-Match: *` (with `412
 Precondition Failed` treated as success), and the only mutable objects, `pointers/*`, advanced by an
 `If-Match` compare-and-swap that is the single atomic commit point — keyed under a caller-supplied
-`experiment-hash` namespace within an app's Phase-23 ObjectStore bucket. Second, an **orchestrator/worker
+`experiment-hash` namespace within an app's Phase-23 ObjectStore bucket. Every namespace also binds a finite
+`ObjectStoreDemand`: exact store/tenant/bucket/full-key resident identities, structural additional-retention
+object extents, bounded concurrent write sets, bounded failed writes, a positive finite orphan-GC horizon,
+required `StorageBudgetId`, and exclusive writer admission. Blob/manifest bytes uploaded before a failed pointer CAS stay
+charged until an observed GC deletion; the logical peak consumes Phase 19's MinIO erasure/healing and uniform
+claim-plan witness rather than assuming logical bytes equal physical disk. Second, an **orchestrator/worker
 workflow runtime** on top of the Phase-24 client: an orchestrator worker produces a workflow `command` on a
 derived topic; worker daemons attached over a Pulsar **Failover** subscription have one active
 consumer and the rest as name-ordered hot standbys; the active worker writes a content-addressed artifact and
 produces an `event` carrying the manifest SHA the orchestrator fetches back by that SHA.
+
+This phase also closes the Job-terminal live-proof boundary deliberately left open in Phase 16. Phase 16
+builds and model-checks the closed success/failure completion state machine but has no MinIO or sole content
+mutation gateway, so its live terminal Pod remains retained and charged. Here the already-provisioned
+collector/verification Job is driven through the full live sequence: terminal outcome → exact
+content-addressed `JobCompletion` write through the sole gateway → independent MinIO digest/outcome/revision
+readback → cleanup deadline plus scheduler release partition → authenticated terminal-Pod cleanup. A failed or
+ambiguous write retains the Pod and all modeled resident axes; an equal persisted completion yields
+`CompletedJobNoOp` and cannot recreate the Job until a new execution revision.
 
 The load-bearing property this phase proves live is that **standby takeover is delegated to Pulsar, not
 elected by amoebius**. Killing the active worker triggers the subscription's own ranked failover to the
@@ -67,16 +81,101 @@ self-emitted worker log), with at-least-once redelivery of the un-acked command.
 load-bearing safety story *live*: the promoted standby re-fetches the artifact by manifest SHA, the resulting
 `pointers/latest` HEAD is **byte-identical to a committed no-fault reference run**, and an **external Pulsar
 consumer** (attached at the OS boundary, not the runtime under test) observes the workflow command **exactly
-once**; the kill-window placement (store-write-done, event-unacked) is recorded in the per-run ledger. The whole
-	topology spins up, runs, and **tears down leak-free** — the postflight sweep inventories every resource class
-	enumerated in Sprint 25.3 and fails hard on any non-empty remainder outside its explicitly named
-	retained-by-design set — and **re-runs idempotently under a
+once**. A separate failed-commit drill uploads the maximum blob/manifest write set and deliberately loses the
+pointer CAS; an external MinIO inventory proves those orphan bytes remain resident and debited before the
+positive finite GC horizon, an over-capacity follow-on write is refused with zero object mutation, and capacity
+is credited only after the GC horizon has elapsed **and** a fresh inventory observes deletion. The independent
+checker projects committed + concurrent + orphan logical extents through the Phase-19 per-drive
+erasure/healing and uniform-claim witness. The collector/verification Job also exercises the first live
+Phase-16 terminal protocol: its exact completion variant is gateway-written and independently read back before
+deadline/release-authorized Pod deletion; a forced gateway-write failure proves retention, and a rerun proves
+`CompletedJobNoOp`. The kill-window placement (store-write-done, event-unacked) is
+recorded in the per-run ledger. The whole
+topology spins up, runs, and **tears down leak-free** — the postflight sweep inventories every resource class
+enumerated in Sprint 25.3 and fails hard on any non-empty remainder outside its explicitly named
+retained-by-design set — and **re-runs idempotently under a
 distinct `experiment-hash` namespace** (a cache-bypassing independent recompute, not a content-addressed
 store-hit), emitting a per-run proven/tested/assumed ledger artifact. The gate is checked against the
 Phase-0-committed fixtures named in Sprints 25.1/25.3 and MUST turn red on the committed seeded mutants named
 there (e.g. the insertion-order-leaking CBOR encoder and the ack-before-store-write worker); the representative
 service set is exactly the `round_trip_failover.dhall` topology's **one orchestrator + three workers** (one
 active, two name-ordered standbys) over the standing single-node Pulsar + MinIO.
+
+### Resource-provisioning contract
+
+The representative runtime's provisioned steady epoch contains exactly four resource-bearing Pods: one
+orchestrator and three workers. A pure `WorkflowRuntimeDemand` contains the exact identity-keyed runnable
+sources; binding lowers each source to a `BoundExecutionUnit` whose `resource` contains one complete
+`PodResourceEnvelope`, not a pre-expanded replica list or an envelope multiplied by an assumed scalar. Each
+includes immutable image and OCI
+image-store/import bytes; CPU, memory, and ephemeral-storage requests and limits; runtime working set;
+writable-root, log, artifact staging, CBOR encode/decode, Pulsar frame/redelivery, and store upload/download
+headroom; projected credentials/config/service-account-token bytes; local/durable/cache/accelerator arms;
+exact byte-free `PodRuntimeMetadataSource` network-attachment identities and container-to-volume mount
+identities; and pod slots. Each standing orchestrator/worker/gateway unit is structurally a Deployment body
+with exactly one `ReplicaCardinality` (`Once | Replicated`) and one `DeploymentRolloutPolicy`: `Recreate` or
+`RollingUpdate { maxSurge, maxUnavailable }`, with
+`maxSurge + maxUnavailable > 0`; there is no separate Deployment replica or
+strategy-plus-inapplicable-fields record. The finite verification/collector unit is structurally a Job body
+with its own completions, parallelism, backoff, replacement, and terminal-retention policy—not a Deployment
+rollout record. `provision` alone expands those symbolic units into
+`MaterializedExecutionInstance`s and every reachable old/new/surge/terminating epoch. All three workers are
+debited while two are hot standbys, and the transition peak includes the bounded old-active + promoted-worker
+work overlap. Any artifact cache is a bounded `InClusterCacheDemand` (otherwise
+`cache = None`), and linux-cpu binds `accelerator = None`.
+
+For each planned orchestrator, worker, mutation-gateway, or collector/verification Pod slot, provision derives
+one `KubeletRuntimeMetadataShape` from that exact source, its complete container/volume graph, and the selected
+node's pinned `kubeletMetadataModel`; live normalization instead keys the observed form by authenticated
+`PodUid` plus owner/source witness. The private fold derives each component's bytes and
+`KubeletNodefs | CriRuntimeRoot` role, resolves it through the selected filesystem layout, and groups aliases
+by physical carve once. SplitRuntime charges kubelet components to nodefs and CRI components to
+imagefs/containerfs; Unified and SplitImage sum forced aliases before one backing check. These physical bytes
+are not repeated as logical Pod ephemeral demand.
+
+Pure provision gives each planned epoch, and live preflight each observed snapshot, one
+`ProvisionedNodeRuntimeStorageAccounting` per node: exact planned-slot/observed-UID domain, a disjoint and
+exhaustive partition between qualified Pod metadata keys and image-model component keys, and one combined
+debit per physical carve. Missing/swapped roles, wrong layout backing, scope/domain mismatch, ownership
+hole/overlap, or alias double debit are `UnknownCommitment`/preflight refusal, never free capacity.
+
+The content writer is exactly the `Content` arm of the closed six-arm `ObjectStoreProducerDemand` union, never
+an open producer list or a scalar "artifact bytes" field. Its `ContentStoreLogicalDemand`/`ObjectStoreDemand`
+retains one `StorageBudgetId`; exact store/tenant/bucket/full-key identities for every blob, manifest, and
+pointer; committed residents; future retained extents; concurrent write sets; multipart/upload workspace;
+failed-write sets, CAS-loser orphans, and positive finite GC horizon; and `ObjectStoreMutationAdmission` for
+the exclusive writer. The concurrency bound includes the declared active/failover overlap. Same digest under
+different namespaces remains two objects unless the full physical object identity is equal.
+
+The sole-routable content mutation gateway and the orphan collector/verification Job are also runnable units
+with complete `PodResourceEnvelope`s. Their CPU/memory/ephemeral/image/log and scan/upload workspace enter the
+same peak as the four runtime Pods; direct worker S3 PUT stays denied. Whole-deployment provision merges the
+Content peak with every desired producer in the other five arms, MinIO geometry/healing, Pulsar hot/offload
+demand, namespace quotas, Pod/CSI slots, storage models, and planned rollout/failover transition. Snapshot-bound
+preflight then joins the live residual before it creates a Pod, topic, or object. Pure controller expansion
+gives every desired/prior object a `KubernetesApiObjectDemand`; live preflight joins the observed old/new/apply map.
+`EtcdLogicalDemand { desiredObjects, churn, model }` derives the private logical peak, which must fit
+`ControlPlaneStorageDemand.etcd.backendQuotaBytes`, before the backend-at-quota plus
+WAL/snapshot/serialized-defrag peak separately fits its physical backing. Render
+accepts only opaque provisioned projections. External
+Pod/controller/Pulsar/MinIO readback must normalize to those projections, and unknown children, consumers,
+keys, multiparts, observed-UID runtime-metadata components/roles/backings, scope rows, or bytes are `UnknownCommitment`.
+
+The collector's terminal record is the `JobCompletion` member of `ControlPlaneState`, not a content blob or an
+unaccounted side table. Its exact execution-identity digest, outcome variant, revision, canonical byte bound,
+retention/failure/orphan horizon, `StorageBudgetId`, and mutation admission join the global object-producer
+inventory and MinIO physical fold before the collector Pod is created. The same sole gateway is the only
+mutation route. Cleanup consumes a fresh external MinIO readback plus deadline and scheduler-release evidence;
+neither a Job status condition nor a gateway acknowledgement alone is sufficient.
+
+The committed boundary corpus makes each runnable source envelope, exact four-instance steady expansion,
+gateway/collector, kind-indexed controller/rollout/failover
+overlap, runtime-metadata shape/component/role/backing, topic cursor/backlog, object identity/count/size, concurrent/failure/orphan term, storage budget,
+API-object revision/Event, and etcd term one unit short. Omission mutants dropping either standby, the gateway
+or collector, the largest simultaneous runtime-metadata row, a role/domain/ownership/grouping witness, or pinned kubelet model, a failed CAS object, a declared pointer object, the `Content` producer arm, one desired API
+object, the collector's `JobCompletion` identity/retention/failure extent, a churn operand, or the etcd model
+refuse before any k8s/Pulsar/MinIO effect; exact-fit twins render
+and match live readback.
 
 ```mermaid
 flowchart LR
@@ -103,7 +202,10 @@ them.
   three classes / two protocols; [`§2.2`](../documents/engineering/content_addressing_doctrine.md#22-why-this-shape-removes-the-races)
   why the shape removes the write/write and write/read hazards), keyed under the
   [`§3 experimentHash`](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran)
-  namespace consumed here as an opaque pinned prefix.
+  namespace consumed here as an opaque pinned prefix. The same §2.1 capacity contract and
+  [`resource_capacity_doctrine.md §5.1`](../documents/engineering/resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry)
+  require committed residents + bounded in-flight writes + every failed-write orphan through the finite
+  positive GC horizon to remain charged through MinIO's physical and uniform-claim witness.
 - [`content_addressing_doctrine.md §5`](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)
   — *confluence*: content-addressed data is a join-semilattice, which is what makes the standby's re-fetch by
   manifest SHA and the at-least-once redelivery idempotent without a distributed lock.
@@ -144,20 +246,31 @@ them.
 
 **Status**: Planned
 **Implementation**: `amoebius-store/src/Amoebius/Store/ContentAddress.hs`,
-`amoebius-store/src/Amoebius/Store/Manifest.hs`, `amoebius-store/src/Amoebius/Store/Pointer.hs` (target paths;
-not yet built)
-**Blocked by**: Phase 19 gate (MinIO reachable as a standard HA platform service) and Phase 17 gate (the
+`amoebius-store/src/Amoebius/Store/Manifest.hs`, `amoebius-store/src/Amoebius/Store/Pointer.hs`,
+`amoebius-store/src/Amoebius/Store/ControlPlaneState.hs`, and
+`amoebius-runtime/src/Amoebius/Execution/JobTerminalLive.hs` (target paths; not yet built)
+**Blocked by**: Phase 16 gate (the modeled typed Job-terminal protocol), Phase 19 gate (MinIO reachable as a standard HA platform service) and Phase 17 gate (the
 `no-provisioner` retained PV the MinIO bytes land on); Phase 23 gate (the `<app>/<bucket>` ObjectStore the
 store keys under) — all external earlier-phase prerequisites.
 **Independent Validation**: this suite runs in **Register 3** against the **live single-node kind-cluster MinIO**
 (the standing Phase-19 HA service on the Phase-17 retained PV), never an in-process or local S3 fake — the
-register is stated so its evidential weight is unambiguous. A blob PUT under `If-None-Match: *` returns success
+register is stated so its evidential weight is unambiguous. A gateway-admitted blob PUT under
+`If-None-Match: *` returns success
 on first write and treats the second write's `412` as success; a canonical-CBOR manifest encodes byte-identically
 from **two writers that first construct the manifest with distinct component insertion orders/permutations**, and
 both reproduce the **Phase-0-committed golden bytes and sha256 key** (cross-checked against an independent CBOR
 canonicalizer); a `pointers/latest` `If-Match` CAS commits the winner and returns `412` to the loser, who
 re-reads and reapplies the typed advance predicate; a reader always observes a 32-byte SHA naming an immutable
-manifest, never torn state.
+manifest, never torn state. A capacity drill fills the declared maximum write set, forces the pointer CAS to
+lose after blob/manifest PUT success, and proves from an external MinIO inventory that the resulting orphan is
+charged until the finite positive GC horizon; an otherwise admissible follow-on write that would exceed the
+provision is refused before mutation, and deletion earns capacity credit only after a fresh observation.
+The writer's direct MinIO PUT credential/route is denied. The same SHA under two experiment namespaces is
+charged as two physical objects, an identical full object id deduplicates, and conflicting sizes reject.
+The live collector Job persists its exact `JobCompletion` variant through that gateway; an independent MinIO
+reader must match digest/outcome/revision before deadline/release-authorized terminal cleanup, while forced
+write failure retains the Pod and immediate rerun after success yields `CompletedJobNoOp` with no new object or
+Pod.
 **Docs to update**: `documents/engineering/content_addressing_doctrine.md` (§2),
 `documents/engineering/storage_lifecycle_doctrine.md` (the retained-PV MinIO the bytes land on),
 `DEVELOPMENT_PLAN/system_components.md`, this document.
@@ -178,6 +291,22 @@ store is a single one-object atomic pointer flip.
 - `pointers/*` (`latest`, `best/<metric>`, `trial/<id>/…`) — the only mutable objects; each body is a 32-byte
   manifest SHA, updated by `If-Match: <etag>` compare-and-swap as the single atomic commit point; the pure CAS
   decision (`PointerWritten` vs `PointerConflict`) and a typed `AdvancePredicate` resolve a lost CAS.
+- A mandatory `ObjectStoreDemand` per namespace: exact physical-id-keyed committed residents, structural
+  maximum additional retained extents/retention, maximum concurrent write sets, maximum object extents per
+  set, maximum failed write sets per finite window, a positive finite orphan-GC horizon, the bucket's required
+  `StorageBudgetId`, and `ObjectStoreMutationAdmission`. Provisioning returns the private resident +
+  future/transient extent peak, merges it with all Phase-19 producer arms, and feeds that structure—not a byte
+  scalar—into MinIO geometry. The sole gateway enforces object identity/count/size/concurrency/retention;
+  direct S3 writes are denied, and observed orphan/multipart bytes remain resident until post-GC inventory.
+- The demand enters the closed producer inventory only through its `Content` arm. The resource-bearing write
+  gateway and collector/verification Job have complete Pod envelopes, and content concurrency includes the
+  active/promoted-worker overlap; there is no free admission or GC process.
+- The collector/verification Job consumes the Phase-16 terminal state machine live for the first time. Its
+  success and `FailedBackoffExhausted` variants lower to the `JobCompletion` control-plane-state kind with an
+  exact content-addressed key. The sole gateway writes it, a distinct read-only MinIO client verifies canonical
+  bytes/digest/outcome/revision, and only fresh cleanup-deadline plus scheduler-release evidence authorizes
+  deletion. Failed/unknown write outcome keeps the terminal UID and all retained axes charged; equal readback
+  constructs `CompletedJobNoOp` and a changed execution revision is required to run again.
 - Store keys taken under a caller-supplied `experiment-hash` namespace string within the app's ObjectStore
   bucket; this sprint does **not** build `deriveExperimentHash`, the `ContentAddress` typeclass, or SplitMix
   seed derivation (Phase 31 kernel work).
@@ -190,7 +319,11 @@ store is a single one-object atomic pointer flip.
   offset** and a key differing from the golden — paired with the positive that differs only in component
   ordering. Committed seeded mutant (operator: dropped-normalization / effect swap):
   `mutant/insertion-order-encoder` — an encoder that emits map/component bytes in insertion order rather than
-  sorted order; the gate MUST turn this mutant **red** against the golden vector.
+  sorted order; the gate MUST turn this mutant **red** against the golden vector. The independently authored
+  `amoebius-store/test/golden/write_budget_boundaries.csv` pins committed/concurrent/failed/horizon inputs and
+  expected logical peaks, including one-byte-under/over and a pre-horizon resident orphan. The committed
+  mutants `mutant/orphan-free-on-pointer-conflict` (credits failed PUTs immediately) and
+  `mutant/orphan-budget-omitted` (drops the full-horizon failure term) MUST turn that corpus red.
 
 ### Validation
 1. Write the same blob twice and assert first-write success, second-write `412` treated as a no-op success.
@@ -203,6 +336,26 @@ store is a single one-object atomic pointer flip.
    committed `mutant/insertion-order-encoder` turns this validation **red**.
 3. Race two `pointers/latest` updates; assert one commits, the loser gets `412`, re-reads, and the advance
    predicate converges both to the same HEAD; assert no reader ever sees a torn pointer body.
+4. Run `write_budget_boundaries.csv`, then upload the maximum blob/manifest set and force its pointer CAS to
+   lose. From an external MinIO inventory, assert the orphan is resident before the configured GC horizon and
+   remains in residual capacity; a one-byte-over follow-on admission returns the specific capacity error with
+   zero object mutation. After the horizon, run the collector but grant no capacity credit until a fresh
+   inventory observes deletion. Assert `mutant/orphan-free-on-pointer-conflict` and
+   `mutant/orphan-budget-omitted` each turns this validation red.
+   Also reject direct MinIO PUT, too many same-total-byte objects, a missing/conflicting writer admission, and
+   a dropped physical object id before backing usage changes.
+5. Make the gateway or collector CPU, memory, ephemeral/image/log/workspace term one unit short, or omit the
+   closed `Content` arm, one blob/manifest/pointer identity, one multipart, one CAS-loser orphan, or one
+   `JobCompletion` identity/retained-version/failed-write extent. Assert each
+   case rejects before object mutation; the exact-fit twin's full MinIO inventory and live gateway/Job
+   envelope equal the private provisioned projection.
+6. Drive the collector Job once to `Succeeded` and once to `FailedBackoffExhausted`. For each variant, use an
+   apiserver watch plus an independent MinIO `HEAD`/`GET` reader to prove gateway write and exact
+   digest/outcome/revision readback precede terminal-Pod deletion. Inject failed/ambiguous PUT, wrong digest,
+   wrong outcome/revision, early deadline, and incomplete scheduler release: each retains and charges the exact
+   terminal UID with no delete. After matching persistence and authorized cleanup, an immediate reconcile
+   yields `CompletedJobNoOp`, creates no Pod, and changes no object version. Seeded cleanup-on-Job-status and
+   trust-gateway-ack-without-readback mutants must turn red.
 
 > **Honesty.** Blob/manifest conflict-freedom and pointer lattice-convergence are *proven-in-types* arguments
 > (immutability + a commutative/associative/idempotent join) per
@@ -219,7 +372,9 @@ The whole sprint (📋 Planned).
 **Status**: Planned
 **Implementation**: `amoebius-runtime/src/Amoebius/Workflow/Runtime.hs`,
 `amoebius-runtime/src/Amoebius/Workflow/Orchestrator.hs`,
-`amoebius-runtime/src/Amoebius/Workflow/Worker.hs` (target paths; not yet built)
+`amoebius-runtime/src/Amoebius/Workflow/Worker.hs`, and
+`amoebius-runtime/src/Amoebius/Workflow/Resources.hs` (kind-indexed runnable sources and structural
+runtime-metadata sources consumed by the shared capacity provisioner) (target paths; not yet built)
 **Blocked by**: Sprint 25.1 (the content store the worker writes and the orchestrator fetches); Phase 24 gate
 (the native Pulsar client — the capability surface, CBOR codec, and broker-side dedup); Phase 22 gate (the live
 DSL deploy via the Deployment-`replicas=1` singleton that schedules the workflow).
@@ -248,6 +403,11 @@ artifact reference a content address.
   same immutable manifest/blob is a no-op, which is exactly what the at-least-once contract needs.
 - The runtime is scheduled under the Deployment-`replicas=1` singleton (Phase 22); no orchestrator/worker role
   runs a bespoke election, and the singleton's single-instance stays a k8s/etcd property.
+- A `WorkflowRuntimeDemand` whose one orchestrator and three worker sources lower to identity-keyed symbolic
+  Deployment-indexed `BoundExecutionUnit`s with complete envelopes, `ReplicaCardinality`,
+  `DeploymentRolloutPolicy`, client buffers and artifact workspace, Pod slots, and bounded failover overlap.
+  The collector lowers separately to a finite Job body. Provision derives the exact
+  four-instance all-running standby epoch before any command is produced.
 
 ### Validation
 1. Run the command → event round-trip and assert the artifact the worker wrote is fetched by the orchestrator
@@ -263,6 +423,11 @@ artifact reference a content address.
    round-trip asserting zero calls to a k8s `Lease`/`coordination.k8s.io` endpoint or any external lock API.
    Committed seeded mutant (operator: added-effect): `mutant/lease-election` — a worker that acquires a k8s
    `Lease` before consuming; both checks MUST turn it **red**.
+4. Run one-short fixtures for each orchestrator/worker CPU, memory, ephemeral, image/log, projected-file,
+   Pulsar-buffer, artifact-workspace, Pod slot, Deployment rollout/failover term, runtime component role, and
+   grouped layout backing. A mutant that drops either standby
+   from the provision fold must reject before Pod creation or command production; live readback must contain
+   exactly the four provisioned identities and envelopes.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -271,7 +436,10 @@ The whole sprint (📋 Planned).
 
 **Status**: Planned
 **Implementation**: `amoebius-runtime/dhall/test/round_trip_failover.dhall` (the gate topology),
-`amoebius-runtime/test/live/FailoverSpec.hs` (target paths; not yet built)
+`amoebius-runtime/test/live/FailoverSpec.hs`, and
+`amoebius-runtime/test/live/RuntimeStorageSpec.hs` (planned-slot→observed-Pod-UID equality, node
+scope/domain/ownership/grouping, reservation/observed no-double-debit, SplitRuntime one-byte-short and alias
+controls) (target paths; not yet built)
 **Blocked by**: Sprint 25.2 (the orchestrator/worker round-trip the injection acts on); Phase 24 gate (the
 `Exclusive`/`Failover` subscription type and the at-least-once redelivery); Phase 17 / Phase 14 gates (the
 cluster-lifecycle teardown the InForceSpec drives).
@@ -323,11 +491,14 @@ bespoke amoebius election — and assemble the phase gate.
   the `event` before the store write completes, so a mid-window kill loses the command) and
   `mutant/sweep-skips-pulsar` (operator: invariant-clause delete — the sweep omits the Pulsar topic/subscription
   class and thus reports leak-free vacuously while topics leak).
-- The gate `round_trip_failover.dhall` test topology — the named **representative service set: one orchestrator
-  + three workers (one active, two name-ordered standbys)** over the standing Pulsar + MinIO — and its
+- The gate `round_trip_failover.dhall` test topology — the named **representative service set: one orchestrator +
+  three workers (one active, two name-ordered standbys)** over the standing Pulsar + MinIO — and its
   `FailoverSpec`: spin up, run the store/fetch-by-manifest-SHA round-trip, inject the critical-window worker
   kill, observe the specific name-ordered standby take over, and always tear down — emitting a per-run ledger
   artifact.
+- The opaque whole-deployment provision witness for exactly those four runtime Pods plus gateway/collector,
+  all topic/cursor/offload and closed `Content` object demands, and the active→standby/rollout transition peak;
+  the live gate cannot start from a raw bound topology.
 
 ### Validation
 1. Run the gate topology end-to-end on the linux-cpu kind cluster and assert the artifact is fetched by manifest
@@ -353,6 +524,11 @@ bespoke amoebius election — and assemble the phase gate.
 3. Assert the run emits a proven/tested/assumed ledger per
    [`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed);
    skipping the applicable failover-injection move marks that layer UNVERIFIED, never green.
+4. Assert every one-short/omission case in the phase resource corpus—including both SplitRuntime metadata
+   backings, role resolution, planned/observed domains, qualified Pod/image ownership, and alias grouping—has zero apiserver, broker-admin, and
+   MinIO mutations. For the exact-fit run, normalize the live four-Pod/controller set, gateway/collector,
+   topics/subscriptions, and exact object/multipart inventory and compare it with the opaque provisioned value;
+   `Ready` plus an unexplained resource is a gate failure.
 
 > **Honesty.** This sprint exercises the **intra-cluster** Failover subscription only; the
 > asynchronous cross-cluster failover boundary and its formal gateway-migration model are owned by
@@ -442,7 +618,11 @@ The whole sprint (📋 Planned).
 - `documents/engineering/content_addressing_doctrine.md` — record that §2 (the three-tier store + the two write
   protocols) is realized in `amoebius-store`, namespaced under an opaque `experiment-hash` prefix, with the §3
   `experimentHash` derivation and seed kernel explicitly deferred to Phase 31; note §5 confluence is consumed
-  (idempotent re-fetch/redelivery) but cross-cluster replication remains unexercised.
+  (idempotent re-fetch/redelivery) but cross-cluster replication remains unexercised. Record the live
+  failed-pointer-CAS drill: orphan bytes remain charged through the finite positive GC horizon and reclamation
+  earns capacity only after an external inventory observes deletion.
+- `documents/engineering/resource_capacity_doctrine.md` — record the content-store logical peak boundary
+  corpus and its consumption of Phase 19's MinIO physical/uniform-claim witness.
 - `documents/engineering/daemon_topology_doctrine.md` — record the orchestrator/worker scaffolding and that
   standby takeover is the §5/§5.2 delegated Pulsar `Exclusive`/`Failover` subscription, with no bespoke
   election anywhere in the runtime.

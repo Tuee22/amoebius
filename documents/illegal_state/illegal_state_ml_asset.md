@@ -23,8 +23,9 @@ It is **not** the index of the catalog. The full catalog index, the SSoT split, 
 limit (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned by
 [`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage
 matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three-layer foreclosure** model ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus
-axis** (the orthogonal `Gate-1-editor` / `Gate-2-decoder` / `rendered-output-golden` / `live-effect` axis added
-on top of the foreclosure layer) are owned by
+axis** (the orthogonal `Gate-1-editor` / `Gate-2-decoder` / `provision-seal` / `rendered-output-golden` /
+`live-effect` axis added on top of the foreclosure layer; `provision-seal` means post-bind Phase-8 provision
+returns a `ProvisionError` before any `ProvisionedSpec` exists) are owned by
 [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice **references** those — it does not
 restate them. Each entry below preserves its original number and heading verbatim (inbound links depend on the
 slug), reproduces the entry body faithfully, and adds one **Validation-locus** line deriving the entry's place on
@@ -48,7 +49,7 @@ the detected substrate, and the shared **jit-build resolver** materializes that 
 into a **`CacheBudget`-bounded content-addressed cache**
 ([content_addressing_doctrine.md §4.5](../engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 Naming an engine by an arbitrary URL has no syntax; the first-miss resolve is a bounded-cache act, not a startup
-URL fetch, and "more cached than fits" is decode-rejected by the capacity fold over `CacheBudget`.
+URL fetch, and "more cached than fits" is rejected at the provision seal by the capacity fold over `CacheBudget`.
 **(b) A `ModelArtifact` without a completed `.ready` *and a provenance witness*.** A `ModelArtifact` yields an
 `ArtifactRef` **only** once its `.ready` sentinel exists (staging writes `.ready` LAST) **and** it carries a
 **provenance witness** — one of a **committed producing checkpoint** (a committed `latest`/`best` pointer that
@@ -70,14 +71,17 @@ engine as a substrate-selected capability). **Technique:** [§4.2](./illegal_sta
 [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (an `ArtifactRef` handle exists only once its `.ready` edge does) + [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) (the model↔engine relation).
 **Layer:** type-foreclosed for the no-arbitrary-URL engine identity and the `.ready`-**and-provenance-witness**-gated `ArtifactRef` (the
 committed-checkpoint arm and the *presence* of a provenance witness are genuine no-inhabitant constructors); decode-foreclosed
-for the model↔engine relation and the `Σ(resident) ≤ CacheBudget` cache fold (checked total folds, not an absence of inhabitants); runtime-checked residue — that the
+for the model↔engine relation and the catalog-derived
+`ProvisionedCacheDemand.derivedPeak = digest-deduped residents + bounded concurrent materialization ≤ CacheBudget`
+cache fold (checked total folds, not an absence of inhabitants); runtime-checked residue — that the
 first-miss resolve succeeds, the staged bytes actually load on the substrate, and that an imported model's pin/tag is **truthful** (owned by
 [`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) §6.1).
 
 **Validation-locus:** `Gate-1-editor` (the closed `EngineRuntime` union with no arbitrary-`Url` arm fails
 `dhall type` the moment an engine is named by URL) + `Gate-2-decoder` (the `.ready`-and-provenance-witness-gated
-`ArtifactRef` GADT edge, the model↔engine total relation, and the `Σ(resident) ≤ CacheBudget` capacity fold all
-return `Left` from the total decoder) + `live-effect` (the residue: the first-miss resolve succeeding, the staged
+`ArtifactRef` GADT edge and the model↔engine total relation return `Left` from the total decoder) +
+`provision-seal` (the post-bind `ProvisionedCacheDemand.derivedPeak ≤ CacheBudget` capacity fold returns a
+`ProvisionError` before any `ProvisionedSpec` exists) + `live-effect` (the residue: the first-miss resolve succeeding, the staged
 bytes loading on the substrate, and an imported model's pin/tag being truthful).
 
 ### 3.32 A continuous training run with no checkpoint cadence, or a feed with no bounded retention
@@ -105,7 +109,8 @@ runtime-checked tail).
 
 **Validation-locus:** `Gate-1-editor` (the closed `TrainBudget`/`Feed` unions with no unbounded arm, and the
 mandatory `checkpointCadence` / bounded-retention `StorageBudget` fields, fail `dhall type` at authoring time) +
-`Gate-2-decoder` (the [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) retention room-fit is a total decode fold that returns `Left` on overflow) +
+`provision-seal` (the [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) retention room-fit is a post-bind provision fold that returns a
+`ProvisionError` on overflow before any `ProvisionedSpec` exists) +
 `live-effect` (the residue: the trainer actually checkpointing at cadence and retention actually holding).
 
 ### 3.33 A multi-partition training feed with no defined merge order

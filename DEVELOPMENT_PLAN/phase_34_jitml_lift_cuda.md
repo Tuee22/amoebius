@@ -6,10 +6,13 @@
 **Generated sections**: none
 
 > **Purpose**: Lift the sibling `jitML` training/JIT library onto the amoebius seams — checkpoints on the
-> Phase-23 content store, a `linux-cuda`-bound determinism contract, a Feed-sourced single-writer trainer whose
+> Phase-25 content store, a `linux-cuda`-bound determinism contract, a Feed-sourced single-writer trainer whose
 > failover is **delegated** to a Pulsar Failover subscription plus the content-store CAS (never an
-> amoebius election), and a jit-resolved CUDA engine — gated live on `linux-cuda` by a bit-deterministic run, a
-> delegated trainer failover, and a demo web app that deploys as application-logic-only.
+> amoebius election), and a capacity-preflighted, jit-resolved CUDA engine whose sole accelerator-owner pod's
+> named owner container receives the derived whole-device Kubernetes extended-resource allocation while its
+> pod receives the required affinity — gated live on `linux-cuda` by a
+> bit-deterministic run, a delegated trainer failover, and a demo web app that deploys as
+> application-logic-only.
 
 ---
 
@@ -38,15 +41,27 @@ This phase makes `jitML` — the sibling training + JIT-codegen ML library — a
 rather than a standalone product, and stands its training loop up on a GPU substrate for the first time. It
 lifts the proven numerical/checkpoint core and re-homes it onto amoebius seams
 ([`lift_and_compose_doctrine.md` §2](../documents/engineering/lift_and_compose_doctrine.md)): the `jitML`
-checkpoint blob/manifest/pointer format becomes entries in the Phase-23 three-tier content-addressed store; the
+checkpoint blob/manifest/pointer format becomes entries in the Phase-25 three-tier content-addressed store; the
 `jitML` `.dhall` **nests inside** the `InForceSpec` as a shared library whose surface carries no replica count,
 region, substrate selector, or failover field; and the SplitMix determinism kernel is consumed from Phase 31
 rather than rebuilt. Its CUDA compute is **not** welded into the library or baked into the base image: which
 substrate the training/JIT compute runs on is a **deployment rule**, so the CUDA engine is substrate-selected
-and **jit-resolved** — a named catalog identity the Phase-25 resolver materializes on first miss into the
+and **jit-resolved** — a named catalog identity the Phase-32 resolver materializes on first miss into the
 `CacheBudget`-bounded content-addressed cache, never a baked payload and never a URL fetch — and it runs under
 the node's wholesale accelerator-owner worker, which multiplexes training, serving, and Tier-3 JIT on the
-linux-cuda node.
+linux-cuda node. Before an owner pod is rendered or any engine/cache/checkpoint effect occurs, `provision`
+exact-joins every served model, training job, Tier-3 JIT compilation, and CUDA-library work source to an
+equal-keyed `CudaOwnerDemand.workloads` map. Its finite class-based residency/running policy derives every
+allowed coexistence epoch; provision aggregates/assigns all residency components in each epoch per concrete
+device and checks family/profile, wholesale device count, shard bytes/interconnect, and each device's **net
+allocatable VRAM after its mandatory driver/runtime reserve**.
+Immediately before effects it also checks each device against
+`min(declared residual after surviving claims, observed currentFreeVram)`, alongside the owner's CPU, memory,
+ephemeral-storage, durable-storage, and cache envelope. The renderer then gives the sole owner pod's named
+owner container an equal integer request/limit for the configured GPU extended resource (`nvidia.com/gpu` in
+the Phase-34 fixture), derived as the selected node offering's wholesale device count, and gives its pod the
+required affinity; a CPU-only target, count shortage, or per-device-net-VRAM mismatch is a structured preflight
+rejection, never a silent CPU fallback or a pod left `Pending`.
 
 The genuinely distributed piece is recast from the legacy design. A **Feed-sourced continuous trainer** needs a
 single authoritative writer per feed so the committed model pointer never regresses, and this phase places that
@@ -73,10 +88,10 @@ clusters serve by replication of the immutable checkpoints, never by training a 
 ```mermaid
 flowchart LR
   dhall[InForceSpec: jitML nested as a shared library] --> up[Bring up on linux-cuda: content store, Pulsar, MinIO already HA]
-  up --> engine[CUDA engine jit-resolved into the Phase-25 CacheBudget cache: not baked, no URL]
+  up --> engine[CUDA engine jit-resolved into the Phase-32 CacheBudget cache: not baked, no URL]
   engine --> owner[Accelerator-owner worker: wholesale per-node GPU, Tier-3 JIT]
   owner --> train[jitML training run: experimentHash bound to the linux-cuda fingerprint]
-  train --> ckpt[Checkpoints written to the Phase-23 three-tier content store]
+  train --> ckpt[Checkpoints written to the Phase-25 three-tier content store]
   ckpt --> det[Assert bit-determinism: two fresh runs, equal manifest SHA per contract]
   det --> feed[Feed-sourced single-writer trainer on a Pulsar Failover subscription]
   feed --> kill[Kill the active trainer]
@@ -100,7 +115,15 @@ only on the first-N-step prefix; no cross-substrate equality claim), the **singl
 over via a Pulsar Failover subscription plus the content-store ETag-CAS + `AdvancePredicate`** — a
 name-ordered standby takes over with no torn or regressed `latest` and **no amoebius election of any kind** —
 and the **jitML demo web app deploys as application-logic-only**, all on `linux-cuda` with a leak-free
-idempotent teardown and an emitted ledger.
+idempotent teardown and an emitted ledger. Before the positive run, the gate proves that the provisioned CUDA
+owner has a matching device family, enough whole devices, sufficient net allocatable VRAM on each selected device and in
+every structurally derived coexistence epoch, sufficient observed current-free VRAM, exact source/workload
+key equality and policy-class domains, and a rendered equal
+`nvidia.com/gpu` request/limit for the full-offering wholesale
+owner allocation. Committed CPU-only, insufficient-count, and VRAM-fragmentation negatives fail before any pod,
+cache materialization, Pulsar publish, or content-store write; a fourth boundary negative fits raw
+`memory.total` but exceeds allocatable VRAM after the reserve, and a fifth fits raw/net allocatable but exceeds
+current-free VRAM (including a `Zero` observation). Both fail at the same snapshot-bound zero-effect boundary.
 
 **Gate integrity ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub), committed oracles, no stub passes).** The gate's representative set, its Phase-0-pinned
 oracles, and its committed mutant are named here so no token workload, memoized second run, or quiescent kill
@@ -113,8 +136,8 @@ can pass:
   manifest records fewer than the pinned executed step count, is a gate failure, not a pass (§M forecloses the
   token-workload stub).
 - **Determinism is an independent recompute, not a store hit (§M.6).** The two runs execute in **distinct,
-  purged content-addressed namespaces** (per-run `trialPointerKey` prefix isolation; the run-1 namespace is
-  purged or made unreadable to run 2 before run 2 starts), and the gate reads **two distinct per-run ledgers**
+  isolated content-addressed namespaces** (per-run `trialPointerKey` prefix isolation; the retained run-1
+  namespace is made unreadable to run 2 until run 2 finishes), and the gate reads **two distinct per-run ledgers**
   each showing its run independently executed every stage and issued its **own blob and manifest PUTs** (a
   cache/store hit that skips the compute path is a gate failure) before the manifest-SHA comparison is made.
 - **GPU-execution witness from an OS-boundary observer (§M.5).** Each run's ledger carries a GPU-execution
@@ -131,12 +154,135 @@ can pass:
   each of a named operator, and the gate re-runs them: (a) `encodeManifestCbor` with the tensor-sort dropped
   (effect-drop) — determinism comparison must go red; (b) `AdvancePredicate` with its monotonicity guard negated
   (guard-negation) — the failover reconciliation must go red; (c) the CUDA selector silently falling back to CPU
-  (effect-swap) — the `experimentHash`/witness check must go red. A gate run in which any committed mutant stays
-  green is itself a failure.
+  (effect-swap) — the `experimentHash`/witness check must go red; and (d) the accelerator-owner renderer dropping
+  its `nvidia.com/gpu` request/limit (effect-drop); (e) one source/work item omitted; (f) a hand-selected
+  favorable epoch substituted for the derived epoch set; and (g) a co-resident per-device debit dropped so a
+  one-byte-short overlap appears to fit — each source/epoch mutant must turn the independent provision oracle
+  red. A
+  gate run in which any committed mutant stays green is itself a failure.
 - **Reference oracles are independent (§M.1/§M.3).** Expected manifest SHAs, expected step counts, and the
-  expected CAS-conflict count are hand-authored and committed in Phase 0 in
+  expected CAS-conflict count, CUDA device inventory, expected wholesale extended-resource allocation, and
+  zero-effects negative result, plus the exact owner/cache/coordinator/SPA/build/failover resource witness
+  `test/fixtures/phase_34/resource_shape.json`, are hand-authored and committed in Phase 0 in
   `test/fixtures/phase_34/` **before** the implementation exists; none is regenerated from the SUT's own encoder
   or fold.
+
+## Complete resource provision for the CUDA run, failover, and demo app
+
+The accelerator witness does not replace ordinary workload sizing. Binding retains an identity-keyed complete
+`PodResourceEnvelope` for (1) the topology-expanded NVIDIA device-plugin DaemonSet instance on every selected
+CUDA node, (2) the Phase-32 cache owner surviving on that node, (3) the sole accelerator-owner Pod and its
+exactly-once GPU-owning container, (4) every active/standby ML batch-coordinator candidate, and (5) every
+demo-SPA replica. Each container selects a platform-specific `ImageArtifact` and declares
+lifecycle, CPU/memory/ephemeral-storage requests+limits, runtime working set, bounded writable root (or
+read-only root), and log headroom. Each Pod adds overhead, disk/memory volumes, derived mapped
+ConfigMap/Secret/projected/token bytes, structural runtime-metadata network/mount sources, durable claims with presentation/attachment class, cache ownership or
+typed cache-handle use, and an explicit accelerator arm. Only the named owner container has `Cuda`; cache,
+coordinator, and SPA Pods say `None` and cannot consume an untracked device.
+
+The first linux-cuda topology also binds a pure `CudaNodeSystemDemand`. Its host row pins the observed NVIDIA
+driver/kernel/runtime versions and executable/module digests, host CPU/memory reservation+ceiling, installed/
+temporary/log nodefs bytes, device nodes/plugin socket, mandatory per-device VRAM reserve and enforcement
+model. Its device-plugin Pod row has a content-digested image, CPU/memory/ephemeral requests+limits,
+writable/log/mapped bytes, `cache = None`, `accelerator = None`, placement and one pod slot plus the fixture's
+declared CNI/IP mode. This is either an exact Phase-14 linux-cuda survivor witness or a prerequisite provision;
+it is never assumed from the presence of `/dev/nvidia*`. Missing driver/runtime reserve, plugin Pod/socket, or
+live `status.allocatable[nvidia.com/gpu]` rejects before the owner/cache/workload exists.
+
+Training, serving, Tier-3 JIT and CUDA-library work are multiplexed inside the accelerator owner. Their finite
+source inventory exact-joins an equal-keyed `NonEmptyMap` workload demand. Structural weights/KV-cache/
+activation/optimizer/JIT/library residency, wholesale device/profile, and
+`AcceleratorCoexistencePolicy { maxResidentByClass, maxRunningByClass, model }` derive its CPU, host RAM,
+pod-local scratch, cache temp, and every permitted per-device/shard/link epoch. The policy domains both equal
+`classes(sources)`; missing/extra classes reject. Residency bytes are total for `Unsharded`/`Sharded` and per
+device for `ReplicatedPerDevice`; sharded bytes sum to the declared residency, shard ids are unique, and shard
+count cannot exceed owner devices. Pulsar, MinIO and Vault clients remain
+libraries: message/checkpoint/CAS/retry buffers and staging bytes are charged to the coordinator or owner
+container that performs the call; no client Pods are invented. The source-equal Phase-24/25 projection retains
+every training command/event/Feed topic and Failover subscription with finite client execution concurrency,
+message/rate window, backlog/retention, cursor/dedup, hot-ledger and offload object extents; these merge into
+the standing broker/bookie/object-store capacity before the first publish. Checkpoints are exact object-store producer
+objects plus upload/failed-write extents and retention, not a scalar disk estimate. Every checkpoint mutation
+routes through the Phase-25 sole content-mutation gateway and collector/verification Job; their complete Pod
+envelopes, admission concurrency, upload/failure workspace and pod/IP/CSI/image/API-object demands remain in
+the failover/checkpoint peak. The PureScript contract,
+frontend and app image consume a complete finite `BuildExecutionEnvelope` before the resulting image can be
+selected for the demo SPA. The resulting OCI index/manifests/config/layers, upload workspace/retained partials
+and finite mutation policy form a separate structured registry storage/publication demand; the standing
+registry mutation-proxy Pod retains its full envelope and is the sole push path. Build scratch, registry
+backing and CUDA-node image content/snapshots are never collapsed into one byte scalar.
+
+The transition epochs are closed. A CUDA Pod is structurally a DaemonSet
+`OnDelete AmoebiusSerialOnDelete` owner with pure `CudaRecreateAfterDeviceRelease` policy; no rolling-owner
+arm exists because two wholesale claims cannot fit one offering. Live enactment is staged. First the desired
+DaemonSet template/config generation is applied and freshly observed. Then
+`ValidatedSerialOnDeletePlan` authorizes deletion of exactly one old UID. A post-delete observation must prove
+that UID absent, device-plugin allocation and live CUDA-process holds released, required per-device VRAM
+freshly free, and all retained image/snapshot/writable/log/cache extents still charged by their own observed
+resident state before `ValidatedSerialOnDeleteContinuation` may resume the controller. A further fresh
+observation must prove the expected replacement UID is reservation-joined, Bound, and Ready before
+`ValidatedSerialOnDeleteAdvance` may delete the next owner. A missing/stale device observation, an old live
+controller template, or Pod-gone/NVML-process-still-live state cannot release the scheduler's device row.
+Determinism trials run one at a time through the persistent owner, while distinct old/new checkpoint
+namespaces coexist until comparison and observed cleanup. Feed failover provisions the active and every
+name-ordered standby simultaneously and also enumerates the bounded transition epoch containing the dying
+active, promoted standby and any controller-created replacement candidate; the already-declared two-writer
+CAS overlap includes both candidates' complete CPU/memory/ephemeral/log/buffer envelopes, not only pointer
+state. SPA rollout similarly uses exact old/new/surge/terminating replica sets.
+The device-plugin DaemonSet's declared rollout operands independently enumerate old/new/terminating plugin
+Pods and keep their image/local bytes and pod/CNI slots charged; no owner enactment may straddle a plugin
+epoch whose extended-resource key is absent or changed.
+
+Only the private `ProvisionedCudaOwnerDemand` epoch assignment and aggregate device claim enter the
+`ProvisionedSpec` renderer projection. The source/workload maps and unprovisioned ordinary rollout/runtime-
+metadata inputs remain sealed behind provision; live validation independently matches work-item/device holds
+and old/new/terminating Pod metadata identities before mutation.
+
+Every live or terminating Pod atomically spends a pod and CNI/IP slot; every unique CSI PVC spends one
+driver-scoped attachment slot. The representative checkpoint path is network object storage and declares no
+trainer/owner PVC unless its fixture names one, so zero CSI is explicit. Image content/snapshots/import
+workspace, Pod local bytes, cache residents/temp, checkpoint objects/transients, build scratch/cache, exact
+registry publication objects/upload partials and
+durable volumes are folded onto their actual physical backings alongside surviving platform workloads. The
+host gate/CUDA-trace harness has a pure `JitMLCudaGateHarnessDemand`: content digests and installed bytes for
+the test binary and CUPTI/`nsys`/device observer, substrate-matched CPU/memory reservation+ceiling, bounded
+trace/capture/profile/writable/log/scratch bytes on named host backings, finite trace/probe concurrency, serial
+setup/run/teardown lifecycle, `cache = None`, and no accelerator claim. Its subprocesses remain inside the
+derived `HostResourceEnvelope`; CUPTI/`nsys` observation does not secretly acquire a second GPU. Live readback
+matches executable digests, process tree/enforcement, trace/log/backing high-water and concurrency exactly.
+
+After controller expansion, the binder serializes exhaustive `desiredObjects` for all rendered and derived
+Kubernetes objects, not selected kinds, and joins observed survivors with old/new/apply-before-prune.
+`EtcdLogicalDemand { desiredObjects, churn, model }` includes revisions, Leases and Events; only private
+`ProvisionedEtcdLogicalDemand.derivedPeak <= backendQuotaBytes` may continue. Physical capacity separately fits
+backend-at-quota plus WALs, retained/saving snapshots and defrag old+new workspace. Live object/quota/backend
+readback must equal the witness. One-byte logical/physical shortages and `drop_api_object_demand.dhall`,
+`drop_etcd_churn.dhall` or `drop_etcd_model.dhall` reject before plugin/owner apply.
+
+The snapshot-bound whole-deployment `provision` completes before frontend/image build/push, owner apply, cache
+materialization, Pulsar publish, checkpoint PUT/CAS, or device acquire. Only private projections render Pods,
+images, resources, volumes, placements and the existing exact GPU request/limit+affinity. Live readback compares
+image IDs, every container/Pod resource, mapped/volume/writable/log bounds, pod/IP/CSI use, exact Pulsar
+client/topic/cursor/backlog/hot-ledger/offload state, registry
+objects/upload partials/mutation-proxy admission, node image-store objects, cache and object-store extents,
+content-gateway/collector execution and admission, rollout/failover epoch, selected device vector, device hold,
+VRAM and
+link graph to that witness. The same observer reads the driver/runtime versions and host controls, plugin Pod
+image/resources/socket and the exact Node allocatable extended-resource key/count. In addition to the existing
+CUDA negatives, Phase 0 carries one-unit/one-byte-short
+fixtures for every owner/coordinator/SPA CPU, host memory, pod ephemeral and routed backing, image workspace,
+pod/IP and matched-CSI slot, cache/checkpoint/build storage, host trace-harness CPU/memory/local bytes, and
+Pulsar client/topic/backlog/offload, registry publication/proxy, device-plugin/driver host+Pod resources/rollout
+plus content-gateway/collector and failover/replacement overlap.
+Dropped-envelope
+mutants under `test/mutants/phase_34/resources/` name the cache owner, coordinator standby, SPA, build, and
+dying-active/replacement rows; `drop_cuda_node_system.dhall` omits the driver/plugin witness,
+`drop_registry_publication_envelope.dhall` omits the image push/storage row,
+`drop_pulsar_topic_demand.dhall` omits the Feed/messaging row,
+`drop_content_gateway_collector.dhall` omits checkpoint mutation execution,
+`drop_host_trace_harness.dhall` omits the observer and
+`early_owner_replacement.dhall` starts before device release. All must turn the gate red with zero workload/
+store effects.
 
 ## Doctrine adopted
 
@@ -168,7 +314,7 @@ can pass:
 - [`content_addressing_doctrine.md` §4.5](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
   and [`§4.6`](../documents/engineering/content_addressing_doctrine.md#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)
   — *the ML-asset lifecycle: one bounded content-addressed cache, resolved on first miss* / *the training-run
-  topology*: the CUDA engine is a named catalog identity the Phase-25 resolver materializes on first miss into
+  topology*: the CUDA engine is a named catalog identity the Phase-32 resolver materializes on first miss into
   the `CacheBudget`-bounded cache — never baked, never URL-fetched — and the Feed-sourced continuous trainer is
   the training-run topology's continuous arm without an unbounded arm.
 - [`daemon_topology_doctrine.md` §4.2](../documents/engineering/daemon_topology_doctrine.md#42-the-accelerator-owner-worker-wholesale-per-node-ownership-a-typed-per-node-singleton)
@@ -177,6 +323,16 @@ can pass:
   node's GPUs are owned wholesale by one typed per-node-singleton accelerator-owner worker (a DaemonSet-like
   node-affinity, at most one per node — a **k8s placement property, not an amoebius election**), which
   multiplexes training, serving, and Tier-3 JIT; a `Cuda` offering on linux-cuda hardware is an in-cluster pod.
+- [`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+  and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
+  — *the systematic provision matrix* / *the total provision fold*: the CUDA owner demand names accelerator
+  family/profile, wholesale device count, an exact work-source/demand map, structural residency/sharding, and
+  finite coexistence policy; `provision` binds it to one eligible node, derives every allowed per-device epoch,
+  and spends only each selected device's declared net allocatable VRAM after its mandatory reserve before effects.
+  The selected wholesale owner count is rendered as equal integer `nvidia.com/gpu`
+  request/limit on the demand's exactly-once named owner container plus affinity on its pod, while every
+  container's CPU, memory, and ephemeral-storage envelope and the pod's cache/durable demands remain explicit.
+  Aggregate VRAM cannot disguise an unplaceable per-device footprint.
 - [`daemon_topology_doctrine.md` §4.3](../documents/engineering/daemon_topology_doctrine.md#43-the-feed-sourced-continuous-trainer-single-writer-delegated),
   [`§4`](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected),
   [`§5`](../documents/engineering/daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected) /
@@ -200,13 +356,13 @@ can pass:
 
 ## Sprints
 
-## Sprint 27.1: jitML lifted as a shared library — checkpoints on the Phase-23 content store 📋
+## Sprint 34.1: jitML lifted as a shared library — checkpoints on the Phase-25 content store 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/JitML/Library.hs`, `dhall/jitml/package.dhall`,
 `src/Amoebius/JitML/Checkpoint/Store.hs`, `src/Amoebius/JitML/Checkpoint/Manifest.hs` (target paths; not yet
 built) — the jitML library surface, its nested `.dhall` package, and the checkpoint key renderers + canonical
-manifest encoder mapped onto the Phase-23 store.
+manifest encoder mapped onto the Phase-25 store.
 **Blocked by**: Phase 25 gate (external prereq — the three-tier content-addressed MinIO store and its
 blob/manifest/pointer write protocols); Phase 24 gate (external prereq — the native Pulsar CBOR client the
 checkpoint adopt/resume events ride).
@@ -222,7 +378,7 @@ MinIO required for the pure layer.
 ### Objective
 Adopt [`lift_and_compose_doctrine.md` §2](../documents/engineering/lift_and_compose_doctrine.md) and
 [`app_vs_deployment_doctrine.md` §8](../documents/engineering/app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic):
-re-home the sibling jitML checkpoint format onto the Phase-23 store and expose the training/JIT call graph as a
+re-home the sibling jitML checkpoint format onto the Phase-25 store and expose the training/JIT call graph as a
 shared library whose `.dhall` nests inside the `InForceSpec`, so *that* an app uses jitML is application logic
 while the workload's placement stays a separate deployment-rules dial.
 
@@ -231,10 +387,10 @@ while the workload's placement stays a separate deployment-rules dial.
   region, failover, chaos, or substrate; and a nested `jitml/package.dhall` composed into a parent amoebius app
   `.dhall`, the substrate/replica dials living only in the deployment-rules layer that joins with the app.
 - `blobKey`/`manifestKey`/`latestPointerKey`/`bestPointerKey`/`trialPointerKey` renderers producing the fixed
-  prefix schema under the app's Phase-21 ObjectStore bucket (`jitml-checkpoints/<experiment-hash>/…`), and a
+  prefix schema under the app's Phase-23 ObjectStore bucket (`jitml-checkpoints/<experiment-hash>/…`), and a
   **canonical** `encodeManifestCbor` (tensors sorted by name, optimizer blobs by kind, RNG blobs by stream id,
   metrics by name) so equal logical content ⇒ byte-identical CBOR ⇒ the same manifest SHA, written through the
-  Phase-23 blob/manifest PUT + pointer CAS protocols.
+  Phase-25 blob/manifest PUT + pointer CAS protocols.
 - The mandatory `TensorBoard` monitoring surface on the jitML `ExtensionSpec` (per
   [`monitoring_doctrine.md` §5](../documents/engineering/monitoring_doctrine.md#5-extensible-surfaces-tensorboard)),
   so an unmonitored jitML run is unrepresentable; `tfevents` land in the per-experiment `tb/` prefix on MinIO.
@@ -250,7 +406,7 @@ while the workload's placement stays a separate deployment-rules dial.
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 27.2: CUDA engine — substrate-selected, jit-resolved, run under the accelerator-owner worker 📋
+## Sprint 34.2: CUDA engine — substrate-selected, jit-resolved, run under the accelerator-owner worker 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/JitML/Engine/Cuda.hs`, `src/Amoebius/JitML/Engine/Select.hs`,
@@ -258,12 +414,17 @@ The whole sprint (📋 Planned).
 engine interface, the substrate-driven engine selector, and the typed per-node accelerator-owner worker.
 **Blocked by**: Phase 32 gate (external prereq — the jit-build engine resolver + `CacheBudget`-bounded
 content-addressed cache the CUDA engine identity resolves into); Phase 31 gate (external prereq — the
-determinism kernel the engine dispatch respects); Sprint 27.1 (the jitML library the engine backs).
+determinism kernel the engine dispatch respects); Sprint 34.1 (the jitML library the engine backs).
 **Independent Validation**: on a linux-cuda node the named CUDA engine identity resolves on **first miss** into
 the `CacheBudget`-bounded cache and a second pod reuses it; the engine is **never** baked into the base image
 and **never** fetched by URL; engine selection is a pure function of the resolved substrate (no env var, no
-`PATH`); the node's GPUs are reached only through the single per-node accelerator-owner worker, and a second
-owner on the same node has no constructor.
+  `PATH`); before that first miss can materialize anything, `provision` exact-joins every declared work source
+  to its workload residency demand, derives every class-policy coexistence epoch, and binds the wholesale
+  device count and per-device assignments to one `CudaOffering` using its
+`rawVram/driverRuntimeReserve/allocatableVram` boundary; the node's GPUs are reached only
+through the single per-node accelerator-owner worker, whose exactly-once named owner container receives the
+derived equal integer `nvidia.com/gpu` request/limit for the node's wholesale selected device count while its
+pod receives the required affinity, and a second owner on the same node has no constructor.
 **Docs to update**: `documents/engineering/app_vs_deployment_doctrine.md`,
 `documents/engineering/content_addressing_doctrine.md`, `documents/engineering/daemon_topology_doctrine.md`,
 `DEVELOPMENT_PLAN/system_components.md`.
@@ -279,35 +440,60 @@ the image.
 ### Deliverables
 - A CUDA engine implementing the shared jitML `Engine` interface, selected by the **resolved substrate** (a
   `Cuda` offering projected from linux-cuda hardware, [`§4.1`](../documents/engineering/daemon_topology_doctrine.md#41-the-engine-offering-vs-the-node-hardware-in-cluster-pod-or-host-subprocess)),
-  with a fail-fast diagnostic when CUDA is selected on a node whose substrate does not project it — never a
-  silent CPU fallback that would change `experimentHash`.
-- The CUDA engine payload delivered as a **named catalog identity** the Phase-25 resolver materializes on first
+  with a fail-fast, pre-effect diagnostic when CUDA is selected on a node whose substrate does not project it,
+  when the whole-device count is short, or when any derived coexistence epoch's per-device residency/sharding
+  assignment does not fit net allocatable VRAM — never a silent CPU fallback that would change `experimentHash`, and never a
+  raw-product-size fit.
+- The CUDA engine payload delivered as a **named catalog identity** the Phase-32 resolver materializes on first
   miss into the `CacheBudget`-bounded content-addressed cache; no arbitrary `Url` arm and no baked per-engine
   image layer, so a second pod on the node reuses the cached artifact and "more cached than fits" stays
-  decode-rejected.
+  rejected at the post-bind `provision-seal`.
 - The typed **per-node-singleton accelerator-owner worker** that owns the linux-cuda node's GPUs wholesale and
   multiplexes training, serving, and Tier-3 JIT compilation of the CUDA kernel; the "one owner per node"
-  invariant is a k8s node-affinity property, and "two owners contending for one node" is type-foreclosed.
+  invariant is a k8s node-affinity property, and "two owners contending for one node" is type-foreclosed. Its
+  complete pod envelope gives every container CPU, memory, and pod-local ephemeral-storage requests/limits plus
+  bounded cache/scratch, and its rendered Kubernetes resources include an equal integer request/limit on the
+  exactly-once named owner container for the configured GPU extended-resource key (`nvidia.com/gpu` in this
+  fixture), plus affinity on its pod, all derived from the provision witness rather than authored independently
+  in the manifest.
+  Its unprovisioned owner input contains exact equal-keyed served-model/training-job/JIT/library source and
+  workload maps plus finite class-based residency/running policy; only the private derived epoch assignment
+  and aggregate device claim can render.
 
 ### Validation
 1. `cabal build` on a host with no CUDA toolchain compiles and links the CPU path; on the linux-cuda host the
-   CUDA engine resolves its named identity into the Phase-25 cache on first miss and a second pod reuses it —
+   CUDA engine resolves its named identity into the Phase-32 cache on first miss and a second pod reuses it —
    verifying nothing was baked or URL-fetched.
-2. Selecting CUDA where the substrate does not project it fails fast with an actionable diagnostic, touching no
-   store; engine selection reads only the resolved substrate, never an env var or `PATH`.
-3. A `.dhall` placing two accelerator-owner workers on one node, or a fractional/straddled GPU claim, fails to
+2. Selecting CUDA where the target does not project it, requesting more whole devices than one eligible node
+   offers, omitting one source work item, mismatching either coexistence-map domain, accepting a favorable
+   authored epoch, or requesting an unsharded 40-GiB residency from only 24-GiB devices fails in `provision`
+   with the specific `MissingCapability`/count/VRAM diagnostic. So does a co-resident per-device overlap that
+   is one byte short and a near-boundary demand that is no larger than
+   raw `memory.total` but is one byte larger than `allocatableVram` after the declared reserve. An OS-boundary
+   effects observer records zero created
+   pods, zero cache materializations, zero Pulsar publishes, and zero content-store writes for each negative;
+   engine selection reads only the resolved substrate, never an env var or `PATH`.
+3. Inspect the rendered accelerator-owner pod and assert that the exactly-once named owner container's
+   configured GPU extended-resource request equals its limit and both equal the provision witness's wholesale
+   selected device count, while the pod has the required node affinity. Dropping that resource entry, using a
+   fractional value, or rendering only the workload's smaller logical share fails the Phase-0 allocation
+   oracle.
+4. A `.dhall` placing two accelerator-owner workers on one node, or a fractional/straddled GPU claim, fails to
    type-check.
+5. Mutants that omit one work item, replace derived epochs with a favorable list, drop one co-resident
+   per-device debit, disagree on sharded totals/unique ids/count, or spend raw rather than net VRAM each turn
+   the provision oracle red before any owner/cache/checkpoint effect.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 27.3: jitML training bit-determinism on linux-cuda 📋
+## Sprint 34.3: jitML training bit-determinism on linux-cuda 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/JitML/Determinism.hs` (target path; not yet built) — the jitML binding of the
-Phase-24 `deriveExperimentHash` and SplitMix seed streams to the linux-cuda substrate fingerprint and the
+Phase-31 `deriveExperimentHash` and SplitMix seed streams to the linux-cuda substrate fingerprint and the
 training stream set.
-**Blocked by**: Sprint 27.1 (checkpoints on the store), Sprint 27.2 (the CUDA engine the run dispatches on);
+**Blocked by**: Sprint 34.1 (checkpoints on the store), Sprint 34.2 (the CUDA engine the run dispatches on);
 Phase 31 gate (external prereq — the determinism kernel: `experimentHash` + SplitMix seed derivation).
 **Independent Validation**: pure tests that `experimentHash` changes when the substrate fingerprint changes
 (linux-cpu vs linux-cuda) and when any identity-bearing `.dhall` field changes (e.g. a metric `direction`
@@ -328,7 +514,7 @@ deriving every RNG stream from `(masterSeed, streamIndex)` alone.
 - A jitML `experimentHash` binding over `(resolved-dhall, linux-cuda substrate fingerprint)` so a linux-cuda run
   occupies a distinct namespace from any CPU run and a metric `direction` flip defines a different experiment.
 - Per-stream SplitMix seeds for the full jitML training stream set (per-experiment, per-game RL self-play,
-  per-HPO-trial, MCTS root noise) via the Phase-24 `deriveSplitMixSeed`, with the in-types property that a
+  per-HPO-trial, MCTS root noise) via the Phase-31 `deriveSplitMixSeed`, with the in-types property that a
   stream's seed is independent of worker count, scheduling, and assignment.
 - The honest ceiling encoded as the determinism *contract* this run is checked against: same-substrate
   bit-equality for SL / on-policy RL / per-game AlphaZero; a first-N-step prefix for off-policy RL asserted by
@@ -345,8 +531,9 @@ deriving every RNG stream from `(masterSeed, streamIndex)` alone.
 2. On linux-cuda, run each committed workload (`det-sl`, `det-onpolicy`, `det-alphazero`, `det-offpolicy`;
    ≥ 200 executed optimizer steps, ≥ 10M parameters) to a checkpoint **twice at the same `experimentHash`** and
    assert identical manifest SHAs (for `det-offpolicy`, first-`N`-step prefix equality, `N = max(20, rl_steps/10)`).
-   The two runs execute in **distinct, purged content-addressed namespaces** so run 2 recomputes rather than
-   adopting run 1's store artifact (§M.6): each run's ledger must show it independently executed every stage and
+   The two runs execute in **distinct, isolated content-addressed namespaces**, with retained run-1 objects
+   unreadable to run 2, so run 2 recomputes rather than adopting run 1's store artifact (§M.6): each run's
+   ledger must show it independently executed every stage and
    issued its own blob/manifest PUTs, and each run's checkpoint manifest must **embed the executed step count and
    the dispatched engine identity** matching an OS-boundary GPU-execution witness (device-hold + CUDA
    kernel-launch trace) before the SHA comparison is accepted. The comparison is against the Phase-0 committed
@@ -357,13 +544,13 @@ deriving every RNG stream from `(masterSeed, streamIndex)` alone.
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 27.4: Feed-sourced single-writer trainer — delegated failover, never elected 📋
+## Sprint 34.4: Feed-sourced single-writer trainer — delegated failover, never elected 📋
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/JitML/FeedTrainer.hs` (target path; not yet built) — the existing ML batch
 coordinator worker parameterized with a `Feed` source, riding a Pulsar Failover subscription and the
 content-store CAS commit point.
-**Blocked by**: Sprint 27.1 (the checkpoint store and its `latest` pointer CAS); Phase 25 gate (external prereq
+**Blocked by**: Sprint 34.1 (the checkpoint store and its `latest` pointer CAS); Phase 25 gate (external prereq
 — the orchestrator/worker workflow runtime and the Failover standby-takeover path); Phase 24 gate
 (external prereq — the subscription surface and at-least-once + dedup).
 **Independent Validation**: a pure model of the single-writer decision (capture inputs → decide → fence → act)
@@ -427,19 +614,20 @@ ETag-CAS + `AdvancePredicate`, so single-writer is a **delegation, never an elec
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 27.5: Demo web app application-logic-only + the linux-cuda gate 📋
+## Sprint 34.5: Demo web app application-logic-only + the linux-cuda gate 📋
 
 **Status**: Planned
 **Implementation**: `web/jitml/` (the lifted PureScript SPA shell), `src/Amoebius/JitML/Contracts.hs` (the
 purescript-bridge contract source), `test/dhall/phase_34_jitml_cuda.dhall`, `test/live/JitMLCudaGate.hs`
 (target paths; not yet built) — the demo app deployment and the end-to-end gate topology.
-**Blocked by**: Sprint 27.3 (bit-determinism), Sprint 27.4 (the delegated Feed trainer failover); Phase 33 gate
+**Blocked by**: Sprint 34.3 (bit-determinism), Sprint 34.4 (the delegated Feed trainer failover); Phase 33 gate
 (external prereq — the infernix demo web app pattern this reuses); Phase 13 (the representational SPA-composition
 fixtures).
 **Independent Validation**: the jitML PureScript demo SPA deploys as an app-spec that *uses* the jitML extension
 (no extension logic in the app), its contract types regenerated from the amoebius-composed Haskell ADTs and
 present only as a build artifact (never committed); the gate `.dhall` runs the full bit-deterministic + delegated
-failover + demo-deploy workflow end-to-end on linux-cuda and tears down leak-free, emitting a
+failover + demo-deploy workflow end-to-end on a capacity-preflighted linux-cuda placement, verifies the derived
+whole-device extended-resource allocation on the accelerator owner, and tears down leak-free, emitting a
 proven/tested/assumed ledger.
 **Docs to update**: `documents/engineering/lift_and_compose_doctrine.md`,
 `documents/engineering/app_vs_deployment_doctrine.md`, `documents/engineering/chaos_failover_doctrine.md`,
@@ -459,18 +647,34 @@ delegated trainer failover, and the application-logic-only demo — into the sin
   artifact that is never committed ([`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md)),
   with its HA replica count and substrate binding in the orthogonal deployment-rules layer.
 - The gate `.dhall` (`test/dhall/phase_34_jitml_cuda.dhall`, emitted from Haskell, never committed): bring up
-  the linux-cuda cluster, jit-resolve the CUDA engine, run the committed `det-*` workload corpus (§M.7;
+  the linux-cuda cluster, provision the complete owner/workload resource envelopes against the observed
+  `CudaOffering`, prove exact source/workload and policy-class-domain equality, enumerate every permitted
+  residency/running epoch, verify the private per-device assignment and the derived equal `nvidia.com/gpu`
+  request/limit on the exactly-once named owner
+  container plus affinity on its pod, then jit-resolve the CUDA engine and run the committed `det-*` workload
+  corpus (§M.7;
   ≥ 200 steps, ≥ 10M params) to a checkpoint at a fixed `experimentHash`, assert bit-determinism as **two fresh
-  runs in distinct purged content-addressed namespaces** (first-`N`-step prefix, `N = max(20, rl_steps/10)`, for
-  off-policy RL), inject a Feed-trainer kill **between a blob PUT and its pointer CAS**, assert Pulsar Failover
+  runs in distinct isolated content-addressed namespaces retained through comparison** (first-`N`-step prefix,
+  `N = max(20, rl_steps/10)`, for off-policy RL), inject a Feed-trainer kill **between a blob PUT and its
+  pointer CAS**, assert Pulsar Failover
   standby takeover with the CAS + `AdvancePredicate` keeping `latest` intact and ≥ 1 CAS-conflict event
   exercised, deploy the demo app, and tear everything down.
+- The identity-keyed cache-owner, accelerator-owner, active/standby/replacement coordinator and SPA envelopes;
+  frontend/image `BuildExecutionEnvelope`; exact old/new checkpoint extents; pod/IP/CSI/image/backing ledger;
+  and bounded host trace-harness envelope from the phase resource contract. The failover transition must fit
+  as a whole and the owner replacement must wait for observed device release before any new owner exists.
 - **Phase-0-committed gate oracles and mutants** (authored before any implementation, §M.1/§M.2/§M.3): the
   workload corpus `test/dhall/phase_34_det_workloads.dhall`; the hand-authored expected-manifest-SHA,
   expected-executed-step-count, expected-step-sequence, and expected-CAS-conflict-count fixtures under
-  `test/fixtures/phase_34/`; the single-writer decision truth table `test/fixtures/phase_34/single_writer.tbl`;
+  `test/fixtures/phase_34/`; the pinned CUDA inventory, expected owner extended-resource allocation, and
+  CPU-only/count/VRAM zero-effects negatives, including raw-fits-but-net-allocatable-fails and
+  raw/net-fit-but-current-free-fails; omitted-work-item, favorable-epoch, per-device-overlap-one-short,
+  policy-domain-mismatch, and malformed-shard negatives; a mismatched link graph; the single-writer decision truth table
+  `test/fixtures/phase_34/single_writer.tbl`;
   and the seeded mutant set (manifest-encoder tensor-sort dropped; `AdvancePredicate` monotonicity-guard negated;
-  CUDA-selector silent CPU fallback) the gate re-runs and requires each to turn its claim red.
+  CUDA-selector silent CPU fallback; accelerator-owner GPU-allocation dropped; omitted work item; favorable
+  epoch substituted; co-resident device debit dropped) the gate re-runs and requires
+  each to turn its claim red.
 - A proven/tested/assumed ledger artifact per [`chaos_failover_doctrine.md` §12](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed):
   same-substrate bit-equality *tested*; delegated (no-election) failover *tested*; cross-substrate equality and
   the cross-cluster boundary *not asserted* (deferred to Phase 28); GPU-float physics *assumed* (sibling
@@ -478,13 +682,20 @@ delegated trainer failover, and the application-logic-only demo — into the sin
 
 ### Validation
 1. **Gate (determinism).** The committed `det-*` corpus (≥ 200 executed optimizer steps, ≥ 10M parameters) is
-   run **twice in distinct purged content-addressed namespaces** at the same `experimentHash` and produces equal
-   manifest SHAs (or equal first-`N`-step prefix, `N = max(20, rl_steps/10)`, for off-policy). Each run's ledger
+   first provisioned against one observed CUDA node: exact work-source/demand keys and coexistence domains;
+   family/profile; full-offering whole-device count; every derived epoch's per-device net
+   allocatable VRAM after mandatory reserve, structural residency/shard assignment, required link graph, and per-device current-free
+   residual, plus CPU, memory, ephemeral storage, cache, and durable demand all fit. The owner manifest's named
+   container has an equal `nvidia.com/gpu` request/limit matching the wholesale device-count witness while its
+   pod has the required affinity. It is then run **twice in distinct isolated content-addressed namespaces
+   retained through comparison** at the same `experimentHash` and produces equal manifest SHAs (or equal
+   first-`N`-step prefix, `N = max(20, rl_steps/10)`, for off-policy). Each run's ledger
    must show independent execution of every stage with its own blob/manifest PUTs (no store-hit adoption, §M.6),
    and each manifest must embed the executed step count and dispatched engine identity matching an OS-boundary
    GPU-execution witness (device-hold + CUDA kernel-launch trace, §M.5). SHAs are checked against the Phase-0
    committed expected-SHA fixture; the ceiling's not-asserted rows are recorded. The committed manifest-encoder
-   and CUDA-CPU-fallback mutants must turn this red.
+   mutant, CUDA-CPU-fallback mutant, dropped-owner-allocation mutant, omitted-work-item mutant,
+   favorable-epoch mutant, and dropped-co-resident-debit mutant must turn this red.
 2. **Gate (delegated failover).** Killing the active Feed trainer **between a blob PUT and its pointer CAS**
    triggers Pulsar Failover standby takeover — no amoebius election (committed dependency-graph ban plus positive
    coordination-edge assertion) — with **≥ 1 exercised CAS-conflict / `AdvancePredicate`-absorption event** in the
@@ -500,6 +711,30 @@ delegated trainer failover, and the application-logic-only demo — into the sin
    processes hold the linux-cuda device (accelerator-owner device-hold released) — a namespace-only check is
    insufficient. The topology re-runs idempotently, and the ledger is emitted and green for every applicable move
    (skips mark UNVERIFIED, never green).
+4. **Gate (impossible CUDA placements have zero effects).** Re-run the CPU-only target, insufficient/full-
+   offering device-count mismatch, per-device-VRAM fragmentation, link-topology mismatch,
+   omitted-work-item, coexistence-domain mismatch, favorable-epoch, malformed-shard, per-device-overlap-one-short,
+   raw-fits-but-net-allocatable-fails, and raw/net-fit-but-current-free-fails fixtures (including
+   `currentFreeVram = Zero`). Pure incompatibilities fail in `provision`; live free-memory/topology mismatch
+   fails in a read-only preflight that returns a single-use token bound to the device/process/cache snapshot.
+   The observer re-reads that fingerprint immediately before the first engine/cache/pod effect; a fixture
+   changes free VRAM between validation and enactment and must invalidate the token. Every case fails before
+   render or
+   reconciliation; the external effects observer must show no owner/workload pod, no cache entry, no Pulsar
+   message, and no content-store object. A silent CPU fallback or a Kubernetes `Pending` pod is a gate failure,
+   not an acceptable rejection.
+5. **Gate (complete non-GPU resources and transitions).** Independently lower by one unit/byte every
+   owner/coordinator/SPA/build/harness CPU, memory, pod-local or routed physical-storage operand, selected-image
+   workspace, pod/IP or matched-CSI slot, cache/checkpoint extent, and failover/replacement-epoch operand. Each
+   returns its pinned specific `Left` before effects. Re-run the dropped-envelope and premature-owner-
+   replacement mutants and require the external Pod/device/cache/store observer to turn red; matching exact-fit
+   controls must render and live-read back byte-for-byte equal to the opaque provision projection.
+6. **Gate (serial CUDA replacement state machine).** Exercise apply desired DaemonSet template → freshly
+   observe exact generation/template → delete one old UID → freshly observe Pod absence plus device/process
+   release → resume → freshly observe the expected replacement reservation-joined, Bound, and Ready → advance.
+   Mutants that delete while the old controller template is live, resume from a stale snapshot, credit the
+   device when Pod-gone/NVML-process-live, delete two owners, or advance before replacement readiness must lack
+   a `ValidatedSerialOnDelete*` constructor and produce zero next-stage effects.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -508,13 +743,13 @@ The whole sprint (📋 Planned).
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/lift_and_compose_doctrine.md` — record that the jitML numerical/checkpoint core and the
-  SplitMix kernel are lifted onto the amoebius seams (Phase-23 store, Phase-24 kernel, native CBOR client), the
+  SplitMix kernel are lifted onto the amoebius seams (Phase-25 store, Phase-31 kernel, native CBOR client), the
   substance intact and only the envelope re-homed; keep the sibling-evidence framing.
 - `documents/engineering/app_vs_deployment_doctrine.md` — record that the §7 substrate-as-deployment-rule, §8
   shared-library-is-app-logic, and §6 application-logic-only demo classifications are demonstrated for jitML
   (the jitML `.dhall` nests under the `InForceSpec`; CUDA is substrate-selected and jit-resolved, not welded in).
 - `documents/engineering/content_addressing_doctrine.md` — confirm §2/§3/§4 and the §6 ceiling are exercised on
-  a GPU substrate, and that the §4.5 CUDA engine stayed jit-resolved into the Phase-25 cache (never baked, never
+  a GPU substrate, and that the §4.5 CUDA engine stayed jit-resolved into the Phase-32 cache (never baked, never
   URL-fetched) and §4.6's continuous-feed arm was realized.
 - `documents/engineering/daemon_topology_doctrine.md` — confirm the §4.3 Feed-sourced trainer is single-writer
   **delegated** (Pulsar Failover + CAS/`AdvancePredicate`), that the §4.2 accelerator-owner worker
@@ -523,11 +758,11 @@ The whole sprint (📋 Planned).
   trainer-kill injection, and that the §16 cross-cluster boundary stays deferred to Phase 28.
 
 **Cross-references to add:**
-- `DEVELOPMENT_PLAN/README.md` — flip the Phase-27 status when the gate passes; link this document.
+- `DEVELOPMENT_PLAN/README.md` — flip the Phase-34 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — record Phase 34's gate substrate (linux-cuda, the first GPU substrate) in
   the per-phase substrate map.
 - `DEVELOPMENT_PLAN/system_components.md` — register the `Amoebius.JitML.*`, `Amoebius.Accelerator.Owner`, and
-  the CUDA engine + Feed-trainer + gate modules as Phase-27 design-first rows.
+  the CUDA engine + Feed-trainer + gate modules as Phase-34 design-first rows.
 
 ## Related Documents
 - [README.md](README.md) — the live tracker; the Phase 34 row is the authoritative one-line gate and status

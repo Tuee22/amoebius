@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Stand up `amoebius-pulsar` — the one native-protocol Haskell Pulsar client (no WebSockets),
@@ -58,7 +58,9 @@ test topology **round-trips a workflow command → event over the native Pulsar 
 broker-side deduplication enabled**, a **CBOR command/event payload round-trips byte-for-byte** through the
 typed codec, and a **fixture attempting a non-CBOR payload fails to type-check** — the topology spinning up,
 running, and tearing down leak-free and idempotently on re-run, emitting a Register-3 proven/tested/assumed
-ledger.
+ledger. The topic descriptor also round-trips its required `StorageBudgetId` and complete
+`PulsarOffloadObjectDemand` source operands (segment size, offload concurrency/rate window, deletion lag,
+failure/orphan horizon, and admission model); Phase 19 owns the live MinIO geometry/drill.
 
 The gate passes only when every clause below holds; each is checked against a **Phase-0-committed oracle**
 authored before `amoebius-pulsar` exists (§M.1), not a value regenerated from the client.
@@ -68,7 +70,7 @@ authored before `amoebius-pulsar` exists (§M.1), not a value regenerated from t
   the `BaseCommand` frame set `{CONNECT, CONNECTED, LOOKUP_TOPIC, PRODUCER, PRODUCER_SUCCESS, SEND,
   SEND_RECEIPT, SUBSCRIBE, FLOW, MESSAGE, ACK, ACK_RESPONSE, SEEK}` derived by hand from the Pulsar protocol
   spec (never from `proto-lens` output of this fork); (b) a CBOR command vector and event vector with their
-  hand-computed canonical-CBOR byte strings; (c) the non-CBOR negative fixtures of Sprint 22.2 V4 with their
+  hand-computed canonical-CBOR byte strings; (c) the non-CBOR negative fixtures of Sprint 24.2 V4 with their
   expected compile diagnostics; (d) the gate topology's `RouteEntry` descriptor `round_trip_dedup.dhall` and a
   hand-written expected derived-topic table (the `persistent://<tenant>/<ns>/<workflow>.<phase>.linux-cpu`
   strings), authored independently of `topicFor` (§M.3); (e) a pre-run snapshot of the standing Phase-18
@@ -94,6 +96,59 @@ authored before `amoebius-pulsar` exists (§M.1), not a value regenerated from t
   re-applied a second time against a **distinct test namespace** (cache-bypass: no reuse of the first run's
   namespace, cursors, or dedup cursor) and the setup/round-trip path is asserted to have actually executed on
   run 2 — a no-op served by leftover state from run 1 fails the gate.
+
+### Resource-provisioning contract
+
+This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
+[`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting);
+embedded client demand must be charged to a canonical execution envelope.
+
+`amoebius-pulsar` is a library, not a hidden standalone daemon: it creates no resource-free client Pod. A pure
+`PulsarClientExecutionDemand` names maximum broker connections, producers, consumers, outstanding requests,
+in-flight frames, frame/payload bytes, FLOW permits, redelivery/replay window, CBOR encode/decode workspace,
+and reconnect burst. Binding compiles those operands into the complete `PodResourceEnvelope` of each consuming
+orchestrator/worker. The Phase-24 live gate therefore declares a client-runner Pod with immutable image and OCI
+import footprint; CPU, memory, and ephemeral-storage requests and limits; runtime working set; writable-root
+and log headroom; projected credentials/config/service-account-token bytes; local volumes; pod slot;
+exact byte-free `PodRuntimeMetadataSource` network-attachment identities and container-to-volume mount
+identities; `cache = None`; and `accelerator = None`. Later phases must re-bind the same client demand into
+their own Pod envelopes rather than borrowing the gate runner's capacity. The finite gate runner is
+structurally a Job body with `completions=1`, `parallelism=1`, `restartPolicy=Never`, replacement-on-Failed,
+bounded backoff, and finite terminal retention; it does not carry Deployment rollout fields. After the runner's
+`BoundExecutionUnit` is expanded, `provision` derives one `KubeletRuntimeMetadataShape` per planned Pod slot
+from that source and the complete container/volume graph under the selected node's pinned
+`kubeletMetadataModel`; live readback constructs the observed form under the authenticated Pod UID and source
+witness. The private fold derives each component's bytes and `KubeletNodefs | CriRuntimeRoot` role, resolves
+the role through the selected filesystem layout, and groups aliases by physical carve once. SplitRuntime
+charges kubelet components to nodefs and CRI components to imagefs/containerfs; Unified and SplitImage sum
+forced aliases before one backing check. These physical bytes are not repeated as logical Pod ephemeral demand.
+
+Pure provision represents each planned epoch, and live preflight each observed snapshot, by one
+`ProvisionedNodeRuntimeStorageAccounting` per node. Its planned-slot/observed-UID domain equals the assigned
+Pods exactly, its qualified Pod metadata keys and image-model component keys form a disjoint exhaustive
+partition, and its combined backing map debits each carve once. A missing/swapped role, wrong backing, scope or
+domain mismatch, ownership hole/overlap, or alias double debit rejects before any broker socket opens.
+
+Topics and subscriptions are not free either. Each descriptor retains its hot-ledger/backlog operands and its
+required `StorageBudgetId` plus complete `PulsarOffloadObjectDemand` (exact topic identity, retained and segment
+bytes, concurrent/rate-window offloads, deletion lag, failed/orphan horizon, mutation admission). The Phase-19
+Pulsar provisioner merges these with BookKeeper/ZooKeeper, broker execution, and the closed six-arm MinIO
+producer inventory. The whole-deployment check runs against a live snapshot before opening a broker socket or
+changing a namespace policy. Only the private provisioned client/topic projection reaches the gate runner and
+reconciler. Pure expansion gives every desired/prior object a `KubernetesApiObjectDemand`; live preflight
+joins the observed old/new/apply transition map. `EtcdLogicalDemand { desiredObjects, churn, model }` derives
+the private logical peak, which must fit `ControlPlaneStorageDemand.etcd.backendQuotaBytes`, before the
+backend-at-quota plus WAL/snapshot/serialized-defrag peak separately fits its physical backing. Normalized live
+Pod resources, API/etcd state, and broker topic/subscription/offload policy must equal the witness.
+
+Exact-fit/one-short cases cover every client buffer/concurrency term, Pod CPU/memory/ephemeral/image/log term,
+runtime-metadata shape/component/role and each grouped layout backing, hot ledger/backlog, object count/segment size, offload
+concurrency/failure, budget, API-object revision/Event, and etcd term. Mutants that omit the
+client runner, a reconnect/redelivery buffer, a subscription cursor, the offload producer, one desired API
+object, a churn operand, metadata role/domain/ownership/grouping, the kubelet metadata model or largest simultaneous metadata row, or the etcd model must reject before
+the first CONNECT or broker-admin mutation; a successful command/event round-trip cannot excuse an omitted
+provision.
 
 ## Doctrine adopted
 
@@ -129,7 +184,7 @@ authored before `amoebius-pulsar` exists (§M.1), not a value regenerated from t
 
 ## Sprints
 
-## Sprint 22.1: Fork supernova → amoebius-pulsar native binary protocol 📋
+## Sprint 24.1: Fork supernova → amoebius-pulsar native binary protocol 📋
 
 **Status**: Planned
 **Implementation**: `amoebius-pulsar/src/Amoebius/Pulsar/Frame.hs`,
@@ -164,6 +219,9 @@ session per broker — the supernova provenance as **sibling evidence, not an am
 - A `Connection` that performs CONNECT → CONNECTED and resolves topics by looping on `LOOKUP_TOPIC`
   Connect/Redirect responses, multiplexing producers and consumers by `producer_id` / `consumer_id` /
   `request_id`.
+- A structural `PulsarClientExecutionDemand` for connection/request/frame/reconnect peaks, bound into the
+  complete envelope of the Phase-24 client-runner Pod and, later, each actual consumer Pod; there is no
+  separately scheduled or uncharged client service.
 - Any codegen tool (`protoc`) discovered lazily by full path through the substrate package manager — no
   environment variable, no `PATH` lookup, anywhere in the build or runtime path.
 
@@ -174,18 +232,21 @@ session per broker — the supernova provenance as **sibling evidence, not an am
    assert the client reaches an owning broker through any redirects.
 3. Flip one byte of a payload frame's body and assert a structured CRC32C-mismatch decode error, never a
    silent drop.
+4. Make the client-runner CPU, memory, ephemeral, image/import, log, connection, outstanding-frame, or
+   reconnect term one unit short in turn; each fixture refuses before CONNECT. The exact-fit runner's live
+   requests/limits/image/local storage normalize to the private provisioned projection.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 22.2: Capability surface + exclusively-CBOR payload codec 📋
+## Sprint 24.2: Capability surface + exclusively-CBOR payload codec 📋
 
 **Status**: Planned
 **Implementation**: `amoebius-pulsar/src/Amoebius/Pulsar/Producer.hs`,
 `amoebius-pulsar/src/Amoebius/Pulsar/Consumer.hs`, `amoebius-pulsar/src/Amoebius/Pulsar/Subscription.hs`,
 `amoebius-pulsar/src/Amoebius/Pulsar/Seek.hs`, `amoebius-pulsar/src/Amoebius/Pulsar/Cbor.hs` (the typed CBOR
 payload codec on `serialise`/`cborg`) — target paths, not yet built.
-**Blocked by**: Sprint 22.1.
+**Blocked by**: Sprint 24.1.
 **Independent Validation**: run against the **live single-node `kind`-cluster broker (Register 3)** — the same
 standing Pulsar service as the gate, not an in-process fake — so the FLOW/MESSAGE/ACK_RESPONSE and
 four-subscription-shape assertions are wire-real: a persistent producer sends N messages and collects N
@@ -202,7 +263,7 @@ a structured `Left DecodeError` on consume.
 Adopt [`pulsar_client_doctrine.md §5`](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek)
 and [`§3.1`](../documents/engineering/pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor): build the
 five-verb client surface — long-lived producers, flow-controlled consumers, all four subscription types, and
-seek-based replay — over the persistent session from Sprint 22.1, with **every application payload encoded
+seek-based replay — over the persistent session from Sprint 24.1, with **every application payload encoded
 exclusively as CBOR** through a typed codec.
 
 ### Deliverables
@@ -246,7 +307,7 @@ exclusively as CBOR** through a typed codec.
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 22.3: Declarative topology algebra + one-sided-link validation 📋
+## Sprint 24.3: Declarative topology algebra + one-sided-link validation 📋
 
 **Status**: Planned
 **Implementation**: `amoebius-pulsar/src/Amoebius/Pulsar/Topology.hs` — target path, not yet built.
@@ -300,13 +361,15 @@ a runtime mystery — the illegal-state-unrepresentable principle applied to the
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 22.4: At-least-once + broker-side dedup + the command→event round-trip gate 📋
+## Sprint 24.4: At-least-once + broker-side dedup + the command→event round-trip gate 📋
 
 **Status**: Planned
 **Implementation**: `amoebius-pulsar/src/Amoebius/Pulsar/Dedup.hs`,
 `amoebius-pulsar/src/Amoebius/Pulsar/Namespace.hs` (the namespace dedup-policy reconcile),
-`amoebius-pulsar/dhall/test/round_trip_dedup.dhall` (the gate topology) — target paths, not yet built.
-**Blocked by**: Sprint 22.2, Sprint 22.3; Phase 22 — the live DSL deploy via the `replicas=1` singleton (the
+`amoebius-pulsar/dhall/test/round_trip_dedup.dhall` (the gate topology), and
+`test/integration/Phase24RuntimeStorage.hs` (runner planned-slot→observed-Pod-UID join, component-role/layout
+backings, node scope/domain/ownership equality, reservation/observed no-double-debit, alias controls) — target paths, not yet built.
+**Blocked by**: Sprint 24.2, Sprint 24.3; Phase 22 — the live DSL deploy via the `replicas=1` singleton (the
 `InForceSpec` harness that applies the gate topology).
 **Independent Validation**: with namespace deduplication enabled, a producer that retries the same
 `(producer_name, sequence_id)` has the duplicate rejected at ingest; a consumer that crashes before `ACK` is
@@ -314,7 +377,7 @@ redelivered the un-acked message; the `MessageId`→`sequence_id` packing (`ledg
 request-scoped-producer-name fallback both keep distinct keys off one dedup cursor; the gate topology
 round-trips a command → event, byte-for-byte CBOR, and tears down leak-free and idempotently.
 **Docs to update**: `documents/engineering/pulsar_client_doctrine.md` (§7),
-`DEVELOPMENT_PLAN/README.md` (flip the Phase-22 status when the gate passes).
+`DEVELOPMENT_PLAN/README.md` (flip the Phase-24 status when the gate passes).
 
 ### Objective
 Adopt [`pulsar_client_doctrine.md §7`](../documents/engineering/pulsar_client_doctrine.md#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default):
@@ -336,6 +399,10 @@ command→event round-trip over the native protocol with dedup on and CBOR paylo
   topics are `topicFor`-derived, not hand-written: bring up against the standing Pulsar service, produce a
   workflow `command`, consume it, produce the corresponding `event`, consume it back — all CBOR — and always
   tear down, emitting a per-run proven/tested/assumed ledger.
+- A pure provision boundary covering the client runner, exact topic/subscription/cursor set, hot
+  BookKeeper/ZooKeeper demand, and complete `PulsarOffloadObjectDemand`/`StorageBudgetId`, followed by
+  snapshot-bound preflight of observed/reserved/terminating identities and node runtime/image-storage rows; no
+  broker socket or namespace mutation occurs on `Left ProvisionError` or live-preflight refusal.
 - The Phase-0-committed gate oracles (§M.1), authored before the client exists: the CBOR command/event byte
   vectors, the hand-authored expected derived-topic table, the standing-namespace pre-run policy snapshot, and
   the committed seeded-mutant set (topicFor-literal, one-sided-link-clause-deleted, produceRaw-re-added) each
@@ -362,6 +429,10 @@ command→event round-trip over the native protocol with dedup on and CBOR paylo
    subscriptions, stray topics, and a left-enabled dedup policy each fail the assertion. Emit the Register-3
    ledger — the deferred content-store, workflow-runtime, and cross-cluster surfaces (Phase 25 and later)
    recorded UNVERIFIED, never green.
+4. Run one-short and omission mutants for the client-runner envelope, session buffers, cursor/backlog, offload
+   demand, both SplitRuntime metadata backings, role resolution, planned/observed domain, qualified ownership,
+   and alias grouping. Assert zero CONNECT frames and zero broker-admin writes for every rejection; for the
+   exact-fit twin, externally read Pod and broker policy/state normalize exactly to the provisioned value.
 
 > **Honesty.** infernix's duplicate-collapse was validated against a real broker — but **over WebSockets, in
 > infernix**. That is *sibling evidence*, not an amoebius result; this sprint re-implements the contract over
@@ -371,20 +442,20 @@ command→event round-trip over the native protocol with dedup on and CBOR paylo
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 22.5: Register-2.5 exactly-once effect under simulated redelivery 📋
+## Sprint 24.5: Register-2.5 exactly-once effect under simulated redelivery 📋
 
 **Status**: Planned
 **Implementation**: `test/sim/PulsarDedupSimSpec.hs` (the `IOSimPOR` battery over the modeled Pulsar), driving
-the real `amoebius-pulsar/src/Amoebius/Pulsar/Dedup.hs` consumer-side fold lifted onto the Phase-11.4
+the real `amoebius-pulsar/src/Amoebius/Pulsar/Dedup.hs` consumer-side fold lifted onto the Phase-12
 `io-classes` `Env` interface — target paths, not yet built.
-**Blocked by**: Sprint 22.4 (the built at-least-once + dedup client); Phase 11 Sprint 11.4 (the `io-classes`
+**Blocked by**: Sprint 24.4 (the built at-least-once + dedup client); the Phase 12 gate (the `io-classes`
 seams + the modeled Pulsar).
 **Independent Validation**: the real dedup fold — keyed by a replication-surviving work-id — runs under
 `IOSimPOR` against the modeled Pulsar with injected reorder, duplicate, crash-mid-acknowledge, and partition;
 the suite asserts the **exactly-once effect** invariant (R3): on every explored schedule, no effect is lost and
 none is double-applied. This is the amoebius-owned fold; Pulsar's broker/bookie consensus stays delegated and
 is *modeled*, not re-proven. Deterministically replayable, substrate `none`, Register 2.5.
-**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (Phase-22 status backlink),
+**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (Phase-24 status backlink),
 `documents/engineering/pulsar_client_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
@@ -428,10 +499,10 @@ The whole sprint (📋 Planned).
 **Cross-references to add:**
 - `DEVELOPMENT_PLAN/system_components.md` — register the `amoebius-pulsar` package and its target module paths
   (`Frame`, `Connection`, `Proto/PulsarApi`, `Producer`, `Consumer`, `Subscription`, `Seek`, `Cbor`,
-  `Topology`, `Dedup`, `Namespace`) as Phase-22 design-first rows against the component inventory.
+  `Topology`, `Dedup`, `Namespace`) as Phase-24 design-first rows against the component inventory.
 - `DEVELOPMENT_PLAN/substrates.md` — record Phase 24's gate substrate (`linux-cpu`) in the per-phase substrate
   map, and the topology algebra's per-substrate topic lanes.
-- `DEVELOPMENT_PLAN/README.md` — flip the Phase-22 row's status from this plan once the gate passes; link this
+- `DEVELOPMENT_PLAN/README.md` — flip the Phase-24 row's status from this plan once the gate passes; link this
   document.
 
 ## Related Documents
@@ -444,7 +515,7 @@ The whole sprint (📋 Planned).
 - [system_components.md](system_components.md) — the target component inventory for the module paths above
 - [Native Pulsar Client Doctrine](../documents/engineering/pulsar_client_doctrine.md) — the adopted transport,
   capability, topology, CBOR-payload, and dedup doctrine
-- [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — the Register-2.5 io-sim environment the dedup fold's exactly-once is validated against in Sprint 22.5
+- [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — the Register-2.5 io-sim environment the dedup fold's exactly-once is validated against in Sprint 24.5
 - [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — §3.23, the non-CBOR payload made
   unrepresentable
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — the no-env/no-`PATH` lazy tool

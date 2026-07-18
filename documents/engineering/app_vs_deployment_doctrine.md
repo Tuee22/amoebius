@@ -324,7 +324,8 @@ Cashing out "zero app change":
 - The app spec is **byte-identical** across the single-cluster and N-cluster deployments; the diff is
   entirely in the deployment-rules layer.
 
-> **Honesty.** Geo-replication and cross-cluster failover are **Phase 28** and **not started**. Synchronous
+> **Honesty.** Geo-replication is **Phase 28**; cross-cluster gateway failover is **Phase 29**; neither is
+> started. Synchronous
 > intra-cluster HA is delegated to the systems that do their own consensus (MinIO / Pulsar / Postgres /
 > Patroni); the **asynchronous** cross-cluster boundary — what happens if a cluster dies mid-geo-sync and amoebius
 > fails over to it — is an open correctness obligation owned by

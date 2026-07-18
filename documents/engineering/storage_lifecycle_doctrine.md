@@ -85,20 +85,26 @@ would be open-ended and unauditable, and the guarantee that every retained byte 
 unverifiable. amoebius closes the
 creation path to exactly one shape.
 
-**A PVC is only ever created by a StatefulSet's `volumeClaimTemplate`**. There are no bare PVCs, no Deployment-mounted
-`persistentVolumeClaim` volumes, no Job-created claims. Consequences:
+**A PVC is only ever created by a StatefulSet's `volumeClaimTemplate`**. There are no bare PVCs, no
+Deployment-mounted `persistentVolumeClaim` volumes, and no Job-created claims. The one narrow consumer
+exception does not widen creation: a provisioned copy/verify `Job` may temporarily mount the exact old and
+replacement claims named by a private `ProvisionedStorageMigration`; it cannot create a claim, name a third
+claim, retain state of its own, or run without the old+new+workspace capacity witness. Consequences:
 
 - **Durable state ⇒ StatefulSet.** Anything that needs to persist bytes is a StatefulSet, so its claims get
   stable per-ordinal identity (`<claim>-<statefulset>-<ordinal>`) that survives Pod reschedules — the
   identity the deterministic rebind in [§6](#6-the-lossless-teardown-guarantee-deterministic-rebind) depends on.
-- **Stateless ⇒ no claim.** A workload with no StatefulSet has no durable storage by construction; shared
+- **Stateless ⇒ no owned claim.** An ordinary workload with no StatefulSet owns no durable storage by
+  construction; the migration Job exception only receives a capability to two already-accounted claims for
+  the finite verified transition and never becomes their owner. Shared
   state for such workloads lives in a platform service (MinIO, Postgres, Pulsar), never in an ad-hoc PV. The
   **control-plane singleton** is the canonical stateless case: it is a Deployment `replicas=1` with no PVC,
   and its durable state is the MinIO bucket ([§7.2](#72-amoebius-own-control-plane-state-is-the-minio-bucket-not-a-pvc),
   [daemon_topology_doctrine.md §3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)).
 - **The DSL is the gate.** The amoebius Dhall DSL does not expose a "make me a loose PVC" primitive at all;
   durable storage is requested through the app/StatefulSet surface and nowhere else. The illegal-state
-  framing — *a claim that cannot bind, or storage attached to a non-StatefulSet, is unrepresentable* — is
+  framing — *a claim that cannot bind, or durable state owned by an ordinary non-StatefulSet, is
+  unrepresentable* — is
   owned by [dsl_doctrine.md](./dsl_doctrine.md) and catalogued in
   [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md); this doc states the storage-side invariant the
   DSL enforces.
@@ -139,7 +145,7 @@ flowchart TD
   claimref -->|carries| pv
   pvc -->|WaitForFirstConsumer binds to the claimRef-pinned PV| pv
   pv -->|host-backed: node-affinity pin| host[Host path on one node]
-  pv -->|provider-backed: one EBS per PV| ebs[EBS volume sized to the PVC]
+  pv -->|provider-backed: one EBS per PV| ebs[EBS volume rounded to provider allocation geometry]
 ```
 
 ---
@@ -150,15 +156,36 @@ An advisory-only size is not enforceable. If a "10Gi" volume can quietly grow to
 fill the host disk, then capacity planning, dynamic node provisioning, and "this volume fits on that node"
 all become guesswork. amoebius makes the declared size a **hard ceiling**, not a hint.
 
-- **Every PVC declares a minimum size; every PV declares a capacity**. A sizeless durable claim is not representable.
-- **Hard allocation, not advisory accounting**. The declared capacity is the real
-  ceiling; a workload cannot spill past it onto shared host disk. OPEN (mechanism only); position fixed.
-  Provider volumes hard-cap via EBS size today; host-backed volumes will be hard-capped by a quota- or
-  image-backed volume, never a raw shared-filesystem subdirectory. Until it lands, host caps are advisory.
-  Delivery tracked in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
-- **One EBS drive per PV on provider substrates**. amoebius never carves many claims
-  out of one shared cloud volume; the PV ↔ PVC ↔ EBS-volume mapping is 1:1:1, each EBS sized to exactly the
-  paired PVC. Pulumi materializes the volume; Kubernetes does not dynamically provision it. The provider
+- **Every PVC declares a minimum size, presentation, and backing; every PV declares a capacity.** A sizeless
+  durable claim is not representable. `VolumePresentation = Block | Filesystem { fsType, overheadModel }`
+  makes the usable-vs-raw distinction explicit: application/geometry demand first yields required usable bytes;
+  a versioned filesystem model adds metadata, journal, and reserved-block overhead; then the backing allocation
+  policy rounds raw bytes to its minimum and quantum.
+- **One `volumeClaimTemplate` means one capacity across all ordinals.** A StatefulSet cannot vary one
+  template's request by ordinal. When the resource fold produces unequal per-bookie/per-drive physical
+  requirements, each requirement first maps to a unique `(StatefulSet, template, ordinal)` slot; the claim
+  plan sets that template's required usable size to the largest ordinal requirement, derives one rounded raw
+  `provisionedBytes`, and debits `provisionedBytes × ordinalCount` from the backing. Every resulting PVC/PV
+  carries that same exact rounded capacity, so
+  padding on smaller ordinals remains reserved. A fold that spends only the unequal raw sum is invalid; truly
+  different sizes require distinct typed templates/StatefulSets.
+- **Hard allocation, not advisory accounting.** The provisioned raw capacity is the real ceiling; a workload
+  cannot spill past it onto shared host disk, and the mounted filesystem must expose at least the derived usable
+  capacity. Provider volumes enforce the raw ceiling with the EBS volume size. A host-backed
+  volume must name an amoebius-managed quota- or image-backed extent that enforces the same byte ceiling;
+  a raw shared-filesystem subdirectory is not an admissible `StorageBacking`. The Phase-17 live gate must
+  prove a write past the cap fails and neighboring volumes/backing remain intact. Until that enforcement
+  exists, the storage phase is simply unimplemented — amoebius does not downgrade the provision to an
+  “advisory but deployable” state.
+- **Aggregate backing admission precedes render/apply.** Each retained claim names the exact backing/pool it
+  debits, and the post-bind resource fold checks `Σ(provisionedBytes) ≤ observed/declarable backing` before a
+  `ProvisionedSpec` exists. The same physical bytes cannot also be presented as node ephemeral or cache
+  capacity unless the substrate inventory declares disjoint carves.
+- **One EBS drive per PV on provider substrates.** amoebius never carves many claims
+  out of one shared cloud volume; the PV ↔ PVC ↔ EBS-volume mapping is 1:1:1. “1:1:1” is an identity/cardinality
+  invariant, not byte-for-byte arithmetic: the PVC/PV capacity and EBS request all use the same
+  provider-rounded `provisionedBytes`, which may exceed the application's usable demand. Pulumi materializes
+  the volume; Kubernetes does not dynamically provision it. The provider
   plumbing and credential model that let normal operation *create* but not *delete* EBS are owned by
   [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md); this doc owns only the 1:1:1 sizing invariant.
 
@@ -189,8 +216,140 @@ node-level precondition for the cluster-level guarantee in [§6](#6-the-lossless
 unbounded storage in amoebius: durable storage is **either** host-level (bounded by a physical disk) **or**
 cloud (bounded by a quota), encoded as a **closed union with no unbounded arm**:
 
-```
-StorageBacking = HostDisk Capacity | Ebs Capacity | CloudQuota Quota
+```text
+StorageCapacity =
+  { rawBytes             : Quantity Bytes
+  , reservedRawBytes     : Quantity Bytes
+  , allocatableRawBytes  : Quantity Bytes
+  , partitionExact       :
+      reservedRawBytes + allocatableRawBytes <= rawBytes
+  }
+-- Every field is a finite physical/raw Quantity. A demand begins as required usable bytes; its selected
+-- presentation overhead and allocation quantum derive provisioned raw bytes, which alone are compared with
+-- allocatableRawBytes. Usable and raw quantities are never summed or compared across stages.
+
+ProviderLogicalObjectByteModelVersion = ContentAddress
+ProviderBilledObjectByteModelVersion = ContentAddress
+ProviderLogicalToBilledByteConversionModelVersion = ContentAddress
+
+ProviderObjectByteAccounting =
+  < Logical :
+      { model   : ProviderLogicalObjectByteModelVersion
+      , witness : ProviderLogicalObjectByteModelTotalityWitness
+      }
+  | Billed :
+      { model      : ProviderBilledObjectByteModelVersion
+      , conversion : ProviderLogicalToBilledByteConversionModelVersion
+      , witness    : ProviderBilledByteConversionTotalityAndMonotonicityWitness
+      }
+  >
+
+ProviderObjectByteAmount accounting quantity =
+  { accounting : accounting
+  , value      : quantity
+  }
+-- The accounting arm is the byte unit. Logical uses the pinned canonical object-payload model; Billed uses
+-- the provider's pinned rounding/metadata/tier model and names the exact logical-to-billed conversion. There
+-- is no unit-free provider-object byte scalar and no implicit comparison between the two arms.
+
+StorageQuota =
+  { id             : ProviderStorageQuotaId
+  , account        : CloudAccountId
+  , accounting     : ProviderObjectByteAccounting
+  , maxBytes       : ProviderObjectByteAmount accounting (Quantity Bytes)
+  , maxObjectCount : PositiveNatural
+  , sourceEquality : ProviderStorageQuotaAccountAccountingMaximumEqualityWitness
+  }
+-- This is the finite declared maximum, not evidence of current availability. The live/forest folds consume
+-- resource_capacity_doctrine's ObservedProviderObjectQuota, which adds complete current selected-unit byte
+-- usage and object-count usage, zero-capable residuals, account/quota identity, and one snapshot fingerprint.
+-- Unknown or partial provider-object usage cannot be treated as zero; a logical declaration cannot consume a
+-- billed observation, or vice versa, without the selected arm's explicit pinned conversion model.
+
+HostDiskBacking =
+  { id         : BackingId
+  , carve      : DiskCarveId
+  , capacity   : StorageCapacity
+  , allocation : BackingAllocationPolicy
+  }
+
+EbsBacking =
+  { id     : BackingId
+  , account: CloudAccountId
+  , policy : ProviderVolumePolicy
+  }
+
+CloudQuotaBacking =
+  { id : BackingId, quota : StorageQuota }
+
+StorageBacking =
+  < HostDisk   : HostDiskBacking
+  | Ebs        : EbsBacking
+  | CloudQuota : CloudQuotaBacking
+  >
+
+BackingAllocationPolicy =
+  { minimumBytes : Quantity Bytes
+  , quantumBytes : Quantity Bytes
+  }
+
+ProviderVolumePolicy =
+  { volumeType : ProviderVolumeType
+  , zone       : Zone
+  , allocation : BackingAllocationPolicy
+  }
+
+ProviderVolumeRequest = -- private, derived from demand + policy
+  { volumeType       : ProviderVolumeType
+  , zone             : Zone
+  , requiredUsableBytes : Quantity Bytes
+  , sizeGiB          : PositiveNatural
+  , provisionedBytes : Quantity Bytes
+  , presentation     : VolumePresentation
+  , allocation       : BackingAllocationPolicy
+  , witness          : BackingAllocationWitness
+  }
+
+ProviderVolumeSlotId =
+  { account : CloudAccountId
+  , cluster : ClusterId
+  , claim   : StatefulSetClaimSlot
+  , request : ProviderVolumeRequest
+  }
+
+EbsBackingProvisionState = < Promised | Materialized >
+
+EbsBackingMaterialization state =
+  < Promised :
+      { state    : Promised
+      , volumeId : Absent
+      }
+  | Materialized :
+      { state    : Materialized
+      , volume   : ProviderVolumeId
+      , readback : ProviderVolumeIdentityAccountZoneSizePresentationReadbackWitness
+      }
+  > -- private constructor requires selected arm = state
+
+ProvisionedEbsBacking state = -- private post-provision state
+  { id       : BackingId
+  , slot     : ProviderVolumeSlotId
+  , volumeDemand : ProvisionedVolumeDemand
+  , materialization : EbsBackingMaterialization state
+  , sourceEquality :
+      EbsBackingDemandSlotAccountClaimRequestMaterializationEqualityWitness
+  }
+
+PromisedProvisionedEbsBacking = ProvisionedEbsBacking Promised
+MaterializedProvisionedEbsBacking = ProvisionedEbsBacking Materialized
+
+EbsBackingMaterializationResult =
+  { promised     : PromisedProvisionedEbsBacking
+  , materialized : MaterializedProvisionedEbsBacking
+  , cloudAction  : CloudProviderActionId
+  , sourceEquality :
+      EbsPromisedActionProviderReadbackMaterializedEqualityWitness
+  }
 ```
 
 - **No unbounded constructor** (a type-foreclosed union shape, [illegal_state_catalog.md §6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
@@ -198,14 +357,45 @@ StorageBacking = HostDisk Capacity | Ebs Capacity | CloudQuota Quota
   `CloudQuota` backing is bounded by a quota owned by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md); the
   content-addressed MinIO store is a `HostDisk`/`CloudQuota` backing owned by
   [content_addressing_doctrine.md](./content_addressing_doctrine.md). Each arm names exactly one owner of its
-  ceiling number, so "available storage" has one definition.
-- **The aggregate fold lives elsewhere.** This doc owns the *union shape* and the per-volume sizing ([§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim));
-  the **aggregate arithmetic** — `Σ(PV caps) ≤ backing`, and the Pulsar two-ceiling fold — is owned by
+  ceiling number, so "available storage" has one definition. A raw EBS declaration contains only a provider
+  policy; the private request is derived from volume demand and the provider's whole-GiB/minimum rules. It
+  never contains a fabricated future volume id or an arbitrary raw-byte request.
+- **The identity path is total, not implied by matching byte counts.** A `HostDisk.id` resolves exactly once
+  to `PhysicalDiskPartition.retainedPools[].id`; its `carve` must equal that pool's globally scoped
+  `NamedDiskCarve.id`, and `capacity` is the carve's net allocatable extent. An EBS id resolves exactly once
+  to its `ProviderVolumeSlotId`; a cloud-quota id resolves exactly once to the named account/quota
+  ledger. BookKeeper/MinIO/PV demands carry this `BackingId`, never a free `Capacity`, so checked construction
+  can walk demand → logical backing → carve/provider owner → physical/account ceiling without inventing an
+  association. Before `CreateVolume`, provisioning derives required usable bytes from geometry, applies
+  `VolumePresentation`, rounds to the backing minimum/quantum (for AWS EBS, an integral GiB satisfying the
+  volume-type minimum), and derives the globally scoped slot from account + cluster + StatefulSet claim slot +
+  request. It debits `provisionedBytes` and count against observed residual quota and stores
+  `Promised` in the witness. After create it attaches and cross-checks the real `ProviderVolumeId`, moving only
+  to `Materialized`; retained rebind keeps the same logical `BackingId`/slot. Reusing an id, mapping two ids to
+  one carve/slot, or declaring a capacity different from its owner rejects before aggregate arithmetic.
+  A provider backing's declared allocation policy must equal the selected volume type in the pinned provider
+  catalog; an author cannot weaken the minimum or quantum.
+- **Provider-object bytes have one selected accounting arm.** `CloudQuotaBacking` retains the exact
+  `StorageQuota.accounting` choice. `Logical` means the pinned canonical object-payload model; `Billed` means
+  the pinned provider rounding/metadata/tier model plus its explicit logical-to-billed conversion. Declared
+  maximum, demand, observed current/residual usage, per-object allocation readback, forest carve, and residual
+  all carry `ProviderObjectByteAmount` indexed by that same choice. Object count is observed and partitioned
+  alongside bytes. No raw `Quantity Bytes` can cross that boundary, and incomplete inventory or unit/model
+  mismatch refuses rather than being treated as free capacity.
+- **The aggregate fold lives elsewhere.** This doc owns the *union shape* and the per-volume/uniform-template
+  sizing ([§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim)); the **aggregate arithmetic** —
+  uniform claim-group debit followed by `Σ(PV caps) ≤ backing`, and the Pulsar two-ceiling fold — is owned by
   [resource_capacity_doctrine.md §5, §7](./resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm) (the [§4.6](../illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) capacity-accounting
   technique). An app that would consume more storage than its backing
-  ([illegal_state_catalog.md §3.19](../illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)) is rejected by that fold at decode; "unbounded"
+  ([illegal_state_catalog.md §3.19](../illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)) is rejected by that fold at the
+  post-bind `provision-seal`; "unbounded"
   is representable **only** through a `Growable` scaling policy whose ceiling is itself a quota
   ([resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)).
+- **Declared-vs-observed fail-closed check.** Before storage mutation or pod apply, the reconciler observes
+  the actual host extent/EBS raw size, volume mode/fsType, mounted usable capacity, and provider quota. If raw
+  bytes are smaller than `provisionedBytes`, usable bytes are smaller than `requiredUsableBytes`, presentation
+  differs, or the quota snapshot changed, it performs zero writes; a pure provision-seal witness is never
+  treated as proof that the physical backing still exists at runtime.
 
 ---
 
@@ -318,12 +508,19 @@ bytes — MinIO's own backing disks, Pulsar/BookKeeper, Postgres/Patroni, and an
 - **The amoebius control plane holds no PVC.** The control-plane singleton is a stateless Deployment
   `replicas=1` ([daemon_topology_doctrine.md §3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election));
   it mounts no durable volume and keeps nothing on local disk.
-- **Its durable state is exclusively the Vault-enveloped MinIO bucket.** The `InForceSpec`, the Pulumi
-  state, and every other byte the control plane must persist live as Vault-Transit-enveloped objects in
-  MinIO ([pulumi_iac_doctrine.md §2](./pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio),
+- **Its durable state is exclusively the capacity-admitted Vault-enveloped MinIO bucket.** The singleton
+  constructs the closed `ControlPlaneStateObjectDemand` set—`InForceSpecSnapshot`,
+  `ManagedResourceRegistry`, `ReconcileJournal`, `ValidationLedger`, and `JobCompletion`—while Pulumi constructs its distinct
+  `PulumiCheckpointObjectDemand`. Every object carries a `StorageBudgetId`, exact canonical-size inputs,
+  retained old/new/failure/orphan bounds, and a mutation-admission identity before it can be written as a
+  Vault-Transit-enveloped MinIO object
+  ([resource_capacity_doctrine.md §5.1](./resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry),
+  [pulumi_iac_doctrine.md §2](./pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio),
   [dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness)), decrypted
   in-process and never written to a plaintext ConfigMap, to etcd, or to a control-plane PVC
   ([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md), the plaintext-spec-at-rest entry).
+  “Every other byte” is deliberately not an open escape hatch: a new persistent state kind first extends the
+  closed union, its budget/peak model, source↔producer equality check, gateway policy, and one-byte-short tests.
 - **Why the distinction matters.** It keeps the singleton disposable — k8s can reschedule it anywhere with
   no volume to re-attach and no data to lose ([§5.1](#51-storage-is-independent-of-the-node-lifecycle) applies
   to platform-service volumes, not to the control plane, because the control plane has none). MinIO itself is
@@ -347,19 +544,50 @@ forbidden operation of [§7](#7-deleting-durable-data-is-forbidden-under-normal-
 
 amoebius's design position: **a shrink is never an in-place truncation; it is a verified migration.**
 
+```text
+ReclaimEligible =
+  { prior             : PriorVolumeProvisionRef
+  , oldProvision      : ProvisionedVolumeDemand
+  , oldBacking        : BackingId
+  , oldProviderVolume : Optional ProviderVolumeId
+  , replacement       : ProvisionedVolumeDemand
+  , copyVerified      : VerifiedStorageCopyContentAndExtentWitness
+  , cutoverObserved   : ReplacementMountedOldDetachedWitness
+  , retainedDebit     : BackingAllocation
+  , snapshot          : InventoryFingerprint
+  , sourceEquality    :
+      PriorProvisionBackingVolumeReplacementVerificationDebitSnapshotEqualityWitness
+  , automaticDeleteAuthority : Absent
+  }
+```
+
 - **Grow is representable in place.** Increasing a PVC's requested size is an ordinary, data-preserving
   change (resize the EBS volume / grow the filesystem); the larger volume still holds every original byte.
 - **Shrink is expressed as create-new → verified-migrate → retire-old**, never as "represent a smaller
   volume holding the same data." The DSL value the operator writes denotes the *target smaller size*; the
-  reconciler realizes it by provisioning a new, correctly-sized retained volume, copying the live bytes,
-  **verifying the copy**, and only then detaching the old volume from active use and recording an immutable
-  `ReclaimEligible` artifact. No `.dhall` value ever denotes "discard these bytes," so destruction stays
-  unrepresentable even while the effective size goes down.
+  source carries a `StorageMigrationIntent` with a raw `PriorProvisionRefSource` Volume arm, the replacement
+  logical demand, and a structural chunk/concurrency/workspace policy. Gate 2 validates and brands that arm as
+  an opaque `PriorVolumeProvisionRef`; the binder expands the intent to an unprovisioned
+  `StorageMigrationDemand`. Provisioning alone resolves the reference from the prior `ProvisionedSpec` context
+  and derives the replacement's required-usable/raw allocation, complete copy/verify Job
+  `PodResourceEnvelope`, and workspace; it admits only if old+new+workspace fit every backing and provider
+  byte/count ledger and the executor fits a node including pod/CSI slots. Only that private
+  `ProvisionedStorageMigration` reaches render. The reconciler then creates the replacement and exact Job,
+  copies the live bytes, **verifies the copy**, and only then detaches the old volume from active use and
+  records an immutable `ReclaimEligible` artifact. No `.dhall` value ever denotes "discard these bytes," so
+  destruction stays unrepresentable even while the effective size goes down.
 - **`Retire-old` does not itself delete backing.** Actual reclaim of the now-orphaned old volume is an external
   privileged operator action under [§7](#7-deleting-durable-data-is-forbidden-under-normal-operation), outside
   amoebius automation and outside the elevated test harness. Until that break-glass action occurs, the old
   backing remains intact. A shrink that cannot verify its copy emits no `ReclaimEligible` artifact, leaves
   *both* volumes intact, and fails loud — it never trades the old bytes for an unverified new home.
+- **Live enactment rechecks the transition, not only steady state.** One read-only snapshot normalizes the old
+  PV/PVC, replacement/backing inventory, all surviving pods/attachments, and current copy workspace. A
+  snapshot-bound token is minted only after the exact old+new+workspace+Job high-water still fits; render,
+  SSA, and the copy runner accept that token/private projection rather than raw sizes. A topology where steady
+  old or target state fits but the overlap is one byte, one pod slot, one CSI attachment, or one executor
+  resource short performs zero creates/copies. Failed verification keeps both volumes and all partial
+  workspace charged on the next observation.
 
 > **Honesty.** This is a *design resolution* of an explicitly open question, not a built or tested
 > amoebius capability. The mechanism above (especially the verified-migrate gate, `ReclaimEligible` artifact,

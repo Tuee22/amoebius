@@ -20,8 +20,8 @@ own doc. It owns nothing new. The **catalog index** (which states are illegal, i
 honesty limit** (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned
 by [`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
 **coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three foreclosure layers** ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the
-orthogonal `Gate-1-editor` / `Gate-2-decoder` / `rendered-output-golden` / `live-effect` classification each
-entry below carries) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice
+orthogonal `Gate-1-editor` / `Gate-2-decoder` / `provision-seal` / `rendered-output-golden` / `live-effect`
+classification each entry below carries) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice
 **references** those; it does not restate them.
 
 Everything below is **design intent**, not a tested amoebius result. Per the honesty limit ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
@@ -37,8 +37,9 @@ correct manifests, whether the apiserver admits them, or whether the running clu
 Each entry keeps its **original catalog number and heading** (inbound links depend on the slug). The
 **Validation-locus** line added to each entry places it on the orthogonal validation-locus axis defined in
 [`illegal_state_techniques.md`](./illegal_state_techniques.md): `Gate-1-editor` (fails `dhall type` at
-authoring time), `Gate-2-decoder` (the total decoder returns `Left`), `rendered-output-golden` (caught by a
-golden test on the *rendered* manifest, not a live cluster), and `live-effect` (only observable at
+authoring time), `Gate-2-decoder` (the total decoder returns `Left`), `provision-seal` (post-bind Phase-8
+provision returns a `ProvisionError` before any `ProvisionedSpec` exists), `rendered-output-golden` (caught by
+a golden test on the *rendered* manifest, not a live cluster), and `live-effect` (only observable at
 reconcile/runtime — the runtime-checked residue).
 
 ### 3.3 Misconfigured gateway
@@ -165,22 +166,39 @@ shape).
 
 In raw k8s a Deployment may omit resource requests/limits — a noisy-neighbour or OOM-the-node risk — and run
 as root with a writable root filesystem and full Linux capabilities. amoebius **generates** every workload
-object from a typed record that *requires* refined non-zero CPU/RAM and attaches a hardened (non-root,
-no-privilege-escalation, dropped-capabilities, read-only-root-by-default) securityContext, so a workload
-missing either is not a value `render` can return — there is nothing to lint because there was never a value
-to lint. The cpu/ram rule is owned by
+object from a typed record that *requires* a complete resource envelope: refined non-zero CPU, memory, and
+pod `ephemeral-storage` requests+limits for every app/sidecar/init container; a size bound for every
+disk-backed scratch/cache volume; per-container private writable/log allowances covered by that container's
+ephemeral request/limit and, with shared volume bounds, by the effective pod request; writer-indexed
+memory-backed volumes with access/persistence and exactly one reservation carrier per resident lifecycle epoch;
+platform-specific OCI content/snapshot/import metadata routed by the node's closed filesystem layout and
+finite pull policy; checked durable claim presentation/usable/raw sizes; and, for the
+accelerator-owner pod, a derived integer
+extended-resource request/limit on its named owner container plus the pod's required affinity. It also
+attaches a hardened (non-root,
+no-privilege-escalation, dropped-capabilities, read-only-root-by-default) `securityContext`. Binding and
+provisioning must first construct the opaque whole-deployment `ProvisionedSpec`; only deployment-global
+`renderAll :: ProvisionedSpec -> [K8sObject]` crosses the seal, so neither an incomplete resource projection nor an
+unprovisionable target/workload pair can reach manifest generation. There is nothing to lint because there
+was never a renderable value to lint. The
+complete-resource-envelope rule is owned by
 [`platform_services_doctrine.md` §10](../engineering/platform_services_doctrine.md#10-every-container-declares-cpu-and-ram);
 the generation discipline that makes the unsafe shape unconstructible is owned by
 [`manifest_generation_doctrine.md` §3](../engineering/manifest_generation_doctrine.md#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible). **Owner:**
 [`manifest_generation_doctrine.md`](../engineering/manifest_generation_doctrine.md) (best-practice-by-construction) +
-[`platform_services_doctrine.md`](../engineering/platform_services_doctrine.md) (the cpu/ram rule). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
+[`platform_services_doctrine.md`](../engineering/platform_services_doctrine.md) (the complete resource-envelope
+rule) + [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the private checked
+provision boundary). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (required-field-by-construction — a record without the field has no inhabitant).
 
-**Validation-locus:** `Gate-1-editor` (required refined non-zero CPU/RAM — a workload record missing either
-fails `dhall type` at authoring, so there is no value to lint) + `rendered-output-golden` (the hardened
-non-root / no-privilege-escalation / dropped-capabilities / read-only-root securityContext and the resource
-limits present in the emitted manifest) + `live-effect` residue (that the running pod actually enforces the
-hardened context).
+**Validation-locus:** `Gate-1-editor` (a workload record missing its mandatory resource envelope fails
+`dhall type` at authoring) + `provision-seal` (the post-bind resource/capability fold must construct the opaque
+whole-deployment `ProvisionedSpec`, returning a `ProvisionError` before that seal when the selected target
+cannot supply any demand) +
+`rendered-output-golden` (the hardened non-root / no-privilege-escalation / dropped-capabilities /
+read-only-root `securityContext` and the exact checked resource projection are present in the emitted
+manifest) + `live-effect` residue (the running pod actually enforces the hardened context and resource
+ceilings).
 
 ### 3.40 A secure-gateway reach collapsing into wild ingress
 
@@ -244,8 +262,18 @@ Raw k8s (and Keycloak, Vault, Pulsar, and MinIO alongside it) lets an operator h
 a realm-role grant, a Vault policy, a Pulsar ACL, or a bucket policy that grants one tenant reach into
 another's resources — or simply mis-scopes a grant — with nothing to catch it but review. amoebius has **no
 DSL surface with which to author a grant at all**: every concrete provider policy is the image of one **total
-function of the typed tenant→role graph** (`render :: TenantSpec t → [KeycloakRole | VaultPolicy | PulsarAcl |
-MinioPolicy | NetworkPolicy]`), so a hand-authored, un-derived binding is not a value `render` can return, and
+function of the typed tenant→role graph**
+(`deriveTenantPolicies :: TenantSpec -> TenantPolicyDerivation`). This is an intermediate, never a renderer:
+it carries exact policy outputs plus the source-linked Keycloak SQL/WAL, Vault Raft, Pulsar ZooKeeper, MinIO
+system-metadata, and Kubernetes API/etcd persistence operands, along with exact provider action/executor
+identities and bounded execution cost, through whole-deployment provision. The pure executor attachment is only
+`Dedicated | SharedControlPlaneRole`, never a concrete target. One plural binder resolves and coalesces every
+tenant's actions/deltas by target, debits a shared base once, and seals only private provisioned execution
+references/capacity witnesses. MinIO policy metadata is globally grouped and may resolve only to a retained
+MinIO backing; static reserve is once per store. Desired and observed outputs carry normalized content digests,
+so same-size/different-content is `Replace`, never `NoOp`. Observed old state remains charged with rollback/
+executor overlap until verified cleanup. A
+hand-authored, un-derived binding is not a value that function can return, and
 a *cross-tenant* binding has no inhabitant for the same reason [§3.8](#38-cross-tenant-references-and-literal-secrets)'s
 cross-tenant reference does — references are tenant-tagged and no function re-tags a grant from one tenant to
 another. This is the RBAC lift of the derived-not-authored discipline that [§3.22](./illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration)
@@ -257,13 +285,26 @@ authored) + [`vault_pki_doctrine.md`](../engineering/vault_pki_doctrine.md) (the
 grant is tagged under *this* tenant and no function re-tags it) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
 (the typed tenant→role graph is the single owner of every derived grant). **Layer:** `type-foreclosed`
 uninhabitable for the hand-authored and cross-tenant binding (no constructor); `runtime-checked` residue — that
-the derived Keycloak/Vault/Pulsar/MinIO policies *actually* refuse a live cross-tenant access.
+the derived Keycloak/Vault/Pulsar/MinIO policies *actually* refuse a live cross-tenant access. Source/key-set
+equality also makes an output/action whose persistence demand was dropped `decode-foreclosed` at whole
+provision ([resource_capacity_doctrine.md §5.1](../engineering/resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry)); only private `ProvisionedSpec` projections
+paired with the exact observation-bound `ValidatedLiveTarget` may render or act.
 
-**Validation-locus:** `Gate-2-decoder` (every provider policy is the image of one total function of the typed
+**Validation-locus:** `Gate-2-decoder` (every provider policy is the image of one total derivation of the typed
 tenant→role graph, and grants are phantom-tenant-tagged — a hand-authored, un-derived, or cross-tenant binding
-has no inhabitant) + `rendered-output-golden` (the emitted policy set matches the tenant→role graph, with no
-grant crossing a tenant tag) + `live-effect` residue (that the realized provider policies refuse a live
-cross-tenant read — the cryptographic/runtime isolation that backs the author-time foreclosure).
+has no inhabitant) + `provision-seal` (whole-deployment source equality requires exact policy outputs and their four-store plus
+API/etcd demands and executor actions share a source and exact nested identities; independent wrong-digest,
+equal-cardinality key-swap, extra-entry, nested-id mismatch, omitted action/executor/old-state, one-short,
+drop-demand-while-action-remains, duplicate-target (`DuplicateTenantPolicyExecutionTarget`), uncoalesced-delta
+(`UncoalescedTenantPolicyExecutionDelta`), double-base (`TenantPolicyBaseExecutionDoubleDebit`), split-MinIO-
+group (`TenantPolicyMinioGroupMismatch`), provider-quota supply
+(`UnsupportedTenantPolicyProviderObjectQuota`), MinIO static/dynamic drop/double-add
+(`MinioMetadataComponentMismatch`), and same-size/different-content (`PolicyContentDigestMismatch`) mutants
+reject before effects) +
+`rendered-output-golden` (only private provisioned projections emit a policy set matching the tenant→role
+graph, with no grant crossing a tenant tag) + `live-effect` residue (provider-state/action readback matches
+normalized content digests, one coalesced target/base witness, store-global MinIO components, and the sealed
+transition high-water; the policies refuse a live cross-tenant read).
 
 ---
 
@@ -278,7 +319,7 @@ cross-tenant read — the cryptographic/runtime isolation that backs the author-
   represent illegal state") these entries instantiate.
 - Owning doctrines cited by the entries in this slice:
   - [`platform_services_doctrine.md`](../engineering/platform_services_doctrine.md) — the LoadBalancer + single wild-ingress
-    path, derived NetworkPolicy, and the cpu/ram rule (§3.3, §3.4, §3.6, §3.7, §3.11).
+    path, derived NetworkPolicy, and the complete resource-envelope rule (§3.3, §3.4, §3.6, §3.7, §3.11).
   - [`pulumi_iac_doctrine.md`](../engineering/pulumi_iac_doctrine.md) — route53 + zerossl, and the Vault-enveloped backend
     (§3.4, §3.9).
   - [`host_cluster_comms_doctrine.md`](../engineering/host_cluster_comms_doctrine.md) — the host-local-peer carve-out and

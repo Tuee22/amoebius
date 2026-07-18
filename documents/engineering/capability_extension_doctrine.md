@@ -18,7 +18,8 @@ A vendored ML library rarely stands alone: `jitML` needs the shared build/cache 
 single-writer primitives its Feed-sourced trainer runs on, and `infernix` needs the same resolver. Composing
 those shared concerns admits three classes of defect that surface only at link time or at runtime. First, a
 **duplicated horizontal concern** — one copy of the resolver and one `CacheBudget`-bounded cache *per* library —
-so the same engine materializes twice and the capacity fold double-counts a single host's cache
+so the same engine materializes twice and two in-cluster owners debit node-ephemeral capacity (or two native
+host-worker owners debit the named host-cache backing)
 ([content_addressing_doctrine.md §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 Second, **silent shadowing** — two libraries define the same id or constructor and one wins with no diagnostic.
 Third, a **broken dependency** — a required capability with no provider, or a requirement cycle, that deadlocks

@@ -63,10 +63,15 @@ gates.
 > **declared** axis owned by
 > [`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md); EKS is therefore a
 > *managed provider entry* (below), **not** a fifth detected substrate. Each host entry also **advertises a
-> declared `Capacity`** (cpu / mem / disk / gpu) — the number the capacity fold
+> declared inventory**: physical and allocatable CPU/memory, logical pod-ephemeral capacity, a closed
+> nodefs/imagefs/containerfs layout with content/snapshot model and pull policy, disjoint
+> system/VM/cache/retained/build disk pools, and an accelerator device vector
+> (family/profile/count/per-device raw/reserved/allocatable VRAM, with current free observed live) or Apple
+> unified-memory shape. These are the operands the capacity fold
 > ([`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) §4) checks
-> workload/VM/engine demand against, cross-checked at runtime against detection (§2 of the substrate
-> doctrine). The registry records that a `Capacity` is declared per host/node; the fold and its layer are the
+> workload/VM/cache/engine demand against, cross-checked at runtime against observed allocatable, backing,
+> and device inventory (§2 of the substrate doctrine). The registry records that a complete `Capacity` is
+> declared per host/node; the fold and its layer are the
 > capacity doctrine's.
 
 ### apple
@@ -130,7 +135,7 @@ gates.
 > **Why `windows` is not split into `windows-cuda` (§F, this round's addition — normative in the doctrine).**
 > The amoebius four-name catalog keys each member on the **OS / VM-provider + wire strategy**, not on accelerator
 > presence: a Windows host's CUDA reaches the cluster as a **host worker** regardless (CUDA does not run
-> performantly under WSL2), so the deployment-shape-changing axis is captured by the Phase-28 host-worker
+> performantly under WSL2), so the deployment-shape-changing axis is captured by the Phase-35 host-worker
 > elevation (§B), not by a new substrate name. The seed's finer `windows-gpu` member therefore collapses to
 > `windows`, while the seed-attributed `linux-gpu` keeps its `linux-gpu` ⇔ amoebius `linux-cuda` mapping — the
 > seed strings above are quotations and are kept verbatim. `cuda` names the **NVIDIA accelerator family**; a
@@ -146,10 +151,11 @@ it has no host to detect and no `LinuxHost` witness. It is the `Managed Eks` arm
 
 | Field | Value |
 |-------|-------|
-| Kind | Provider-managed cluster (`Managed Eks`) — no host binary, no host worker daemons, only the in-cluster singleton |
+| Kind | Provider-managed cluster (`Managed Eks`) — no host binary or host worker daemons; the same executable runs the mandatory in-cluster control-plane singleton, capacity-scheduler, and worker roles |
 | Detected substrate? | **No** — declared, provisioned over the cloud API from inside a parent ([`pulumi_iac_doctrine.md` §4](../documents/engineering/pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog)) |
-| Node capacity | From the declared **instance types**, not a physical host; folded like any other `Capacity` ([`resource_capacity_doctrine.md` §3](../documents/engineering/resource_capacity_doctrine.md)) |
-| Storage ceiling | A **cloud quota** (`CloudQuota` `StorageBacking`); "unbounded" storage/compute only via a quota-bounded `ScalingPolicy` |
+| Provider account | Required authored `Managed Eks.account : CloudAccountId`; it exact-joins the account quota ledger, credentials, observation, and every derived `ProviderInstanceId` |
+| Node capacity | From exact declared `ProviderNodeClass { name, sku, allocatable, quotaVcpu, zones, price, baseCount, maxCount }` values, not the managed control plane. `allocatable` is the complete `ProviderNodeCapacityTemplate { allocatableCpu, allocatableMemory, podSlots, cniSlots, attachableVolumes, localDisks, cpuOvercommit, localStorage, accelerator }`; each `localDisks` entry is a `PerInstanceDiskTemplate` with raw `InstanceStore.provisionedRawBytes` or an `EphemeralRootEbs` policy and usable `ProviderUsableDiskCarveTemplate.requiredUsableBytes` system/layout carves. Each selected instance becomes a distinct privately provisioned capacity before folding ([`resource_capacity_doctrine.md` §3](../documents/engineering/resource_capacity_doctrine.md)) |
+| Storage ceiling | Three non-interchangeable cases: SKU-pinned `InstanceStore.provisionedRawBytes` is per-instance raw supply and spends no EBS quota; an `EphemeralRootEbs` root derives and spends a provider-rounded raw request under `ProviderQuota.nodeRootStorage`; retained durable EBS uses the `Ebs` `StorageBacking` arm and spends `ProviderQuota.durable`. For either node-disk arm, private `ProvisionedPerInstanceDiskTemplate` derives presentation-pinned `mountedUsableBytes` before proving the usable system reserve plus unique usable carves fit; raw supply and usable carve bytes are never summed. The `CloudQuota` arm is only provider-object byte/count quota. “Unbounded” storage/compute exists only behind a quota-bounded `ScalingPolicy` |
 | LoadBalancer | Cloud LoadBalancer (the one substrate-driven difference, [`substrate_doctrine.md` §7](../documents/engineering/substrate_doctrine.md#7-the-loadbalancer-is-the-one-substrate-driven-platform-difference)) |
 | Gate phase(s) | 30 (the `linux-cpu` parent drives the deploy; the provider target is not a hardware substrate) — owned by [§4](#4-per-phase-substrate-map) |
 | Status | 📋 Planned |
@@ -188,7 +194,8 @@ Lima VM on Apple presents as `linux-cpu` to everything above it.
 
 > **VM budget.** Each virtualized substrate carves a **`Capacity`** from its host (`carve`,
 > [`resource_capacity_doctrine.md` §4](../documents/engineering/resource_capacity_doctrine.md)); the guest
-> Linux cluster folds against that sub-capacity, so "a VM asking for more than its host" is decode-rejected
+> Linux cluster folds against that sub-capacity, so "a VM asking for more than its host" is rejected at the
+> pure post-bind `provision-seal`
 > ([`illegal_state_catalog.md` §3.17](../documents/illegal_state/illegal_state_catalog.md)). A Lima/WSL2 VM is
 > also the **only `LinuxHost` witness** its non-Linux host can produce — which is why an rke2/kind cluster on
 > apple/windows must interpose one (I1, §3.14).
@@ -219,15 +226,15 @@ sprint breakdown lives in its phase document (`phase_00_documentation_suite.md` 
 | 5 | GADT IR + fail-closed decoder (Gate 2) | `none` | Register 1: the in-process `Dhall.inputFile` decode + the fail-closed refining fold; no cluster. |
 | 6 | Illegal-state corpus + validation-locus ledger | `none` | Register 1: the negative/positive corpus + QuickCheck + compile-fail goldens + the per-entry validation-locus ledger; no cluster. |
 | 7 | Capacity / topology folds | `none` | Register 1: `fits`/`carve`/`place` + topology-relation properties, in-process. |
-| 8 | Capability → provider → shape binder | `none` | Register 1: the capability→`ServiceSpec` binding checked at the type level. |
-| 9 | Pure `render` + rendered-output goldens | `none` | Register 1: `render` + byte-for-byte manifest goldens; rendering never touches live infra. |
+| 8 | Capability → provider → shape binder | `none` | Register 1: capability binding followed by conditional pure infrastructure planning/authenticated materialization and the whole-deployment provision seal; the opaque `ProvisionedSpec` carries one equal-keyed render-source set with field ownership and four-stage activation. |
+| 9 | Pure `renderAll` + rendered-output goldens | `none` | Register 1: sole public whole-deployment `renderAll` + byte-for-byte manifest goldens; rendering never touches live infra, and no service-valued render boundary exists. |
 | 10 | chain/Step kernel + `--dry-run` plan render | `none` | Register 1: the pure `[Step]` plan + `--dry-run` golden; no effects. |
 | 11 | Boundary-integration fake-tool harness | `none` | Register 2: the binary runs the plan against fake `kubectl`/`docker`/`pulumi` by absolute path; recorded argv and applied bytes match the committed goldens; no cluster. |
 | 12 | Deterministic-simulation substrate | `none` | Register 2.5: the real daemon/reconciler code under `IOSim`/`IOSimPOR` against a modeled fault-injectable environment; same-seed → byte-identical trace; no cluster. |
 | 13 | SPA composition (representational) + demo-SPA local | `none` | Register 1/2: composition property + the PureScript demo SPA against a faked backend (Playwright); no cluster. |
-| 14 | Python midwife + substrate detect + single kind cluster | `linux-cpu` | The default substrate brings up an empty single-node kind cluster idempotently; substrate *detection* runs here. First live (Register 3) phase. |
-| 15 | Multi-arch base image + jit-build resolver + `distribution` registry | `linux-cpu` | The base-image build + atomic publish into the in-cluster `distribution` registry, on the default substrate. |
-| 16 | Typed renderer + live SSA reconciler | `linux-cpu` | The SSA reconciler applies a rendered object set to convergence on the default substrate. |
+| 14 | Python midwife + substrate detect + single kind cluster | `linux-cpu` | The default substrate admits engine/process/etcd-transition demand, realizes the kubelet filesystem layout, and records logical ephemeral, physical content/snapshot, and presented backing inventory. |
+| 15 | Multi-arch base image + jit-build resolver + `distribution` registry | `linux-cpu` | Host build CPU/memory/scratch/cache/concurrency is snapshot-admitted; an explicit `ProvisionedBootstrapRegistry`/snapshot-bound action side-loads and initializes only registry/proxy objects, then equality-hands them into later whole-deployment ownership before atomic publication. |
+| 16 | Typed renderer + live SSA reconciler | `linux-cpu` | The SSA reconciler validates the whole peak transition against residual logical ephemeral, observed filesystem/content/snapshot, presented durable, and accelerator supply before applying it. |
 | 17 | No-provisioner retained storage + lossless rebind | `linux-cpu` | A real cluster delete destroys the PVC/PV API objects; fresh deterministic PV bindings reattach the retained host backing after recreate. MetalLB is the bare-metal/kind LB ([`substrate_doctrine.md` §7](../documents/engineering/substrate_doctrine.md#7-the-loadbalancer-is-the-one-substrate-driven-platform-difference)). No GPU axis. |
 | 18 | Root Vault + PKI + built-in Haskell Vault client | `linux-cpu` | Vault init/unseal + PKI anchor + the Haskell Vault client, on the default substrate. |
 | 19 | Platform backbone (MetalLB + MinIO + Pulsar HA) | `linux-cpu` | The backbone comes up HA from generated manifests + baked binaries; the `distribution` registry re-homes onto the MinIO S3 driver and a size-triggered Pulsar S3 offload fires; no GPU. |
@@ -238,16 +245,16 @@ sprint breakdown lives in its phase document (`phase_00_documentation_suite.md` 
 | 24 | Native Pulsar client (CBOR) | `linux-cpu` | A native-Pulsar round-trip with CBOR payloads; fully containerized, no GPU. |
 | 25 | Content store + workflow runtime (Pulsar-Failover single-writer) | `linux-cpu` | A content-addressed store + workflow + Pulsar-Failover standby takeover; no election, no GPU. |
 | 26 | Release lifecycle (ledger + PromotionGate + RolloutPlan) | `linux-cpu` | A live Release-ledger write + a PromotionGate refusal + a readiness-gated RolloutPlan applied in order, on the default substrate; no hardware axis. |
-| 27 | WireGuard network fabric | `linux-cpu` | The singleton reconciles raw-kernel WireGuard from Vault-KV Curve25519 keys so every cluster draws its VPN IP and the gateway-role hub is reachable; all Linux, no GPU. |
+| 27 | WireGuard network fabric | `linux-cpu` | The topology-derived peer/rate/queue/log demand fits each node before the singleton reconciles raw-kernel WireGuard from Vault-KV key names; all Linux, no GPU. |
 | 28 | Multi-cluster spawn + geo-replication | `linux-cpu` | A parent spawns two children (Pulumi-from-inside, first built here) that geo-replicate a workflow; all Linux, no GPU. |
 | 29 | Gateway-migration drills + model-correspondence | `linux-cpu` | A `Planned` (RPO=0) handover + a `Failover` rebind within budget, trace-validated against the Phase-3 model; all Linux, no GPU. |
-| 30 | Provider-managed clusters + dynamic provisioning | `linux-cpu → provider` | The `linux-cpu` parent drives Pulumi; the **gate** spins up a provider (EKS) cluster and provisions a node, where the LB becomes a cloud LoadBalancer ([`substrate_doctrine.md` §7](../documents/engineering/substrate_doctrine.md#7-the-loadbalancer-is-the-one-substrate-driven-platform-difference)). |
+| 30 | Provider-managed clusters + dynamic provisioning | `linux-cpu → provider` | The `linux-cpu` parent drives Pulumi for an authored `CloudAccountId`; the gate materializes an EKS node's complete pod/CSI-slot, root-backing/filesystem/image model under independent instance/vCPU/accelerator/node-root/durable quota fields, where the LB becomes a cloud LoadBalancer. |
 | 31 | Determinism kernel | `linux-cpu` | `experimentHash` + seed-derivation reproducibility on a CPU substrate; CUDA is a later phase. |
-| 32 | jit-build engine resolver + `CacheBudget` cache | `linux-cpu` | The resolve-on-miss engine cache + the `CacheBudget` fold, on the default substrate. |
+| 32 | jit-build engine resolver + `CacheBudget` cache | `linux-cpu` | Catalog resident/temp operands and finite first-miss concurrency derive the bounded per-node owner's private peak; it fits `CacheBudget ≤ emptyDir.sizeLimit`, and its CPU/memory/ephemeral envelope reserves that volume plus writable/log headroom. |
 | 33 | infernix lift + CPU inference reproducibility | `linux-cpu` | A reproducible **CPU** infernix-inference workflow (same `experimentHash` ⇒ same output); no GPU. |
-| 34 | jitML lift + checkpoints + coordinator + CUDA | `linux-cuda` | The first GPU workload — bit-deterministic jitML + Pulsar-Failover trainer takeover — via the **in-cluster** NVIDIA container runtime ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)). |
-| 35 | Apple-Metal host compute daemon | `apple` | The host-worker case where hardware refuses containerization: Apple Metal needs unified memory and cannot run in a Linux VM/container. One-substrate discipline pins the gate to `apple` (Windows-CUDA shares the doctrine but is not the gate). |
-| 36 | Test-topology DSL + suggest-test + elevated harness | `per generated test` | `suggest-test` detects the actual substrate/resources/credentials and emits a representative test `.dhall`; the substrate is **whatever the generated test targets** — single-substrate, chosen at generation. |
+| 34 | jitML lift + checkpoints + coordinator + CUDA | `linux-cuda` | The first GPU workload — CUDA family/count and per-device allocatable/free VRAM after mandatory reserve must satisfy the pure demand before effects; the named owner container receives the exact whole-device allocation and pod affinity. |
+| 35 | Apple-Metal host compute daemon | `apple` | Physical CPU/unified memory and storage are carved across system reserve, a presentation/quantum-derived Lima VM disk, Metal worker, and host cache before launch. |
+| 36 | Test-topology DSL + suggest-test + elevated harness | `per generated test` | `suggest-test` detects CPU, memory, logical/physical node storage, presented durable/native cache, accelerator memory, distinct provider quotas, and credentials, then emits one fitting substrate. |
 | 37 | Live SPA deploy | `linux-cpu` | Compose + deploy a multi-service SPA + an ML workflow behind Keycloak/Envoy, reachable on the default substrate; no new hardware axis. |
 
 The provider/host-side details under three of these rows are owned elsewhere: the cloud-LB and provider-cluster

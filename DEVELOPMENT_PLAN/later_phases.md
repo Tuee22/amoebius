@@ -11,8 +11,8 @@
 
 ---
 
-Phases 0–32 each own a dedicated `phase_NN_<slug>.md`. Everything past Phase 37 is *in scope* but not yet
-detailed: the README phase index lists it as the single row **`33+ — Later phases`**. This document is that
+Phases 0–37 each own a dedicated `phase_NN_<slug>.md`. Everything past Phase 37 is *in scope* but not yet
+detailed: the README phase index lists it as the single row **`38+ — Later phases`**. This document is that
 row, expanded into a candidate pool.
 
 Read it as a **backlog of confirmed-but-unscheduled work**, governed by the same disciplines as the rest of
@@ -24,10 +24,10 @@ the suite:
   prodbox or hostbootstrap projects, that is *sibling evidence*, not amoebius proof.
 - **Promotion means a contiguous number.** When a candidate is picked up, it is appended as the next
   `phase_NN_<slug>.md` with a full skeleton ([development_plan_standards.md §D](development_plan_standards.md)),
-  a concrete single-substrate gate ([§L](development_plan_standards.md)), and a contiguous id — Phase 33, 34,
+  a concrete single-substrate gate ([§L](development_plan_standards.md)), and a contiguous id — Phase 38, 39,
   … with no gaps or fractional ids ([§E](development_plan_standards.md)). The provisional numbers below are
   *ordering hints only*; the real id is assigned at promotion.
-- **No forward dependencies.** A later phase consumes earlier phases; nothing in Phases 0–32 is allowed to
+- **No forward dependencies.** A later phase consumes earlier phases; nothing in Phases 0–37 is allowed to
   declare a `Blocked by` that points here ([§E](development_plan_standards.md)). These candidates sit strictly
   *after* the live-SPA-deploy gate of Phase 37.
 - **One substrate per gate.** Each candidate names at most one provisional acceptance substrate; a candidate
@@ -40,7 +40,7 @@ provisional ids reflect a *likely* sequencing, not a dependency chain.
 
 ## Candidate phase: GHC 9.14.1 toolchain bump
 
-**Status**: 📋 Planned (provisional Phase 33)
+**Status**: 📋 Planned (provisional Phase 38)
 **Provisional substrate**: none (a toolchain/build-graph change, validated by rebuild + the full suite)
 **Scope** (one line): move the single shared pin from GHC **9.12.4** to **9.14.1** across every package, and
 re-derive the `allow-newer` set the `dhall` library's transitive deps require on the new compiler.
@@ -57,7 +57,7 @@ re-proven on 9.14.1. This candidate owns that re-pin and its validation, not any
 
 ## Candidate phase: DB schema-migration automation + manifest-change correctness semantics
 
-**Status**: 📋 Planned (provisional Phase 34)
+**Status**: 📋 Planned (provisional Phase 39)
 **Provisional substrate**: linux-cpu
 **Scope** (one line): a typed, ordered, idempotent schema-migration engine for the Patroni-via-Percona
 Postgres clusters, unified with a precise account of what a *manifest change* means when the desired object
@@ -67,7 +67,9 @@ a populated database forward idempotently (re-apply is a no-op), and a manifest 
 field is reconciled by the typed diff with **zero silent data loss**.
 
 The reconcile half of this is a hardening of the typed reconciler's state model:
-[`manifest_generation_doctrine.md` §6 — the reconcile state model (desired is `render(InForceSpec)`, observed is
+[`manifest_generation_doctrine.md` §6 — the reconcile state model (desired is the pure
+`bind/expand → plan/resolve infrastructure → provision → renderAll` result for the authenticated
+materialization, observed is
 etcd, a diff is typed)](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)
 already frames the diff as a *typed* value; this candidate extends that diff to classify schema-affecting and
 immutable-field changes so a change that would otherwise drop rows cannot be applied as a silent replace. The
@@ -91,7 +93,7 @@ runs in a sibling, not an amoebius result.
 
 ## Candidate phase: Haskell extension DSL + custom AST checker + native JIT
 
-**Status**: 📋 Planned (provisional Phase 35)
+**Status**: 📋 Planned (provisional Phase 40)
 **Provisional substrate**: linux-cuda (the JIT path exercises the GPU compute substrate)
 **Scope** (one line): the second, *extension* language of the vision — Haskell-as-DSL validated by a custom
 AST checker, with full access to the amoebius libraries and a native JIT, into which jitML is absorbed as
@@ -111,45 +113,24 @@ This candidate is where that forward pointer is redeemed — the custom AST chec
 and the JIT that subsumes jitML — and it is correctly a later phase because the README treats v1 as a complete
 orchestrator for arbitrary containers without it.
 
-## Candidate phase: Niche substrates (dual-boot same-cluster; WireGuard / Linkerd vs Envoy)
+## Candidate phase: Niche substrate — dual-boot same-cluster
 
-**Status**: 📋 Planned (provisional Phase 36)
-**Provisional substrate**: windows (the dual-boot case is the substrate-distinguishing one; the mesh
-evaluation is substrate-agnostic and rides along)
-**Scope** (one line): two niche substrate questions — admitting a *dual-boot, same-cluster* host into the
-substrate model, and a designed evaluation of WireGuard / Linkerd against the existing Envoy + Gateway API
-path to decide whether either earns a place or is redundant.
-**Provisional gate**: a dual-boot host joins and rejoins the same cluster across an OS switch without violating
-the retained-PV rebind guarantees; **and** the mesh evaluation lands a written verdict (adopt-with-scope or
-reject-as-redundant) backed by a reproducible comparison against the Envoy baseline — not a code merge for its
-own sake.
+**Status**: 📋 Planned (provisional Phase 41)
+**Provisional substrate**: windows.
+**Scope** (one line): admit a *dual-boot, same-cluster* host into the substrate model.
+**Provisional gate**: a dual-boot host joins and rejoins the same cluster across an OS switch without
+violating the retained-PV rebind guarantees.
 
-These are deferred because they probe the *edges* of two locked invariants rather than the core. The substrate
+This is deferred because it probes the edge of one locked invariant. The substrate
 model treats the substrate as a *fact about the host, not a knob*
 ([`substrate_doctrine.md` §1 — the substrate is a fact about the host, not a knob](../documents/engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob));
 a dual-boot host is a host whose *fact* changes under it, which is exactly the case the detection model does
-not yet cover. The mesh question probes the single wild-ingress path: Keycloak owns all wild ingress via the
-LoadBalancer + Gateway API
-([`platform_services_doctrine.md` §9 — the LoadBalancer and the single wild-ingress path](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)),
-so any WireGuard/Linkerd adoption must justify itself *against* that path rather than alongside it — and the
-honest default outcome of the evaluation may well be "redundant, do not adopt." Stating the gate as a *verdict*
-rather than a feature keeps that outcome admissible.
-
-Cross-cluster failover is especially valuable for a VPN host that flattens the node-network topology: when the
-cluster carrying that role fails over, the flattened mesh moves with it, so peers keep a single, stable view of
-the network. If first-class VPN/mesh is adopted, the proposed semantics are: the root node deploys an HA
-cluster; that cluster configures a WireGuard gateway; and every cluster (root included) receives a VPN IP from
-that gateway. Whether a *service* mesh should then ride on top of that VPN is a separate, still-open
-sub-question: a cross-VPN mesh is only **one candidate**, weighed against the existing Envoy + Gateway-API
-baseline rather than pre-selected. Linkerd is *not* the chosen answer — it is merely the most-cited
-implementation to evaluate — and the honest default outcome is **reject-as-redundant**, because Gateway-API
-`HTTPRoute` weights already carry the one traffic-split feature a mesh would add, on the Envoy edge amoebius
-already renders. That evaluation and its written verdict are owned by
-[`network_fabric_doctrine.md` §6 — the service-mesh verdict](../documents/engineering/network_fabric_doctrine.md#6-the-service-mesh-verdict-no-linkerd-for-v1).
+not yet cover. WireGuard is already adopted in Phase 27 and the no-Linkerd service-mesh verdict is normative;
+neither belongs in this candidate's gate.
 
 ## Candidate phase: Surgical proof-assistant track (`emitTLA` faithfulness + fold-closure)
 
-**Status**: 📋 Planned (provisional Phase 37)
+**Status**: 📋 Planned (provisional Phase 42)
 **Provisional substrate**: none (a pure-proof track, validated by the proof checker + the existing suite)
 **Scope** (one line): discharge — machine-checked — the **two** load-bearing meta-properties the rest of the
 suite currently only *tests*: (a) the `emitTLA`/`interpret` **faithfulness meta-theorem** (each `Expr`/`Temporal`
@@ -190,15 +171,20 @@ re-open it as a candidate phase.
 
 ## Resolved — *not* a later phase: capacity / topology / bounded-storage type discipline
 
-Making dysfunctional deployment states unrepresentable — resource overcommit (host / VM / cluster),
-compute-engine ↔ substrate incompatibility, illegal cluster topology (rke2-on-bare-apple, multi-node kind on
-two hosts, multi-node rke2 with fewer hosts than nodes), unbounded storage, un-tiered Pulsar topics, and
-policy-less capacity growth — is **not** a new phase. It is **folded into Phases 4 and 7** as a spec-layer type
-discipline (with its acceptance fixtures in the same gate), because it is pure
-type-checking with no forward dependency (§E one-canonical-phase). Its **runtime** residues distribute to the
-phases that already own each substrate: the Pulsar two-ceiling offload to Phase 24, the Lima `LinuxHost`
-witness + host/VM capacity cross-check to Phase 35, live multi-node rke2/kind topology to Phase 28, and the
-`Managed EKS` arm + `ScalingPolicy` enaction + cloud quota to Phase 30. So there is **zero phase renumber**:
+Foreclosing dysfunctional deployment states — resource overcommit (host / VM / cluster), compute-engine ↔
+substrate incompatibility, illegal cluster topology (rke2-on-bare-apple, multi-node kind on two hosts,
+multi-node rke2 with fewer hosts than nodes), unbounded storage, un-tiered Pulsar topics, and policy-less
+capacity growth — is **not** a new phase. Two honesty layers apply. Closed union and topology shapes with no
+illegal constructor are type-foreclosed; quantitative capacity sums, placements, and inventory-dependent
+compatibility are total decode/provision checks, never dependent-type proofs. Raw incompatible values may
+exist, but `provision` returns `Left` and therefore cannot construct the opaque `ProvisionedSpec`, the sole
+deployable representation. The discipline is **folded into Phase 4** for source/schema shapes, **Phase 7** for
+the pure fold implementation and generated properties, **Phase 8** for full bind/expansion plus the opaque
+provision seal, and **Phase 9** for the closed `renderAll` consumer. None requires an external effect or a
+forward live-phase dependency (§E one-canonical-phase). Its **runtime**
+residues distribute to the phases that already own each substrate: the Pulsar two-ceiling offload to Phase
+19, the Lima `LinuxHost` witness + host/VM capacity cross-check to Phase 35, live kind topology to Phases
+14/28, and the `Managed EKS` arm + `ScalingPolicy` enaction + cloud quota to Phase 30. So there is **zero phase renumber**:
 the discipline is owned by two new doctrines
 ([`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md),
 [`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md)) and catalogued in
@@ -206,11 +192,15 @@ the discipline is owned by two new doctrines
 delivered without inserting a phase. Named here only to close the question: do not re-open it as a candidate
 phase.
 
+Live multi-node rke2 remains **unassigned Phase-N work**: Phases 4–7 define/prove its server/agent topology,
+role reserves, and elastic templates, but no current Register-3 gate may claim host admission, join, or
+enforcement. Promoting that gate is required before an rke2 mutation continuation exists.
+
 ---
 
 ## Related Documents
 
-- [README.md](README.md) — the live tracker; the `33+ — Later phases` row this document expands
+- [README.md](README.md) — the live tracker; the `38+ — Later phases` row this document expands
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook (§D skeleton, §E one-phase
   model, §K honesty, §L one-substrate) every candidate obeys at promotion
 - [overview.md](overview.md) — target architecture and constraints these candidates extend
@@ -227,10 +217,8 @@ phase.
   container (Phase 15, resolved)
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — §1 the substrate-is-a-fact model the
   niche-substrate candidate probes
-- [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — §9 the single
-  wild-ingress path the WireGuard/Linkerd evaluation measures against
 - [Release Lifecycle Doctrine](../documents/engineering/release_lifecycle_doctrine.md) — §5 `RolloutPlan` /
-  `RolloutPhase`, where the Phase-34 candidate's DB schema-migration half is folded in as a readiness-gated
-  phase (create-new→verified-migrate→retire-old)
-- [Network Fabric Doctrine](../documents/engineering/network_fabric_doctrine.md) — §6 the service-mesh
-  (Linkerd) verdict the WireGuard/Linkerd niche-substrate mesh evaluation defers to
+  `RolloutPhase`, where this backlog candidate's DB schema-migration half is folded into Phase 26 as a
+  readiness-gated phase (create-new→verified-migrate→retire-old)
+- [Network Fabric Doctrine](../documents/engineering/network_fabric_doctrine.md) — Phase 27 WireGuard and the
+  no-Linkerd verdict are resolved inputs, not Phase-41 work

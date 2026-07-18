@@ -14,8 +14,8 @@
 ## Phase Status
 
 📋 Planned. Specified before implementation; every sprint below is 📋 Planned and every prescriptive statement
-is design intent, never a tested amoebius result. This phase opens after the Phase 9 gate (the pure `render ::
-ServiceSpec -> [K8sObject]` and its rendered-output goldens) and runs on **no substrate** (`none`) in
+is design intent, never a tested amoebius result. This phase opens after the Phase 9 gate (the pure
+`renderAll :: ProvisionedSpec -> [K8sObject]` and its rendered-output goldens) and runs on **no substrate** (`none`) in
 **Register 1** — it stands up no host, no cluster, and no effectful interpreter, only an in-process plan-render
 battery. Where a shape below is already exercised in a sibling system (hostbootstrap's `Step`/`Chain` algebra,
 its `renderChainPlan`, its `foldLift`, and its `runChainFromFrame` descent), that is **sibling evidence, not an
@@ -26,7 +26,8 @@ amoebius result**.
 This phase seeds, from hostbootstrap, the pure reconcile kernel every later apply rides on — and proves that
 its plan is *data*. It delivers the `Step` algebra (a label, the frame it runs in, a `StepKind`, and an
 effectful `stepRun` action that is *declared but never invoked here*), the `chain :: cfg -> [Step]` builder
-that turns a decoded config into a pure list of steps, the pure descent (`nextFrameAfter`/`foldLift`) that
+whose amoebius instantiation receives a checked plan config containing the whole `ProvisionedSpec`, the pure
+descent (`nextFrameAfter`/`foldLift`) that
 computes which steps belong to which frame without running a single action, and the `renderChainPlan` /
 `--dry-run` renderer that emits the exact plan a live apply would execute. The load-bearing claim is
 [conformance_harness_doctrine §3](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure)'s
@@ -38,6 +39,9 @@ one thin IO seam, `runChainFromFrame`), which Register 2 exercises against fakes
 [Phase 11](phase_11_boundary_fake_tool_harness.md) and Register 3 exercises against the live Deployment
 `replicas=1` singleton in [Phase 22](phase_22_live_dsl_singleton.md) — there is **no election, no standby, and
 no singleton runtime** in this phase, only the pure kernel and its no-effect render.
+`renderAll` contributes the complete desired object set, while Step construction retains each source's
+`RenderActivation`; the dry-run therefore shows later-stage objects and their readiness-gated action stage
+without implying they are eligible for the first generic apply.
 
 **Substrate:** none — no host, no cluster, no effectful interpreter; the gate is an in-process `cabal test`
 plan-render battery analogous to the Phase-9 rendered-output goldens.
@@ -48,20 +52,25 @@ plan-render battery analogous to the Phase-9 rendered-output goldens.
 descent is golden-locked — concretely, `cabal test chain-spec` is green **when run inside a network-isolated
 namespace (`unshare -n`) with `KUBECONFIG`/cloud-credential/`VAULT_ADDR`/`VAULT_TOKEN` env vars scrubbed**,
 and:
-- **Representative set (§7, concrete corpus).** The gate exercises exactly the two Phase-0-committed decoded
-  fixture cfgs at `test/kernel/fixtures/cfg/`: `multi.cfg.json` (≥2 frames, ≥3 declared services, with one
+- **Representative set (§7, concrete corpus).** The gate exercises exactly two Phase-0-committed raw fixture
+  inputs at `test/kernel/fixtures/cfg/`, each passed through the real
+  decode→bind/expand→plan/resolve-infrastructure→provision path before
+  `chain`: `multi.cfg.json` (≥2 frames, ≥3 declared services, with one
   service whose step is out-of-frame so its `stepRun` must never be reached) and `minimal.cfg.json` (one
-  frame, one service). "Fixture chain" everywhere in this phase means `chain` **applied to a decoded fixture
-  cfg** — the builder exercised end-to-end — never a hand-authored `[Step]` literal.
+  frame, one service). "Fixture chain" everywhere in this phase means `chain` applied to the resulting
+  checked config containing its opaque `ProvisionedSpec` — the builder exercised end-to-end — never a
+  hand-authored opaque witness or `[Step]` literal. A provision failure produces no plan.
 - **Oracle-pinning (§1).** The `--dry-run` plan goldens (`test/kernel/fixtures/plan/{multi,minimal}.plan.golden`)
   and descent goldens (`.../descent/{multi,minimal}.descent.golden`) are hand-authored and **committed in
   Phase 0 before `renderChainPlan` exists**; a golden regenerated from the renderer is not a test. The
   independent step-set reference is a hand-authored table `test/kernel/fixtures/plan/expected_steps.json`
   (one entry per declared service/frame per cfg), authored from the cfg by hand — not from `chain`'s output.
 - **Cross-golden render identity (§3, independent oracle).** `chain` produces a pure `[Step]` value whose
-  `--dry-run` render matches the plan golden byte-for-byte **and** whose each Step's embedded rendered objects
-  are byte-identical to the **Phase-9** committed `render` goldens for the corresponding fixture `ServiceSpec`
-  — the reference side is Phase 9's independently-committed output, not the kernel's own.
+  `--dry-run` render matches the plan golden byte-for-byte **and** whose manifest-bearing steps are
+  identity-selected subsets of the one **Phase-9** `renderAll` golden for the fixture's whole
+  `ProvisionedSpec`. Their disjoint identity union equals that complete object set byte-for-byte; no Step
+  invokes a per-service renderer. The reference side is Phase 9's independently committed output, not the
+  kernel's own.
 - **Structural step-set coverage (§3).** The plan contains exactly the step set in `expected_steps.json` for
   the cfg (asserted structurally against the hand table, not read back off the plan golden).
 - **Committed mutants (§2).** `cabal test chain-spec` turns **red** on each of ≥2 committed seeded mutants:
@@ -113,38 +122,51 @@ emitting its proven/tested/assumed ledger with model↔runtime correspondence an
 **Status**: Planned
 **Implementation**: `src/Amoebius/Kernel/Step.hs` (the `Step` type, `StepKind`, and the `stepRun` action
 field), `src/Amoebius/Kernel/Chain.hs` (the `chain :: cfg -> [Step]` builder) — target paths, not yet built.
-**Blocked by**: Phase 9 gate (the pure `render :: ServiceSpec -> [K8sObject]` a step's renderable shape
-embeds); Phase 5 (the decoded `cfg` = `ClusterIR` / `FrameConfig` the chain consumes).
-**Independent Validation**: `chain` applied to each committed decoded fixture cfg (`multi.cfg.json`,
-`minimal.cfg.json`) evaluates to a pure `[Step]` value whose shape (label, frame, `StepKind`, embedded
+**Blocked by**: Phase 9 gate (the pure `renderAll :: ProvisionedSpec -> [K8sObject]` whose output a step's
+renderable shape embeds); Phase 8 (the only constructor of the `ProvisionedSpec` carried by the plan config); Phase 5 (raw
+decode into `ClusterIR` / `FrameConfig`).
+**Independent Validation**: the real decode→bind/expand→plan/resolve-infrastructure→provision path followed by `chain` for each committed
+fixture cfg (`multi.cfg.json`, `minimal.cfg.json`) evaluates to a pure `[Step]` value whose shape (label,
+frame, `StepKind`, embedded
 rendered objects) is inspectable with no `stepRun` executed. "Partiality-free evaluation" is defined
 concretely as **`deepseq` of the `[Step]` value to normal form succeeds** (the `stepRun` IO field is excluded
-from the `NFData` instance so forcing the plan cannot execute an action), with a `-Wall`-clean build. Each
-Step's embedded rendered objects are byte-identical to the corresponding Phase-9 committed `render` golden.
+from the `NFData` instance so forcing the plan cannot execute an action), with a `-Wall`-clean build. The
+builder invokes public `renderAll` once for the fixture's whole `ProvisionedSpec`; every Step embeds only an
+identity-selected subset of that value, and the disjoint union is byte-identical to the corresponding
+Phase-9 whole-deployment golden.
 **Docs to update**: `documents/engineering/dsl_doctrine.md` (§2 chain/Step-kernel status backlink),
 `DEVELOPMENT_PLAN/system_components.md` (register the `Amoebius.Kernel.*` modules).
 
 ### Objective
 Adopt [`dsl_doctrine.md §2 — Dhall carries params, Haskell carries logic`](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic):
-seed hostbootstrap's chain/Step algebra as the amoebius reconcile kernel — `chain :: cfg -> [Step]`, each
+seed hostbootstrap's chain/Step algebra as the amoebius reconcile kernel — `chain :: cfg -> [Step]`, instantiated
+with a checked plan config containing the whole `ProvisionedSpec`, each
 `Step` being a pure renderable shape (label, frame, `StepKind`, the `[K8sObject]` it would apply) plus an
-effectful `stepRun` action — with the chain being the system and the decoded config merely supplying `cfg`.
+effectful `stepRun` action — with the chain being the system and the checked config supplying `cfg`.
 
 ### Deliverables
-- A `Step` type = label + frame + `StepKind` + `stepRun :: cfg -> IO ()`, and a `chain :: cfg -> [Step]`
-  builder, **both pure values**; the `stepRun` field is carried but never executed in this phase. `Step` is
+- A `Step` type = label + frame + `StepKind` + `stepRun :: cfg -> IO ()`, and a generic
+  `chain :: cfg -> [Step]`; the amoebius `cfg` exposes only the opaque whole-deployment `ProvisionedSpec` to
+  the manifest-plan builder, never raw `ClusterIR`/`BoundDeployment` or an independently renderable service
+  projection. `chain` calls only public `renderAll`; manifest-bearing steps select typed identity subsets from
+  that one result and preserve the sources' four-arm activation partition.
+  The builder and its resulting list are pure values; the `stepRun` field is carried but never executed in
+  this phase. `Step` is
   constructible **only** through a counting smart constructor (the raw constructor is not exported), so no
   step's action can be executed without incrementing the battery's instrumentation counter, and the `NFData`
   instance excludes the `stepRun` field so forcing the plan cannot execute an action.
-- Each `Step`'s renderable shape embeds the Phase-9 `render` output for the objects it would apply, so the plan
-  is derivable from the step value alone.
+- Each `Step`'s renderable shape embeds its identity-selected projection of the Phase-9 whole-deployment
+  `renderAll` output, so the plan is derivable from the step value alone without a second render boundary.
 
 ### Validation
-1. `chain` applied to each decoded fixture cfg (`multi.cfg.json`, `minimal.cfg.json`) produces a pure `[Step]`
+1. The real provision path followed by `chain` on each fixture cfg (`multi.cfg.json`, `minimal.cfg.json`)
+   produces a pure `[Step]`
    whose renderable shape is fully inspectable without executing any `stepRun`; the evaluation is
    partiality-free in the sense above (`deepseq` to normal form succeeds; `stepRun` excluded from `NFData`).
-2. Each Step's embedded rendered objects equal the Phase-9 committed `render` goldens for the corresponding
-   fixture `ServiceSpec` byte-for-byte (independent cross-golden oracle, not the kernel's own output).
+2. The identity-disjoint union of all manifest-bearing Step projections equals the Phase-9 committed
+   `renderAll` golden for the fixture's whole `ProvisionedSpec` byte-for-byte (independent cross-golden
+   oracle, not the kernel's own output); every projected object is byte-identical to the same identity in
+   that golden and no public per-service renderer is reachable.
 3. The `[Step]` step set equals the hand-authored `expected_steps.json` table for the cfg (one entry per
    declared service/frame), asserted structurally against the table.
 
@@ -202,7 +224,8 @@ The whole sprint (📋 Planned).
 (the `--dry-run` **render** path, kept structurally separate from any apply path) — target paths, not yet
 built.
 **Blocked by**: Sprint 10.1, Sprint 10.2.
-**Independent Validation**: `renderChainPlan` of the fixture chain (`chain` applied to a decoded fixture cfg)
+**Independent Validation**: `renderChainPlan` of the fixture chain (`chain` applied after the fixture has
+successfully constructed its `ProvisionedSpec`)
 is a pure `Text`/bytes value; the `--dry-run` code path has no branch that opens a socket, reads a credential,
 or resolves a cluster. This is enforced by two committed mechanisms that are **part of the gate command**, not
 a one-off manual check: (a) an automated static assertion (a `cabal test chain-spec` case) that the transitive
@@ -248,9 +271,10 @@ The whole sprint (📋 Planned).
 committed in Phase 0 before the renderer exists.
 **Blocked by**: Sprint 10.3 (and Sprints 10.1, 10.2).
 **Independent Validation**: `cabal test chain-spec`, run inside `unshare -n` with credential env vars scrubbed,
-is green — the `--dry-run` render of each fixture chain (`chain` applied to the decoded fixture cfg) matches
-its Phase-0-committed golden byte-for-byte, each Step's embedded rendered objects match the Phase-9 committed
-`render` goldens, the step set matches `expected_steps.json`, the descent goldens hold, the canaried counter
+is green — the `--dry-run` render of each fixture chain (`chain` applied after real provisioning) matches
+its Phase-0-committed golden byte-for-byte, the Step projections form the exact identity-disjoint union of
+the Phase-9 committed whole-deployment `renderAll` golden, the step set matches `expected_steps.json`, the
+descent goldens hold, the canaried counter
 reads zero `stepRun` executions across the run (and the canary control case proves it reads nonzero when one
 is executed), and both committed mutants (m1, m2) turn the suite red.
 **Docs to update**: `documents/engineering/conformance_harness_doctrine.md` (§4 the Plan spine step is
@@ -270,9 +294,10 @@ model↔runtime correspondence and runtime fidelity marked UNVERIFIED (owned by 
   goldens, the descent goldens, and the hand-authored `expected_steps.json` step-set table — all authored and
   committed **before** the renderer exists (a golden regenerated from the implementation is not a test).
 - `test/kernel/PlanSpec.hs` asserting, for each fixture cfg: the `--dry-run` render of `chain cfg` equals its
-  committed plan golden byte-for-byte; **each Step's embedded rendered objects are byte-identical to the
-  Phase-9 committed `render` goldens** for the corresponding fixture `ServiceSpec` (independent cross-golden
-  oracle); the `[Step]` step set equals `expected_steps.json` (structural, not read off the golden); the
+  committed plan golden byte-for-byte; the manifest-bearing steps are identity-disjoint projections of one
+  `renderAll` call and their union is byte-identical to the **Phase-9 committed whole-deployment golden** for
+  the fixture `ProvisionedSpec` (independent cross-golden oracle); the `[Step]` step set equals
+  `expected_steps.json` (structural, not read off the golden); the
   `nextFrameAfter`/`foldLift` descent goldens hold.
 - A **canaried** instrumentation counter: `Step` values are constructible **only** via the counting smart
   constructor, and the counter increments when a `stepRun` IO action is *executed*. The battery asserts zero
@@ -293,8 +318,9 @@ model↔runtime correspondence and runtime fidelity marked UNVERIFIED (owned by 
 
 ### Validation
 1. `cabal test chain-spec`, run inside `unshare -n` with credential env vars scrubbed, is green — for each
-   fixture cfg the plan and descent goldens match byte-for-byte, each Step's embedded objects match the
-   Phase-9 committed `render` goldens, the step set matches `expected_steps.json`, and the canaried
+   fixture cfg the plan and descent goldens match byte-for-byte, the manifest-bearing Step projections are
+   identity-disjoint and union to the Phase-9 committed whole-deployment `renderAll` golden, the step set
+   matches `expected_steps.json`, and the canaried
    zero-`stepRun`-execution assertion holds (with the canary case proving nonzero detection); the suite is red
    if the render drifts from its golden or if any action is executed during render.
 2. Both committed mutants turn the suite red: m1 (cfg service-drop) diverges the plan and descent goldens; m2
@@ -331,11 +357,13 @@ The whole sprint (📋 Planned).
 - [overview.md](overview.md) — target architecture and the DSL vision
 - [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — §2 the chain/Step algebra and *"the plan is the data"*
 - [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — §3 rendering never
-  touches live infrastructure, §4 the decode→validate→render→plan→dry-run spine, §2 Register 1
+  touches live infrastructure, §4 the
+  decode→bind/expand→`planInfrastructure`→(infrastructure-plan golden | authenticated-materialization
+  fixture→provision→`renderAll`)→plan→dry-run spine, §2 Register 1
 - [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — the rendered plan
   is emitted from source and never committed
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — §2 Register 1, §4 the per-run ledger
-- [phase_09](phase_09_render_manifest_goldens.md) — the pure `render` a step's renderable shape embeds
+- [phase_09](phase_09_render_manifest_goldens.md) — the pure `renderAll` output from which a step selects its renderable shape
 - [phase_11](phase_11_boundary_fake_tool_harness.md) — Register 2 exercises the effectful seam against fake tools
 - [phase_22](phase_22_live_dsl_singleton.md) — Register 3 runs the chain via the Deployment-`replicas=1`
   singleton (no election)

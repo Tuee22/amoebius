@@ -53,7 +53,7 @@ end to end for a spec-driven single-page app.
 
 ```mermaid
 flowchart LR
-  spa[Phase-13 decode-proven SPA .dhall: capability needs plus nested infernix workflow] --> compose[Compose with linux-cpu deployment-rules layer: replicas, provider plus shape, inference substrate]
+  spa[Phase-13 decode-proven SPA .dhall: capability needs plus nested infernix workflow] --> compose[Compose with linux-cpu deployment-rules layer: Deployment cardinality and rollout, provider plus shape, inference substrate]
   compose --> apply[Typed SSA reconciler applies under the replicas=1 singleton onto the HA stack]
   apply --> edge[Edge publish renders an HTTPRoute gated by Keycloak over Envoy Gateway API]
   edge --> infer[Inference request round-trips through the composed infernix workflow: engine jit-resolved into the CacheBudget cache]
@@ -92,7 +92,13 @@ identity `spa_gate/engine_identity.txt` within `CacheBudget`, with the deployed 
 hand-authored `spa_gate/expected_exposures.txt` and a refused pod-IP/Service bypass. The exposure sweep, the
 pod-IP-bypass refusal, the first-miss materialization, the zero-election audit, and the postflight inventory diff
 are all read from **OS-boundary observers** (the live k8s API server and its audit log, a foreign-pod CNI probe,
-the on-disk Phase-32 store, a containerd image inspection), never a self-emitted compliance trace, per [§N](#n-representative-set-oracle-pins-and-seeded-mutants).
+the on-disk Phase-32 cache, a containerd image inspection), never a self-emitted compliance trace, per [§N](#n-representative-set-oracle-pins-and-seeded-mutants).
+
+Before any of those effects, the whole-deployment fold must admit the exact materialized application-service instances,
+CPU-inference worker and cold-tenant overlap, foreign-probe Pod, controller delta, selected images, mapped/
+local/durable/cache/object bytes, pod/IP/CSI slots and all standing providers. A short axis is a structured
+zero-effect rejection, never a `Pending` Pod or a partially applied SPA; live resource readback must match the
+private projections described below.
 
 ## N. Representative set, oracle pins, and seeded mutants
 
@@ -104,8 +110,9 @@ artifacts named here are authored and committed **in Phase 0**, before `Amoebius
 - **Representative set (explicit, §M-7):** the gate exercises exactly the composing fixture
   `dhall/examples/spa_chatbot.dhall` (the Phase-13 infernix multi-service surface: `ObjectStore` + `Sql` +
   `MessageBus` + `Identity` + `Edge`) composed with **two** committed deployment-rules layers —
-  `spa_chatbot_deploy_linux_cpu.dhall` at `replicas=1` and `spa_chatbot_deploy_linux_cpu_r3.dhall` at a distinct
-  replica count — plus `dhall/examples/spa_rl_gaming.dhall` (jitML) as the type-check-only second composition and
+  `spa_chatbot_deploy_linux_cpu.dhall` with Deployment `Replicated { desiredReplicas = 1 }` and
+  `spa_chatbot_deploy_linux_cpu_r3.dhall` with a distinct positive `desiredReplicas` in the same `ReplicaCardinality`
+  arm—plus `dhall/examples/spa_rl_gaming.dhall` (jitML) as the type-check-only second composition and
   the gate topology `phase_37_spa_live.dhall`. No other surface satisfies "representative".
 - **Committed oracle pins (Phase 0, §M-1 / §M-3):**
   - `spa_gate/infernix_cpu_response.cbor` — the expected inference response, **byte-identical to Phase-33's
@@ -119,9 +126,17 @@ artifacts named here are authored and committed **in Phase 0**, before `Amoebius
   - `spa_gate/spa_edge_negatives.expected` — the expected Gate-1 `dhall type` error locus / Gate-2 `DecodeError`
     tag for the backdoor negative `illegal_spa_open_edge.dhall`, paired with `spa_chatbot.dhall` differing only in
     the gated-vs-open edge dimension; the gate asserts the *tag*, not merely a non-zero exit (§M-8).
+  - `spa_gate/resource_shape.json` and `spa_gate/resource_mutants/` — the independently authored complete
+    service/survivor/rollout/cold-tenant resource witness and its one-axis-short/dropped-envelope variants;
+    neither is regenerated from the binder or renderer.
 - **OS-boundary observers (§M-5), never a self-emitted trace:**
+  - Before the gate starts, the enforced Phase-14 `ControlPlaneStorageDemand` must retain Events and audit
+    records for at least this gate's declared observation window and remain within `EngineSystemReserve`;
+    a too-short or over-carve configuration fails before deployment, so a missing audit event is not accepted
+    as rotation loss.
   - Exposure sweep and election audit read from the **live k8s API server** (object enumeration) and its
-    **audit log** (zero `coordination.k8s.io` `Lease` acquisitions by any amoebius principal); the pod-IP/Service
+    **audit log** (zero application/workflow `coordination.k8s.io` `Lease` acquisitions; the designated
+    reconciler's mandatory control-plane Lease is explicitly excluded); the pod-IP/Service
     bypass is driven from a **foreign pod via a CNI probe** and must be refused by the derived `NetworkPolicy`.
   - The no-baked-engine check reads from a **containerd image inspection** of the deployed app/workflow images
     (no engine layer) and the registry-pull log (no engine blob pulled at deploy).
@@ -130,8 +145,9 @@ artifacts named here are authored and committed **in Phase 0**, before `Amoebius
     `engine_identity.txt` within `CacheBudget`), not a workflow self-report.
 - **Determinism honesty (§M-6):** cache **reuse** and output **determinism** are distinct claims. Reuse is proven
   by a same-namespace second request that produces **no** new materialization event (a store hit). Determinism is
-  proven by a **third run in a distinct tenant namespace with the CacheBudget cache bypassed (cold)** that
-  **independently re-resolves the engine and recomputes** the inference, whose response MUST again byte-match
+  proven by a **third run in a distinct tenant namespace after observed deletion of the warm engine resident**
+  under `ObserveDeleteThenRematerialize`; only after the digest is absent may it independently re-resolve a
+  real MISS and recompute the inference, whose response MUST again byte-match
   `spa_gate/infernix_cpu_response.cbor` — proving the compute path, not a memoized store hit, produced the pinned
   bytes.
 - **Committed seeded mutants (§M-2), each committed and re-run, from the operator set:**
@@ -147,6 +163,118 @@ artifacts named here are authored and committed **in Phase 0**, before `Amoebius
   - **M-election** (guard weakening): introduce a `Lease`-based leader election — the API-server audit-log
     zero-election check MUST go red.
 
+## Complete resource provision for the live SPA and cold tenant
+
+This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
+[`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting);
+the composed app remains an exhaustive set of canonical execution and storage demands.
+
+SPA composition does not collapse resources into an app-level scalar. Binding lowers the selected
+deployment-rules layer to an identity-keyed map of symbolic `BoundExecutionUnit`s, one per application service;
+it does not create replica or node identities. Each SPA service unit retains one complete source
+`PodResourceEnvelope` in a Deployment-indexed `BoundExecutionBody` with exactly one `ReplicaCardinality`
+(`Once | Replicated { desiredReplicas }`) and one `DeploymentRolloutPolicy`: `Recreate` or
+`RollingUpdate { maxSurge, maxUnavailable }`, with
+`maxSurge + maxUnavailable > 0`. Every container has lifecycle, selected-platform `ImageArtifact`,
+CPU/memory/ephemeral-storage requests+limits, runtime working set, bounded writable root (or read-only root)
+and log headroom; every Pod adds overhead, bounded disk/memory volumes, derived
+ConfigMap/Secret/projected/service-account-token mapped bytes, durable claims with presentation/attachment
+class, exact byte-free `PodRuntimeMetadataSource` network-attachment identities and container-to-volume mount
+identities, cache demand and explicit accelerator arm. The chatbot rules layer inherits Phase 33's finite
+`CpuInferenceWorkBudget` and says `accelerator = None`; "linux-cpu" never supplies an inferred/default CPU or
+RAM value. The frontend/other service clients charge HTTP/CBOR/auth/request buffers and retry work to their
+own envelopes rather than creating client Pods.
+
+Only pure `provision`, after joining topology and exact prior-provision references, expands each symbolic unit into
+identity-keyed `MaterializedExecutionInstance`s and complete steady/old/new/surge/terminating epochs. For every
+planned Pod slot it combines the exact runtime-metadata source with the complete container/volume graph and the
+selected node's pinned `kubeletMetadataModel` to derive one `KubeletRuntimeMetadataShape`; live normalization
+instead keys the observed form by authenticated Pod UID plus owner/source witness. The private fold derives
+each component's bytes and `KubeletNodefs | CriRuntimeRoot` role, resolves it through the selected filesystem
+layout, and groups aliases by physical carve once. SplitRuntime charges kubelet components to nodefs and CRI
+components to imagefs/containerfs; Unified and SplitImage sum forced aliases before one backing check. No
+physical runtime-metadata debit is repeated as logical Pod ephemeral demand.
+
+Pure provision gives each planned epoch, and live preflight each observed inventory snapshot, one
+`ProvisionedNodeRuntimeStorageAccounting` per node. Its planned-slot/observed-UID domain equals assigned Pods
+exactly, qualified Pod metadata and image-model component keys form a disjoint exhaustive partition, and its
+combined backing map debits each carve once. A missing/swapped role, wrong layout backing, scope/domain
+mismatch, ownership hole/overlap, or alias double debit cannot reach render.
+
+The Phase-32 cache owner, Phase-33 workflow workers, Keycloak, Envoy/Gateway and the platform capability
+providers are surviving workloads in the same live snapshot; their CPU/memory/storage/images/pod/IP/CSI
+commitments are subtracted before this SPA is placed. The source-equal Phase-33 workflow projection also
+retains its Phase-24/25 client/topic/subscription, cursor/backlog/retention/hot-ledger/offload demands and adds
+this gate's finite request/redelivery window before publish. `HTTPRoute`, `NetworkPolicy` and Service objects do not
+create Pods, and the Phase-22 singleton's additional render/reconcile/API-client work is merged into its
+existing controller container envelope. The foreign CNI bypass probe **is** a real, explicitly requested Pod,
+so it has its own content-digested minimal image, CPU/memory/ephemeral requests+limits, writable/log/mapped
+bounds, Pod/IP slot, `cache = None`, `accelerator = None`, zero CSI attachments, and a finite
+`JobExecutionPolicy`; it carries no Deployment rollout fields. API/audit exposure scans
+and the authenticated browser run execute in the separately bounded host gate-harness envelope, not more
+probe Pods.
+
+That pure `SpaGateHarnessDemand` pins content digests/installed bytes for the test binary, browser/Playwright
+driver and API/audit/containerd/cache observers; Linux-cgroup-v2 CPU/RSS reservation+ceiling; bounded browser
+profile/download, screenshot, audit/capture, fetched-output, writable/log/scratch bytes on named host backings;
+finite probe/browser concurrency; serial setup/run/teardown lifecycle; and `cache = None`/`accelerator = None`.
+Live readback compares its executable/process/cgroup and backing high-waters exactly; no browser or observer
+may run outside this host envelope.
+
+The live peak includes transitions, not only the steady epoch derived from
+`Replicated { desiredReplicas = 1 }`. The alternative `Replicated { desiredReplicas = 3 }` rules value is
+separately provisioned before it may render; when it is only a composition proof it allocates nothing. If the
+gate applies it after the one-instance value, its `DeploymentRolloutPolicy` derives exact
+old/new/surge/terminating identity sets, and all complete envelopes/slots/storage remain charged until
+observed absence. The same-namespace second inference request adds buffers/work but no Pod. The distinct-tenant
+cold third run adds its tenant workflow Pod(s), pod/IP slots, images and mapped/local storage while the primary
+SPA remains live. Its typed `ObserveDeleteThenRematerialize` cache-bypass policy first closes the warm handle,
+requests deletion of the gate-only engine resident, and waits until the on-disk observer reports that digest
+absent; only then may the third run resolve a real MISS. The existing owner remains the sole cache Pod, and the
+transition peak is exactly `max(oldResidentUntilObservedAbsent, newResident + newTemporary)`—never two
+deduplicated copies or an uncharged namespace. Primary and cold output
+objects coexist until byte comparison and observed deletion. A terminating primary/cold worker is likewise
+charged according to the pinned `ColdRecomputePolicy`; deletion intent never grants early credit.
+
+Placement spends one pod and CNI/IP slot for every live or terminating app/workflow/probe Pod and one
+driver-scoped CSI attachment per unique mounted PVC. Network object-store clients use no PVC in the committed
+fixture, making their CSI count exactly zero; any capability-bound SQL/object volume still retains its typed
+volume geometry and attachment class. Selected OCI content, snapshots and bounded pull/import workspace,
+pod-local/mapped/log bytes, cache residents/temp, exact app/content objects and durable volumes are routed to
+their real physical backings. This phase performs no image build: it can select only already-provisioned
+Phase-15/33 `ImageArtifact`s; a missing platform image is a pre-effect failure.
+
+After controller expansion, the binder serializes exhaustive `desiredObjects` for all rendered and derived
+Kubernetes objects, not selected kinds; live preflight separately joins observed survivors with
+old/new/apply-before-prune.
+`EtcdLogicalDemand { desiredObjects, churn, model }` includes revisions, Leases and Events; only private
+`ProvisionedEtcdLogicalDemand.derivedPeak <= backendQuotaBytes` may continue. Physical capacity separately fits
+backend-at-quota plus WALs, retained/saving snapshots and defrag old+new workspace. Live object/quota/backend
+readback must equal the witness. One-byte logical/physical shortages and `drop_api_object_demand.dhall`,
+`drop_etcd_churn.dhall` or `drop_etcd_model.dhall` reject before SSA.
+
+Snapshot-bound live preflight joins that private provisioned demand to the fresh survivor/reservation inventory,
+constructs the observed-UID node aggregate, and mints `ValidatedLiveTarget` before SSA apply, cache resolve,
+route or policy mutation, probe creation, Pulsar publish, inference compute or object write. Only private service
+projections render. Live readback compares image IDs, all container/Pod resources and overhead, volume/mapped/
+writable/log bounds, observed-Pod-UID runtime-metadata component/role/backing rows and node scope aggregate,
+Deployment-derived rollout and cold-tenant epochs, placement, Pod/IP/CSI use, node image-store
+objects, Pulsar topic/cursor/backlog/offload state, cache extents, object-store extents,
+HTTPRoute/NetworkPolicy ownership and controller delta to the
+witness. Phase 0 adds one-unit/one-byte-short cases for every app/workflow/probe/controller CPU, memory,
+logical and physical ephemeral axis, image workspace, mapped/durable/cache/object storage, pod/IP and matched
+CSI slot, Pulsar backlog/offload, materialized Deployment rollout epoch, runtime-metadata component/role/
+backing and node-domain/ownership/grouping, cold-cache transition
+and host-harness CPU/memory/local
+bytes. Resource mutants that drop an app service, SPA envelope,
+foreign-probe envelope, cold tenant/cache workspace, or terminating rollout row are pinned under
+`spa_gate/resource_mutants/`; `drop_host_harness_envelope.dhall` and
+`credit_cache_deletion_before_observation.dhall` cover those additional rows;
+`drop_pulsar_topic_demand.dhall` covers messaging. Each must turn the gate red with zero deployment/cache/
+store effects, alongside
+the existing semantic mutants.
+
 ## Doctrine adopted
 
 This phase is the first live amoebius realization of the SPA composition. Each bullet names the section it
@@ -155,7 +283,7 @@ adopts; individual sprints cite the same sections where they build on them.
 - [`app_vs_deployment_doctrine.md §2`](../documents/engineering/app_vs_deployment_doctrine.md#2-the-application-logic-surface--what-an-app-is)
   and [`§3`](../documents/engineering/app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)
   — *the application-logic surface* / *the deployment-rules surface*: the SPA spec is a write-once
-  application-logic artifact deployed unchanged, while replica counts, the capability provider+shape bindings,
+  application-logic artifact deployed unchanged, while Deployment cardinality/rollout, the capability provider+shape bindings,
   and the inference substrate live entirely in the orthogonal deployment-rules layer keyed by the SPA app name.
 - [`app_vs_deployment_doctrine.md §6`](../documents/engineering/app_vs_deployment_doctrine.md#6-the-proof-case-a-demo-web-app-as-application-logic-only)
   — *the proof case: a demo web app as application-logic-only*: the lifted infernix/jitML demo web app is
@@ -182,8 +310,9 @@ adopts; individual sprints cite the same sections where they build on them.
   or a baked payload, keyed to the `linux-cpu` selection of the deployment-rules layer.
 - [`content_addressing_doctrine.md §4.5`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
   — *the ML-asset lifecycle: one bounded content-addressed cache, resolved on first miss*: the engine materializes
-  into the CacheBudget-bounded content-addressed cache (`CacheBudget ≤` host storage), never baked and never
-  fetched by arbitrary URL.
+  through the Phase-32 per-node cache owner whose `CacheBudget`, disk-backed `emptyDir.sizeLimit`, and pod
+  `ephemeral-storage` limit are nested bounds on one node-ephemeral debit; it is never baked or fetched by
+  arbitrary URL.
 - [`platform_services_doctrine.md §2`](../documents/engineering/platform_services_doctrine.md#2-ha-always--including-replicas1)
   and [`§9`](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)
   — *HA always (including `replicas=1`)* / *the LoadBalancer and the single wild-ingress path*: the SPA rides the
@@ -200,7 +329,11 @@ adopts; individual sprints cite the same sections where they build on them.
 
 **Status**: Planned
 **Implementation**: `amoebius-spa/src/Amoebius/Spa/Deploy.hs`,
-`amoebius-spa/dhall/examples/spa_chatbot_deploy_linux_cpu.dhall` (target paths; not yet built); consumes the
+`amoebius-spa/src/Amoebius/Spa/Resources.hs` (Deployment-indexed service demands and structural
+runtime-metadata sources), `amoebius-spa/dhall/examples/spa_chatbot_deploy_linux_cpu.dhall`, and
+`amoebius-spa/test/live/SpaRuntimeStorageSpec.hs` (planned-slot→observed-UID join, role/layout backings, node
+scope/domain/ownership/grouping, reservation/observed no-double-debit, SplitRuntime one-byte-short and alias
+controls) (target paths; not yet built); consumes the
 Phase-13 `Amoebius.Spa.Spec` + `dhall/amoebius/Spa.dhall`, the Phase-16 SSA reconciler, and the Phase-22
 `replicas=1` singleton, re-implementing none of them.
 **Blocked by**: Phase 13 (the decode-proven SPA spec `Amoebius.Spa.Spec` + `dhall/amoebius/Spa.dhall` +
@@ -208,11 +341,12 @@ Phase-13 `Amoebius.Spa.Spec` + `dhall/amoebius/Spa.dhall`, the Phase-16 SSA reco
 resolve against); Phase 16 (the typed SSA reconciler); Phases 19–20 (the standard HA platform stack); Phase 22 (the
 live DSL deploy via the Deployment-`replicas=1` singleton); Phase 23 (the app-tenancy namespace + `<app>/<bucket>`
 ObjectStore the SPA deploys into) — all external earlier-phase prerequisites.
-**Independent Validation**: a deployment-rules `.dhall` keyed by the SPA app name binds replica counts, the
+**Independent Validation**: a deployment-rules `.dhall` keyed by the SPA app name binds Deployment
+`ReplicaCardinality`/`DeploymentRolloutPolicy` values, the
 capability provider+shape bindings (canonical providers; single-node shapes on a small cluster), and the
 inference substrate (`linux-cpu`); composed with the **byte-identical** Phase-13 SPA spec it deploys via the
 typed reconciler onto the HA stack, a re-run is a no-op (owned field manager, ApplySet prune, wait), and a second
-deployment-rules layer at a different replica count composes with the *same* SPA spec — the SPA app-spec normal
+deployment-rules layer with a different `Replicated.desiredReplicas` composes with the *same* SPA spec — the SPA app-spec normal
 form (its hash) unchanged across both.
 **Docs to update**: `documents/engineering/app_vs_deployment_doctrine.md`,
 `documents/engineering/service_capability_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`, this document.
@@ -226,33 +360,50 @@ through the typed reconciler under the `replicas=1` singleton — none of it tou
 
 ### Deliverables
 - An `Amoebius.Spa.Deploy` model and a `spa_chatbot_deploy_linux_cpu.dhall` keyed by the SPA app name, declaring
-  the replica count on the unchanged HA chart (HA even at `replicas=1`), the capability provider+shape bindings
+  `Replicated { desiredReplicas = 1 }` plus a `DeploymentRolloutPolicy` for the unchanged HA chart (HA even
+  at one replica), the capability provider+shape bindings
   (canonical providers by default; single-node shapes on a small cluster), and the inference-substrate binding
   set to `linux-cpu`.
 - The composition of that layer with the byte-identical Phase-13 SPA spec, rendered by the typed reconciler
   (owned field manager, ApplySet prune, wait) into the Phase-23 tenant namespace + `<app>/<bucket>` ObjectStore,
   applied under the Deployment-`replicas=1` singleton — the singleton stateless (no PVC), its durable state the
   Vault-enveloped MinIO bucket, and its single-instance a k8s/etcd property.
-- A demonstration that a second deployment-rules layer at a different replica count composes with the *same* SPA
+- A demonstration that a second deployment-rules layer with a distinct positive
+  `Replicated.desiredReplicas` composes with the *same* SPA
   spec, the SPA app-spec hash unchanged across both; the rendered manifests are generated artifacts and are
   **not committed**.
+- A symbolic bound service map for both rules alternatives, retaining each service `BoundExecutionUnit`
+  unchanged through binding. Provision alone produces the private instance map: every exact materialized
+  service instance has the complete image/resource/local/mapped/runtime-metadata/durable/cache/accelerator
+  envelope and pod/IP/CSI placement witness from the phase resource contract. The
+  `Replicated { desiredReplicas = 3 }` alternative must fit before it may render; applying it after the
+  one-instance alternative additionally requires the exact rollout old/new/surge/terminating epoch to fit.
 
 ### Validation
-1. The deployment-rules `.dhall` composes with the SPA spec and renders to the standard HA stack at the chosen
-   replica count in the tenant namespace; a **second reconcile while the topology is still deployed** is a no-op,
+1. The deployment-rules `.dhall` composes with the SPA spec and renders to the standard HA stack at the
+   replica count derived from the chosen Deployment cardinality in the tenant namespace; a **second reconcile while
+   the topology is still deployed** is a no-op,
    defined concretely as an **empty ApplySet prune set** and **zero SSA managed-field mutations** — every owned
    object's `resourceVersion` unchanged across the second apply, as reported by the owned field manager against
    the live k8s API server (not a reconciler self-report). Full teardown→re-spin idempotence is the separate 37.4
    claim.
-2. Changing the replica count or the inference-substrate binding changes no SPA `.dhall` or `.hs` source — the
+2. Changing `Replicated.desiredReplicas` or the inference-substrate binding changes no SPA `.dhall` or `.hs` source — the
    SPA app-spec normal-form hash is byte-identical across `spa_chatbot_deploy_linux_cpu.dhall` and
    `spa_chatbot_deploy_linux_cpu_r3.dhall`, asserted against a Phase-0-committed expected hash independent of the
    deploy renderer.
 3. No orchestration path runs an election, proven by the OS-boundary check: the **k8s API-server audit log**
-   records **zero `coordination.k8s.io` `Lease` acquisitions by any amoebius principal** over the run, and the
-   only workload controller is the `replicas=1` Deployment whose single-instance is delegated to k8s/etcd. The
+   records **zero application/workflow `coordination.k8s.io` `Lease` acquisitions** over the run; the
+   control-plane authority is the designated `replicas=1` Deployment/Lease pair, while SPA/workflow resources
+   use their provisioned kind-indexed controllers and never elect. The
    committed seeded mutant **M-election** ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)) — introducing a `Lease`-based leader election — MUST turn this
    check red.
+4. Lower one materialized application instance's CPU, memory, ephemeral/image/runtime-storage backing or Pod/IP
+   slot by one unit/byte and
+   lower one matched CSI attachment limit by one in the PVC fixture; each alternative fails before render/apply
+   with its pinned reason. A dropped-service-envelope, dropped largest metadata row, changed pinned model,
+   dropped/swapped role, wrong layout backing, planned/observed domain mismatch, qualified Pod/image ownership
+   hole/overlap, alias double debit, or omitted-rollout-epoch mutant must turn red, while the
+   fitting manifest and live readback equal the opaque projection exactly.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -268,7 +419,8 @@ re-implementing neither. The emitted HTTPRoute is a **generated artifact and is 
 door this route rides).
 **Independent Validation**: the SPA's `Edge` publish renders a live Envoy/Gateway-API `HTTPRoute` gated by
 Keycloak; a request without a valid session is refused at the edge and an authenticated session **reaches the SPA
-UI**, where "reaches the UI" is defined as a **driven browser interaction (Playwright-style) through a real
+UI**, where "reaches the UI" is defined as a **driven browser interaction from the bounded host gate harness
+(Playwright-style) through a real
 Keycloak session that loads the served PureScript bundle** — the bundle bytes hashing to the Phase-13 Register-1
 golden bundle hash — and completes one UI interaction, **not** a bare HTTP 200. A **live exposure sweep** over the
 tenant namespace, read from the k8s API server, matches the hand-authored `spa_gate/expected_exposures.txt` ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)):
@@ -360,9 +512,12 @@ without being run.
   workflow on the Phase-25 orchestrator/worker runtime (unelected workers; single-writer delegated to the Pulsar
   subscription), and the response returns to the caller.
 - The inference engine backing the round-trip resolved as a **named catalog identity on first miss** into the
-  Phase-32 CacheBudget-bounded content-addressed cache (`CacheBudget ≤` host storage) — never baked into the base
-  image, never fetched by arbitrary URL — and reused from cache by a second request, keyed to the `linux-cpu`
-  substrate selection of the deployment-rules layer (Sprint 37.1).
+  Phase-32 per-node cache owner, whose checked
+  catalog-derived `ProvisionedCacheDemand.derivedPeak ≤ CacheBudget ≤ emptyDir.sizeLimit` nesting and pod
+  ephemeral request covering the volume plus
+  writable/log headroom account for one node-ephemeral debit — never baked into the base image,
+  never fetched by arbitrary URL — and reused through a typed cache handle by a second request, keyed to the
+  `linux-cpu` substrate selection of the deployment-rules layer (Sprint 37.1).
 - The jitML RL-gaming demo SPA composed and type-checked against the same SPA spec (the "any combination" claim),
   with an explicit note that *running* its workflow on a GPU/Apple-Metal substrate is out of contract for this
   single-substrate gate — the substrate is a deployment dial, not an app edit.
@@ -392,7 +547,7 @@ the InForceSpec drives).
 **Independent Validation**: a gate `InForceSpec` over the **[§N](#n-representative-set-oracle-pins-and-seeded-mutants) representative set** composes the multi-service SPA
 + the infernix demo app's ML workflow with the `linux-cpu` deployment-rules layer, deploys via the typed
 reconciler under the `replicas=1` singleton, reaches the SPA UI through the Keycloak/Envoy edge (a driven
-Playwright interaction serving the Phase-13-golden bundle, with the API-server exposure sweep matching
+Playwright interaction from the bounded host gate harness serving the Phase-13-golden bundle, with the API-server exposure sweep matching
 `spa_gate/expected_exposures.txt` and the pod-IP bypass refused), round-trips an inference request whose response
 **byte-matches `spa_gate/infernix_cpu_response.cbor`** with the engine proven first-miss-materialized ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)), and
 tears the deployment down **leak-free**. "Leak-free (postflight sweep empty)" is defined as the union of (a) the
@@ -421,6 +576,9 @@ deployed, reachable behind Keycloak/Envoy, its inference round-tripped, and torn
   infernix chatbot demo app from one app spec plus the `linux-cpu` deployment-rules layer, deploys it via the
   typed reconciler under the `replicas=1` singleton, reaches the SPA UI through the Keycloak/Envoy edge,
   round-trips an inference request through the composed infernix workflow, and always tears the deployment down.
+- The complete identity-keyed service/workflow/foreign-probe Pod map, cold-tenant and rollout epochs, surviving
+  provider ledger, exact images/storage/cache/object extents and host-harness envelope from the phase resource
+  contract. `provision` must produce all private projections before the first SSA/cache/route/probe effect.
 - A check that the jitML RL-gaming demo app SPA also composes and type-checks (the "any combination" claim), with
   an explicit note that *running* its workflow on a GPU/Apple-Metal substrate is out of contract for this
   single-substrate gate.
@@ -442,11 +600,16 @@ deployed, reachable behind Keycloak/Envoy, its inference round-tripped, and torn
    `spa_gate/engine_identity.txt` ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)).
 2. The RL-gaming SPA composes and type-checks; the topology tears down leak-free — the Phase-36 test-owned sweep
    **and** the preflight→postflight substrate inventory diff are empty, including retained-host-backing and
-   host-cache allocation inventories after the observed `CacheBudget` engine entry is reclaimed — and a second
+   pod-ephemeral cache inventory after the observed `CacheBudget` engine entry is reclaimed, while the separate
+   native-host-cache allocation inventory remains unchanged/empty — and a second
    reconcile-while-deployed is a no-op (empty ApplySet prune, zero SSA field
    mutations). All committed [§N](#n-representative-set-oracle-pins-and-seeded-mutants) mutants (M-canned, M-baked, M-openedge, M-nopolicy, M-election) go red.
 3. The run emits a proven/tested/assumed ledger; it marks no GPU-substrate or geo-replication claim green, and
    skipping an applicable move marks that layer UNVERIFIED, never green.
+4. Run every one-axis/one-byte-short and dropped-resource-envelope fixture from the phase resource contract,
+   including the real foreign CNI probe, cold tenant/cache workspace, pod/IP/CSI slots and rollout overlap.
+   Each rejected case has zero SSA/cache/store effects; the fitting gate's rendered and live resource inventory
+   equals the opaque provision projections exactly before teardown earns any credit.
 
 > **Honesty.** This gate deploys the SPA composition already decode-proven at Registers 1–2 in
 > [Phase 13](phase_13_spa_composition_representational.md); the representational battery and the local
@@ -463,7 +626,8 @@ The whole sprint (📋 Planned).
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/app_vs_deployment_doctrine.md` — record the SPA as the live composition apex of §2/§3/§8:
   a write-once application-logic artifact composing an ML workflow as shared-library use, deployed with its
-  replicas, provider+shape, and inference substrate bound only in the deployment-rules layer (§7), the same SPA
+  Deployment cardinality/rollout, provider+shape, and inference substrate bound only in the deployment-rules
+  layer (§7), the same SPA
   bytes across the variations.
 - `documents/engineering/service_capability_doctrine.md` — backlink §7 to the live SPA `.dhall` as a worked
   multi-service surface whose `Edge` publishes behind the Identity-owned door, and §4.1 to the jit-resolved,

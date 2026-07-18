@@ -2,10 +2,12 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_22_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, DEVELOPMENT_PLAN/phase_24_pulsar_client.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_22_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, DEVELOPMENT_PLAN/phase_24_pulsar_client.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
-> **Purpose**: Single Source of Truth for the one amoebius binary's three runtime contexts (CLI / sudo host-daemon / in-cluster pod) and its daemon role taxonomy — exactly one control-plane singleton with total authority over the cluster and its secrets, deployed as a Kubernetes **Deployment with `replicas=1`** whose single-instance guarantee is **delegated to k8s/etcd** (never a bespoke election), plus N unelected worker daemons.
+> **Purpose**: Single Source of Truth for the one amoebius binary's three runtime contexts (CLI / sudo
+> host-daemon / in-cluster pod) and its closed daemon role taxonomy: the mandatory-Lease control-plane
+> singleton, a dedicated capacity-scheduler process, and N unelected workers.
 
 ---
 
@@ -18,7 +20,7 @@ package"; there is one Haskell binary that *runs* in three different ways:
 |---------|-------------|----------------|
 | **CLI tool** | A one-shot invocation on a host, exits when done | Operator commands, `bootstrap`, reconcile triggers, status queries |
 | **Sudo host daemon** | A long-running host process with `sudo` powers | Bring up the distro (kind / rke2) — including installing the **root rke2 server** ([§2.1](#21-a-third-orthogonal-axis-rke2-serveragent-declared)) — install host tooling, talk to `kube-apiserver` over distro mTLS, **supervise host-level worker subprocesses** |
-| **In-cluster pod** | Deployed as a generated typed manifest (the typed reconciler, no Helm) inside the cluster | Hosts the **control-plane singleton role** ([§3](#3-the-control-plane-singleton)) *or* a **worker role** ([§4](#4-worker-daemons--n-unelected)) |
+| **In-cluster pod** | Deployed as a generated typed manifest (no Helm) inside the cluster | Hosts the **control-plane singleton role** ([§3](#3-the-control-plane-singleton)), the dedicated **capacity-scheduler role** ([§3.3](#33-the-capacity-scheduler-a-separate-role-in-the-same-binary)), or a **worker role** ([§4](#4-worker-daemons--n-unelected)) |
 
 The **same-binary policy** is generalized directly from the prodbox sibling
 (`/home/matthewnowak/prodbox/documents/engineering/distributed_gateway_architecture.md` → "Same-binary
@@ -56,13 +58,13 @@ no-environment-variables / no-`PATH` lazy-tool-ensure contract — are owned by
 is doing" (role) are independent axes.** Confusing them is the bug this section prevents — "the in-cluster
 pod" is not a role, and "the control-plane singleton" is not a context.
 
-|                         | **Control-plane singleton role** | **Worker role** |
-|-------------------------|----------------------------------|-----------------|
-| **CLI context**         | — (a CLI run is not a daemon)     | — |
-| **Sudo host daemon**    | Pre-cluster bootstrap *acts on behalf of* the future singleton, then hands off | Supervises host-level workers (e.g. Apple-Metal and Windows-CUDA inference, [§4](#4-worker-daemons--n-unelected)) |
-| **In-cluster pod**      | **Exactly one** — a Deployment `replicas=1`, single-instance from k8s/etcd ([§3](#3-the-control-plane-singleton)) | **N**, unelected ([§4](#4-worker-daemons--n-unelected)) |
+|                         | **Control-plane singleton role** | **Capacity-scheduler role** | **Worker role** |
+|-------------------------|----------------------------------|-----------------------------|-----------------|
+| **CLI context**         | — (a CLI run is not a daemon) | — | — |
+| **Sudo host daemon**    | Pre-cluster bootstrap *acts on behalf of* the future singleton, then hands off | Bootstrap installs the first provisioned scheduler Pod/config but does not run the live role | Supervises host-level workers (e.g. Apple-Metal and Windows-CUDA inference, [§4](#4-worker-daemons--n-unelected)) |
+| **In-cluster pod**      | **Exactly one writer** — Deployment `replicas=1` plus mandatory Lease ([§3](#3-the-control-plane-singleton)) | Independently provisioned same-binary Deployment; sealed placement/root-ledger CAS/Binding only ([§3.3](#33-the-capacity-scheduler-a-separate-role-in-the-same-binary)) | **N**, unelected ([§4](#4-worker-daemons--n-unelected)) |
 
-Two facts fall out of the grid:
+Three facts fall out of the grid:
 
 - **The control-plane singleton is always an in-cluster role.** A cluster's brain lives *in* the cluster it
   governs. Before that cluster exists, the **sudo host daemon** does the bootstrap work that brings the
@@ -72,6 +74,9 @@ Two facts fall out of the grid:
   host-level subprocesses because their hardware cannot be containerized (Apple-Metal GPU work, and
   native Windows-CUDA inference — CUDA does not run performantly under WSL2). A host-level worker is the **same binary in the worker role under the
   host-daemon context**, supervised as a subprocess.
+- **The capacity scheduler is an in-cluster-only role.** It is not the singleton, does not hold the Lease or
+  Vault authority, and is not a general worker. Its only mutation surface is its provisioned aggregate
+  reservation root and Kubernetes Binding subresource.
 
 Which roles run, how many replicas each gets, and which workers are host-level versus in-cluster are all
 **deployment-rules** decisions, never application logic — that orthogonal DSL split is owned by
@@ -86,12 +91,14 @@ the other two:
 - **(i) Substrate — DETECTED.** kind / rke2 / EKS, discovered at bring-up
   ([cluster_topology_doctrine.md §1](./cluster_topology_doctrine.md#1-two-axes-the-substrate-is-detected-the-engine-is-declared),
   [substrate_doctrine.md](./substrate_doctrine.md)).
-- **(ii) amoebius daemon-role.** the control-plane singleton ([§3](#3-the-control-plane-singleton)) versus an unelected worker ([§4](#4-worker-daemons--n-unelected)). The singleton's
+- **(ii) amoebius daemon-role.** the control-plane singleton ([§3](#3-the-control-plane-singleton)), dedicated
+  capacity scheduler ([§3.3](#33-the-capacity-scheduler-a-separate-role-in-the-same-binary)), or an unelected worker ([§4](#4-worker-daemons--n-unelected)). The singleton's
   single-instance is a k8s/etcd property ([§3.1](#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)), not an amoebius election, so this axis carries no
   election of its own.
 - **(iii) rke2 server/agent — DECLARED.** which *nodes* carry the Kubernetes control plane
   (kube-apiserver + the etcd quorum) versus which are pure workload nodes. This is the `Rke2Servers` closed
-  union — `Single` / `Ha3` / `Ha5`, the only legal odd etcd quorums {1,3,5} — plus an `agents` list, owned by
+  union — `Single` / `Ha3` / `Ha5`, the only legal odd etcd quorums {1,3,5} — plus
+  `Rke2AgentPool = Fixed [Rke2AgentNode] | Autoscaled { floor : [Rke2AgentNode], policy : ScalingPolicy }`, owned by
   [cluster_topology_doctrine.md §2, §4](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm). An even- or zero-server (no-quorum /
   split-brain) control plane has no constructor: **type-foreclosed unrepresentable**.
 
@@ -113,7 +120,7 @@ server/agent split.
 daemon topology:
 
 - **The sudo host daemon installs the ROOT rke2 server** — the zero-secret single node
-  `{ servers = Rke2Servers.Single host, agents = [] }`. This makes the [§2](#2-context--role-an-orthogonal-grid) *midwife* concrete: before any
+  `{ servers = Rke2Servers.Single host, agents = Fixed [] }`. This makes the [§2](#2-context--role-an-orthogonal-grid) *midwife* concrete: before any
   cluster exists there is no singleton yet, so the host daemon (acting on behalf of the future singleton)
   brings up the first `rke2-server`, then defers. This is the prodbox single-node `rke2-server` base —
   **sibling evidence, not an amoebius result** (prodbox's `Rke2.hs` proves the single-node install only).
@@ -128,7 +135,8 @@ daemon topology:
   machine**.
 
 A **quorum change** (e.g. `Single → Ha3`) is a deliberate re-provision of the declared server set, **never** an
-autoscale; a `ScalingPolicy` grows the `agents` list only. Because axis (iii) is *declared* — not detected — the
+autoscale; a `ScalingPolicy` exists only in `Rke2AgentPool.Autoscaled` and grows the worker pool beyond its
+declared floor within its finite quota. Because axis (iii) is *declared* — not detected — the
 singleton never promotes a node from agent to server at runtime; it re-provisions against the new declaration.
 
 > **Honesty.** Multi-node rke2 server/agent, etcd-HA, and the join-token flow are **Phase-N design intent** —
@@ -152,6 +160,22 @@ The control-plane daemon is a Kubernetes **Deployment with `replicas=1`.** It is
 — it holds no PVC; its durable state is exclusively the Vault-enveloped MinIO bucket
 ([storage_lifecycle_doctrine.md §7.2](./storage_lifecycle_doctrine.md#72-amoebius-own-control-plane-state-is-the-minio-bucket-not-a-pvc)),
 so a lost pod loses nothing and is simply rescheduled by k8s.
+
+Stateless does not mean resource-free. The singleton is an ordinary bound execution unit with a complete
+`PodResourceEnvelope`: digest-selected image/content/import bytes; CPU, memory, and ephemeral-storage requests
+and limits covering decode/bind/provision, discovery/diff/SSA serialization, Lease/watch/list buffers,
+health/metrics, writable root and logs; mapped ConfigMap/Secret/downward-API/token bytes; bounded local volumes;
+no PVC/cache; and no accelerator. Its rollout strategy supplies the finite transition epochs, and provisioning
+spends every live/terminating pod, pod/CNI slot, and image/nodefs byte before the Deployment can render.
+`replicas=1` is not a scalar exemption from this expansion.
+
+Its MinIO state is equally closed and capacity-admitted. `ControlPlaneStateObjectDemand` contains exactly
+`InForceSpecSnapshot`, `ManagedResourceRegistry`, `ReconcileJournal`, `ValidationLedger`, and
+content-addressed `JobCompletion`, with a required
+`StorageBudgetId`, exact keys/canonical-size inputs, retained versions, failed-write/orphan bounds, and writer
+admission. The sole object-write gateway has its own complete pod envelope, and the singleton holds no direct
+S3 mutation credential. A new persistent state kind requires a new union arm and capacity test; it cannot hide
+behind “other control-plane bytes.”
 
 **Single-instance is delegated to k8s/etcd — amoebius runs no election of its own.** The Deployment controller
 and etcd already guarantee the cluster converges to one running pod, restarting it elsewhere on node loss. A
@@ -227,6 +251,30 @@ simulation/proof obligation, owned by [gateway_migration_model_doctrine.md](./ga
 and [gateway_migration_doctrine.md](./gateway_migration_doctrine.md). route53 has no compare-and-swap, so the
 cross-cluster record is a short-TTL A-record with availability-first bounded rebind — modeled there, not here.
 
+### 3.3 The capacity scheduler: a separate role in the same binary
+
+The capacity scheduler is a third closed daemon role, not an implementation detail of the singleton and not a
+kube-scheduler framework plugin. The provisioned bootstrap Deployment runs the same amoebius Haskell binary
+with its scheduler command. Its own Pod is the sole `default-scheduler` exception, constrained to one uniquely
+eligible node and an exact namespace `ResourceQuota pods=1`; every other Pod able to consume managed-node
+capacity—including platform/addon Pods—uses `schedulerName=amoebius-capacity`.
+
+Before reporting Ready, the role validates and atomically activates the sealed prior+desired,
+controller-child-indexed reservation config. For each named Pending Pod it authenticates owner chain and
+protected identity/template annotations, resolves any attested elastic target, runs the canonical complete
+resource fold, CASes the singleton reservation root to Reserved then BindingInFlight, and alone submits the
+Kubernetes Binding. Crash/lost-response recovery keeps the reservation charged until exact UID/node readback
+repairs it to Bound or proves it unbound. It never decodes a new desired deployment, operates Vault, applies
+general manifests, or holds the reconciler Lease.
+
+This role is resource-bearing and deployment-global. Its image, CPU, memory, logical and physical ephemeral
+storage, runtime metadata, Pod/CNI/CSI slots, static bootstrap reservation, config/RBAC/admission/taints,
+aggregate ledger bytes/churn, readiness, and live resident-artifact baseline all pass through
+`CapacitySchedulerSystemDemand → ProvisionedCapacitySchedulerSystem`. The scheduler's shared amoebius image
+extents deduplicate by physical allocation identity with workload extents, while compute/slots remain
+additive. The root ledger is scheduler-field-owned and is neither server-side-applied nor pruned by the
+singleton's generic object path.
+
 ---
 
 ## 4. Worker daemons — N, unelected
@@ -253,7 +301,9 @@ Properties shared by all workers:
   bespoke amoebius election.
 - **HA like everything else.** A worker Deployment runs the HA chart at a configurable replica count, even
   at `replicas=1` ([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1)). Every worker
-  container declares explicit CPU and RAM ([platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)).
+  container declares explicit CPU, memory, and pod-ephemeral requests/limits plus any bounded volume,
+  durable, or accelerator provision it consumes
+  ([platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)).
 - **Host-level workers are subprocesses, not pods.** When hardware forbids containerization — **Apple-Metal
   unified-memory inference and native Windows-CUDA inference** (CUDA does not run performantly under WSL2,
   [substrate_doctrine.md](./substrate_doctrine.md)) — the worker runs as a
@@ -305,7 +355,7 @@ The inference and training worker kinds above run on nodes carrying accelerators
 This round introduces the rule for how those accelerators are **owned**: a node's accelerators are owned
 **wholesale** by a single **accelerator-owner worker** on that node — substrate-independent, whether the
 owner is an in-cluster pod (`linux-cuda`) or a host subprocess (`windows` / `apple`, [§4.1](#41-the-engine-offering-vs-the-node-hardware-in-cluster-pod-or-host-subprocess)). Other pods may
-use the node's leftover CPU and RAM but **never** its accelerators. This revises the earlier narrative in
+use the node's leftover CPU, memory, and pod-ephemeral capacity but **never** its accelerators. This revises the earlier narrative in
 which a GPU was a per-pod, indivisible bin-packable `Count`: accelerators are reached **only** through the
 wholesale owner (the per-pod GPU request axis is removed — [resource_capacity_doctrine.md §3](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)).
 
@@ -319,6 +369,23 @@ accelerator owners contending for one node's devices" and "a fractional / stradd
 compilation** on its node — which is what lets a node continuously train a model while serving it (the
 continuous-training mode owned by content_addressing / dsl, [§4.3](#43-the-feed-sourced-continuous-trainer-single-writer-delegated)). The per-node-singleton is a k8s node-affinity
 property (a DaemonSet places at most one pod per node), not an amoebius election.
+
+A heterogeneous cluster cannot use one uniform DaemonSet template: Kubernetes would apply one GPU count to
+every node. Binding therefore computes an immutable `AcceleratorOfferingClassKey` from resource key, profile,
+full device count, net-VRAM vector, and link topology; every accelerator node/candidate has exactly one such
+label. It renders one owner workload per homogeneous offering class with disjoint required affinity and that
+class's exact full-device request. Fixed classes expand from concrete nodes; elastic provider classes carry a
+class-scoped template for future nodes. Two classes may share a worker binary but never a pod template. The
+class partitions cover every accelerator node exactly once, preserving one owner per node without a Pending
+4-GPU request on a 1-GPU node.
+
+Wholesale ownership does not make the Kubernetes allocation implicit. On `linux-cuda`, the provision fold
+resolves the demand's `ContainerId` exactly once and derives one integer extended-resource request/limit on
+that named container **equal to the selected node's full device count**, plus the node/profile/topology
+affinity on its pod that binds it to that offering. Subset allocation has no v1 constructor and requires a
+future typed DRA/MIG arm. Ordinary workload pods have no constructor for this claim. Per-device VRAM and
+supported sharding remain an internal admission budget owned by the resource-capacity doctrine; the Kubernetes
+claim allocates whole devices.
 
 Wholesale per-node accelerator ownership and the per-node-singleton invariant are the **SSoT of this
 doctrine**; [resource_capacity_doctrine.md §4.1](./resource_capacity_doctrine.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope) / [§3](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget) and the illegal-state catalog **consume** it.
@@ -448,10 +515,12 @@ flowchart TD
   hostd[Sudo host daemon context] -->|same binary| binary
   pod[In-cluster pod context] -->|same binary| binary
   pod -->|singleton role, Deployment replicas 1| cp[Control-plane singleton: single-instance from k8s and etcd]
+  pod -->|capacity-scheduler role| sched[Scheduler: sealed placement, root-ledger CAS, Binding]
   pod -->|unelected role| workers[Worker daemons: web hosts, Pulsar coordinators, ML batch, inference]
   hostd -->|supervises subprocess| hostwork[Host-level worker: Apple-Metal and Windows-CUDA inference]
   hostd -->|distro mTLS| api[kube-apiserver]
   cp -->|reconcile and secret authority| world[Cluster state and Vault]
+  sched -->|schedulerName amoebius-capacity only| api
   cp -->|workflow events and audit| plane[Coordination plane: Pulsar plus MinIO plus signed event log]
   workers -->|work events and single-consumer subscriptions| plane
   hostwork -->|peer over host-only NodePort, no mTLS| plane
@@ -490,7 +559,9 @@ shape and links back for status.
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — [§0](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision) the checkpoint-free tag-discovery host reconciler (tier (b)) that enacts child rke2 rollout over SSH
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md)
-- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the control-plane singleton runs the capacity fold at decode; **consumes** the wholesale per-node accelerator ownership of [§4.2](#42-the-accelerator-owner-worker-wholesale-per-node-ownership-a-typed-per-node-singleton)
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — Phase-8 provisioning runs the complete
+  post-bind capacity fold before `ProvisionedSpec`/`renderAll`; **consumes** the wholesale per-node accelerator
+  ownership of [§4.2](#42-the-accelerator-owner-worker-wholesale-per-node-ownership-a-typed-per-node-singleton)
 - [Service Capability Doctrine](./service_capability_doctrine.md) — [§4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-substrate-selected-and-jit-resolved-never-authored) owns the substrate→`EngineRuntime` quotient whose pod-vs-host-subprocess consequence [§4.1](#41-the-engine-offering-vs-the-node-hardware-in-cluster-pod-or-host-subprocess) records
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — the ETag-CAS commit point + `AdvancePredicate` ([§2](./content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers)/[§5](./content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely)) the Feed-sourced trainer of [§4.3](#43-the-feed-sourced-continuous-trainer-single-writer-delegated) delegates single-writer to
 - [DSL Doctrine](./dsl_doctrine.md) — [§3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness) how each context's `.dhall` is delivered (sibling / stdin / ConfigMap)

@@ -218,8 +218,8 @@ cluster), and **Register 3** (live infrastructure) — with exactly two delibera
 the count: **Phase 0** (the documentation-lint gate) reaches **no** register (it validates text and the link
 graph, not amoebius behaviour), and **Phase 13** (the representational SPA phase) is the single gate that
 spans **two** — Register 1 (the composition property decodes) *and* Register 2 (the PureScript demo SPA against
-a faked backend), both in-process, no cluster. The pre-cluster band (phases 1–12, substrate `none`) discharges
-Registers 1–2; the live band (phases 13–32) is Register 3. **Rendering a plan / `--dry-run` must never require
+a faked backend), both in-process, no cluster. The pre-cluster band (phases 1–13, substrate `none`) discharges
+Registers 1–2; the live band (phases 14–37) is Register 3. **Rendering a plan / `--dry-run` must never require
 live infrastructure.** The per-phase proven/tested/assumed ledger names the register(s) its gate reached; a
 Register-1/2 in-process ledger marks the Register-3 runtime layer UNVERIFIED and can never advance a production
 `PromotionGate`.
@@ -236,7 +236,7 @@ ledger (its result is *tested against a modeled environment*, with the environme
 substrate recorded **assumed**), which does not by itself advance a `PromotionGate`.
 
 A **design-proof / in-process phase** — one whose substrate is `none` (§L) and whose gate is an in-process
-type/model check rather than a live-substrate run, e.g. the pre-cluster band, [phases 1–12](README.md) —
+type/model check rather than a live-substrate run, e.g. the pre-cluster band, [phases 1–13](README.md) —
 emits a ledger whose acceptance token reads **"spec-composition proven"** / **"proven for the model"**, never
 **"runtime proven"**: a green Dhall typecheck, Haskell decoder, or TLC run establishes that the spec composes
 and the protocol is sound in the abstract, not that any cluster enforces it. Front-loading such a design

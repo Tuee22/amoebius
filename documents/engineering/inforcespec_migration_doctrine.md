@@ -53,7 +53,9 @@ runtime-checked.
 
 An "`InForceSpec` migration" introduces no new machinery. It is the typed diff between the in-force
 `RootInForceSpec` and a newly-uploaded one, submitted through the singleton's `dhall update` endpoint and
-realized by the **ordinary reconcile** — desired is `render(spec)`, observed is cluster state, and the diff is
+realized by the **ordinary reconcile** — desired is the object set produced by pure
+`bind/expand → plan/resolve infrastructure → provision → renderAll` against authenticated materialization,
+observed is cluster state, and the diff is
 typed ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)).
 There is no bespoke "migrate" verb bolted onto the control plane.
 
@@ -123,6 +125,19 @@ old one. No `.dhall` value ever denotes "discard these bytes." This is the verif
 [storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction),
 referenced here, not restated.
 
+The typed diff must first become a resource-bearing transition. A volume/PV arm constructs
+`StorageMigrationIntent` from a raw `PriorProvisionRefSource` Volume arm, replacement logical demand, and
+structural chunk/concurrency/workspace policy. Gate 2 validates and brands that arm as an opaque
+`PriorVolumeProvisionRef`; binding expands it to `StorageMigrationDemand`. Only provisioning resolves the
+reference from the prior `ProvisionedSpec` context before deriving physical peaks. A DB arm constructs
+`SchemaMigrationIntent` from exact old/new
+table/index identities and its cost policy. Provisioning derives presentation-rounded replacement bytes,
+old+new+workspace/temp/WAL high-water, provider byte/count overlap, and complete copy/verify or schema
+executor `PodResourceEnvelope`s. The Phase-16 live snapshot must fit those backings, CPU/memory/ephemeral,
+pod/CNI/CSI slots, and image bytes before the expand phase receives a mutation continuation. A steady old or
+target shape fitting alone is insufficient
+([resource_capacity_doctrine.md §5.1](./resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry)).
+
 - **`Retire-old` marks eligibility; it does not delete backing.** After the copy verifies, the reconciler
   detaches the old coordinate from active use and records an immutable `ReclaimEligible` artifact naming the
   old backing, verification evidence, and replacement coordinate. The final physical reclaim is itself a
@@ -132,7 +147,9 @@ referenced here, not restated.
   production backing. A human operator may later perform an audited external break-glass reclaim against the
   exact `ReclaimEligible` target. Until that happens, the retired backing remains intact.
 - **A failed verification retires nothing.** A `Shrink` that cannot verify its copy leaves *both* coordinates
-  intact and fails loud; it never trades the old bytes for an unverified new home.
+  intact and fails loud; it never trades the old bytes for an unverified new home. Both volumes/schemas,
+  partial target/workspace/temp/WAL, and the executor remain live commitments until a fresh observation proves
+  cleanup.
 - **A rename is a move over a fixed identity, never a delete-then-create.** A coordinate's identity is a total
   function of `(tenant, app, name)`, so a rename is realized as a dual-name / copy-verify / drop-alias move
   that preserves the bytes under a stable identity — it cannot degrade to a destroy-then-recreate that loses
@@ -286,7 +303,7 @@ competing status ledger; it links back for status.
 - [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — [§5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply) the readiness-gated `RolloutPlan`/`RolloutPhase` a migration composes with; [§2](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash) the immutable ledger that makes rollback free; [§4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable) the `PromotionGate`
 - [Tenancy Doctrine](./tenancy_doctrine.md) — [§3](./tenancy_doctrine.md#3-what-a-tenant-is) the immutable `TenantId` that travels with the bytes, [§5](./tenancy_doctrine.md#5-rbac-is-derived-never-authored) derived-not-authored grants, [§7](./tenancy_doctrine.md#7-two-isolation-layers-and-the-honest-limit) the two isolation layers and the honest limit
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§3.8](../illegal_state/illegal_state_security.md#38-cross-tenant-references-and-literal-secrets) / [§3.10](../illegal_state/illegal_state_security.md#310-a-child-spec-that-reaches-beyond-its-own-subtree) cross-tenant and cross-subtree references, [§4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) the phantom-tag / no-`Ref t1 → Ref t2` technique
-- [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — [§6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed) the ordinary reconcile (`desired = render(spec)`, the diff is typed) a migration is realized by
+- [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — [§6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed) the ordinary reconcile (desired is the deployment-level `renderAll` result from the opaque `ProvisionedSpec`; the diff is typed) a migration is realized by
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the `ModelArtifact` a cross-app grant may share
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — [§6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model) the normal-operation create-vs-delete boundary; production break-glass reclaim remains outside amoebius automation
 - [Testing Doctrine](./testing_doctrine.md) — the elevated harness deletes test-owned backing only; it never performs production retire-old reclaim

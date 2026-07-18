@@ -176,7 +176,7 @@ flowchart TD
   recv -->|decode, total Either| out[Right a, or Left DecodeError, never a silent misread]
 ```
 
-> **Honesty.** The CBOR-payload rule is Phase-22 design intent, not a tested amoebius result. Canonical CBOR
+> **Honesty.** The CBOR-payload rule is Phase-24 design intent, not a tested amoebius result. Canonical CBOR
 > is *proven in the sibling jitML content store* (`encodeManifestCbor`) — that is sibling evidence, not
 > amoebius proof ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)). The type-foreclosed claim is the
 > *produce* surface having no non-CBOR constructor; that a *received* body decodes is the same total-check /
@@ -282,7 +282,7 @@ The algebra is generalized from jitML's `JitML.Coordinator.Topology` (`RouteEntr
 
 A fully-qualified topic is derived, never literal:
 
-```
+```text
 persistent://<tenant>/<namespace>/<workflow>.<phase>.<substrate>
 ```
 
@@ -351,6 +351,12 @@ policy**, not an operator afterthought. This is the SSoT for that policy; the DS
 owned by [dsl_doctrine.md](./dsl_doctrine.md), and the two-ceiling *arithmetic* by
 [resource_capacity_doctrine.md §7](./resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total).
 
+The topic's two ceilings are not the provider's complete storage provision. Pulsar's canonical v1 binding also
+constructs a separate `PulsarMetadataStoreDemand = ZooKeeper` for exact znode/session/watch/transaction
+population, complete member pod envelopes, retained transaction logs/snapshots, and failure recovery overlap.
+That metadata demand is deployment-wide rather than per-topic and must fit independently before brokers start;
+neither BookKeeper headroom nor the offload target can pay for it.
+
 Every topic carries three mandatory, non-optional fields and folds against **two** ceilings:
 
 - **A mandatory `RetentionPolicy`.** There is no "keep forever" arm and no optional retention — a topic
@@ -361,18 +367,37 @@ Every topic carries three mandatory, non-optional fields and folds against **two
   trigger, so a time-only policy is uninhabitable. This is the load-bearing difference: the size trigger is
   what bounds the hot tier.
 - **The hot-tier fit (availability-critical).** The per-topic hot-tier cap **plus headroom** — the open
-  ledger, in-flight ingest during offload, and the deletion lag — folds against the BookKeeper
-  `StorageBacking`: `Σ(hot caps + headroom) ≤ bookie disk`. A hot-tier overflow is a decode-foreclosed decode-time
-  rejection ([resource_capacity_doctrine.md §7](./resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total)).
+  ledger, in-flight ingest during offload, and the deletion lag — is a **logical**
+  `BookKeeperLogicalDemand`, not a disk debit. The pure capacity fold validates
+  `ackQuorum ≤ writeQuorum ≤ ensembleSize ≤ bookies`, places bounded ledger segments onto `writeQuorum`
+  distinct bookies, adds each bookie's journal/index reserve, and derives every failure subset required by
+  the finite bookie fault policy. It then re-replicates each scenario and takes the per-bookie maximum while
+  old/replacement copies coexist. Every bookie ordinal must fit its physical slot, after which each
+  StatefulSet claim-template group is rounded to its maximum ordinal requirement and the uniform
+  `uniformProvisionedBytes × ordinalCount` debit is checked. `Σ(hot caps + headroom) ≤ Σ bookie disk` and the unequal raw
+  physical sum are never sufficient. A logical-fit/physical-overflow, rounded-template overflow, or omitted
+  required recovery case is a post-bind `provision-seal` rejection
+  ([resource_capacity_doctrine.md §5.1](./resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry)).
 - **The durable-total fit.** The total retained bytes fold against the selected offload target's ceiling — a
   provider-S3 quota ([pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md)) for cloud clusters, or the MinIO
   content store ([content_addressing_doctrine.md](./content_addressing_doctrine.md)) for host-bounded ones
   — the `StorageBacking` arm ([storage_lifecycle_doctrine.md §5.2](./storage_lifecycle_doctrine.md#52-the-storage-backing-is-bounded--the-closed-storagebacking-union)) selecting
-  which owner's number the fold reads.
+  which owner's number the fold reads. A normalized `PulsarOffloadObjectDemand` requires the topic's
+  `StorageBudgetId` and derives ledger-object count/size from retained bytes, segment size, maximum concurrent
+  offloads, maximum segments per finite window, deletion lag, and explicit failed-offload/orphan-GC bounds.
+  Provider S3 checks that structured demand in its declared logical/billed quota. Retained-PV MinIO instead
+  joins exact observed offload-object identities and those structured future/deletion-lag/failure extents with
+  every other closed object-store producer, expands every object through data/parity geometry and stripe
+  padding, and proves the steady/healing maximum on every active and replacement drive. Each
+  claim-template group is then rounded to its maximum drive requirement and debited uniformly across its
+  ordinals. Neither the logical retained total, the unequal raw drive sum, nor a cluster-wide physical average
+  is a MinIO capacity witness. Offload mutation uses its snapshot-bound writer capability through the sole
+  object gateway; direct broker S3 PUT credentials/routes are denied.
 - **A mandatory backlog quota (runtime fail-safe).** A burst, or a stalled/S3-unreachable offload, can still
   race the cap at runtime — no spec-layer check prevents that. So the policy carries a mandatory backlog
   quota (`producer_request_hold` / back-pressure at the high-water mark), so overflow degrades to **per-topic
-  producer throttling, never a disk-full broker outage**. The decode-time two-ceiling fit is decode-foreclosed; the
+  producer throttling, never a disk-full broker outage**. The two-ceiling fit is a pure post-bind
+  `provision-seal` rejection; the
   back-pressure actually holding is runtime-checked, owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md).
 
 The retention/offload/backlog policy is enabled on the namespace as a reconcile step, the same shape as the
@@ -383,8 +408,8 @@ flowchart TD
   produce[Producer writes to a topic] -->|hot tier| bk[BookKeeper closed ledgers, bounded by size high-water mark]
   bk -->|size trigger, optionally sooner by time| offload[Offload closed ledgers to S3 target]
   offload -->|retention deletes after deletion lag| free[BookKeeper space reclaimed]
-  bk -->|hot cap plus headroom at most bookie disk, decode fold| avail[Hot tier never overflows, decode-foreclosed]
-  offload -->|total retained at most offload target ceiling, decode fold| durable[Durable total bounded, decode-foreclosed]
+  bk -->|hot cap plus headroom at most bookie disk, provision fold| avail[Hot tier admitted at provision-seal]
+  offload -->|logical retained + write/orphan peak, then provider quota or MinIO per-drive erasure/healing fold| durable[Durable physical demand admitted at provision-seal]
   bk -->|high-water mark reached before offload catches up| hold[Backlog quota holds producer, runtime-checked fail-safe]
 ```
 
@@ -531,7 +556,7 @@ infernix and jitML remain **ML extension libraries**; they stop shipping their o
 This document is normative client doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the native client,
 the topology algebra, and the round-trip gate land in **Phase 24**, and the infernix/jitML migration onto it
-is **Phases 26 (infernix) and 27 (jitML)**. This doc never maintains a competing status ledger.
+is **Phases 33 (infernix) and 34 (jitML)**. This doc never maintains a competing status ledger.
 
 ---
 

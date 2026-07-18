@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_21_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_21_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for how amoebius runs Pulumi — only from inside an existing amoebius cluster, with every byte of state held as a Vault-Transit-enveloped object in MinIO — to provision provider-managed clusters (EKS), spawn self-managed children, materialize per-PV EBS volumes under the create-but-never-delete credential model, and integrate DNS (route53) and TLS (zerossl); and how independent deploys are parallelized applicatively.
@@ -100,6 +100,37 @@ Concretely:
   by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md). A deploy is therefore something the
   cluster *does*, gated by the same authority that owns every other mutation — not something an operator's
   shell does behind the cluster's back.
+- **The engine is a resource-bearing workload, not free control-plane work.** The expanded deploy graph carries
+  `PulumiExecutionDemand { deploys, concurrency, plugins, pluginVolume, workspaceVolume, model }`: each deploy
+  carries an exact executor `ExecutionUnitId` and explicit bounded `InClusterCacheDemand`; the outer value carries exact
+  deploy-unit and plugin identities, `Serial | BoundedParallel n` concurrency, content-digested plugin
+  installed/peak-install bytes, typed plugin-cache and workspace volumes, and a pinned execution-cost model.
+  Before any provider or checkpoint effect, the pure capacity fold privately
+  constructs `ProvisionedPulumiExecutionDemand { source, executorPods, deployGraph, pluginObjects,
+  pluginVolume : ProvisionedPulumiExecutionVolume PluginVolume,
+  workspaceVolume : ProvisionedPulumiExecutionVolume WorkspaceVolume, caches, sourceEquality, witness }`.
+  Each typed volume owns its derived required-usable peak, presentation/allocation policy, and provisioned raw
+  debit. Fresh observation separately proves that peak fits mounted usable bytes and that raw debit fits the
+  backing's raw residual; the two units are never compared directly.
+  Every executor `Job` in `executorPods` has a complete `PodResourceEnvelope` — image, CPU and memory
+  requests/limits, pod-ephemeral request/limit, logs, writable root, mapped inputs, exact byte-free
+  `PodRuntimeMetadataSource` network-attachment and container-to-volume mount identities, and lifecycle
+  overlap — and its kind-indexed `JobExecutionPolicy` fixes completions, parallelism, backoff,
+  `restartPolicy=Never`, replacement-on-Failed, and finite terminal retention. Every active wave and retained
+  terminal Pod is charged. Cloud capacity does not make a
+  deployment possible when the parent cluster cannot place its executor Jobs or either typed volume peak.
+  After provision expands each executor `BoundExecutionUnit`, it derives one `KubeletRuntimeMetadataShape` for
+  every planned Pod slot from that source and the complete container/volume graph under the selected node's
+  pinned `kubeletMetadataModel`; live normalization derives the observed form under authenticated Pod UID plus
+  owner/source witness. The private fold derives each component's bytes and
+  `KubeletNodefs | CriRuntimeRoot` role, resolves it through the selected filesystem layout, and groups aliases
+  by physical carve once. SplitRuntime charges kubelet components to nodefs and CRI components to
+  imagefs/containerfs; Unified and SplitImage sum forced aliases before one backing check. Across executors,
+  the mutation gateway, and copy/verification Jobs, pure provision gives each planned epoch and live preflight
+  each observed snapshot one
+  `ProvisionedNodeRuntimeStorageAccounting` per node with exact metadata-id domain, disjoint/exhaustive
+  qualified Pod/image component ownership, and one combined debit per carve. None of these physical bytes is
+  repeated as logical Pod ephemeral storage.
 - **The root is the bottom turtle.** The very first cluster (typically a single-node `kind` on an admin's
   laptop) is *bootstrapped*, not Pulumi-deployed — bootstrap needs no secrets and no backend
   ([cluster_lifecycle_doctrine.md §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap)). Every cluster *after* the root is
@@ -130,21 +161,40 @@ opaque ciphertext.
   ([platform_services_doctrine.md](./platform_services_doctrine.md);
   [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md)). A parent's deploy of a child therefore
   stores the child-infrastructure checkpoint in the **parent's** MinIO; a child stores checkpoints only for
-  deploys that child itself owns, such as its descendants. Each checkpoint is one **opaque object**, not a
+  deploys that child itself owns, such as its descendants. A logical checkpoint is a model-derived closed set
+  of **opaque objects** — current/old/new revision objects and any bounded failed-partial/orphan extents — not a
   vendor-managed state service and not a host file.
+- **Checkpoint bytes come from exact state identities, never a caller-authored ciphertext aggregate.** Each
+  stack carries one `PulumiCheckpointObjectDemand { stack, budget, entries, maxRetainedRevisions,
+  updateConcurrency = Serial, failure, model, mutationAdmission }`. Every `PulumiStateEntryDemand` names the
+  `PulumiResourceStateId`; every field names its `PulumiStateFieldPath`, maximum canonical bytes, and
+  `Plain | Secret` classification. The pinned model derives canonical serialization, encryption-envelope
+  overhead, current/old/new update overlap, retained revision identities, and partial-write/orphan exposure.
+  The resulting `ProvisionedObjectStoreLogicalPeak` retains exact `(store, tenant, bucket, key)` identities and
+  extents; two revisions or two stack namespaces are not collapsed merely because their bytes digest alike.
+- **The checkpoint budget and mutation path are mandatory operands.** `budget : StorageBudgetId` resolves
+  exactly once against the owning MinIO backing (or an explicitly selected provider-object quota); missing,
+  duplicate, wrong-owner, or one-byte-short budgets reject before an executor or cloud effect. The exclusive
+  object-write gateway enforces the snapshot-bound `ObjectStoreMutationAdmission` identity, object/count/size
+  class, serial update, retention, failure window, orphan-GC horizon, and aggregate budget. Executor and host
+  credentials have no direct mutating S3 route; a PUT/CAS outside that gateway is denied rather than making the
+  provision witness stale silently. The gateway is itself a resource-bearing execution unit: its admitted
+  concurrency/rate/model derives a complete image/CPU/memory/pod-ephemeral/log/writable/cardinality-transition
+  `PodResourceEnvelope` with exact byte-free `PodRuntimeMetadataSource` network/mount identities, which is
+  placed before checkpoint writers are enabled.
 - **Encryption = a Vault-Transit envelope.** The checkpoint is sealed with a data key that Vault's Transit
   engine wraps and unwraps; the plaintext key never lands on disk, and MinIO sees only ciphertext.
   **This doctrine does not own the envelope mechanism** — the Transit mount, the
   wrap/unwrap policy, the seal/unseal posture, and the parent/child trust tree are owned by
   [vault_pki_doctrine.md](./vault_pki_doctrine.md). This doc owns only the *requirement* that Pulumi state
-  be a Transit-enveloped MinIO object and never anything weaker.
+  be a Transit-enveloped MinIO object set and never anything weaker.
 - **Parent-owned child state is keyed per child.** When a parent spawns a child, the parent's checkpoint for
   that child-infrastructure deploy and the child's subtree spec are enveloped under the child's **own per-child
   Transit key**
   (`transit/amoebius-<child-id>-config`), not a single shared parent key — so a child's checkpoint is opaque
   to its siblings even under an unsealed parent. The per-child key mechanism and policy are owned by
   [vault_pki_doctrine.md §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes); this doc
-  only requires that each child's backend object use it.
+  only requires that every object in the child's backend namespace use it.
 - **Durability rides the platform's durable storage.** Because the backend is MinIO, and MinIO's own bytes
   live on retained backing exposed through `no-provisioner` PV bindings, a checkpoint survives teardown and
   rebuild of the **owning** cluster exactly the way every other durable object does — the rebuilt owner creates
@@ -160,7 +210,7 @@ opaque ciphertext.
 ```mermaid
 flowchart TD
   singleton[Control-plane singleton runs the Pulumi engine in-cluster] -->|deploy and destroy actions| target[Cloud or SSH API: provider cluster, EBS, route53, child nodes]
-  singleton -->|read and write the checkpoint| minio[MinIO object: opaque enveloped Pulumi state]
+  singleton -->|read and write admitted checkpoint identities| minio[MinIO object set: opaque enveloped Pulumi state]
   singleton -->|wrap and unwrap the state data key| vault[Vault Transit mount]
   vault -->|envelope-encrypts the checkpoint| minio
 ```
@@ -168,7 +218,8 @@ flowchart TD
 > **Honesty.** This backend shape is **proven in the sibling prodbox project** (`Prodbox.Pulumi.EncryptedBackend`:
 > a scratch backend hydrated from an opaque Model-B MinIO object, with a Transit/KV Vault gate on every
 > apply/destroy). That is *evidence from a sibling system, not proof in amoebius*, which has not built its
-> backend layer. Read every statement here as design intent
+> backend layer; amoebius's exact retained-revision/failed-partial object-set model is additional design, not
+> a claim about prodbox's physical object layout. Read every statement here as design intent
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---
@@ -204,7 +255,7 @@ credential class.* In prodbox this is machine-enforced — every stack is one `S
   ([storage_lifecycle_doctrine.md §7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation)): durable storage exists until a
   deliberate, privileged deletion, never "until the next teardown."
 - **The class assignment is the single source of truth for both backend and credential.** A resource's
-  class selects *which* checkpoint object it lives in and *which* credential may mutate it, so the two can
+  class selects *which* logical checkpoint namespace it lives in and *which* credential may mutate it, so the two can
   never drift apart. The managed-resource registry that makes this total — one typed entry per creatable
   resource, each with a `discover` and a `destroy` — is owned by the reconciler doctrine
   ([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)); this doc supplies the Pulumi
@@ -223,11 +274,11 @@ duplicates it.
 
 | Resource | What Pulumi does here | Owned by |
 |---|---|---|
-| **Provider-managed clusters** (EKS — prodbox's reality) | Provision the managed cluster via cloud keys over the API, from inside a parent; land the stateless in-cluster singleton daemon | Lifecycle meaning: [cluster_lifecycle_doctrine.md §1, §3](./cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape) |
+| **Provider-managed clusters** (EKS — prodbox's reality) | Provision the managed control plane and worker pools via cloud keys from inside a parent for the authored `Managed Eks.account : CloudAccountId`, using only named `ProviderNodeClass { name, sku, allocatable, quotaVcpu, zones, price, baseCount, maxCount }` values. `allocatable` is the complete `ProviderNodeCapacityTemplate { allocatableCpu, allocatableMemory, podSlots, cniSlots, attachableVolumes, localDisks, cpuOvercommit, localStorage, accelerator }`. Each `localDisks` recipe declares raw `InstanceStore.provisionedRawBytes` or an `EphemeralRootEbs` policy separately from usable `ProviderUsableDiskCarveTemplate.requiredUsableBytes` system/layout carves; private provisioning derives mounted usable capacity and proves their nested fit. Land the stateless in-cluster singleton and capacity-scheduler roles, then admit each joined Node through the managed taint/admission/Binding authority before workload use | Topology/worker-supply shape: [cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm); lifecycle meaning: [cluster_lifecycle_doctrine.md §1, §3](./cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape) |
 | **Spawned self-managed children** (`kind` / `rke2`) | Provision nodes via one or more SSH keys, then bring up the standard service set | Spawn lifecycle: [cluster_lifecycle_doctrine.md §3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest) |
-| **Dynamic node provisioning** | Add/drain EC2 or managed nodes driven by load / spot cost / workflow completion, enacting a typed `ScalingPolicy` | Elastic-shape policy: [cluster_lifecycle_doctrine.md §8](./cluster_lifecycle_doctrine.md#8-dynamic-node-provisioning); the `ScalingPolicy` type + capacity fold: [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns) |
-| **Cloud resource quota** | The outer bound on cloud storage/compute — the `CloudQuota` backing ceiling and the `ScalingPolicy` cap, so "unbounded" cloud storage is never truly unbounded | Backing union: [storage_lifecycle_doctrine.md §5.2](./storage_lifecycle_doctrine.md#52-the-storage-backing-is-bounded--the-closed-storagebacking-union); the fold: [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) |
-| **Per-PV EBS volumes** | One Pulumi-created EBS per PV, sized 1:1 to its PVC, decoupled from the EC2/node lifecycle and attached through a statically rendered `ebs.csi.aws.com` PV whose `volumeHandle` is the Pulumi volume ID | Sizing/rebind/static-attach invariant: [storage_lifecycle_doctrine.md §5, §5.1](./storage_lifecycle_doctrine.md#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim); credential model: [§6](#6-the-ebs-create-vs-delete-credential-model) here |
+| **Dynamic node provisioning** | Add/drain a compatible named node class driven by load / spot cost / workflow completion, only after the full pending envelope and worst-case instance count fit that class and quota | Elastic-shape policy: [cluster_lifecycle_doctrine.md §8](./cluster_lifecycle_doctrine.md#8-dynamic-node-provisioning); the `ScalingPolicy` type + capacity fold: [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns) |
+| **Cloud resource quota** | Observe authoritative regional limits and complete current allocations; spend only `min(declared carve, observed limit − usage)` separately for instance/vCPU/accelerator, ephemeral node-root EBS bytes/count, durable retained bytes/count, and each provider-object quota's selected Logical/Billed bytes plus object count; unknown/incomplete usage refuses and one ledger/unit cannot pay another | Backing union: [storage_lifecycle_doctrine.md §5.2](./storage_lifecycle_doctrine.md#52-the-storage-backing-is-bounded--the-closed-storagebacking-union); the fold: [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) |
+| **Per-PV EBS volumes** | Derive/debit a deterministic promised provider-volume slot before create; one claim slot maps to exactly one PVC, one PV, and one Pulumi-created EBS. The private request derives required usable bytes, applies `VolumePresentation` overhead, and rounds to the provider minimum/GiB quantum; its `provisionedBytes` is rendered unchanged on the PVC/PV and EBS request before the returned ID is attached through a static `ebs.csi.aws.com` PV | Sizing/rebind/static-attach invariant: [storage_lifecycle_doctrine.md §5, §5.1](./storage_lifecycle_doctrine.md#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim); credential model: [§6](#6-the-ebs-create-vs-delete-credential-model) here |
 | **DNS — route53** | Provision/maintain hosted zones and records | This doctrine, [§5](#5-dns-route53-and-tls-zerossl-the-provider-integrations-this-doctrine-owns) |
 | **TLS — zerossl** | The ACME **provider integration** only: the ZeroSSL account/directory choice, the EAB credential (a `SecretRef` into Vault), the route53 zone/credential the solver uses, and the **retained** certificate material across rebuilds. **Issuance itself is cert-manager's**, in-cluster — see [§5.2](#52-tls--zerossl) | This doctrine, [§5](#5-dns-route53-and-tls-zerossl-the-provider-integrations-this-doctrine-owns); the in-cluster issuer → [manifest_generation_doctrine.md §4](./manifest_generation_doctrine.md#4-no-third-party-charts--no-third-party-software-operators-are-generated) |
 
@@ -245,6 +296,69 @@ Two boundaries worth stating, because they are easy to blur:
   failover **repoint** of those DNS records when a lead's gateway dies is owned by
   [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Provisioning, routing, and failover are three
   different concerns with three different owners.
+- **Resource/capability admission precedes cloud mutation.** Before `pulumi up` may create a control plane,
+  node group, instance, or EBS volume, the fully expanded `BoundDeployment` must construct a
+  `ProvisionedInfrastructurePlan` against the complete declared provider node classes and the exact
+  `ProviderQuota { maxInstances, maxVcpu, acceleratorCaps, nodeRootStorage, durable }`. The fold preserves each
+  class's exact `name`, `sku`, `allocatable`, `quotaVcpu`, `zones`, `price`, `baseCount`, and `maxCount` fields.
+  In particular, `allocatable` preserves `podSlots`, CNI/IP `cniSlots`, driver-indexed
+  `attachableVolumes`, `localDisks`,
+  `cpuOvercommit`, `localStorage.imageStorageModel`, `localStorage.imagePullConcurrency`, and the accelerator
+  slot/link offering rather than reconstructing any of them. Every `localDisks` member preserves the exact
+  `PerInstanceDiskTemplate { id, backing, systemReserve, carves }`: `backing` is
+  `InstanceStore { skuDevice, provisionedRawBytes, presentation } | EphemeralRootEbs { policy }`, while
+  `systemReserve` and every non-empty `carves` member are
+  `ProviderUsableDiskCarveTemplate { id, requiredUsableBytes }`. Each selected ordinal first receives a globally scoped
+  `ProviderInstanceId { account, cluster, class, ordinal }`; two nodes from one class instantiate separate
+  symbolic template paths and must join with distinct concrete backing/carve/device identities
+  from the cloud result. No compatible class, worst-case
+  instance-count overflow, node-root- or durable-quota overflow, or missing CUDA offering returns a structured error with
+  zero Pulumi/AWS mutations. The plan is not renderable: its validated batch is CAS-enacted and the matching
+  provider readback constructs `ObservedInfrastructureMaterialization`; only then does `ProvisionContext`
+  permit the final `ProvisionedSpec` seal. After nodes join, their observed allocatable/device inventory is
+  cross-checked before in-cluster apply; cloud creation is never used merely to discover that the requested
+  deployment cannot fit. `ProviderInstanceId.account` is copied unchanged from `Managed Eks.account`; the same
+  `CloudAccountId` must exact-join `SharedSupplyLedger.accounts`, the credential binding, AWS Service Quotas,
+  current allocations, and every provider action. A missing key, a quota snapshot from another account, or a
+  credential/account mismatch refuses before Pulumi starts. Admission also reads AWS Service Quotas plus current instances/volumes and the pinned
+  instance-type/zone/price catalog; it uses only residual account capacity and refuses unknown/incomplete
+  observations. Replacement overlap keeps old and new root volumes charged until deletion is freshly
+  observed. Success is a single-use snapshot token immediately rechecked before every Pulumi/AWS
+  mutation.
+- **Provider-object quota observation is byte-unit exact.** Every referenced `CloudQuotaBacking` selects the
+  closed `Logical { model, witness } | Billed { model, conversion, witness }` accounting arm declared by its
+  `StorageQuota`. `observeProviderAccount` must return complete current usage in that exact byte unit **and**
+  complete current object count under one fingerprint. A logical observation enumerates every in-scope live object version
+  under the pinned logical-size model; a billed observation uses the provider's pinned billing/rounding model
+  and its named logical-to-billed conversion. Unit mismatch, incomplete pagination/version inventory, a meter
+  whose observation window cannot be joined to the snapshot, or unknown usage refuses before checkpoint or
+  cloud mutation; none is normalized to zero and neither byte arm can pay the other implicitly.
+- **Pod, CNI/IP, and CSI-attachment capacity are provider resources, too.** A `ProviderNodeClass` carries a
+  `podSlots` policy, a CNI/IP `cniSlots` policy, and a driver-indexed `attachableVolumes` policy, all derived
+  from the pinned SKU/CNI/CSI
+  catalog rather than inferred from CPU. Placement spends one pod slot for every simultaneously live pod and
+  one driver-scoped attach slot for every unique CSI PVC mounted on that node; repeated container/pod mounts of
+  the same PVC spend one attachment, and node-local volumes spend none. Executor/copy Jobs, controller children,
+  DaemonSets, old/new replicas, surge, and terminating overlap all count. Live admission uses the lesser of the
+  declaration, kubelet `status.allocatable.pods` and remaining CNI/IP capacity, and the observed
+  `CSINode`/SKU driver limit. An account-wide EBS-volume count cannot pay a per-node attach-slot debt, and an
+  unknown or smaller live limit refuses before workload apply.
+- **Provider per-instance disk geometry is raw/usable exact.** An `InstanceStore` template carries
+  `provisionedRawBytes`, never an unqualified `provisionedBytes`; that field must equal its catalog-pinned SKU
+  device's raw capacity. An `EphemeralRootEbs` template contains only its volume type, filesystem-only
+  `FilesystemPresentation`, and `BackingAllocationPolicy`; it has no caller-authored byte request. The
+  provision fold totals `systemReserve.requiredUsableBytes` and the unique kubelet-layout carve
+  `requiredUsableBytes`, applies presentation overhead and provider minimum/GiB quantum, and privately
+  constructs
+  `ProvisionedNodeRootVolumeRequest { volumeType, requiredUsableBytes, presentation, allocation, sizeGiB,
+  provisionedBytes, witness }`. Pulumi receives exactly that
+  request; its witness retains the selected allocation minimum/quantum and presentation derivation. Pulumi
+  debits node-root EBS bytes/count (separate from durable-volume quota). For either backing arm, private
+  `ProvisionedPerInstanceDiskTemplate` derives presentation-model-pinned `mountedUsableBytes` from the raw SKU
+  supply or rounded request, then proves the usable system reserve plus unique usable carves fit that mounted
+  capacity exactly once. Live admission checks the returned raw block/device size, mounted usable bytes/fs
+  type, and layout limits before the node can host workloads; no raw provider byte count can pay a usable
+  filesystem carve directly.
 - **A provider-native node capability is *surfaced* into this catalog, never re-built.** Should a provider
   offer off-cloud full-member nodes on its own managed control plane — **EKS Hybrid Nodes** — that capability,
   if ever added, would enter this catalog as one more Pulumi-provisioned resource the `Managed Eks` arm
@@ -335,7 +449,7 @@ default, *destroy* it on `pulumi destroy`. If the ephemeral cluster stack owned 
 the cluster down would delete the data. So the EBS volumes must be **structurally** outside the ephemeral
 destroy set, and the authority to delete them must be **structurally** withheld from normal operation.
 
-**The resolution — four locked decisions.**
+**The resolution — five locked decisions.**
 
 1. **EBS volumes are in Pulumi, but in their own durable class — never in the ephemeral cluster stack.**
    The cluster stack (VPC, EKS/EC2, node group) is per-run and freely destroyable; the per-PV EBS volumes
@@ -344,6 +458,14 @@ destroy set, and the authority to delete them must be **structurally** withheld 
    storage_lifecycle's node-vs-storage decoupling: a destroyed node's volume detaches and survives, and
    the next bring-up re-attaches the same volume to the same claim
    ([storage_lifecycle_doctrine.md §5.1, §6](./storage_lifecycle_doctrine.md#51-storage-is-independent-of-the-node-lifecycle)).
+   Before create, the provision witness contains a deterministic `ProviderVolumeSlotId` derived from account,
+   cluster, StatefulSet claim slot, and the private allocation-rounded `ProviderVolumeRequest` (type, zone,
+   `requiredUsableBytes`, allocation minimum/quantum, `sizeGiB`, `provisionedBytes`, presentation, and
+   witness)—never a fabricated future EBS id. Its rounded raw
+   bytes/count debit the observed quota. `CreateVolume` moves the private backing from `Promised` to
+   `Materialized` only after the returned raw size and `ProviderVolumeId` are attached and cross-checked;
+   retained rebind preserves the slot. The 1:1 rule here is claim/PVC/PV/EBS identity and cardinality, not
+   equality between logical, usable, pre-rounding raw, and provider-rounded bytes.
 2. **Normal operational credentials can create EBS but cannot delete it.** The least-privilege operational
    credential — the one a running cluster uses for ordinary deploys — is granted `ec2:CreateVolume` (and
    the cluster-stack create/delete it needs) but **denied `ec2:DeleteVolume`** on durable, retained
@@ -367,6 +489,21 @@ destroy set, and the authority to delete them must be **structurally** withheld 
    `kubernetes.io/no-provisioner`. The CSI runtime identity is distinct from the Pulumi operational identity:
    it may describe/attach/detach, but is denied both `CreateVolume` and `DeleteVolume`. This consumes the
    provider's upstream CSI implementation; amoebius does not build its own attach controller.
+5. **Replacement and shrink are explicit old+new migrations, never in-place edits or advance capacity
+   credit.** A provider-volume transition starts from a `StorageMigrationIntent` naming a raw
+   `PriorProvisionRefSource` Volume arm. Gate 2 validates and brands that arm as an opaque
+   `PriorVolumeProvisionRef`; binding expands it to
+   `StorageMigrationDemand { identity, old, replacement, policy }`. Provisioning resolves `old` from the
+   prior `ProvisionedSpec` context and presentation-rounds the
+   replacement and privately returns `ProvisionedStorageMigration { old, replacement, workspaceBytes,
+   copyExecution, perBackingPeak, witness }`. Before `CreateVolume`, the fold fits the old raw allocation, new
+   raw allocation, copy/verification workspace, provider volume-count overlap, and the complete copy/verify
+   Job `PodResourceEnvelope` (image, CPU/memory, pod-ephemeral, logs, writable root, mapped inputs, exact
+   byte-free `PodRuntimeMetadataSource` network/mount identities, concurrency, rollout, and termination).
+   Cutover follows verified copy; failure or loss of observation retains both
+   volumes and the checkpoint evidence. Even after cutover, old bytes/count remain charged until a fresh
+   privileged external observation proves deletion, so a smaller desired volume is never capacity credit for
+   creating its replacement.
 
 Production break-glass reclaim is deliberately outside this automated model. No `.dhall`, reconciler, or
 test-harness credential can delete production EBS; after verified migration the old backing remains until a
@@ -428,9 +565,17 @@ multiple independent pulumi deploys)"**.
   algebra; the algebra itself is owned by [dsl_doctrine.md](./dsl_doctrine.md).
 - **Parallelism never weakens the safety rules.** Concurrent deploys still each run under [§1](#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster) (inside the
   cluster, under the singleton, no env vars), [§2](#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio) (enveloped MinIO state), and [§3](#3-state-lifetime-matches-resource-lifetime-per-class) (lifetime/credential
-  class). Two deploys writing the *same* checkpoint object would be a data dependency and therefore are
+  class). Two deploys writing the *same* logical checkpoint namespace would be a data dependency and therefore are
   **not** independent — they would compose monadically, not applicatively — so applicative fan-out cannot
   produce a write-write race on one checkpoint by construction.
+- **Fan-out is finite and its physical peak is admitted first.** The applicative graph becomes the exact
+  `deploys` inventory in `PulumiExecutionDemand`; `BoundedParallel n` is a finite constructor, not a scheduler
+  hint or an unbounded worker pool. The execution model expands every dependency-valid concurrent deploy set,
+  joins each referenced plugin by identity/digest, and derives the simultaneously live executor-Job envelopes,
+  each deploy's explicit bounded cache, plugin install peak, and workspace/checkpoint-temporary peak. Only the private
+  `ProvisionedPulumiExecutionDemand` exposes an enaction continuation. Dropping one parallel executor from the
+  peak, serializing at runtime after admitting an under-sized parallel declaration, or increasing `n` without
+  reprovisioning is a failed admission, not a performance choice.
 - **It composes with the orthogonal deployment-rules surface.** "Run these N children" is a
   deployment-rule, not app logic ([app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md)); the
   applicative fan-out is how that rule is *enacted* efficiently when the N are independent.
@@ -447,6 +592,61 @@ Every Pulumi action in this document — spawn a child ([§4](#4-what-pulumi-pro
 ([§6](#6-the-ebs-create-vs-delete-credential-model)), create a DNS record or issue a cert ([§5](#5-dns-route53-and-tls-zerossl-the-provider-integrations-this-doctrine-owns)) — is enacted by the **same reconciler shape** the rest of
 amoebius uses: *observe the authoritative source, diff against the `.dhall`, enact, re-observe,* idempotent
 by construction, with three-valued `Present | Absent | Unreachable` observation and `Unreachable → refuse`.
+Every arm's read-only prefix includes exact checkpoint-object inventory/metadata, the complete parent
+`ObservedInventory`, parent executor capacity and live commitments, plugin/workspace/cache backing residuals,
+and live pod/CNI/CSI slots. Cloud-provider arms additionally observe authoritative account quota/current
+usage, SKU offerings/catalog, provider-resource inventory, and every referenced provider-object quota's
+complete selected-unit byte usage and object count under the declared accounting-model version. SSH-host arms
+instead observe the authoritative host capacity, existing child identity/generation, and host/credential
+binding. A single `ProvisionedProviderActionBatch` owns the exact closed cloud-provider/SSH-host action map,
+deploy graph, checkpoint domain, dependency order, concurrency admission, and
+cloud-quota/SSH-child-budget partition. Each action carries only its exact deploy and checkpoint projections;
+it cannot embed or replay a duplicate executor graph. Batch validation reruns every executor
+CPU/memory/pod-ephemeral/pod/CNI/CSI-slot and backing fit against that fresh parent snapshot and returns the
+matching snapshot-bound `ValidatedInfrastructureActionBatch`. Its action map contains the appropriate
+single-use `ValidatedCloudProviderAction` or `ValidatedSshHostProviderAction` arm. The cloud arm's complete
+fingerprint is account-keyed and re-read immediately before each create/modify/destroy/EBS mutation; the SSH
+arm re-reads its exact host/child snapshot immediately before mutation. Either change restarts observation
+with zero mutation under the stale token.
+The executor's `InClusterCacheDemand` is observed through its `InClusterCacheOwner.volume` and that target
+node's nodefs/elastic carve residual; it cannot be reinterpreted as a native-host `CacheBackingId` or a
+durable host/EBS backing.
+
+Initial infrastructure is two-stage. `planInfrastructure` can return only a `ProvisionedInfrastructurePlan`
+owning one `ProvisionedProviderActionBatch`, not a renderable `ProvisionedSpec`. Fresh validation constructs
+the `ValidatedInfrastructurePlan`; its plan token and every arm-specific action token are CAS-consumed into
+one `InfrastructureEnactmentReceipt`. Only provider/host readback tied to that receipt can construct
+`ObservedInfrastructureMaterialization` and hence `ProvisionContext`. A child-create payload therefore carries
+the bound child intent plus disjoint `ClusterBudget`, never a child spec that presupposes the infrastructure
+being created. Within the cloud arm, managed-node actions solely own their exact root-volume request map and
+debit; there is no independent node-root-volume action that could create or charge the same EBS twice.
+Cloud-only runtime storage-capacity transitions and live cloud targets narrow the generic owner to opaque
+`ProvisionedCloudActionBatch` / `ValidatedCloudActionBatch` refinements; an SSH-host child batch cannot enter
+those paths.
+
+Rendering is a projection of the private provisioned values, not a second sizing pass. Executor and migration
+Jobs receive exactly the witnessed image, requests/limits, pod-ephemeral/log/writable allowances, volumes, and
+bounded parallelism; `CreateVolume` receives exactly the witnessed raw GiB request; checkpoint writes receive
+only the admitted object identities/extents. Cloud-action readback compares live Job/Pod specs and placement, PVC/PV/EBS raw
+and usable geometry, observed-Pod-UID runtime-metadata components/roles/layout backings and the scope-indexed
+node aggregate, Node/`CSINode` slot
+limits, object `HEAD`/revision inventory, each provider-object quota's exact accounting arm/current
+selected-unit bytes/object count, and all five independent provider quota fields to the same account-keyed
+witness. SSH-host child readback instead exact-joins the host, child identity/generation, checkpoint, budget,
+and observed child materialization to the consumed SSH-host token. The conformance corpus includes missing-account,
+wrong-account, credential/account-mismatch, dropped-slot-policy, dropped-largest-metadata-row,
+changed-or-missing-kubelet-metadata-model, role/backing drop-or-swap, planned/observed-domain mismatch,
+qualified Pod/image ownership hole/overlap, alias double debit, both SplitRuntime backing one-short, and
+one-short-per-quota-field mutants. Provider-object cases additionally mutate the selected byte arm, one byte,
+one object, accounting-model version, and inventory pagination/version completeness independently. A
+one-unit shortfall or a renderer/live value that differs from the witness refuses the next effect; it is never
+repaired by silently recomputing a smaller demand.
+
+Module ownership is explicit: `src/Amoebius/Capacity/RuntimeStorage.hs` owns the shared structural
+component-role/layout and node-aggregate fold; `amoebius-pulumi/src/Amoebius/Pulumi/Observed.hs` owns Pulumi
+executor/Job readback normalization; and `amoebius-pulumi/test/RuntimeStorageSpec.hs` owns the planned-slot→observed-Pod-UID,
+SplitRuntime backing, scope/domain/ownership, reservation/observed no-double-debit, and alias-control
+conformance cases.
 
 This doc **does not own** that machinery. The reconciler-with-predicates pattern, the managed-resource
 registry, the totality/soundness/idempotence invariants, and the canonical teardown cascade are owned by
@@ -459,7 +659,7 @@ feeds the storage/manifest renderer, not the Pulumi registry. The Pulumi-specifi
    checkpoint** ([§2](#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio)) and whose `destroy` runs the matching `pulumi destroy` — observed read-only *first*,
    so a corrupt or unreadable checkpoint **refuses** (fail-closed) rather than crashing or silently
    skipping.
-2. Each entry carries its **lifetime class** ([§3](#3-state-lifetime-matches-resource-lifetime-per-class)), which selects its checkpoint object and its credential
+2. Each entry carries its **lifetime class** ([§3](#3-state-lifetime-matches-resource-lifetime-per-class)), which selects its logical checkpoint namespace and its credential
    class — so a per-run checkpoint closes only after target absence is proven, while durable/long-lived state
    is never auto-destroyed.
 3. Each entry carries its **credential class** ([§6](#6-the-ebs-create-vs-delete-credential-model)), so the create/delete authority boundary is part of the
@@ -479,7 +679,7 @@ To keep SSoT boundaries crisp:
 | Concern | Owned by |
 |---|---|
 | The Vault Transit envelope mechanism, seal/unseal, parent/child trust tree, secret-by-name injection | [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
-| MinIO durability / retained-PV rebind that the checkpoint object rides on; EBS sizing (1:1 per PV) and node-vs-storage decoupling; the cardinal "no normal deletion of durable data" rule | [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) |
+| MinIO durability / retained-PV rebind that the checkpoint object set rides on; EBS presentation/allocation sizing and 1:1 claim/PVC/PV/EBS identity/cardinality (not logical-byte equality); node-vs-storage decoupling; the cardinal "no normal deletion of durable data" rule | [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) |
 | The reconciler-with-predicates pattern, managed-resource registry, teardown cascade, `Unreachable → refuse` | [cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) |
 | The *lifecycle meaning* of spawning a child, dynamic node provisioning, push-back on unsatisfiable root `InForceSpec` | [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md) |
 | The elevated test harness as the sole automated deleter of test-owned storage, test flags, leak-free cycles, and the per-run ledger | [testing_doctrine.md](./testing_doctrine.md) |
@@ -489,6 +689,7 @@ To keep SSoT boundaries crisp:
 | Making "DNS bound to the wrong IP", "a PVC that can't bind", "open ingress" unrepresentable | [dsl_doctrine.md](./dsl_doctrine.md), [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) |
 | Which daemon context runs the Pulumi engine (the control-plane singleton) | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
 | The no-env / no-`PATH` lazy-tool-ensure contract for the `pulumi` binary and plugins | [substrate_doctrine.md](./substrate_doctrine.md) |
+| The canonical `PulumiCheckpointObjectDemand`, `PulumiExecutionDemand`, pod/CNI/CSI-slot, provider-quota, and storage-migration capacity types and pure fold | [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) |
 
 ---
 

@@ -16,8 +16,8 @@ it ([chaos_failover_doctrine.md](./chaos_failover_doctrine.md)):
 
 - **Intra-cluster replicated state** — object storage, the message log, the SQL primary — is delegated to
   **MinIO**, **Pulsar/BookKeeper**, and **Percona/Patroni Postgres**.
-- **Single-instance of the control-plane singleton** is delegated to **k8s/etcd**: the singleton is a
-  Deployment `replicas=1`, and a hard lock (if ever needed) is a k8s `Lease`, itself etcd-backed
+- **Single-writer authority of the control-plane singleton** is delegated to **k8s/etcd**: the singleton is a
+  Deployment `replicas=1` protected by the mandatory reconciler `Lease`
   ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)). There is
   **no bespoke leader election** — amoebius does not duplicate etcd, and there is no First-Axis
   singleton-election model to prove.

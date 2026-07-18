@@ -26,7 +26,9 @@ forecloses is amoebius reimplementing MinIO, Pulsar, autodiff, or inference orch
 and whose re-doing would be pure risk.
 
 The lifting is itself pre-cluster-validatable ([conformance_harness_doctrine.md](./conformance_harness_doctrine.md)):
-re-homing a proven core onto a new seam is decode/render/compose work exercised in Registers 1 and 2.
+re-homing a proven core onto a new seam is
+decode/bind/plan-or-resolve-infrastructure/provision/`renderAll`/compose work exercised in Registers 1
+and 2.
 
 ---
 
@@ -38,7 +40,7 @@ Each row is a shape lifted largely intact; the change is the *seam* it plugs int
 |---|---|---|
 | `chain`/`Step` algebra, host-lift, binary-context/witness | `hostbootstrap` `Step.hs`/`Chain.hs`/`Lift.hs`/`Context.hs` (prodbox vendors it) | the kernel; extended with a GADT-indexed IR |
 | Dhall decode + smart-constructor illegal-state types + schema-reflected-from-Haskell | `prodbox` `Settings`, `Cluster/Topology.hs`, `SchemaDhall.hs`; `hostbootstrap` `Dhall/Gen.hs` | the two typed gates + the full illegal-state catalog |
-| Pure manifest render + byte-for-byte dry-run goldens | `prodbox` `CLI/Charts.hs`, `Lib/ChartPlatform.hs`, `EksImageMirror.hs` | `render :: ServiceSpec -> [K8sObject]` ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)) |
+| Pure manifest render + byte-for-byte dry-run goldens | `prodbox` `CLI/Charts.hs`, `Lib/ChartPlatform.hs`, `EksImageMirror.hs` | deployment-global `renderAll :: ProvisionedSpec -> [K8sObject]`, after the amoebius post-bind resource/capability seal ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)) |
 | Numerical core / autodiff / JIT codegen / RL-SL-AlphaZero / tuning | `jitML` `Numerics/*`, `Codegen/*`, `RL/*`, `SL/*`, `Tune/*` | an extension's `extChain`; hardware is a deployment rule |
 | Determinism kernel (SplitMix) + content-addressed CBOR checkpoint store | `jitML` `Engines/Rng.hs`, `Checkpoint/*` | `Kernel/{Rng,ContentAddress,ExperimentHash}` ([content_addressing_doctrine.md](./content_addressing_doctrine.md)) |
 | Inference orchestration, engine-pool routing, durable-context event-source, JWT | `infernix` `Runtime/*`, `Conversation/*`, `Auth/Jwt.hs` | an extension nested under the `InForceSpec` |
@@ -52,7 +54,7 @@ The substance lifts; the **infrastructure envelope** around it is replaced, beca
 amoebius already rejects on doctrine grounds. These are the only parts rewritten, and each re-homing is
 Register-1/2 validatable:
 
-- **Helm charts → typed `render`.** Both siblings deploy via Helm; amoebius renders the full object set from
+- **Helm charts → typed `renderAll`.** Both siblings deploy via Helm; amoebius renders the full object set from
   typed Haskell with its own apply engine ([manifest_generation_doctrine.md §1](./manifest_generation_doctrine.md#1-why-this-doctrine-exists-types-render-manifests-helm-does-not)).
 - **Pulsar WebSocket + protobuf + base64-in-JSON → the native CBOR client.** Both siblings speak Pulsar over a
   WebSocket bridge with base64-inflated JSON; amoebius speaks the native binary protocol with exclusively-CBOR
@@ -106,7 +108,7 @@ is design intent, never a tested amoebius result.
 
 - [Engineering Doctrine Index](./README.md)
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — a demo web app is application logic, not an extension
-- [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — Helm → typed render
+- [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — Helm → typed `renderAll`
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — WebSocket/protobuf/base64 → native CBOR
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — k8s-Secret → Vault secrets-by-name
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — Python engine-fork/baked → jit-build bounded cache

@@ -22,8 +22,9 @@ It owns nothing but the faithful reproduction of these entries. The catalog **in
 **honesty limit** (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are
 owned by [`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques**, the
 **coverage matrix**, the **three foreclosure layers**, and the **validation-locus axis** (the orthogonal
-axis — `Gate-1-editor` / `Gate-2-decoder` / `rendered-output-golden` / `live-effect` — added on each entry
-below) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice references
+axis — `Gate-1-editor` / `Gate-2-decoder` / `provision-seal` / `rendered-output-golden` / `live-effect` — added
+on each entry below; `provision-seal` is post-bind Phase-8 provision returning a `ProvisionError` before any
+`ProvisionedSpec`) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice references
 them and does not restate them.
 
 Everything below is **design intent**, per the honesty discipline of
@@ -80,17 +81,23 @@ that one host, and a second host has no field to bind. **Owner:**
 
 A multi-node rke2 cluster needs one distinct Linux host per node; raw tooling permits asking for five nodes with
 three machines, or reusing one machine for two nodes. amoebius's `Rke2` arm carries
-`{ servers : Rke2Servers, agents : List LinuxHost }`: the server arm fixes the server count structurally
-(`Single`/`Ha3`/`Ha5`, [§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)) and the `agents` list binds one `LinuxHost` per worker, so every node names its
-own host field and "more nodes than hosts" cannot be built. **Distinctness** ("no host reused") is the one part
-Dhall cannot express as a type (no Set-distinctness), so it degrades to the total decode-time `mkRke2` fold that
-rejects a duplicate `HostId` **over `servers ∪ agents`** — a server host reused as an agent, or two agents on one
-machine, is caught alongside two servers on one machine. This **generalizes** the original "the node list *is*
-the host list" cardinality to the split server/agent inventory (the quorum shape itself is [§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)). **Owner:**
+`{ servers : Rke2Servers, agents : Fixed (List LinuxHost) | Autoscaled { floor, policy } }`: the server arm
+fixes the server count structurally (`Single`/`Ha3`/`Ha5`,
+[§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)), and every fixed/floor agent
+binds one `LinuxHost`; future agents are represented by the policy's non-empty candidate classes and finite
+quota, not by fictitious host values. **Distinctness** ("no declared host reused") is the one part Dhall cannot
+express as a type (no Set-distinctness), so it degrades to the total post-bind provision fold that rejects a
+duplicate `HostId` **over `servers ∪ agentFloor`** — a server host reused as an agent, or two declared agents on
+one machine, is caught alongside two servers on one machine. This **generalizes** the original "the node list
+*is* the host list" cardinality to the split fixed/elastic server-agent inventory (the quorum shape itself is
+[§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)). **Owner:**
 [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (`node == host`
-cardinality) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (distinctness fold over `servers ∪ agents`). **Layer:** decode-foreclosed — assigned to its weaker
+cardinality) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (distinctness fold over `servers ∪ agentFloor`). **Layer:** decode-foreclosed — assigned to its weaker
 distinctness floor; the cardinality sub-part is type-foreclosed.
-**Validation-locus:** `Gate-2-decoder` (the total `mkRke2` distinctness fold over `servers ∪ agents` returns `Left` on a reused `HostId`) + `Gate-1-editor` (the `node == host` cardinality sub-part — one required `host` field per node, `replicas`/`agents` never conjures a host).
+**Validation-locus:** `provision-seal` (the post-bind distinctness fold over `servers ∪ agentFloor` returns a
+`ProvisionError` before any `ProvisionedSpec` exists on a reused `HostId`) + `Gate-1-editor` (the fixed-node cardinality
+sub-part — one required `host` field per declared node; an elastic candidate is a capacity/substrate class, not
+a host).
 
 ### 3.24 An even/zero-server rke2 control plane (no etcd quorum / split-brain)
 
@@ -100,9 +107,10 @@ makes the server set a **closed union** `Rke2Servers = < Single : LinuxHost | Ha
 only arms are the legal **odd etcd quorums {1, 3, 5}**: a 0- or 2-server control plane has no constructor. This
 is the same "no unbounded arm" idiom as the `StorageBacking`/`Growable` unions ([§3.18](./illegal_state_storage.md#318-unbounded-storage-anywhere), [§3.21](./illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)) — the illegal
 cardinality is not rejected, it is *unrepresentable*. The root cluster is
-`{ servers = Rke2Servers.Single host, agents = [] }` (the existing zero-secret single node); HA is capped at 5
+`{ servers = Rke2Servers.Single host, agents = Fixed [] }` (the existing zero-secret single node); HA is capped at 5
 by design, and a `Ha7` arm is a deliberate future add, not an omission. A quorum change (`Single` → `Ha3`) is a
-deliberate re-provision, **never** a `ScalingPolicy`/autoscale — `ScalingPolicy` grows the `agents` list only.
+deliberate re-provision, **never** a `ScalingPolicy`/autoscale — `ScalingPolicy` exists only inside the
+`Autoscaled` agent arm and grows that data plane.
 The control-plane taint and its tolerations are **derived** from the server set, never hand-authored (the
 [§3.5](./illegal_state_capacity.md#35-undeployable-pods-taints-tolerations--affinity)/[§3.22](./illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration) derive-don't-author discipline). **Owner:**
 [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `Rke2Servers`

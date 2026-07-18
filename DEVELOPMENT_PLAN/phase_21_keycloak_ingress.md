@@ -90,12 +90,62 @@ three. The "test-realm user" is the Phase-0-committed `phase21-tester` realm/use
   (dropped effect) so the recreate-witness check finds an identical cluster identity. Each is committed and
   re-run, not a one-off strawman.
 - **Independent oracle (§M.3):** the derived-NetworkPolicy check and the route-coverage check compare against
-  the committed hand tables / an independent graph-walker (a code path distinct from `render`), never the
+  the committed hand tables / an independent graph-walker (a code path distinct from `renderAll`), never the
   reconciler's own fold.
 - **External-observer traces (§M.5):** reachability, off-host-unreachability, ordering-enforcement, and
   EAB-provenance assertions read from OS-boundary observers (per-origin netns probe exit codes, an argv/env
   recording shim on the ACME client, a readiness-withholding harness), never a compliance trace the edge emits
   about itself.
+
+### Resource-provisioning contract
+
+This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
+[`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting);
+the names below are phase-specific source composites that must flatten to those canonical execution atoms.
+
+The edge is not a resource-free collection of CRs. Before any certificate request, database mutation, or
+apiserver apply, Gate 2 yields the pure source that binding expands into an `EdgeResourceDemand` containing
+the Envoy Gateway controller, every operator-derived Envoy data-plane child, Keycloak, the ACME
+issuance/renewal Job, and the Keycloak `PatroniSqlDemand`. Every runnable unit carries a complete
+`PodResourceEnvelope`: immutable image artifact and
+its image-store/import bytes; per-container CPU, memory, and ephemeral-storage requests and limits; runtime
+working-set evidence; writable-root and log headroom; disk- or memory-backed `emptyDir`, projected
+ConfigMap/Secret/service-account-token bytes, durable claims, bounded cache population or explicit `None`, and
+`accelerator = None` on this linux-cpu gate. Controller operands also declare replicas and `Recreate` or rolling
+old/new/surge/terminating overlap. `Gateway` and `HTTPRoute` objects consume apiserver/etcd capacity but do not
+pretend to be extra Pods; the Envoy Gateway controller's private `ControllerChildEnvelope` is what enumerates
+the actual data-plane Pods. After exhaustive controller expansion, every desired/live/old/new/apply object
+identity contributes a `KubernetesApiObjectDemand` to the complete map in
+`EtcdLogicalDemand { desiredObjects, churn, model }`. Only private
+`ProvisionedEtcdLogicalDemand.derivedPeak <= ControlPlaneStorageDemand.etcd.backendQuotaBytes` may continue;
+the separate backend-at-quota plus WAL/snapshot/serialized-defrag peak must then fit its physical backing.
+
+`PatroniSqlDemand` is the pure Keycloak database input and `ProvisionedPatroniSql` has a private constructor.
+The demand names the operator-derived `ControllerChildEnvelope`, complete Patroni/Postgres child execution,
+the exact non-empty `SchemaObjectDemand` set, WAL, checkpoint, failover-replay and recovery-workspace bounds,
+a `DeclaredVolumeDemand`, failover and rollout overlap, its `StorageBudgetId`, and
+`SqlMutationAdmission`. Binding expands those logical terms through
+filesystem/allocation geometry into per-backing debits and a witness; a failed transition keeps
+the old database, WAL, and replacement resident until verified recovery, never credits them early. ACME
+declares its bounded order/challenge/retry set, temporary key/CSR workspace, certificate/key revision count,
+issuer concurrency/rate admission, and resulting Vault Raft/audit delta; the complete issuer Job envelope and
+Vault high-water are checked together.
+
+The private SQL result also contains the complete admission-proxy `PodResourceEnvelope` and admission witness.
+Keycloak's mutating SQL route goes through that snapshot-bound proxy; direct or over-connection/transaction/
+WAL-budget writes are denied before the database mutates. The proxy is included in rollout and live readback,
+not treated as free middleware.
+
+The whole-deployment provisioner admits the edge only after these demands, namespace quotas, pod slots, volume
+attachments, kubelet image/nodefs headroom, Vault backing, and the live-snapshot residual all fit. Rendering
+accepts only the resulting private provisioned projections. Readback normalizes every live Pod, PVC, operator
+child, certificate revision, and provider object to that projection; an unexplained child or byte is an
+`UnknownCommitment`, not free capacity. Boundary fixtures make each CPU, memory, ephemeral, image, log,
+pod-slot, attachment, API-object/revision/Event/etcd, SQL object/WAL/recovery/proxy, and ACME/Vault term one unit short
+in turn. Omission mutants that drop the Envoy child, Keycloak Pod, ACME Job, old/new rollout overlap, or
+Patroni WAL/recovery term, and API/etcd mutants that drop one desired object, churn operand, or model, must refuse
+before the first effect, while their exact-fit twins render and reconcile.
 
 ## Doctrine adopted
 
@@ -112,7 +162,7 @@ three. The "test-realm user" is the Phase-0-committed `phase21-tester` realm/use
   the derived-allow-edge NetworkPolicy rule).
 - [`manifest_generation_doctrine.md` §5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)
   — **the apply/reconcile engine**: the Gateway, `HTTPRoute`, Keycloak, and the derived NetworkPolicies are
-  typed `K8sObject`s rendered by `render` and enacted by the Phase-16 server-side-apply reconciler under the
+  typed `K8sObject`s rendered by `renderAll` and enacted by the Phase-16 server-side-apply reconciler under the
   fixed `amoebius` field manager — no Helm, no hand-authored YAML.
 - [`pulumi_iac_doctrine.md` §5](../documents/engineering/pulumi_iac_doctrine.md#5-dns-route53-and-tls-zerossl-the-provider-integrations-this-doctrine-owns)
   — **DNS (route53) and TLS (zerossl)**: the public-edge TLS wired through the edge is *referenced*, not
@@ -146,6 +196,10 @@ observed as readiness conditions, not durations.
   terminating TLS and routing, applied by the Phase-16 reconciler.
 - Keycloak deployed against its Phase-20 Patroni DB, owning OIDC/JWT enforcement in front of every platform
   browser surface, so an unauthenticated request never reaches a workload.
+- The pure `EdgeResourceDemand` bound to complete envelopes for the Gateway controller, all derived Envoy
+  children, Keycloak, and the ACME Job, plus a `PatroniSqlDemand` whose private provisioned result retains exact
+  SQL objects, WAL, checkpoint/recovery, volume, admission proxy, failover, and rollout operands. No CR or Service stands in
+  for its children, and no scalar "database bytes" stands in for the storage structure.
 - The readiness edges wired into the derived DAG: MetalLB address before the Gateway listener; Keycloak ready
   before the edge admits wild traffic — never a `threadDelay`.
 - The Phase-0-committed oracle fixtures this sprint checks against: `test/fixtures/phase21/route-inventory.golden`
@@ -166,6 +220,12 @@ observed as readiness conditions, not durations.
    readiness and assert the wild-admit step blocks; then release each and assert progress. A post-hoc scan of
    the render source shows **no `threadDelay`** on these edges. Passing by ordering the implementation's own
    happy-path event log is not sufficient.
+4. Run the exact-fit/one-short resource corpus before apply, including one case for each Gateway/Envoy/Keycloak
+   CPU, memory, ephemeral, image/log, pod-slot and rollout term and each Patroni data/WAL/recovery/attachment
+   and SQL-proxy/admission term. Compare rendered requests, limits, claims, rollout controls, operator children,
+   proxy envelope, and admission witness with live readback;
+   the omission mutants named in the phase contract must reject before any certificate, SQL, or apiserver
+   mutation.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -195,6 +255,9 @@ one carve-out really is a *different type* of endpoint, not a wild one.
   and referenced here, not re-specified.
 - Public-edge TLS (ZeroSSL via DNS, route53) wired through the edge, with the EAB material a Vault `SecretRef`;
   the provisioning itself is owned by the Pulumi/IaC doctrine and referenced.
+- An ACME execution demand with a complete issuer-Job `PodResourceEnvelope`, bounded challenge/order/retry and
+  key/CSR workspace, certificate/key revision retention, and the resulting Vault Raft/audit high-water; this
+  demand is provisioned before the ACME client or Vault mutation can run.
 - The committed scanner-validation seed (`test/fixtures/phase21/backdoor-seed.yaml`, a raw-`kubectl`
   NodePort/`Ingress` bypass authored in Phase 0) and the argv/env-recording ACME shim used to observe EAB
   provenance from the OS boundary.
@@ -214,6 +277,10 @@ one carve-out really is a *different type* of endpoint, not a wild one.
    ACME chain is acceptable in place of live public ZeroSSL/route53 issuance (no public DNS zone is required);
    the load-bearing assertion is the **provenance of the EAB material (Vault, not Dhall)**, not that the cert
    was signed by production ZeroSSL.
+4. Make the issuer Job CPU, memory, ephemeral workspace, image/import bytes, log headroom, and Vault revision
+   high-water one unit short in turn; each case refuses before an ACME order is opened. An omission mutant that
+   drops retry-temporary bytes or the prior certificate revision turns red, while live Job/Vault readback for
+   the exact-fit twin equals the provisioned projection.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -223,7 +290,7 @@ The whole sprint (📋 Planned).
 **Status**: Planned
 **Implementation**: `src/Amoebius/Manifest/NetworkPolicy.hs`, `src/Amoebius/Platform/Edge.hs` (target paths; not yet built)
 **Blocked by**: Sprint 21.1
-**Independent Validation**: "derived" is oracled two ways that a hardcoded static allow-list cannot satisfy. (1) **Graph variation:** the gate deploys a scratch consumer workload, adds a declared consuming edge to a provider, re-renders/re-applies, and asserts both the applied policy set **and** live reachability flip on; then removes the edge and asserts denial returns — so the policy must be a total function of the graph, not the fixed Phase-19/20 service names. (2) **Independent set-equality:** the applied policies are compared for set equality against the Phase-0-committed `netpol-expected.json` and against a **separate graph-walker** over the declared dependency edges (a code path distinct from `render`), never the reconciler's own fold. After apply, a pod declaring consumer of `B` reaches `B`, a pod that does not is denied, and a probe to an undeclared edge times out.
+**Independent Validation**: "derived" is oracled two ways that a hardcoded static allow-list cannot satisfy. (1) **Graph variation:** the gate deploys a scratch consumer workload, adds a declared consuming edge to a provider, re-renders/re-applies, and asserts both the applied policy set **and** live reachability flip on; then removes the edge and asserts denial returns — so the policy must be a total function of the graph, not the fixed Phase-19/20 service names. (2) **Independent set-equality:** the applied policies are compared for set equality against the Phase-0-committed `netpol-expected.json` and against a **separate graph-walker** over the declared dependency edges (a code path distinct from `renderAll`), never the reconciler's own fold. After apply, a pod declaring consumer of `B` reaches `B`, a pod that does not is denied, and a probe to an undeclared edge times out.
 
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/illegal_state/illegal_state_catalog.md`
 
@@ -241,7 +308,7 @@ and every other is denied.
   severed — the two shapes [§3.6](../documents/illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other)
   makes unrepresentable at authoring time, now confirmed on the running cluster.
 - The Phase-0-committed expected-policy oracle `test/fixtures/phase21/netpol-expected.json`, an independent
-  graph-walker (a code path distinct from `render`) that recomputes the expected allow-set from the declared
+  graph-walker (a code path distinct from `renderAll`) that recomputes the expected allow-set from the declared
   dependency edges, and committed mutant (b) — a `derive` variant that drops one allow-edge and adds one
   undeclared allow-edge, which the set-equality check must show going red.
 
@@ -254,7 +321,7 @@ and every other is denied.
    fails against committed mutant (b) (drop one allow, add one undeclared allow), which the gate must show going
    red.
 4. Assert set equality between the applied policies and the Phase-0-committed `netpol-expected.json` **and** the
-   output of an **independent graph-walker** (distinct from `render`) over the declared dependency edges — not
+   output of an **independent graph-walker** (distinct from `renderAll`) over the declared dependency edges — not
    by re-running the implementation's own `derive`.
 
 ### Remaining Work
@@ -313,6 +380,10 @@ deterministic storage rebind.
    read-back bytes are unchanged. This fails against committed mutant (c) (delete no-op'd), which the gate
    must show going red because the recreate witness finds an identical cluster identity.
 3. Assert the full stack is still up, reachable only through the Keycloak edge, and HA-shaped after the recreate.
+4. Re-run provision against the fresh live snapshot before recreate apply and prove the transition peak includes
+   the old and replacement edge Pods, Keycloak Patroni data/WAL/checkpoint state, and ACME/Vault revisions.
+   Removing any one of those operands must fail the committed omission-mutant corpus rather than relying on the
+   successful recreate as evidence of capacity.
 
 ### Remaining Work
 The whole sprint (📋 Planned).

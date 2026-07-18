@@ -1,1 +1,5 @@
 - resource limits : DEVELOPMENT_PLAN/README.md says "containers always declare cpu/ram". that is true but we need a systmatic review of all resource provisions : cpu, memory, storage, vram. it's true these must be explicit at the pod level in k8s but they are derived from pure representations. it is impossible to represent a cluster deployment to a cluster which lacks the sufficient resources, eg a workload needing cuda cannot be deployed to a cluster without cuda. ephemeral pod storage for cache is also an explicitly declared resource. 
+
+- testing
+
+- backups

@@ -71,7 +71,7 @@ Concretely, the store lives under one MinIO bucket per project (`jitml-checkpoin
 fixed prefix schema. The `jitML` key renderers in `jitML/src/JitML/Checkpoint/Format.hs` (`blobKey`,
 `manifestKey`, `latestPointerKey`, `bestPointerKey`, `trialPointerKey`) are the reference implementation:
 
-```
+```text
 <store>/
   <experiment-hash>/                       -- §3: sha256(resolved-dhall ‖ substrate-fingerprint)
     blobs/<sha256>                         -- write-once, content-addressed, opaque bytes
@@ -126,6 +126,45 @@ checkpoint-format deferral this doctrine records for checkpoints ([§7](#7-what-
   on failure, but a manifest becomes HEAD only when its pointer CAS succeeds. The pure CAS decision is
   `applyPointerWrite` (`PointerWritten` vs `PointerConflict`); the `jitML` checkpoint format owns the retry
   harness and the typed `AdvancePredicate` that resolves a lost CAS.
+
+#### Capacity is charged before commit and remains charged after a failed commit
+
+The atomic pointer makes the *reader* protocol simple; it does not make failed blob/manifest writes disappear.
+Every content-store namespace therefore carries the mandatory `ContentStoreLogicalDemand` from
+[`resource_capacity_doctrine.md` §5.1](./resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry):
+
+- **Budget and writer identity are mandatory operands.** The demand is the `Content` arm of the closed
+  six-arm `ObjectStoreProducerDemand`, resolves exactly one `StorageBudgetId` to the chosen backing/quota, and
+  carries `ObjectStoreMutationAdmission`. Binding proves equality between every content namespace source and
+  its producer; omission is not a capacity optimization. The sole object-write gateway authenticates the
+  snapshot-bound writer and enforces identity/count/size/retention/concurrency. Its own image,
+  CPU/memory/ephemeral/log/replica/rollout `PodResourceEnvelope` is provisioned before any direct backend route
+  is exposed; clients have no S3 PUT credential.
+- **Committed resident objects** include all immutable blobs, manifests, pointers, TensorBoard objects, and
+  other namespace objects still retained by policy — not merely the graph reachable from the current
+  `latest` pointer. They are an exact `Map ObjectStoreObjectId storedBytes`, where the id includes store,
+  tenant, bucket, and full key. Equal physical ids debit once after residency is established; the same content
+  hash under two experiment namespaces is two objects unless a selected-store physical-dedup witness says
+  otherwise. Unequal sizes for one physical id reject, and a hoped-for future dedup hit is not free capacity.
+- **In-flight write extents** are bounded by a positive maximum concurrent-write count and a maximum object set
+  per write. Their whole peak is charged because multipart staging and completed parts can coexist with the
+  last committed generation.
+- **Failed-write orphan extents** are bounded by a declared maximum failed-write rate and a mandatory finite,
+  positive `orphanGcHorizon`. A writer can upload every part and the manifest before losing the pointer CAS, so
+  the conservative orphan unit is the whole maximum write set. Capacity reserves every failed set that can
+  accumulate over the horizon; neither a retry nor a `412` pointer conflict implies deletion.
+
+The logical store peak is the sum of those three simultaneously live terms. On retained-PV MinIO it then
+passes through the declared data/parity-shard geometry, per-object stripe padding, metadata reserve, and the
+fault policy's complete derived healing scenarios to produce a **per-drive physical** witness. Because one
+StatefulSet `volumeClaimTemplate` has one size for every ordinal, the claim plan rounds each template group to
+its largest drive requirement and debits that uniform size times ordinal count; comparing logical bytes or
+only the unequal raw per-drive sum with MinIO PVC capacity is invalid. At reconcile, all observed resident/orphan/multipart bytes stay debited,
+and a GC run creates no capacity credit until a subsequent object-store observation proves the bytes are gone.
+The finite horizon is thus a required cleanup SLO and failure-envelope bound, not an assumption that GC runs
+immediately or succeeds. The sibling checkpoint-format document still owns which unreachable checkpoint
+objects are eligible for collection and the deletion algorithm; this doctrine owns the fact that their
+pre-deletion bytes remain provisioned.
 
 **The `If-Match` CAS is an assumed store premise, not a proven property — the single atomic commit point rests
 on it.** S3 conditional PUT with `If-Match` linearizes the pointer flip *only if* the object store honors the
@@ -238,7 +277,7 @@ deriveExperimentHash resolvedDhall substrateFingerprint =
 
 so that
 
-```
+```text
 experimentHash = sha256(resolved-dhall ‖ substrate-fingerprint)
 ```
 
@@ -398,10 +437,37 @@ into the bounded cache on first miss. The foreclosure therefore **shifts** from 
 (baked)" to **"no arbitrary-URL arm (a closed named catalog) + a `CacheBudget`-bounded cache"**
 ([`illegal_state_catalog.md` §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)).
 
-The cache is a **bounded typed pool.** It carries an explicit **`CacheBudget` (a `Quantity`) ≤ host storage**,
-content-addressed with aggressive pin-aware pruning; "more cached than fits" is **unrepresentable** — the same
-capacity fold that bounds every other budget rejects a `Σ(resident) > CacheBudget` at decode
+The cache is a **bounded typed pool with one node/host owner.** Each closed-catalog entry owns an
+`AssetMaterializationDemand { identity, digest, residentBytes, peakTemporaryBytes }`; deployment binding
+collects the exact selected entries per node/host and carries a finite
+`firstMissConcurrency = Serial | BoundedParallel n`. No deployment author may supply a scalar `cachePeak`.
+Construction rejects two entries that assign different sizes to one content digest, deduplicates selected
+residents by digest, and derives the worst permitted overlap by adding the largest concurrently permitted
+temporary materializations. Only the private `ProvisionedCacheDemand` carries that derived peak.
+The pool also carries an explicit `CacheBudget` and uses aggressive pin-aware pruning. On an in-cluster node
+the budget nests inside the owner pod's node-ephemeral provision; only a native Apple/Windows host worker
+debits a separately named host cache pool. The owner pod's separate ephemeral reservation covers its bounded cache volume plus
+writable-layer and log headroom; "the final files fit but the build scratch or logs fill the node" is not
+admitted.
+The same capacity fold that bounds every other budget rejects an over-budget peak at the post-bind
+`provision-seal` before any effect
 ([resource_capacity_doctrine.md §3–§4](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)).
+
+For an in-cluster node, a typed per-node cache-owner pod owns the pool. Its pure resource envelope renders
+CPU/memory/`ephemeral-storage` requests+limits and a disk-backed `emptyDir.sizeLimit` derived from the
+`CacheBudget`; client pods receive typed cache handles and do not mount a shared writable `hostPath`
+(Kubernetes does not account `hostPath` bytes as pod ephemeral storage). This preserves same-node cross-pod
+reuse while keeping the cache explicitly pod-ephemeral: deleting/replacing the cache owner loses only
+re-materializable bytes. The relation is
+`ProvisionedCacheDemand.derivedPeak ≤ CacheBudget ≤ emptyDir.sizeLimit`, while
+`Σ disk-backed volume sizeLimits + writable-layer allowance + log headroom ≤
+ownerPod.ephemeralStorage.request ≤ ownerPod.ephemeralStorage.limit`. These are nested proofs on the same
+node-ephemeral bytes and are charged once, not a second “cache storage” sum beside pod ephemeral storage. For
+Apple/Windows host-worker lanes the same one-owner budget is instead enforced once against a named host cache
+pool rather than a Kubernetes pod. Live first-miss admission begins with every observed resident/active
+temporary object, unions the requested catalog objects by digest, adds the complete temporary overlap
+permitted by the concurrency policy, and credits pruning only after a fresh observation proves deletion. A
+deleted catalog operand, conflicting size, or unobservable resident is a closed error, never zero.
 The trade this accepts, relative to baking, is stated plainly: baking gave no-network-at-boot and instant
 availability; the cache pays a **first-miss materialization** (download-or-build) the first time a named asset
 is needed on a host, amortized across every later use.
@@ -703,7 +769,7 @@ specification to validate, never as a proven amoebius result. Status and gates: 
 | Host↔cluster comms: the daemon as MinIO/Pulsar peer over host-only NodePorts (no mTLS) | [`host_cluster_comms_doctrine.md`](./host_cluster_comms_doctrine.md) |
 | The elevated harness as the sole actor allowed to delete test-flagged store objects; leak-free cycles | [`testing_doctrine.md`](./testing_doctrine.md) |
 | Per-substrate float semantics, the JIT cache six-tuple, the engine envelope | `jitML/documents/engineering/determinism_contract.md` (sibling) |
-| The `.jmw1` wire format, full `CheckpointManifest` CBOR shape, CAS retry harness, retention/GC | `jitML/documents/engineering/checkpoint_format.md` (sibling) |
+| The `.jmw1` wire format, full `CheckpointManifest` CBOR shape, CAS retry harness, and the exact retention/GC eligibility + deletion algorithm (the finite orphan-horizon capacity contract remains [§2.1](#21-three-object-classes-two-write-protocols)) | `jitML/documents/engineering/checkpoint_format.md` (sibling) |
 | The infernix model-staging `.ready` artifact + readiness contract | `infernix/documents/architecture/pulsar_ml_workflow.md` (sibling) |
 
 ---

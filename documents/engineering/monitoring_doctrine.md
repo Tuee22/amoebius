@@ -55,7 +55,7 @@ Monitoring attaches at three points, each a required field whose omission is uni
 The topology SSoT is promoted from a bare `List RouteEntry` to a per-workflow grouping record. `monitor` is
 mandatory; the routing lanes carry their own per-topic liveness ([§2.2](#22-per-topic-liveness--routeentryliveness)):
 
-```
+```text
 Workflow = { name : Text, routes : NonEmpty RouteEntry, monitor : WorkflowMonitor }
 
 WorkflowMonitor = { sli : NonEmpty Sli, objective : Objective, sink : AlertBinding }
@@ -83,7 +83,7 @@ reconciles `routes[].workflow` against `Workflow.name` ([§3](#3-derivation-and-
 
 Every routing entry additionally carries a mandatory per-derived-topic liveness obligation:
 
-```
+```text
 RouteEntry = { workflow : Text, phase : Phase, lanes : List Substrate, liveness : Liveness }
 Liveness   = { freshness : Freshness, backlog : BacklogBound }   -- closed; no Silent arm
 ```
@@ -99,7 +99,7 @@ An extension declares the monitoring surfaces it stands up. The v1 extension set
 declare are a **closed** union with no open "other service" arm — the same closure the capability union
 carries ([service_capability_doctrine.md](./service_capability_doctrine.md)):
 
-```
+```text
 ExtensionSpec = { extDhall, extChain, extCapabilities, extMonitoring : NonEmpty MonitoringSurface }
 
 MonitoringSurface =
@@ -119,7 +119,7 @@ jitML (and every app, including the demo web apps) declare at least the generic 
 Monitoring artifacts are **derived**, never authored, so coverage cannot be forgotten. The derivation is a
 total function of the same descriptor the topology fold already walks:
 
-```
+```text
 monitorFor       :: Workflow -> ([PrometheusRule], GrafanaPanel)   -- total
 validateTopology :: [Workflow] -> [ExtensionSpec] -> Either [TopologyError] MonitoredTopology
 ```
@@ -145,7 +145,7 @@ The operator sees monitoring two ways, both on pre-existing surfaces:
   inside its existing reconcile loop — no new container — and the operator reads it via a `pb workflow health`
   verb on the singleton admin REST ([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)).
 
-```
+```text
 SLOStatus = Fresh | Degraded BudgetRemaining | Breached BreachReason | NotYetObserved
 ```
 
@@ -158,7 +158,7 @@ eventually-consistent, never live truth.
 
 Every renderable monitoring surface carries a mandatory access scope with no unauthenticated arm:
 
-```
+```text
 AccessScope = < AdminGlobal | UserScoped : { rule : AuthRule } >   -- no Public / Unauthenticated arm
 ```
 
@@ -255,24 +255,48 @@ with **no per-workflow sidecar** — honouring the no-sidecar-fleet stance and t
 precedent ([network_fabric_doctrine.md](./network_fabric_doctrine.md)). Each remaining cost folds against the
 existing capacity machinery ([resource_capacity_doctrine.md](./resource_capacity_doctrine.md)):
 
-- Recording/alert-rule evaluation runs inside the already-budgeted `Observability` Prometheus workload and is
-  folded **as a function of N workflows** (N × rules), not a flat add.
+- Recording/alert-rule evaluation runs inside the `Observability` Prometheus workload and is folded **as a
+  function of N workflows** (N × rules), not a flat add. A mandatory finite
+  `MonitoringWorkBudget` bounds workflows, derived rules, series, scrape samples/second, evaluation interval,
+  CPU, memory, finite TSDB retention, a structural
+  `QueryWorkBudget { maxConcurrentQueries, maxSeriesPerQuery, maxSamplesPerQuery, maxRange, timeout,
+  costModel }`, and one StatefulSet
+  claim/backing/`VolumePresentation`. Binding
+  rejects a descriptor above any cardinality bound and derives Prometheus requests/limits from a version-pinned
+  conservative baseline + rule/series/evaluation cost overlapping maximum concurrent query work. It also
+  derives the query-admission proxy's complete pod envelope; neither request set is a fixed constant
+  independent of the descriptor. The renderer writes that same interval to Prometheus's global evaluation setting and every
+  generated rule group (no shorter override); the live gate reads the effective configuration back. A cost
+  derived for one interval with a shorter runtime default is drift and refuses convergence.
+- Versioned TSDB/query models derive the retained-block bytes plus WAL/head, old+new block compaction overlap,
+  and query/temp headroom from the bounded series/sample rate, retention, and structural query operands. A
+  scalar `maxQueryTempBytes` is not authorable. That result is required usable bytes;
+  the pinned filesystem-overhead model and backing minimum/quantum then construct the private
+  `ProvisionedVolumeDemand` for Prometheus. The exact rounded PVC/PV capacity, volumeMode/fsType, and
+  `--storage.tsdb.retention.time`/`--storage.tsdb.retention.size` configuration are rendered from it.
+  Prometheus receives the concurrency/sample/timeout flags and a sole-routable admission proxy enforces
+  series/range bounds; NetworkPolicy denies direct query API access. A PVC
+  whose mounted usable bytes are one byte below the TSDB peak, or whose raw allocation is one quantum below
+  `provisionedBytes`, rejects. Live validation drives a compaction boundary and verifies
+  WAL/head/blocks/temp remain inside usable capacity and raw allocation. Optional local Thanos remains a distinct
+  bounded pod/durable demand and cannot borrow this claim.
 - The `workflow-health` topic and the jitML `tfevents` prefix are Pulsar/MinIO objects, bounded by the
   mandatory retention/offload/backlog triple ([pulsar_client_doctrine.md §6.1](./pulsar_client_doctrine.md#61-topic-storage-lifecycle-bounded-tiered-retained--and-the-hot-tier-never-overflows)) and the closed
   `StorageBudget` with no unbounded arm.
 - The optional local Thanos downsample/long-term store is one companion beside the single Prometheus — a
   strictly **local** role for the baked-but-otherwise-roleless binary, never a cross-cluster Query/Store/Receive
-  — whose one pod declares refined non-zero cpu/mem and folds via `place`.
-- The **one shared** TensorBoard pod declares cpu/mem `requests`/`limits` and folds via `place`/`podFits` like
+  — whose pod declares the complete CPU/memory/`ephemeral-storage` envelope, bounded scratch, durable demand,
+  and explicit accelerator `None`, then folds via `place`.
+- The **one shared** TensorBoard pod declares complete CPU/memory/`ephemeral-storage` requests/limits,
+  bounded scratch, and explicit durable/cache/accelerator provisions, and folds via `place`/`podFits` like
   any pod. Per-user scoping is an access filter over that shared instance
   ([§5](#5-extensible-surfaces-tensorboard)), not a pod per user, so it does not multiply `Demand`.
 - **No parent-rollup budget exists** — the forest rollup flow is foreclosed
   ([§6](#6-the-parent-monitoring-posture)), so there is no parent-side storage to budget.
 
-One residue is named honestly: recording-rule series-count and evaluation CPU grow with descriptor size while
-the Prometheus workload carries fixed `requests`, so a large descriptor can outrun provisioned Prometheus at
-runtime. `StorageBudget` bounds bytes, not query performance. An optional decode-foreclosed rule-cardinality
-budget (`Σ derived rules ≤ declared rule-capacity`) closes this and is recorded as an optional improvement.
+The honest residue is narrower: the mandatory cardinality/work budget and conservative cost model bound the
+declared Prometheus CPU/memory provision, but actual query latency and transient engine overhead remain
+runtime-checked within those ceilings. There is no optional bypass and no descriptor-independent fixed request.
 
 ---
 
@@ -307,9 +331,9 @@ not a flat "type-foreclosed":
 
 Phase order, status, and validation gates live only in
 [`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). The monitoring obligation types land in **Phase 4** and the
-`validateTopology` fold in **Phase 7**; the derived rules/panels, the baked TensorBoard renderer, the
-optional local Thanos companion, and the `workflow-health` TableView projection in **Phases 9, 15, and 18**;
-the orchestrator/worker SLO-status event in **Phases 22–23**; the extension surfaces in **Phase 33**
+`validateTopology` fold in **Phase 7**; rendered monitoring shapes and baked binaries land in **Phases 9 and 15**;
+the derived rules/panels and optional local Thanos companion in **Phase 20**; the `workflow-health` TableView
+projection in **Phase 22** and the orchestrator/worker SLO-status event in **Phase 25**; the extension surfaces in **Phase 33**
 (infernix) and **Phase 34** (jitML → TensorBoard); the peer-cluster posture and the forest foreclosure in
 **Phase 28**; and the decode-rejection tests in **Phase 36**. This doc never maintains a competing status
 ledger; it states the target shape and links back for status, per

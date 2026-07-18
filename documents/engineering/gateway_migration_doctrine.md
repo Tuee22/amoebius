@@ -88,7 +88,7 @@ proper begins only from a target that already holds the source's state.
    per-cluster (stretched-cluster) construct owned by that cluster, never a shared address repointed here.
 
 **Guarantee — RPO=0.** No committed write is lost — the `PlannedIsLossless` model invariant, proven-for-the-model
-at scope 2 (the runtime fidelity of the caught-up verification stays assumed until Phase 28;
+at scope 2 (the runtime fidelity of the caught-up verification stays assumed until Phase 29;
 [§6](#6-honesty-and-layer-markers)) — because writes were frozen and the replica was verified
 caught-up before authority moved. This is a coordinated cross-cluster switchover (Patroni-style), **not** an
 asynchronous [Second-Axis](./chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
@@ -133,7 +133,7 @@ and the reconciliation of divergent histories are owned by
 [chaos_failover_doctrine.md §16–§19](./chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
 and its
 [Appendix B](./chaos_failover_doctrine.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question);
-the formal model is [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) (Phase 28).
+the formal model is [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) (Phase 3).
 
 **Reconciliation on the primary's return** (summarized; owned by
 [chaos_failover_doctrine.md Appendix B](./chaos_failover_doctrine.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question)):
@@ -205,10 +205,10 @@ a constructive proof ([illegal_state_catalog.md §6](../illegal_state/illegal_st
 
 ## 6. Honesty and layer markers
 
-Everything in this document is **design intent for Phase 28** (multi-cluster: amoebic spawning +
-geo-replication + gateway/DNS failover). Nothing here is built or verified today. Phase order, status, and
+The forest/geo-replication substrate is **Phase 28**; everything in this document's gateway-migration/DNS
+failover runtime and acceptance is **design intent for Phase 29**. Nothing here is built or verified today. Phase order, status, and
 the acceptance gate are owned by
-[DEVELOPMENT_PLAN/README.md → Phase 28](../../DEVELOPMENT_PLAN/README.md); this document never restates phase
+[DEVELOPMENT_PLAN/README.md → Phase 29](../../DEVELOPMENT_PLAN/README.md); this document never restates phase
 status.
 
 - The `Planned` branch's **RPO=0** is the model invariant **`PlannedIsLossless`** — cutover is reachable only
@@ -217,15 +217,15 @@ status.
   [§6](./gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty)), not merely argued. What stays
   **assumed** is the *runtime physics* the model abstracts — that the caught-up verification and the
   MinIO/Pulsar/Patroni lossless delegation actually hold live — a **runtime-observed** caught-up edge, not a
-  constructive type-level impossibility, confirmed only by the Register-3 chaos injection of Phase 28. Per the
+  constructive type-level impossibility, confirmed only by the Register-3 chaos injection of Phase 29. Per the
   honesty rule ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)),
-  the model property is *proven-for-the-model* and the runtime fidelity is *assumed until Phase 28*.
+  the model property is *proven-for-the-model* and the runtime fidelity is *assumed until Phase 29*.
 - **Both** branches are the subject of amoebius's one proof obligation, owned by
   [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) and set in the concentration
   principle of [chaos_failover_doctrine.md](./chaos_failover_doctrine.md): the `Failover` async correctness via
   `NoWriteAfterStaleFailover` (safety) and `MergeConverges` (liveness), and the `Planned` handover via
   `PlannedIsLossless` — one reifiable `Model`, simulated (io-sim) and proven (TLC) at design time, with
-  model↔code correspondence **by construction** (no deferred correspondence table). What remains for Phase 28
+  model↔code correspondence **by construction** (no deferred correspondence table). What remains for Phase 29
   is Register-3 chaos injection against the running forest — confirming the abstracted physics hold — never a
   paper correspondence.
 - The typed `GatewayFailover { active : ClusterId, standby : ClusterId, dnsRecord, hubRole }` forest relation
@@ -262,6 +262,6 @@ status.
 - [Consistency & PACELC Doctrine](./consistency_pacelc_doctrine.md) — the whole-stance PACELC posture and the unified deployment-rules surface (the R8 lag bound, R9 RTO budget, and per-app participation flag) that this taxonomy's budget and pairing feed into.
 - [Illegal-State Catalog](../illegal_state/illegal_state_catalog.md) — the "session that cannot rebind on migration" entry (§3.44) and the GADT-indexed-state-machine technique (§4.3).
 - [DSL Doctrine](./dsl_doctrine.md) — the typed `GatewayFailover` forest relation as a parent-minted, child-projected subtree field.
-- [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — the formal model of the `Failover` branch (Phase 28).
-- [Development Plan → Phase 28](../../DEVELOPMENT_PLAN/README.md) — phase order, status, and the failover acceptance gate.
+- [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — the formal model of the `Failover` branch (Phase 3).
+- [Development Plan → Phase 29](../../DEVELOPMENT_PLAN/README.md) — phase order, status, and the failover acceptance gate.
 - [Documentation Standards](../documentation_standards.md) — header, SSoT, and the proven/tested/assumed honesty rule.

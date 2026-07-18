@@ -6,8 +6,9 @@
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the Kubernetes namespace partition — one namespace per platform
-> capability plus one per app — derived from the fixed capability set so a workload's namespace is a pure
-> function of what it is, never a free-text field an operator or app writes.
+> capability, dedicated namespaces for the closed capacity-scheduler and singleton roles, plus one per app —
+> derived from typed identity so a workload's namespace is a pure function of what it is, never a free-text
+> field an operator or app writes.
 
 ---
 
@@ -29,9 +30,10 @@ enforce at all. Isolation would then rest on review, not on construction, which 
 ([dsl_doctrine.md](./dsl_doctrine.md), [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)) rejects for
 exactly this class of invariant.
 
-The rule this doctrine states: **the namespace layout is DERIVED from the fixed capability set — one namespace
-per platform capability, one namespace per app — and a workload's namespace is computed from what the workload
-is, never authored.** A platform provider lands in its capability's namespace because it *is* that capability's
+The rule this doctrine states: **the namespace layout is DERIVED from the fixed capability and closed system-
+role sets — one namespace per platform capability, one for each of the scheduler/singleton roles, and one
+namespace per app — and a workload's namespace is computed from what the workload is, never authored.** A
+platform provider lands in its capability's namespace because it *is* that capability's
 realization; an app lands in its own namespace because it *is* that app. No spec surface accepts a namespace
 string, so a workload cannot name a foreign capability's namespace and two capabilities cannot share one.
 
@@ -60,9 +62,10 @@ derived — not a layout an installer hand-maintains:
 | `amoebius-registry` | Registry | `distribution` (`registry:2`), blobs in MinIO, no PV ([platform_services_doctrine.md §3](./platform_services_doctrine.md#3-the-registry--the-single-image-source)) |
 | `amoebius-keycloak` | Identity | Keycloak — owns all wild ingress ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)) |
 | `amoebius-edge` | Edge | Envoy + Gateway API + the L4 LoadBalancer (MetalLB or cloud LB) |
+| `amoebius-capacity-scheduler` | capacity-scheduler bootstrap role (not a capability) | the one `amoebius-capacity` scheduler Deployment, its namespaced config/root projection, and its exact `ResourceQuota pods=1` cycle break |
 | `amoebius-control-plane` | the orchestrator singleton (not a capability) | the control-plane Deployment `replicas=1` ([§6](#6-the-control-plane-namespace--a-stateless-singleton-no-pvc)) |
 
-Two properties make the set a *derivation*, not a convention:
+Three properties make the set a *derivation*, not a convention:
 
 - **One namespace per capability, never a shared one.** The Identity edge (Keycloak) and the L7 edge
   (Envoy/Gateway) are distinct capabilities and therefore distinct namespaces (`amoebius-keycloak`,
@@ -75,17 +78,26 @@ Two properties make the set a *derivation*, not a convention:
   ([service_capability_doctrine.md §1](./service_capability_doctrine.md#1-why-capabilities-not-products)). The
   `amoebius-` prefix marks a namespace as a platform slice, so an app namespace ([§4](#4-one-namespace-per-app--per-app-tenancy-referenced)) can never collide with a
   capability's.
+- **The scheduler cycle break has its own namespace.** `amoebius-capacity-scheduler` is derived from the
+  closed capacity-scheduler role, never authored by an operator. Its exact `ResourceQuota pods=1` applies only
+  to the one default-scheduled, unique-node-affinity scheduler Deployment. It cannot share
+  `amoebius-control-plane`: doing so would either cap the later singleton out of existence or weaken the
+  scheduler's one-Pod bootstrap proof. The namespace is default-deny like every other slice; only the derived
+  apiserver/config/readiness edges required by the scheduler role are admitted. No platform workload, app,
+  controller child, or singleton Pod may land there.
 
 The concrete provider set, its HA-always deployment, and its bring-up ordering are owned by
 [platform_services_doctrine.md](./platform_services_doctrine.md); this doctrine owns only that the set is
-partitioned one-namespace-per-capability and that the partition is derived.
+partitioned one-namespace-per-capability plus the two closed control roles and that the partition is derived.
 
 ```mermaid
 flowchart TD
   capset[Fixed capability set: ObjectStore, SecretStore, MessageBus, Sql, Identity, Observability, Registry, Edge] -->|pure function per capability| nsplat[One platform namespace each: amoebius-minio ... amoebius-edge]
+  schedrole[Closed capacity-scheduler role] -->|pure role-to-namespace function| nssched[amoebius-capacity-scheduler: exact pods=1]
   singleton[Control-plane singleton, not a capability] -->|its own namespace| nscp[amoebius-control-plane]
   appset[Declared apps] -->|one namespace per app, owned by service_capability and tenancy| nsapp[Per-app namespaces]
   nsplat -->|default-deny boundary| policy[Derived NetworkPolicies follow the dependency graph]
+  nssched -->|default-deny plus derived apiserver edge| policy
   nscp -->|default-deny boundary| policy
   nsapp -->|default-deny boundary| policy
 ```
@@ -145,10 +157,14 @@ and defines no NetworkPolicy of its own.
 
 ## 6. The control-plane namespace — a stateless singleton, no PVC
 
-`amoebius-control-plane` holds the control-plane singleton and nothing that needs durable local state. The
-singleton is a Kubernetes **Deployment `replicas=1`**; its single-instance property is **delegated to
-k8s/etcd** (a `Lease` if one is ever needed), never a bespoke amoebius election — owned by
+`amoebius-control-plane` holds the control-plane singleton and nothing that needs durable local state. It is
+distinct from `amoebius-capacity-scheduler`; the latter's exact `pods=1` quota never constrains this
+namespace. The singleton is a Kubernetes **Deployment `replicas=1`**; its single-instance property is **delegated to
+k8s/etcd** through the mandatory reconciler `Lease`, never a bespoke amoebius election — owned by
 [daemon_topology_doctrine.md §3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election).
+The namespace also owns that Lease and its namespaced RBAC. At cold start, a bootstrap capability limited to
+this Namespace and Lease may create/acquire them; no scheduler, platform, or workload write is authorized
+until the exact bootstrap holder/resourceVersion is read back.
 
 - **No PVC in the control-plane namespace.** The singleton mounts no durable volume and keeps nothing on local
   disk; the namespace holds no StatefulSet and no retained PV. Its durable state is **exclusively the
@@ -175,6 +191,7 @@ k8s/etcd** (a `Lease` if one is ever needed), never a bespoke amoebius election 
 | Derived east-west NetworkPolicy (default-deny + dependency-graph allow) and its unrepresentability | [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path), [illegal_state_catalog.md §3.6](../illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other) |
 | One-Patroni-cluster-per-consumer and the Percona operator | [platform_services_doctrine.md §8](./platform_services_doctrine.md#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin) |
 | The stateless control-plane singleton, its k8s/etcd-delegated single-instance, and its MinIO-bucket state | [daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton), [storage_lifecycle_doctrine.md §7.2](./storage_lifecycle_doctrine.md#72-amoebius-own-control-plane-state-is-the-minio-bucket-not-a-pvc) |
+| The scheduler's bootstrap/full-readiness protocol, managed-node authority, and reservation accounting | [resource_capacity_doctrine.md](./resource_capacity_doctrine.md), [readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md) |
 | Retained-PV storage for platform-service volumes | [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) |
 | Rendering `Namespace` objects from typed Haskell (no Helm, no templating) | [manifest_generation_doctrine.md](./manifest_generation_doctrine.md) |
 

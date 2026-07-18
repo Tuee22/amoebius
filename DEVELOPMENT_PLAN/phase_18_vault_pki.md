@@ -34,7 +34,17 @@ internal leaf certificates that chain back to it. Finally, the phase proves the 
 the client is linked directly into the amoebius binary, so an in-cluster consumer authenticates to Vault with its
 Kubernetes service-account JWT and resolves a `SecretRef` by name — **no HashiCorp Vault Agent sidecar**, no
 Secret-mounted plaintext, no environment variable, no `PATH` lookup. A sealed, uninitialized, policy-missing, or
-secret-missing read returns a typed, fail-closed error that carries no secret material.
+secret-missing read returns a typed, fail-closed error that carries no secret material. Its retained state is
+not an arbitrary PVC: a canonical `VaultStorageDemand` is derived from finite declared KV/Transit/PKI/auth
+populations, value/key/certificate sizes, version histories, revocations, and active/expired leases. A
+version-pinned Raft model adds WAL, snapshot, old+new compaction overlap, and restart/recovery headroom; each
+Raft target names its claim/backing and `VolumePresentation`. A separate finite rotated file-audit demand
+selects either a bounded pod-ephemeral volume or a retained claim/backing/presentation. Only the resulting private
+`ProvisionedVaultStorageDemand` can reach rendering, and its exact durable and audit capacities are enforced.
+The Vault app and every init/rotation execution unit are likewise rendered only from the enclosing opaque
+`ProvisionedServiceSpec`: explicit CPU, memory, and `ephemeral-storage` requests/limits, bounded pod-local
+volumes and writable/log allowances, durable/audit backings as above, cache `None`, and accelerator `None` on
+linux-cpu.
 
 What this phase deliberately does **not** do: the full standard-service stack that consumes these secrets
 (Phases 19–20), the Keycloak-owned edge (Phase 21), and the parent/child unseal modes, parent secret injection, and the
@@ -47,8 +57,12 @@ linux-cuda, or windows substrate is touched.
 **Register:** 3 — live infrastructure (§K).
 
 **Gate:** on a single-node linux-cpu cluster, the root single-node password-encrypted Vault **inits exactly once
-and unseals fail-closed** (an empty PV inits and password-seals its unlock material without printing raw keys, a
-delete+recreate only unseals the same Vault, and a secret-dependent workload against a sealed Vault fails closed);
+and unseals fail-closed** (an empty correctly provisioned PV inits and password-seals its unlock material without
+printing raw keys, a delete+recreate only unseals the same Vault, and a secret-dependent workload against a
+sealed Vault fails closed); the bounded source populations plus versioned Raft/audit models derive exact
+retained and rotated-audit backing demands, with a one-byte-under provision rejected before effects and live
+snapshot/compaction/recovery plus audit rotation remaining inside those caps, and every Vault app/init/rotation
+execution unit and volume exactly matching its complete `ProvisionedServiceSpec` projection;
 the Vault `pki/` engine holds a **self-signed root CA that issues** an internal leaf chaining back to it; and the
 **built-in Haskell Vault client (no agent sidecar)** authenticates via Vault Kubernetes auth and **reads a
 `SecretRef` by name**, returning a typed fail-closed error on any sealed/missing/denied read — a **Register-3**
@@ -62,8 +76,13 @@ field="token" }` with a fixed 32-byte value; (b) the pinned unlock-material enve
 field layout), hand-authored independently of `Seal.hs` (§M.3); (c) the typed-error-tag table
 `test/golden/vault/error-tags.golden` enumerating the six tags (`unavailable`/`uninitialized`/`sealed`/
 `policy-missing`/`secret-missing`/`decrypt-denied`) with, per tag, the exact redacted log line the client must emit
-(§M.3, §M.8). The **representative set (§M.7)** is exactly: this one KV `SecretRef.Vault`, one `TransitKey` unwrap,
-the self-signed root CA plus one internal leaf, and the six typed error tags — no other shapes are in gate scope.
+(§M.3, §M.8); (d) `test/golden/vault/storage-demand.golden`, a hand-calculated component table for the bounded
+KV/Transit/PKI/auth/version/lease population and pinned Raft model, including resident, WAL, snapshot,
+old+new-compaction, and recovery bytes; and (e) `test/golden/vault/audit-rotation.golden`, the independent
+per-file/backups/retention/total-backing oracle (§M.3). The **representative set (§M.7)** is exactly: this one KV
+`SecretRef.Vault`, one `TransitKey` unwrap, the self-signed root CA plus one internal leaf, the six typed error
+tags, and the one bounded storage-population fixture with its exact-fit/one-byte-under variants — no other
+shapes are in gate scope.
 **External-observer traces (§M.5)** are read from a Vault **audit device** (file backend) and an argv/exec observer
 on the consumer pod, never from any log the client emits about itself. Each sprint below names **>=1 committed
 seeded mutant** (§M.2) that MUST turn the gate red, committed and re-run.
@@ -101,6 +120,11 @@ seeded mutant** (§M.2) that MUST turn the gate red, committed and re-run.
 - [`platform_services_doctrine.md §11`](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering)
   — *bring-up and dependency ordering*: the hard edge this phase installs — **Vault reachable, initialized, and
   unsealed before any secret-dependent startup** — as a witnessed readiness gate, never a timer.
+- [`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) — the canonical
+  `VaultStorageDemand` and private `ProvisionedVaultStorageDemand`: every persisted source population and
+  history is finite, the version-pinned Raft model includes WAL/snapshot/compaction/recovery peaks, and the
+  file audit device has a named backing/presentation with finite rotation. A raw demand cannot author its own physical
+  bytes, and neither renderer nor reconciler accepts an unprovisioned Vault storage value.
 
 ## Sprints
 
@@ -116,9 +140,12 @@ registry).
 **Independent Validation**: on an empty PV, `vault init` runs exactly once and captures password-sealed unlock
 material while **never** printing raw unseal/recovery keys or the root token; a cluster delete + recreate brings
 the *same* Vault up by **unseal only** (no re-init, no key regeneration); a secret-dependent workload started
-against a sealed Vault fails its readiness gate closed with no plaintext fallback.
+against a sealed Vault fails its readiness gate closed with no plaintext fallback; one byte below the derived
+Raft or rotated-audit physical peak rejects before effects, while a live snapshot/compaction/recovery and audit
+rotation stay within their provisioned backings.
 **Docs to update**: `documents/engineering/vault_pki_doctrine.md`, `documents/engineering/platform_services_doctrine.md`,
-`documents/engineering/storage_lifecycle_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+`documents/engineering/storage_lifecycle_doctrine.md`, `documents/engineering/resource_capacity_doctrine.md`,
+`DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 Adopt [`vault_pki_doctrine.md §5`](../documents/engineering/vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal),
@@ -129,7 +156,27 @@ retained PV — the prodbox root-unseal shape as **sibling evidence, not an amoe
 
 ### Deliverables
 - Root Vault in **Shamir seal mode**, rendered and reconciled onto the Phase-17 retained PV; first-ever `vault
-  init` runs only when the PV is empty, and every later bring-up redeploys against existing data and only unseals.
+  init` runs only when the PV is empty, and every later bring-up redeploys against existing data and only
+  unseals. The PVC/PV claim slot, backing, presentation, required usable bytes, and rounded provisioned
+  capacity are exact projections of the private
+  `ProvisionedVaultStorageDemand`, never a hand-authored storage constant.
+- A canonical `VaultStorageDemand` derived from the complete bounded persisted source sets: maximum KV secrets,
+  value/path/envelope bytes and retained versions; Transit keys and retained versions; PKI roots/roles,
+  certificates, revocations and leases; Kubernetes-auth roles/policies; and active plus retained-expired lease
+  records. The version-pinned Raft cost fold accounts for resident records/metadata, WAL, snapshots,
+  simultaneous old+new bytes during compaction, and restart/recovery headroom. Binding fits that peak to the
+  named retained claim/backing/presentation, applies filesystem overhead and backing allocation quantum, and
+  alone constructs `ProvisionedVaultStorageDemand`; no unbounded population,
+  ignored history, or raw physical-byte override exists.
+- A separate finite file-audit demand within that provision names either its pod-ephemeral volume or retained
+  claim/backing/presentation and declares enforceable
+  per-file maximum bytes, backup count, and retention. Rendering mounts exactly that backing, enables Vault's
+  file audit device at the provisioned path, and installs the derived rotation/sweeper limits; audit files
+  cannot spill into an unbounded container writable layer or borrow the Raft claim implicitly.
+- The complete Vault pod projection: every app/init/rotation container has the exact checked CPU, memory, and
+  `ephemeral-storage` request/limit; each pod-local volume and private writable/log allowance is bounded and
+  covered; the durable and audit mounts come only from the storage provision; and cache/accelerator are
+  explicitly `None` for the linux-cpu gate.
 - **Password-sealed unlock material**: the first init's unseal/recovery keys + initial root token captured once
   and immediately sealed under the operator's password with a real KDF (**Argon2id**) feeding an AEAD
   (ChaCha20-Poly1305 / AES-256-GCM) — **never raw SHA-256**; the password memorized, entered at the prompt on
@@ -145,7 +192,10 @@ retained PV — the prodbox root-unseal shape as **sibling evidence, not an amoe
   *dropped-guard* mutant of `Unseal.hs` that re-runs `vault operator init` on rebuild instead of unsealing existing
   data (must fail the canary-identity and already-initialized checks); (ii) an *effect-swap* mutant of `Seal.hs`
   that seals the unlock material with raw `SHA-256(password)`-keyed obfuscation instead of the Argon2id→AEAD
-  envelope (must fail the envelope-format and wrong-password checks).
+  envelope (must fail the envelope-format and wrong-password checks); (iii) a *storage-term deletion* mutant
+  that omits Raft old+new compaction/recovery headroom or renders a one-byte-smaller PVC (must fail the
+  independent peak oracle before apply); and (iv) an *unbounded-audit* mutant that drops the backup/retention
+  limits or points the audit path outside its named backing (must fail render identity and the live cap probe).
 
 ### Validation
 1. **Init-once / unseal-on-rebuild witness (forecloses wipe-and-re-init).** On an empty PV, run init; write the
@@ -172,6 +222,27 @@ retained PV — the prodbox root-unseal shape as **sibling evidence, not an amoe
    volumes, the host filesystem under the retained-PV mount, the raw PV block bytes, every container's environment
    block (`/proc/<pid>/environ`), the reconciler and Vault logs, and the bring-up shell history — a byte-scan for
    the password string over exactly this set, no broader and no narrower.
+5. **Pure storage-boundary and zero-effects witness.** Independently rederive the durable usable peak from the declared
+   KV/Transit/PKI/auth populations, histories, leases, and pinned Raft model. Supply a retained backing or
+   mounted target exactly one usable byte below the resident + WAL + snapshot + old/new compaction + recovery
+   peak and require typed rejection before rendering/apply; separately make the raw backing one allocation
+   quantum below the private rounded requirement, and repeat those boundaries for retained audit (or one byte
+   below its pod-ephemeral volume arm). In every case,
+   apiserver audit, retained-backing, and host filesystem observers record zero object/allocation/file effects.
+   The paired exact-fit values produce the private `ProvisionedVaultStorageDemand`; applied PVC/PV claim slot,
+   backing, presentation, rounded capacity, mounted usable bytes, audit arm/mount/path, and rotation settings
+   read back byte-identical to it. The same readback
+   compares every Vault app/init/rotation CPU, memory, and `ephemeral-storage` request/limit, bounded pod-local
+   volume, writable/log allowance, cache `None`, and accelerator `None` to the enclosing opaque
+   `ProvisionedServiceSpec`; presence-only checks are insufficient.
+6. **Live Raft/audit high-water witness.** Populate the bounded test corpus through its declared retained
+   versions, certificate/revocation and lease histories; force a Raft snapshot and compaction while observing
+   simultaneous old+new files, then restart at that boundary and observe WAL replay/recovery. The mounted
+   filesystem high-water must stay within the usable provision and the raw device within
+   `provisionedBytes`. Generate audited operations through more
+   than one file boundary, wait through the declared retention boundary, and assert active-file size, retained
+   backup count/age, and total audit-backing high-water stay within the provision; no audit byte appears outside
+   the named mount. The storage-term-deletion and unbounded-audit mutants must turn these live checks red.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -352,6 +423,8 @@ The whole sprint (📋 Planned).
   ordering edge gains its first amoebius validation.
 - `documents/engineering/storage_lifecycle_doctrine.md` — the init-once/unseal-on-rebuild Vault face of the
   retained-PV durability guarantee gains its first amoebius proof on linux-cpu.
+- `documents/engineering/resource_capacity_doctrine.md` — record the exact bounded Vault source-population,
+  Raft peak, retained claim/backing, and rotated-audit backing as live-checked against the private provision.
 - `documents/engineering/testing_doctrine.md` — record the Register-3 ledger variant this gate emits (federation
   surfaces UNVERIFIED).
 

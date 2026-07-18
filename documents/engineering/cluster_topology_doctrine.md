@@ -7,9 +7,10 @@
 
 > **Purpose**: Single Source of Truth for the amoebius **declared** compute-engine axis — the `ComputeEngine`
 > union (`Kind` / `Rke2` / `Managed` EKS / …), the substrate-indexed `LinuxHost` witness that makes
-> "rke2 on a host with no Linux node" uninhabitable, the `Topology` fold over a `NonEmpty Node` that pins
-> kind to one host and rke2 to one Linux host per node, and the engine↔substrate compatibility relation that
-> keeps heterogeneous multi-substrate clusters legal while rejecting an incompatible pairing.
+> "rke2 on a host with no Linux node" uninhabitable, the explicit fixed/elastic `NodeSupply` that pins fixed
+> nodes to hosts and elastic workloads to compatible candidate classes plus a quota, and the
+> engine↔substrate compatibility relation that keeps heterogeneous multi-substrate clusters legal while
+> rejecting an incompatible pairing.
 
 ---
 
@@ -42,37 +43,168 @@ Everything below is **design intent for Phase 4** (the type discipline) with run
 The compute engine is a closed union — a product name amoebius does not support has no arm, exactly as the
 service-capability union admits no product ([service_capability_doctrine.md](./service_capability_doctrine.md)):
 
-```
+```text
 ComputeEngine
-  = Kind { host : LinuxHost, replicas : Replicas }
-  | Rke2 : { servers : Rke2Servers, agents : List LinuxHost }
-  | Managed Eks           -- provider-managed, hostless
+  = Kind { host : LinuxHost, replicas : Replicas, demand : KindEngineDemand }
+  | Rke2 : { servers : Rke2Servers, agents : Rke2AgentPool }
+  | Managed Eks :
+      { account     : CloudAccountId
+      , nodeClasses : NonEmpty ProviderNodeClass
+      , quota       : ProviderQuota
+      , workers     : ProviderWorkerPool account nodeClasses quota
+      }                    -- provider-managed control plane; explicit worker supply
+
+Rke2AgentPool =
+  < Fixed      : List Rke2AgentNode
+  | Autoscaled : { floor : List Rke2AgentNode, policy : Rke2AgentScalingPolicy }
+  >
+
+ProviderWorkerPool account nodeClasses quota =
+  < FixedAtDeclaredBase
+  | AutoscaledFromDeclaredBase :
+      ProviderWorkerScalingPolicy account nodeClasses quota
+  >
+-- ProviderNodeClass.baseCount is the unique floor and maxCount is the per-class ceiling; the pool adds no
+-- second authorable count map that could disagree with those values.
+
+Rke2ServerNode =
+  { host : LinuxHost, capacity : NodeCapacity, systemReserve : EngineSystemReserve }
+
+Rke2AgentNode =
+  { host : LinuxHost, capacity : NodeCapacity, systemReserve : EngineSystemReserve }
+
+ProviderNodeClass =
+  { name        : ProviderNodeClassId
+  , sku         : ProviderSkuRef
+  , allocatable : ProviderNodeCapacityTemplate -- one-node disk/carve + accelerator-slot recipe, never concrete ids
+  , quotaVcpu   : Quantity Vcpu                -- provider billing/quota cost; not inferred from net allocatable CPU
+  , zones       : NonEmpty Zone
+  , price       : Price
+  , baseCount   : Natural
+  , maxCount    : PositiveNatural
+  }
+
+ProviderNodeCapacityTemplate =
+  { allocatableCpu    : Quantity Cpu
+  , allocatableMemory : Quantity Bytes
+  , podSlots          : ProviderPodSlotPolicy
+  , cniSlots          : Map CniDriverId ProviderCniSlotPolicy
+  , attachableVolumes : Map CsiDriverId ProviderAttachSlotPolicy
+  , localDisks        : NonEmpty PerInstanceDiskTemplate
+  , cpuOvercommit     : CpuOvercommitPolicy
+  , localStorage      : PerInstanceNodeLocalStorageTemplate
+  , accelerator       : PerInstanceAcceleratorOffering
+  }
+
+PerInstanceDiskTemplate =
+  { id            : DiskTemplateId
+  , backing       :
+      < InstanceStore :
+          { skuDevice : ProviderLocalDeviceName
+          , provisionedRawBytes : Quantity Bytes
+          , presentation : FilesystemPresentation
+          }
+      | EphemeralRootEbs :
+          { policy : ProviderNodeRootVolumePolicy }
+      >
+  , systemReserve : ProviderUsableDiskCarveTemplate
+  , carves        : NonEmpty ProviderUsableDiskCarveTemplate
+  }
+
+ProviderUsableDiskCarveTemplate =
+  { id                  : DiskCarveTemplateId
+  , requiredUsableBytes : Quantity Bytes
+  }
+
+ProviderSkuRef =
+  { provider       : < AwsEc2 >
+  , region         : Region
+  , machineType    : ProviderMachineType
+  , catalogVersion : ProviderCatalogVersion
+  }
+
+ProviderQuota =
+  { maxInstances       : PositiveNatural
+  , maxVcpu            : Quantity Vcpu
+  , acceleratorCaps    : Map AcceleratorProfile PositiveNatural
+  , nodeRootStorage    : NodeRootStorageQuota
+  , durable            : DurableQuota
+  }
+
+NodeRootStorageQuota =
+  < NoNodeRootEbs
+  | BoundedNodeRootEbs :
+      { bytes : Quantity Bytes, volumeCount : PositiveNatural }
+  >
+
+DurableQuota =
+  < NoDurable
+  | Bounded : { bytes : Quantity Bytes, volumeCount : PositiveNatural }
+  >
 
 Rke2Servers            -- CLOSED odd-quorum union: an arm only for a legal etcd quorum {1,3,5}
-  = < Single : LinuxHost
-    | Ha3    : { s0 : LinuxHost, s1 : LinuxHost, s2 : LinuxHost }
-    | Ha5    : { s0 : LinuxHost, s1 : LinuxHost, s2 : LinuxHost, s3 : LinuxHost, s4 : LinuxHost }
+  = < Single : Rke2ServerNode
+    | Ha3    : { s0 : Rke2ServerNode, s1 : Rke2ServerNode, s2 : Rke2ServerNode }
+    | Ha5    : { s0 : Rke2ServerNode, s1 : Rke2ServerNode, s2 : Rke2ServerNode, s3 : Rke2ServerNode, s4 : Rke2ServerNode }
     >
 ```
 
-- **`Kind`** carries **exactly one** `LinuxHost` field. A multi-node kind cluster is `replicas > 1` on that
+- **`Kind`** carries **exactly one** `LinuxHost` field. Its `KindEngineDemand` expands exactly `replicas`
+  ordinal-indexed node-container demands, each carrying the concrete `NodeCapacity` that becomes placement
+  supply and an in-node `KindControlPlane | KindWorker` reserve, plus a separate host-only
+  Docker/containerd/kind-supervisor reserve. The in-node reserve fits inside its container envelope and is not
+  debited again at the host. A multi-node kind cluster is `replicas > 1` on that
   *one* host — kind runs every node as a container on a single Docker host, so "a multi-node kind cluster
   spread across hosts" (I3) has no field to express it ([§4](#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction), [illegal_state_catalog.md §3.15](../illegal_state/illegal_state_topology.md#315-a-multi-node-kind-cluster-not-on-a-single-linux-host)).
-- **`Rke2`** carries `{ servers : Rke2Servers, agents : List LinuxHost }` — a **control plane** and a **data
-  plane**, not a flat node bag. `Rke2Servers` is a **closed odd-quorum union** (`Single` / `Ha3` / `Ha5`), so
+- **`Rke2`** carries `{ servers : Rke2Servers, agents : Rke2AgentPool }` — a **control plane** and an explicitly
+  fixed-or-elastic **data plane**, not a flat node bag. `Rke2Servers` is a **closed odd-quorum union**
+  (`Single` / `Ha3` / `Ha5`), so
   an **even- or zero-server** control plane (no etcd majority / split-brain) has no constructor and is
   **type-foreclosed unrepresentable** ([illegal_state_catalog.md §3.24](../illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)); it caps HA at
-  five by design (a `Ha7` arm is a deliberate future add). Agents are an ordinary `List LinuxHost`. "More
-  nodes than hosts" stays uninhabitable and "the same host reused for two nodes" — now over `servers ∪ agents`
-  — is a decode-rejected distinctness violation (I4,
+  five by design (a `Ha7` arm is a deliberate future add). `Fixed` binds every agent to one `LinuxHost`;
+  Each server/agent node pairs its Linux host with the exact `NodeCapacity` advertised to placement and a
+  `Rke2Server`/`Rke2Agent` `EngineSystemReserve`; host admission proves capacity plus that role reserve fits
+  before join. `Autoscaled` binds its current floor the same way and carries a `ScalingPolicy` whose non-empty candidate
+  classes and outer quota represent future supply. "More declared nodes than hosts" stays uninhabitable and
+  "the same host reused for two declared nodes" — now over `servers ∪ agentFloor` — is a decode-rejected
+  distinctness violation (I4,
   [illegal_state_catalog.md §3.16](../illegal_state/illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused)); the cardinality detail is [§4.1](#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation).
   This same `{ servers, agents }` split, given a **`Site`-indexed quorum**, expresses a **self-managed
   stretched cluster** — data-plane agents at a network `Site` distinct from the co-located control plane —
   **without a new `ComputeEngine` arm**; that stretched refinement is [§4.1](#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation).
-- **`Managed Eks`** is the **first-class** provider arm (I13): a provider-managed cluster with **no host** and
-  no `LinuxHost` field at all. Its nodes' capacity comes from the declared instance types, not physical hosts
-  ([resource_capacity_doctrine.md §3](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)), and it is provisioned over the cloud
-  API, owned by [pulumi_iac_doctrine.md §4](./pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog).
+- **`Managed Eks`** is the **first-class** provider arm (I13): its managed **control plane** has no physical
+  host and no `LinuxHost` field, but its account identity and worker supply are never implicit. The arm carries
+  the authored `account : CloudAccountId`, a non-empty set of declared `ProviderNodeClass` values, and one
+  `ProviderQuota { maxInstances, maxVcpu, acceleratorCaps, nodeRootStorage, durable }` for that exact account.
+  Each reusable class carries `allocatable : ProviderNodeCapacityTemplate { allocatableCpu,
+  allocatableMemory, podSlots, cniSlots, attachableVolumes, localDisks, cpuOvercommit, localStorage, accelerator }`, where
+  `localStorage` is exactly `{ podEphemeralAllocatable, filesystems, imageStorageModel,
+  imagePullConcurrency, kubeletMetadataModel }`; it also carries `sku`, `quotaVcpu`, `zones`, `price`,
+  `baseCount`, and `maxCount`.
+  Thus pod/CNI slots and each driver-indexed CSI attachment policy are catalog operands, not CPU-derived
+  defaults, and `quotaVcpu` remains distinct from net `allocatableCpu`. The quota separately caps
+  `maxInstances`, `maxVcpu`, `acceleratorCaps`, ephemeral `nodeRootStorage` bytes/count, and durable retained
+  bytes/count. Each `InstanceStore.provisionedRawBytes` is fixed SKU raw supply, while every
+  `ProviderUsableDiskCarveTemplate.requiredUsableBytes` is mounted-filesystem usable demand; neither can be
+  substituted for or summed directly with the other. Checked construction creates a private
+  `ProvisionedPerInstanceDiskTemplate` for each selected instance, converts either those SKU raw bytes or the
+  allocation-rounded `EphemeralRootEbs` request through its pinned presentation into
+  `mountedUsableBytes`, and only then proves system reserve plus every unique layout carve fits that usable
+  capacity. Template ids are local recipe names, not
+  globally unique physical `DiskCarveId`/`AcceleratorDeviceId` values that could be aliased by two instances.
+  Class names are unique within their cluster, and template-local ids/references/arithmetic satisfy the
+  `ProviderNodeCapacityTemplate` constructor invariants in resource capacity doctrine.
+  `ProviderQuota.nodeRootStorage = NoNodeRootEbs` permits only instance-store-backed classes;
+  `ProviderQuota.durable = NoDurable` means the
+  provider supply has zero durable backing and any durable demand rejects; it never means an omitted or
+  unbounded quota. Every class must satisfy `baseCount ≤ maxCount`, and aggregate base
+  instances/vCPU/devices/node-root-EBS bytes+count/durable demand must fit all five independent fields of the
+  account's `ProviderQuota`; no quota field can fund another. The base counts derive stable hostless provider
+  slots for `NodeSupply.floor`.
+  The class/quota arithmetic is owned by
+  [resource_capacity_doctrine.md §3](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget),
+  and cloud realization is owned by
+  [pulumi_iac_doctrine.md §4](./pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog).
   Because the `Managed` arm carries no `LinuxHost` / host-worker index, "a host workload (Apple Metal /
   Windows CUDA) on a hostless provider child" is uninhabitable — the hostless-provider honesty already named
   by [cluster_lifecycle_doctrine.md §1](./cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape),
@@ -120,35 +252,137 @@ the virtualization provider.
 
 ## 4. `Topology`: a cluster is a fold over its nodes, and cardinality is by construction
 
-A cluster is not a loose bag of settings — it is a **`NonEmpty Node`**, and the engine dictates how
-node count relates to host count. Making the count a *structural* property forecloses the topology illegal
-states without arithmetic where possible.
+A cluster is not a loose bag of settings. A fixed supply is a **`NonEmpty Node`**; an elastic supply is an
+explicit fixed floor plus a non-empty compatible candidate-class set and an outer quota. The engine dictates
+which supply arm is derived and how declared node count relates to host count. Making that distinction
+structural prevents `place` from pretending that a not-yet-created node is an observed fixed node.
 
+```text
+Topology = { engine : ComputeEngine, supply : NodeSupply } -- opaque; supply is derived from engine
+
+NodeSupply =
+  < Fixed   : NonEmpty Node
+  | Elastic :
+      { floor      : List Node
+      , candidates : NonEmpty CandidateNodeClass
+      , quota      : GrowthQuota
+      }
+  >
+
+Node =
+  { host : Host
+  , substrate : Substrate
+  , capacity : NodeCapacity
+  } -- Host is a LinuxHost witness or a hostless Provider slot
+
+CandidateNodeClass =
+  { id          : CandidateClassId
+  , substrate   : Substrate
+  , sku         : Optional ProviderSkuRef
+  , allocatable : ProviderNodeCapacityTemplate
+  , engineProvision :
+      < ProviderManagedWorker
+      | Rke2Agent : Rke2AgentReserveTemplate
+      >
+  , quotaVcpu   : Quantity Vcpu
+  , zones       : NonEmpty Zone
+  , price       : Price
+  , baseCount   : Natural
+  , maxCount    : PositiveNatural
+  }
+
+Rke2AgentReserveTemplate =
+  { hostCapacity :
+      { cpu : Quantity Cpu, memory : Quantity Bytes, disks : NonEmpty PerInstanceDiskTemplate }
+  , processes : NonEmpty EngineProcessTemplate
+  , storage   :
+      { carve  : PerInstanceCarveRef
+      , demand : WorkerEngineStorageDemand
+      }
+  }
+
+EngineProcessTemplate =
+  { id : EngineProcessTemplateId, runtime : HostResources }
+
+GrowthQuota =
+  { maxInstances    : PositiveNatural
+  , maxVcpu         : Quantity Vcpu
+  , acceleratorCaps : Map AcceleratorProfile PositiveNatural
+  , nodeRootStorage : NodeRootStorageQuota
+  , durable         : DurableQuota
+  }
 ```
-Topology = { engine : ComputeEngine, nodes : NonEmpty Node }
-Node     = { host : Host, substrate : Substrate }   -- Host is a LinuxHost witness or a hostless Provider slot
-```
+
+The `PerInstanceDiskTemplate` used by either a provider-managed candidate or an autoscaled rke2-agent host
+template preserves that same raw/usable unit boundary. `InstanceStore.provisionedRawBytes` and
+`ProvisionedNodeRootVolumeRequest.provisionedBytes` are raw capacities;
+`systemReserve.requiredUsableBytes` and each unique
+`carves[*].requiredUsableBytes` are usable demands. The private `ProvisionedPerInstanceDiskTemplate`
+presentation conversion produces `mountedUsableBytes` before the nested fit, so that fit never compares a
+filesystem carve directly with raw provider bytes.
 
 - **Kind: exactly one host (I3, type-foreclosed).** The `Kind` arm's single `host` field *is* the cardinality bound —
-  a second host has no field to bind, a Gate-1 type error. Multi-node is `replicas`, which never adds a host.
+  a second host has no field to bind, a Gate-1 type error. Multi-node is `replicas`, which never adds a host;
+  `deriveNodeSupply` always returns `Fixed` and maps every ordinal in the same arm's `KindEngineDemand` to a
+  `Node` carrying that exact checked `NodeCapacity`. The host carve proves all node-container runtime
+  ceilings, unique filesystem-layout carves, accelerator assignments, fabric demand, and the kind engine reserve fit together; a
+  capacity cannot be authored independently in `Topology`.
 - **rke2: one Linux host per node, quorum by construction (I4).** `Rke2` no longer carries a flat
-  `NonEmpty LinuxHost`; it splits into `{ servers : Rke2Servers, agents : List LinuxHost }` ([§2](#2-computeengine-a-closed-union-eks-a-first-class-arm)). Every server
-  and every agent still *is* a `LinuxHost` value, so "more nodes than hosts" stays type-foreclosed uninhabitable — but
-  the server count is now pinned to a legal odd etcd quorum by the closed `Rke2Servers` union rather than left
-  to a runtime check. **Distinctness** ("no host reused for two nodes") now ranges over `servers ∪ agents` and
-  is still the one part Dhall cannot express as a type (no Set-distinctness), so it degrades to a **decode-foreclosed
-  total decode fold** (`mkRke2` rejects a duplicate `HostId`), and the catalog classifies [§3.16](../illegal_state/illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused) at that weaker
-  floor honestly. Full cardinality treatment is [§4.1](#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation).
+  `NonEmpty LinuxHost`; it splits into `{ servers : Rke2Servers, agents : Rke2AgentPool }`
+  ([§2](#2-computeengine-a-closed-union-eks-a-first-class-arm)). Every server and every fixed/floor agent still
+  contains a `LinuxHost` value plus the exact checked `NodeCapacity` and role-indexed engine reserve, while
+  every future elastic node is represented by a candidate capacity/substrate
+  class rather than a fictitious host witness. The server count is pinned to a legal odd etcd quorum by the
+  closed `Rke2Servers` union. **Distinctness** ("no host reused for two declared nodes") ranges over
+  `servers ∪ agentFloor` and is still the one part Dhall cannot express as a type (no Set-distinctness), so it
+  degrades to a **decode-foreclosed total decode fold** (`mkRke2` rejects a duplicate `HostId`), and the catalog
+  classifies [§3.16](../illegal_state/illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused) at that weaker floor honestly. Full cardinality treatment is
+  [§4.1](#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation).
+- **Managed EKS: elastic supply is explicit.** `deriveNodeSupply` projects the authored `CloudAccountId`,
+  non-empty `ProviderNodeClass` set, and `ProviderQuota` into `Elastic`: each class's `baseCount` derives stable
+  class/ordinal hostless provider slots in `floor`, while the full class set remains `candidates`. Instantiating
+  one slot first copies that exact account identity into a globally scoped
+  `ProviderInstanceId { account, cluster, class, ordinal }`, then derives backing/carve and promised
+  accelerator-slot ids from that instance id plus the complete disk/carve/slot template path; after join,
+  provider backing ids and observed physical
+  accelerator device ids are attached to and cross-checked against that slot. Two instances of one class
+  therefore multiply the per-instance bytes/devices instead of sharing one concrete backing or device. The
+  account key must exact-join the same `CloudAccountId` entry in the forest `SharedSupplyLedger`; it is never
+  inferred from an AWS credential, region, or observed instance. A managed control plane with no compatible
+  worker class, an omitted/mismatched account or quota, `baseCount > maxCount`, or aggregate base supply beyond
+  any independent quota field cannot produce a `Topology`.
+  Accelerator caps are a canonical keyed map: one ceiling per profile. Gate 1 admits no duplicate-key list,
+  Gate 2 preserves the map, and all selected classes debit the same profile entry cumulatively; two classes
+  cannot each spend a copied full cap.
+  A provider class's `sku` is a catalog-pinned EC2 machine identity, not a decorative label. Its raw
+  CPU/memory/local-instance-storage/GPU/link shape, provider-vCPU quota cost, region/zone availability, and
+  price observation are derived from or cross-checked against the named immutable catalog snapshot; the
+  declared net allocatable template must be a valid carve of that raw SKU after provider/node reserves.
+  An impossible shape, stale catalog version, unavailable zone, or field mismatch has no provisioned class.
+  The provider SKU is mandatory in the managed arm; a self-managed rke2 candidate instead has `sku = None`
+  and its explicit raw host template.
+- **An autoscaled rke2 candidate is not a managed-provider worker.** Its candidate class carries
+  `engineProvision = Rke2Agent Rke2AgentReserveTemplate`: the exact runtime/kubelet/agent-overhead process
+  templates plus worker log/static-storage demand, declared per-instance raw host CPU/memory/disk supply, and
+  a class-local system-carve reference. Checked construction proves advertised node allocatable + agent
+  reserve ≤ that raw per-instance host supply before create. Effective
+  candidate capacity, instance/vCPU/storage quota cover, and price comparison include that reserve before the
+  class can be selected. Materialization derives the concrete reserve/carve from the
+  account/cluster/class/ordinal path (including globally qualified process ids), observes the host, and
+  re-proves reserve + advertised `NodeCapacity` fit
+  before join. `Managed Eks` classes instead carry `ProviderManagedWorker`; no unobservable provider control-
+  plane reserve is fabricated. The arms cannot be interchanged or omitted.
 - **Multi-substrate clusters stay legal (I2 carve-out).** A `Topology` may mix nodes of *different*
   substrates — a heterogeneous cluster is explicitly allowed. Compatibility ([§5](#5-the-compatibility-relation-technique-47-only-compatible-pairs-have-a-constructor)) is checked **elementwise**
-  per node, never as a single whole-cluster substrate, so a legal multi-substrate cluster decodes while an
-  incompatible pairing does not.
+  over fixed/floor nodes and elastic candidate classes, never as a single whole-cluster substrate, so a legal
+  multi-substrate cluster decodes while an incompatible pairing does not.
 
 ### 4.1 rke2 server/agent cardinality: odd quorum by union, distinctness by fold, taint by derivation
 
-The flat `Rke2.nodes : NonEmpty LinuxHost` treated every rke2 node alike. The typed model ([§2](#2-computeengine-a-closed-union-eks-a-first-class-arm)) splits the
-cluster into a **control plane** (`servers : Rke2Servers`) and a **data plane** (`agents : List LinuxHost`) and
-pins three properties at three honest layers.
+The flat `Rke2.nodes : NonEmpty LinuxHost` treated every rke2 node alike. The typed model
+([§2](#2-computeengine-a-closed-union-eks-a-first-class-arm)) splits the cluster into a **control plane**
+(`servers : Rke2Servers`) and a fixed-or-autoscaled **data plane** (`agents : Rke2AgentPool`) and pins three
+properties at three honest layers.
 
 - **Quorum by closed union (type-foreclosed).** `Rke2Servers = < Single | Ha3 | Ha5 >` has an arm *only* for the legal
   odd etcd quorums {1, 3, 5}. A **0-server** (no control plane) or **2-server** (no majority / split-brain)
@@ -160,13 +394,15 @@ pins three properties at three honest layers.
   never needs at a steady-state write-latency price. A `Ha7` arm is therefore a deliberate deferral, not an
   oversight — a future add. This is catalog entry
   [illegal_state_catalog.md §3.24](../illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain) (Owner: this doc; Technique: [§4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) closed union).
-- **Distinctness by fold over `servers ∪ agents` (decode-foreclosed).** Dhall has no Set-distinctness, so "no host reused
+- **Distinctness by fold over `servers ∪ agentFloor` (decode-foreclosed).** Dhall has no Set-distinctness, so "no host reused
   for two nodes" cannot be a type. It degrades to the **decode-foreclosed total decode fold** `mkRke2`, which now ranges
-  over the **union of the server set and the agent list** and rejects a duplicate `HostId`. This *generalizes*
+  over the **union of the server set and the `Fixed` list or `Autoscaled.floor`** and rejects a duplicate
+  `HostId`. This *generalizes*
   the old single-node-list fold: distinctness must hold across both planes at once, so a host cannot be both a
   server and an agent, nor appear twice in either. The catalog classifies
   [illegal_state_catalog.md §3.16](../illegal_state/illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused) to this weaker floor honestly and now scopes it
-  to `servers ∪ agents`.
+  to `servers ∪ agentFloor`. Candidate classes are checked for compatibility/capacity, not host-id
+  distinctness, because they describe future nodes rather than already-bound hosts.
 - **Control-plane taint by derivation (type-foreclosed structural, runtime-checked residue).** The control-plane node taint and
   its matching workload tolerations are **derived from the server set**, never hand-authored — the same
   derive-don't-author discipline the catalog names for tolerations
@@ -174,13 +410,16 @@ pins three properties at three honest layers.
   taint, there is no seam to author an un-derived one; the derivation is type-foreclosed at the spec layer, with the
   actual kube-level taint/toleration application a runtime-checked residue on the reconciler.
 
-**Root cluster.** The zero-secret root is exactly `{ servers = Rke2Servers.Single host, agents = [] }` — one
-server, no agents — the single-node base named by the root-single-node rule in
+**Root cluster.** The zero-secret root is exactly
+`{ servers = Rke2Servers.Single host, agents = Fixed [] }` — one server, no agents — the single-node base named
+by the root-single-node rule in
 [cluster_lifecycle_doctrine.md §2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap). Growing it is two
 different moves, never fused:
 
-- **Agents grow by `ScalingPolicy`.** Adding data-plane capacity extends the `agents` list, enacted as Pulumi
-  node provisioning ([resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns),
+- **Agents grow only through the `Autoscaled` arm.** Adding data-plane capacity is representable only as
+  `Autoscaled { floor, policy }`; the policy's candidate classes and quota are part of the pure topology before
+  Pulumi node provisioning enacts it
+  ([resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns),
   [pulumi_iac_doctrine.md §4](./pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog)).
 - **Quorum is fixed by declaration.** The server count is *not* an autoscaled quantity: moving `Single → Ha3`
   (or `Ha3 → Ha5`) is a **deliberate re-provision of the control plane**, authored in the `.dhall`, never a
@@ -221,7 +460,7 @@ This doc owns the classifier and the K2 (full-node) control-plane witness; the K
   consumed here and never re-minted — so a host worker has **no path** into control-plane membership (**type-foreclosed**:
   the total `witness` fold has no constructor carrying a K1 host worker into a member `Reach`). It is the
   attach-pool shape ([single_logical_data_plane_doctrine.md §4](./single_logical_data_plane_doctrine.md#4-the-elastic-worker-pool-the-attach-topology)),
-  representable on **any** `ComputeEngine`, including a hostless `Managed Eks`.
+  representable on **any** `ComputeEngine`, including one with a hostless `Managed Eks` control plane.
 - **K2 — a full k8s node** (a kubelet member inside the `Rke2` arm) carries the control-plane witness
   **`ReachesControlPlane c`**, minted **from** the declared `Networking`'s `VpnFabric`
   ([network_fabric_doctrine.md §3](./network_fabric_doctrine.md#3-keys-config-and-distribution--wireguard-as-just-another-reconcile)/[§5](./network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric))
@@ -277,9 +516,10 @@ collection**.
 - **Element-level (type-foreclosed where structural).** `Managed Eks` pairs only with a hostless provider slot;
   `Rke2`/`Kind` pair only with a `LinuxHost` witness ([§3](#3-the-linuxhost-witness-rke2kind-on-a-host-with-no-linux-node-is-uninhabitable)). A pairing outside the relation — e.g. a native
   Apple-Metal engine on a Linux node, or a managed arm carrying a `LinuxHost` — has no constructor.
-- **Collection-level (decode-foreclosed fold).** The cluster-wide compatibility check is a **total elementwise fold**
-  over `NonEmpty Node`: every node's `(engine, substrate)` pair must satisfy the relation, and the fold
-  returns the full list of incompatible nodes (not just the first), like `validateTopology`
+- **Collection-level (decode-foreclosed fold).** The cluster-wide compatibility check is a **total elementwise
+  fold** over every fixed/floor `Node` and elastic `CandidateNodeClass`: every `(engine, substrate)` pair must
+  satisfy the relation, and the fold returns the full list of incompatible entries (not just the first), like
+  `validateTopology`
   ([pulsar_client_doctrine.md §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra)). Because it
   is elementwise, heterogeneous multi-substrate is legal by construction; only the incompatible *pair* is
   rejected.
@@ -298,7 +538,7 @@ flowchart LR
   lima --> node
   wsl --> node
   slot --> node
-  node -->|elementwise fold over NonEmpty Node| topo[Topology, incompatible pair yields Left]
+  node -->|elementwise fold over fixed/floor nodes and candidate classes| topo[Topology, incompatible pair yields Left]
   topo -->|capacity fold| cap[resource_capacity place fold]
 ```
 
@@ -311,11 +551,16 @@ This doctrine owns the *shape* of a legal cluster; two siblings own what rides o
 - **Capacity.** `resource_capacity`'s `place` fold ranges over *this* `Topology`, and it is a **placement**, not
   a sum ([resource_capacity_doctrine.md §4.1](./resource_capacity_doctrine.md#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope)):
   the `ComputeEngine` shape selects the check. A **fixed** node set (`Kind` with `replicas`, `Rke2` `servers` +
-  statically-declared `agents`) yields a concrete pod→node **witness** bin-pack; an **elastic** node set
-  (`Autoscaled` agents, a `Managed Eks` node group up to a `CloudQuota`) yields a two-**envelope** check
-  (per-pod-fits-largest-candidate-instance + Σ-at-max-scale ≤ quota) the autoscaler can always satisfy; a hybrid
-  witness-packs its fixed floor and envelope-checks the headroom. Topology owns the node set (and thus the
-  fixed-vs-elastic distinction); capacity owns the placement arithmetic over it.
+  `Rke2AgentPool.Fixed`) yields a concrete pod→node **witness** bin-pack. An **elastic** supply
+  (`Rke2AgentPool.Autoscaled`, or a `Managed Eks` node group up to `ProviderQuota`) first witness-packs its
+  concrete floor, subtracts every topology-expanded per-node execution unit from each candidate's effective
+  capacity, then constructs a compatible candidate-class count cover across CPU/memory/logical ephemeral and
+  layout-routed node storage,
+  locality, device count, and per-device memory. Every class count (base/floor + additional) must stay within
+  its `maxCount`, and the selected instance/provider-vCPU/device/node-root-EBS/durable totals must stay within
+  the outer quota. Replacement overlap charges old and new node-root volumes until the old node/root volume is
+  observed deleted. Topology's derived `NodeSupply` owns the fixed-vs-elastic distinction; capacity owns the placement
+  arithmetic over it.
 - **Lifecycle.** The bring-up, spawn, teardown, and dynamic-provisioning *verbs* over these engines are owned
   by [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md) (the root-single-node rule in [§2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap), the
   provider-managed vs self-managed split in [§1](./cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape)). This doc supplies the *types* those verbs act on; it does not
@@ -349,8 +594,9 @@ This doctrine owns the *shape* of a legal cluster; two siblings own what rides o
 This document is normative topology doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the `ComputeEngine` /
 `LinuxHost` / `Topology` types and the compatibility relation land in **Phase 4** (with the negative `.dhall`
-gate); the Lima `LinuxHost` witness is exercised on **Phase 35** (`apple`); live multi-node rke2/kind topology
-on **Phase 28**; the `Managed Eks` arm on **Phase 30**. This doc never maintains a competing status ledger; it
+gate); the Lima `LinuxHost` witness is exercised on **Phase 35** (`apple`); live kind topology lands in
+**Phases 14/28**, while live multi-node rke2 remains an explicitly unassigned Phase-N gate; the `Managed Eks`
+arm lands in **Phase 30**. This doc never maintains a competing status ledger; it
 states the target shape and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
 ---

@@ -16,8 +16,8 @@
 
 📋 Planned. Nothing in this phase is implemented; every sprint below is 📋 Planned and every prescriptive
 statement is design intent, never a tested amoebius result. The phase runs on the **linux-cpu** substrate in
-**Register 3** (live infrastructure) — the single-node `kind` cluster of Phases 13–19 with its standard
-platform-service stack already reconciled by the Phase-22 control-plane singleton onto the Phase-17 retained
+**Register 3** (live infrastructure) — the single-node `kind` cluster assembled through Phases 14–22, with
+its standard platform-service stack already reconciled by the Phase-22 control-plane singleton onto the Phase-17 retained
 storage. It opens only after the Phase 22 gate (live DSL deploy via the Deployment-`replicas=1` singleton and
 the SSA reconciler the `RolloutPlan` enacts on) and the Phase 25 gate (the three-tier content-addressed store
 the `releaseHash`-keyed ledger writes into) both close, because delivery here **composes** those primitives
@@ -38,7 +38,8 @@ store — promoting the manifest reconciler's *optional* applied-log to THE cano
 Second, the per-**`Environment`** (`Dev`/`Staging`/`Prod`) **ETag-CAS promotion pointer**: "promote to prod"
 is a compare-and-swap of that environment's pointer from the old `releaseHash` to the new one — not a rebuild;
 app bytes are byte-identical across environments. Third, the **`PromotionGate`**: a typed precondition whose
-`advance` constructor demands an `EvidenceWitness` read from the Phase-36 test-topology evidence ledger, so an
+`advance` constructor demands an `EvidenceWitness` read from the typed per-run proven/tested/assumed evidence
+ledger, so an
 under-verified `Release` has **no `advance` value to hand the CAS** — promote-unverified→prod is
 type-foreclosed unrepresentable, not a runtime check that fires. Fourth, the readiness-gated
 **`RolloutPlan`/`RolloutPhase`** apply on the Phase-22 in-cluster SSA reconciler: an ordered plan whose each
@@ -53,8 +54,9 @@ required evidence strength advances the ETag-CAS pointer, after which the SSA re
 `render(release)` through the ordered `RolloutPlan`. The scope deliberately consumes upstream primitives as
 given: the `releaseHash` formula and the hash/pointer master registry are the Phase-25/Phase-31 store's
 (consumed here as an opaque content-address protocol); the proven/tested/assumed evidence ledger the gate
-reads is Phase-36's (consumed here as an opaque witness); the Gateway-API canary weight-shift and the
-cross-cluster/geo promotion boundary are **not** exercised by this gate (Phase 37 and Phase 28 respectively).
+reads is the contract owned by `testing_doctrine` (consumed here as an opaque witness; Phase 36 later automates
+test-topology generation but is not a prerequisite); the Gateway-API canary weight-shift remains later-phase
+work, and the cross-cluster/geo promotion boundary is exercised in Phase 28 — neither is part of this gate.
 
 **Substrate:** linux-cpu — the whole gate runs on a single-node `kind` cluster on a linux-cpu host, in
 Register 3 (live infrastructure); no apple, linux-cuda, or windows substrate is touched. The ledger/pointer
@@ -90,6 +92,58 @@ The representative set is exactly the `release_lifecycle.dhall` topology's **one
 environment pointers (`Dev`/`Staging`/`Prod`), two committed `Release` entries (`release_verified`,
 `release_unverified`), and one `RolloutPlan` of three ordered phases (base-apply → DB schema-migration →
 finalize)** over the standing single-node platform stack plus one Postgres.
+
+### Resource-provisioning contract
+
+This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
+[`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting);
+release and migration composites must flatten completely before any rollout effect.
+
+`amoebius-release` adds no hidden CI/CD controller. Its hashing, evidence lookup, CAS, and rollout planning run
+inside the Phase-22 singleton, so a pure `ReleaseExecutionDemand` expands the singleton's complete
+`PodResourceEnvelope` for release-Dhall/image/evidence reads, hashing and canonical-CBOR workspace, SSA object
+serialization, watch/readiness buffering, writable-root/log headroom, and CPU/memory/ephemeral requests and
+limits, with `cache = None` and `accelerator = None` on linux-cpu. Every app/controller object in every
+`RolloutPhase` retains its own complete Pod envelope and replica plus old/new/surge/terminating operands. A new
+controller, Job, or sidecar cannot enter `phaseObjects` without an identity-keyed demand.
+
+Release ledger entries, resolved-deployment content, evidence-ledger references, three environment pointers,
+and retained pointer history are exact full-key objects in a `ContentStoreLogicalDemand`, admitted through the
+existing `Content` arm of the closed six-arm `ObjectStoreProducerDemand` union. That demand carries one
+`StorageBudgetId`, committed residents, exact future-retained objects, maximum concurrent writes, failed/CAS
+loser and multipart extents through a finite GC horizon, and `ObjectStoreMutationAdmission`. Promotion and
+release writes use the sole resource-bearing content gateway; neither the singleton nor a rollout Job receives
+direct S3 PUT authority. Same `releaseHash` deduplicates only when the full store/tenant/bucket/key identity and
+size agree; pointer history and an old pointer body remain charged through a failed race.
+
+Database migration is a pure `SchemaMigrationDemand`, and only private `ProvisionedSchemaMigration` may reach
+the rollout renderer. The input retains exact old/new schema objects and indexes plus row/data high-water and
+a temporary-workspace/WAL cost model; the private result derives those extents and a complete executor-Job
+`PodResourceEnvelope`. The enclosing plan separately retains the surrounding old/new application rollout, and
+the migration Job binds `accelerator = None` on linux-cpu. A single admitted migration identity owns
+DDL/copy/verify mutation; direct or competing schema writes are denied. It has no caller-supplied scalar peak.
+Capacity is the structural old schema/data + new schema/data + WAL + temporary/verification workspace +
+executor + old/new workload
+overlap; any failed copy or verification keeps the old schema/data and all new/WAL/workspace commitments until
+observed cleanup. `retire-old` may become eligible only after the private verification witness and never earns
+capacity credit merely because the plan advanced.
+
+Before a ledger PUT, environment-pointer CAS, apiserver apply, SQL DDL, or migration Job creation, the
+live-snapshot-bound whole-deployment provisioner checks release execution, all phase Pods/controllers,
+content objects/gateway, `SchemaMigrationDemand`, Patroni backing, namespace quotas, pod/CSI slots, kubelet
+stores, transition overlap, and the exhaustive post-controller-expansion desired/live/old/new/apply
+Kubernetes-object identity map. Every identity has a `KubernetesApiObjectDemand`;
+`EtcdLogicalDemand { desiredObjects, churn, model }` derives the private logical peak, which must fit
+`ControlPlaneStorageDemand.etcd.backendQuotaBytes`, before the backend-at-quota plus
+WAL/snapshot/serialized-defrag peak separately fits its physical backing. Render accepts only opaque projections. Live
+Pods/controllers, ApplySet order, exact MinIO keys/history/multiparts, Postgres schemas/indexes/row
+bytes/WAL/workspace, claims, and cleanup state
+must normalize to them; any unexplained object or byte is `UnknownCommitment`. Exact-fit/one-short and omission
+mutants cover every execution, object, budget/admission/failure, schema/index/row, WAL/temp, Job, old/new
+transition, API-object revision/Event, and etcd term. A raw-bound render, scalar migration peak, missing
+old-schema retention, omitted release object, dropped desired API object, missing churn operand, or missing
+etcd model must refuse before effects.
 
 ```mermaid
 flowchart LR
@@ -182,6 +236,10 @@ to THE canonical, content-addressed, append-only release record keyed by `releas
   append-only entry into the Phase-25 store (pointers → manifests → blobs), keyed by
   `releaseHash = sha256(resolved-deployment-dhall ‖ image-digests ‖ substrate-fp)`; the hash is consumed as
   the registered `releaseHash` class of the Phase-25/Phase-31 hash/pointer master table, not re-owned here.
+- An exact `Content`-producer demand for both release fixtures and their resolved-Dhall/image/evidence objects,
+  carrying full object identities, `StorageBudgetId`, structural concurrent/failure/orphan extents, and
+  mutation admission. The content gateway's complete envelope and the singleton's added hashing/canonicalizing
+  execution are provisioned before the first ledger PUT.
 - Immutability by construction: no field of a written `Release` is ever edited; the content-addressed write
   protocol rejects any bytes that do not hash to their key, so a half-written or edited-out-from-under entry is
   unrepresentable at the store boundary.
@@ -205,6 +263,10 @@ to THE canonical, content-addressed, append-only release record keyed by `releas
    this validation **red** (two substrate-distinct fixtures collapse to one key).
 3. Attempt to edit a field of an existing `releaseHash` entry and assert the content-addressed write protocol
    **rejects** it — the ledger is append-only and immutable.
+4. Make the singleton release-execution CPU, memory, ephemeral/image/log/workspace or any ledger object,
+   count/size, failure-horizon, budget, admission, or gateway term one unit short. Every case refuses with zero
+   object mutation; exact-fit live full-key inventory and gateway/singleton envelopes equal the provisioned
+   projection.
 
 > **Honesty.** The immutability and self-naming are **runtime-checked residue** of the content-addressed write
 > protocol (a blob at a hash either is the bytes that hash to it, or the write is rejected), not a
@@ -253,6 +315,9 @@ pointer over the fixed ledger, not a redeploy.
   differs rides the deployment-rules surface.
 - The store's retained pointer history as the audit trail — the prior pointer values are a first-class query,
   replacing a git-polling controller's changelog.
+- Exact Content-demand objects for all three pointer HEADs and their retained histories; concurrent CAS loser,
+  failed write, multipart, and prior-body extents remain charged under the release `StorageBudgetId` and sole
+  mutation admission until fresh inventory proves reclamation.
 - **Phase-0-pinned oracles:** a committed **compile-fail fixture** `test/reject/fourth_environment.hs` whose
   expected outcome is a **specific type error at the `Environment` constructor site** (no constructor for a
   fourth arm), paired with a positive that names an enumerated arm; and a golden pointer-history transcript
@@ -269,6 +334,9 @@ pointer over the fixed ledger, not a redeploy.
    `Release` (zero app rebuild), and that no new `Release` entry was written.
 3. Race two concurrent `promote` calls; assert one commits, the loser gets `412`, re-reads and re-applies, and
    assert `mutant/blind-put` turns this validation **red** (a lost update is observed under the racing check).
+4. Make pointer-history retention, the concurrent CAS-loser extent, gateway execution, or the Content budget
+   one unit short, and omit one environment pointer in turn; each case refuses before PUT. The exact-fit
+   pointer HEAD/history inventory must normalize to the provisioned Content projection.
 
 > **Honesty.** Atomicity of promotion is **runtime-checked** — the ETag-CAS protocol forecloses the
 > lost-update/split-promotion race, not a type-level impossibility. The **closedness** of `Environment` (no
@@ -286,8 +354,8 @@ The whole sprint (📋 Planned).
 `amoebius-release/src/Amoebius/Release/EvidenceWitness.hs` (target paths; not yet built)
 **Blocked by**: Sprint 26.2 (the ETag-CAS pointer advance the gate is a precondition on); Phase 25 gate (the
 `Release` ledger whose entries carry the evidence reference) — external earlier-phase prerequisites. The
-Phase-36 test-topology evidence ledger is consumed as an **opaque `EvidenceWitness`**; this sprint does not
-build the ledger, only the environment→required-strength mapping that reads it.
+per-run evidence ledger contract from `testing_doctrine` is consumed as an **opaque `EvidenceWitness`**; this
+sprint does not build the ledger, only the environment→required-strength mapping that reads it.
 **Independent Validation**: this suite runs in **Register 3**. The gate's `advance` constructor demands an
 `EvidenceWitness`; the environment→required-strength mapping is monotone (`Dev` on a green Decision layer;
 `Prod` on the Runtime/chaos layer **proven**). A `Release` whose consumed evidence ledger records the
@@ -345,7 +413,7 @@ unrepresentable state.
    is a gate failure, observed as an unwarranted pointer advance in the store history.
 
 > **Honesty.** Promote-unverified→prod is **type-foreclosed** (uninhabitable — no `advance` term); this sprint
-> validates the *live wiring* of that foreclosure through the Phase-25 store and the consumed Phase-36 evidence
+> validates the *live wiring* of that foreclosure through the Phase-25 store and the consumed per-run evidence
 > ledger, so the result is **tested at runtime, never proven** by this phase. The strength mapping is a policy
 > value enforced at construction time. The `.ready`-gated idiom is proven in the sibling infernix — sibling
 > evidence for the shape; the `PromotionGate` itself is unbuilt amoebius design intent that also generalizes
@@ -396,6 +464,10 @@ values end-to-end.
   `create-new → verified-migrate → retire-old`: provision the new schema/columns, migrate and **verify** the
   copy, then retire the old in a later phase — the retire step inheriting the durable-data-deletion
   prohibition. This is the delivery home of the promoted schema-migration candidate.
+- The corresponding `SchemaMigrationDemand` and private `ProvisionedSchemaMigration`: exact old/new schemas
+  and indexes, row/data high-water, copy/verify WAL, temporary workspace model, full executor-Job
+  `PodResourceEnvelope`, plus the enclosing plan's old/new application rollout. Failed migration retains both
+  schema generations and all WAL/workspace; no caller scalar or early-retire capacity credit is accepted.
 - Rollback as ordinary operations over the immutable ledger: **re-apply** the prior generation's object set via
   the same SSA declare-and-prune path, or **CAS the environment pointer back** to the prior `Release` (Sprint
   26.2) and let the reconciler converge — no special "undo" machinery, because a prior generation is a valid
@@ -430,6 +502,10 @@ values end-to-end.
    copy against the committed `migrated_rows.txt` oracle, and only a later phase retires the old — asserting no
    phase, including retire, denotes durable-byte destruction. Assert `mutant/rollout-reorders-retire` turns
    this validation **red** (retire-before-verified-migrate is a gate failure).
+   In the same run, make each schema/index/row, WAL, temporary workspace, executor CPU/memory/ephemeral/image/
+   log, claim/attachment, and old/new workload-overlap operand one unit short; assert each refuses before DDL or
+   Job creation. A scalar-peak mutant and mutants dropping the old schema on failure or verification WAL must
+   turn red.
 3. Assert the mandated `mutant/gate-admits-unverified` turns the gate **red** (an admitted under-verified
    promotion advances the pointer that should not move), and `mutant/phase-gate-selfreport` turns it **red**
    (the external-observer apply-order trace catches a phase gated on a self-report rather than live status).
@@ -443,7 +519,11 @@ values end-to-end.
    (linux-cpu), marking the **runtime layer tested — never proven** (§K, a live-band Register-3 gate), the
    type-foreclosure of promote-unverified→prod proven-in-types but its live wiring tested, and the
    **cross-cluster/geo promotion and the Gateway-API canary weight-shift layers UNVERIFIED** (deferred to
-   Phase 28 and Phase 37); skipping an applicable move marks that layer UNVERIFIED, never green.
+   Phase 28 and a later phase, respectively); skipping an applicable move marks that layer UNVERIFIED, never
+   green.
+6. Normalize the live singleton/phase Pod envelopes, controllers and rollout epoch, exact release/pointer
+   Content objects, Postgres schemas/indexes/row bytes/WAL/workspace, and migration Job/claims to the opaque
+   provisioned deployment. Any difference or `UnknownCommitment` fails even when every phase reports Ready.
 
 > **Honesty.** This is a **Register 3** result on **linux-cpu**: the gate proves the *live wiring* of the four
 > delivery values, so the runtime layer is **tested, never proven**. The `RolloutPhase` pattern is jitML's
@@ -452,7 +532,8 @@ values end-to-end.
 > not an amoebius result**. This gate exercises the **intra-cluster** ordered apply and the schema-migration
 > phase only; the **Gateway-API canary weight-shift** and **Pulsar consumer-group cutover** RolloutPhases of
 > §5, and the **cross-cluster/geo promotion** boundary, are adopted in doctrine but **not exercised here** —
-> their proof rides Phase 37 and Phase 28. Pulumi cloud-IaC (tier a) and the host spot-fleet reconciler
+> their proof rides a later phase and Phase 28, respectively. Pulumi cloud-IaC (tier a) and the host spot-fleet
+> reconciler
 > (tier b) are unrelated; only tier (c), the in-cluster SSA reconciler, enacts this plan.
 
 ### Remaining Work
@@ -465,7 +546,7 @@ The whole sprint (📋 Planned).
   §3 (the `environment` ETag-CAS promotion pointer), §4 (the `PromotionGate`), and §5 (the readiness-gated
   `RolloutPlan`/`RolloutPhase` with the DB schema-migration phase) are realized live in `amoebius-release`,
   with the Gateway-API canary weight-shift, the Pulsar consumer-group cutover, and the cross-cluster/geo
-  promotion boundary explicitly still deferred (Phase 37 / Phase 28); flip the Phase-0 reference-only honesty
+  promotion boundary explicitly still deferred (later phase / Phase 28); flip the Phase-0 reference-only honesty
   note to live-proof status for the exercised values (status itself stays in this plan).
 - `documents/engineering/manifest_generation_doctrine.md` — record that §6.1's optional applied-log is
   promoted to THE canonical release ledger by this phase, and that the §5 SSA reconciler is the tier-(c) engine

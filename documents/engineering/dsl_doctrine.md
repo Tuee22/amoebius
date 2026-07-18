@@ -27,8 +27,9 @@ This document owns four things about that surface:
 2. **Total composability** — how one `InForceSpec` is built by nesting Dhall fragments (app-in-cluster,
    extension-in-app, child-cluster-in-parent, test-topology-in-Dhall).
 3. **Secrets-by-name** — the DSL holds only a *name* for each secret, never a value.
-4. **The illegal-state-unrepresentable contract** — the principle, and the mechanism (two typed gates)
-   that enforces it.
+4. **The illegal-state-unrepresentable contract** — the layered principle, the two typed gates for
+   structural legality, and the conditional post-bind infrastructure/materialization/provision seal for
+   value- and inventory-dependent legality.
 
 It does **not** own: the *catalog* of specific illegal states and the typing techniques that defeat each
 one ([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)); the application-logic-vs-deployment-rules
@@ -136,6 +137,18 @@ The point of separating these three is that the orchestration surface is **self-
 acts**: the `InForceSpec` says what to build, context says who is allowed to build it here, and witnesses
 confirm the binary is actually standing where the context claims. All three are typed Dhall, none is a secret
 ([§6](#6-secrets-are-names-never-values)), and none is logic ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)).
+
+The uploaded value is also a storage producer; “it lives in MinIO” is not a capacity exemption. After
+resolve/freeze/typecheck/decode, the binder derives its canonical serialized byte identity as the
+`InForceSpecSnapshot` entry of a `ControlPlaneStateObjectDemand`. That closed demand also covers only
+`ManagedResourceRegistry`, `ReconcileJournal`, `ValidationLedger`, and content-addressed `JobCompletion`;
+Pulumi checkpoints use their distinct
+producer arm. Each has a required `StorageBudgetId`, old/new CAS retention, failure/orphan bounds, and
+snapshot-bound mutation admission. Source↔producer equality, the six-arm object-store merge, MinIO geometry,
+and the control-plane gateway's own complete pod envelope must provision before the upload endpoint can
+persist the candidate or advance the pointer. A one-byte-short backing, omitted state entry, missing gateway
+capacity, or changed live snapshot yields zero object writes. There is no open “other control-plane bytes”
+constructor.
 
 **How the minted context reaches each frame.** The child `amoebius.dhall`/`FrameConfig` of the Context
 bullet is not written to a host file and bind-mounted in; it is **delivered in place, on the lift's `stdin`
@@ -354,15 +367,29 @@ never here.
 
 ## 5. The illegal-state-unrepresentable contract
 
-The claim is exact: **a valid `InForceSpec` cannot represent
-illegal, non-working, or insecure cluster state**. Not "is rejected by a
-linter," not "is caught in CI" — *cannot be written down in the first place*. The contract has a one-line
-form an operator can hold onto:
+The claim is layered, not a blanket assertion that every bad target is uninhabitable. **Closed structural
+illegality has no constructor; value- and inventory-dependent illegality is rejected by a total staged
+planning/provision check; initial infrastructure effects require a validated plan plus single-use plan/action
+tokens; and only the successfully sealed result can authorize Kubernetes rendering.** A raw, well-typed
+`InForceSpec` may therefore describe a quantitative overcommit or a CUDA workload paired with CPU-only
+inventory. That input is
+representable for diagnostics, but it has no deployable representation because infrastructure planning or
+`provision` returns `Left` and cannot construct the opaque `ProvisionedSpec`. The contract has a one-line form
+an operator can hold onto:
 
-> **If it decodes, it is deployable.**
+> **Gate 1/2 and bind/expand produce only intent. `planInfrastructure` derives demand from that exact intent
+> and declared supply or forest budget: `NoInfrastructureRequired` witnesses the explicit
+> `ObservedInfrastructureMaterialization.AlreadyMaterialized` state arm, while its required arm can mutate
+> only after its one `ProvisionedProviderActionBatch` is snapshot-validated as the matching
+> `ValidatedInfrastructureActionBatch` and the plan/action tokens are CAS-consumed. Receipt-bound
+> provider/host readback constructs `ProvisionContext`; only
+> `provision` can then construct the opaque `ProvisionedSpec` accepted by deployment-level `renderAll`.**
 
-That guarantee is bought by **two typed gates** in front of any effect. This section owns the *principle*
-and the *mechanism*; the **inventory** of specific illegal states (PVC↔PV binding, gateway misconfig, DNS
+That guarantee is bought by **two typed gates plus one conditional post-bind
+plan/materialize/provision seal**. Raw decoded or bound values authorize no effect; the only pre-spec effect
+authority is the validated initial-infrastructure plan and its single-use plan/action tokens, and it cannot
+render. This section owns the *principle* and the *mechanism*; the **inventory** of specific illegal states
+(PVC↔PV binding, gateway misconfig, DNS
 binding the wrong address, certs, taints/tolerations/affinity, NetworkPolicy partitions, backdoor ingress,
 resource overcommit, compute-engine/substrate incompatibility, illegal cluster topology, unbounded storage,
 and un-tiered topic lifecycles) and the **techniques** that defeat each (capability/phantom tags,
@@ -392,23 +419,54 @@ things happen here:
 - **Decoding is total and fail-fast.** A malformed or out-of-domain value surfaces as an `Either`/
   structured error (`readContextFile` returns `Left (ContextDecodeFailed …)` rather than throwing into a
   half-applied effect; `Context.hs`). Nothing is reconciled against a config that did not fully decode.
-- **The ADTs make illegal combinations un-spellable.** The Haskell types the Dhall decodes *into* are
-  designed — via sum types, smart constructors, and type indices — so that an illegal combination has no
-  inhabitant. This is where the catalog's techniques live; the decoder is merely the place they take
-  effect. Because the value cannot be constructed, it cannot be decoded, and because it cannot be decoded,
-  it cannot be deployed.
+- **The ADTs make structurally illegal combinations un-spellable and refinements reject local value
+  failures.** Sum types and type indices give closed illegal shapes no inhabitant; total smart constructors
+  can reject constructible values. Gate 2 produces only decoded, unprovisioned declarations. It does not
+  decide whole-deployment placement, storage peaks, live target compatibility, or inventory sufficiency.
 
-The two gates compose: Gate 1 rejects what is not even well-typed Dhall; Gate 2 rejects what is well-typed
-Dhall but not a legal amoebius world. What survives both is, by construction, a deployable cluster
-description — which is exactly *"if it decodes, it is deployable."*
+### Post-gate seal — bind/expand, conditionally materialize infrastructure, provision
 
-**Where the two gates are discharged: front-loaded to the pre-cluster gates, Phases 4–7 (Tier 1).** Both gates are *in-process,
-design-time* checks with no real resource behind them — Gate 1 is `dhall type` at authoring time, Gate 2 is
-the in-process `Dhall.inputFile auto` decode plus a QuickCheck exercise of the decoder's ADTs. Their
-integrity is therefore **discharged in-process in the front-loaded pre-cluster gates (Phases 4–7)** — the Tier-1 design/spec layer
-(dhall typecheck + decoder + QuickCheck), which needs no cluster. What stays deferred is only the **Tier-2
-runtime-enforcement residue** — that the *running* cluster enforces what the typed spec composed — owned by
-**Phase 22**. A green typecheck or decode proves the spec composes, not that the cluster enforces it.
+The pure Phase-8 binder expands the complete source inventory and produces an unprovisioned
+`BoundDeployment`. `planInfrastructure :: ProvisionTargetSupply -> BoundDeployment -> Either ProvisionError
+InfrastructurePlanningResult` derives the whole demand from that value and the declared standalone supply or
+opaque forest-member budget; it never accepts a second caller-authored demand vector. The result is a closed
+choice:
+
+- `NoInfrastructureRequired` supplies the witness for an explicit
+  `ObservedInfrastructureMaterialization.AlreadyMaterialized` state and proves that no initial provider or
+  SSH-host action is required.
+- `InfrastructureRequired` carries a non-renderable `ProvisionedInfrastructurePlan`. Exactly one
+  `ProvisionedProviderActionBatch` owns its closed cloud-provider/SSH-host action map, Pulumi deploy graph,
+  checkpoints, dependencies, bounded concurrency, and cloud-quota/SSH-child-budget partition. Fresh snapshot
+  validation returns a `ValidatedInfrastructurePlan` whose `ValidatedInfrastructureActionBatch` equals that
+  batch and whose plan/action tokens are fresh; their CAS consumption and only receipt-bound provider/host
+  readback can construct `ObservedInfrastructureMaterialization`.
+
+Either authenticated materialization arm constructs `ProvisionContext`. `provision` then joins that context
+to the exact `BoundDeployment`, checks CPU, memory, storage, slots, accelerators, VRAM, quotas, controller
+multiplicity, materialized identities, and every other whole-deployment demand, and returns `Either
+ProvisionError ProvisionedSpec`. Its success arm is opaque and constructor-private. Only that
+`ProvisionedSpec` can cross the Phase-9 deployment-level `renderAll` boundary. Thus a capacity sum is a
+checked rejection of constructible input, never a dependent-type inhabitance proof, and a promised
+infrastructure identity cannot be smuggled into a manifest before provider/host readback.
+
+The layers compose: Gate 1 rejects Dhall schema failures; Gate 2 rejects structural and local refinement
+failures; binding rejects unresolved or incoherent source composition; infrastructure planning rejects an
+unfit declared supply/budget or returns the explicit no-action arm / the sole validated action batch; and the
+post-materialization provision seal rejects mismatched readback or remaining incompatible demand. The final
+success produces the sole representation that `renderAll` accepts. Runtime enforcement remains a separate
+claim.
+
+**Where the contract shape is discharged: front-loaded to Phases 4–9 (Tier 1).** Gate 1 is
+`dhall type` at authoring time; Gate 2 is the in-process `Dhall.inputFile auto` decode and its focused
+properties (Phases 4–7); Phase 8 owns binding, pure infrastructure-plan construction, modeled/fixture
+materialization validation, and the opaque provision seal; Phase 9 proves the sole public `renderAll`
+boundary and its goldens. These contract/golden checks are pure or in-process and need no cluster. Live CAS
+enaction and provider/host readback of an `InfrastructureRequired` plan are exercised only by the later live
+infrastructure phases; they are not silently claimed by the Phase-8 type gate. What also stays deferred is the
+**Tier-2 runtime-enforcement residue** — that the *running* cluster enforces what the sealed spec composes —
+owned by **Phase 22**. A green typecheck or decode alone proves neither target feasibility nor live
+enforcement.
 
 ### Recursion: a child's spec is a typed subtree projection
 
@@ -442,10 +500,10 @@ its building phase, not yet built.
 
 > **Honesty.** The *strength* of this contract is a property of the type designs catalogued in
 > [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md). This doc states the contract and the decode
-> mechanism; it does **not** claim any specific illegal state is *proven* unrepresentable — that claim is
-> made, state by state, only where the catalog exhibits the type that excludes it. Per
+> plus provision-seal mechanism; it does **not** claim every illegal state is excluded by type inhabitance —
+> each catalog entry states whether its foreclosure is type-, decode-, provision-, or runtime-checked. Per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), a typing argument is evidence, not a
-> tested or proven result: the two gates' in-process integrity is front-loaded to the pre-cluster gates, Phases 4–7 (Tier 1), while
+> tested or proven result: the pure contract is front-loaded to the pre-cluster gates, Phases 4–9 (Tier 1), while
 > runtime enforcement — that the running cluster enforces what the spec composed — stays the Tier-2 residue
 > deferred to Phase 22.
 
@@ -510,7 +568,7 @@ This doc is the SSoT for the **orchestration** DSL (the Dhall surface). The **ex
 Haskell-as-DSL plus its custom AST checker and native JIT — is a scheduled **later phase**, not specified
 here. In [§4](#4-total-composability)'s extension taxonomy this is **Path 2** — the *only* path by which a non-vendored third party
 extends amoebius (Path 1, the closed linked set `{infernix, jitML}`, is vendored) — scheduled
-as provisional **Phase 35**
+as **Phase 40**
 ([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md#candidate-phase-haskell-extension-dsl--custom-ast-checker--native-jit)).
 See also the "Later phases" entry in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). It is named here only so the
@@ -542,8 +600,11 @@ does not serve as a message-payload format).
 This document is normative DSL doctrine only. Delivery sequencing, completion status, validation gates, and
 remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). The
 orchestration Dhall DSL's **in-process contract validation** — the two typed gates of
-[§5](#5-the-illegal-state-unrepresentable-contract) that make an illegal spec fail to type-check (Tier 1:
-dhall typecheck + decoder + QuickCheck) — is **front-loaded to the pre-cluster gates (Phases 4–7)**, while the DSL's
+[§5](#5-the-illegal-state-unrepresentable-contract), followed by bind/expand, conditional infrastructure
+planning/materialization fixtures, and the opaque provision seal (Tier 1: Dhall typecheck + decoder +
+QuickCheck + whole-deployment plan/provision + `renderAll` goldens) — is **front-loaded to Phases 4–9**,
+while live enaction/readback of a required initial-infrastructure batch belongs to the later live
+infrastructure phase that owns that substrate. The DSL's
 **runtime-enforcement** half (the live deploy + singleton reconcile that makes the running cluster
 enforce what the spec composed, Tier 2) lands in **Phase 22**, atop the Phase 10 `dsl-step`/`chain` kernel
 seeded from hostbootstrap. This doc never maintains a competing status ledger; it states the target shape and
@@ -551,8 +612,10 @@ links back for status.
 
 > **Honesty.** Everything in this doctrine is Phase 0 design intent, specified before implementation. Where
 > it borrows behaviour proven in prodbox or implemented in hostbootstrap, that is *evidence from a sibling
-> system*, not proof in amoebius — which has built neither the front-loaded pre-cluster (Phases 4–7) in-process validation of
-> this contract (Tier 1: dhall typecheck + decoder + QuickCheck) nor the Phase 22 runtime enforcement (Tier 2)
+> system*, not proof in amoebius — which has built neither the front-loaded pre-cluster (Phases 4–9)
+> in-process validation of this contract (Tier 1: Dhall typecheck + decoder + QuickCheck + conditional
+> infrastructure-plan/materialization fixtures + provision seal + `renderAll` goldens) nor the later live
+> infrastructure enaction/readback and Phase 22 runtime enforcement (Tier 2)
 > that makes the running cluster enforce what the spec composed. Read every prescriptive statement here
 > as the contract amoebius intends to satisfy, never as a tested amoebius result
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
@@ -574,6 +637,6 @@ links back for status.
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the capacity/budget/scaling types the surface carries
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the compute-engine/topology types the surface carries
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — [§3.1](./pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor) runtime message payloads are CBOR, not Dhall
-- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — Phase 35 Haskell extension DSL ([§4](#4-total-composability)/[§8](#8-the-haskell-extension-dsl-forward-pointer-only) Path 2 for third parties)
+- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — Phase 40 Haskell extension DSL ([§4](#4-total-composability)/[§8](#8-the-haskell-extension-dsl-forward-pointer-only) Path 2 for third parties)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

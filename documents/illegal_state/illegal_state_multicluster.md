@@ -24,13 +24,15 @@ The surrounding framing is owned elsewhere and is **referenced, not restated** h
   [`illegal_state_catalog.md`](./illegal_state_catalog.md).
 - The **seven typing techniques** (§4.1–§4.7 of the catalog), the **coverage matrix**, the **three-layer
   foreclosure** model (`type-foreclosed` / `decode-foreclosed` / `runtime-checked`), and the **validation-locus
-  axis** (`Gate-1-editor` / `Gate-2-decoder` / `rendered-output-golden` / `live-effect`) are owned by
+  axis** (`Gate-1-editor` / `Gate-2-decoder` / `provision-seal` / `rendered-output-golden` / `live-effect`;
+  `provision-seal` is post-bind Phase-8 provision returning a `ProvisionError` before any `ProvisionedSpec`
+  exists) are owned by
   [`illegal_state_techniques.md`](./illegal_state_techniques.md).
 
 Each entry below keeps its existing `**Layer:**` foreclosure tag and adds a new `**Validation-locus:**` line —
 the orthogonal axis defined in [`illegal_state_techniques.md`](./illegal_state_techniques.md) — naming *where*
-the illegal state is caught (at the Dhall editor, in the total decoder, in a golden test on the rendered
-manifest, or only as runtime residue). As throughout the catalog, everything here is **design intent**: a
+the illegal state is caught (at the Dhall editor, in the total decoder, at the post-bind provision seal, in a
+golden test on the rendered manifest, or only as runtime residue). As throughout the catalog, everything here is **design intent**: a
 type-check proves the specification composes into something internally coherent, not that the running
 deployment enforces it (the load-bearing limit owned by [`illegal_state_catalog.md`](./illegal_state_catalog.md) §2).
 
@@ -45,7 +47,8 @@ Distributing one workload across clusters looks like "just fold capacity over bo
 ([`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) §4). A multi-cluster / fleet capacity fold
 therefore has **no constructor** — the same type-foreclosed "no arm" idiom that forecloses the worker pool as a fourth
 `ComputeEngine`. Distributing across clusters is **geo-replication** (N independent clusters, each its own
-`place`, related only by async Pulsar replication — a deliberate Phase-29 non-goal); it is **not** the stateless
+`place`, related only by async Pulsar replication — outside the single-cluster `place` fold and enacted by
+Phase 28); it is **not** the stateless
 attach pool, which is single-cluster and already **inside** `place`'s elastic branch
 ([`single_logical_data_plane_doctrine.md`](../engineering/single_logical_data_plane_doctrine.md) §4 re-runs the same `place`
 fold on the enlarged topology) — modeling the attach pool as cross-cluster machinery is the category error §5 of
@@ -175,7 +178,7 @@ A failover pairing that names one cluster as both `active` and `standby` crosses
 owes a failover budget — a degenerate "geo pair" raw configuration admits, and whose failover can never execute
 because there is no second cluster to promote. amoebius rejects `active == standby` on the parent-owned
 `GatewayFailover` relation with a total decode-time distinctness fold — the weaker floor `mkRke2` applies to
-reject a reused host across servers ∪ agents
+reject a reused host across `servers ∪ agentFloor` (fixed agents, or the concrete floor of an autoscaled pool)
 ([`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md)). **Owner:**
 [`consistency_pacelc_doctrine.md` §3.3](../engineering/consistency_pacelc_doctrine.md#33-the-ir-and-its-decode-foreclosures-haskell-gate-2),
 cross-referencing the parent-owned relation of [`gateway_migration_doctrine.md` §6](../engineering/gateway_migration_doctrine.md#6-honesty-and-layer-markers).
