@@ -18,7 +18,7 @@
 is design intent, never a tested amoebius result. This phase opens after the Phase 2 gate (the
 `Model`/`interpret`/`emitTLA` kernel) passes and runs on **no substrate** (`none`) — it stands up no host and
 no cluster. The `Model`→{`interpret`, `emitTLA`} mechanism was confirmed end to end in a throwaway sibling
-spike ([`formal_model_doctrine.md §7`](../documents/engineering/formal_model_doctrine.md)); that is sibling
+spike ([`formal_model_doctrine.md §7`](../documents/engineering/formal_model_doctrine.md#7-prototype-validation)); that is sibling
 evidence the mechanism works, not a built amoebius result.
 
 ## Phase Summary
@@ -77,6 +77,12 @@ data-aware `PlannedIsLossless` and an over-budget-divergence mutant caught by `N
 each safety mutant (a transition that drops the fence or decommissions before `drain-complete`) red in all
 instruments, each fairness-drop/liveness mutant (a stall that never reconverges) red only in TLC's `PROPERTY` —
 so a single surviving mutant, or any safety invariant with no committed falsifying mutant, fails the gate.
+**Oracle-pinning (§M.1):** the oracles this gate checks against — the `emitTLA GatewayMigration` byte-for-byte
+`.tla`/`.cfg` golden, the hand-derived expected reachable-distinct-state fingerprint set the explorer/TLC run
+is compared to, and the per-invariant expected-outcome catalogue (which invariant each seeded mutant must
+violate) — are **authored and committed in Phase 0 before `interpret`/`emitTLA` exist**, exactly as
+[`phase_02`](phase_02_formal_model_kernel.md#phase-summary) §M.1
+pins the `ToyModel` oracles; a golden regenerated from `emitTLA`'s own output is not a test.
 Register 1, in-process, substrate `none`.
 
 ## Doctrine adopted
@@ -102,7 +108,7 @@ Register 1, in-process, substrate `none`.
   and [`§6 — what a green model-check proves`](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not):
   because `interpret` and `emitTLA` render one value, there is no variable→module table to maintain; a green
   TLC run is *proven-for-the-model at the bound*, generalized only by the stated §5 cutoff.
-- [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md) and
+- [`generated_artifacts_doctrine.md §3`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule) and
   [`conformance_harness_doctrine.md §2 — the registers`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation):
   the emitted `.tla`/`.cfg` are build artifacts, **never committed**, and every check here is Register 1,
   in-process, needing no cluster.
@@ -287,8 +293,11 @@ predicate living in `test/formal/CutoffSpec.hs` that shares no code with
 be a tautology; the property carries committed `cover`/`checkCoverage` thresholds (§M.4) that force each
 violation class (**multi-active, cyclic, shared-DNS, cluster-reuse-across-records**) and each graph larger than
 scope 2 to be generated at a stated minimum rate, so the reject and boundary branches actually fire; **each of
-three fold-mutation checks — deleting the pairwise clause, the independence clause, or the acyclicity clause
-from the fold — turns the equivalence property red** (§M.2); the fold is total, discharged by a committed
+four fold-mutation checks — deleting the pairwise clause, the graph-independence clause, the
+resource-independence clause (cluster-reuse-across-records), or the acyclicity clause
+from the fold — turns the equivalence property red** (§M.2); the resource-independence mutant is distinct
+because a fold implementing graph-independence alone would otherwise survive every other mutant while
+admitting the shared survivor ([`illegal_state_multicluster.md §3.52`](../documents/illegal_state/illegal_state_multicluster.md#352-a-gateway-failover-graph-reusing-one-cluster-across-two-dns-records)); the fold is total, discharged by a committed
 QuickCheck no-exception property forcing the fold to normal form over arbitrary (including malformed and
 oversized) graphs; **no** per-spec model-check runs; and at least one over-scope TLC run (3 clusters, chained)
 that **models the shared resources in** (a survivor reused across records, one route53 zone, one Vault) with
@@ -314,13 +323,15 @@ total fold, never a per-`InForceSpec` TLC.
   [`gateway_migration_model_doctrine.md §5`](../documents/engineering/gateway_migration_model_doctrine.md#5-one-and-done-plus-a-per-inforcespec-structural-fit))
   as **both** graph-independence (no shared edge/cycle structure across pairs) **and resource-independence** (no
   cluster/survivor reused as active or standby across two DNS records); the fold **rejects cluster-reuse-across-
-  records**, not only edge/cycle structure — the two engineers' readings are reconciled to this one.
+  records**, not only edge/cycle structure. The owning doctrine states the same strict reading and records the
+  excluded shared-survivor topology as a deferred obligation gated on the decomposition lemma
+  ([`gateway_migration_model_doctrine.md §6`](../documents/engineering/gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty)).
 - A QuickCheck property over random migration graphs asserting **accepts ⟺ pairwise ∧ independent ∧ acyclic**
   (equivalence), decided against an **independently-authored naive reference predicate** (§M.3) sharing no code
   with `StructuralFit.hs`, with committed `cover`/`checkCoverage` thresholds forcing each violation class
   (multi-active, cyclic, shared-DNS, **cluster-reuse-across-records**) and each over-scope-2 graph at a stated
-  minimum rate; plus the three fold-mutation checks (delete pairwise / independence / acyclicity clause → each
-  turns the equivalence red); plus a **committed Phase-0-pinned corpus** of in-envelope (accepted) and
+  minimum rate; plus the four fold-mutation checks (delete pairwise / graph-independence / resource-independence
+  / acyclicity clause → each turns the equivalence red); plus a **committed Phase-0-pinned corpus** of in-envelope (accepted) and
   out-of-envelope fixtures, each rejected fixture asserting **which** clause it violates — multi-active,
   cyclic, shared-DNS, and cluster-reuse-across-records — paired with an accepted positive differing only in that
   one dimension (§M.8); and a committed no-exception totality property forcing the fold to normal form over
@@ -340,7 +351,8 @@ total fold, never a per-`InForceSpec` TLC.
 ### Validation
 1. The fold's **accepts ⟺ in-envelope** equivalence holds under QuickCheck against the independently-authored
    reference predicate (no code shared with `StructuralFit.hs`), with the coverage thresholds met and each of
-   the three fold-mutation checks (pairwise / independence / acyclicity clause deleted) turning the equivalence
+   the four fold-mutation checks (pairwise / graph-independence / resource-independence / acyclicity clause
+   deleted) turning the equivalence
    red; the committed corpus passes with each rejected fixture asserting its specific violated clause; the fold
    is total (no-exception property to normal form over arbitrary graphs); the shared-resource-modeled over-scope
    run has non-dead interaction actions and catches its committed seeded shared-resource mutant red while finding

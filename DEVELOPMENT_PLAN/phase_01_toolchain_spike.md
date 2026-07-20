@@ -272,7 +272,7 @@ like the removed formal-model spike; nothing here is a durable amoebius module.
 
 ## Documentation Requirements
 
-**Engineering docs to update:**
+**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/dsl_doctrine.md` — §9's Toolchain note gets a backlink to the recorded `dhall`
   `allow-newer`/patch set once Sprint 1.2/1.4 lands.
 - `documents/engineering/gateway_migration_model_doctrine.md` — §4's io-sim instrument gets a backlink to the

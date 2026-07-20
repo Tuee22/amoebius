@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_15_base_image_registry.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_17_retained_storage.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_32_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_33_infernix_lift.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_15_base_image_registry.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_17_retained_storage.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_32_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_33_infernix_lift.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define amoebius testing as a self-tearing-down `InForceSpec` topology — spin up resources, run a
@@ -31,8 +31,11 @@ specific tests are values of it.
 Three consequences fall straight out of "a test is a spec":
 
 - **A test is a deployment-rules layer.** A test composes an app spec (or the platform itself) with a
-  deployment-rules layer that adds two things the production layer omits: a **chaos/failover schedule** and
-  a **mandatory teardown**. That chaos injection lives in deployment rules, never in application logic — the
+  deployment-rules layer that adds three things the production layer omits: a **chaos/failover schedule**, a
+  typed **expectation surface** (the `Expectation` values of
+  [chaos_failover_doctrine.md §11.2](./chaos_failover_doctrine.md#112-the-typed-expectation-surface-expectation),
+  which state what the injected faults must not break), and a **mandatory teardown**. That chaos injection
+  lives in deployment rules, never in application logic — the
   app under test does not know it is being tested — per
   [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md).
 - **A test cannot reach execution with an illegal cluster.** Because the test reuses the production DSL and
@@ -45,8 +48,9 @@ Three consequences fall straight out of "a test is a spec":
   [resource_capacity_doctrine.md](./resource_capacity_doctrine.md), and
   [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md).
 - **The test runs the real thing.** There is no parallel mock cluster. A test stands up real platform
-  services (or a representative subset) and runs a real workflow against them; the only thing that makes it
-  a *test* rather than a deployment is the chaos schedule and the always-teardown contract of [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).
+  services (or a representative subset) and runs a real workflow against them; the only things that make it
+  a *test* rather than a deployment are the chaos schedule, the expectation surface, and the always-teardown
+  contract of [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).
 
 > **Honesty.** Test-as-an-`InForceSpec`-topology, `suggest-test`, flagged credentials, and the elevated
 > storage-deleting harness are **Phase 36** in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
@@ -134,7 +138,7 @@ isolated ephemeral stacks, unique names per run, aggressive tagging, *always* te
 
 ```mermaid
 flowchart TD
-  spec["test .dhall topology (deployment-rules layer + chaos schedule + teardown)"] -->|spin up| up["allocate resources: cluster, PVs, stacks, workloads (tagged test-owned)"]
+  spec["test .dhall topology (deployment-rules layer + chaos schedule + expectations + teardown)"] -->|spin up| up["allocate resources: cluster, PVs, stacks, workloads (tagged test-owned)"]
   up -->|run workflow| run["exercise workflow + inject faults (HA failover, substrate quorum re-election)"]
   run -->|success| down["teardown: idempotent destroy of every allocated resource"]
   run -->|workflow failure| down
@@ -167,8 +171,13 @@ machine-visible by emitting a ledger.
   correctness layers it actually reached and at what strength. The artifact is the deliverable: it is the
   run's record of *what is known and how it is known*.
 - **The ledger has a fixed, committed, lint-checked schema.** The artifact is a structured record —
-  `{phase, gate_command, register, substrate, date, layers: [{name, status ∈ proven | tested | assumed | UNVERIFIED}], ledger_hash}` —
-  and, unlike other generated artifacts, it **is committed**: the deliberate carve-out from the
+  `{phase, gate_command, register, substrate, date, layers: [{name, status ∈ proven | tested | assumed | UNVERIFIED}], coverage: [{surface, status ∈ proven | tested | assumed | UNVERIFIED}], ledger_hash}` —
+  where `layers` carries the correctness layers (Decision / Protocol / Runtime) and `coverage` carries the
+  enumerated *surfaces* the derivation boundary of [§9](#9-derivation-generated-enumeration-authored-expectation)
+  requires — the two are distinct axes and are never conflated. Each `coverage` row's `surface` must resolve
+  against the run's regenerated enumeration; a `surface` naming nothing the enumeration produces is a
+  lint failure, foreclosing an emitter that certifies coverage of a surface that does not exist. Unlike other
+  generated artifacts the ledger **is committed**: the deliberate carve-out from the
   generated-never-committed rule ([generated_artifacts_doctrine.md §3](./generated_artifacts_doctrine.md#3-the-rule)),
   because an uncommitted ledger emitted by the code under test is not durable evidence. A `ledger_lint` — a
   sibling of the Phase-0 documentation lint
@@ -210,7 +219,7 @@ machine-visible by emitting a ledger.
   prod requires the Runtime/chaos layer *tested* (its highest achievable strength; live injection is never
   *proven*, [chaos_failover_doctrine.md §12](./chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)),
   and an in-process ledger carries no Runtime witness for the
-  advance constructor to consume, so "we validated the DSL in-process" cannot mean "the cluster enforces it."
+  advance constructor to consume, so *in-process validation of the DSL* cannot mean *the cluster enforces it*.
   The two-tier split (Tier-1 design-time integrity vs. Tier-2 runtime-enforcement / runtime fidelity) — and the
   Tier-1/Tier-2 vocabulary itself — is owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)
   (model↔code correspondence holds by construction and is not a deferred tier,
@@ -418,7 +427,74 @@ somewhere amoebius decided to retreat to."
 
 ---
 
-## 9. What this doctrine does not own
+## 9. Derivation: generated enumeration, authored expectation
+
+A test suite maintained by hand drifts from the specification it covers. A component added to an
+`InForceSpec` acquires no fault drill; a union arm added to a workflow ADT acquires no driven interaction;
+an entry added to the illegal-state catalog acquires no negative fixture. The drift is silent at author
+time, at type-check, and at decode — the suite still compiles and still passes, reporting a green result
+whose coverage no longer matches the surface it claims to cover. The uncovered surface is first exercised
+in production.
+
+Generating the tests from the specification removes the drift and destroys the test. An expectation
+rendered from the same source as the subject asserts only that the source agrees with itself: a driven
+interaction generated from the contract the frontend consumes, or a golden regenerated from the renderer
+under test, passes for any output, a stub's included. This is the tautology
+[development_plan_standards.md §M](../../DEVELOPMENT_PLAN/development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
+already forbids — an equivalence check defines its reference side independently of the code under test.
+
+**A test artifact divides into two halves with opposite correctness requirements, and the derivation
+boundary falls between them.**
+
+| Half | Content | Requirement | Disposition |
+|---|---|---|---|
+| **Enumeration** — which surfaces exist | declared components, admissible fault targets, capability arms, illegal-state entries, contract constructors | never lags the spec | **generated** from committed source, never committed |
+| **Expectation** — what must hold | assertions, oracles, expected error tags, goldens | independent of the code under test | **authored** and committed |
+
+Enumeration is a pure projection of a committed typed value, so it is a generated artifact in the ordinary
+sense and inherits the ordinary treatment of
+[generated_artifacts_doctrine.md §3](./generated_artifacts_doctrine.md#3-the-rule) — emitted at gate time,
+stamped generated, never checked in. Expectation is authored source
+([generated_artifacts_doctrine.md §5](./generated_artifacts_doctrine.md#5-authored-vs-generated-the-committed-source))
+and is committed. Neither half changes the existing artifact rules; what is new is that a test contains
+both and that they are treated differently.
+
+**The coverage obligation.** The generator emits not tests but the list of surfaces requiring an authored
+expectation. Each enumerated surface is either bound to a committed expectation or it is not, and an unbound
+surface emits an **UNVERIFIED** row in the ledger's `coverage` array ([§4](#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)),
+naming the surface — the `coverage` axis exists precisely so an uncovered surface is recorded, not lost.
+
+```mermaid
+flowchart TD
+  spec["committed typed source: InForceSpec, catalog, composed ADTs"] -->|pure projection| enum["enumeration: surfaces requiring coverage (generated, not committed)"]
+  enum -->|join by identity| oblig["coverage obligation"]
+  auth["authored expectations: assertions, oracles, tagged fixtures (committed)"] -->|join by identity| oblig
+  oblig -->|every surface bound| reached["layer status from the run"]
+  oblig -->|surface unbound| unver["UNVERIFIED row naming the uncovered surface"]
+  reached --> ledger["per-run proven / tested / assumed ledger"]
+  unver --> ledger
+```
+
+This introduces no new honesty vocabulary. UNVERIFIED already denotes an applicable move a run did not
+perform, already blocks promotion to prod, and is already externally checked
+([§4](#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)). The extension is to the *set* of things
+recordable as UNVERIFIED — from skipped moves to uncovered surfaces — so absent coverage becomes a claim the
+ledger states rather than a gap no artifact represents. Because the enumeration is regenerated at gate time
+and never committed, a surface cannot be removed from the required set by editing a checked-in list.
+
+What this forecloses: a hand-curated inventory of what a suite covers, which is the artifact that goes
+stale; and generated assertions, with them the appearance of coverage a generated suite produces at no
+evidential cost. Authored expectations can still be weak or wrong — that failure is caught by the committed
+seeded-mutant discipline required at every gate, not by this boundary.
+
+The analysis this rule was drawn from — including the alternatives rejected, the recommendations not
+adopted, and the corpus defects repaired alongside it — is recorded in
+[test_derivation_analysis.md](./test_derivation_analysis.md). That record is not authoritative; this section
+is.
+
+---
+
+## 10. What this doctrine does not own
 
 To keep the SSoT boundaries crisp:
 
@@ -435,10 +511,12 @@ To keep the SSoT boundaries crisp:
 | Leadership-election and HA-failover mechanics the topologies exercise | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md), [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md) |
 | Making an illegal test cluster unrepresentable | [dsl_doctrine.md](./dsl_doctrine.md), [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) |
 | Phase order, the "at most one substrate per validation" rule as phase discipline, the toolchain pin | [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) |
+| The typed `Expectation` surface and the `FaultKind`→invariant map [§9](#9-derivation-generated-enumeration-authored-expectation) derives against | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
+| Which artifacts are generated, and the never-commit rule [§9](#9-derivation-generated-enumeration-authored-expectation) inherits | [generated_artifacts_doctrine.md](./generated_artifacts_doctrine.md) |
 
 ---
 
-## 10. Planning ownership
+## 11. Planning ownership
 
 This document is normative testing doctrine only. Delivery sequencing, completion status, validation gates,
 and remaining work — the test-topology DSL, `suggest-test`, flagged credentials, the elevated

@@ -529,7 +529,7 @@ The whole sprint (📋 Planned).
 
 ## Documentation Requirements
 
-**Engineering docs to update:**
+**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/platform_services_doctrine.md` — when this phase lands, its §2 HA-always and §4 MinIO
   notes flip from "design intent" to a Register-3-tested amoebius result on linux-cpu, and the §6 Pulsar
   honesty note gains its first live evidence (still *tested*, never *proven*).

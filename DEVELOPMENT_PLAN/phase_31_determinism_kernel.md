@@ -113,7 +113,7 @@ seeded stage, one `masterSeed`); its three committed negative siblings differing
 `.dhall` fixtures, the schema, resource witness, and mutants are the phase's explicit representative set; no golden output bytes are pre-committed (they are substrate-specific),
 so the byte-equality legs compare **two fresh runs against each other**, never against a regenerated golden.
 
-## Complete resource provision for the live recomputes
+## Resource provision — the live recomputes
 
 This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
 [`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
@@ -225,7 +225,7 @@ names the section it implements; individual sprints cite the same sections where
   — *the honest ceiling: types make the bookkeeping total, not the physics deterministic*: the contract stays
   at same-substrate reproducibility; cross-substrate bit-equality is deliberately not asserted and the ledger
   never marks it green.
-- [`substrate_doctrine.md`](../documents/engineering/substrate_doctrine.md) §L — *the no-env / no-`PATH`,
+- [`substrate_doctrine.md §3`](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) — *the no-env / no-`PATH`,
   full-path-probe substrate contract*: the linux-cpu substrate fingerprint consumed by `experimentHash` is
   gathered by absolute-path subprocess probes only, never from `PATH` or environment variables.
 - [`illegal_state_catalog.md`](../documents/illegal_state/illegal_state_catalog.md) §4.5 — *the totality

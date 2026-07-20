@@ -68,7 +68,7 @@ flowchart TD
   singleton --> release[Host drains, releases Lease, and observes holder absence]
   release --> acquire[Authenticated singleton Pod UID acquires the same Lease]
   acquire -->|exposes /readyz| rest[amoebius NodePort REST admin API]
-  rest -.->|HANDOFF: Lease holder plus Serving edge observed| hb
+  rest -->|HANDOFF: Lease holder plus Serving edge observed| hb
   cli[Operator CLI] -->|vault init/unseal, then dhall update| rest
   rest --> reconcile[Singleton reconciles the cluster toward its InForceSpec]
 ```

@@ -121,7 +121,7 @@ on channel 2, with Apple-Metal physics marked *assumed* (sibling evidence, not a
 
 **Gate-integrity clauses (§M).** The gate passes only when all of the following hold; each is authored under
 the [§M gate-integrity standard](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
-and its concrete fixtures are pinned per the [Phase-0 oracle-pinning obligation](#n-phase-0-pinned-oracle-set-for-this-phase).
+and its concrete fixtures are pinned per the [Phase-0 oracle-pinning obligation](#gate-integrity).
 
 - **Input-dependent output oracle (§M.1/§M.3).** The artifact retrieved from MinIO by content address must be
   byte-equal to an independently pinned expected output computed **off-implementation** — the committed
@@ -161,7 +161,7 @@ and its concrete fixtures are pinned per the [Phase-0 oracle-pinning obligation]
   swept to its pre-run state. Phase 36's general postflight sweep is not yet available, so this phase pins its
   own explicit three-part residue check rather than deferring to it.
 
-## N. Phase-0-pinned oracle set for this phase
+## Gate integrity
 
 Under [§M.1 oracle-pinning](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub),
 the following fixtures, goldens, and expected-error tags are authored and committed **in Phase 0 — before any
@@ -191,7 +191,7 @@ the implementation):
 - `test/mutants/phase_35/resources/` — one-short provider/compiler/worker/harness cases and dropped-envelope/
   premature-replacement mutants, paired with the complete `resource_fold.json` positive.
 
-## Complete resource provision for the host worker and its transitions
+## Resource provision — the host worker and its transitions
 
 The physical-host fold retains complete envelopes for every new execution unit, not just the Metal working
 set. The `pb`/brew probe-install-resolve bootstrap, Lima/provider process, fixed-bridge compiler invocation,

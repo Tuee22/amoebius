@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_33_infernix_lift.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_33_infernix_lift.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md
 **Generated sections**: none
 
 > **Purpose**: Define the hard separation between an app's **application logic** (what it *is* to a user)
@@ -162,7 +162,7 @@ deliberately tricky cases:
 | "The app uses infernix for inference" | application logic | a shared-library dependency ([§8](#8-shared-library-use-is-application-logic)) |
 | "Inference runs on Apple Metal vs CUDA" | deployment rule | a placement choice ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)) |
 | "Replicate the app across us-east and eu-west and fail over" | deployment rule | topology + robustness; the app is unchanged ([§9](#9-composition-one-cluster--n-geo-replicated-clusters-zero-app-change)) |
-| "Inject a broker kill every 10 minutes" | deployment rule | the app does not know it is being tested |
+| "Inject a broker kill at a bounded offset after the workflow's quiesce edge" | deployment rule | a typed `FaultSchedule` in logical/simulated time ([chaos_failover_doctrine.md §11.2](./chaos_failover_doctrine.md#112-the-typed-expectation-surface-expectation)); the app does not know it is being tested |
 | "Promote a build from staging to prod" | deployment rule | a pointer CAS over byte-identical app bytes; only the deployment rules differ ([§3](#3-the-deployment-rules-surface--how-the-same-app-runs)) |
 | "A login requires MFA for the admin role" | application logic | an auth rule that *defines* the app's behaviour |
 
@@ -334,7 +334,40 @@ Cashing out "zero app change":
 
 ---
 
-## 10. What this document does not own
+## 10. Application-author testing is a deliberate v1 exclusion
+
+The split this document draws has a consequence worth stating rather than leaving implicit: because a chaos
+schedule is a deployment-rules value
+([§3](#3-the-deployment-rules-surface--how-the-same-app-runs)) and the deployment-rules surface is written by
+the operator, **an application author has no surface on which to write a test of their own application.**
+
+For v1 this is correct rather than incomplete. The extension set is closed at `{infernix, jitML}`, both
+lifted as libraries rather than authored as third-party applications, so no third-party application author
+exists for the surface to serve. An exclusion that follows from a closed set is not a gap.
+
+Leaving it unstated is the hazard. An unrecorded exclusion is indistinguishable from an oversight, and the
+natural way to "fix" an oversight here is to give the application surface a testing affordance — which means
+moving a chaos, HA, or failover concern onto application logic. That is precisely the leak the concentration
+principle uses as its diagnostic: a proof obligation appearing outside the one cross-cluster boundary
+indicates a modelling error, usually a deployment-rules concern that has migrated into app logic
+([chaos_failover_doctrine.md §6](./chaos_failover_doctrine.md#6-the-concentration-principle--where-the-obligation-lives)).
+The exclusion is therefore load-bearing: it is what keeps the app surface free of the distribution behaviour
+the concentration principle concentrates at the platform layer, to be discharged there once. Nothing in that
+arrangement is a proven amoebius result today — no phase delivering it has started
+([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
+
+A later application-author surface, if one is warranted, requires an application-level **expectation**
+surface that composes with deployment rules but cannot author them — the author states what their
+application must uphold; the operator states which faults are injected and where it runs. The expectation
+type that would carry it is owned by
+[chaos_failover_doctrine.md §11.2](./chaos_failover_doctrine.md#112-the-typed-expectation-surface-expectation),
+and the derivation boundary it would sit on by
+[testing_doctrine.md §9](./testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation). No
+phase schedules it; it is named here so the v1 exclusion is a recorded decision rather than an absence.
+
+---
+
+## 11. What this document does not own
 
 This doc owns the **classification** — which surface a concern lives on — and nothing else. The owners of the
 mechanics it points at:
@@ -356,7 +389,7 @@ mechanics it points at:
 
 ---
 
-## 11. Planning ownership
+## 12. Planning ownership
 
 This document is normative classification doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md):

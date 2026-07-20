@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Assemble the exhaustive illegal-state corpus — every negative fixture split by the locus that
@@ -72,6 +72,39 @@ consumes it (§1 oracle-pinning):
 > the documentation lint to require/reconcile them, and pinning the resulting registry before the emitter is
 > implemented are explicit Phase-6 deliverables below. No check in this plan assumes those tags already exist.
 
+> **Open question the enrichment must settle: subcase identity.** The registry schema below carries a
+> `subcase` column, but the catalog has **no subcase syntax** — an entry is identified only by its `3.N`
+> heading. At least two entries owe more than one fixture at more than one locus
+> ([`§3.16`](../documents/illegal_state/illegal_state_topology.md) fixed-node cardinality *and* host
+> distinctness; [`§3.23`](../documents/illegal_state/illegal_state_capability_messaging.md) produce-side *and*
+> malformed-received-body), so those entries cannot be expressed as one registry row. Sprint 6.1 must either
+> give the catalog subcase identifiers or change the registry key; it may not leave `subcase` unpopulated,
+> because a multi-fixture entry would then read as covered once its first fixture lands. This is a
+> prerequisite of the coverage join, not a detail of it.
+
+**The coverage obligation this registry serves.** The registry is **not** the enumeration half of
+[`testing_doctrine.md §9`](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation)
+— that half is regenerated at gate time and never committed. `locus_registry.tsv` is the committed,
+independently-authored **oracle** (§M.3) that the gate-time-regenerated enumeration is checked against; the
+committed fixtures are the *expectation* half. Joining the regenerated enumeration to the committed fixtures,
+with the registry as the oracle, yields the coverage obligation, whose semantics are:
+
+- A registry row whose `owner_phase` is **this phase or an earlier one** (Phase 4/5/6) and which has **no
+  committed fixture** turns the Phase-6 gate **red** — the fixture the reached owner phase was obliged to
+  commit is missing. This is the same red-on-unmapped rule as the `**Gate:**` above and the Sprint 6.4
+  validation below.
+- A registry row whose `owner_phase` is a **later** phase is correctly deferred: it is **mapped as deferred**
+  to that phase and emits **no UNVERIFIED row** — deferral is not absence. When that later phase's gate runs
+  and finds the fixture still missing, *its* run records the entry **UNVERIFIED** in the ledger's `coverage`
+  array. This is what the `Delivery-owner:` enrichment exists to distinguish, and why the join cannot be
+  built before it.
+
+The **catalog-side** half of this obligation — that every entry carries a locus, that numbering is
+contiguous, that index anchors resolve, and that every entry has a technique-matrix row — is not deferred to
+this phase: it is Phase-0 documentation-lint check (g)
+([`phase_00`](phase_00_documentation_suite.md)), which validates the enumeration is well-formed over text
+alone, before any fixture exists to join against.
+
 - **Oracle-pinning (§1) + specific-reason negatives (§8).** Each negative fixture ships a committed expected-failure
   golden authored by hand, not regenerated from the implementation: `dhall/examples/goldens/<name>.typeerr`
   (the `dhall type` error, naming the offending union/field) for each `illegal_gate1_*`;
@@ -120,13 +153,13 @@ consumes it (§1 oracle-pinning):
   **shape/normalization** cases its predecessors own (including the missing-envelope §3.11 negative) and
   derives every later capacity, storage, accelerator, VRAM, and missing-capability deferral from registry
   ownership tags; it never claims those Phase-7/8 folds have run early.
-- [`testing_doctrine.md §2 — three registers`](../documents/engineering/testing_doctrine.md) — **Register 1**
+- [`testing_doctrine.md §2 — three registers`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) — **Register 1**
   (pure/golden, in-process, no cluster): the register this phase's gate reaches; and
-  [`§4 — the per-run ledger`](../documents/engineering/testing_doctrine.md) — the proven/tested/assumed ledger
+  [`§4 — the per-run ledger`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) — the proven/tested/assumed ledger
   the battery emits, the validation-locus ledger being its per-catalog-entry specialization with model↔runtime
   correspondence marked UNVERIFIED.
-- [`conformance_harness_doctrine.md §2 — the registers`](../documents/engineering/conformance_harness_doctrine.md)
-  and [`§5 — honesty`](../documents/engineering/conformance_harness_doctrine.md): Register 1 is the pure/golden
+- [`conformance_harness_doctrine.md §2 — the registers`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation)
+  and [`§5 — honesty`](../documents/engineering/conformance_harness_doctrine.md#5-honesty-what-the-harness-does-and-does-not-establish): Register 1 is the pure/golden
   no-cluster band, and a green Register-1 corpus establishes the spec composes and the foreclosures fire —
   **nothing** about whether the physical effects converge, which is the deferred `live-effect` locus.
 
@@ -164,8 +197,9 @@ must pass `dhall type` and decode-reject — never billing a Gate-2-only foreclo
 ### Deliverables
 - A one-time catalog enrichment across every `documents/illegal_state/illegal_state_*.md` entry: retain the
   existing `**Validation-locus:**` tag and add required `**Delivery-owner:**` and `**Case-family:**` tags. The
-  documentation lint is extended to reject a missing/duplicate/unknown tag and to emit/reconcile
-  `locus_registry.tsv`. This oracle is committed before the fixtures/harness are implemented. It is planned
+  documentation lint is extended to reject a missing/duplicate/unknown **`Delivery-owner:` or `Case-family:`**
+  tag (the `Validation-locus:` presence check is owned by Phase-0 check (g), not re-owned here) and to
+  emit/reconcile `locus_registry.tsv`. This oracle is committed before the fixtures/harness are implemented. It is planned
   Phase-6 work, not a claim about the catalog's current shape.
 - Positive fixtures (`legal_multisubstrate_cluster`, `legal_managed_eks`, `trivial_app`, a deployment-rules
   fixture) that decode with complete normalized resource envelopes and target capacities, carried forward
@@ -288,7 +322,7 @@ the suite is red if that mutant survives any property.
 
 ### Objective
 Adopt [`illegal_state_catalog.md §6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)
-and [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md): establish the
+and [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact): establish the
 closure / round-trip / fold-totality / composition-preservation properties of the type discipline, labelled
 honestly — **TESTED (sampled)** for infinite domains, upgraded to **PROVEN** only where a finite domain is
 exhausted (the three `Rke2Servers` arms).
@@ -340,7 +374,7 @@ registry owner without being reclassified. The enriched catalog and registry are
 `DEVELOPMENT_PLAN/README.md` (flip the Phase-6 status when the gate passes).
 
 ### Objective
-Adopt [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md) and
+Adopt [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) and
 [`illegal_state_catalog.md §6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force):
 emit the per-entry validation-locus ledger — the honest map from every catalog entry to the one locus that
 settles it — and gate on it, so no entry is silently unvalidated and no deferred entry is silently claimed.

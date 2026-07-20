@@ -130,7 +130,7 @@ runs on no substrate.
 
 ## Doctrine adopted
 
-- [`capability_extension_doctrine.md`](../documents/engineering/capability_extension_doctrine.md)
+- [`capability_extension_doctrine.md §3`](../documents/engineering/capability_extension_doctrine.md#3-the-provide-and-require-contract)
   — **the extension provide/require capability graph.** The binder validates the `extRequires` provide/require
   graph is total and acyclic and rejects an anti-shadow (shadowing) merge or a provide-and-require self-loop; a
   cyclic or shadowing extension fixture fails Gate 2 at its committed locus (the closed v1 extension set
@@ -180,7 +180,7 @@ runs on no substrate.
   — **the illegal-state-unrepresentable contract's two typed gates** (Gate 1 the Dhall typechecker, Gate 2 the
   in-process decoder): the capability union is guarded at Gate 1, the binding decodes through Gate 2 — this
   phase adds the capability-model instance of that contract, no live half.
-- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md) §2 (**Register 1** — pure/golden,
+- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) §2 (**Register 1** — pure/golden,
   in-process, no cluster) and §4 (the per-run proven/tested/assumed ledger): the register this gate reaches and
   the ledger it emits, with the live realization of any provider (and the jit-resolve of any engine) marked
   UNVERIFIED, owned by the live band.
@@ -634,7 +634,7 @@ gate passes), `DEVELOPMENT_PLAN/substrates.md` (the Phase-8 `none` gate row).
 
 ### Objective
 Adopt [`service_capability_doctrine.md §8`](../documents/engineering/service_capability_doctrine.md#8-capabilities-and-the-illegal-state-contract)
-and [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md) §2/§4: assemble the phase's single
+and [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) §2/§4: assemble the phase's single
 Register-1 gate — every positive need binds and provisions to a checked deployment while every product- or
 URL-named app has no syntax and every insufficient target returns its specific `ProvisionError` without
 constructing `ProvisionedSpec` — and emit the per-entry

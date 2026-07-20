@@ -32,7 +32,9 @@ This phase makes testing a *first-class amoebius deployment* rather than a frame
 test is a `.dhall` value of a topology type that spins resources up, runs a workflow, and **always** tears
 them down. It delivers, on top of the live runtime landed by earlier phases, five composed pieces. The
 **test-topology type** is an ordinary deployment-rules layer over a production app or platform spec, adding
-exactly two things production omits — a chaos/failover schedule and a mandatory teardown — so the
+three things production omits — a chaos/failover schedule, a typed expectation surface
+([`chaos_failover_doctrine.md §11.2`](../documents/engineering/chaos_failover_doctrine.md#112-the-typed-expectation-surface-expectation)),
+and a mandatory teardown — so the
 always-tear-down guarantee is a property of the *type*, not of operator diligence. **`suggest-test`** detects
 the current substrate's complete capacity/capability shape — CPU, memory, logical pod-local ephemeral storage,
 node filesystem layout/**all resident OCI content and snapshots**, presented durable
@@ -94,7 +96,7 @@ single named substrate (the active worker is killed and a name-ordered standby t
 `Exclusive`/`Failover` subscription — single-writer delegated to Pulsar, never a bespoke amoebius election),
 then **tears down leak-free**, and emits a proven/tested/assumed ledger. The gate is satisfied only when every
 criterion below holds; the run happens in Register 3 (live infrastructure) on the concrete representative set
-of [§N](#n-gate-integrity-the-concrete-representative-set-committed-oracles-and-register-binding). Before the
+of [Gate integrity](#gate-integrity). Before the
 first allocation, the reviewed topology must construct a `ProvisionedSpec` proving all CPU, memory,
 Pod-ephemeral storage (including the catalog-derived nested cache), layout-routed physical node storage,
 planned-slot/observed-Pod-UID kubelet/CRI runtime-metadata components and scope-indexed node aggregates,
@@ -104,7 +106,7 @@ obligations fit the single named substrate; an impossible generated
 proposal is rejected with zero effects rather than launched and left pending.
 
 The gate is checked against these committed, Phase-0-pinned criteria (see
-[§N](#n-gate-integrity-the-concrete-representative-set-committed-oracles-and-register-binding)):
+[Gate integrity](#gate-integrity)):
 
 1. **Leak-freedom by implementation-independent inventory diff, not tag query.** Leak-freedom is asserted by a
    substrate-scope enumeration performed by an observer outside the typed allocation path: a pre-run
@@ -134,7 +136,7 @@ The gate is checked against these committed, Phase-0-pinned criteria (see
    (`test/dhall/phase_36_review_allowlist.json`); a review edit outside that set fails the gate.
 4. **Ledger applicability is derived and oracle-pinned, not self-declared.** The set of applicable moves is
    computed from the topology's `ChaosSchedule`/`FaultTarget` projections and the
-   [`chaos_failover_doctrine.md §11.1`](../documents/engineering/chaos_failover_doctrine.md#11-move-iii--inject-break-the-running-thing-on-purpose)
+   [`chaos_failover_doctrine.md §11.1`](../documents/engineering/chaos_failover_doctrine.md#111-the-typed-fault-schedule-chaosschedule--faulttarget)
    `FaultKind`→invariant map, never declared by the emitter. The emitted ledger MUST match, field-for-field,
    the externally hand-authored expected-ledger fixture `test/golden/phase_36_ledger.json` (committed in
    Phase 0, authored independently of `Ledger.hs`): it records the Runtime-layer (Inject) move as *tested on
@@ -158,7 +160,7 @@ The gate is checked against these committed, Phase-0-pinned criteria (see
    allocation. The Phase-0 overcommit/missing-capability mutants must fail with an empty Kubernetes/host/cloud
    mutating-effects trace.
 
-## N. Gate integrity: the concrete representative set, committed oracles, and register binding
+## Gate integrity
 
 **Representative set (concrete, not "sized to capacity" hand-waving).** The canonical gate run stands up, on
 the `linux-cpu` single-node `kind` cluster, at minimum: the pre-standing Phase-19 HA Pulsar and MinIO on
@@ -226,7 +228,7 @@ simulation of the Gate are discharged only in **Register 3** on the `linux-cpu` 
 may silently choose its own world: the register is stated on each, and a Register-2 discharge never counts as
 the Register-3 gate obligation.
 
-## Complete resource provision for the generator, harness, and failover epoch
+## Resource provision — the generator, harness, and failover epoch
 
 `suggest-test` and the elevated harness are real host processes. Their pure inputs therefore carry a selected
 executable digest/installed bytes, substrate-matched `HostResources`, bounded credential/API response buffers,
@@ -475,21 +477,29 @@ before the runner allocates anything.
 Adopt [`testing_doctrine.md §3 — the test-topology contract: spin up → run → always tear down`](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down)
 and the framing of [`§1 — a test is an amoebius spec`](../documents/engineering/testing_doctrine.md#1-a-test-is-an-amoebius-spec):
 define a `TestTopology` Dhall type that is an ordinary deployment-rules layer over a production app/platform
-spec, adding exactly two things production omits — a chaos/failover schedule and a mandatory teardown — and a
+spec, adding three things production omits — a chaos/failover schedule, a typed expectation surface, and a
+mandatory teardown — and a
 Haskell runner whose structured `bracket`/`finally` cleanup makes "always tears down" a property of the type,
 not of operator diligence, with the chaos injection on the deployment-rules surface so the app under test is
 none the wiser ([`app_vs_deployment_doctrine.md §3`](../documents/engineering/app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)).
 
 ### Deliverables
-- A `TestTopology` Dhall type wrapping any app/platform spec with a `chaosSchedule` and a non-optional
-  `teardown`, reusing the production DSL so an illegal cluster (bad PVC↔PV, open ingress, mis-substrated
-  workload) is unrepresentable in a test exactly as in production and every execution unit carries the same
-  complete `ResourceEnvelope` as production, including `PodRuntimeMetadataSource` and the closed
-  `CudaOwnerDemand`/`MetalOwnerDemand` accelerator arm where applicable.
-- A `runTestTopology` interpreter that spins up, runs the workflow + injects the scheduled faults, and tears
+- A `TestTopology` Dhall type wrapping any app/platform spec with the **three** things a test adds to a
+  production deployment — a `chaosSchedule`, an `expectations` surface (the typed `Expectation` values of
+  [`chaos_failover_doctrine.md §11.2`](../documents/engineering/chaos_failover_doctrine.md#112-the-typed-expectation-surface-expectation)),
+  and a non-optional `teardown` — reusing the production DSL so an illegal cluster (bad PVC↔PV, open ingress,
+  mis-substrated workload) is unrepresentable in a test exactly as in production and every execution unit
+  carries the same complete `ResourceEnvelope` as production, including `PodRuntimeMetadataSource` and the
+  closed `CudaOwnerDemand`/`MetalOwnerDemand` accelerator arm where applicable.
+- A `runTestTopology` interpreter that spins up, runs the workflow + injects the scheduled faults, **evaluates
+  each `Expectation`'s witness** and tears
   down inside structured cleanup so a crash or Ctrl-C still reclaims what it built. It accepts only the opaque
   provisioned topology returned after placement/storage/capability/quota checks, never the unchecked decoded
-  value.
+  value. The two UNVERIFIED triggers of
+  [`§11.2`](../documents/engineering/chaos_failover_doctrine.md#112-the-typed-expectation-surface-expectation) —
+  a derived invariant with no authored witness, and a declared invariant no scheduled fault stresses — are
+  recorded per that section, the first in the ledger's `coverage` array, the second as a Runtime-layer
+  UNVERIFIED.
 - Idempotent destroy (re-running converges to "nothing left", never errors on already-gone resources) and a
   cleanup-failure-is-a-real-failure result type: a passed workflow with a leaked teardown reports failure,
   with the workflow failure surfaced first when both fail.
@@ -671,7 +681,7 @@ requirement of the create-vs-delete model owned by
 1. The flagged and normal identities are non-interchangeable at the type level; a workload-under-everyday
    attempt is rejected at type-check with a Dhall type error at the credential field, paired with a positive
    using the flagged credential that type-checks (differing only in that field).
-2. Every resource the [§N](#n-gate-integrity-the-concrete-representative-set-committed-oracles-and-register-binding) representative-set topology allocates carries the test-owned tag; an untagged
+2. Every resource the [Gate integrity](#gate-integrity) representative-set topology allocates carries the test-owned tag; an untagged
    allocation is rejected at type-check with a Dhall type error at the missing-tag field, paired with a
    tagged positive that type-checks.
 3. The credential material never appears in any `.dhall`; it is a Vault `SecretRef`.

@@ -202,7 +202,7 @@ and Prometheus + Grafana — no more, no fewer. The full derived DAG spans these
 - [`storage_lifecycle_doctrine.md §2 — one storage class, and it provisions nothing`](../documents/engineering/storage_lifecycle_doctrine.md#2-one-storage-class-and-it-provisions-nothing)
   and [`§4 — deterministic PV naming and the explicit bind`](../documents/engineering/storage_lifecycle_doctrine.md#4-deterministic-pv-naming-and-the-explicit-bind):
   each Patroni cluster and Prometheus lands its durable bytes on the Phase-17 `no-provisioner` retained PVs.
-- [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md)
+- [`deterministic_simulation_doctrine.md §4`](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits)
   as [Register 2.5](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing): the
   *real* readiness-DAG orchestration runs unchanged under `IOSimPOR` against the Phase-11.4 modeled substrates
   before the Register-3 live gate.
@@ -426,7 +426,7 @@ The whole sprint (📋 Planned).
 
 ## Documentation Requirements
 
-**Engineering docs to update:**
+**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/platform_services_doctrine.md` — when this phase lands, its §8 "which standard
   services take a database" detail resolves to the delivered consumer set `{Grafana}`, and the §8 mandated
   synchronous-Patroni configuration flips from "required configuration" design intent to a Register-3-tested,

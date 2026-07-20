@@ -40,7 +40,7 @@ once work begins.
 This phase makes `jitML` — the sibling training + JIT-codegen ML library — an amoebius extension *library*
 rather than a standalone product, and stands its training loop up on a GPU substrate for the first time. It
 lifts the proven numerical/checkpoint core and re-homes it onto amoebius seams
-([`lift_and_compose_doctrine.md` §2](../documents/engineering/lift_and_compose_doctrine.md)): the `jitML`
+([`lift_and_compose_doctrine.md` §2](../documents/engineering/lift_and_compose_doctrine.md#2-what-lifts-the-reuse-map)): the `jitML`
 checkpoint blob/manifest/pointer format becomes entries in the Phase-25 three-tier content-addressed store; the
 `jitML` `.dhall` **nests inside** the `InForceSpec` as a shared library whose surface carries no replica count,
 region, substrate selector, or failover field; and the SplitMix determinism kernel is consumed from Phase 31
@@ -167,7 +167,7 @@ can pass:
   `test/fixtures/phase_34/` **before** the implementation exists; none is regenerated from the SUT's own encoder
   or fold.
 
-## Complete resource provision for the CUDA run, failover, and demo app
+## Resource provision — the CUDA run, failover, and demo app
 
 The accelerator witness does not replace ordinary workload sizing. Binding retains an identity-keyed complete
 `PodResourceEnvelope` for (1) the topology-expanded NVIDIA device-plugin DaemonSet instance on every selected
@@ -286,7 +286,7 @@ store effects.
 
 ## Doctrine adopted
 
-- [`lift_and_compose_doctrine.md` §2 / §3 / §5](../documents/engineering/lift_and_compose_doctrine.md) — *what
+- [`lift_and_compose_doctrine.md` §2 / §3 / §5](../documents/engineering/lift_and_compose_doctrine.md#2-what-lifts-the-reuse-map) — *what
   lifts (the reuse map)* / *the friction envelope* / *evidence, not proof*: the jitML numerical core, the
   SplitMix determinism kernel, and the content-addressed CBOR checkpoint store lift largely intact onto amoebius
   seams; the rewritten envelope is the WebSocket/base64-JSON Pulsar bridge → the native CBOR client and the
@@ -376,7 +376,7 @@ MinIO required for the pure layer.
 `DEVELOPMENT_PLAN/system_components.md`, this document.
 
 ### Objective
-Adopt [`lift_and_compose_doctrine.md` §2](../documents/engineering/lift_and_compose_doctrine.md) and
+Adopt [`lift_and_compose_doctrine.md` §2](../documents/engineering/lift_and_compose_doctrine.md#2-what-lifts-the-reuse-map) and
 [`app_vs_deployment_doctrine.md` §8](../documents/engineering/app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic):
 re-home the sibling jitML checkpoint format onto the Phase-25 store and expose the training/JIT call graph as a
 shared library whose `.dhall` nests inside the `InForceSpec`, so *that* an app uses jitML is application logic
@@ -636,7 +636,7 @@ proven/tested/assumed ledger.
 ### Objective
 Adopt [`app_vs_deployment_doctrine.md` §6](../documents/engineering/app_vs_deployment_doctrine.md#6-the-proof-case-a-demo-web-app-as-application-logic-only)
 / [`§8`](../documents/engineering/app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic),
-[`lift_and_compose_doctrine.md` §4](../documents/engineering/lift_and_compose_doctrine.md), and
+[`lift_and_compose_doctrine.md` §4](../documents/engineering/lift_and_compose_doctrine.md#4-the-demo-web-apps-purescript-spas-contracts-generated-from-haskell), and
 [`testing_doctrine.md` §3](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down):
 deploy the jitML demo web app as application-logic-only and compose the three gate claims — bit-determinism,
 delegated trainer failover, and the application-logic-only demo — into the single linux-cuda acceptance gate.

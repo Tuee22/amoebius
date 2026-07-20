@@ -185,7 +185,7 @@ proven/tested/assumed ledger, marking runtime enforcement UNVERIFIED (owned by t
   — generated artifacts are emitted from a Haskell source of truth and **never committed**: the rendered
   `[K8sObject]` set is never a checked-in deployment artifact; the byte-for-byte golden is a *test fixture*
   that pins the renderer, not a committed manifest.
-- [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md) — **Register 1** (pure/golden,
+- [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) — **Register 1** (pure/golden,
   in-process, no cluster): the register this phase's gate reaches; and §4 — the per-run
   proven/tested/assumed ledger the battery emits, marking runtime-enforcement correspondence UNVERIFIED
   (owned by the live band).

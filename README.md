@@ -10,7 +10,12 @@
 
 amoebius is a single Haskell binary that runs as a **CLI**, a **sudo-capable host daemon**, and an
 **in-cluster singleton service**. It manages Kubernetes cluster lifecycle and interprets a `.dhall` DSL
-into opinionated, provably-coherent deployments. Its constituent capabilities are unified libraries, not
+into opinionated deployments whose coherence is enforced by the type system at author and decode time — a
+spec that mis-binds a PVC, opens a backdoor ingress, or mis-substrates a workload does not type-check. That
+is a design-time guarantee about the spec, not a runtime claim that a live cluster enforces it; the boundary
+is stated precisely in the [verification doctrine](./documents/engineering/testing_doctrine.md) and its
+[honesty rule](./documents/documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
+Its constituent capabilities are unified libraries, not
 separate products: **prodbox** (root control-plane behaviour), **infernix** + **jitML** (ML extensions,
 each shipping a demo web app that is amoebius's application-logic demonstrator), and **hostbootstrap**
 (bootstrap + DSL core).
@@ -30,6 +35,11 @@ and reattaches retained backing
   the engineering family (the DSL, platform services, storage, secrets, runtime, verification) and the
   illegal-state catalog family.
 - **How docs work:** [`documents/documentation_standards.md`](./documents/documentation_standards.md).
+- **How amoebius is tested:** [`documents/engineering/testing_doctrine.md`](./documents/engineering/testing_doctrine.md)
+  — a test *is* an amoebius deployment: a spec composed with a chaos schedule, a typed expectation surface,
+  and a mandatory teardown. Validation runs in four named registers (1 pure/golden · 2 boundary-with-fakes ·
+  2.5 deterministic-simulation · 3 live), and every gate emits a committed proven/tested/assumed ledger that
+  states which layer it reached and marks the rest UNVERIFIED.
 
 ## Toolchain
 

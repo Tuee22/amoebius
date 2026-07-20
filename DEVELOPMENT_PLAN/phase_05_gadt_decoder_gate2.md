@@ -150,8 +150,8 @@ independent of the decoder's own output (§M clause 3).
   — the load-bearing limit and the three layers of foreclosure: layers 1–2 (type-/decode-foreclosed) are
   Register-1 and honestly discharged here; layer 3 (runtime-checked) stays deferred. Honors §2 verbatim: *a
   type-check proves the spec composes, not that the cluster enforces it.*
-- [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md) — **Register 1** (pure/golden,
-  in-process, no cluster): the register this phase's gate reaches; and [`§4`](../documents/engineering/testing_doctrine.md)
+- [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) — **Register 1** (pure/golden,
+  in-process, no cluster): the register this phase's gate reaches; and [`§4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
   — the per-run proven/tested/assumed ledger the battery emits, marking model↔runtime correspondence
   UNVERIFIED.
 
@@ -425,8 +425,6 @@ structural owner. These are the ADTs that make an illegal combination un-spellab
   folds and Phase 8 invokes them on the fully expanded `BoundDeployment`; only their private constructor
   produces `ProvisionedSpec`. `ClusterIR` and `BoundDeployment` are forbidden renderer inputs and a structural
   type-inventory check rejects any `Provisioned*` field in either.
-
-### Deliverables
 - The committed minimal-pair compile-fail fixtures: for each of §4.2/§4.3/§4.4, a legal twin (compiles; cited
   to a named `legal_*.dhall` positive it decodes through) and an illegal twin (fails `ghc -fno-code` with a
   type error naming the same constructor/index), plus each pair's committed expected type-error locus.
@@ -577,7 +575,7 @@ exercised here → layer-2 Register-1), `documents/engineering/testing_doctrine.
 `DEVELOPMENT_PLAN/README.md` (flip the Phase-5 status when the gate passes).
 
 ### Objective
-Adopt [`testing_doctrine.md §2 — Register 1`](../documents/engineering/testing_doctrine.md): assemble the
+Adopt [`testing_doctrine.md §2 — Register 1`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing): assemble the
 in-process decode battery that exercises the fail-closed decoder over every positive fixture and confirms it
 returns a structured `Left` on each representative Gate-2 negative, emitting a Register-1 proven/tested/assumed ledger
 with model↔runtime correspondence marked UNVERIFIED (owned by Phase 22). The exhaustive per-catalog-entry

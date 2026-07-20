@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_12_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_24_pulsar_client.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_12_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_24_pulsar_client.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: The amoebius concurrency-and-failover doctrine — *Extract* the decision into a value, *Model* the protocol into a proof, *Inject* faults into the deployment — plus the proven/tested/assumed ledger and the invariant-confluence **cross-cluster boundary** that governs asynchronous geo-replication and gateway migration (both `Planned` and `Failover`), the **one** boundary where a per-system proof obligation concentrates on amoebius itself.
@@ -569,7 +569,7 @@ target a component the spec actually declares. The shape:
 
 ```haskell
 ChaosSchedule  = NonEmpty FaultInjection
-FaultInjection = { target :: FaultTarget, kind :: FaultKind, … }
+FaultInjection = { target :: FaultTarget, kind :: FaultKind, schedule :: FaultSchedule }
 FaultKind      = < Partition | KillMidClaim | Latency | ReorderRedeliver | KillClusterMidGeoSync >
 ```
 
@@ -594,6 +594,58 @@ survival of a reboot:
 The harness that *runs* the schedule — the test-as-`InForceSpec` topology, `suggest-test`, and the
 always-teardown contract — is owned by [testing_doctrine.md](./testing_doctrine.md); this doctrine owns the
 typed shape and the `FaultKind`→invariant map.
+
+### 11.2 The typed expectation surface: `Expectation`
+
+A schedule that injects a fault and tears down cleanly asserts nothing. Without an expectation surface, a
+drill's only pass/fail signals are the leak-inventory diff and the provision fold — neither of which is a
+claim about the behaviour the fault was injected to stress, so a topology reports success having established
+that the cluster was built and destroyed.
+
+Admitting a free-form predicate on the test surface reintroduces what the DSL forecloses elsewhere: a value
+that type-checks while naming a component, an invariant, or a state the enclosing spec does not declare. It
+also makes the ledger's applicable-move set unverifiable, because an emitter free to declare its own
+obligations may declare none.
+
+The `FaultKind`→invariant map above is already a total function from an injected fault to the invariant its
+drill must not break, so it is the generator. **`Expectation` is a projection over that map**, exactly as
+`FaultTarget` is a projection over declared components:
+
+```haskell
+Expectation = { stresses :: FaultInjection, invariant :: Invariant, witness :: ExpectationWitness }
+```
+
+`ExpectationWitness` is named in full to distinguish it from the corpus-wide `…Witness` convention for
+machine-checkable proof terms (`EvidenceWitness`, `…EqualityWitness`): an `ExpectationWitness` is an
+operator-authored assertion, not a proof certificate.
+
+For each `FaultInjection` in a schedule, the required expectation set is **derived** from the
+`FaultKind`→invariant map; the operator authors an `ExpectationWitness` per derived invariant. Two distinct
+UNVERIFIED triggers follow, and must not be confused:
+
+- **A derived invariant with no authored witness** — the schedule injects a fault the map says stresses an
+  invariant, but the operator supplied no witness for it. Recorded **UNVERIFIED** in the ledger's `coverage`
+  array ([testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)),
+  the surface being the unwitnessed invariant — never silently green.
+- **A declared invariant with no targeting fault** — the topology declares an invariant that no fault in its
+  schedule stresses. This is legal and constructible: it is the honest case UNVERIFIED exists for, and the
+  ledger records that invariant's Runtime layer UNVERIFIED rather than pretending a drill covered it.
+
+What has **no inhabitant** is narrower: an `Expectation` naming an invariant **outside the
+`FaultKind`→invariant map's range** — an invariant no fault kind can stress at all. That is a category error
+foreclosed at decode, not the declared-but-unfaulted case above.
+
+`FaultSchedule`, the third field of the [§11.1](#111-the-typed-fault-schedule-chaosschedule--faulttarget)
+record, carries *when* a fault fires. Every schedule is finite and
+declared, per the bound-everything rule ([§13](#13-the-supporting-rules--the-conditions-the-moves-need)), and
+is expressed in **logical or simulated time** under Register 2.5 and as **bounded offsets relative to a
+workflow edge** under Register 3. A wall-clock-relative schedule is unrepresentable: rule R2 forbids
+asserting on wall-clock, and a schedule that cannot be replayed cannot yield a deterministically replayable
+counterexample.
+
+The derivation boundary this rests on — generated enumeration, authored expectation — is owned by
+[testing_doctrine.md §9](./testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation); this
+doctrine owns the typed shape and the map it derives against.
 
 ---
 
@@ -1274,9 +1326,12 @@ Assert: (1) **confluent convergence** — all interleavings reach one identical 
 pairwise-disjoint`, preserved by every action including rebalances (a rebalance only *moves* budget, never
 *creates* it); (3) **exhaustion is fail-closed**; (4) **no fabricated cross-record invariant (CALM made
 executable)** — the model shows the naive merge *breaks* "sum = total," and that the only sound options are
-**single-writer** co-location or **restructure** to a derived fold. The concrete spec is owned by
-[gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md). Honest limit: logical time at bounded scope —
-nothing about real lag, real lease timing, or cluster counts beyond scope (R8/R9 ledger rows).
+**single-writer** co-location or **restructure** to a derived fold. This worked example is **illustrative
+only — no owning model or phase**; amoebius's one authored `Model` is the gateway migration
+([gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md)), not this active-active OLTP
+sketch, and the method it illustrates is owned by [§17](#17-the-boundary-and-its-classifier). Honest limit:
+logical time at bounded scope — nothing about real lag, real lease timing, or cluster counts beyond scope
+(R8/R9 ledger rows).
 
 **Inject applied.** Extend the test-`.dhall` harness: partition during bounded-authority writes (assert each
 serves *up to its allowance/block*, global floor/uniqueness never break); drive a cluster to **exhaust its

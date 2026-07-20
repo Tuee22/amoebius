@@ -111,7 +111,8 @@ let FailoverBudget = { rto : PosDuration }
 -- distinction is an event classified at the gateway-change edge, not authored desired state (§3.4).
 let GatewayFailover =
       { active    : ClusterId
-      , standby   : ClusterId       -- decode fold: active ≠ standby (§3.3)
+      , standby   : ClusterId       -- decode folds: active ≠ standby, and no cluster reused as active/standby
+                                     --   across two dnsRecords (resource independence) (§3.3)
       , dnsRecord : DnsName
       , hubRole   : HubRole
       , dnsTtl    : PosDuration      -- must already be low; bounds the client-rebind split window
@@ -138,11 +139,17 @@ data GatewayFailover (s :: Scope) where
 data MigrationMode = Planned | Failover
 ```
 
-Two total decode-time folds (`Dhall.inputFile auto -> Either DecodeError`): (a) **`active ≠ standby`**
+Three total decode-time folds (`Dhall.inputFile auto -> Either DecodeError`): (a) **`active ≠ standby`**
 distinctness — the weaker floor `mkRke2` already uses to reject a reused host
 ([`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md)); a degenerate one-cluster "geo pair" owing
 a budget but crossing no boundary is rejected. (b) **`GeoReplicated` ⇒ the app's parent owns a
-`GatewayFailover` relation** — an app cannot elect geo-replication into a pairing that does not exist.
+`GatewayFailover` relation** — an app cannot elect geo-replication into a pairing that does not exist. (c)
+**resource independence** — no cluster is reused as `active` or `standby` across two `dnsRecord`s. This is the
+strict reading of the structural-fit fold's independence predicate
+([`gateway_migration_model_doctrine.md §5`](./gateway_migration_model_doctrine.md#5-one-and-done-plus-a-per-inforcespec-structural-fit)):
+a shared survivor would rest on the assumed shared-resource premise, so the fold admits only what the scope-2
+proof reaches, and the excluded shared-survivor topology is a deferred obligation catalogued at
+[`illegal_state_multicluster.md §3.52`](../illegal_state/illegal_state_multicluster.md#352-a-gateway-failover-graph-reusing-one-cluster-across-two-dns-records).
 
 ### 3.4 The mode is world-triggered, not authored
 

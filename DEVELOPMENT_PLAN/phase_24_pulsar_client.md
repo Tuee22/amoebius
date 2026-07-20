@@ -177,7 +177,7 @@ provision.
   — *delivery: at-least-once with broker-side dedup*: at-least-once made effectively-once by **broker-side**
   namespace deduplication on `(producer_name, sequence_id)`; intra-cluster consensus is delegated, not
   re-proven.
-- [`substrate_doctrine.md`](../documents/engineering/substrate_doctrine.md) §2 — *lazy, absolute-path tool
+- [`substrate_doctrine.md`](../documents/engineering/substrate_doctrine.md#2-detection-a-pure-classification-over-three-reads) §2 — *lazy, absolute-path tool
   discovery*: the supernova fork's `protoc`/`proto-lens` codegen is discovered lazily by full path through the
   substrate package manager — no `PATH` lookup and no environment variable anywhere in the build or runtime
   path.

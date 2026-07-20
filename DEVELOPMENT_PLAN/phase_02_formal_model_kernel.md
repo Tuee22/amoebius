@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Build the reusable formal-model kernel — the reifiable Haskell `Model` fragment and its two total renderings, the in-process `interpret` explorer and the `emitTLA` TLA+ emitter — and prove them on one small model whose generated `.tla` is TLC-checkable and never committed.
@@ -39,7 +39,7 @@ The one concrete protocol amoebius proves itself — the cross-cluster gateway m
 **not** authored here; that is [Phase 3](phase_03_gateway_migration_model.md). This phase proves the *kernel*
 on a small, throwaway transition-system model (a bounded two-process mutual-exclusion or token model) so the
 machinery is trustworthy before a load-bearing model rides on it. Validation is entirely in-process
-([`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md) §2 — the
+([`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) §2 — the
 registers, and §3 — rendering never touches live infrastructure): the explorer is a `cabal test`, and TLC
 runs on the emitted spec through the version-stable JVM `tla2tools` toolchain. This is a **Register 1**
 (pure/golden, in-process, no cluster) design-proof phase.
@@ -335,7 +335,7 @@ The whole sprint (📋 Planned). This sprint carries the phase gate.
 
 ## Documentation Requirements
 
-**Engineering docs to update:**
+**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/formal_model_doctrine.md` — backlink §2/§3/§4/§5/§6 to the Phase-2 kernel that
   realizes them; the round-trip claim moves from spike evidence (§7) to a built, Register-1-validated
   amoebius result on `ToyModel` when the gate runs.

@@ -125,7 +125,7 @@ missing/rotated peer key, or a hub-role config that omits its `Endpoint` — MUS
   committed `DecodeError` tags. Each negative is paired with a positive differing only in the foreclosed
   dimension.
 
-## Complete resource provision for the fabric transition
+## Resource provision — the fabric transition
 
 The two kernel interfaces and their listeners are host execution units, not resource-free infrastructure.
 Before `wg`, `ip`, `tc`, a socket bind, a key read, or a log write, binding expands one pure fabric transition

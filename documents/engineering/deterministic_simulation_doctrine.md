@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_12_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_18_vault_pki.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_24_pulsar_client.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_31_determinism_kernel.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_12_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_18_vault_pki.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_24_pulsar_client.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_31_determinism_kernel.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for **deterministic simulation testing (DST)** in amoebius — running the
@@ -82,6 +82,17 @@ environment provides deterministic, in-`IOSim` fakes of:
 
 Each fake models an **interface contract**, not the vendor's internals; the faults are the ones the R1–R9 rules
 name as the hazards amoebius's code must survive.
+
+These per-substrate **fault knobs are a different surface from the five-arm `FaultKind`** union of
+[chaos_failover_doctrine.md §11.1](./chaos_failover_doctrine.md#111-the-typed-fault-schedule-chaosschedule--faulttarget),
+and are not the same enumeration. `FaultKind` is the **Register-3** injected-fault union a live test topology
+schedules against a running forest; the knobs above are the **Register-2.5** modeled-environment surface, finer
+because a simulated substrate can perturb its own interface contract in ways a live fault schedule does not
+name. The two are related but not equal, so the `FaultKind`→invariant map's totality is a claim about the
+Register-3 union alone; a knob with no `FaultKind` counterpart (a MinIO lost-write-before-ack, a watch-gap) is
+a modeled-environment perturbation, not a scheduled fault, and the conformance suite that discharges the
+fidelity premise ([§5](#5-what-dst-establishes-and-the-one-premise-it-buys)) is what ties a knob back to real
+substrate behaviour.
 
 ---
 

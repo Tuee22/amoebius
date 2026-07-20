@@ -43,7 +43,7 @@ names throughout:
 `credential` and `transitKey` are `SecretRef`s resolved in-cluster via the Phase-18 built-in Vault client.
 
 What this phase deliberately does **not** do: the tenant-admin scope-narrowed `dhall update` surface and its
-Keycloak-fronted browser client ([`tenancy_doctrine.md §6`](../documents/engineering/tenancy_doctrine.md)), the
+Keycloak-fronted browser client ([`tenancy_doctrine.md §6`](../documents/engineering/tenancy_doctrine.md#6-the-tenant-admin-surface-reduces-to-a-scope-narrowed-admin-mutation)), the
 promotion of a hostile or regulated tenant onto its **own child cluster** (the cryptographic-isolation hardening
 dial, owned by the amoebic-spawning/federation phases), and any claim that `deriveTenantPolicies` is faithful
 (that residue is runtime-checked, per the honest limit) are all out of scope here. Only the single root
@@ -192,7 +192,7 @@ mutant rejects before an enactor runs.
 
 ## Doctrine adopted
 
-- [`tenancy_doctrine.md §4`](../documents/engineering/tenancy_doctrine.md) — *the typed shapes:
+- [`tenancy_doctrine.md §4`](../documents/engineering/tenancy_doctrine.md#4-the-typed-shapes-tenantspec--userspec--rolebinding) — *the typed shapes:
   `TenantSpec` / `UserSpec` / `RoleBinding`*: the three phantom-tagged types nested in the `InForceSpec`, whose
   isolation is the **absent arms** — no `Ref t1 a → Ref t2 a` constructor, no un-indexed `UserSpec`, and a
   `project` that yields only tenant `t`'s subtree — so a cross-tenant reference has no inhabitant in a well-typed
@@ -334,7 +334,7 @@ typed.
 (per-entry layer reconciliation for §4.2), `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
-Adopt [`tenancy_doctrine.md §4`](../documents/engineering/tenancy_doctrine.md) (the typed shapes) and
+Adopt [`tenancy_doctrine.md §4`](../documents/engineering/tenancy_doctrine.md#4-the-typed-shapes-tenantspec--userspec--rolebinding) (the typed shapes) and
 [`illegal_state_catalog.md §4.2`](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable):
 stand up the `TenantSpec`/`UserSpec`/`RoleBinding` surface whose **absent arms** make a foreign-tenant reference
 unrepresentable, and prove the deploy path never admits one — the author-time foreclosure was proven in-process
@@ -494,7 +494,7 @@ to type-check or decode; the run emits a Register-3 proven/tested/assumed ledger
 
 ### Objective
 Adopt [`dsl_doctrine.md §5`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
-and [`tenancy_doctrine.md §4`](../documents/engineering/tenancy_doctrine.md): assemble the phase's single **live**
+and [`tenancy_doctrine.md §4`](../documents/engineering/tenancy_doctrine.md#4-the-typed-shapes-tenantspec--userspec--rolebinding): assemble the phase's single **live**
 acceptance gate — one `.dhall` deploys a tenant app whose namespace, `<app>/<bucket>` `ObjectStore`, and
 in-namespace `Sql` the `replicas=1` singleton reconciles to ready and tears down leak-free; and, as a regression
 guard, the pre-cluster no-foreign-tenant corpus is re-run so a spec naming a foreign tenant's resource still

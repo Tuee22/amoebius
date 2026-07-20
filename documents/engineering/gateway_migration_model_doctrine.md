@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: documents/engineering/tla_modelling_assumptions.md
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the *one* protocol amoebius proves itself — the cross-cluster **gateway migration**, covering **both** branches of `GatewayMigration = <Planned | Failover>` — expressed as a reifiable `Model` ([formal_model_doctrine.md](./formal_model_doctrine.md)), **simulated** with io-sim and **proven** with TLC, and reduced to every `InForceSpec` by a decode-time structural-fit fold rather than any per-spec model-check.
@@ -132,12 +132,18 @@ record it repoints and the hub role it moves. The fold accepts *G* only when it 
 
 - **pairwise** — each `dnsRecord` labels **at most one** edge (one active + one standby per record);
 - **acyclic** — the directed edge relation has no cycle (no chain of hand-offs loops back onto a cluster);
-- **independent** — defined on the **label projection, not on the vertices**: two edges are independent iff
-  their `dnsRecord`s differ *and* no reachable interleaving of their transitions requires one vertex to hold the
-  wild-ingress role for two records at once. Independence is therefore **not** vertex-disjointness — a single
-  survivor cluster may legitimately be the `standby` of two edges (the shared-survivor stress case,
-  [§6](#6-modelling-bounds-and-honesty)) — but such a shared vertex is admitted only where the parameter
-  envelope below serializes its promotions per record and the shared-resource premise (the honest limit) holds.
+- **independent** — **both** graph-independence **and** resource-independence. Two edges are graph-independent
+  iff their `dnsRecord`s differ and no reachable interleaving of their transitions requires one vertex to hold
+  the wild-ingress role for two records at once. They are resource-independent iff **no cluster is reused as
+  `active` or `standby` across two DNS records**. The fold requires both, and therefore **rejects
+  cluster-reuse-across-records**, not only cycle and pairing structure.
+
+  Rejecting the shared survivor is the deliberate strict reading. A shared vertex would be admissible only
+  under the shared-resource premise of the honest limit below — an *assumed* premise, not a proven one — so
+  admitting it would let the decoder accept specs the scope-2 proof does not cover on the strength of an
+  assumption. The fold instead admits only what the proof reaches. The cost is stated in
+  [§6](#6-modelling-bounds-and-honesty): the shared-survivor topology is **not expressible** in an accepted
+  spec, and remains a named deferred obligation gated on the decomposition lemma.
 
 **The parameter envelope, not only the graph shape.** Graph shape alone does not carry the scope-2 proof: that
 proof was discharged over specific `CONSTANTS` — a declared per-branch **data-loss budget**, a bounded **TTL
@@ -155,12 +161,15 @@ the reduction
 [formal_model_doctrine.md §6](./formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not)
 requires before "green at scope N" generalizes.
 
-**The honest limit of the cutoff (do not overclaim it).** The decoder enforces **graph** independence
-(acyclic, pairwise), which is *not the same as* **resource** independence: two "independent" 2-cluster instances
-can still interact through shared infrastructure — one survivor cluster standing by for two records, one route53
-hosted zone and its write rate-limit, one Vault, one commit log. The scope-2 cutoff is sound only if those
-shared-resource interactions are genuinely absent or themselves confluent, and **that is an assumed premise, not
-a proven one**. Two things keep it honest, and neither may be reported as more than it is: (a) the **decomposition
+**The honest limit of the cutoff (do not overclaim it).** Rejecting cluster reuse removes the *shared-cluster*
+interaction from the accepted set, but it does **not** make accepted instances resource-independent in general.
+Two vertex-disjoint 2-cluster instances still interact through infrastructure the graph does not model — one
+route53 hosted zone and its write rate-limit, one Vault, one commit log. The scope-2 cutoff is sound only if
+those remaining shared-resource interactions are genuinely absent or themselves confluent, and **that is an
+assumed premise, not a proven one**. The strict fold therefore narrows the assumption rather than discharging
+it: it removes the one shared-resource class the decoder can see, and leaves the classes it cannot.
+
+Two things keep the residue honest, and neither may be reported as more than it is: (a) the **decomposition
 lemma** — that the N-instance product refines the 2-instance model under the decoder's independence predicate —
 is a named obligation, discharged either by a machine-checked proof (TLAPS/Lean,
 [formal_model_doctrine.md §4](./formal_model_doctrine.md#4-correspondence-by-construction)) or by an over-scope
@@ -184,6 +193,13 @@ Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the
   explicitly: the **liveness fairness `F`** ([§3](#3-the-model)) — the scheduler eventually fires every
   continuously-enabled action — which the `MergeConverges`/`SessionEventuallyRebinds` proofs rest on; and the
   **shared-resource independence** the scope-2 cutoff assumes ([§5](#5-one-and-done-plus-a-per-inforcespec-structural-fit)).
+- **The shared-survivor topology is a named deferred obligation, not a supported shape.** Because [§5](#5-one-and-done-plus-a-per-inforcespec-structural-fit)'s
+  independence predicate rejects cluster-reuse-across-records, a forest in which one survivor stands by for two
+  DNS records **has no accepted spec**. The exclusion is deliberate: admitting it would rest on the
+  shared-resource premise above, which is assumed rather than proven. It is revisitable only once the
+  decomposition lemma is discharged, and until then the shape is unavailable rather than unsound. The
+  over-scope stress run still *models* a shared survivor in, so the stress model retains the ability to detect
+  a cutoff violation the fold now forecloses.
 - **Correspondence is by construction; runtime fidelity is bridged, not only sampled.** Because `interpret` and
   `emitTLA` render one `Model`, there is no separate variable→module correspondence table to complete later —
   the inversion the superseded doc left "empty and UNVERIFIED until Phase 28" is dissolved. The residual

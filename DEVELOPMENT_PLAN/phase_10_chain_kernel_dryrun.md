@@ -104,14 +104,14 @@ emitting its proven/tested/assumed ledger with model↔runtime correspondence an
   the load-bearing invariant this phase discharges for the plan — a render is a pure function of committed
   source, the `--dry-run` preview is byte-for-byte what a live apply would submit, and prerequisite checks (is
   a cluster reachable, are credentials present) belong on the *apply* path, never the *render* path.
-- [`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md) §2 (Register 1
+- [`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) §2 (Register 1
   — pure/golden, in-process) and §4 (the spine's **Plan** step — *"`chain` produces the `[Step]` value;
   `--dry-run` renders it; a golden test pins the plan"*): this phase is exactly that spine step, golden-locked,
   with the single IO seam deferred to Register 3.
-- [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md): the rendered
+- [`generated_artifacts_doctrine.md §3`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule): the rendered
   plan is emitted from the Haskell source of truth and **never committed** — the `--dry-run` preview is a golden
   fixture of the renderer, not a committed runtime artifact.
-- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md) §2 (**Register 1**, the register this
+- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) §2 (**Register 1**, the register this
   gate reaches) and §4 (the per-run proven/tested/assumed ledger the battery emits, marking model↔runtime
   correspondence and runtime fidelity UNVERIFIED, owned by Phases 11/20).
 
@@ -282,7 +282,7 @@ golden-locked here), `documents/engineering/testing_doctrine.md` (the Register-1
 `DEVELOPMENT_PLAN/README.md` (flip the Phase-10 status when the gate passes).
 
 ### Objective
-Adopt [`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md) §4's spine
+Adopt [`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run) §4's spine
 **Plan** step (*"`chain` produces the `[Step]` value; `--dry-run` renders it; a golden test pins the plan"*)
 and §2's **Register 1**: assemble the in-process battery that pins the `--dry-run` plan and the descent
 byte-for-byte and proves no action runs during render, emitting a Register-1 proven/tested/assumed ledger with

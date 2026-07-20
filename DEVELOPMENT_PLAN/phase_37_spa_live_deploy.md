@@ -78,8 +78,8 @@ plus independent substrate inventory diff empty after the test-owned cache entry
 each run emits a proven/tested/assumed ledger recording the composition as *tested on
 linux-cpu* and recording that no GPU/Apple-Metal ML-workflow claim and no geo-replication claim was made.
 
-The gate runs over the **representative set pinned in [§N](#n-representative-set-oracle-pins-and-seeded-mutants)**
-and is **red unless every committed seeded mutant named in [§N](#n-representative-set-oracle-pins-and-seeded-mutants) goes red**. Three load-bearing observables are
+The gate runs over the **representative set pinned in [Gate integrity](#gate-integrity)**
+and is **red unless every committed seeded mutant named in [Gate integrity](#gate-integrity) goes red**. Three load-bearing observables are
 pinned so no stub, canned handler, or alternate exposure passes: (a) the inference round-trip counts **only** when
 the returned bytes **byte-match the Phase-0-committed Phase-33 reproducible golden**
 (`spa_gate/infernix_cpu_response.cbor`, authored from Phase-33's reproducible CPU output for the fixed
@@ -92,7 +92,7 @@ identity `spa_gate/engine_identity.txt` within `CacheBudget`, with the deployed 
 hand-authored `spa_gate/expected_exposures.txt` and a refused pod-IP/Service bypass. The exposure sweep, the
 pod-IP-bypass refusal, the first-miss materialization, the zero-election audit, and the postflight inventory diff
 are all read from **OS-boundary observers** (the live k8s API server and its audit log, a foreign-pod CNI probe,
-the on-disk Phase-32 cache, a containerd image inspection), never a self-emitted compliance trace, per [§N](#n-representative-set-oracle-pins-and-seeded-mutants).
+the on-disk Phase-32 cache, a containerd image inspection), never a self-emitted compliance trace, per [Gate integrity](#gate-integrity).
 
 Before any of those effects, the whole-deployment fold must admit the exact materialized application-service instances,
 CPU-inference worker and cold-tenant overlap, foreign-probe Pod, controller delta, selected images, mapped/
@@ -100,7 +100,7 @@ local/durable/cache/object bytes, pod/IP/CSI slots and all standing providers. A
 zero-effect rejection, never a `Pending` Pod or a partially applied SPA; live resource readback must match the
 private projections described below.
 
-## N. Representative set, oracle pins, and seeded mutants
+## Gate integrity
 
 This section fixes the one shared interpretation of the gate's "representative set", committed oracles,
 OS-boundary observers, and seeded mutants, so two engineers implement the same gate (§M clauses 1–8). All
@@ -163,7 +163,7 @@ artifacts named here are authored and committed **in Phase 0**, before `Amoebius
   - **M-election** (guard weakening): introduce a `Lease`-based leader election — the API-server audit-log
     zero-election check MUST go red.
 
-## Complete resource provision for the live SPA and cold tenant
+## Resource provision — the live SPA and cold tenant
 
 This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
 [`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
@@ -395,7 +395,7 @@ through the typed reconciler under the `replicas=1` singleton — none of it tou
    records **zero application/workflow `coordination.k8s.io` `Lease` acquisitions** over the run; the
    control-plane authority is the designated `replicas=1` Deployment/Lease pair, while SPA/workflow resources
    use their provisioned kind-indexed controllers and never elect. The
-   committed seeded mutant **M-election** ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)) — introducing a `Lease`-based leader election — MUST turn this
+   committed seeded mutant **M-election** ([Gate integrity](#gate-integrity)) — introducing a `Lease`-based leader election — MUST turn this
    check red.
 4. Lower one materialized application instance's CPU, memory, ephemeral/image/runtime-storage backing or Pod/IP
    slot by one unit/byte and
@@ -423,7 +423,7 @@ UI**, where "reaches the UI" is defined as a **driven browser interaction from t
 (Playwright-style) through a real
 Keycloak session that loads the served PureScript bundle** — the bundle bytes hashing to the Phase-13 Register-1
 golden bundle hash — and completes one UI interaction, **not** a bare HTTP 200. A **live exposure sweep** over the
-tenant namespace, read from the k8s API server, matches the hand-authored `spa_gate/expected_exposures.txt` ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)):
+tenant namespace, read from the k8s API server, matches the hand-authored `spa_gate/expected_exposures.txt` ([Gate integrity](#gate-integrity)):
 the sole wild exposure is the Keycloak-fronted `HTTPRoute`, and a **direct pod-IP/Service request bypassing Envoy,
 driven from a foreign pod via a CNI probe, is refused by the derived `NetworkPolicy`**. The backdoor negative
 `illegal_spa_open_edge.dhall` fails at its **Phase-0-pinned tagged reason** recorded in
@@ -431,7 +431,7 @@ driven from a foreign pod via a CNI probe, is refused by the derived `NetworkPol
 `spa_chatbot.dhall` differing only in the gated-vs-open edge dimension. Each capability the SPA consumes appears
 in the derived east-west graph and a surface consuming an undeclared capability has no derived connectivity to it.
 The committed seeded mutants **M-openedge** (an ungated `NodePort`) and **M-nopolicy** (dropped `NetworkPolicy`)
-of [§N](#n-representative-set-oracle-pins-and-seeded-mutants) MUST turn the exposure sweep and the bypass probe red respectively.
+of [Gate integrity](#gate-integrity) MUST turn the exposure sweep and the bypass probe red respectively.
 **Docs to update**: `documents/engineering/service_capability_doctrine.md`,
 `documents/engineering/platform_services_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -460,7 +460,7 @@ unauthenticated backdoor.
    interaction serving the Phase-13-golden PureScript bundle bytes** (not a bare 200). The API-server exposure
    sweep matches `spa_gate/expected_exposures.txt` — the Keycloak `HTTPRoute` is the sole wild exposure — and a
    foreign-pod pod-IP/Service bypass is refused by the derived `NetworkPolicy`; **M-openedge** and **M-nopolicy**
-   ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)) MUST turn these red.
+   ([Gate integrity](#gate-integrity)) MUST turn these red.
 2. The backdoor variant `illegal_spa_open_edge.dhall` fails Gate 1 **at its Phase-0-pinned tag in
    `spa_gate/spa_edge_negatives.expected`** (the recorded `dhall type` error locus / `DecodeError` tag, not a mere
    non-zero exit), paired with `spa_chatbot.dhall` differing only in the edge-gating dimension; a surface
@@ -484,7 +484,7 @@ infernix chatbot workflow on the Phase-25 runtime, and the response **byte-match
 reproducible golden `spa_gate/infernix_cpu_response.cbor`** for the fixed `spa_gate/prompt.json` at unchanged
 `experimentHash` `H_spa`, **and** the run's canonical-CBOR manifest + `.ready` sentinel appear in the Phase-25
 content store under that `experimentHash` namespace — pinning the bytes to infernix output, not a canned handler.
-The engine is proven jit-resolved on first miss, **not** baked or pre-warmed, by three OS-boundary reads ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)): a
+The engine is proven jit-resolved on first miss, **not** baked or pre-warmed, by three OS-boundary reads ([Gate integrity](#gate-integrity)): a
 **preflight** showing the Phase-32 content-addressed store holds **no entry** for `H_spa`'s engine identity; a
 **first-miss materialization event** whose postflight entry hashes to `spa_gate/engine_identity.txt` within
 `CacheBudget`; and a **containerd image inspection** confirming the deployed app/workflow images carry **no engine
@@ -493,7 +493,7 @@ not re-resolution). Output determinism is proven separately (§M-6) by a **third
 with the cache cold/bypassed** that independently re-resolves and recomputes, whose response MUST again byte-match
 the same golden. The jitML RL-gaming SPA composes and type-checks against the same SPA spec, while a grep of
 neither SPA surface names a substrate; running the jitML workflow on a CUDA/Apple-Metal substrate is explicitly
-out of contract for this single-substrate gate. The committed seeded mutants **M-canned** and **M-baked** ([§N](#n-representative-set-oracle-pins-and-seeded-mutants))
+out of contract for this single-substrate gate. The committed seeded mutants **M-canned** and **M-baked** ([Gate integrity](#gate-integrity))
 MUST turn the byte-match and the first-miss/no-engine-layer checks red respectively.
 **Docs to update**: `documents/engineering/app_vs_deployment_doctrine.md`,
 `documents/engineering/service_capability_doctrine.md`, `documents/engineering/content_addressing_doctrine.md`,
@@ -529,7 +529,7 @@ without being run.
    `spa_gate/engine_identity.txt` (within `CacheBudget`) plus a **containerd no-engine-layer** inspection prove
    jit-resolution; a same-namespace second request reuses the cache with **no new materialization event**; and a
    **distinct-namespace cold-cache third run recomputes to the same golden** (§M-6). **M-canned** and **M-baked**
-   ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)) MUST go red.
+   ([Gate integrity](#gate-integrity)) MUST go red.
 2. The jitML RL-gaming SPA composes and type-checks against the same SPA spec; neither SPA surface names an
    inference/training substrate.
 
@@ -544,19 +544,19 @@ The whole sprint (📋 Planned).
 **Blocked by**: Sprint 37.2 (the live Keycloak/Envoy edge the gate reaches through); Sprint 37.3 (the composed
 inference round-trip the gate exercises); Phase 14 / Phase 17 (the cluster-lifecycle + retained-storage teardown
 the InForceSpec drives).
-**Independent Validation**: a gate `InForceSpec` over the **[§N](#n-representative-set-oracle-pins-and-seeded-mutants) representative set** composes the multi-service SPA
+**Independent Validation**: a gate `InForceSpec` over the **[Gate integrity](#gate-integrity) representative set** composes the multi-service SPA
 + the infernix demo app's ML workflow with the `linux-cpu` deployment-rules layer, deploys via the typed
 reconciler under the `replicas=1` singleton, reaches the SPA UI through the Keycloak/Envoy edge (a driven
 Playwright interaction from the bounded host gate harness serving the Phase-13-golden bundle, with the API-server exposure sweep matching
 `spa_gate/expected_exposures.txt` and the pod-IP bypass refused), round-trips an inference request whose response
-**byte-matches `spa_gate/infernix_cpu_response.cbor`** with the engine proven first-miss-materialized ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)), and
+**byte-matches `spa_gate/infernix_cpu_response.cbor`** with the engine proven first-miss-materialized ([Gate integrity](#gate-integrity)), and
 tears the deployment down **leak-free**. "Leak-free (postflight sweep empty)" is defined as the union of (a) the
 **Phase-36 test-owned sweep** AND (b) a **full preflight→postflight substrate inventory diff** (tenant namespaces,
 PVs/PVCs, CRs, MinIO buckets, allocation-level retained host backing under `${RETAINED_ROOT}`, host-cache
 allocations, `kind` containers) read from the k8s API server and host, which MUST be empty. The materialized
 `CacheBudget` engine entry is asserted present-and-within-budget before teardown, then reclaimed as test-owned
 by the elevated harness; any surviving cache entry, newly allocated retained backing, PV/PVC binding, orphaned
-namespace, or leftover `kind` container fails the gate. The gate is **red unless the committed seeded mutants of [§N](#n-representative-set-oracle-pins-and-seeded-mutants)
+namespace, or leftover `kind` container fails the gate. The gate is **red unless the committed seeded mutants of [Gate integrity](#gate-integrity)
 (M-canned, M-baked, M-openedge, M-nopolicy, M-election) each go red**. The run re-runs idempotently and emits a
 per-run proven/tested/assumed ledger that marks no GPU/Apple-Metal ML-workflow claim and no geo-replication claim
 green.
@@ -582,7 +582,7 @@ deployed, reachable behind Keycloak/Envoy, its inference round-tripped, and torn
 - A check that the jitML RL-gaming demo app SPA also composes and type-checks (the "any combination" claim), with
   an explicit note that *running* its workflow on a GPU/Apple-Metal substrate is out of contract for this
   single-substrate gate.
-- The **Phase-0-committed [§N](#n-representative-set-oracle-pins-and-seeded-mutants) oracle set and mutant set** the gate checks against: `spa_gate/prompt.json`,
+- The **Phase-0-committed [Gate integrity](#gate-integrity) oracle set and mutant set** the gate checks against: `spa_gate/prompt.json`,
   `spa_gate/infernix_cpu_response.cbor` (the Phase-33 reproducible golden), `spa_gate/engine_identity.txt`,
   `spa_gate/expected_exposures.txt`, `spa_gate/spa_edge_negatives.expected`, the backdoor negative
   `illegal_spa_open_edge.dhall`, and the committed seeded mutants M-canned, M-baked, M-openedge, M-nopolicy, and
@@ -597,13 +597,13 @@ deployed, reachable behind Keycloak/Envoy, its inference round-tripped, and torn
    proven by the API-server exposure sweep matching `spa_gate/expected_exposures.txt` and the refused foreign-pod
    pod-IP bypass — and an inference request is served by the composed infernix workflow whose response
    **byte-matches `spa_gate/infernix_cpu_response.cbor`** with the engine first-miss-materialized to
-   `spa_gate/engine_identity.txt` ([§N](#n-representative-set-oracle-pins-and-seeded-mutants)).
+   `spa_gate/engine_identity.txt` ([Gate integrity](#gate-integrity)).
 2. The RL-gaming SPA composes and type-checks; the topology tears down leak-free — the Phase-36 test-owned sweep
    **and** the preflight→postflight substrate inventory diff are empty, including retained-host-backing and
    pod-ephemeral cache inventory after the observed `CacheBudget` engine entry is reclaimed, while the separate
    native-host-cache allocation inventory remains unchanged/empty — and a second
    reconcile-while-deployed is a no-op (empty ApplySet prune, zero SSA field
-   mutations). All committed [§N](#n-representative-set-oracle-pins-and-seeded-mutants) mutants (M-canned, M-baked, M-openedge, M-nopolicy, M-election) go red.
+   mutations). All committed [Gate integrity](#gate-integrity) mutants (M-canned, M-baked, M-openedge, M-nopolicy, M-election) go red.
 3. The run emits a proven/tested/assumed ledger; it marks no GPU-substrate or geo-replication claim green, and
    skipping an applicable move marks that layer UNVERIFIED, never green.
 4. Run every one-axis/one-byte-short and dropped-resource-envelope fixture from the phase resource contract,

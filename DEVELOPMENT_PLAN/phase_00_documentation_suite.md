@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Author the complete amoebius DSL specification and every engineering doctrine before any
@@ -57,10 +57,18 @@ under the §4 slug rule; every `Referenced by` header reconciled from the true l
 **near-duplicate normative content** — measured by sentence-shingle overlap above a stated threshold between two
 governed docs, outside quoted/exempt blocks — absent, with semantic SSoT *ownership* documented as a hand review
 rather than a lint verdict; each README Phase-Overview status marker equal to its phase doc's `## Phase Status`
-marker; and every phase **Gate** naming its committed fixtures, at least one committed mutant, and an
-independent oracle per [`development_plan_standards.md §M`](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub))
+marker; every phase **Gate** naming its committed fixtures, at least one committed mutant, and an
+independent oracle per [`development_plan_standards.md §M`](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub);
+and **illegal-state catalog integrity** — every entry carrying a `**Validation-locus:**`, entry numbering
+contiguous with no gaps or duplicates, every index bullet's anchor resolving, and every entry carrying a
+technique-matrix row)
 **and** it exits non-zero on every fixture in a committed seeded-negative corpus. A lint that only passes on the
-suite is not a gate; the committed corpus is what proves the lint can fail.
+suite is not a gate; the committed corpus is what proves the lint can fail. **The corpus is this gate's
+independent oracle (§M.3):** the `tools/doc_lint_corpus/` fixtures are hand-authored — one seeded negative per
+check and sub-check, committed in [`Sprint 0.5`](#sprint-05-verification-formal-model-doctrine--the-documentation-lint-gate-)
+*before* `tools/doc_lint.sh` exists, so the party writing the lint is not the sole author of
+what "clean" means; a lint that cannot turn its own committed negatives red is not admitted, exactly as it
+requires of every other phase's gate.
 
 ## Doctrine adopted
 
@@ -111,7 +119,13 @@ name.
   inherit.
 - [`testing_doctrine.md §1`](../documents/engineering/testing_doctrine.md#1-a-test-is-an-amoebius-spec) —
   *A test is an amoebius spec*: test-as-`InForceSpec` (spin up → run → always tear down), `suggest-test`, and the
-  per-run ledger artifact.
+  per-run ledger artifact — and
+  [`§9`](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation),
+  *Derivation: generated enumeration, authored expectation*: the enumeration/expectation split and the coverage
+  obligation whose catalog-side half this phase's lint check (g) enforces.
+- [`illegal_state_catalog.md`](../documents/illegal_state/illegal_state_catalog.md) — the *illegal-state catalog*
+  index and its themed sub-catalogs: the numbered entry set, each carrying a `**Validation-locus:**`, that
+  check (g) validates as a well-formed enumeration before any fixture exists to join against.
 - [`tla_modelling_assumptions.md`](../documents/engineering/tla_modelling_assumptions.md#why-this-doc-is-deprecated) —
   authored as a **deprecated redirect stub**: its content is re-homed to `formal_model_doctrine.md` and
   `gateway_migration_model_doctrine.md`, and its header carries `Status: Deprecated` so the lint accepts the
@@ -145,9 +159,9 @@ amoebius's snake_case rule), and the tracker is rebuilt for the ~33 single-gate 
 
 - The documentation standard (header block, naming, SSoT/no-duplication, bidirectional links, honesty, tone,
   diagram rules).
-- The plan rulebook (`development_plan_standards.md`): the §A–§L disciplines (header, snake_case layout, status
-  vocabulary, per-phase skeleton, one-phase model, sprint block format, doctrine-citation rule, generated
-  markers, cross-ref path rules, honesty, one-substrate).
+- The plan rulebook (`development_plan_standards.md`): the §A–§M disciplines (header, snake_case layout, status
+  vocabulary, per-phase skeleton, one-phase model, sprint block format, Documentation Requirements,
+  doctrine-citation rule, generated markers, cross-ref path rules, honesty, one-substrate, gate integrity).
 - The live tracker (`README.md`): the Document Index, the ~33-phase Overview table with its one-line gates and
   substrate/register columns, the status vocabulary, the phase discipline, and the cross-cutting invariants.
 - `overview.md`, `system_components.md`, `substrates.md`, `legacy_tracking_for_deletion.md`, `later_phases.md`,
@@ -302,15 +316,19 @@ The whole sprint (📋 Planned).
 
 **Status**: Planned
 **Implementation**: `documents/engineering/chaos_failover_doctrine.md`, `testing_doctrine.md`,
+`test_derivation_analysis.md` (the analysis record behind the derivation boundary),
 `formal_model_doctrine.md`, `gateway_migration_model_doctrine.md`, `tla_modelling_assumptions.md` (deprecated
 stub), `tools/doc_lint.sh`, `tools/doc_lint_corpus/` (the committed seeded-negative fixtures), and
 `tools/ledger_lint` (target standalone scripts; not yet built — they must not depend on the amoebius binary,
 which first appears in the pre-cluster implementation band, Phase 2+)
 **Blocked by**: Sprint 0.1, Sprint 0.2, Sprint 0.3, Sprint 0.4
 **Independent Validation**: run the lint **two-sided** — clean over the whole `documents/` + `DEVELOPMENT_PLAN/`
-tree, **and** non-zero on every fixture in the committed `tools/doc_lint_corpus/` (a bad header, a near-duplicate
-paragraph, a dangling anchor, a one-way `Referenced by`, a drifted status marker, a gate line missing its
-committed mutant/oracle, and a malformed ledger).
+tree, **and** non-zero on every fixture in the committed `tools/doc_lint_corpus/` (a bad header (a); a
+near-duplicate paragraph (d); a dangling anchor (b); a one-way `Referenced by` (c); a drifted status marker
+(e); a gate line missing its committed mutant/oracle (f); and — for catalog integrity (g), one per sub-check —
+a catalog entry missing its `**Validation-locus:**`, non-contiguous catalog numbering, a catalog index bullet
+with a dangling anchor, and a catalog entry with no technique-matrix row). The malformed-ledger negative lives
+in `ledger_lint`'s own corpus, not here.
 **Docs to update**: the five verification docs above, `DEVELOPMENT_PLAN/README.md` (record the gate command),
 `documents/engineering/README.md`
 
@@ -343,24 +361,49 @@ checker that *is* the Phase 0 gate.
   docs outside quoted/exempt blocks (semantic SSoT *ownership* is a documented hand review, not a lint verdict);
   (e) **status-consistency** — each README Phase-Overview marker equals that phase doc's `## Phase Status`
   marker; (f) **gate-integrity** ([`development_plan_standards.md §M`](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)) —
-  every phase Gate names its committed fixtures/goldens, ≥1 committed mutant, and an independent oracle, and a
+  every phase Gate names its committed fixtures/goldens, ≥1 committed mutant, and an independent oracle —
+  **following one anchor hop** from the `**Gate:**` line into the phase's `## Gate integrity` section where the
+  gate delegates to it (§M Gate → Gate-integrity delegation), so a gate whose apparatus lives one hop away is not flagged —
+  and a
   ✅ Done row carries a recorded gate command + date + substrate + ledger hash. The gate command is recorded in
-  the tracker.
-- `tools/doc_lint_corpus/`: the **committed** seeded-negative fixtures — one per check above — that the lint
-  must turn red; this is what makes the lint falsifiable rather than a checker that can always exit 0.
+  the tracker; and (g) **illegal-state catalog integrity** — every `### 3.N` entry across the eight themed
+  sub-catalogs (`illegal_state_storage.md`, `_topology.md`, `_capacity.md`, `_security.md`,
+  `_capability_messaging.md`, `_ml_asset.md`, `_multicluster.md`, `_lifecycle.md` — **not**
+  [`illegal_state_catalog.md`](../documents/illegal_state/illegal_state_catalog.md), which is the pure index
+  and holds no `### 3.N` entries) carries a `**Validation-locus:**` field, entry numbering is contiguous with
+  no gaps or duplicates, every [`illegal_state_catalog.md`](../documents/illegal_state/illegal_state_catalog.md)
+  index bullet's anchor resolves to a real heading, and every entry carries a row in the
+  [`illegal_state_techniques.md`](../documents/illegal_state/illegal_state_techniques.md) coverage matrix.
+  Check (g) is the **catalog-side** half of the coverage obligation of
+  [`testing_doctrine.md §9`](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation) —
+  it validates the enumeration the fixture join will later consume. The *fixture* half (an entry with no
+  committed witness yields an UNVERIFIED row) is **not** in Phase 0: it requires the
+  `Delivery-owner:`/`Case-family:` enrichment and the `locus_registry.tsv` that
+  [`phase_06`](phase_06_illegal_state_corpus.md) Sprint 6.1 owns, and no fixture exists to join against
+  until then. An explicit `<a id="...">` is a valid anchor target for (b) and (g): the suite uses it to keep
+  inbound links alive across a heading rename.
+- `tools/doc_lint_corpus/`: the **committed** seeded-negative fixtures — **at least one per check (a)–(f), and
+  one per sub-check of (g)**, so every check and sub-check has a fixture that turns it red — that the lint
+  must turn red; this is what makes the lint falsifiable rather than a checker that can always exit 0. The
+  malformed-ledger negative is **not** in this corpus; it lives in `ledger_lint`'s own corpus below.
 - `tools/ledger_lint`: a schema checker for the proven/tested/assumed ledger
   ([`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)) —
-  the `{phase, gate_command, register, substrate, date, layers, ledger_hash}` shape, `register`/`substrate`
-  equal to the tracker row, every out-of-register correctness layer a mandatory UNVERIFIED row — with its own
-  committed malformed-ledger negatives.
+  the `{phase, gate_command, register, substrate, date, layers, coverage, ledger_hash}` shape, `register`/`substrate`
+  equal to the tracker row, every out-of-register correctness layer a mandatory UNVERIFIED `layers` row, and
+  every `coverage` row's `surface` resolving against the run's regenerated enumeration (an unresolvable
+  `surface` fails the lint) — with its own committed malformed-ledger negatives, including a `coverage` row
+  naming a non-existent surface.
 
 ### Validation
 
 1. The lint runs **two-sided**: clean over the full suite once Sprints 0.1–0.4 have landed, **and** non-zero
    (with an actionable message) on every fixture in the committed `tools/doc_lint_corpus/` — the Phase 0 gate.
-2. The committed negative corpus covers each check — a broken header, a dangling anchor, a one-way bidirectional
-   link, a near-duplicate normative paragraph, a drifted status marker, a gate line missing its committed
-   mutant/oracle, and a malformed ledger — each causing a non-zero exit; `ledger_lint` likewise fails on its
+2. The committed negative corpus covers each check — a broken header (a), a dangling anchor (b), a one-way
+   bidirectional link (c), a near-duplicate normative paragraph (d), a drifted status marker (e), a gate line
+   missing its committed mutant/oracle (f), and — for catalog integrity (g) — a catalog entry missing its
+   `**Validation-locus:**`, non-contiguous catalog numbering, a catalog index bullet with a dangling anchor,
+   and a catalog entry with no technique-matrix row — each causing a
+   non-zero exit with a message naming the offending file and check; `ledger_lint` likewise fails on its
    malformed-ledger negatives.
 3. The formal-model docs unambiguously separate what a green model-check proves (the protocol, in the abstract)
    from the model↔code correspondence and runtime fidelity discharged in the later implementation phases.
@@ -371,7 +414,7 @@ The whole sprint (📋 Planned).
 
 ## Documentation Requirements
 
-**Engineering docs to update:**
+**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/documentation_standards.md` — authored/finalized as the header/link/SSoT mechanics the gate
   enforces (Sprint 0.1).
 - `documents/engineering/README.md` — the doctrine index flips each doc's authoring marker as Sprints 0.2–0.5

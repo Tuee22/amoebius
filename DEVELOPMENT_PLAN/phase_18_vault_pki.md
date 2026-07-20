@@ -120,7 +120,7 @@ seeded mutant** (§M.2) that MUST turn the gate red, committed and re-run.
 - [`platform_services_doctrine.md §11`](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering)
   — *bring-up and dependency ordering*: the hard edge this phase installs — **Vault reachable, initialized, and
   unsealed before any secret-dependent startup** — as a witnessed readiness gate, never a timer.
-- [`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) — the canonical
+- [`resource_capacity_doctrine.md §5`](../documents/engineering/resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm) — the canonical
   `VaultStorageDemand` and private `ProvisionedVaultStorageDemand`: every persisted source population and
   history is finite, the version-pinned Raft model includes WAL/snapshot/compaction/recovery peaks, and the
   file audit device has a named backing/presentation with finite rotation. A raw demand cannot author its own physical

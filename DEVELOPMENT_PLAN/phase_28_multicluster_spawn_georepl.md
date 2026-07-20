@@ -104,25 +104,25 @@ neither child. The private provisioned execution/checkpoint witnesses live under
 resources and live MinIO revision objects must read back to that same witness.
 
 Concretely: each
-child's delivered value is `project(subtree)` — discharged as a **committed compile-fail corpus** ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists):
+child's delivered value is `project(subtree)` — discharged as a **committed compile-fail corpus** ([Gate integrity](#gate-integrity):
 `test/compile-fail/ChildInForceSpec/`, ≥ 2 negatives asserting a specific compile-fail locus + a paired
 positive) plus a runtime subtree-inspection assertion that the delivered `ChildInForceSpec` carries no sibling
 branch; each child unseals in **both** sanctioned modes and child A's subtree ciphertext fails to decrypt under
 child B's Transit key even with the parent unsealed; a named `SecretRef` resolves to parent-injected bytes,
 never a Dhall fragment or env var; the two siblings round-trip a workflow and a **duplicate or reordered
 cross-cluster batch produces the identical fold result and identical blob keys** (a committed content-addressed
-golden, [§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists)); the invariant-confluence classifier sorts every crossing mutable invariant against a
-**committed independent classification table** ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists)) with an unclassified invariant defaulting to non-confluent
+golden, [Gate integrity](#gate-integrity)); the invariant-confluence classifier sorts every crossing mutable invariant against a
+**committed independent classification table** ([Gate integrity](#gate-integrity)) with an unclassified invariant defaulting to non-confluent
 and active-active wiring on a non-confluent invariant **refused**; the gate turns red on **at least one
-committed seeded mutant** ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists): the `classifier-default-confluent` and `project-identity` mutants); teardown is
-**leak-free by the OS-boundary observer of [§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists)** (`pulumi stack ls` and kubeconfig-context enumeration, read
+committed seeded mutant** ([Gate integrity](#gate-integrity): the `classifier-default-confluent` and `project-identity` mutants); teardown is
+**leak-free by the OS-boundary observer of [Gate integrity](#gate-integrity)** (`pulumi stack ls` and kubeconfig-context enumeration, read
 outside the forest, report zero surviving child stacks and zero surviving child clusters, retained backing
-stores exempt); and the run emits a **machine-derived** proven/tested/assumed ledger ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists)) that
+stores exempt); and the run emits a **machine-derived** proven/tested/assumed ledger ([Gate integrity](#gate-integrity)) that
 marks the spawn and geo-replication *tested* (drilled) on the linux-cpu runtime — never *proven* — the
 projection type-safety *proven-for-the-model* (a decode/type result), and every layer outside Register 3
 UNVERIFIED.
 
-## N. Gate-integrity oracles (committed in Phase 0, before the runtime exists)
+## Gate integrity
 
 This phase's gate binds to
 the following named, committed artifacts so no self-authored harness or post-hoc fixture can pass it:
@@ -546,12 +546,12 @@ managed-resource registry entry so teardown is a reconcile, not a state machine.
 4. A parent brings up two empty child `kind` clusters on linux-cpu; re-running the spawn is a no-op (observed at
    the OS boundary via `pulumi stack ls`); the "no total function producing a `ChildInForceSpec` containing a
    sibling's branch" claim is discharged as a **committed compile-fail corpus** (not a
-   code-review/parametricity argument): `test/compile-fail/ChildInForceSpec/` ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists)) holds ≥ 2 negative fixtures
+   code-review/parametricity argument): `test/compile-fail/ChildInForceSpec/` ([Gate integrity](#gate-integrity)) holds ≥ 2 negative fixtures
    that each attempt to construct a `ChildInForceSpec` carrying a sibling or ancestor-only branch and **must
    fail to typecheck**, each asserting its **specific expected compile-fail locus/message** (the type error
    naming the absent constructor/field), paired with a positive fixture that differs only in projecting the
    child's own subtree and **must** compile — authored and committed in Phase 0 before `ChildInForceSpec.hs`
-   exists; the committed `project-identity` mutant ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists)) makes a sibling branch appear in a child's delivered
+   exists; the committed `project-identity` mutant ([Gate integrity](#gate-integrity)) makes a sibling branch appear in a child's delivered
    spec and the runtime subtree-inspection assertion goes red; mode (b) bricks with the parent sealed and
    unseals with it available; cross-child Transit decrypt fails; a graceful child teardown leaves zero surviving
    stacks by the OS-boundary observer, retained backing stores exempt.
@@ -600,13 +600,13 @@ Pulsar log cross freely, while the gateway authority and any CAS "latest" pointe
 ### Validation
 
 1. A workflow round-trips between the two siblings; replaying a duplicate or reordered batch produces the same
-   fold result **and identical blob keys against the committed content-addressed golden ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists))** (exactly-once for
+   fold result **and identical blob keys against the committed content-addressed golden ([Gate integrity](#gate-integrity))** (exactly-once for
    replicated-or-recovered effects); the classifier's output is checked against the **committed independent
-   classification table ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists))**, not its own re-derivation, an unclassified invariant defaults to non-confluent,
+   classification table ([Gate integrity](#gate-integrity))**, not its own re-derivation, an unclassified invariant defaults to non-confluent,
    and the classifier refuses active-active on a non-confluent invariant; the committed
-   `classifier-default-confluent` mutant ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists)) — which flips the unclassified default to confluent — wrongly
+   `classifier-default-confluent` mutant ([Gate integrity](#gate-integrity)) — which flips the unclassified default to confluent — wrongly
    admits the unclassified fixture and the classification oracle goes red; the forest tears down leak-free by
-   the OS-boundary observer of [§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists), retained backing stores exempt.
+   the OS-boundary observer of [Gate integrity](#gate-integrity), retained backing stores exempt.
 
 ### Remaining Work
 

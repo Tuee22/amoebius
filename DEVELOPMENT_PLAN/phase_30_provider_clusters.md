@@ -139,9 +139,10 @@ flowchart LR
   nodes --> gate[Gate: spin provider cluster, provision a node, tear per-run stack down leak-free]
 ```
 
-**Substrate:** linux-cpu — the acceptance gate runs on exactly one hardware substrate, the linux-cpu parent
+**Substrate:** linux-cpu → provider — the §L Parent-drives-provider escape form. The acceptance gate runs on
+exactly one hardware substrate, the linux-cpu parent
 `kind` cluster from inside which the Pulumi engine issues the deploy; `→ provider` (EKS) is the deploy target
-class, not a hardware substrate ([development_plan_standards.md §L](development_plan_standards.md)).
+class, not a hardware substrate ([development_plan_standards.md §L](development_plan_standards.md#l-one-substrate-discipline)).
 
 **Register:** 3 (live infrastructure) — the gate spins up real provider resources, runs a workflow, and tears
 them down; no register-1/2 in-process check discharges it.

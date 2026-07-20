@@ -69,6 +69,16 @@ check ([`deterministic_simulation_doctrine.md §5`](../documents/engineering/det
 A green run is quoted as *"the code upholds the invariants under the modeled schedules and faults,"* never as
 *"the cluster is correct."* An in-process **Register-2** check that runs on no substrate.
 
+**Independent oracle (§M.3).** The determinism assertion (same-seed → byte-identical trace) is guarded against
+tautology by the §M-6 schedule-sensitivity control, but the *invariant verdicts* are checked against a
+**Phase-0-committed, hand-authored expected-outcome table** — one row per committed schedule-fixture giving the
+invariant verdict (`upheld` / `violated`, and for a violation the expected failing invariant) that the
+reconciler must produce under that schedule — authored **independently of the `Env m` reconciler code** and
+sharing none of it, so the equivalence `replayed-verdict ⟺ expected-verdict` cannot be a re-derivation of the
+subject under test. A verdict table regenerated from the reconciler's own replay is not an oracle; the seeded
+fault-mutant (§M-2) must flip a row of this table from `upheld` to `violated`, proving the table has
+discriminating power.
+
 ## Doctrine adopted
 
 - [`deterministic_simulation_doctrine.md §2 — the io-classes environment abstraction`](../documents/engineering/deterministic_simulation_doctrine.md#2-the-io-classes-environment-abstraction--build-it-pure-lift-it-whole)

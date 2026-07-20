@@ -89,8 +89,8 @@ against the Phase-0-committed fixtures named in Sprints 26.1–26.4 and **MUST t
 mutant `mutant/gate-admits-unverified` — a `PromotionGate` whose guard is weakened so a promotion that SHOULD
 be refused (`release_unverified` → `Prod`) is **admitted** — and on the additional mutants named per sprint.
 The representative set is exactly the `release_lifecycle.dhall` topology's **one trivial app with three
-environment pointers (`Dev`/`Staging`/`Prod`), two committed `Release` entries (`release_verified`,
-`release_unverified`), and one `RolloutPlan` of three ordered phases (base-apply → DB schema-migration →
+environment pointers (`Dev`/`Staging`/`Prod`), three committed `Release` entries (`release_verified`,
+`release_unverified`, `release_protocol_unverified`), and one `RolloutPlan` of three ordered phases (base-apply → DB schema-migration →
 finalize)** over the standing single-node platform stack plus one Postgres.
 
 ### Resource-provisioning contract
@@ -165,7 +165,7 @@ This phase is the first live amoebius realization of the release lifecycle. It a
 composition doctrine that owns the delivery values and defers every primitive they compose. Each bullet names
 the section it adopts; individual sprints cite the same sections where they build on them.
 
-- [`inforcespec_migration_doctrine.md`](../documents/engineering/inforcespec_migration_doctrine.md)
+- [`inforcespec_migration_doctrine.md §3`](../documents/engineering/inforcespec_migration_doctrine.md#3-the-dsl-exposes-no-destructive-verb--the-closed-storagemutation-union)
   — **the no-destruction InForceSpec-migration invariants.** A RolloutPlan that evolves the live spec is checked
   at `dhall update`: the StorageMutation closed union, the decode-time orphan / retention-shrink rejection, and
   the owner-immutability diff fold foreclose a promotion that would strand or silently destroy retained data;
@@ -191,7 +191,8 @@ the section it adopts; individual sprints cite the same sections where they buil
   — *`PromotionGate`: promote-unverified→prod is unrepresentable*: `advance` demands an `EvidenceWitness` read
   from the test-topology evidence ledger
   ([`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact));
-  prod requires the Runtime/chaos layer *proven*, so an under-verified `Release` has no `advance` term —
+  prod requires the Runtime/chaos layer *tested* (its highest achievable strength — live injection is never
+  *proven*), so an under-verified `Release` has no `advance` term —
   catalogued at
   [`illegal_state_catalog.md §3.26`](../documents/illegal_state/illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence),
   the "a handle exists only once its evidence edge does" technique.
@@ -358,12 +359,14 @@ per-run evidence ledger contract from `testing_doctrine` is consumed as an **opa
 sprint does not build the ledger, only the environment→required-strength mapping that reads it.
 **Independent Validation**: this suite runs in **Register 3**. The gate's `advance` constructor demands an
 `EvidenceWitness`; the environment→required-strength mapping is monotone (`Dev` on a green Decision layer;
-`Prod` on the Runtime/chaos layer **proven**). A `Release` whose consumed evidence ledger records the
+`Staging` on the Protocol layer **tested** via Register-2.5 deterministic simulation; `Prod` on the
+Runtime/chaos layer **tested** — its highest achievable strength, since live injection samples the faults
+chosen and is never *proven*). A `Release` whose consumed evidence ledger records the
 Runtime/chaos layer **UNVERIFIED** — a Tier-1-only in-process ledger, or a skipped-but-applicable move —
 yields **no Runtime witness**, so there is **no `advance` value** to hand the Sprint-26.2 CAS: the promotion is
 **refused** with the specific reason tag `PromotionRefused:RuntimeEvidenceMissing`, and the environment
 pointer HEAD is **unchanged in the store** (observed from the pointer history, not a gate self-report). A
-`Release` carrying a proven Runtime witness constructs an `advance` value that the CAS commits. The mapping
+`Release` carrying a *tested* Runtime witness constructs an `advance` value that the CAS commits. The mapping
 table is a committed hand-authored fixture, independent of the gate's own fold.
 **Docs to update**: `documents/engineering/release_lifecycle_doctrine.md` (§4),
 `documents/engineering/testing_doctrine.md` (§4 — the evidence ledger the gate consumes),
@@ -384,18 +387,25 @@ unrepresentable state.
   This is the same idiom as infernix's `.ready`-gated `ArtifactRef`: a handle exists only once its evidence
   edge does.
 - The environment→required-evidence-strength **mapping** (this doctrine's sole owned policy): `Dev` advances
-  on a green Decision layer; `Prod` requires the Runtime/chaos layer **proven**, not assumed. The mapping is a
-  committed value the gate enforces at construction time; it does **not** compute the ledger, only reads it.
+  on a green Decision layer; `Staging` requires the Protocol layer **tested** (Register-2.5 deterministic
+  simulation, no live substrate); `Prod` requires the Runtime/chaos layer **tested** — its highest achievable
+  strength, never *proven* ([`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)),
+  not assumed. The mapping is a committed value the gate enforces at construction time; it does **not** compute
+  the ledger, only reads it.
 - The Tier-1-only fence: a purely in-process evidence ledger (Dhall typecheck + decoder + QuickCheck + TLA+/TLC,
   no live substrate) supplies **no Runtime `EvidenceWitness`**, so a `Prod` `PromotionGate` cannot be advanced
   on it — "we validated the DSL in-process" can never mean "the cluster enforces it".
 - A refusal carries the **specific reason** (`PromotionRefused:RuntimeEvidenceMissing`), not a bare failure,
   and leaves the environment pointer HEAD untouched.
 - **Phase-0-pinned oracles (authored before the gate exists):** the committed environment→required-strength
-  mapping table `test/golden/evidence_strength.txt` (hand-authored, independent of the gate's fold); the
+  mapping table `test/golden/evidence_strength.txt` (hand-authored, independent of the gate's fold), which
+  records `Dev` = Decision green, `Staging` = Protocol *tested*, `Prod` = Runtime/chaos *tested* — never
+  *proven* on any arm; the
   under-verified `Release` fixture `test/fixture/release_unverified` (its consumed evidence ledger marks the
   Runtime/chaos layer UNVERIFIED) with expected outcome **refused with tag
-  `PromotionRefused:RuntimeEvidenceMissing`**; and the positive `test/fixture/release_verified` differing
+  `PromotionRefused:RuntimeEvidenceMissing`**; the `Staging`-refusal fixture
+  `test/fixture/release_protocol_unverified` (Protocol layer UNVERIFIED) with expected outcome **refused with
+  tag `PromotionRefused:ProtocolEvidenceMissing`**; and the positive `test/fixture/release_verified` differing
   **only in the Runtime evidence edge** with expected outcome **advance**. Committed seeded mutant (operator:
   guard weakening): `mutant/gate-admits-unverified` — a `PromotionGate` whose precondition is weakened so
   `release_unverified → Prod` is **admitted**; the gate MUST turn it **red** (the promotion that SHOULD be
@@ -406,10 +416,14 @@ unrepresentable state.
    `PromotionRefused:RuntimeEvidenceMissing`** (not a bare failure) and that the `Prod` pointer HEAD is
    **unchanged in the store's ETag history** (external-observer read, not a gate self-report); assert the
    paired positive `release_verified → Prod` (differing only in the Runtime evidence edge) **advances**.
-2. Assert the required-strength decision is taken **against the committed `evidence_strength.txt`** hand table,
+2. Attempt `release_protocol_unverified → Staging` and assert it is **refused with the specific tag
+   `PromotionRefused:ProtocolEvidenceMissing`** with the `Staging` pointer HEAD **unchanged**, exercising the
+   middle arm of the three-arm mapping; assert the paired positive advances `Staging` once its Protocol-layer
+   (Register-2.5) evidence is present.
+3. Assert the required-strength decision is taken **against the committed `evidence_strength.txt`** hand table,
    never against a value derived from the gate's own fold, and that a Tier-1-only (in-process,
    Runtime-UNVERIFIED) ledger supplies no Runtime witness for `Prod`.
-3. Assert `mutant/gate-admits-unverified` turns this validation **red** — an admitted under-verified promotion
+4. Assert `mutant/gate-admits-unverified` turns this validation **red** — an admitted under-verified promotion
    is a gate failure, observed as an unwarranted pointer advance in the store history.
 
 > **Honesty.** Promote-unverified→prod is **type-foreclosed** (uninhabitable — no `advance` term); this sprint
@@ -473,8 +487,8 @@ values end-to-end.
   26.2) and let the reconciler converge — no special "undo" machinery, because a prior generation is a valid
   `Release` and a prior pointer value is a valid CAS target.
 - The gate `release_lifecycle.dhall` test topology — the named **representative set: one trivial app with three
-  environment pointers (`Dev`/`Staging`/`Prod`), two committed `Release` entries (`release_verified`,
-  `release_unverified`), and one `RolloutPlan` of three ordered phases (base-apply → DB schema-migration →
+  environment pointers (`Dev`/`Staging`/`Prod`), three committed `Release` entries (`release_verified`,
+  `release_unverified`, `release_protocol_unverified`), and one `RolloutPlan` of three ordered phases (base-apply → DB schema-migration →
   finalize)** over the standing platform stack plus one Postgres — and its `ReleaseLifecycleSpec`: write the
   ledger, refuse the under-verified promotion, advance the satisfied one, roll out in order, and always tear
   down, emitting a per-run ledger artifact.

@@ -72,6 +72,34 @@ in the Apple/Windows phases.
 **Register:** 3 (live infrastructure) — the gate provisions a real kind cluster on a real `linux-cpu` host and
 tears down leak-free; a Register-1/2 in-process check cannot discharge it.
 
+**Gate:** on a `linux-cpu` host with a container runtime pre-installed, the Python `pb` midwife's
+`pb bootstrap --distro=kind` ensures the package-manager root, the pinned GHC 9.12.4 / Cabal 3.16.1.0
+toolchain, and a built binary, then `exec`s `amoebius bootstrap --distro=kind`, which brings an empty
+single-node kind cluster to exactly one `Ready` node (`kubectl get nodes` shows one node, `Ready`) **only after**
+a physical-host observation proves the complete kind engine carve fits; records a
+complete observed inventory of allocatable CPU/memory/logical local-ephemeral capacity, canonical
+`Unified | SplitRuntime` nodefs/imagefs backing and quota identities, resident CRI content/snapshots, disjoint
+durable/native-host-cache backing pools, and accelerator devices/profiles/per-device
+raw/reserved/allocatable plus current-free VRAM; and proves the decoded target's declared
+capacity/capability is no greater than and compatible with that inventory (the linux-cpu observation has no
+CUDA offering);
+**re-running the identical command reports already-converged and changes nothing** — where "changes nothing"
+means the observable triple `(docker/podman container list, `kind get clusters`, kubeconfig file bytes)` is
+byte-for-byte identical before and after the re-run, and the `execve` audit log for the re-run contains **zero
+mutating package-manager or `kind create` invocations**; from at least one named partially-converged start
+state the identical run **converges without recreating the cluster** (divergence-repair, Sprint 14.4); **every
+external tool invocation during the run resolved through an `AbsExe` absolute path** as witnessed by the
+`execve` audit log (every `argv[0]` absolute, drawn from the resolved tool map), no bare-name `PATH` lookup,
+and Helm is never ensured or invoked (no `helm` `execve`, no `helm` trap fired); and the gate ends by tearing
+the cluster down (`kind delete cluster`) and asserting a **leak-free postflight sweep** (no residual kind
+cluster, node container, or kubeconfig context).
+
+The committed fixtures, seeded mutants, and independent observers this gate is checked against are named in the [`## Gate integrity`](#gate-integrity) section below (§M Gate → Gate-integrity delegation).
+
+## Gate integrity
+
+<a id="gate-integrity"></a>
+
 **Gate prerequisite (stated, not ensured):** a container runtime (Docker or Podman) is a **pre-installed host
 prerequisite** of this gate, *not* a member of the closed `HostTool` enum. `kind` cannot create a cluster
 without one, but amoebius does not provision it; the enum stays exactly `ghcup`, `cabal`, `kubectl`, `kind`,
@@ -104,28 +132,6 @@ host→engine fold — the zero-create overdraw fixture must catch it; (M5) an e
 steady-state WAL/backend estimate and omits transition workspace — the one-byte transition fixture must catch
 it; and (M6) a kind config renderer that swaps/aliases runtime roots or omits their hard quota — the independent
 layout readback must catch it. A gate run in which any of M1–M6 stays green is void.
-
-**Gate:** on a `linux-cpu` host with a container runtime pre-installed, the Python `pb` midwife's
-`pb bootstrap --distro=kind` ensures the package-manager root, the pinned GHC 9.12.4 / Cabal 3.16.1.0
-toolchain, and a built binary, then `exec`s `amoebius bootstrap --distro=kind`, which brings an empty
-single-node kind cluster to exactly one `Ready` node (`kubectl get nodes` shows one node, `Ready`) **only after**
-a physical-host observation proves the complete kind engine carve fits; records a
-complete observed inventory of allocatable CPU/memory/logical local-ephemeral capacity, canonical
-`Unified | SplitRuntime` nodefs/imagefs backing and quota identities, resident CRI content/snapshots, disjoint
-durable/native-host-cache backing pools, and accelerator devices/profiles/per-device
-raw/reserved/allocatable plus current-free VRAM; and proves the decoded target's declared
-capacity/capability is no greater than and compatible with that inventory (the linux-cpu observation has no
-CUDA offering);
-**re-running the identical command reports already-converged and changes nothing** — where "changes nothing"
-means the observable triple `(docker/podman container list, `kind get clusters`, kubeconfig file bytes)` is
-byte-for-byte identical before and after the re-run, and the `execve` audit log for the re-run contains **zero
-mutating package-manager or `kind create` invocations**; from at least one named partially-converged start
-state the identical run **converges without recreating the cluster** (divergence-repair, Sprint 14.4); **every
-external tool invocation during the run resolved through an `AbsExe` absolute path** as witnessed by the
-`execve` audit log (every `argv[0]` absolute, drawn from the resolved tool map), no bare-name `PATH` lookup,
-and Helm is never ensured or invoked (no `helm` `execve`, no `helm` trap fired); and the gate ends by tearing
-the cluster down (`kind delete cluster`) and asserting a **leak-free postflight sweep** (no residual kind
-cluster, node container, or kubeconfig context).
 
 ## Doctrine adopted
 
@@ -606,7 +612,7 @@ The whole sprint (📋 Planned).
 
 ## Documentation Requirements
 
-**Engineering docs to update:**
+**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/substrate_doctrine.md` — when detection, the `AbsExe`/closed-enum tool-ensure, and the
   Python `pb` midwife land, flip the §9 planning-ownership orientation note for this phase from intent to a
   delivered-status pointer (status stays in the plan) and reconcile any seed-vs-target discovery caveats in §3.

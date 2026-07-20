@@ -116,7 +116,7 @@ proven/tested/assumed ledger recording first-miss resolution, cross-pod reuse, a
 numeric cache/ephemeral inequalities as *checked at the post-bind provision seal*, and the
 model/kernel tiers (Phases 33/34) and cross-node/cross-substrate reuse as **UNVERIFIED**.
 
-## §32.0 Concrete corpus + Phase-0-pinned oracle (§M.1, §M.3, §M.7)
+## Gate integrity
 
 The gate's "representative set" is **exactly one** closed-catalog identity: `EngineRuntime.LlamaCppCpu@<pinned-ver>`
 (a linux-cpu `llama.cpp` engine arm), exercised on **both** resolve arms — `build` (from the pinned source
@@ -144,7 +144,7 @@ The **live** representative set remains exactly the one identity above. The pure
 additional members of the already-closed catalog solely to exercise distinct-digest
 `BoundedParallel n` arithmetic; those members are not claimed as live-resolved Phase-32 evidence.
 
-## Complete resource provision for owner, clients, and resolve transitions
+## Resource provision — owner, clients, and resolve transitions
 
 The cache byte proof remains the nested proof above, but it is only one field of a complete workload proof.
 Binding derives an identity-keyed envelope for the cache-owner Pod and for both live client Pods. Every
@@ -203,7 +203,7 @@ the gate red before materialization.
   Tier 1's `EngineRuntime` is a **named, jit-resolved** identity (never baked, never URL-fetched), the cache is a
   bounded typed pool with an explicit `CacheBudget` and pin-aware pruning, and the trade is stated plainly (baking
   gave no-network-at-boot; the cache pays a first-miss materialization amortized across every later use).
-- [`service_capability_doctrine.md` §4.1](../documents/engineering/service_capability_doctrine.md)
+- [`service_capability_doctrine.md` §4.1](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored)
   — *the `InferenceEngine` capability — the engine is substrate-selected and jit-resolved, never authored*: the
   closed `EngineRuntime` union has **no arbitrary-`Url`/`Download` arm**; the `.dhall` *selects* an arm by the
   detected substrate and can never *author* a fetch, and the shared jit-build resolver materializes the named
@@ -357,7 +357,7 @@ seeded mutant `resolve _ = <fixed 16-byte marker>` (§32.0-a) turns the stored-`
 
 ### Objective
 Adopt [`content_addressing_doctrine.md §4.5`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)'s
-Tier-1 resolve-on-miss and [`service_capability_doctrine.md` §4.1](../documents/engineering/service_capability_doctrine.md):
+Tier-1 resolve-on-miss and [`service_capability_doctrine.md` §4.1](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored):
 implement the shared jit-build resolver so a named engine identity is materialized on first miss into the
 bounded cache — downloaded prebuilt or built from source with the Phase-15 baked toolchain — with **no arm to
 author a URL**, replacing infernix's `curl`-tar-at-image-build with the one shared resolve-on-miss path.

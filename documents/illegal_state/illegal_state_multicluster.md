@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering cross-cluster capacity folds,
@@ -246,6 +246,30 @@ realizing the I-confluence classifier of [`chaos_failover_doctrine.md` §17](../
 honest limit — a genuinely-confluent invariant's confluence is proven at design time, not decidable in the spec).
 **Validation-locus:** `Gate-1-editor` (no `Confluent` arm exists in the authorable union); `live-effect` residue
 — the model's confluence classification actually holding under merge.
+
+### 3.52 A gateway-failover graph reusing one cluster across two DNS records
+
+A forest with two geo-replicated pairs could name one survivor cluster as the `standby` of two distinct
+`dnsRecord`s — the shared-survivor topology. Its migrations are graph-independent (distinct records, no vertex
+holds the wild-ingress role for two records at once), so a fold checking only graph shape would admit it. But
+the scope-2 gateway-migration proof reduces an N-cluster forest to independent 2-cluster instances only under
+**resource** independence, and a shared survivor interacts through infrastructure the graph does not model,
+resting the reduction on an assumed shared-resource premise rather than a proven one. amoebius's structural-fit
+fold therefore requires resource independence as well as graph independence: **no cluster is reused as `active`
+or `standby` across two `dnsRecord`s**, so the shared-survivor graph decodes to a `DecodeError`. The excluded
+topology is a named deferred obligation gated on the decomposition lemma, revisitable only once that lemma is
+discharged; until then the shape is unavailable, not unsound. **Owner:**
+[`gateway_migration_model_doctrine.md` §5](../engineering/gateway_migration_model_doctrine.md#5-one-and-done-plus-a-per-inforcespec-structural-fit)
+(the structural-fit fold and its independence predicate), realized on the authorable surface by
+[`consistency_pacelc_doctrine.md` §3.3](../engineering/consistency_pacelc_doctrine.md#33-the-ir-and-its-decode-foreclosures-haskell-gate-2)
+(the third decode fold). **Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
+(a distinctness fold over the cluster identities projected across the migration graph — the same fold family that
+rejects a reused host or an `active == standby` pair, lifted from one edge to the whole graph). **Layer:**
+`decode-foreclosed` — the constraint is a cross-record fold over the decoded graph, not a single-field type
+index, so a total decoder returns `Left` rather than the shape being uninhabitable. **Validation-locus:**
+`Gate-2-decoder` (the structural-fit fold returns `DecodeError` on a graph reusing a cluster across records,
+before any `ProvisionedSpec` exists); the over-scope stress run that *models* a shared survivor in is a
+`live-effect`/model residue, not an authorable shape.
 
 ---
 

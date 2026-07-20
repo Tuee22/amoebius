@@ -94,7 +94,7 @@ mounted usable bytes, fs type, and the enforced `ENOSPC` boundary without consum
 the enclosing shared host filesystem.
 
 The gate is passed only when all of the following hold, checked against the Phase-0-pinned oracle corpus and
-seeded mutants named in [§N](#n-gate-integrity-provisions):
+seeded mutants named in [Gate integrity](#gate-integrity):
 
 - **Real teardown, not soft delete.** After `cluster delete`, an OS-boundary observer on the host (not the
   apiserver, which is destroyed) confirms the kind cluster is genuinely absent: `kind get clusters` lists no
@@ -131,7 +131,7 @@ seeded mutants named in [§N](#n-gate-integrity-provisions):
   node ephemeral storage. The raw-directory mutant **M-raw-host-directory**, skipped-fold mutant
   **M-skip-durable-aggregate**, and pre-allocation-uniformity mutant **M-uniform-before-allocation** must turn
   these checks red.
-- **Committed mutants go red.** The gate re-runs the committed seeded mutants of [§N](#n-gate-integrity-provisions)
+- **Committed mutants go red.** The gate re-runs the committed seeded mutants of [Gate integrity](#gate-integrity)
   (**M-soft-delete**, **M-seed-marker**, **M-reclaim-delete**, **M-no-rebind**,
   **M-raw-host-directory**, **M-skip-durable-aggregate**, **M-sum-unequal-ordinals**,
   **M-uniform-before-allocation**) and passes only if every one of them turns the gate red; a green mutant
@@ -139,6 +139,77 @@ seeded mutants named in [§N](#n-gate-integrity-provisions):
 - **Honest ledger.** The gate emits its proven/tested/assumed ledger; the aggregate durable-backing fold and
   image-backed host hard cap are live-tested here. The Phase-22 control-plane singleton's no-PVC property
   (which has no realized subject at Phase 17) stays marked **UNVERIFIED**, not asserted as passing.
+
+## Gate integrity
+
+This section pins the concrete corpus, the Phase-0-committed oracles, and the seeded mutants the Gate and each
+sprint Validation above reference. Everything named here is authored and committed in Phase 0, before any
+implementation exists.
+
+**Representative set (concrete corpus).** Exactly two witnesses, no more: (1) a single-ordinal Postgres
+StatefulSet in namespace `retained-witness` with one PVC `pgdata` on one retained PV, marker = a single row in
+table `rebind_witness(nonce text)`; (2) a single-ordinal MinIO StatefulSet in namespace `retained-witness` with
+one PVC `miniodata` on one retained PV, marker = one object `rebind/nonce` in bucket `rebind-witness`. Each
+witness image is a Phase-15 baked binary served only from the in-cluster `distribution` registry (an
+OS-boundary containerd/registry-log observer confirms zero public-registry pull during the cycle).
+
+**Phase-0-committed oracles (independent of the implementation).**
+- `test/live/fixtures/storageclass_expected.yaml` — the exact single-StorageClass golden (Sprint 17.1),
+  hand-authored, not regenerated from the renderer.
+- `test/live/fixtures/claimref_table.csv` — the independent reference table mapping
+  `(namespace, statefulset, ordinal)` to the expected `metadata.name`, `amoebius.io/pv-identity` label,
+  `claimRef` `(namespace, PVC-name)`, logical demand, `requiredUsableBytes`, presentation/model,
+  backing-minimum/quantum operands, and exact private-witness `provisionedBytes` rendered as PVC/PV capacity;
+  authored by hand, never by the renderer's naming or sizing helper (Sprints 17.2, 17.3).
+- `test/live/fixtures/durable-backing-capacity.golden` — the observed named durable-backing ceilings and the
+  accepted post-reconcile per-backing rounded-`provisionedBytes` debit map over existing/proposed stable
+  identities, authored independently of the allocation fold; cache and node ephemeral pools are separately
+  named and excluded.
+- `test/live/fixtures/uniform-claim-boundaries.csv` — hand-authored multi-ordinal usable demands,
+  presentation/overhead versions, backing minimum/quantum policies, expected per-slot provision witnesses,
+  backing identities, and expected uniform claim plans/per-backing debit maps. It includes an accepted skewed
+  group, a group whose unequal per-slot rounded sum fits the backing but whose
+  `max(provisionedBytes) × ordinalCount` debit exceeds it, and a differing-backing group whose aggregate fits
+  while one named backing is short; no
+  renderer/allocation helper generates this table.
+- `test/ci/no_retained_delete.sh` — the committed static check that no non-harness `src/` module issues a
+  backing-store reclaim/destruction call. Scoped PVC/PV binding-object deletion and whole-cluster deletion are
+  explicitly outside this check because the backing lives outside the cluster (Sprint 17.3 Validation 2a).
+- Negative fixtures with pinned failure reasons: `two_storageclasses` (reason `count != 1` /
+  `default-class annotation present`), `pv_capacity_mismatch` (reason
+  `capacity != provisioned witness`), `raw_size_one_byte_under` (reason `raw capacity below witness`),
+  `filesystem_type_mismatch` (reason `observed fsType != presentation`),
+  `presentation_overhead_over_backing` and `allocation_quantum_over_backing` (reason
+  `durable-demand-exceeds-backing after presentation/allocation`), and
+  `pv_aggregate_over_backing` plus `uniform_claim_skew_over_backing` (reason
+  `durable-demand-exceeds-backing` where applicable), each paired with a positive differing only in the
+  foreclosed dimension.
+
+**Committed seeded mutants (must go red).** Each is committed under `test/live/mutants/` and re-run by the gate;
+a green mutant fails the gate.
+- **M-soft-delete** (dropped-effect operator) — a `cluster delete` that deletes only the witness
+  StatefulSets/PVCs and leaves the kind node container + apiserver alive. Must go red on the "cluster genuinely
+  absent" OS-boundary assertion (Gate; 17.3 V1).
+- **M-seed-marker** (union-arm addition) — a witness manifest carrying an init/seed step that reproduces the
+  marker nonce on fresh start. Must go red on the absence-before-write / no-post-recreate-write-path assertion
+  (Gate; 17.3 V1).
+- **M-reclaim-delete** (guard weakening) — a PV rendered with `reclaimPolicy: Delete` instead of `Retain`. Must
+  go red on the `Released`/rebind assertion (17.2 V3/V4).
+- **M-no-rebind** (dropped-effect operator) — a reconciler variant that leaves the PV `Released` but never
+  clears the stale `claimRef.uid`, so a re-created PVC cannot re-bind. Must go red on the actual re-bind step
+  (17.2 V3/V4).
+- **M-raw-host-directory** (mechanism substitution) — backs a PV with an ordinary retained-root directory
+  while still declaring a Kubernetes capacity. Must go red when the fill-plus-one write succeeds without
+  `ENOSPC`, changes shared-parent occupancy, or lacks the raw-size/fs-type/usable witness (17.2 V2).
+- **M-skip-durable-aggregate** (dropped validation) — allocates/applies an aggregate retained set larger than
+  `DurableBacking`. Must go red on the over-backing negative and zero-write assertion (17.2 V1).
+- **M-sum-unequal-ordinals** (wrong aggregation) — debits the unequal per-ordinal provisioned map instead of
+  debiting the uniform maximum rounded provisioned value for every ordinal. Must go red on
+  `uniform_claim_skew_over_backing` and the accepted group's byte-identical PVC-size assertion (17.2 V1/V2).
+- **M-uniform-before-allocation** (stage-reordering operator) — groups authorable logical/usable demand before
+  applying the per-slot presentation and backing allocation policies, then fabricates one group size without
+  retaining each private `ProvisionedVolumeDemand` witness. Must go red on the overhead/quantum boundary
+  fixtures and the per-slot-witness-before-uniformity assertion (17.2 V1/V2).
 
 ## Doctrine adopted
 
@@ -436,14 +507,14 @@ durable backing and no normal-operation path can.
 - A live `RebindSpec` that asserts the round-trip and, honestly, that this phase never deletes durable bytes:
   the eventual reclaim of the test-flagged witness volumes is the elevated harness's sole prerogative, kept
   out of the normal path.
-- The Phase-0-committed gate-integrity artifacts of [§N](#n-gate-integrity-provisions): the two-witness
+- The Phase-0-committed gate-integrity artifacts of [Gate integrity](#gate-integrity): the two-witness
   representative set, the `claimref_table.csv` / `storageclass_expected.yaml` oracles, the
   `no_retained_delete.sh` static check, and the seeded mutants **M-soft-delete**, **M-seed-marker**,
   **M-reclaim-delete**, **M-no-rebind**, **M-raw-host-directory**, **M-skip-durable-aggregate**, and
   **M-sum-unequal-ordinals**, and **M-uniform-before-allocation** the gate re-runs and requires red.
 
 ### Validation
-1. Run the cycle on the concrete representative set of [§N](#n-gate-integrity-provisions) (exactly two
+1. Run the cycle on the concrete representative set of [Gate integrity](#gate-integrity) (exactly two
    witnesses): generate a per-run nonce, assert its absence, write it as the Postgres row and the MinIO object,
    `cluster delete`, confirm via the host OS-boundary observer that the cluster is genuinely absent
    (`kind get clusters` empty, no kind node container in `docker ps`, apiserver unreachable) while
@@ -465,77 +536,6 @@ durable backing and no normal-operation path can.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
-
-## N. Gate-integrity provisions
-
-This section pins the concrete corpus, the Phase-0-committed oracles, and the seeded mutants the Gate and each
-sprint Validation above reference. Everything named here is authored and committed in Phase 0, before any
-implementation exists.
-
-**Representative set (concrete corpus).** Exactly two witnesses, no more: (1) a single-ordinal Postgres
-StatefulSet in namespace `retained-witness` with one PVC `pgdata` on one retained PV, marker = a single row in
-table `rebind_witness(nonce text)`; (2) a single-ordinal MinIO StatefulSet in namespace `retained-witness` with
-one PVC `miniodata` on one retained PV, marker = one object `rebind/nonce` in bucket `rebind-witness`. Each
-witness image is a Phase-15 baked binary served only from the in-cluster `distribution` registry (an
-OS-boundary containerd/registry-log observer confirms zero public-registry pull during the cycle).
-
-**Phase-0-committed oracles (independent of the implementation).**
-- `test/live/fixtures/storageclass_expected.yaml` — the exact single-StorageClass golden (Sprint 17.1),
-  hand-authored, not regenerated from the renderer.
-- `test/live/fixtures/claimref_table.csv` — the independent reference table mapping
-  `(namespace, statefulset, ordinal)` to the expected `metadata.name`, `amoebius.io/pv-identity` label,
-  `claimRef` `(namespace, PVC-name)`, logical demand, `requiredUsableBytes`, presentation/model,
-  backing-minimum/quantum operands, and exact private-witness `provisionedBytes` rendered as PVC/PV capacity;
-  authored by hand, never by the renderer's naming or sizing helper (Sprints 17.2, 17.3).
-- `test/live/fixtures/durable-backing-capacity.golden` — the observed named durable-backing ceilings and the
-  accepted post-reconcile per-backing rounded-`provisionedBytes` debit map over existing/proposed stable
-  identities, authored independently of the allocation fold; cache and node ephemeral pools are separately
-  named and excluded.
-- `test/live/fixtures/uniform-claim-boundaries.csv` — hand-authored multi-ordinal usable demands,
-  presentation/overhead versions, backing minimum/quantum policies, expected per-slot provision witnesses,
-  backing identities, and expected uniform claim plans/per-backing debit maps. It includes an accepted skewed
-  group, a group whose unequal per-slot rounded sum fits the backing but whose
-  `max(provisionedBytes) × ordinalCount` debit exceeds it, and a differing-backing group whose aggregate fits
-  while one named backing is short; no
-  renderer/allocation helper generates this table.
-- `test/ci/no_retained_delete.sh` — the committed static check that no non-harness `src/` module issues a
-  backing-store reclaim/destruction call. Scoped PVC/PV binding-object deletion and whole-cluster deletion are
-  explicitly outside this check because the backing lives outside the cluster (Sprint 17.3 Validation 2a).
-- Negative fixtures with pinned failure reasons: `two_storageclasses` (reason `count != 1` /
-  `default-class annotation present`), `pv_capacity_mismatch` (reason
-  `capacity != provisioned witness`), `raw_size_one_byte_under` (reason `raw capacity below witness`),
-  `filesystem_type_mismatch` (reason `observed fsType != presentation`),
-  `presentation_overhead_over_backing` and `allocation_quantum_over_backing` (reason
-  `durable-demand-exceeds-backing after presentation/allocation`), and
-  `pv_aggregate_over_backing` plus `uniform_claim_skew_over_backing` (reason
-  `durable-demand-exceeds-backing` where applicable), each paired with a positive differing only in the
-  foreclosed dimension.
-
-**Committed seeded mutants (must go red).** Each is committed under `test/live/mutants/` and re-run by the gate;
-a green mutant fails the gate.
-- **M-soft-delete** (dropped-effect operator) — a `cluster delete` that deletes only the witness
-  StatefulSets/PVCs and leaves the kind node container + apiserver alive. Must go red on the "cluster genuinely
-  absent" OS-boundary assertion (Gate; 17.3 V1).
-- **M-seed-marker** (union-arm addition) — a witness manifest carrying an init/seed step that reproduces the
-  marker nonce on fresh start. Must go red on the absence-before-write / no-post-recreate-write-path assertion
-  (Gate; 17.3 V1).
-- **M-reclaim-delete** (guard weakening) — a PV rendered with `reclaimPolicy: Delete` instead of `Retain`. Must
-  go red on the `Released`/rebind assertion (17.2 V3/V4).
-- **M-no-rebind** (dropped-effect operator) — a reconciler variant that leaves the PV `Released` but never
-  clears the stale `claimRef.uid`, so a re-created PVC cannot re-bind. Must go red on the actual re-bind step
-  (17.2 V3/V4).
-- **M-raw-host-directory** (mechanism substitution) — backs a PV with an ordinary retained-root directory
-  while still declaring a Kubernetes capacity. Must go red when the fill-plus-one write succeeds without
-  `ENOSPC`, changes shared-parent occupancy, or lacks the raw-size/fs-type/usable witness (17.2 V2).
-- **M-skip-durable-aggregate** (dropped validation) — allocates/applies an aggregate retained set larger than
-  `DurableBacking`. Must go red on the over-backing negative and zero-write assertion (17.2 V1).
-- **M-sum-unequal-ordinals** (wrong aggregation) — debits the unequal per-ordinal provisioned map instead of
-  debiting the uniform maximum rounded provisioned value for every ordinal. Must go red on
-  `uniform_claim_skew_over_backing` and the accepted group's byte-identical PVC-size assertion (17.2 V1/V2).
-- **M-uniform-before-allocation** (stage-reordering operator) — groups authorable logical/usable demand before
-  applying the per-slot presentation and backing allocation policies, then fabricates one group size without
-  retaining each private `ProvisionedVolumeDemand` witness. Must go red on the overhead/quantum boundary
-  fixtures and the per-slot-witness-before-uniformity assertion (17.2 V1/V2).
 
 ## Documentation Requirements
 

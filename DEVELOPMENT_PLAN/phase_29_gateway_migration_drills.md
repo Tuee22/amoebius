@@ -64,7 +64,7 @@ exercised by killing a sibling on the same host — not a property a single root
 hub-role move, and adversarial fault injection against the running forest.
 
 **Gate:** a `Planned` handover completes with **RPO=0** — proven not by a bare "loss = 0" but by the external
-write-journal oracle of [§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists) below: the drill runs under a **non-idle** workload (the client journals every
+write-journal oracle of [Gate integrity](#gate-integrity) below: the drill runs under a **non-idle** workload (the client journals every
 source-acked write ID to a store *outside* the forest, and the harness asserts **≥ 8 acked-but-un-replicated
 write IDs exist at the quiesce instant**, i.e. observed replication lag > 0, before authority moves), and
 post-cutover every journaled ID is present on the new owner; killing the lead cluster mid-workflow (again with
@@ -74,7 +74,7 @@ numeric `DataLossBudget`** — the concrete budget (`lagBound = 5 s`, `RTO = 60 
 forest) is authored and committed in `test/dhall/phase_29_gateway_migration.dhall` **in Phase 0, before any
 runtime exists**, its content hash recorded in the gate record, and the drill reports declared-vs-measured for
 **both** dimensions so a post-hoc-tuned or absurd budget is visible red; the gate turns red on **at least one
-committed seeded mutant** ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists): the `verify-caught-up`-stub and `promote-before-fence` mutants); the built
+committed seeded mutant** ([Gate integrity](#gate-integrity): the `verify-caught-up`-stub and `promote-before-fence` mutants); the built
 `src/Amoebius/Multicluster/*` runtime is shown to correspond to the Phase-3 `GatewayMigration` design-model — the
 built decision core is that model's `interpret` (correspondence-by-construction, discharged as step-by-step
 trace-validation in Register 2.5 per Sprint 29.3, with the Register-3 drills adding only a
@@ -84,7 +84,7 @@ Inject drills assert the four named invariants (`UniqueGatewayOwner`, `SessionAl
 recovery-time half is carried separately as the *tested* RTO datapoint, not as a bounded-divergence invariant)
 against the live forest; the forest tears down leak-free by the OS-boundary route53/`pulumi stack ls` observer
 (retained `no-provisioner` PVs exempt); and the run emits a **machine-derived** proven/tested/assumed ledger
-([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists)) recording recovery time as *tested* (drilled), the data-loss bound as *assumed* (monitored, not proven),
+([Gate integrity](#gate-integrity)) recording recovery time as *tested* (drilled), the data-loss bound as *assumed* (monitored, not proven),
 and the modeled safety/liveness as *proven-for-the-model at scope 2* (a Phase-3 design result, never a runtime
 guarantee); layers outside Register 3 stay marked UNVERIFIED, and — as a Register-3 live-band gate — the runtime
 layer is marked *tested*, never *proven*.
@@ -142,7 +142,7 @@ remove the source proxy, target edge child, overlap peer graph, Pulumi executor,
 workflow collector, API object, etcd churn/model, or external journal; each must turn the gate red even if the
 RPO/RTO assertions would otherwise pass.
 
-## N. Gate-integrity oracles (committed in Phase 0, before the runtime exists)
+## Gate integrity
 
 This phase's gate binds to the
 following named, committed artifacts so no self-authored harness or post-hoc fixture can pass it:
@@ -268,7 +268,7 @@ it.
 
 ### Validation
 1. A `Planned` handover under a **non-idle** workflow (the drill client journals every source-acked write ID to
-   the out-of-forest store of [§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists), and the harness asserts **≥ 8 acked-but-un-replicated IDs exist at the quiesce
+   the out-of-forest store of [Gate integrity](#gate-integrity), and the harness asserts **≥ 8 acked-but-un-replicated IDs exist at the quiesce
    instant** — observed replication lag > 0 — so an idle-workload rubber stamp cannot pass) moves authority with
    **measured loss = 0 proven by set-equality of journaled-vs-present IDs on the new owner** (not by a
    self-defined "committed = already replicated"), and a session that never loses its endpoint; a `Failover`
@@ -278,7 +278,7 @@ it.
    (`lagBound = 5 s`, `RTO = 60 s`) whose hash is pinned before the drill runs — the drill **reports
    declared-vs-measured for both dimensions**, so a generous or post-hoc-tuned budget is visible; driving lag
    past the committed bound makes the freshness gate refuse to promote and the lag monitor alarm before a breach;
-   and the committed `promote-before-fence` mutant ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists)) — the `PromotionGate` guard negated — must go red.
+   and the committed `promote-before-fence` mutant ([Gate integrity](#gate-integrity)) — the `PromotionGate` guard negated — must go red.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -399,7 +399,7 @@ the Register-3 Inject drills (cut replication, kill the lead mid-`Planned`-hando
 to force `Failover`, drive lag past the bound, fail back with late + duplicate arrivals) run against the live
 forest and assert the four named invariants (`UniqueGatewayOwner`, `SessionAlwaysRebindable`,
 `PlannedIsLossless`, `NoWriteAfterStaleFailover`); and `phase_29_gateway_migration.dhall` spins the forest up,
-runs both branches, asserts RPO=0 for `Planned` **via the out-of-forest write-journal set-equality oracle ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists))
+runs both branches, asserts RPO=0 for `Planned` **via the out-of-forest write-journal set-equality oracle ([Gate integrity](#gate-integrity))
 under a workload carrying ≥ 8 acked-but-un-replicated IDs at the cut** and measured loss ≤ the
 **Phase-0-committed, hash-pinned numeric budget** for `Failover`, tears down leak-free **as read by the
 OS-boundary route53/`pulumi stack ls` observer (retained `no-provisioner` PVs exempt)**, turns the committed
@@ -442,12 +442,12 @@ and [`§19`](../documents/engineering/chaos_failover_doctrine.md#19-the-cross-bo
    trace-validation is the Sprint-29.3 obligation and is not re-run in Register 3. The Inject drills run against
    the live forest and pass, each asserting the four named safety invariants (`NoWriteAfterStaleFailover` is the
    safety half; the recovery-time half is the separate *tested* RTO datapoint). `phase_29_gateway_migration.dhall`
-   reports **RPO=0 for `Planned` proven by the write-journal set-equality oracle ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists)) under a workload with ≥ 8
+   reports **RPO=0 for `Planned` proven by the write-journal set-equality oracle ([Gate integrity](#gate-integrity)) under a workload with ≥ 8
    acked-but-un-replicated IDs at the cut** — not a bare "loss = 0" — and **measured loss ≤ the Phase-0-committed
    `lagBound` and transfer ≤ the committed `RTO`** (hash pinned before the drill; declared-vs-measured reported
-   for both). Teardown is **leak-free by the OS-boundary observer of [§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists)**: the route53 API and `pulumi stack ls`,
+   for both). Teardown is **leak-free by the OS-boundary observer of [Gate integrity](#gate-integrity)**: the route53 API and `pulumi stack ls`,
    read outside the forest, report zero surviving migration DNS records and zero surviving child stacks, with the
-   retained `no-provisioner` PVs of Sprint 29.2 explicitly exempt. The committed seeded mutants ([§N](#n-gate-integrity-oracles-committed-in-phase-0-before-the-runtime-exists):
+   retained `no-provisioner` PVs of Sprint 29.2 explicitly exempt. The committed seeded mutants ([Gate integrity](#gate-integrity):
    `verify-caught-up`-stub and `promote-before-fence`) each go red. The ledger is **machine-derived from the run
    record** and passes its committed validator — every ledger figure (RPO/RTO, observed max lag, raw journal
    counts, seeds, timestamps, teardown-observer result) cross-checks against the raw journal, and any mismatch or

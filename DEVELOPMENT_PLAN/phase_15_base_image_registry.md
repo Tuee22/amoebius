@@ -100,7 +100,7 @@ single-binary `distribution` registry, with a deny-all egress test to `docker.io
 digest-pinned tag.
 
 The gate's oracles are pinned and committed in **Phase 0**, before any implementation exists (§M.1), and are
-listed in [§N](#n-committed-gate-corpus) below; every equivalence check names an
+listed in [Gate integrity](#gate-integrity) below; every equivalence check names an
 independent reference side (§M.3) and every negative asserts its specific failure reason (§M.8). The gate is
 not passed unless, in addition to the above:
 - **Builder execution admitted, not assumed:** before the first `buildx`/BuildKit process, an independent
@@ -137,7 +137,7 @@ not passed unless, in addition to the above:
 - **OS-boundary observation (§M.5):** "zero public-registry pulls" is read from an **observer at the OS
   boundary** — the `kind` node's `containerd` logs plus a node-level packet capture (`tcpdump`/eBPF) spanning
   the entire standup-and-publish window — asserting **zero** TCP connections to the resolved endpoints of
-  `docker.io`/`quay.io`/`ghcr.io` (the concrete set in [§N](#n-committed-gate-corpus)); never a
+  `docker.io`/`quay.io`/`ghcr.io` (the concrete set in [Gate integrity](#gate-integrity)); never a
   compliance trace the publisher emits about itself. The denial scope covers in-cluster registry standup,
   publication, and pull; the **host-side `buildx` build legitimately reaches upstream** (§2/§9) and is
   explicitly outside the denied boundary.
@@ -155,8 +155,57 @@ not passed unless, in addition to the above:
 - **Idempotence as zero writes (§M.6):** "re-run is a no-op" is defined as **zero mutating requests**
   (`PUT`/`POST`/`PATCH`) in the registry access log during the second run — not merely exit-0-twice or a
   permitted full rebuild-and-re-push.
-- **Committed seeded mutants (§M.2):** the mutants named in [§N](#n-committed-gate-corpus) are committed and
+- **Committed seeded mutants (§M.2):** the mutants named in [Gate integrity](#gate-integrity) are committed and
   re-run each gate pass and **must go red**.
+
+## Gate integrity
+
+Per [`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub),
+the oracles below are authored and **committed in Phase 0** — before the Phase 15 implementation exists — and
+their reference sides are defined independently of the code under test. This section is the phase doc's explicit
+"representative set" (§M.7).
+
+**Pinned oracles (Phase-0-committed):**
+- `test/fixtures/phase15/bake_inventory_expected.dhall` — the canonical standard-platform-services inventory
+  (a verbatim copy of the `DEVELOPMENT_PLAN/README.md` standard-platform-services list as ratified in
+  [`platform_services_doctrine.md`](../documents/engineering/platform_services_doctrine.md)) with the per-arch
+  pinned version each `<bin> --version` must match; authored independently of `BakeInventory` (§M.3).
+- `test/fixtures/phase15/build_execution_envelope.dhall` — the per-stage host/engine-VM CPU, memory,
+  intermediate/cache-write operands, scratch/build-cache backings, and architecture/stage-concurrency bounds
+  plus the independently calculated transition peak and
+  expected per-axis rejection tags. It is authored before `BuildExecutionEnvelope`/BuildKit admission code.
+- `test/fixtures/phase15/registry_storage_demand.dhall` — the independently authored
+  `RegistryStoredArtifact` table (compressed layer blobs, configs, child manifests, and manifest-list object),
+  observed-resident overlap, upload concurrency/model-derived workspace, failed-upload residue/GC horizon, exact-fit and
+  one-byte-under expected verdicts, plus the expected digest-size-conflict tag. It is authored before the
+  registry admission/publisher code and is reused unchanged by Phase 19's MinIO rehome.
+- `test/fixtures/phase15/bootstrap_registry_domain.dhall` — the independently authored registry/proxy
+  Kubernetes identity set, initialized-field ownership partition, canonical source/field digest, and expected
+  one-time whole-deployment handoff verdicts (equal, one-field mismatch, stale snapshot, repeated transfer).
+  It is authored before `ProvisionedBootstrapRegistry` or `BootstrapRegistryAction` exists.
+- `test/fixtures/phase15/public_registry_endpoints.txt` — the concrete public-registry endpoint set the
+  OS-boundary observer asserts zero connections to: `registry-1.docker.io`, `auth.docker.io`,
+  `production.cloudflare.docker.com`, `quay.io`, `cdn.quay.io`, `ghcr.io`, `pkg-containers.githubusercontent.com`
+  (and their resolved IP CIDRs at gate time).
+- `test/fixtures/phase15/expected_pull_failure.txt` — the negative-control canary's expected reason
+  (`ErrImagePull`/`ImagePullBackOff`, connection-timeout to the public endpoint), paired with the positive
+  in-cluster pull that must succeed (§M.8).
+
+**Committed seeded mutants (each MUST go red at the named gate, §M.2):**
+- `mutant/phase15/stub-arm64-binary` — a zero-byte binary at a baked path; red at Sprint 15.1 (execution +
+  ELF check).
+- `mutant/phase15/wrong-arch-layer` — amd64 bytes placed in the arm64 layer; red at Sprint 15.1 (`e_machine`
+  check).
+- `mutant/phase15/drop-build-scratch-accounting` — omits intermediate-layer workspace from host build
+  admission; red at Sprint 15.1's zero-builder-process overdraw fixture.
+- `mutant/phase15/bootstrap-domain-expansion` — lets the bootstrap action initialize an object outside its
+  provisioned registry/proxy domain; red at Sprint 15.2's exact-domain/zero-write assertion.
+- `mutant/phase15/handoff-without-equality` — adopts bootstrap objects into the later whole deployment without
+  equal identity/source/owned-field digest readback; red at Sprint 15.2's ownership-handoff assertion.
+- `mutant/phase15/record-before-push` — records the tag as published before the manifest list lands; red at
+  Sprint 15.3 (registry-API un-advertised assertion).
+- `mutant/phase15/noop-egress-policy` — a vanilla unenforced `kindnetd` `NetworkPolicy` substituted for the
+  enforcing firewall; red at Sprint 15.4 (negative-control canary must fail `ImagePull`).
 
 ## Doctrine adopted
 
@@ -284,7 +333,7 @@ snapshot validation, and the typed side-load/object-initialize action); package-
 **Blocked by**: Sprint 15.1 (the built base image to load); Phase 14 gate (the `kind` node + observed
 inventory); Phase 9 gate (the package-private source serializer, but not a public per-service renderer). The
 whole-deployment SSA reconciler remains Phase 16.
-**Independent Validation**: before import or object initialization, a registry-specific read-only snapshot preflight re-observes CPU request/finite-limit-policy residual, memory/logical-ephemeral request+ceiling residual, pod slots, blob-volume capacity and its resident digest/byte map, the nodefs/imagefs/containerfs layout and capacities, all resident containerd OCI content plus committed/active snapshots, the pinned node-image model, and the enforced pull policy. `provisionBootstrapRegistry` first constructs the opaque resource-complete `ProvisionedBootstrapRegistry`; validation then derives the layout-routed import+registry+mutation-proxy transition and returns a snapshot-bound single-use `BootstrapRegistryAction` required by both containerd import and initialization of the exact registry/proxy object domain. The registry side binds the canonical `RegistryStorageDemand` to the snapshot: it unions observed residents with every desired compressed layer/config/manifest object by digest, debits equal digests once, rejects unequal stored-byte metadata for one digest, adds the largest permitted simultaneous upload workspaces, and retains the bounded partial-upload residue through the finite GC horizon. One-field occupied-CPU, occupied-memory, registry/proxy pod-slot or resource shortage, registry-volume/ephemeral-overdraw, digest-size-conflict, content/snapshot-byte-over, layout-alias, and pull-policy-mismatch fixtures perform zero imports and zero apiserver writes. A domain/identity/source-digest or initialized-field mismatch also mints no action. The admitted `distribution` pod and sole mutation proxy then run **from the on-node image** with zero registry pull and complete provisioned envelopes: per-container CPU/memory/ephemeral requests+limits and private allowances, plus a disk-backed blob volume whose `sizeLimit` covers the derived peak recorded in the opaque `ProvisionedRegistryStorageDemand`; shared volume + private allowance fit the pod ephemeral request/limit and route to the selected physical filesystem. The host-only endpoint resolves through the per-distro wiring; Phase 19 preserves this private demand's `objectSet`, `derivedPeak`, and upload/orphan witness while migrating its backend to MinIO. "Zero registry pull" is read from an **OS-boundary observer** (§M.5) — the node's containerd logs plus a node-level packet capture spanning the standup window — asserting no image-layer fetch and no TCP connection to the resolved endpoints of `docker.io`/`quay.io`/`ghcr.io` ([§N](#n-committed-gate-corpus)), never a self-emitted trace.
+**Independent Validation**: before import or object initialization, a registry-specific read-only snapshot preflight re-observes CPU request/finite-limit-policy residual, memory/logical-ephemeral request+ceiling residual, pod slots, blob-volume capacity and its resident digest/byte map, the nodefs/imagefs/containerfs layout and capacities, all resident containerd OCI content plus committed/active snapshots, the pinned node-image model, and the enforced pull policy. `provisionBootstrapRegistry` first constructs the opaque resource-complete `ProvisionedBootstrapRegistry`; validation then derives the layout-routed import+registry+mutation-proxy transition and returns a snapshot-bound single-use `BootstrapRegistryAction` required by both containerd import and initialization of the exact registry/proxy object domain. The registry side binds the canonical `RegistryStorageDemand` to the snapshot: it unions observed residents with every desired compressed layer/config/manifest object by digest, debits equal digests once, rejects unequal stored-byte metadata for one digest, adds the largest permitted simultaneous upload workspaces, and retains the bounded partial-upload residue through the finite GC horizon. One-field occupied-CPU, occupied-memory, registry/proxy pod-slot or resource shortage, registry-volume/ephemeral-overdraw, digest-size-conflict, content/snapshot-byte-over, layout-alias, and pull-policy-mismatch fixtures perform zero imports and zero apiserver writes. A domain/identity/source-digest or initialized-field mismatch also mints no action. The admitted `distribution` pod and sole mutation proxy then run **from the on-node image** with zero registry pull and complete provisioned envelopes: per-container CPU/memory/ephemeral requests+limits and private allowances, plus a disk-backed blob volume whose `sizeLimit` covers the derived peak recorded in the opaque `ProvisionedRegistryStorageDemand`; shared volume + private allowance fit the pod ephemeral request/limit and route to the selected physical filesystem. The host-only endpoint resolves through the per-distro wiring; Phase 19 preserves this private demand's `objectSet`, `derivedPeak`, and upload/orphan witness while migrating its backend to MinIO. "Zero registry pull" is read from an **OS-boundary observer** (§M.5) — the node's containerd logs plus a node-level packet capture spanning the standup window — asserting no image-layer fetch and no TCP connection to the resolved endpoints of `docker.io`/`quay.io`/`ghcr.io` ([Gate integrity](#gate-integrity)), never a self-emitted trace.
 **Docs to update**: `documents/engineering/image_build_doctrine.md`, `documents/engineering/platform_services_doctrine.md`.
 
 ### Objective
@@ -359,7 +408,7 @@ whole-deployment spec and creates no public service-render boundary.
    below the derived peak. Every conflict/overflow rejects before import, apply, or registry mutation; an
    object merely selected for deletion remains charged until a later snapshot observes it absent.
 3. Assert no public-registry pull occurred during registry standup **from the OS-boundary observer** (node
-   `containerd` logs + packet capture; zero TCP connections to the [§N](#n-committed-gate-corpus) public
+   `containerd` logs + packet capture; zero TCP connections to the [Gate integrity](#gate-integrity) public
    endpoints), recorded for the Sprint 15.4 gate — never from a self-emitted compliance trace.
 
 ### Remaining Work
@@ -422,7 +471,7 @@ The whole sprint (📋 Planned).
 **Status**: Planned
 **Implementation**: `src/Amoebius/Image/Gate.hs` / a `pb` gate subcommand + `test/live/RegistryGate.hs` (the Register-3 gate harness) — target paths, not yet built.
 **Blocked by**: Sprint 15.3 (the atomically-published tag), Sprint 15.2 (the running registry).
-**Independent Validation**: the egress denial is realized as a **node-level host firewall / IP-CIDR blackhole** of the resolved public-registry endpoints (or an enforcing-CNI FQDN policy) — **not** a vanilla `kindnetd` `NetworkPolicy`, which `kindnetd` does not enforce and which cannot match FQDNs (§M ambiguity resolution). Its enforcement is proven by a **negative control** (§M.8): under the *same* policy, a canary pod referencing `docker.io/library/busybox` **FAILS `ImagePull`** with the committed expected reason (`ErrImagePull`/`ImagePullBackOff` from a connection-timeout to the public endpoint), paired with the positive that an in-cluster `distribution` pull of the same shape succeeds. Under that enforced denial the registry stands up and the base-image manifest list publishes and resolves with **zero** requests leaving for a public registry, asserted from the **OS-boundary observer** (§M.5) — node `containerd` logs + a packet capture spanning the entire standup-and-publish window, showing zero TCP connections to the resolved endpoints of the [§N](#n-committed-gate-corpus) public-registry set; never a self-emitted compliance trace. The denial scope covers in-cluster standup/publication/pull; the **host-side `buildx` build is outside it** and legitimately reaches upstream (§2/§9). Both `linux/amd64` and `linux/arm64` resolve under the one digest-pinned tag; a re-run of the whole build → side-load → standup → publish flow is idempotent, defined as **zero mutating (`PUT`/`POST`/`PATCH`) requests** in the registry access log during the second run (§M.6 — not a permitted full rebuild-and-re-push). The committed mutant `mutant/phase15/noop-egress-policy` (a vanilla unenforced `NetworkPolicy` substituted for the enforcing firewall) MUST turn the negative-control assertion red (§M.2).
+**Independent Validation**: the egress denial is realized as a **node-level host firewall / IP-CIDR blackhole** of the resolved public-registry endpoints (or an enforcing-CNI FQDN policy) — **not** a vanilla `kindnetd` `NetworkPolicy`, which `kindnetd` does not enforce and which cannot match FQDNs (§M ambiguity resolution). Its enforcement is proven by a **negative control** (§M.8): under the *same* policy, a canary pod referencing `docker.io/library/busybox` **FAILS `ImagePull`** with the committed expected reason (`ErrImagePull`/`ImagePullBackOff` from a connection-timeout to the public endpoint), paired with the positive that an in-cluster `distribution` pull of the same shape succeeds. Under that enforced denial the registry stands up and the base-image manifest list publishes and resolves with **zero** requests leaving for a public registry, asserted from the **OS-boundary observer** (§M.5) — node `containerd` logs + a packet capture spanning the entire standup-and-publish window, showing zero TCP connections to the resolved endpoints of the [Gate integrity](#gate-integrity) public-registry set; never a self-emitted compliance trace. The denial scope covers in-cluster standup/publication/pull; the **host-side `buildx` build is outside it** and legitimately reaches upstream (§2/§9). Both `linux/amd64` and `linux/arm64` resolve under the one digest-pinned tag; a re-run of the whole build → side-load → standup → publish flow is idempotent, defined as **zero mutating (`PUT`/`POST`/`PATCH`) requests** in the registry access log during the second run (§M.6 — not a permitted full rebuild-and-re-push). The committed mutant `mutant/phase15/noop-egress-policy` (a vanilla unenforced `NetworkPolicy` substituted for the enforcing firewall) MUST turn the negative-control assertion red (§M.2).
 **Docs to update**: `DEVELOPMENT_PLAN/README.md` (flip the Phase-15 status when the gate passes), `documents/engineering/image_build_doctrine.md`, `DEVELOPMENT_PLAN/substrates.md`.
 
 ### Objective
@@ -456,55 +505,6 @@ later reconciler-owned rendering (Phase 16) and the MinIO-backed blob store (Pha
 
 ### Remaining Work
 The whole sprint (📋 Planned).
-
-## N. Committed gate corpus
-
-Per [`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub),
-the oracles below are authored and **committed in Phase 0** — before the Phase 15 implementation exists — and
-their reference sides are defined independently of the code under test. This section is the phase doc's explicit
-"representative set" (§M.7).
-
-**Pinned oracles (Phase-0-committed):**
-- `test/fixtures/phase15/bake_inventory_expected.dhall` — the canonical standard-platform-services inventory
-  (a verbatim copy of the `DEVELOPMENT_PLAN/README.md` standard-platform-services list as ratified in
-  [`platform_services_doctrine.md`](../documents/engineering/platform_services_doctrine.md)) with the per-arch
-  pinned version each `<bin> --version` must match; authored independently of `BakeInventory` (§M.3).
-- `test/fixtures/phase15/build_execution_envelope.dhall` — the per-stage host/engine-VM CPU, memory,
-  intermediate/cache-write operands, scratch/build-cache backings, and architecture/stage-concurrency bounds
-  plus the independently calculated transition peak and
-  expected per-axis rejection tags. It is authored before `BuildExecutionEnvelope`/BuildKit admission code.
-- `test/fixtures/phase15/registry_storage_demand.dhall` — the independently authored
-  `RegistryStoredArtifact` table (compressed layer blobs, configs, child manifests, and manifest-list object),
-  observed-resident overlap, upload concurrency/model-derived workspace, failed-upload residue/GC horizon, exact-fit and
-  one-byte-under expected verdicts, plus the expected digest-size-conflict tag. It is authored before the
-  registry admission/publisher code and is reused unchanged by Phase 19's MinIO rehome.
-- `test/fixtures/phase15/bootstrap_registry_domain.dhall` — the independently authored registry/proxy
-  Kubernetes identity set, initialized-field ownership partition, canonical source/field digest, and expected
-  one-time whole-deployment handoff verdicts (equal, one-field mismatch, stale snapshot, repeated transfer).
-  It is authored before `ProvisionedBootstrapRegistry` or `BootstrapRegistryAction` exists.
-- `test/fixtures/phase15/public_registry_endpoints.txt` — the concrete public-registry endpoint set the
-  OS-boundary observer asserts zero connections to: `registry-1.docker.io`, `auth.docker.io`,
-  `production.cloudflare.docker.com`, `quay.io`, `cdn.quay.io`, `ghcr.io`, `pkg-containers.githubusercontent.com`
-  (and their resolved IP CIDRs at gate time).
-- `test/fixtures/phase15/expected_pull_failure.txt` — the negative-control canary's expected reason
-  (`ErrImagePull`/`ImagePullBackOff`, connection-timeout to the public endpoint), paired with the positive
-  in-cluster pull that must succeed (§M.8).
-
-**Committed seeded mutants (each MUST go red at the named gate, §M.2):**
-- `mutant/phase15/stub-arm64-binary` — a zero-byte binary at a baked path; red at Sprint 15.1 (execution +
-  ELF check).
-- `mutant/phase15/wrong-arch-layer` — amd64 bytes placed in the arm64 layer; red at Sprint 15.1 (`e_machine`
-  check).
-- `mutant/phase15/drop-build-scratch-accounting` — omits intermediate-layer workspace from host build
-  admission; red at Sprint 15.1's zero-builder-process overdraw fixture.
-- `mutant/phase15/bootstrap-domain-expansion` — lets the bootstrap action initialize an object outside its
-  provisioned registry/proxy domain; red at Sprint 15.2's exact-domain/zero-write assertion.
-- `mutant/phase15/handoff-without-equality` — adopts bootstrap objects into the later whole deployment without
-  equal identity/source/owned-field digest readback; red at Sprint 15.2's ownership-handoff assertion.
-- `mutant/phase15/record-before-push` — records the tag as published before the manifest list lands; red at
-  Sprint 15.3 (registry-API un-advertised assertion).
-- `mutant/phase15/noop-egress-policy` — a vanilla unenforced `kindnetd` `NetworkPolicy` substituted for the
-  enforcing firewall; red at Sprint 15.4 (negative-control canary must fail `ImagePull`).
 
 ## Documentation Requirements
 

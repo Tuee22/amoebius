@@ -117,6 +117,7 @@ owned by exactly one doctrine SSoT; the overview only names and links them.
 | **Baked service binaries + the `distribution` registry** — every third-party *service* binary is baked into the multi-arch base container (in-cluster pulls only); the ML **engine payloads** are the exception — jit-resolved into a `CacheBudget`-bounded cache, never baked or URL-fetched. | [`image_build_doctrine.md` §2](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster); [`content_addressing_doctrine.md` §4.5](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) |
 | **Generated artifacts are never committed** — manifests, the emitted `.tla`/`.cfg`, the reflected Dhall schema, and PureScript contracts are rendered from Haskell source and not committed. | [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md) |
 | **The one formal obligation is the cross-cluster gateway migration** (both `Planned` and `Failover` branches), modelled as data, **safety + liveness-under-fairness** proven (TLC) and simulated (io-sim) once; its runtime fidelity is bridged by deterministic simulation + trace validation before live; intra-cluster consensus is delegated, not re-proven. | [`gateway_migration_model_doctrine.md`](../documents/engineering/gateway_migration_model_doctrine.md); [`formal_model_doctrine.md`](../documents/engineering/formal_model_doctrine.md); [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md) |
+| **A test generates the enumeration, authors the expectation** — the spec generates the *enumeration* of surfaces requiring coverage; the operator authors the *expectations* asserted against them; an uncovered surface emits an UNVERIFIED `coverage` ledger row, never a silent pass. | [`testing_doctrine.md` §9 — Derivation: generated enumeration, authored expectation](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation); [`chaos_failover_doctrine.md` §11.2](../documents/engineering/chaos_failover_doctrine.md#112-the-typed-expectation-surface-expectation) |
 
 The standard service set behind these capabilities — Registry (`distribution`) · MinIO · Vault · Pulsar ·
 Prometheus/Grafana · Percona/Patroni Postgres + pgAdmin · Envoy/Gateway-API · Keycloak · LoadBalancer — is
@@ -127,8 +128,9 @@ inventoried in [system_components.md](system_components.md) and owned by
 
 Each phase ends in a single, checkable acceptance gate on **at most one** substrate (the one-substrate
 discipline, [development_plan_standards.md §L](development_plan_standards.md)). The authoritative gate text
-and status live in [README.md](README.md); the line below names the gate and links the phase document. All
-are 📋 Planned (greenfield).
+and status live in [README.md](README.md); the line below names the gate and links the phase document.
+Pre-implementation, Phase 0 is 🔄 Active and every later phase is 📋 Planned (greenfield); the tracker is
+authoritative.
 
 The DSL is validated and **simulated per phase**, never as a monolithic pre-implementation: each pre-cluster
 phase discharges an in-process Register-1/2 gate and each live-band phase a Register-3 gate before the next
@@ -141,7 +143,7 @@ runtime fidelity UNVERIFIED until that phase discharges them
 [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md)).
 
 *Pre-cluster band (substrate `none`, Registers 1–2):*
-- **Phase 0 — Documentation suite (whole DSL)** (`none`) → [phase_00](phase_00_documentation_suite.md): the documentation lint passes two-sided — headers, anchors, bidirectional Referenced-by, near-duplicate, status-consistency, gate-integrity — and fails on every committed seeded negative.
+- **Phase 0 — Documentation suite (whole DSL)** (`none`) → [phase_00](phase_00_documentation_suite.md): the documentation lint passes two-sided — headers, anchors, bidirectional Referenced-by, near-duplicate, status-consistency, gate-integrity, illegal-state catalog integrity — and fails on every committed seeded negative.
 - **Phase 1 — Toolchain spike** (`none`) → [phase_01](phase_01_toolchain_spike.md): a probe of `dhall` + `io-sim`/`io-classes` + the jit-build resolver + `purescript-bridge` + the Pulsar `supernova` fork builds on the pinned GHC/Cabal, or the exact blocker is recorded with a transcript.
 - **Phase 2 — Formal-model EDSL (`Model`/`interpret`/`emitTLA`)** (`none`) → [phase_02](phase_02_formal_model_kernel.md): the `Model` explorer + `emitTLA` round-trip (safety **and** a liveness `PROPERTY` under fairness); a differential generator finds no explorer/TLC safety disagreement; committed renderer mutants are caught; the `.tla` is TLC-checkable, never committed.
 - **Phase 3 — Gateway-migration model (both branches)** (`none`) → [phase_03](phase_03_gateway_migration_model.md): TLC reaches every safety invariant and every liveness `PROPERTY` (under fairness) at scope for both `Planned` and `Failover` with passing vacuity / fairness-sensitivity / cutoff checks; io-sim agrees on safety; every mechanical mutant is caught.
@@ -194,10 +196,12 @@ self-tearing-down test topology of [`testing_doctrine.md`](../documents/engineer
 - **Authored:** the Phase 0 documentation suite — the full DSL specification and every doctrine indexed in
   [`../documents/engineering/README.md`](../documents/engineering/README.md), plus this
   `DEVELOPMENT_PLAN/` tracker. Phase 0's gate (documentation lint) is the only gate currently in play.
-- **Status posture:** every phase and sprint is 📋 Planned; nothing is 🔄 Active, ✅ Done, or
-  🧪 Live-proof-pending. Per [development_plan_standards.md §K](development_plan_standards.md), a sprint is
-  never marked Done on "it compiles," and a gate is passed only when its acceptance test actually ran on its
-  substrate.
+- **Status posture:** pre-implementation — Phase 0 (this documentation suite) is 🔄 Active and every later
+  phase is 📋 Planned; nothing is ✅ Done or 🧪 Live-proof-pending. Authoritative per-phase status lives **only**
+  in the [README.md tracker](README.md); this narrative defers to it rather than restating a status ledger.
+  Per [development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed), a
+  sprint is never marked Done on "it compiles," and a gate is passed only when its acceptance test actually
+  ran on its substrate.
 - **Toolchain pin:** GHC **9.12.4**, Cabal 3.16.1.0, one shared pin across all packages.
   (GHC 9.14.1 is a deferred later-phase bump.)
 - **Evidence vs. proof:** the sibling `prodbox` project is cited throughout the doctrine as a working

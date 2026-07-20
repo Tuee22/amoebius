@@ -75,16 +75,16 @@ check that runs on no substrate.
   or interpreter boundary* — so the fakes live in a dedicated boundary suite and the planning/rendering code
   stays pure. The prodbox interpreter-only-mocking lineage the register generalizes is **sibling evidence, not
   an amoebius result**.
-- [`conformance_harness_doctrine.md §2`](../documents/engineering/conformance_harness_doctrine.md) — the
+- [`conformance_harness_doctrine.md §2`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) — the
   registers as amoebius uses them for pre-cluster validation (§2, **Register 2 — boundary integration with
   fakes, no cluster**): the real binary run with fake `helm`/`kubectl`/`docker`/`pulumi` that record their argv
   and applied bytes, asserting the exact commands and manifests. This phase builds precisely that recorder.
-- [`conformance_harness_doctrine.md §3`](../documents/engineering/conformance_harness_doctrine.md) — the
+- [`conformance_harness_doctrine.md §3`](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure) — the
   load-bearing invariant (§3), *rendering a plan MUST NOT require, contact, or depend on live infrastructure*:
   the plan and manifest bytes the fakes receive were rendered in Register 1 with no cluster, and the fake-apply
   adds no infrastructure dependency. Prerequisite checks (a cluster is reachable, credentials are present) belong
   on the live *apply* path (Phase 16), never here.
-- [`conformance_harness_doctrine.md §4`](../documents/engineering/conformance_harness_doctrine.md) — the spine
+- [`conformance_harness_doctrine.md §4`](../documents/engineering/conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run) — the spine
   (§4), *decode → bind/expand → `planInfrastructure` → (infrastructure-plan golden | authenticated-
   materialization fixture → provision → `renderAll`) → plan → dry-run → fake apply*: this phase implements the
   **fake
@@ -93,7 +93,7 @@ check that runs on no substrate.
 - [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
   — the per-run proven/tested/assumed ledger (§4): the Register-2 gate emits one, led by a Tier-2-UNVERIFIED
   banner. Fail-fast, no skips — a missing fake or a missing golden fails with an actionable error, never a
-  pass-with-a-skip. Per [`conformance_harness_doctrine.md §5`](../documents/engineering/conformance_harness_doctrine.md)
+  pass-with-a-skip. Per [`conformance_harness_doctrine.md §5`](../documents/engineering/conformance_harness_doctrine.md#5-honesty-what-the-harness-does-and-does-not-establish)
   (honesty), a green boundary run is quoted as *"the binary emits the exact commands and applied bytes,"* never
   as *"the cluster is correct."*
 
@@ -120,7 +120,7 @@ enumerated set is empty (no primitive was searched for), guarding against a vacu
 this document.
 
 ### Objective
-Adopt [`conformance_harness_doctrine.md §2`](../documents/engineering/conformance_harness_doctrine.md) and
+Adopt [`conformance_harness_doctrine.md §2`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) and
 [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing):
 stand up the **single thin IO seam** through which every external tool invocation flows, so the boundary suite
 can substitute fakes at exactly one substitutable point while the planning/rendering code stays pure — the
@@ -153,7 +153,7 @@ and applied-manifest bytes **losslessly** (round-trips the recorded bytes with n
 `documents/engineering/conformance_harness_doctrine.md` (the §2/§4 fake-apply recorder), `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
-Adopt [`conformance_harness_doctrine.md §2/§4`](../documents/engineering/conformance_harness_doctrine.md): build
+Adopt [`conformance_harness_doctrine.md §2/§4`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation): build
 the four **subprocess-boundary fixtures** — fake tools that record argv and applied bytes and return canned
 success — that stand in for the real `kubectl`/`helm`/`docker`/`pulumi`. These are *fixtures*: they fake a
 boundary and are reusable, and (per the testing doctrine) a fixture never silences a missing real-substrate
@@ -204,8 +204,8 @@ The suite failing on each is a demonstrated negative control, not merely asserti
 
 ### Objective
 Adopt [`testing_doctrine.md §2 — Register 2`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing),
-[`conformance_harness_doctrine.md §4`](../documents/engineering/conformance_harness_doctrine.md) (the fake-apply
-step), [`§5`](../documents/engineering/conformance_harness_doctrine.md) (honesty), and
+[`conformance_harness_doctrine.md §4`](../documents/engineering/conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run) (the fake-apply
+step), [`§5`](../documents/engineering/conformance_harness_doctrine.md#5-honesty-what-the-harness-does-and-does-not-establish) (honesty), and
 [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
 (the per-run ledger): drive the real amoebius binary over the Phase-10 plan against the fakes and assert the
 exact commands and applied bytes, and prove at the boundary that every tool was invoked by absolute path

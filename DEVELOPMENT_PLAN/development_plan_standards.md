@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_12_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_14_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_15_base_image_registry.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_17_retained_storage.md, DEVELOPMENT_PLAN/phase_18_vault_pki.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_21_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_22_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, DEVELOPMENT_PLAN/phase_24_pulsar_client.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_27_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_31_determinism_kernel.md, DEVELOPMENT_PLAN/phase_32_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_33_infernix_lift.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_35_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_12_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_14_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_15_base_image_registry.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_17_retained_storage.md, DEVELOPMENT_PLAN/phase_18_vault_pki.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_21_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_22_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, DEVELOPMENT_PLAN/phase_24_pulsar_client.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_27_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_31_determinism_kernel.md, DEVELOPMENT_PLAN/phase_32_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_33_infernix_lift.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_35_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: The rulebook for the amoebius `DEVELOPMENT_PLAN/` suite — the canonical file layout, the
@@ -98,6 +98,8 @@ Every `phase_NN_<slug>.md` follows this skeleton:
 **Register:** <1 pure/golden · 2 boundary-with-fakes · 3 live> (§K)
 **Gate:** <the concrete acceptance test that must pass before the next phase opens>
 
+## Gate integrity            (optional; see below)
+## Resource provision — …    (optional, live band; see below)
 ## Doctrine adopted
 <the engineering doctrine sections this phase implements, each cited by name + anchor (§H)>
 
@@ -112,6 +114,18 @@ Every `phase_NN_<slug>.md` follows this skeleton:
 `Phase Summary` is declarative present tense ("this phase stands up …"), not a promise log. The **Gate** is a
 single, checkable acceptance condition — ideally an `InForceSpec` topology that spins resources up, runs a
 workflow, and tears them down.
+
+**Two optional sections have fixed slots and fixed names**, both in the gate-detail block between
+`## Phase Summary` and `## Doctrine adopted`, in this order. A phase whose gate-integrity apparatus (the
+committed representative set, oracle pins, and seeded mutants of [§M](#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub))
+is too large to sit inline in the `**Gate:**` paragraph places it in a **`## Gate integrity`** section; the
+`**Gate:**` line then delegates to it by anchor (permitted by
+[§M](#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)). A live-band phase that itemises the complete
+resource envelope its gate provisions places it in a **`## Resource provision`** section, whose heading takes a
+fixed `## Resource provision` prefix and an optional ` — <phrase>` suffix naming what is provisioned. The
+**`## Gate integrity`** name is exact — a literal `## N.` heading, using the letter `N` as a section id, is not
+admitted (it collides with the `Phase N` placeholder above). Neither section is required; a phase whose gate
+fits inline and provisions nothing worth itemising needs neither.
 
 ## E. One canonical phase model
 
@@ -158,12 +172,17 @@ Every phase doc ends its body with an explicit doc-sync block so doctrine and pl
 ```markdown
 ## Documentation Requirements
 
-**Engineering docs to update:**
+**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/<doc>.md` — <what changes when this phase lands>
 
 **Cross-references to add:**
 - <backlinks to add>
 ```
+
+The parenthetical on the `**Engineering docs to update**` label is **required**, not decorative: it carries
+the [§K](#k-honesty-proven--tested--assumed) honesty rule that a doctrine doc's verification layer is flipped
+only when the phase gate actually runs on its substrate, never on merge. The bare label without it is
+non-conforming.
 
 ## H. The doctrine-citation rule (cite by name)
 
@@ -294,6 +313,13 @@ happy-path, or self-fulfilling fixture can pass is not a gate. Every phase **Gat
    and **committed in Phase 0** — extending the per-entry validation-locus ledger of the illegal-state corpus
    to every gate — *before* the implementation exists. A golden or expected value regenerated from the
    implementation's own output is not a test: it passes for any output, a stub's included.
+   **Named exception — oracles depending on a later-phase enrichment.** Where an oracle cannot be authored in
+   Phase 0 because it depends on a catalog enrichment or registry a later phase produces (e.g. the
+   `Delivery-owner:`/`Case-family:` tags and `locus_registry.tsv` that
+   [phase_06](phase_06_illegal_state_corpus.md) adds), it is committed **at the start of that owning phase,
+   before the implementation that consumes it** — never regenerated from that implementation. The
+   before-the-implementation invariant holds; only the *phase* in which the oracle is pinned moves, and the
+   owning phase names the exception explicitly.
 2. **Committed mutation quota.** Every gate names **at least one committed seeded mutant** — a deliberately
    broken implementation or spec — that the gate must turn red. Mutants are drawn from a defined operator set
    (guard negation/weakening, effect swap, dropped effect/`UNCHANGED`, quantifier flip, fairness drop,
@@ -328,6 +354,53 @@ documentation lint verifies that every gate line names its committed fixtures, i
 independent oracle; the honesty ledger ([§K](#k-honesty-proven--tested--assumed)) records the result. The
 load-bearing principle: **the party that writes the implementation must not be the sole author of the oracle it
 is checked against** — Phase 0 pins the oracle first.
+
+<a id="gate-integrity-delegation"></a>
+**Gate → Gate-integrity delegation.** A `**Gate:**` line may discharge these clauses inline **or** delegate them to the
+phase's `## Gate integrity` section ([§D](#d-the-per-phase-document-skeleton)) by anchor. Delegation is a
+first-class, conforming form: a `**Gate:**` line that names its fixtures, mutant(s), and oracle *in a linked
+`## Gate integrity` section* satisfies this section exactly as an inline naming does. A conforming
+implementation of the Phase-0 gate-integrity lint (check (f)) therefore **follows one anchor hop** from the
+`**Gate:**` line into the delegated section before reporting a gate under-specified; it must not flag a gate
+whose apparatus lives one hop away.
+
+---
+
+## N. Reopening and amending a phase
+
+[§C](#c-status-vocabulary) names five status markers and [§K](#k-honesty-proven--tested--assumed) defines one
+transition: a phase moves **to** ✅ Done only when its gate ran and the run's command, date, substrate, and
+ledger hash are recorded. This section defines the reverse and lateral moves §C left implicit, so that
+changing a phase after it is gated is a recorded act, not a silent Markdown edit.
+
+- **A reverse transition is recorded, never silent.** Moving a phase ✅ Done → 🔄 Active or 📋 Planned, or a
+  🔄 Active phase back to 📋 Planned, requires a dated entry in that phase's `## Phase Status` log
+  ([§D](#d-the-per-phase-document-skeleton) prescribes reverse-chronological dated entries) naming **which
+  gate is invalidated, why, and by what change**. The README Phase-Overview marker and the phase doc's
+  `## Phase Status` marker move together ([§K](#k-honesty-proven--tested--assumed) single-sourcing); the
+  documentation lint's status-consistency check holds across the move.
+
+- **Scope amendment of a gated phase strikes its evidence.** When a phase whose gate has passed gains scope —
+  a new sprint, a new doctrine adoption, a widened gate — the recorded gate command, date, substrate, and
+  ledger hash **no longer cover the phase's gate**. They are **struck from the tracker row and the phase doc**
+  in the same change, and the phase reverts to a non-Done marker (🔄 Active if work resumes now, 📋 Planned
+  otherwise). A retained ledger hash that no longer certifies the current gate is a stale evidence claim —
+  exactly the dishonesty [§K](#k-honesty-proven--tested--assumed) forbids. The Phase-0 lint, which already
+  rejects a ✅ Done row lacking a recorded command/date/substrate/hash, thereby also forecloses a ✅ Done row
+  whose recorded hash predates a later scope edit, because the amendment must have struck it.
+
+- **The amendment log is the `## Phase Status` block.** Every reopen or scope amendment appends a dated entry
+  there; the block is the phase's audit trail, and no amendment is made without one.
+
+- **What reopening never does.** It never renumbers ([§E](#e-one-canonical-phase-model)) and never mints a
+  fractional id. Adding cross-cutting discipline to existing phases with **zero renumber** — the pattern
+  recorded in [`later_phases.md`](later_phases.md) where a discipline is folded into the phases that already
+  own its surfaces — remains the default; reopening is for changing a phase's *own* gate or scope, not for
+  inserting work between phases.
+
+Pre-implementation, this section is dormant: with every phase 📋 Planned bar the 🔄 Active Phase 0 and none
+✅ Done, no gate evidence exists to strike. It is written now, while it costs nothing, so the first phase to
+complete has a documented reverse move rather than an ad-hoc one.
 
 ---
 

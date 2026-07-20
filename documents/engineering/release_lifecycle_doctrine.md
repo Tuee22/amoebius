@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define delivery — build, promote, roll out — as **typed composition on primitives amoebius
@@ -190,23 +190,31 @@ advance :: Environment -> Release -> EvidenceWitness -> PointerCas
   [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). The `PromotionGate` **consumes** that ledger as
   the `EvidenceWitness` for a `Release`. This doctrine owns only the *mapping from environment to required
   evidence strength*, not the ledger itself.
-- **Prod requires the chaos layer proven.** The required-evidence-strength mapping is monotone up the
-  environments: `Dev` may advance on a green Decision layer; `Prod` requires the **Runtime/chaos layer
-  proven**, not merely assumed. A layer the run recorded **UNVERIFIED** (a skipped-but-applicable move,
-  [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact))
-  yields no witness for that layer — so a `Release` short of prod's required strength has **no** `advance`
-  value to hand the CAS.
+- **Prod requires the chaos layer tested.** The required-evidence-strength mapping is monotone up the closed
+  three-arm `Environment` union: `Dev` may advance on a green Decision layer; `Staging` additionally requires
+  the Protocol layer ***tested*** via Register-2.5 deterministic simulation against modeled substrates — a
+  per-release, per-run result the ledger emits, not the design-time TLC token (a property of the model,
+  invariant across releases, carrying no `Release`-specific witness); `Prod`
+  additionally requires the **Runtime/chaos layer *tested***, not merely assumed. *Tested* is the **highest
+  achievable** strength for that layer, not a concession: live fault injection samples the faults chosen and
+  is therefore categorically *tested*, never *proven*
+  ([chaos_failover_doctrine.md §12](./chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed),
+  [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)).
+  Requiring *proven* at the Runtime layer would demand a strength no applicable move can emit, making prod
+  promotion unsatisfiable rather than strict. A layer the run recorded **UNVERIFIED** (a skipped-but-applicable
+  move, [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact))
+  yields no witness for that layer — so a `Release` short of an environment's required strength has **no**
+  `advance` value to hand the CAS.
 - **A Tier-1-only in-process ledger cannot advance the gate to prod.** The front-loaded pre-cluster (Phases 2–6)
   formal-validation track emits its evidence ledger from a purely **in-process** run — Dhall typecheck +
   decoder + QuickCheck + TLA+/TLC, **no live substrate** — a **Tier-1 (design-time) artifact** that
   establishes only that the spec composes and the protocol is sound in the abstract, with the Runtime/chaos
   (Tier-2) correspondence and enforcement left **UNVERIFIED**
   ([testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) owns
-  this Tier-1-only variant). Because the strength mapping demands the Runtime/chaos layer *proven* for `Prod`,
+  this Tier-1-only variant). Because the strength mapping demands the Runtime/chaos layer *tested* for `Prod`,
   such a ledger supplies **no Runtime `EvidenceWitness`** — there is no `advance` value to hand the CAS, so a
   `Prod` `PromotionGate` **cannot be advanced on a Tier-1-only (in-process, correspondence/runtime-UNVERIFIED)
-  ledger**. This is the structural fence that keeps "we validated the DSL in-process" from ever meaning "the
-  cluster enforces it."
+  ledger**. This is the structural fence that keeps *in-process validation of the DSL* from ever meaning *the cluster enforces it*.
 - **Promote-unverified→prod is type-foreclosed unrepresentable.** Because `advance` demands an `EvidenceWitness` and
   that witness exists only once the corresponding evidence edge exists, there is simply **no term** that
   promotes an under-verified `Release` to prod — not a runtime check that fires, but a value that cannot be

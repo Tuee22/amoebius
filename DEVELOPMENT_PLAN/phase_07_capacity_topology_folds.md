@@ -65,11 +65,11 @@ analogous to the Phase 5 decode battery and the Phase 6 property suite.
 
 **Gate:** the `fits`/`carve`/`place` capacity fold and the compute-engine/topology relation hold under
 QuickCheck — every generated positive input yields a sound headroom/placement/compatibility result and the
-folds are **provably total** (interpreted concretely in [§N](#n-gate-integrity-refinements-this-phase): compile-time exhaustiveness under
+folds are **provably total** (interpreted concretely in [Gate integrity](#gate-integrity): compile-time exhaustiveness under
 `-Werror=incomplete-patterns` on every `Amoebius.Capacity.*` / `Amoebius.Dsl.Topology` module **and** a
 sampled QuickCheck no-crash run — both, not either) — and the pure folds return their structured
 `ProvisionError`/`Left` on each capacity/topology negative fixture when invoked through the post-bind
-provision harness in the **representative set named in [§N](#n-gate-integrity-refinements-this-phase)** (engine↔substrate
+provision harness in the **representative set named in [Gate integrity](#gate-integrity)** (engine↔substrate
   mismatch, a reused rke2 host, host/VM/cluster overcommit, CPU-limit-policy, per-container/private,
   memory-writer, pod-ephemeral, finite-limit/physical-peak, node-local filesystem/image,
   OCI content/snapshot/model,
@@ -79,12 +79,12 @@ provision harness in the **representative set named in [§N](#n-gate-integrity-r
 `legal_multisubstrate_cluster` and `legal_managed_eks` fixtures place feasibly. Every fixture, golden, and
 expected `Left`-tag it checks against is **authored and committed in Phase 0 before the
 `Amoebius.Capacity.*` / `Amoebius.Dsl.Topology` implementation exists** (§M.1); the gate turns red under the
-**committed per-fold seeded-mutant battery named in [§N](#n-gate-integrity-refinements-this-phase)** (§M.2) and green only when an
+**committed per-fold seeded-mutant battery named in [Gate integrity](#gate-integrity)** (§M.2) and green only when an
 **implementation-independent witness validator** (§M.3, defined in Sprint 7.3) accepts every returned
 placement — a **Register-1** in-process check that runs on no substrate.
 
 <a id="n-gate-integrity-refinements"></a>
-## N. Gate-integrity refinements (this phase)
+## Gate integrity
 
 This section pins the concrete interpretations the [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
 clauses require for Phase 7; it strengthens, never weakens, the Gate and sprint Validations above.
@@ -236,7 +236,7 @@ clauses require for Phase 7; it strengthens, never weakens, the Gate and sprint 
   ([`§6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
   every capacity **sum** is checked at `provision-seal` and never type-foreclosed, honoring the load-bearing limit of
   [`§2`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it).
-- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md) §2 (**Register 1** — pure/golden,
+- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) §2 (**Register 1** — pure/golden,
   in-process, no cluster) and §4 (the per-run proven/tested/assumed ledger): the register this gate reaches and
   the ledger it emits, with model↔runtime correspondence and runtime fidelity marked UNVERIFIED (owned by the
   live band).
@@ -315,7 +315,7 @@ bind/plan-or-resolve-infrastructure/materialization/provision boundary.
 ### Validation
 1. Each positive `Topology` decodes; a mismatched pair returns a structured `Left` listing every incompatible
    node; a reused host returns a duplicate-`HostId` `Left`; the illegal constructors have no inhabitant, proven
-   by the committed `ghc -fno-code` expect-fail compile goldens ([§N](#n-gate-integrity-refinements-this-phase), §M.8) whose specific expected type errors
+   by the committed `ghc -fno-code` expect-fail compile goldens ([Gate integrity](#gate-integrity), §M.8) whose specific expected type errors
    are re-checked on every `dsl-spec` run.
 
 ### Remaining Work
@@ -716,7 +716,7 @@ aggregation, reservation/observed no-double-debit, and alias/one-byte-short muta
 **Independent Validation**: `cabal test dsl-spec` runs the property battery green — the fold/relation
 soundness, totality, headroom-non-negativity, carve-subtraction, elementwise-compatibility, and Pulsar
 two-ceiling properties hold over generated inputs, each meeting its committed `cover`/`checkCoverage` minimum
-(≥30% rejecting, ≥30% accepting per fold; §M.4); and the **committed per-fold seeded-mutant battery of [§N](#n-gate-integrity-refinements-this-phase) — one
+(≥30% rejecting, ≥30% accepting per fold; §M.4); and the **committed per-fold seeded-mutant battery of [Gate integrity](#gate-integrity) — one
 mutant each for `fits`, `carve`, fixed `place`, elastic `place`, storage `Σ`, each Pulsar ceiling, elementwise
 compatibility, and `mkRke2` distinctness, plus the per-axis and per-eligibility validator mutants — turns the
 suite red individually** (§M.2), not merely one hand-picked strawman.
@@ -725,7 +725,7 @@ suite red individually** (§M.2), not merely one hand-picked strawman.
 Register-1 property register), `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
-Adopt [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md) §2 (Register 1) and the honesty
+Adopt [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) §2 (Register 1) and the honesty
 limit of [`resource_capacity_doctrine.md §2`](../documents/engineering/resource_capacity_doctrine.md#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed):
 express the capacity fold and the topology relation as QuickCheck properties. For the checks that are decidable
 in **both** directions — the storage `Σ ≤ backing` sum and the elementwise-compatibility relation — assert the
@@ -834,7 +834,7 @@ and never claim completeness there.
   monitoring evaluation+query/proxy compute or TSDB presentation derivation; or drop a registry/object-write
   admission-gateway envelope), and one per
   eligibility clause (taint, affinity), each individually required to turn the suite red (§M.2,
-  [§N](#n-gate-integrity-refinements-this-phase)).
+  [Gate integrity](#gate-integrity)).
 - Execution/metadata/partition boundary properties are explicit, not implied by the general placement check.
   For every legal Deployment, StatefulSet, DaemonSet, Job, and HostProcess body, independently enumerated prior and desired
   source-unit/revision/ordinal/resource maps must equal the materialized maps in both directions for steady,
@@ -914,7 +914,7 @@ and never claim completeness there.
 
 ### Validation
 1. The property battery is green with every fold meeting its coverage minimum; and **each committed mutant in
-   the per-fold seeded-mutant battery ([§N](#n-gate-integrity-refinements-this-phase)) — including the storage `Σ`, both Pulsar ceilings, `carve`, elastic
+   the per-fold seeded-mutant battery ([Gate integrity](#gate-integrity)) — including the storage `Σ`, both Pulsar ceilings, `carve`, elastic
    `place`, and `mkRke2` distinctness mutants, not only the compute-axis and compatibility ones — makes a
    property red when re-run individually** — the properties have teeth on every fold, not two.
 
@@ -948,7 +948,7 @@ four elastic-branch negatives) + reuse of
 `legal_tmpfs_two_concurrent_writers_single_debit`; `test/dsl/CapacityTopologyGate.hs` (the gate battery +
 validation-locus ledger) — target paths, not yet built. All forty fixtures and their expected results /
 `Left`-tags
-are authored and committed in Phase 0 before the implementation exists (§M.1, [§N](#n-gate-integrity-refinements-this-phase)).
+are authored and committed in Phase 0 before the implementation exists (§M.1, [Gate integrity](#gate-integrity)).
 **Blocked by**: Sprint 7.1, Sprint 7.2, Sprint 7.3; Phase 4 gate (the positive Gate-1 corpus).
 **Independent Validation**: the gate decodes and binds each positive fixture, runs the conditional
 `planInfrastructure` arm, constructs `ProvisionContext` only from the explicit already-materialized fixture
@@ -1071,9 +1071,9 @@ validation-locus ledger that names the honest foreclosure layer of each.
 
 ### Validation
 1. `cabal test dsl-spec` is green — every one of the thirty-seven fold negatives
-   ([§N](#n-gate-integrity-refinements-this-phase) representative set, including the four elastic negatives)
+   ([Gate integrity](#gate-integrity) representative set, including the four elastic negatives)
    returns its **specific committed** tagged `Left`, all three positives place feasibly,
-   the QuickCheck battery holds at its coverage minima, and the committed per-fold seeded-mutant battery ([§N](#n-gate-integrity-refinements-this-phase))
+   the QuickCheck battery holds at its coverage minima, and the committed per-fold seeded-mutant battery ([Gate integrity](#gate-integrity))
    turns the suite red individually; the suite is red if any capacity/topology negative provisions to `Right` or
    to the wrong tag; the validation-locus ledger is present and honestly classifies each foreclosure, marking
    the runtime residue UNVERIFIED.

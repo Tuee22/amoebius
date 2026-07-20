@@ -390,7 +390,7 @@ The whole sprint (📋 Planned).
 
 ## Documentation Requirements
 
-**Engineering docs to update:**
+**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/platform_services_doctrine.md` — when this phase lands, the §9 single-wild-ingress
   honesty note and the §11 ordering edges flip from "design intent" to a delivered-status pointer (status stays
   in the plan); the east-west-derived-NetworkPolicy subsection gains its first live amoebius realization.
