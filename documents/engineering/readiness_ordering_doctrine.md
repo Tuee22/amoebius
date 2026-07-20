@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for how amoebius sequences bring-up — a dependent starts on a
@@ -212,7 +212,7 @@ own the *shape*; the *enactment* is not a new engine. It is the one
 whose in-cluster specialization is the SSA apply engine's **wait-for-ready**: after apply it *observes* the
 live object's readiness condition (rollout complete / `Ready`/`Available` / CR `status` healthy) before
 declaring convergence — **"readiness is observed from the live object, never assumed by a `threadDelay`"**
-([`manifest_generation_doctrine.md` §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)).
+([`manifest_generation_doctrine.md` §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)).
 Its ordered form, the `RolloutPlan` whose phase *n+1* gates on phase *n*'s live readiness, is owned by
 [`release_lifecycle_doctrine.md` §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply).
 
@@ -237,7 +237,7 @@ discipline once; each site keeps its own SSoT and is cited, never restated:
 | Vault ready-before-consumer / fail-closed | a secret consumer vs a sealed Vault | `runtime-checked` (fail-closed); the `Unsealed` edge is [§3](#3-readiness-is-a-condition-never-a-duration) | [vault_pki §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) |
 | `FabricMember c` reachability | a workload bound to a store it cannot reach | `type-foreclosed` (static reach is a *type*, not a probe) | [single_logical_data_plane §3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe) |
 | `.ready` sentinel / `ArtifactRef` | serving a half-staged model | `type-foreclosed` (no handle without the sentinel edge) | [content_addressing §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) |
-| SSA wait-for-ready | a generation declared converged before it is | `runtime-checked` (observed from live object) | [manifest_generation §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait) |
+| SSA wait-for-ready | a generation declared converged before it is | `runtime-checked` (observed from live object) | [manifest_generation §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) |
 | `RolloutPlan` / `ReadinessGate` | phase *n+1* before phase *n* is ready | `runtime-checked` gate on a `type-foreclosed` phase value | [release_lifecycle §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply) |
 | Daemon `/readyz`, no-`threadDelay` | a daemon self-reporting ready by a timer | `runtime-checked` discipline (forbids the timer) | [daemon_topology §6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine) |
 
@@ -273,7 +273,7 @@ states the target shape and links back for status.
 - [Platform Services Doctrine](./platform_services_doctrine.md) — [§11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering) the derived bring-up DAG
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — [§4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) ready-before-consumer / fail-closed
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine) the daemon spine forbids `threadDelay`/`sd_notify`/marker probes
-- [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — [§5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait) wait-for-ready observed from the live object
+- [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — [§5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) wait-for-ready observed from the live object
 - [Single Logical Data Plane Doctrine](./single_logical_data_plane_doctrine.md) — [§3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe) reachability is a type, not a runtime probe
 - [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — [§5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply) the readiness-gated `RolloutPlan`
 - [DSL Doctrine](./dsl_doctrine.md) — [§2](./dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) the `chain`/`Step` surface the gate rides, [§3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness) the `RuntimeWitness`

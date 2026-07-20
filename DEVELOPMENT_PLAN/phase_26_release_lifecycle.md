@@ -199,7 +199,7 @@ the section it adopts; individual sprints cite the same sections where they buil
 - [`release_lifecycle_doctrine.md §5`](../documents/engineering/release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)
   — *`RolloutPlan`/`RolloutPhase`: the readiness-gated apply*: an ordered plan enacted by the Phase-22 SSA
   reconciler
-  ([`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)),
+  ([`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)),
   each phase's readiness a condition observed from live state
   ([`readiness_ordering_doctrine.md §3`](../documents/engineering/readiness_ordering_doctrine.md#3-readiness-is-a-condition-never-a-duration),
   never a duration), with DB schema-migration a phase obeying `create-new → verified-migrate → retire-old`
@@ -472,7 +472,7 @@ values end-to-end.
 ### Deliverables
 - `RolloutPlan = [RolloutPhase]` where each `RolloutPhase` carries `{ phaseObjects, phaseGate }`: the desired
   slice this phase applies and the readiness condition observed from live state that gates the next phase.
-  Enacted by the Phase-22 SSA/ApplySet engine ([`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait));
+  Enacted by the Phase-22 SSA/ApplySet engine ([`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions));
   it introduces **no new reconciler**.
 - A **DB schema-migration `RolloutPhase`** against the standing Phase-23 Postgres obeying
   `create-new → verified-migrate → retire-old`: provision the new schema/columns, migrate and **verify** the
@@ -592,7 +592,7 @@ The whole sprint (📋 Planned).
 - [Release Lifecycle Doctrine](../documents/engineering/release_lifecycle_doctrine.md) — the immutable
   `Release` ledger, the `Environment` ETag-CAS promotion pointer, the `PromotionGate`, and the
   `RolloutPlan`/`RolloutPhase` this phase realizes
-- [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — [§5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)
+- [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — [§5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
   the SSA reconciler the `RolloutPlan` enacts on, [§6.1](../documents/engineering/manifest_generation_doctrine.md#61-the-release-ledger-the-applied-log-is-canonical-not-optional)
   the applied-log promoted to the canonical ledger
 - [Content Addressing & Determinism Doctrine](../documents/engineering/content_addressing_doctrine.md) — [§2.3](../documents/engineering/content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)

@@ -174,7 +174,7 @@ layout readback must catch it. A gate run in which any of M1–M6 stays green is
 - **Resource-capacity doctrine §8 — declared in pure input, provisioned before render, cross-checked at
   runtime.** This phase establishes the
   first live inventory required by
-  [`resource_capacity_doctrine.md` §8](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-at-decode-cross-checked-at-runtime):
+  [`resource_capacity_doctrine.md` §8](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime):
   allocatable CPU, memory, and logical local ephemeral storage; canonical kubelet filesystem backing and
   content/snapshot-root identities; disjoint durable/native-host-cache pools; and the closed accelerator/device/
   net-allocatable-VRAM offering. A declared target that exceeds or contradicts the observation is refused before
@@ -401,7 +401,7 @@ for the self-managed, host-binary-present, single-node kind cluster of
 brought up as a `discover → diff → enact → re-observe` reconcile so that **re-running is a no-op** — carrying a
 typed host context per [`dsl_doctrine.md` §3](../documents/engineering/dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness)
 and discharging the live-inventory cross-check of
-[`resource_capacity_doctrine.md` §8](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-at-decode-cross-checked-at-runtime).
+[`resource_capacity_doctrine.md` §8](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime).
 
 ### Deliverables
 - A `bootstrap` command chain that detects the substrate (Sprint 14.1), assembles a `BinaryContext`

@@ -113,7 +113,7 @@ The ordered steps, each gated on the prior step's readiness:
 7. **Platform services come up** in the derived bring-up DAG order — MinIO → registry, LB → edge, everything
    Vault-sealed for now ([`platform_services_doctrine.md` §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering)),
    applied by the tier-(c) SSA reconciler only from `ManagedCapacityReady`
-   ([`manifest_generation_doctrine.md` §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)).
+   ([`manifest_generation_doctrine.md` §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)).
 8. **The control-plane singleton Pod completes prerequisites while the host still holds the Lease**
    ([`daemon_topology_doctrine.md` §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)). It may not
    mutate cluster state or report `/readyz` Serving yet. The host then quiesces its effect loop, proves no

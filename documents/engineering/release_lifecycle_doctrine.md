@@ -45,7 +45,7 @@ elsewhere. There is nothing to install, nothing to poll, and nothing to reconcil
   `render(release)`, recomputed from a value, exactly as the manifest reconciler recomputes desired from
   the pure `bind/expand → plan/resolve infrastructure → provision → renderAll` result for the authenticated
   materialization
-  ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)).
+  ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)).
 - **The environment axis is orthogonal, not a new machine.** Dev/staging/prod is one of amoebius's four
   independent typed dimensions (substrate detected; daemon-role elected; rke2 server/agent declared;
   environment declared) — it rides the same reconciler, never a bespoke delivery engine.
@@ -56,7 +56,7 @@ and how they chain. Every primitive they compose is owned elsewhere:
 | Concern | Owned by |
 |---------|----------|
 | `releaseHash`, the hash/pointer master registry, the content-addressed store the ledger writes into | [content_addressing_doctrine.md §2.3 / §4](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) |
-| The SSA/ApplySet reconciler `RolloutPlan` enacts, and the *optional applied-log* this doctrine promotes to canonical | [manifest_generation_doctrine.md §5 / §6](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait) |
+| The SSA/ApplySet reconciler `RolloutPlan` enacts, and the *optional applied-log* this doctrine promotes to canonical | [manifest_generation_doctrine.md §5 / §6](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) |
 | The per-run proven/tested/assumed evidence ledger a `PromotionGate` reads | [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) |
 | That env differences are **deployment rules**, and app bytes are byte-identical across environments | [app_vs_deployment_doctrine.md §3 / §4](./app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs) |
 | `create-new → verified-migrate → retire-old` for the schema-migration phase | [storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction) |
@@ -94,7 +94,7 @@ data Release = Release
   image bytes it runs, and the substrate it targets. Change any one and the identity changes; change none and
   the same `Release` is returned — content-addressed, self-naming, deduplicated.
 - **The ledger is the applied-log, promoted to canonical.**
-  [manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)
+  [manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)
   leaves an **optional** content-addressed applied-log — "amoebius *may* write each rendered generation into
   the content-addressed store." **This doctrine promotes that optional log to THE canonical, immutable release
   ledger**: every built generation is an append-only `Release` entry in the content-addressed store (pointers
@@ -260,7 +260,7 @@ data ProvisionedRolloutWork       -- private constructors only
 
 - **Enacted by reconciler tier (c) — the in-cluster SSA/ApplySet reconciler.** A `RolloutPlan` is applied by
   the server-side-apply engine of
-  [manifest_generation_doctrine.md §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait):
+  [manifest_generation_doctrine.md §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions):
   each phase's objects are applied under the `amoebius` field manager, its readiness gate is **observed from
   the live object** (rollout complete / `Ready` / CR `status` healthy — never a `threadDelay`), and only then
   does the next phase apply. This is tier (c) of the reconciler taxonomy; the host-level spot-fleet reconciler
@@ -279,7 +279,7 @@ data ProvisionedRolloutWork       -- private constructors only
   half of **Phase 26** (release lifecycle); the remaining manifest-change-correctness hardening stays in
   [DEVELOPMENT_PLAN/later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md). The schema-migration engine is a
   `RolloutPhase`, and the manifest-change-correctness half hardens the typed diff of
-  [manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed).
+  [manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed).
   A failed executor/verification leaves the old schema/data active and every new/temp/WAL byte charged; a
   topology where steady old/new fit but the transition Job or backing high-water is one unit short cannot
   construct `SchemaEpoch`.
@@ -293,7 +293,7 @@ data ProvisionedRolloutWork       -- private constructors only
   ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)).
 - **Rollback is re-apply or CAS-back.** A failed convergence has two equivalent recoveries, both already in
   the primitive set: **re-apply the prior generation's object set** via the same SSA-declare-and-prune path
-  ([manifest_generation_doctrine.md §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)),
+  ([manifest_generation_doctrine.md §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)),
   or **CAS the environment pointer back** to the previous `Release` ([§3](#3-environment-and-the-etag-cas-promotion-pointer)) and let the reconciler converge. Both
   are ordinary operations over the immutable ledger — there is no special "undo" machinery, because a prior
   generation is still a valid `Release` and a prior pointer value is still a valid CAS target.
@@ -331,7 +331,7 @@ elsewhere:
 | Concern | Owned by |
 |---------|----------|
 | The `releaseHash` formula, the hash/pointer master registry, ETag-CAS pointer mechanics, the content-addressed store | [content_addressing_doctrine.md §2.3 / §4](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) |
-| The SSA/ApplySet reconciler, wait-for-ready, prune, and the applied-log this doctrine promotes to canonical | [manifest_generation_doctrine.md §5 / §6](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait) |
+| The SSA/ApplySet reconciler, wait-for-ready, prune, and the applied-log this doctrine promotes to canonical | [manifest_generation_doctrine.md §5 / §6](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) |
 | The proven/tested/assumed evidence ledger the `PromotionGate` reads, and the no-skip / UNVERIFIED rule | [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) |
 | The Extract → Model → Inject chaos methodology and the layer-strength grammar | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
 | That environment differences are deployment rules and app bytes are identical across environments | [app_vs_deployment_doctrine.md §3 / §4](./app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs) |
@@ -356,7 +356,7 @@ third-party extension mechanism remain in [Later Phases](../../DEVELOPMENT_PLAN/
 
 - [Engineering Doctrine Index](./README.md)
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) the hash/pointer master registry (`releaseHash`, the `environment` pointer kind), [§4](./content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) determinism; the store the ledger writes into
-- [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — [§5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait) the SSA/ApplySet reconciler `RolloutPlan` enacts, [§6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed) the applied-log this doctrine promotes to the canonical ledger
+- [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — [§5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) the SSA/ApplySet reconciler `RolloutPlan` enacts, [§6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed) the applied-log this doctrine promotes to the canonical ledger
 - [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§3](./readiness_ordering_doctrine.md#3-readiness-is-a-condition-never-a-duration) the `ReadinessGate` on a `RolloutPhase` is the tier-(c) instance of the general `Readiness` edge (a condition, never a duration)
 - [Testing Doctrine](./testing_doctrine.md) — [§4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run proven/tested/assumed evidence ledger the `PromotionGate` consumes
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md) — the Extract → Model → Inject grammar behind the evidence-strength the gate requires

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, documents/engineering/README.md, documents/engineering/gateway_migration_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for amoebius's PACELC posture — which consistency / availability /
@@ -66,6 +66,7 @@ restates ([`documentation_standards.md` §5](../documentation_standards.md#5-dup
 | **Control-plane quorum** (E) | **Consistency** at a bounded write-latency cost | Closed odd-quorum union `<Single \| Ha3 \| Ha5>`; even/zero split-brain has no arm | [`cluster_topology_doctrine.md`](./cluster_topology_doctrine.md) |
 | **Cross-cluster** (E) | **Latency** — asynchronous replication only | No synchronous-strong cross-cluster arm; sync cross-cluster RPC is anti-doctrinal | [`chaos_failover_doctrine.md` Appendix B](./chaos_failover_doctrine.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question), [`network_fabric_doctrine.md`](./network_fabric_doctrine.md) |
 | **Cross-cluster gateway** (P) | **Availability-first**, bounded and self-healing | The one boundary amoebius owns; realized as `<Planned \| Failover>` | [`chaos_failover_doctrine.md` §13](./chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need) (R7) + [`gateway_migration_doctrine.md`](./gateway_migration_doctrine.md) |
+| **Cross-cluster cold-DR seed** (P) | **Consistency over Availability** — a `ColdSeedFromBackup` secondary stays down until its seeded state is proven fresh | No availability-first arm; the gateway-take guard admits only a proven-fresh seed ([§3.7](#37-the-cold-dr-seed-recovery-source)) | [`backup_recovery_doctrine.md` §8](./backup_recovery_doctrine.md#8-the-gateway-dovetail-seed-from-backup-under-consistency-over-availability) + [`gateway_migration_model_doctrine.md`](./gateway_migration_model_doctrine.md) |
 
 The first four rows are fixed because their alternative is either **physics** (one strongly-consistent store
 cannot span two clusters without unbounded latency or divergence — a realtime hop cannot pay cross-cluster RTT
@@ -209,6 +210,38 @@ There is deliberately no operator-authorable `Confluent` arm. Confluence — clo
 invariant (a global floor, global uniqueness, a sum-to-whole) as confluent would decode cleanly and then
 diverge under merge, breaking "if it decodes, it is deployable". The confluent classification is therefore
 carried by the model, not the spec; the spec's authorable arms are the bounded-authority mechanisms only.
+
+### 3.7 The cold-DR seed recovery source
+
+The `<Planned | Failover>` taxonomy assumes the standby is already deployed and asynchronously replicating.
+A distinct case is the down-primary recovery where the secondary is **not deployed until needed** and must be
+seeded from backups ([`backup_recovery_doctrine.md`](./backup_recovery_doctrine.md)). This surface carries the
+recovery-source choice as a per-pairing deployment rule:
+
+```dhall
+let RecoverySource =
+      < WarmReplica                                              -- a standby already deployed + async-replicating
+      | ColdSeedFromBackup : { backup : BackupPolicyRef, freshnessBound : PosDuration }
+      >
+```
+
+- **The posture is consistency over availability.** A `ColdSeedFromBackup` secondary is stood up on demand,
+  its fresh backing seeded from the latest `Verified` `BackupArtifact`, and it may take the wild-ingress
+  gateway **only** after its seeded state is proven fresh within `freshnessBound`. If freshness cannot be
+  proven, the pairing stays down rather than serving stale data — the opposite choice from `Failover`'s
+  availability-first bounded divergence. This is the `NoTakeWithoutProvenFreshness` guarantee owned by
+  [`gateway_migration_model_doctrine.md`](./gateway_migration_model_doctrine.md).
+- **The mode is world-triggered, not authored.** The `Seed` recovery is an event classified at the recovery
+  edge when a `ColdSeedFromBackup` standby must come up, never a `mode` field on desired state — the same
+  rule as [§3.4](#34-the-mode-is-world-triggered-not-authored).
+- **`freshnessBound ≥ cadence` is a decode fold.** A `freshnessBound` below the backup `cadence` is statically
+  unsatisfiable — a seed can never be fresher than the newest generation — and is rejected at Gate 2, the same
+  total checked-rejection shape as the [§3.5](#35-the-upload-time-feasibility-push-back) `rto ≥ dnsTtl + headroom`
+  relation, before any live signal is consulted.
+
+The `BackupPolicy` surface, the verified `BackupArtifact`, and the seed enactment are owned by
+[`backup_recovery_doctrine.md`](./backup_recovery_doctrine.md); this surface owns only the `RecoverySource`
+deployment rule and the consistency-over-availability posture it selects.
 
 ---
 

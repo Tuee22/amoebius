@@ -471,7 +471,7 @@ consumers read it, and each is a foreclosure that depends on there being exactly
   packs a workload/VM/engine `Demand` against, and the number the detection classifier ([§2](#2-detection-a-pure-classification-over-three-reads)) cross-checks against
   reality at runtime — *allocatable against allocatable* (the declared value is a ceiling the fold trusts; a
   host whose real allocatable is smaller than its declaration
-  refuses, [resource_capacity_doctrine.md §8](./resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-at-decode-cross-checked-at-runtime)). Detection reads the *real*
+  refuses, [resource_capacity_doctrine.md §8](./resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime)). Detection reads the *real*
   numbers; the inventory *declares* them; the fold trusts the declaration and the reconcile checks it. The
   CPU-overcommit arm is declared policy rather than a probed hardware fact, but its ratio is finite and enters
   the same pure fold.
@@ -564,7 +564,7 @@ allocatable — and the host binary is never a third un-owned claimant. This doc
 physical-host total and the system-reserved netting; the **fold arithmetic** (a checked `Left Overcommit` at
 the post-bind provision seal) is [resource_capacity_doctrine.md §4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)'s,
 and the host-worker `Demand` it consumes is declared by
-[platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram).
+[platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope).
 
 <a id="82-accelerator-memory-vram-unified-on-apple-discrete-on-cudawindows"></a>
 

@@ -57,9 +57,9 @@ workload tolerates" leaves the existence fold with no landable node. This streng
 affinity-only entry to cover taints and tolerations. This entry checks placement *constraints*
 (affinity/taints); the complementary *resource-fit* existence check — that a matching node also has enough
 allocatable room once every other pod is placed, **and** that any accelerator demand is met by the node's
-**wholesale accelerator owner** rather than a per-pod GPU claim — is [§3.27](#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing),
+**wholesale accelerator owner** rather than a per-pod GPU claim — is [§3.27](#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement),
 and the two compose in `place`'s `podFits`: **substrate/affinity-capability existence** (this entry) ∘
-**resource-fit existence** ([§3.27](#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing)),
+**resource-fit existence** ([§3.27](#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement)),
 the latter now reading accelerator fit through the wholesale-per-node owner ([§3.28](#328-two-accelerator-owners-on-one-node-or-a-fractional-accelerator-claim)),
 never a per-pod `gpu` axis. **Owner:**
 [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) (substrate/arch capabilities, the closed node-taint set +
@@ -111,8 +111,8 @@ request proof separate; only constructor-required aliases are legal. Durable req
 block/filesystem overhead and backing/provider quantum before raw allocation. Storage backings and local pools
 carry identity: two consumers may be summed only when they debit the same named physical pool, and declared
 disjoint pools must themselves carve within the physical disk. Accelerator
-availability/count and accelerator memory are checked in the placement-specific entries [§3.27](#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing)
-and [§3.30](#330-a-served-model-whose-vram-footprint-exceeds-node-vram).
+availability/count and accelerator memory are checked in the placement-specific entries [§3.27](#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement)
+and [§3.30](#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool).
 
 Because capacity is a *value*, not a type index (Dhall has no dependent arithmetic), these are **total pure
 provision checks**, honestly decode-foreclosed — never claimed uninhabitable. The full expansion and fold
@@ -125,10 +125,10 @@ controls prove this is the Deployment progress invariant, not an accidental both
 DaemonSet, Job, and HostProcess use their own closed policy arms rather than this pair. Consequently the
 provision fold never invents a stalled Deployment epoch and `renderAll` cannot emit one.
 This entry covers aggregate and named-pool overcommit. The distinct case where totals fit but an atomic pod
-has no individually capable node is [§3.27](#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing).
+has no individually capable node is [§3.27](#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement).
 **Owner:** [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md), consuming physical
 inventory from [`substrate_doctrine.md`](../engineering/substrate_doctrine.md), complete workload envelopes
-from [`platform_services_doctrine.md` §10](../engineering/platform_services_doctrine.md#10-every-container-declares-cpu-and-ram),
+from [`platform_services_doctrine.md` §10](../engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope),
 and durable backing/claim sizes from
 [`storage_lifecycle_doctrine.md`](../engineering/storage_lifecycle_doctrine.md). **Technique:**
 [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
@@ -249,7 +249,7 @@ VM-carve + host-worker + cache demand exceeding any physical-host axis is a
 worker with **no** declared physical-host `Capacity` leaves the Demand unfoldable and is likewise a
 decode-foreclosed provision rejection. **Owner:** [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the
 host→host-worker fold arithmetic), consuming the host-worker `Demand` owned by
-[`platform_services_doctrine.md` §10](../engineering/platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)
+[`platform_services_doctrine.md` §10](../engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope)
 (extended to "every container **and every host-level worker subprocess**") and the physical-host `Capacity` +
 system-reserved netting owned by [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) §8. **Technique:**
 [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
@@ -331,27 +331,27 @@ actually fits under real batch/context).
   represent illegal state.
 - [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) — the capacity-accounting folds and the
   `place` witness / growth-envelope (owner of [§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded),
-  [§3.27](#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing),
+  [§3.27](#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement),
   [§3.29](#329-a-host-worker-whose-demand-overflows-its-physical-host), and the device/unified-memory
-  placement arithmetic for [§3.30](#330-a-served-model-whose-vram-footprint-exceeds-node-vram)).
+  placement arithmetic for [§3.30](#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool)).
 - [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) — substrate/arch capabilities, the closed node-taint set +
   node inventory, per-host `Capacity` (including §8 physical-host pools and accelerator device vectors) cited by [§3.5](#35-undeployable-pods-taints-tolerations--affinity),
   [§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded),
-  [§3.22](#322-a-hand-authored-un-derived-toleration), [§3.29](#329-a-host-worker-whose-demand-overflows-its-physical-host), and [§3.30](#330-a-served-model-whose-vram-footprint-exceeds-node-vram).
+  [§3.22](#322-a-hand-authored-un-derived-toleration), [§3.29](#329-a-host-worker-whose-demand-overflows-its-physical-host), and [§3.30](#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool).
 - [`platform_services_doctrine.md`](../engineering/platform_services_doctrine.md) — the derived-toleration rule (parallel to
-  derived NetworkPolicy) and the complete execution-unit resource-envelope rule ([§10](../engineering/platform_services_doctrine.md#10-every-container-declares-cpu-and-ram),
+  derived NetworkPolicy) and the complete execution-unit resource-envelope rule ([§10](../engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope),
   extended to host-level worker subprocesses), cited by [§3.5](#35-undeployable-pods-taints-tolerations--affinity),
   [§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded),
   [§3.22](#322-a-hand-authored-un-derived-toleration), and [§3.29](#329-a-host-worker-whose-demand-overflows-its-physical-host).
 - [`storage_lifecycle_doctrine.md`](../engineering/storage_lifecycle_doctrine.md) — the PV sizes consumed by the aggregate
   overcommit fold ([§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)).
 - [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) — the fixed-vs-elastic `Topology` shape that
-  selects the `place` branch ([§3.27](#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing)).
+  selects the `place` branch ([§3.27](#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement)).
 - [`daemon_topology_doctrine.md`](../engineering/daemon_topology_doctrine.md) — the worker taxonomy and the per-node-singleton
   accelerator-owner worker kind ([§3.28](#328-two-accelerator-owners-on-one-node-or-a-fractional-accelerator-claim)).
 - [`service_capability_doctrine.md`](../engineering/service_capability_doctrine.md) /
   [`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) — the per-workload
-  accelerator-memory envelope consumed by [§3.30](#330-a-served-model-whose-vram-footprint-exceeds-node-vram).
+  accelerator-memory envelope consumed by [§3.30](#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool).
 - [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) — the runtime-enforcement proof for the
   placement / capacity residue (the scheduler reproducing a feasible placement, the autoscaler growing), owed by
-  [§3.27](#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing).
+  [§3.27](#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement).

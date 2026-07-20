@@ -221,11 +221,11 @@ Phase 15) is present as a rehoming consumer of MinIO, not re-delivered here.
   every backbone binary is baked into the Phase-15 multi-arch base image and resolved only in-cluster; the
   registry stores its blobs in MinIO via the S3 driver, so MinIO must be serving before the registry — the
   thin ordering edge §9 names, and the rehoming Phase 19 delivers.
-- [`manifest_generation_doctrine.md §5 — the apply/reconcile engine: server-side apply, owned field manager, prune, wait`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)
-  and [`§2 — the typed manifest model (`renderAll` is the sole public pure function to objects)`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects):
+- [`manifest_generation_doctrine.md §5 — the apply/reconcile engine: server-side apply, owned field manager, prune, wait`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
+  and [`§2 — the typed manifest model (`renderAll` is the sole public pure function to objects)`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects):
   Phase 19 reuses the Phase-16 pure `renderAll :: ProvisionedSpec -> [K8sObject]` and typed-action reconciler whose
   **wait-for-ready is observed from the live object, never a `threadDelay`** to apply and sequence the backbone.
-- [`platform_services_doctrine.md §10 — every execution unit declares its complete resource envelope`](../documents/engineering/platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)
+- [`platform_services_doctrine.md §10 — every execution unit declares its complete resource envelope`](../documents/engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope)
   and [`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix) / [`§5.1`](../documents/engineering/resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry):
   every rendered app/init/sidecar container carries the exact provisioned CPU, memory, and ephemeral-storage
   requests/limits; bounded pod-local volumes and durable presentation/usable/raw sizes are exact; and accelerator `None` is
@@ -455,7 +455,7 @@ The whole sprint (📋 Planned).
 **Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/engineering/image_build_doctrine.md`, `DEVELOPMENT_PLAN/README.md`
 
 ### Objective
-Adopt [`manifest_generation_doctrine.md §5 — the apply/reconcile engine`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)
+Adopt [`manifest_generation_doctrine.md §5 — the apply/reconcile engine`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
 and [`image_build_doctrine.md §9 — bring-up ordering`](../documents/engineering/image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves):
 assemble the Sprint 19.1–19.2 backbone services, bring them up event-driven behind the reconciler's
 wait-for-ready with the MinIO-before-registry and Vault-unsealed-before-Pulsar edges as observed conditions,

@@ -39,7 +39,7 @@ entry uninhabitable.
   typing techniques, the coverage matrix, the three foreclosure layers, and the validation-locus axis —
   lives in [`illegal_state_techniques.md`](./illegal_state_techniques.md). Together they are the SSoT for
   **which platform invariants are type-enforced** (the question
-  [`platform_services_doctrine.md` §10](../engineering/platform_services_doctrine.md#10-every-container-declares-cpu-and-ram) defers here).
+  [`platform_services_doctrine.md` §10](../engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope) defers here).
 - The *normative rule* behind each catalog entry lives in that entry's owning doctrine
   (storage, gateway/ingress, secrets, …). The catalog names the owner and never restates its content.
 
@@ -142,6 +142,22 @@ Register 3 owns). Most entries name a primary locus plus a live-effect residue.
 - [§3.19](./illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar) — An application consuming more storage than its backing (MinIO and Pulsar)
 - [§3.20](./illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle) — A Pulsar topic without a bounded / tiered / retained lifecycle
 - [§3.21](./illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy) — Capacity growth without an amoebius-owned scaling policy
+- [§3.53](./illegal_state_storage.md#353-a-backup-larger-than-its-bounded-medium) — A backup larger than its bounded medium
+- [§3.54](./illegal_state_storage.md#354-deleting-a-backup-in-an-append-only-system) — Deleting a backup in an append-only system
+- [§3.55](./illegal_state_storage.md#355-amoebius-holding-a-credential-that-can-delete-a-backup) — amoebius holding a credential that can delete a backup
+- [§3.56](./illegal_state_storage.md#356-automatically-recovering-from-a-manual-air-gapped-medium) — Automatically recovering from a manual air-gapped medium
+- [§3.57](./illegal_state_storage.md#357-a-restore-that-overwrites-live-durable-bytes) — A restore that overwrites live durable bytes
+- [§3.58](./illegal_state_storage.md#358-unbounded-backup-history) — Unbounded backup history
+- [§3.59](./illegal_state_storage.md#359-a-backup-in-the-same-failure-domain-as-its-source) — A backup in the same failure domain as its source
+- [§3.60](./illegal_state_storage.md#360-backup-bytes-double-counted-as-live-durable-capacity) — Backup bytes double-counted as live durable capacity
+- [§3.61](./illegal_state_storage.md#361-a-plaintext-backup-at-rest) — A plaintext backup at rest
+- [§3.62](./illegal_state_storage.md#362-a-backup-whose-decryption-key-is-escrowed-only-in-the-domain-it-protects) — A backup whose decryption key is escrowed only in the domain it protects
+- [§3.63](./illegal_state_storage.md#363-a-restore-from-an-unverified-backup-artifact) — A restore from an unverified backup artifact
+- [§3.64](./illegal_state_storage.md#364-a-cross-tenant-or-re-tagged-backup-or-restore) — A cross-tenant or re-tagged backup or restore
+- [§3.65](./illegal_state_storage.md#365-an-air-gapped-medium-carrying-a-live-network-credential) — An air-gapped medium carrying a live network credential
+- [§3.66](./illegal_state_storage.md#366-retention-lowered-below-the-currently-retained-generations-on-an-append-only-medium) — Retention lowered below the currently-retained generations on an append-only medium
+- [§3.67](./illegal_state_storage.md#367-a-restore-into-a-target-smaller-than-or-presentation-incompatible-with-the-backup-extent) — A restore into a target smaller than or presentation-incompatible with the backup extent
+- [§3.68](./illegal_state_storage.md#368-two-conflicting-backup-policies-on-one-coordinate) — Two conflicting backup policies on one coordinate
 
 ### Cluster topology — [`illegal_state_topology.md`](./illegal_state_topology.md)
 
@@ -158,10 +174,10 @@ Register 3 owns). Most entries name a primary locus plus a live-effect residue.
 - [§3.5](./illegal_state_capacity.md#35-undeployable-pods-taints-tolerations--affinity) — Undeployable pods (taints, tolerations & affinity)
 - [§3.17](./illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded) — An over-committed deploy or workload (host / VM / cluster capacity exceeded)
 - [§3.22](./illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration) — A hand-authored (un-derived) toleration
-- [§3.27](./illegal_state_capacity.md#327-a-schedulable-in-aggregate-but-unplaceable-workload-atomic-pod--gpu-bin-packing) — A deployment that fits in aggregate but has no resource-capable placement
+- [§3.27](./illegal_state_capacity.md#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement) — A deployment that fits in aggregate but has no resource-capable placement
 - [§3.28](./illegal_state_capacity.md#328-two-accelerator-owners-on-one-node-or-a-fractional-accelerator-claim) — Two accelerator owners on one node, or a fractional accelerator claim
 - [§3.29](./illegal_state_capacity.md#329-a-host-worker-whose-demand-overflows-its-physical-host) — A host worker whose Demand overflows its physical host
-- [§3.30](./illegal_state_capacity.md#330-a-served-model-whose-vram-footprint-exceeds-node-vram) — An accelerator memory envelope that cannot fit the selected devices or unified-memory pool
+- [§3.30](./illegal_state_capacity.md#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool) — An accelerator memory envelope that cannot fit the selected devices or unified-memory pool
 
 ### Security, ingress & secrets — [`illegal_state_security.md`](./illegal_state_security.md)
 
@@ -202,6 +218,9 @@ Register 3 owns). Most entries name a primary locus plus a live-effect residue.
 - [§3.50](./illegal_state_multicluster.md#350-a-standing-spec-that-authors-an-emergency-failover-as-desired-state) — A standing spec that authors an emergency Failover as desired state
 - [§3.51](./illegal_state_multicluster.md#351-an-operator-authored-confluent-cross-boundary-disposition) — An operator-authored Confluent cross-boundary disposition
 - [§3.52](./illegal_state_multicluster.md#352-a-gateway-failover-graph-reusing-one-cluster-across-two-dns-records) — A gateway-failover graph reusing one cluster across two DNS records
+- [§3.69](./illegal_state_multicluster.md#369-a-cold-seeded-secondary-taking-the-gateway-without-proven-freshness) — A cold-seeded secondary taking the gateway without proven freshness
+- [§3.70](./illegal_state_multicluster.md#370-a-coldseedfrombackup-whose-freshness-bound-is-below-the-backup-cadence) — A `ColdSeedFromBackup` whose freshness bound is below the backup cadence
+- [§3.71](./illegal_state_multicluster.md#371-a-freshness-watermark-asserted-rather-than-derived-from-captured-content) — A freshness watermark asserted rather than derived from captured content
 
 ### Readiness, promotion & monitoring — [`illegal_state_lifecycle.md`](./illegal_state_lifecycle.md)
 

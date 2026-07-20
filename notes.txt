@@ -2,4 +2,10 @@
 
 - testing
 
-- backups
+- backups : designed. See documents/engineering/backup_recovery_doctrine.md — the closed BackupPolicy
+  deployment rule (remote / append-only-WORM / air-gapped manual-or-automatic media), the write-but-never-delete
+  credential boundary (retention/deletion strictly out of band), the bounded-no-overcommit sizing fold, the
+  verified content-addressed BackupArtifact, restore that seeds a fresh coordinate (never overwrites), and the
+  ColdSeedFromBackup down-primary posture (seed a secondary and take the gateway only after proven freshness —
+  consistency over availability). Illegal states enumerated at illegal_state_storage.md §3.53-3.68 and
+  illegal_state_multicluster.md §3.69-3.71; the freshness guard extends the Phase-3 formal model.

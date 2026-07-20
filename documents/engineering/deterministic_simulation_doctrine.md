@@ -100,7 +100,7 @@ substrate behaviour.
 
 The register *definitions* are owned by [testing_doctrine.md §2](./testing_doctrine.md#2-three-registers-of-amoebius-testing);
 this doctrine owns the **shape** of the deterministic-simulation register and how it extends the pre-cluster
-spine ([conformance_harness_doctrine.md §4](./conformance_harness_doctrine.md#4-the-spine-decode--validate--render--plan--dry-run)).
+spine ([conformance_harness_doctrine.md §4](./conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run)).
 
 - **Register 1 — pure/golden.** Decode → bind/expand → `planInfrastructure` → either golden-lock the
   non-renderable infrastructure batch or supply its authenticated materialization fixture → provision →

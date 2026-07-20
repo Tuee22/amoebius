@@ -89,7 +89,7 @@ capability declaration from **export-only** to **PROVIDE + REQUIRE**.
 - **`extCapabilities` is PROVIDES.** An extension exports each listed capability into the capability surface
   owned by [service_capability_doctrine.md](./service_capability_doctrine.md). For a workload extension this is
   the capability it stands up (e.g. `infernix` provides `InferenceEngine`,
-  [service_capability_doctrine.md §4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-substrate-selected-and-jit-resolved-never-authored));
+  [service_capability_doctrine.md §4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored));
   for a capability-extension it is the horizontal concern it owns.
 - **`extRequires` is REQUIRES.** An extension names the capabilities it consumes from another linked extension or
   from the core. This is the edge set of the graph: `extRequires` is *what makes an extension depend on a peer*,
@@ -165,7 +165,7 @@ The graph is the union of every extension's `extRequires`. The v1 edge set:
 
 `InferenceEngine`, `ObjectStore`, `Registry`, and `MessageBus` are **core** capabilities
 ([service_capability_doctrine.md §2](./service_capability_doctrine.md#2-the-capability-set),
-[§4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-substrate-selected-and-jit-resolved-never-authored));
+[§4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored));
 `JitBuild` and `Coordination` are **extension-provided** ([§3](#3-the-provide-and-require-contract)). Every edge points
 from a consumer toward a provider, and the whole set is a directed acyclic graph: workload extensions depend on
 capability-extensions, capability-extensions depend on the core, and nothing points back. There is no
@@ -250,7 +250,7 @@ for `coordination`). This doc states the target shape and links back for status.
 
 - [Engineering Doctrine Index](./README.md)
 - [DSL Doctrine](./dsl_doctrine.md) — [§4](./dsl_doctrine.md#4-total-composability) the `ExtensionSpec` seam (linked-not-loaded), the anti-shadow `ProjectSpec` merge, and the closed vendored workload set `{infernix, jitML}` this graph extends
-- [Service Capability Doctrine](./service_capability_doctrine.md) — the capability surface a PROVIDE lands in ([§2](./service_capability_doctrine.md#2-the-capability-set)) and the `InferenceEngine` capability ([§4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-substrate-selected-and-jit-resolved-never-authored)) both workloads require
+- [Service Capability Doctrine](./service_capability_doctrine.md) — the capability surface a PROVIDE lands in ([§2](./service_capability_doctrine.md#2-the-capability-set)) and the `InferenceEngine` capability ([§4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored)) both workloads require
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the shared resolver + `CacheBudget`-bounded cache the `jit-build` capability-extension provides
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§4.3](./daemon_topology_doctrine.md#43-the-feed-sourced-continuous-trainer-single-writer-delegated) the delegated single-writer / failover primitives the `coordination` capability-extension provides; [§3.1](./daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election) the singleton is k8s/etcd, not an election
 - [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — the derived acyclic bring-up DAG (`mkBringUpOrder`) whose decode-foreclosed cycle rejection the acyclic merge reuses

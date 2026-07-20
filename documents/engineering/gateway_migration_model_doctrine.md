@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: documents/engineering/tla_modelling_assumptions.md
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the *one* protocol amoebius proves itself — the cross-cluster **gateway migration**, covering **both** branches of `GatewayMigration = <Planned | Failover>` — expressed as a reifiable `Model` ([formal_model_doctrine.md](./formal_model_doctrine.md)), **simulated** with io-sim and **proven** with TLC, and reduced to every `InForceSpec` by a decode-time structural-fit fold rather than any per-spec model-check.
@@ -79,6 +79,18 @@ the second, so safety alone would not catch a failover that deadlocks.
   committed write is lost (RPO=0) — the property the superseded doc left merely assumed.
 - **`NoWriteAfterStaleFailover`** — on the `Failover` branch, any divergence is named and within the declared
   data-loss budget (the safety half of the old `FailoverBounded`).
+- **`NoTakeWithoutProvenFreshness`** — no cluster takes the wild-ingress role from a data plane whose freshness
+  is unproven. The `Planned` branch's `verify-caught-up` precondition is **generalized** to a `FreshnessWitness`
+  guard on the promote / gateway-take transition, dischargeable two ways: a warm replica proven caught up (the
+  original `PlannedIsLossless` path), or a cold secondary seeded from backup and proven fresh within its
+  declared `freshnessBound` (the `ColdSeedFromBackup` recovery source owned by
+  [consistency_pacelc_doctrine.md §3.7](./consistency_pacelc_doctrine.md#37-the-cold-dr-seed-recovery-source) and
+  [backup_recovery_doctrine.md §8](./backup_recovery_doctrine.md#8-the-gateway-dovetail-seed-from-backup-under-consistency-over-availability)).
+  This is the safety face of the consistency-over-availability choice: a stalled state with **zero** gateway
+  owners satisfies this invariant (staying down is safe), and only the liveness `MergeConverges` goal requires
+  freshness to become reachable — so a secondary whose seeded state cannot prove freshness never takes the
+  gateway, and the pairing stays down rather than serving stale data. The illegal state is
+  [illegal_state_catalog §3.69](../illegal_state/illegal_state_multicluster.md#369-a-cold-seeded-secondary-taking-the-gateway-without-proven-freshness).
 
 **Liveness properties** (`modelProperties`, under the fairness assumption `F` — every continuously-enabled
 migration action eventually fires, i.e. no cluster is starved by an adversarial scheduler; `F` is a named
@@ -151,9 +163,11 @@ regime**, and the replication-**offset**/log domains the state variables range o
 whose parameters fall outside those constants is **not** covered by it even when its graph is
 pairwise/acyclic/independent. The fold therefore checks each instance against a declared **parameter envelope**
 as well as the graph: every edge's `Failover` data-loss budget lies within the proven cap, its `dnsRecord` TTL
-lies within the modelled TTL regime, and its clusters' offset/log domains instantiate (lie within) the model's
-`CONSTANTS`. A spec that fits the graph but exceeds the parameter envelope is rejected, so the scope-2 proof's
-parameter side-conditions transfer to every accepted instance rather than being silently assumed.
+lies within the modelled TTL regime, every `ColdSeedFromBackup` edge's `freshnessBound` lies within the
+modelled freshness regime the `NoTakeWithoutProvenFreshness` guard was proven over, and its clusters'
+offset/log domains instantiate (lie within) the model's `CONSTANTS`. A spec that fits the graph but exceeds the
+parameter envelope is rejected, so the scope-2 proof's parameter side-conditions transfer to every accepted
+instance rather than being silently assumed.
 
 An N-cluster forest that passes both checks then reduces to a set of independent 2-cluster instances, so a
 green model-check at scope 2 is **an argued cutoff, stress-tested** — covering every spec the decoder accepts —

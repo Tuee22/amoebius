@@ -286,24 +286,24 @@ host Lease holder/resourceVersion, and no host-process/device mutation.
 
 ## Doctrine adopted
 
-- [`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)
+- [`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
   — **the apply/reconcile engine.** This phase realizes scoped SSA, the amoebius scheduler-role CAS/Binding
   protocol, kind-indexed and staged execution actions, authenticated dependency-gated deletion, the pure and
   simulated Job completion/cleanup state machine, live terminal retention, and readiness observed from live
   state. Durable Job completion/cleanup first runs live in Phase 25; rollback and the release ledger stay deferred.
-- [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)
+- [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)
   — **desired is the validated identity index of `renderAll(provisionedSpec)`, observed is live inventory, and
   actions are typed.** `renderAll` retains the canonical `[K8sObject]` result; a separate pure
   `validateAndIndexRenderedObjects` checks source/object identity and duplicate freedom before diff. Desired
   state is recomputed; actual Pod UIDs/process IDs, owner chains, reservation records, completions, and physical
   allocations are observed to authorize transitions, never treated as another desired source.
-- [`manifest_generation_doctrine.md §2`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects)
+- [`manifest_generation_doctrine.md §2`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects)
   — **the typed manifest model** (the pure renderer half): this phase *consumes* the Phase-9 pure, total
   private per-source `renderSourcePrivate` projections through Phase 9's exact deployment-global `renderAll` owner union. The
   `[K8sObject]` list is byte-for-byte the value `--dry-run` previews; its separately validated identity index
   is the desired map. An unchecked `ServiceSpec`, duplicate `KubernetesObjectId`, or emitted/source identity
   mismatch cannot reach diff.
-- [`resource_capacity_doctrine.md §8`](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-at-decode-cross-checked-at-runtime)
+- [`resource_capacity_doctrine.md §8`](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime)
   — **declared at decode, cross-checked at runtime.** Immediately before mutation, this phase re-observes
   CPU/memory/local-ephemeral capacity, pod/CNI/CSI slots, mapped files/etcd logical quota, disjoint
   durable/object-store/migration/native-host-cache pools, admission/executor pods, planned execution slots,
@@ -659,7 +659,7 @@ Binding/host/object-store/delete effect. A never-ready fixture and dropped-wait 
 
 ### Objective
 
-Adopt [`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)
+Adopt [`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
 (wait-for-ready) and [`readiness_ordering_doctrine.md §6`](../documents/engineering/readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps):
 gate every action continuation on its live postcondition (never a fixed sleep), then prove the whole engine
 idempotent — a re-run of the same deployment-global `renderAll` result plus the newly observed state plans

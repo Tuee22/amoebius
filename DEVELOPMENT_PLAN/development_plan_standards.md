@@ -190,7 +190,7 @@ A sprint or phase that schedules adoption work **cites the doctrine section by n
 `../documents/engineering/<doc>.md#<section-anchor>` *and* the section's human name in the surrounding
 prose. Example:
 
-> Adopt [`manifest_generation_doctrine.md` §5 — the apply/reconcile engine](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait):
+> Adopt [`manifest_generation_doctrine.md` §5 — the apply/reconcile engine](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions):
 > a server-side-apply reconciler with a fixed `amoebius` field manager and ApplySet pruning.
 
 The `Docs to update` field then lists exactly those governed docs. A phase doc's **Doctrine adopted** section

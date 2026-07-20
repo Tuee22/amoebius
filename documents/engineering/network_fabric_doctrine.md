@@ -61,7 +61,7 @@ Harbor/Helm of networking: the duplicated-control-plane pattern amoebius rejects
 | Netmaker brings | amoebius already owns |
 |---|---|
 | Its own control server | The control-plane singleton ([daemon_topology_doctrine.md](./daemon_topology_doctrine.md)) |
-| Its own DB (a desired-state store) | Pure `bind/expand → plan/resolve infrastructure → provision → renderAll` from `InForceSpec` plus authenticated materialization — **no external desired-state store** ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)) |
+| Its own DB (a desired-state store) | Pure `bind/expand → plan/resolve infrastructure → provision → renderAll` from `InForceSpec` plus authenticated materialization — **no external desired-state store** ([manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)) |
 | Its own MQTT broker to push peer changes | Pulsar — the one coordination plane ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)) |
 | Its own PKI / mTLS | The Vault forest CA + secrets model ([vault_pki_doctrine.md](./vault_pki_doctrine.md)) |
 | Its own node/peer inventory | The typed node inventory ([substrate_doctrine.md](./substrate_doctrine.md)) + the Dhall spec |
@@ -86,7 +86,7 @@ WireGuard fits the amoebius disciplines cleanly because it is a *primitive*, not
   is the Vault-independent floor `ParentReachChannel`
   ([vault_pki_doctrine.md §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes), [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api)), so no fabric key ever gates an unseal.
 - **Peer config is rendered, not managed.** `render(nodeInventory) -> [WireGuardPeerConfig]` — the pure
-  `render()` discipline of [manifest_generation_doctrine.md §2](./manifest_generation_doctrine.md#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects) lifted to
+  `render()` discipline of [manifest_generation_doctrine.md §2](./manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) lifted to
   `wg` config. Illegal peer configurations are foreclosed before runtime, at the honest layer for each: a
   **keyless peer** (a mandatory key field) is **type-foreclosed** — unrepresentable — while **overlapping VPN
   IPs** and an **`AllowedIPs` outside the fabric CIDR** are **decode-foreclosed**, a total relation/fold over

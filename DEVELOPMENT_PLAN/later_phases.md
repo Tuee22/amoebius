@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: The holding pen for the in-scope, high-numbered phases that are real commitments but do not
@@ -70,7 +70,7 @@ The reconcile half of this is a hardening of the typed reconciler's state model:
 [`manifest_generation_doctrine.md` §6 — the reconcile state model (desired is the pure
 `bind/expand → plan/resolve infrastructure → provision → renderAll` result for the authenticated
 materialization, observed is
-etcd, a diff is typed)](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)
+etcd, a diff is typed)](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)
 already frames the diff as a *typed* value; this candidate extends that diff to classify schema-affecting and
 immutable-field changes so a change that would otherwise drop rows cannot be applied as a silent replace. The
 database half adds the migration ordering and idempotence on top of the per-consumer Postgres model. It is a
@@ -166,6 +166,36 @@ pull only in-cluster)](../documents/engineering/image_build_doctrine.md#2-the-si
 delivered by [phase_15_base_image_registry.md](phase_15_base_image_registry.md) and
 recorded as resolved in the README "Later phases" note. It is named here only to close the question: do not
 re-open it as a candidate phase.
+
+---
+
+## Candidate phase: Live backup / restore / cold-DR seed
+
+**Status**: 📋 Planned (provisional Phase 43)
+**Provisional substrate**: linux-cpu → provider (the write-but-never-delete cloud credential is enacted on the
+provider substrate, as with the durable-EBS create-vs-delete model)
+**Scope** (one line): the live enactment of the backup surface — the put-only backup credential, the
+copy/verify `Job` that emits a verified `BackupArtifact` to a remote / append-only-WORM / air-gapped medium,
+the restore that seeds a fresh coordinate, and the `ColdSeedFromBackup` down-primary drill.
+**Provisional gate**: an `InForceSpec` topology backs a durable coordinate up to a bounded medium under a
+credential that is denied delete/expire at the cloud API, verifies the artifact, then loses the source backing
+and **seeds a fresh secondary from the backup**; the secondary takes the wild-ingress gateway only after its
+seeded state proves fresh within `freshnessBound`, and an over-medium backup, an auto-restore from a `Manual`
+air-gap medium, and a delete-a-backup attempt each perform zero effects.
+
+The **representation** half of backup is **not** a later phase — like the capacity / bounded-storage discipline
+below, it is folded into the pure band: the closed `BackupPolicy` / `BackupMedium` / `WriteRegime` /
+`BackupRetention` shapes and the `freshnessBound ≥ cadence` fold land in **Phase 4/5**, the no-overcommit sizing
+fold in **Phase 7/8**, the illegal-state corpus (`illegal_state_storage.md` §3.53–§3.68 /
+`illegal_state_multicluster.md` §3.69–§3.71) in **Phase 6**, and the `FreshnessWitness` /
+`NoTakeWithoutProvenFreshness` guard extending the one formal obligation in **Phase 3**
+([`gateway_migration_model_doctrine.md`](../documents/engineering/gateway_migration_model_doctrine.md)). Only
+the **live** enactment is this candidate, and its runtime residues distribute to the phases that already own
+each substrate: the Vault-Transit envelope to Phase 18, the MinIO remote target to Phase 19, the cross-cluster
+cold-seed drill to Phases 28/29, the write-but-never-delete cloud credential to Phase 30, and the air-gap
+manual/automatic handling drill to the test-topology harness of Phase 36. The standing doctrine is
+[`backup_recovery_doctrine.md`](../documents/engineering/backup_recovery_doctrine.md); the deletion of any
+backup remains out of band and outside amoebius automation, exactly as durable-backing reclaim is.
 
 ---
 

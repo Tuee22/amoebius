@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering cross-cluster capacity folds,
@@ -270,6 +270,50 @@ index, so a total decoder returns `Left` rather than the shape being uninhabitab
 `Gate-2-decoder` (the structural-fit fold returns `DecodeError` on a graph reusing a cluster across records,
 before any `ProvisionedSpec` exists); the over-scope stress run that *models* a shared survivor in is a
 `live-effect`/model residue, not an authorable shape.
+
+### 3.69 A cold-seeded secondary taking the gateway without proven freshness
+
+When a primary is down and a `ColdSeedFromBackup` secondary is stood up on demand and seeded from backups, a
+secondary that took the wild-ingress gateway before its seeded data was proven fresh would serve stale or
+divergent data — the availability-over-consistency error the cold-seed posture exists to refuse. The gateway
+migration model generalizes the `verify-caught-up` precondition into a `FreshnessWitness` guard on the
+gateway-take transition, and the safety invariant `NoTakeWithoutProvenFreshness` holds that no cluster takes
+the wild-ingress role from a data plane whose freshness is unproven; a stalled zero-owner state is safe, and
+only liveness convergence requires freshness to become reachable, so amoebius stays down rather than serving
+stale data. **Owner:** [`gateway_migration_model_doctrine.md`](../engineering/gateway_migration_model_doctrine.md)
+(the guard and invariant), realized on the authorable surface by
+[`consistency_pacelc_doctrine.md` §3](../engineering/consistency_pacelc_doctrine.md#3-the-one-configurable-axis--the-deployment-rules-pacelc-surface)
+and the seed posture of [`backup_recovery_doctrine.md` §8](../engineering/backup_recovery_doctrine.md#8-the-gateway-dovetail-seed-from-backup-under-consistency-over-availability).
+**Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
+(the gateway-take handle exists only from a `FreshnessProven` index). **Layer:** the ordering is
+type-foreclosed; the caught-up/fresh edge is a runtime-observed witness, proven for the model and tested by
+drill, never a constructive proof at reconcile. **Validation-locus:** `live-effect`, backed by the Register-1
+model check.
+
+### 3.70 A `ColdSeedFromBackup` whose freshness bound is below the backup cadence
+
+A cold-seed recovery whose declared `freshnessBound` is shorter than the backup `cadence` is statically
+unsatisfiable: a seed can never be fresher than the newest generation, so no seed could ever satisfy the
+bound and the secondary could never be promoted. The decoder rejects `freshnessBound < cadence` at Gate 2,
+the same total checked-rejection shape as the existing `rto ≥ dnsTtl + headroom` relation, before any live
+signal is consulted. **Owner:** [`backup_recovery_doctrine.md` §8](../engineering/backup_recovery_doctrine.md#8-the-gateway-dovetail-seed-from-backup-under-consistency-over-availability)
+(realized on the PACELC surface by [`consistency_pacelc_doctrine.md` §3.5](../engineering/consistency_pacelc_doctrine.md#35-the-upload-time-feasibility-push-back)).
+**Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
+(binding-by-construction — the bound and cadence relation is checked at decode, not a separate authored field).
+**Layer:** `decode-foreclosed`. **Validation-locus:** `Gate-2-decoder`.
+
+### 3.71 A freshness watermark asserted rather than derived from captured content
+
+If the freshness gate read an operator-asserted watermark instead of one derived from the backup's captured
+content, the consistency-over-availability guarantee would be spoofable: a stale backup could claim a freshness
+it never captured and be promoted. A `BackupArtifact`'s `watermark` is a total function of its content-addressed
+digest, never an asserted field, so the freshness witness the gateway-take guard consumes cannot be forged.
+**Owner:** [`backup_recovery_doctrine.md` §6](../engineering/backup_recovery_doctrine.md#6-the-verified-content-addressed-backupartifact)
+(content addressing owned by [`content_addressing_doctrine.md` §4.5](../engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
+**Technique:** [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content)
+(names are total functions of content). **Layer:** `decode-foreclosed` (the watermark is derived, not an
+authorable field) + `live-effect` residue (that the derived watermark reflects real lag). **Validation-locus:**
+`Gate-2-decoder` + `provision-seal`.
 
 ---
 

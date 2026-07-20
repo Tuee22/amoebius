@@ -21,7 +21,7 @@ configs"*, with *"a generic & reusable helm chart for amoebius apps"*.
 **This doctrine records the operator's locked decision to drop that framing.** amoebius does not template
 YAML and does not ship or consume a Helm chart — its own or anyone else's. It **generates the complete
 per-service Kubernetes object set from pure typed Haskell**, serializes it with Aeson, and applies it with
-its own reconciler ([§5](#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)). This is the same anti-templating rule [dsl_doctrine.md §2](./dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)
+its own reconciler ([§5](#5-the-applyreconcile-engine-snapshot-bound-typed-actions)). This is the same anti-templating rule [dsl_doctrine.md §2](./dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)
 already states for the config surface — grounded in the recorded operator vision that *"we want everything to be dhall"*, which keeps the *how* out of templated config — carried all the way down to the manifests.
 
 Two reasons motivate the decision, and they are different:
@@ -61,8 +61,8 @@ discipline prodbox already applies to its supporting objects up to the entire ob
 Helm-release target with direct typed-manifest rendering plus an amoebius-owned apply engine.** That prodbox
 slice is *evidence the approach works*, not proof amoebius has built the whole renderer ([§8](#8-reusable-prodbox-seeds-vs-what-is-new)).
 
-**What this doc owns vs. what it defers.** This document owns *how* a spec becomes objects (generation, [§2](#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects)–[§4](#4-no-third-party-charts--no-third-party-software-operators-are-generated))
-and *how* those objects are applied and reconciled ([§5](#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)–[§6](#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)). It does **not** own:
+**What this doc owns vs. what it defers.** This document owns *how* a spec becomes objects (generation, [§2](#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects)–[§4](#4-no-third-party-charts--no-third-party-software-operators-are-generated))
+and *how* those objects are applied and reconciled ([§5](#5-the-applyreconcile-engine-snapshot-bound-typed-actions)–[§6](#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)). It does **not** own:
 
 | Concern | Owned by |
 |---------|----------|
@@ -247,7 +247,7 @@ rules feed it):
   custom-scheduled. It copies these fields from the provisioned projections exactly — it neither invents defaults nor recalculates
   capacity. An "unlimited pod", an unbounded cache, or a GPU owner with no device claim is not a value it can
   return. The declaration rule itself is owned by
-  [platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram);
+  [platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope);
   the resource-to-capacity witness is owned by
   [resource_capacity_doctrine.md](./resource_capacity_doctrine.md); whether each part is a type-inhabitance or
   a decode-time check is classified by
@@ -353,7 +353,7 @@ therefore narrow without weakening whole-deployment source uniqueness.
 > well-understood, amoebius may eventually **reimplement that reconcile loop natively** (its own typed
 > reconciler emitting the leaf objects directly) rather than running the upstream operator binary at all.
 > That is a deferred choice made per service, not a present commitment — and it is exactly the same
-> `discover → diff → enact` loop as [§5](#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait).
+> `discover → diff → enact` loop as [§5](#5-the-applyreconcile-engine-snapshot-bound-typed-actions).
 
 ---
 
@@ -509,7 +509,7 @@ flowchart TD
 
 ### 5.1 The `RolloutPlan`: ordered, readiness-gated phases on this same reconciler (tier (c))
 
-[§5](#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait) converges *one* generation through a snapshot-bound typed action plan. Some changes must not land in one action stage: a
+[§5](#5-the-applyreconcile-engine-snapshot-bound-typed-actions) converges *one* generation through a snapshot-bound typed action plan. Some changes must not land in one action stage: a
 schema migration, a canary, a message-bus consumer cutover need **ordered, readiness-gated steps**, each
 gated on the *previous* step's live readiness before the next is applied. amoebius expresses that as a typed
 value the reconciler folds — not an imperative script and not a Helm release list:
@@ -526,7 +526,7 @@ data RolloutPhase = RolloutPhase
 
 - **Same reconciler, no new one.** Each `RolloutPhase` selects an exact owner-closed subset of the global
   desired union and pure transition inputs. The live engine re-observes and mints the applicable SSA,
-  scheduler, staged execution, provider, or authenticated-delete actions ([§5](#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)); between phases, the engine's existing **wait-for-ready** is the gate. Enactment is
+  scheduler, staged execution, provider, or authenticated-delete actions ([§5](#5-the-applyreconcile-engine-snapshot-bound-typed-actions)); between phases, the engine's existing **wait-for-ready** is the gate. Enactment is
   **this doc's tier-(c) reconciler** — the in-cluster typed manifest/action engine; tier (a) (Pulumi-checkpointed
   cloud IaC) and tier (b) (checkpoint-free tag-discovery host) live in
   [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). A `RolloutPlan` introduces **no new reconciler** and no
@@ -534,7 +534,7 @@ data RolloutPhase = RolloutPhase
   control-plane singleton ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)).
 - **Where the plan is owned.** The typed `RolloutPlan` / `RolloutPhase`, the `Environment` promotion pointer,
   and the `Release` a rollout advances are owned by [release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)
-  (and [§2](#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects) for the ledger it advances); **this doc owns only their *enactment* on the tier-(c) reconciler.**
+  (and [§2](#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) for the ledger it advances); **this doc owns only their *enactment* on the tier-(c) reconciler.**
 - **DB-schema migration is a `RolloutPhase` (runtime-checked residue; deferred).** A schema change is a
   phase sequence obeying **create-new → verified-migrate → retire-old** — the exact anti-in-place-destruction
   ordering owned by [storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction):
@@ -549,7 +549,7 @@ data RolloutPhase = RolloutPhase
   (no service mesh needed). A Pulsar workload cuts over by **consumer-group**, not by weight.
   **Rollback** is not special-cased: select the prior generation or CAS the environment pointer back to its
   `Release`, then bind, run the conditional infrastructure/materialization stage, provision, and re-observe it
-  to mint fresh [§5](#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)
+  to mint fresh [§5](#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
   actions. No stored action capability is replayed.
 
 ```mermaid
@@ -636,7 +636,7 @@ release as an opaque gzipped Secret holding the rendered manifests, and the clus
 - **Each applied generation is persisted content-addressed — the canonical release ledger.** amoebius writes
   each rendered generation into the content-addressed MinIO store (pointers → manifests → blobs), reusing the
   mechanism owned by [content_addressing_doctrine.md](./content_addressing_doctrine.md). That buys a **typed
-  revision history**, **rollback** to any prior generation ([§5](#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)), and **drift detection** (diff live objects
+  revision history**, **rollback** to any prior generation ([§5](#5-the-applyreconcile-engine-snapshot-bound-typed-actions)), and **drift detection** (diff live objects
   against the recorded generation) — and it is strictly *more* than Helm offers: typed, content-addressed,
   deduplicated, and confluent across clusters, where Helm's release Secret is an opaque gzip blob with no
   cross-cluster story. **[§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional) promotes this applied-log from *optional* to THE canonical immutable release
@@ -679,12 +679,12 @@ flowchart TD
 
 ### 6.1 The release ledger: the applied-log is canonical, not optional
 
-[§6](#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)'s applied-log is described as *optional*. **This subsection promotes it: the immutable, content-addressed
+[§6](#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)'s applied-log is described as *optional*. **This subsection promotes it: the immutable, content-addressed
 applied-log is THE canonical release ledger** — the one durable record of what amoebius has deployed. The
 promotion changes *nothing* about desired state: **desired is still the checked conditional
 `decode → bind/expand → planInfrastructure → authenticated materialization → ProvisionContext →
 provision → renderAll` result, and there is
-still no separate desired-state store** ([§6](#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)). The ledger records *what was applied*; it never becomes a thing
+still no separate desired-state store** ([§6](#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)). The ledger records *what was applied*; it never becomes a thing
 the reconciler converges *toward*.
 
 - **A `Release` is one immutable ledger entry, keyed by `releaseHash`.** Each converged generation is written
@@ -693,7 +693,7 @@ the reconciler converges *toward*.
   registered in the
   [content_addressing_doctrine.md §2.3 master table](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds),
   namespaced away from `experimentHash` / `kernelKey` / the OCI image digest and never shared with them. The
-  ledger reuses the same pointer → manifest → blob store [§6](#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed) already names; the `Release` type, the ledger, the
+  ledger reuses the same pointer → manifest → blob store [§6](#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed) already names; the `Release` type, the ledger, the
   `Environment` promotion pointer, and the `PromotionGate` are owned by
   [release_lifecycle_doctrine.md §2](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash) (ledger) and [§3](#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)–[§4](#4-no-third-party-charts--no-third-party-software-operators-are-generated) (pointer, gate) —
   **this doc owns only that the reconciler *writes* the entry on convergence.**
@@ -704,7 +704,7 @@ the reconciler converges *toward*.
   before the first PUT. Direct backend credentials/routes are denied. A one-byte-short store or one-unit-short
   gateway rejects the rollout before its first live mutation and records zero ledger/pointer writes; a runtime
   partial/failed CAS makes the generation ineligible for promotion and remains charged until observed deletion.
-- **Why canonical, not optional.** An append-only `releaseHash`-keyed ledger is what makes rollback ([§5](#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)),
+- **Why canonical, not optional.** An append-only `releaseHash`-keyed ledger is what makes rollback ([§5](#5-the-applyreconcile-engine-snapshot-bound-typed-actions)),
   drift detection (diff live objects against a recorded `Release`), typed revision history, and cross-cluster
   confluence *always* available rather than best-effort — and it is the auditability substrate that lets
   amoebius refuse an external CI/CD control plane (no Argo/Flux/Tekton), owned by
@@ -712,7 +712,7 @@ the reconciler converges *toward*.
   "sometimes there is no history" mode; promoting it closes that.
 - **Still not a Helm release store.** The ledger is immutable and content-addressed — a *new* `releaseHash`
   per generation, never an in-place-mutated blob — so it has none of the desync modes of Helm's gzipped
-  release Secret ([§6](#6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed)). The environment pointers that *select* a `Release` (dev / staging / prod, advanced by
+  release Secret ([§6](#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)). The environment pointers that *select* a `Release` (dev / staging / prod, advanced by
   ETag-CAS under a `PromotionGate`) are pointer kinds in the same
   [§2.3 master table](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)
   and are owned by release_lifecycle_doctrine.md [§3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer)–[§4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable), not here.
@@ -764,7 +764,7 @@ Stating the boundary honestly, because most of this generalizes a sibling rather
 | Pure deployment planner with dependency/values orchestration | `ChartPlatform.hs` (`buildChartDeploymentPlan` → `ChartDeploymentPlan`/`ChartReleasePlan`) | **Repurpose** the planner; **drop** its Helm-release/`valuesJson` target |
 | Owner-label stamping for object ownership | `prodbox.io/id` label + annotation on every rendered object | **Reuse** as discovery evidence; add exact structural ownership and snapshot-bound delete authority |
 | Full **workload** renderer (Deployment/StatefulSet/Service from types) | prodbox still uses Helm charts for workloads | **New** — the gap [§1](#1-why-this-doctrine-exists-types-render-manifests-helm-does-not) closes |
-| Typed live actions: scoped SSA, scheduler CAS/Binding, authenticated delete, staged execution, wait, rollback | prodbox uses `kubectl apply -f` + Helm `--wait` | **New** — the engine [§5](#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait) |
+| Typed live actions: scoped SSA, scheduler CAS/Binding, authenticated delete, staged execution, wait, rollback | prodbox uses `kubectl apply -f` + Helm `--wait` | **New** — the engine [§5](#5-the-applyreconcile-engine-snapshot-bound-typed-actions) |
 | Generated operator installs + CR instances (no upstream charts) | prodbox consumes 5 upstream charts | **New** — [§4](#4-no-third-party-charts--no-third-party-software-operators-are-generated) |
 | Multi-arch baked binaries replacing public-registry pulls | prodbox caches via Harbor mirror (`ContainerImage.hs`, `DockerConfig.hs` no-`docker login`) | **New** ([image_build_doctrine.md](./image_build_doctrine.md)) |
 
@@ -792,9 +792,9 @@ lands in Phase 26 on the tier-(c) reconciler. This doc states the target shape a
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — the unrepresentability of the unsafe manifests [§3](../illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent) forecloses
 - [Platform Services Doctrine](./platform_services_doctrine.md) — the standard set, the derived-NetworkPolicy
   rule ([§9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), the complete
-  resource-envelope rule ([§10](./platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)),
+  resource-envelope rule ([§10](./platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope)),
   substrate-equivalence ([§12](./platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant))
-- [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§6](./readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps) the [§5](#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait) wait-for-ready is the runtime enactor of a readiness edge (observed from the live object, never a `threadDelay`)
+- [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§6](./readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps) the [§5](#5-the-applyreconcile-engine-snapshot-bound-typed-actions) wait-for-ready is the runtime enactor of a readiness edge (observed from the live object, never a `threadDelay`)
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — `renderAll` consumes the capacity-checked IR; overcommit is rejected before `renderAll`
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the compute-engine/topology the rendered node set realizes
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — secrets-by-name; a rendered manifest never carries plaintext secret bytes

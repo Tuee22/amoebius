@@ -153,7 +153,7 @@ runs on no substrate.
   (`SingleNode` vs `Distributed`) that selects *which manifest graph* to render — the structural generalization
   of the replica dial — and amoebius builds no alternate provider arm it does not yet need (headroom in the
   type, not shipped code).
-- [`service_capability_doctrine.md §4.1`](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-substrate-selected-and-jit-resolved-never-authored)
+- [`service_capability_doctrine.md §4.1`](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored)
   — the `InferenceEngine` capability: the engine is substrate-selected and jit-resolved, never authored —
   grounded in [`content_addressing_doctrine.md §4.5`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
   — the ninth capability's provider is a closed union of substrate-tagged `EngineRuntime` identities with **no
@@ -532,7 +532,7 @@ return their exact structured `Left`; product labels and raw totals are never su
 `documents/illegal_state/illegal_state_catalog.md` (§3.25 layer reconciliation), `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
-Adopt [`service_capability_doctrine.md §4.1`](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-substrate-selected-and-jit-resolved-never-authored)
+Adopt [`service_capability_doctrine.md §4.1`](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored)
 and [`content_addressing_doctrine.md §4.5`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss):
 build the ninth capability as the strictest instance of the [§4](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding)
 binding — a provider selected from a **concrete eligible target offering** (whose lane is projected from that

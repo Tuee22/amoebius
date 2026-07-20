@@ -304,7 +304,7 @@ adopts; individual sprints cite the same sections where they build on them.
   and [`§6`](../documents/engineering/service_capability_doctrine.md#6-fungibility-reconciled-app-surface-invariant-shape-deployment-ruled)
   — *capability → provider → shape: the binding* / *fungibility, reconciled*: the SPA surface is byte-invariant
   across clusters while the provider+shape binding varies in the deployment-rules layer.
-- [`service_capability_doctrine.md §4.1`](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-substrate-selected-and-jit-resolved-never-authored)
+- [`service_capability_doctrine.md §4.1`](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored)
   — *the InferenceEngine capability — the engine is substrate-selected and jit-resolved, never authored*: the
   inference engine backing the round-trip is a named catalog identity resolved on first miss, not an authored URL
   or a baked payload, keyed to the `linux-cpu` selection of the deployment-rules layer.
@@ -501,7 +501,7 @@ MUST turn the byte-match and the first-miss/no-engine-layer checks red respectiv
 
 ### Objective
 Adopt [`app_vs_deployment_doctrine.md §7 — infernix is a shared library; the inference substrate is a deployment rule`](../documents/engineering/app_vs_deployment_doctrine.md#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule),
-[`service_capability_doctrine.md §4.1 — the engine is substrate-selected and jit-resolved`](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-substrate-selected-and-jit-resolved-never-authored),
+[`service_capability_doctrine.md §4.1 — the engine is substrate-selected and jit-resolved`](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored),
 and [`content_addressing_doctrine.md §4.5 — one bounded content-addressed cache, resolved on first miss`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss):
 round-trip a real inference request through the composed infernix workflow on `linux-cpu`, the engine jit-resolved
 into the bounded cache rather than baked or URL-fetched, while the jitML composition is proven to type-check

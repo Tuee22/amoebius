@@ -186,15 +186,15 @@ and Prometheus + Grafana — no more, no fewer. The full derived DAG spans these
   and [`§6 — the reconciler observes, never sleeps`](../documents/engineering/readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps):
   the whole standard stack's hard ordering edges are derived from the declared dependency graph and enacted as
   observed-ready conditions, never a duration-gated or prose-ordered installer.
-- [`manifest_generation_doctrine.md §5 — the apply/reconcile engine: server-side apply, owned field manager, prune, wait`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)
-  and [`§2 — the typed manifest model (`renderAll` is the sole public pure function to objects)`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects):
+- [`manifest_generation_doctrine.md §5 — the apply/reconcile engine: server-side apply, owned field manager, prune, wait`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
+  and [`§2 — the typed manifest model (`renderAll` is the sole public pure function to objects)`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects):
   Phase 20 reuses the Phase-16 pure `renderAll :: ProvisionedSpec -> [K8sObject]` and typed-action reconciler
   whose **wait-for-ready is observed from the live object, never a `threadDelay`** to apply and sequence the
   set.
 - [`image_build_doctrine.md §2 — the single distribution rule`](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster):
   every service binary (Percona operator, Patroni, pgAdmin, Prometheus, Grafana) is baked into the Phase-15
   multi-arch base image and resolved only in-cluster; nothing in this bring-up pulls from a public registry.
-- [`platform_services_doctrine.md §10 — every execution unit declares its complete resource envelope`](../documents/engineering/platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)
+- [`platform_services_doctrine.md §10 — every execution unit declares its complete resource envelope`](../documents/engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope)
   and [`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix):
   every app/init/sidecar container and volume is the exact rendered projection of the checked CPU, memory,
   ephemeral-storage, durable-storage, cache, and accelerator fields; `None`/empty provisions remain explicit

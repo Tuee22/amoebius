@@ -118,7 +118,7 @@ Register 1, in-process, substrate `none`.
 ## Sprint 3.1: Author the `GatewayMigration` `Model` — both branches 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Formal/GatewayMigration.hs` (the concrete `Model` value + its four named
+**Implementation**: `src/Amoebius/Formal/GatewayMigration.hs` (the concrete `Model` value + its five named
 invariants), atop the Phase-2 `src/Amoebius/Formal/{Model,Interpret,EmitTLA,Explore}.hs` kernel — target
 paths, not yet built.
 **Blocked by**: Phase 2 gate (the `Model`/`interpret`/`emitTLA` kernel and the in-process explorer).
@@ -138,7 +138,12 @@ express the migration as one reifiable value — state variables (per-cluster re
 owner, DNS record, migration phase, active branch), the ordered `Planned` guarded actions
 (`stand-up-replica → quiesce → drain / verify-caught-up → promote → repoint-DNS → unfreeze → drain-monitor →
 decommission`) and the `Failover` guarded actions (promote-survivor → repoint-DNS → bounded-rebind), and the
-four named invariants — with **no** singleton-election variable anywhere.
+five named invariants — the fifth, `NoTakeWithoutProvenFreshness`, generalizes the `Planned` `verify-caught-up`
+precondition into a `FreshnessWitness` guard on the promote / gateway-take transition that a cold secondary
+seeded from backup within its `freshnessBound` also discharges
+([`gateway_migration_model_doctrine.md §3`](../documents/engineering/gateway_migration_model_doctrine.md#3-the-model),
+[`backup_recovery_doctrine.md §8`](../documents/engineering/backup_recovery_doctrine.md#8-the-gateway-dovetail-seed-from-backup-under-consistency-over-availability))
+— with **no** singleton-election variable anywhere.
 
 ### Deliverables
 - The `GatewayMigration` `Model` value in the Phase-2 first-order fragment, both branches expressed as guarded
@@ -152,7 +157,12 @@ four named invariants — with **no** singleton-election variable anywhere.
   committed before cutover (cutover reachable only after `verify-caught-up` **and** the promoted offset covers
   every committed write), so a `verify-caught-up`-passes-while-offsets-lag transition violates it —
   `NoWriteAfterStaleFailover` (accrued divergence stays within the declared budget; an over-budget write
-  violates it).
+  violates it) — and `NoTakeWithoutProvenFreshness` (no cluster takes the wild-ingress role from a data plane
+  whose freshness is unproven): the promote / gateway-take action is guarded by a `FreshnessWitness`
+  dischargeable by a warm caught-up replica **or** a cold backup-seeded standby proven within `freshnessBound`,
+  and a `cold-seed` environment action (populates a standby's log from a backup watermark, never past the
+  active's committed offset) drives the seed dynamics so the invariant cannot hold vacuously; a take-without-
+  witness transition violates it.
 - The **liveness** properties encoded as `Temporal` under a named weak-fairness annotation (`modelFairness` +
   `modelProperties`): `MergeConverges` (`ownerCount ~> ownerCount = 1` after heal) and `SessionEventuallyRebinds`
   — the properties a safety invariant cannot express, per

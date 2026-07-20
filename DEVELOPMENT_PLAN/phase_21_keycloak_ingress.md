@@ -160,7 +160,7 @@ before the first effect, while their exact-fit twins render and reconcile.
   `HostLocalPeer` endpoint that does not interconvert; this phase is the live realization of that
   render-foreclosed impossibility (and of [§3.6](../documents/illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other),
   the derived-allow-edge NetworkPolicy rule).
-- [`manifest_generation_doctrine.md` §5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)
+- [`manifest_generation_doctrine.md` §5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
   — **the apply/reconcile engine**: the Gateway, `HTTPRoute`, Keycloak, and the derived NetworkPolicies are
   typed `K8sObject`s rendered by `renderAll` and enacted by the Phase-16 server-side-apply reconciler under the
   fixed `amoebius` field manager — no Helm, no hand-authored YAML.

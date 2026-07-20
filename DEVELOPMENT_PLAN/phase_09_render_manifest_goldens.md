@@ -142,7 +142,7 @@ proven/tested/assumed ledger, marking runtime enforcement UNVERIFIED (owned by t
   — **one namespace per platform capability, derived never authored.** The render-golden battery asserts every
   emitted object lands in its doctrine-**derived** namespace and that a free-text or cross-capability namespace
   is not a value `renderAll` can emit — the rendered-output enactment that gates the namespace-layout foreclosure.
-- [`manifest_generation_doctrine.md §2`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects)
+- [`manifest_generation_doctrine.md §2`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects)
   — **the typed manifest model: `renderAll` is a pure, total function to objects.** Adopt the pure, total,
   cluster-free `renderAll :: ProvisionedSpec -> [K8sObject]` whose output is a value amoebius inspects before any
   object reaches a cluster; the record *is* the manifest, serialized via Aeson, with no intermediate template
@@ -177,7 +177,7 @@ proven/tested/assumed ledger, marking runtime enforcement UNVERIFIED (owned by t
   Kubernetes objects; the renderer neither recomputes demand nor accepts an unchecked service value.
 - [`platform_services_doctrine.md §9`](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)
   (east-west connectivity derived from the dependency graph; the single wild-ingress path) and
-  [`§10`](../documents/engineering/platform_services_doctrine.md#10-every-container-declares-cpu-and-ram)
+  [`§10`](../documents/engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope)
   (every execution unit declares a complete resource envelope) — the *owners* of the connectivity and resource rules; this phase adopts
   their **rendering enactment** (the derived NetworkPolicy and exact provisioned resource fields on the emitted
   objects), not the rules themselves.
@@ -212,7 +212,7 @@ byte-for-byte golden — proving the record *is* the manifest with no template l
 object model), `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
-Adopt [`manifest_generation_doctrine.md §2`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects):
+Adopt [`manifest_generation_doctrine.md §2`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects):
 build the typed Haskell `K8sObject` model — every Kubernetes object amoebius emits as a typed record
 serialized to JSON via Aeson, exactly the `object [...]` discipline the prodbox sibling already applies to its
 supporting objects (*sibling evidence, not an amoebius result*) — so a manifest is a value, not interpolated

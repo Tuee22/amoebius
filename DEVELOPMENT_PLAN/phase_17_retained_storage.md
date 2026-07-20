@@ -258,7 +258,7 @@ section it implements; individual sprints cite the same sections where they adop
 - [`cluster_lifecycle_doctrine.md §7`](../documents/engineering/cluster_lifecycle_doctrine.md#7-ephemeral-spin-updown-with-deterministic-rebind)
   (cross-reference, not adopted here) — the ephemeral spin-up/down whose teardown removes ephemeral
   infrastructure and never durable backing, which the rebind gate exercises; and
-  [`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait)
+  [`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
   (delivered in Phase 16) — the SSA reconciler that renders and applies the StorageClass and PV objects.
 
 ## Sprints
