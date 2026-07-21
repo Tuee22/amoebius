@@ -28,7 +28,7 @@ repointing DNS, across geo-replication lag, without stranding a live session or 
 cannot cover it because it spans clusters. This is the *only* boundary this model targets, and it is the
 **main focus of amoebius's simulation and proofs**.
 
-Both branches are in scope. The prior framing (`tla_modelling_assumptions.md §2`, now superseded) scoped the
+Both branches are in scope. The prior framing (`tla_modelling_assumptions.md`, now superseded) scoped the
 model to the `Failover` branch and treated the `Planned` branch's RPO=0 as merely an argued assumption. **This
 doctrine reverses that:** the `Planned` coordinated handover and the `Failover` emergency takeover are *both*
 modelled, simulated, and proven.
@@ -61,7 +61,7 @@ state variables (per-cluster replication offset/log, gateway owner, DNS record, 
 `Planned` and `Failover` transitions as guarded actions, and the invariants below — from which `interpret`
 (the runtime decision core) and `emitTLA` (the generated, never-committed `.tla`) are total renderings, so the
 model↔code correspondence holds by construction (no hand-maintained variable→module table, unlike the
-superseded doc's §2).
+superseded doc).
 
 The model asserts properties of **two kinds** — safety (nothing bad ever happens; checked on every reachable
 state) and liveness (something good eventually happens; a temporal `modelProperties` goal checked by TLC under a

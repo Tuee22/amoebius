@@ -6,7 +6,7 @@
 **Generated sections**: none
 
 > **Purpose**: The single, authoritative, numerically-ordered phased plan that delivers the whole amoebius
-> vision. This is the live tracker for phase order, status, validation gates, and remaining work.
+> vision — the live tracker for phase order, status, validation gates, and remaining work.
 
 Amoebius is an **everything-orchestrator**: one Haskell binary running as a CLI, a sudo-capable host
 daemon, and an in-cluster singleton service, whose **Dhall DSL makes illegal cluster state
@@ -230,14 +230,14 @@ the GHC pin, so it is a named acquisition path even though its buildability is n
 
 ✅ Done · 🔄 Active · 📋 Planned · ⏸️ Blocked · 🧪 Live-proof pending. Status lives **only** in this plan;
 doctrine docs state the target shape and link back here. Full definitions in
-[development_plan_standards.md §C](development_plan_standards.md). Pre-implementation, Phase 0 (this
+[development_plan_standards.md §C](development_plan_standards.md#c-status-vocabulary). Pre-implementation, Phase 0 (this
 documentation suite) is 🔄 **Active** and every later phase is 📋 **Planned**.
 
 ## Definition of Done (per phase)
 
 A phase is ✅ Done only when its acceptance **Gate** has actually run in its register on its substrate and
 emitted a green, committed, `ledger_lint`-checked proven/tested/assumed ledger — never on "it compiles" (the
-honesty rule, [development_plan_standards.md §K](development_plan_standards.md)). The ✅ Done flip **records the
+honesty rule, [development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed)). The ✅ Done flip **records the
 exact re-runnable gate command, the run date, the substrate, and the ledger hash** in the phase row or doc; a
 flip missing them is rejected by the documentation lint. Every Gate is written to the gate-integrity discipline
 ([development_plan_standards.md §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)):
@@ -267,7 +267,7 @@ ordered by substrate; phases **38+** are the backlog.
 | 10 | chain/Step kernel + `--dry-run` plan render | none | 1 | `chain :: cfg -> [Step]` renders a byte-for-byte `--dry-run` plan with no effects (zero `stepRun`, external-observer verified); the pure descent is golden-locked | 📋 Planned | [phase_10](phase_10_chain_kernel_dryrun.md) |
 | 11 | Boundary-integration fake-tool harness | none | 2 | the binary runs the plan against fake `kubectl`/`docker`/`pulumi` by absolute path (the `helm` fake a zero-invocations negative); recorded argv == the committed hand-authored transcript and applied bytes == the goldens; committed argv/byte/PATH mutants turn it red | 📋 Planned | [phase_11](phase_11_boundary_fake_tool_harness.md) |
 | 12 | Deterministic-simulation substrate | none | 2 | the real daemon/reconciler code under `IOSim`/`IOSimPOR` replays a committed fault/partition/redelivery schedule; same-seed → byte-identical trace (a distinct seed must differ); a committed fault-mutant turns the invariant red; modeled-env fidelity marked assumed | 📋 Planned | [phase_12](phase_12_deterministic_sim_substrate.md) |
-| 13 | SPA composition (representational) + demo-SPA local | none | 1/2 | `prop_spaCompositionDecodes` holds over generated pairs (coverage floors); the PureScript demo SPA runs locally against a faked backend (Playwright), the contract from a committed golden | 📋 Planned | [phase_13](phase_13_spa_composition_representational.md) |
+| 13 | SPA composition (representational) + demo-SPA local | none | 1/2 | `prop_spaCompositionDecodes` holds over generated pairs (coverage floors); both PureScript demo SPAs run locally against a faked backend (Playwright), the contract from a committed golden | 📋 Planned | [phase_13](phase_13_spa_composition_representational.md) |
 | 14 | Python midwife + substrate detect + single kind cluster | linux-cpu | 3 | `pb bootstrap --distro=kind` admits engine CPU/memory, pod/CNI/CSI slots, mapped/API/etcd logical+physical state, presentation-aware disk, kubelet aliases, and inner/outer OCI content/snapshots; re-run is a no-op; teardown is leak-free | 📋 Planned | [phase_14](phase_14_midwife_bootstrap_kind.md) |
 | 15 | Multi-arch base image + jit-build resolver + `distribution` registry | linux-cpu | 3 | a snapshot-bound host envelope admits buildx CPU/memory/scratch/cache/concurrency before execution; the resulting multi-arch base image publishes atomically into the in-cluster registry with no public-registry pulls | 📋 Planned | [phase_15](phase_15_base_image_registry.md) |
 | 16 | Typed renderer + live SSA reconciler | linux-cpu | 3 | before any write, one live snapshot admits the complete transition across CPU/memory, pod/CNI/CSI slots, mapped/API/etcd state, filesystem/content/snapshots, object/durable/migration backings, controller/webhook/gateway/executor overlap, and accelerator/net-free-VRAM; mismatch writes nothing | 📋 Planned | [phase_16](phase_16_renderer_reconciler.md) |
@@ -290,7 +290,7 @@ ordered by substrate; phases **38+** are the backlog.
 | 33 | infernix lift + CPU inference reproducibility | linux-cpu | 3 | a finite inference work budget derives workflow/cache/SPA/build/registry/harness and cold-run overlap before effects; independent same-hash CPU recompute matches and the application-logic-only demo deploys | 📋 Planned | [phase_33](phase_33_infernix_lift.md) |
 | 34 | jitML lift + checkpoints + coordinator + CUDA | linux-cuda | 3 | observed CUDA family/count and per-device allocatable/free VRAM after mandatory reserve must satisfy the pure envelope; the named owner container receives the exact whole-device claim and pod affinity before effects; raw-fits/net-fails writes nothing | 📋 Planned | [phase_34](phase_34_jitml_lift_cuda.md) |
 | 35 | Apple-Metal host compute daemon | apple | 3 | physical CPU/unified memory/storage fit system reserve + a presentation/quantum-derived Lima disk + Metal worker + host cache; outputs route through the provisioned mutation gateway, raw MinIO stays unexposed, and every high-water is read back | 📋 Planned | [phase_35](phase_35_apple_metal_host_daemon.md) |
-| 36 | Test-topology DSL + suggest-test + elevated harness | per generated test | 3 | a generated test provisions all observed compute/storage/accelerator/quota classes plus closed registry-publication, Pulumi/checkpoint, and old+new migration/copy-Job branches, then tears down with every applicable resource-class delta empty | 📋 Planned | [phase_36](phase_36_test_topology_dsl.md) |
+| 36 | Test-topology DSL + suggest-test + elevated harness | per generated test | 3 | a generated test provisions all observed compute/storage/accelerator/quota classes plus closed registry-publication, Pulumi/checkpoint, and old+new migration/copy-Job branches, runs a delegated-failover simulation on its single named substrate, then tears down with every applicable resource-class delta empty | 📋 Planned | [phase_36](phase_36_test_topology_dsl.md) |
 | 37 | Live SPA deploy | linux-cpu | 3 | the full app/rollout, surviving platform/workflow/cache, cold-tenant rematerialization, object/topic/database, image, slot, and API/etcd transition provisions before apply; the composed inference path round-trips behind Keycloak/Envoy | 📋 Planned | [phase_37](phase_37_spa_live_deploy.md) |
 | 38+ | Later phases | varies | — | each high-numbered in-scope phase gets its own gate when reached (GHC 9.14 bump, schema-migration automation, the Haskell extension DSL + AST checker + JIT, niche substrates incl. Windows-CUDA) | 📋 Planned | [later_phases](later_phases.md) |
 

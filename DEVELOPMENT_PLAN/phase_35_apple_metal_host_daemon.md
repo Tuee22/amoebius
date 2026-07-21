@@ -186,7 +186,8 @@ the implementation):
 - `test/dhall/phase_35_illegal/` — the four wild-exposure negatives (see Sprint 35.5), each a one-field
   mutation of the committed green host-comms spec, each carrying its validation-locus tag and its expected
   `dhall type` error string, registered in the Phase-6 illegal-state corpus.
-- `test/mutants/phase_35/const_output.patch`, `lb_nodeport.patch` — the committed seeded mutants the gate must
+- `test/mutants/phase_35/const_output.patch`, `lb_nodeport.patch`, `omit_metal_work_item.patch`,
+  `favorable_metal_epoch.patch`, `drop_metal_overlap_debit.patch` — the committed seeded mutants the gate must
   turn red.
 - `test/mutants/phase_35/resources/` — one-short provider/compiler/worker/harness cases and dropped-envelope/
   premature-replacement mutants, paired with the complete `resource_fold.json` positive.
@@ -279,7 +280,7 @@ where they adopt them.
   — *the decision that was open, and is now resolved*: this phase builds the resolved channel-2 design — a host
   compute daemon as a plain Pulsar + gateway-backed-MinIO peer over host-only NodePorts with **no mTLS**; the
   gateway is the sole mutation endpoint and the raw MinIO backend is not exposed — taking the two
-  localhost-only channels of [`§1`](../documents/engineering/host_cluster_comms_doctrine.md#1-the-whole-surface-two-channels-both-localhost-only),
+  localhost-only channels of [`§1`](../documents/engineering/host_cluster_comms_doctrine.md#1-the-host-origin-surface-two-channels-both-localhost-only),
   the no-bespoke-control-channel rule of [`§3`](../documents/engineering/host_cluster_comms_doctrine.md#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)
   (*coordination is Pulsar + MinIO*, with MinIO mutation mediated by the Phase-25 gateway), the
   network-restriction threat model of [`§5`](../documents/engineering/host_cluster_comms_doctrine.md#5-why-no-mtls-is-safe-here-the-network-restriction-is-the-security-boundary)
@@ -344,7 +345,10 @@ and [`substrate_doctrine.md §3`](../documents/engineering/substrate_doctrine.md
 — the no-environment / no-`PATH` lazy tool-ensure contract — handed off by the Python `pb` midwife of
 [`substrate_doctrine.md §6`](../documents/engineering/substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off):
 synthesize the Linux host the apple substrate's cluster runs on via Lima, with every host tool ensured and
-invoked by absolute path through brew — the substrate foundation every later Phase-35 sprint stands on.
+invoked by absolute path through brew — the substrate foundation every later Phase-35 sprint stands on. The
+physical-host provision fold this sprint builds adopts [`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
+— the systematic provision matrix and the total provision fold.
 
 ### Deliverables
 - An apple-substrate manager that drives Lima (`limactl`) to start a named, budget-sized Ubuntu-24.04 VM and
@@ -449,10 +453,12 @@ other mutation authority/route; it can never replace or share the mutation-gatew
 
 ### Objective
 Adopt [`host_cluster_comms_doctrine.md §6 — the host-only restriction in practice`](../documents/engineering/host_cluster_comms_doctrine.md#6-the-host-only-restriction-in-practice-and-its-sibling-precedent)
-and [`§1 — two channels, both localhost-only`](../documents/engineering/host_cluster_comms_doctrine.md#1-the-whole-surface-two-channels-both-localhost-only):
+and [`§1 — two channels, both localhost-only`](../documents/engineering/host_cluster_comms_doctrine.md#1-the-host-origin-surface-two-channels-both-localhost-only):
 realize channel 2's transport — a NodePort bound to the host's loopback so the daemon connects to
 `127.0.0.1:<nodeport>` with no path from LAN/WAN — generalizing the prodbox `127.0.0.1:30080` Harbor precedent
-(sibling evidence, not an amoebius result) onto the Lima-backed apple substrate. The rendered manifests are
+(sibling evidence, not an amoebius result) onto the Lima-backed apple substrate, whose Lima VM node network —
+per [`substrate_doctrine.md §4.1 — Lima on Apple`](../documents/engineering/substrate_doctrine.md#41-lima-on-apple)
+— this sprint's substrate-layer loopback binding constrains. The rendered manifests are
 emitted from Haskell and never committed.
 
 ### Deliverables
@@ -612,7 +618,7 @@ The whole sprint (📋 Planned).
 ## Sprint 35.5: Channel-2 peer + wild-exposure unrepresentable + the Apple-Metal peer gate 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/HostWorker/Peer.hs`, `src/Amoebius/HostWorker/Auth.hs`, `src/Amoebius/HostComms/Illegal.hs`, `test/dhall/phase_35_apple_metal_peer.dhall`, `test/live/AppleMetalPeerSpec.hs` (target paths; not yet built)
+**Implementation**: `src/Amoebius/HostWorker/Peer.hs`, `src/Amoebius/HostWorker/Auth.hs`, `src/Amoebius/HostComms/Illegal.hs`, `test/live/AppleMetalPeerSpec.hs` (the authored harness that emits the gate `.dhall` at gate-run time) (target paths; not yet built)
 **Blocked by**: Sprint 35.2 (the host-only loopback NodePorts the peer dials and the gate asserts is localhost-only); Sprint 35.4 (the daemon lifecycle whose `Serve` step does the peering); Phase 24 gate (external prereq — the native Pulsar CBOR client); Phase 25 gate (external prereq — the content-addressed store + workflow runtime); Phase 18 gate (external prereq — Vault for secrets-by-name auth)
 **Independent Validation**: the worker subscribes to its work topic over the native Pulsar TCP binary protocol (no WebSockets), does the work, and writes outputs through the Phase-25 mutation gateway into the content-addressed MinIO store — all over `127.0.0.1:<nodeport>` with **no mTLS and no bespoke binary↔daemon RPC**; client auth resolves through Vault by secret-name, never via a host environment variable or `PATH`; **each of four** wild-exposure negatives — (1) host-origin NodePort typed `LoadBalancer`, (2) an Envoy/HTTPRoute route on it, (3) any wild listener referencing the port, (4) the daemon publishing its own wild ingress — is a committed `.dhall` that is **a one-field mutation of the committed green host-comms spec** (identical except the single wild field, so that field is provably the rejection cause), is registered in the Phase-6 illegal-state corpus with its validation-locus tag, and **fails `dhall type` with the specific structured error naming the violated exclusion** (asserted against the pinned expected error string, not merely "fails"); the gate `.dhall` runs the full Apple-Metal peer workflow end-to-end and tears down leak-free (per the three-part residue check in the Gate), emitting a proven/tested/assumed ledger artifact.
 **Docs to update**: `documents/engineering/host_cluster_comms_doctrine.md`, `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`
@@ -624,7 +630,7 @@ the threat model of [`§5 — why no mTLS is safe here`](../documents/engineerin
 and the type-exclusions of [`§7 — what the DSL makes unrepresentable here`](../documents/engineering/host_cluster_comms_doctrine.md#7-what-the-dsl-makes-unrepresentable-here):
 make the host worker an ordinary Pulsar/gateway-backed-content-store peer over the host-only NodePorts with no custom RPC and no
 transport crypto, close the carve-out so its boundaries cannot be drawn wrong, and prove the phase gate from
-[`§1`](../documents/engineering/host_cluster_comms_doctrine.md#1-the-whole-surface-two-channels-both-localhost-only)
+[`§1`](../documents/engineering/host_cluster_comms_doctrine.md#1-the-host-origin-surface-two-channels-both-localhost-only)
 — an Apple-Silicon host daemon runs a Metal ML workload as a cluster Pulsar/gateway-backed-content-store peer.
 
 ### Deliverables
@@ -640,8 +646,7 @@ transport crypto, close the carve-out so its boundaries cannot be drawn wrong, a
 - The gate `.dhall` (`test/dhall/phase_35_apple_metal_peer.dhall`) is a **generated artifact emitted from
   Haskell at gate-run time and never committed** — its byte-authority is the authored Haskell emitter in
   `src/Amoebius/HostWorker/Peer.hs` / `HostComms/Illegal.hs`, per development_plan_standards §B (Implementation
-  names authored source, never a generated artifact); the path in the Implementation field denotes this
-  emitted-at-runtime output, not committed source. The committed byte-authority for the type-check negatives is
+  names authored source, never a generated artifact). The committed byte-authority for the type-check negatives is
   instead the green host-comms spec and the four one-field-mutant illegal fixtures under
   `test/dhall/phase_35_illegal/` (authored, committed in Phase 0). The gate `.dhall`, once emitted, drives:
   derive and verify the complete physical-host → Lima-VM/node + host-worker + cache provision witness —

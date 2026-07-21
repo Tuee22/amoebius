@@ -221,12 +221,12 @@ Phase 15) is present as a rehoming consumer of MinIO, not re-delivered here.
   every backbone binary is baked into the Phase-15 multi-arch base image and resolved only in-cluster; the
   registry stores its blobs in MinIO via the S3 driver, so MinIO must be serving before the registry — the
   thin ordering edge §9 names, and the rehoming Phase 19 delivers.
-- [`manifest_generation_doctrine.md §5 — the apply/reconcile engine: server-side apply, owned field manager, prune, wait`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
+- [`manifest_generation_doctrine.md §5 — the apply/reconcile engine: snapshot-bound typed actions`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
   and [`§2 — the typed manifest model (`renderAll` is the sole public pure function to objects)`](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects):
   Phase 19 reuses the Phase-16 pure `renderAll :: ProvisionedSpec -> [K8sObject]` and typed-action reconciler whose
   **wait-for-ready is observed from the live object, never a `threadDelay`** to apply and sequence the backbone.
 - [`platform_services_doctrine.md §10 — every execution unit declares its complete resource envelope`](../documents/engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope)
-  and [`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix) / [`§5.1`](../documents/engineering/resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry):
+  and [`resource_capacity_doctrine.md §3.1 — the systematic provision matrix`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix) / [`§5.1 — durable demand is logical first, physical only after geometry`](../documents/engineering/resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry):
   every rendered app/init/sidecar container carries the exact provisioned CPU, memory, and ephemeral-storage
   requests/limits; bounded pod-local volumes and durable presentation/usable/raw sizes are exact; and accelerator `None` is
   explicit alongside cache `None` for this linux-cpu service set. Kubernetes fields are a projection of the
@@ -541,9 +541,10 @@ The whole sprint (📋 Planned).
 - `documents/engineering/resource_capacity_doctrine.md` — record the standard-backbone live assertion that
   every Kubernetes resource/volume field is the exact projection of its checked `ProvisionedServiceSpec`,
   including the logical→physical BookKeeper/MinIO folds and uniform StatefulSet claim-plan debit.
-- `documents/engineering/content_addressing_doctrine.md` — record that committed residents, bounded concurrent
-  writes, and failed-write orphans through the finite positive GC horizon all remain in MinIO's capacity peak;
-  GC creates credit only after observed deletion.
+- `documents/engineering/storage_lifecycle_doctrine.md` — the §2 no-provisioner storage class and §4
+  deterministic PV naming and explicit bind gain their first Register-3-tested evidence as MinIO and Pulsar's
+  ZooKeeper/BookKeeper members land their durable bytes on identity-named retained PVs born from StatefulSet
+  `volumeClaimTemplate`s.
 
 **Cross-references to add:**
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-19 status when the gate passes and link this document.

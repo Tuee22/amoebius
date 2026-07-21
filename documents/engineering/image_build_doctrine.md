@@ -62,7 +62,7 @@ rate limits, and a warm cluster is air-gapped by construction.
   — preferring `apt`, then an official binary/tarball, then build-from-source ([§7](#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)) — so the running workload
   is amoebius's own image carrying a trusted binary, not someone's public container. The only contact with
   upstream is the **base-image build** downloading those binaries/packages on the builder, never an
-  in-cluster pull. This reverses prodbox's mirror-into-registry model (`local_registry_pipeline.md` [§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)).
+  in-cluster pull. This reverses prodbox's mirror-into-registry model (`local_registry_pipeline.md` §5).
 - **The in-cluster registry is `distribution`, not Harbor.** The registry every workload pulls from is the
   single-binary `distribution` (`registry:2`) OCI registry — itself a baked binary ([§7](#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)) — which **replaces
   Harbor**. It serves amoebius-built images (the runtime image, app/workload images); it is *not* a
@@ -74,7 +74,7 @@ rate limits, and a warm cluster is air-gapped by construction.
   fact that the runtime is pointed at the in-cluster registry; the per-distro plumbing that makes that
   endpoint resolve on each node (RKE2 `registries.yaml` rewrite, a cloud-substrate containerd-mirror
   DaemonSet) is a substrate detail owned by [substrate_doctrine.md](./substrate_doctrine.md). prodbox's
-  `local_registry_pipeline.md` [§4](#4-atomic-publication--a-partial-multi-arch-upload-is-a-failed-upload) is the precedent (generalized from Harbor to `distribution`).
+  `local_registry_pipeline.md` §4 is the precedent (generalized from Harbor to `distribution`).
 - **Substrate-equivalent image refs.** The build pipeline produces one ref set used on every substrate;
   there is no "cloud-only" or "no-registry" variant. The *image refs* never vary by substrate (the structural
   check is owned by [platform_services_doctrine.md §12](./platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant)); per-cluster
@@ -104,7 +104,7 @@ Concretely:
   compiles the `amd64` and `arm64` layers.
 
 This is the principal generalization over prodbox, which published **native-host-architecture images only**
-(`local_registry_pipeline.md` [§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1) step 4, [§3](#3-buildx-multi-arch--amd64-and-arm64-one-manifest-list)). amoebius lifts native-host-architecture-only builds to always building
+(`local_registry_pipeline.md` §6 step 4, §3). amoebius lifts native-host-architecture-only builds to always building
 both arches as one manifest list.
 
 ```mermaid
@@ -142,7 +142,7 @@ time on the missing arch, not at publish time. So amoebius treats a multi-arch i
   posture.
 - **Transient registry unavailability is retried, then fails loud.** A flake during push is retried against
   the same source; a persistent failure surfaces as an error, never as a silently-skipped arch. amoebius
-  inherits prodbox's retry-then-fail-loud publication posture (`local_registry_pipeline.md` [§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)); for its
+  inherits prodbox's retry-then-fail-loud publication posture (`local_registry_pipeline.md` §5); for its
   multi-arch images the unit of success is the complete manifest list.
 
 > **Honesty.** Fail-closed atomic publication is the *specified* contract for Phase 15, not a tested amoebius
@@ -171,7 +171,7 @@ amoebius-owned images in cluster specs.**
 - **Each build is published under an immutable tag and is consumed by digest.** A workload spec pins an
   image by its immutable identity (tag + digest), so "what runs" is a fixed, reproducible value — never
   "whatever `:latest` happens to be." prodbox's precedent derives a deterministic tag from machine identity
-  (`local_registry_pipeline.md` [§3](#3-buildx-multi-arch--amd64-and-arm64-one-manifest-list)); amoebius generalizes to a deterministic, source/content-derived tag so
+  (`local_registry_pipeline.md` §3); amoebius generalizes to a deterministic, source/content-derived tag so
   that the same inputs produce the same advertised reference.
 - **`:latest` is not used as a deployment reference.** A mutable convenience tag may exist as a *pointer*,
   but no cluster `.dhall` denotes a workload by `:latest`. Whether the type layer makes a `:latest`
@@ -300,7 +300,7 @@ fall into two classes, and the third-party services are **baked**, not mirrored.
 - **The amoebius runtime image it builds.** The amoebius Haskell binary ships as its own runtime image
   (GHC 9.12.4). Its **in-cluster pod role** is selected as control-plane singleton, dedicated
   `amoebius-capacity` scheduler, or worker — adapting prodbox's union-image pattern
-  (`local_registry_pipeline.md` [§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)). The CLI and sudo host daemon are contexts of the same executable outside that pod-role list; a CLI is not a
+  (`local_registry_pipeline.md` §6). The CLI and sudo host daemon are contexts of the same executable outside that pod-role list; a CLI is not a
   pod-level runtime role. infernix and jitML are linked in as extension
   libraries, not separate images.
 - **The infernix/jitML engine runtimes are jit-resolved, not baked.** What the base image *does* bake for the
@@ -420,7 +420,7 @@ is a separate ordinary migration, not this bootstrap cycle. This doc records the
 - **Cluster-bring-up sequencing, amoebic spawn, and teardown** are owned by
   [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md). A spawned child runs the same baked base
   image and warms its own registry by the same publish pipeline — the build doctrine is identical for parent
-  and child because clusters are fungible (platform [§1](#1-scope--the-build-side-not-the-registrys-existence)).
+  and child because clusters are fungible (platform [§1](./platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster)).
 
 ---
 

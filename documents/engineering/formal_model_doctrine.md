@@ -11,7 +11,7 @@
 
 ## 1. Why this doctrine exists
 
-A formal model earns its keep only if it describes the system that actually runs. The usual practice keeps
+A formal model is only useful when it describes the system that actually runs. The usual practice keeps
 two artifacts by hand: a `.tla` specification written in TLA+, and the Haskell code that implements it. Their
 relationship is then a **hand-maintained correspondence table** — "TLA+ variable `x` stands for Haskell field
 `y` in module `Z`" — plus a divergence log recording every place the two have drifted. The sibling prodbox
@@ -45,24 +45,26 @@ invariants, and an optional state constraint that bounds exploration. The expres
 the amoebius safety invariants need — booleans, arithmetic comparison, finite sets, quantifiers over finite
 sets, function literals/update/application — and no more.
 
-    data Model = Model
-      { modelName       :: Name
-      , modelConstants  :: [(Name, ConstVal)]     -- e.g. the cluster set, a bound
-      , modelVars       :: [Name]                  -- state variables
-      , modelInit       :: [(Name, Expr)]          -- initial value per variable
-      , modelActions    :: [Action]                -- guarded, parameterized transitions
-      , modelInvariants :: [(Name, Expr)]          -- named boolean SAFETY properties
-      , modelFairness   :: [(Name, Fairness)]      -- per-action weak/strong fairness (WF/SF)
-      , modelProperties :: [(Name, Temporal)]      -- named LIVENESS properties (temporal)
-      , modelConstraint :: Maybe Expr              -- bounds the explored state space
-      }
+```haskell
+data Model = Model
+  { modelName       :: Name
+  , modelConstants  :: [(Name, ConstVal)]     -- e.g. the cluster set, a bound
+  , modelVars       :: [Name]                  -- state variables
+  , modelInit       :: [(Name, Expr)]          -- initial value per variable
+  , modelActions    :: [Action]                -- guarded, parameterized transitions
+  , modelInvariants :: [(Name, Expr)]          -- named boolean SAFETY properties
+  , modelFairness   :: [(Name, Fairness)]      -- per-action weak/strong fairness (WF/SF)
+  , modelProperties :: [(Name, Temporal)]      -- named LIVENESS properties (temporal)
+  , modelConstraint :: Maybe Expr              -- bounds the explored state space
+  }
 
-    data Action = Action                            -- a guard that, when it holds, assigns primed
-      { actName   :: Name                           -- variables; unlisted variables are UNCHANGED
-      , actParams :: [(Name, Expr)]                 -- each parameter ranges over a finite set
-      , actGuard  :: Expr
-      , actEffect :: [(Name, Expr)]
-      }
+data Action = Action                            -- a guard that, when it holds, assigns primed
+  { actName   :: Name                           -- variables; unlisted variables are UNCHANGED
+  , actParams :: [(Name, Expr)]                 -- each parameter ranges over a finite set
+  , actGuard  :: Expr
+  , actEffect :: [(Name, Expr)]
+  }
+```
 
 The smallness is a requirement, not an economy. **To render a model to TLA+ faithfully, its transition relation
 must be reified — expressed in this closed first-order fragment — not written as an opaque Haskell function.**
@@ -79,11 +81,13 @@ which a safety invariant cannot express (a stuck state with *zero* owners satisf
 converged). The fragment therefore carries two more closed, structurally-walkable pieces alongside the
 first-order `Expr`:
 
-    data Fairness = WeakFair | StrongFair          -- WF_vars / SF_vars on an action
-    data Temporal                                   -- the minimal liveness sub-fragment
-      = Always     Expr                             -- []P
-      | Eventually Expr                             -- <>P
-      | LeadsTo    Expr Expr                        -- P ~> Q  (P leads to Q)
+```haskell
+data Fairness = WeakFair | StrongFair          -- WF_vars / SF_vars on an action
+data Temporal                                   -- the minimal liveness sub-fragment
+  = Always     Expr                             -- []P
+  | Eventually Expr                             -- <>P
+  | LeadsTo    Expr Expr                        -- P ~> Q  (P leads to Q)
+```
 
 `modelFairness` annotates the actions whose continued enablement the liveness argument assumes; `modelProperties`
 are the named temporal goals. Both are as small and closed as the safety fragment, so `emitTLA` walks them

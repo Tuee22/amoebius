@@ -84,7 +84,7 @@ a pure fold that needs no live infrastructure (it is the Phase-7 fold applied to
 pods on the live cluster, and the run emits a proven/tested/assumed ledger naming that register.
 
 **Gate:** on the single-node linux-cpu `kind` cluster, the **one named representative identity**
-`EngineRuntime.LlamaCppCpu@<pinned-ver>` (§32.0 concrete corpus) resolves on **first miss** into the
+`EngineRuntime.LlamaCppCpu@<pinned-ver>` ([Gate integrity](#gate-integrity) concrete corpus) resolves on **first miss** into the
 `CacheBudget`-bounded content-addressed cache (`resolve = {download | build}`, using the Phase-15 baked
 resolver/toolchain, with **no** public-registry pull authored by URL), and the materialized bytes
 **sha256-match the Phase-0-committed catalog pin** (`test/oracle/phase_32_oracle.dhall`: expected
@@ -322,7 +322,7 @@ before the resolver ever materializes an asset.
 4. **Pin-aware pruning is exercised, not declared:** a cache filled to `CacheBudget` with a mix of pinned and
    unpinned residents, then asked to admit one more resident, **evicts an unpinned resident, never a pinned
    one**, and leaves measured peak/final occupancy within `CacheBudget`; the property asserts a pinned resident is present and a
-   named unpinned resident is absent post-prune. The committed seeded mutant `prune = pure ()` (§32.0-b) must
+   named unpinned resident is absent post-prune. The committed seeded mutant `prune = pure ()` ([Gate integrity](#gate-integrity) (b)) must
    turn this clause red (the over-budget residency survives). This is the pure-pool property; its live on-disk
    counterpart is the Sprint 32.4 postflight residency measurement. The fold's expected verdicts are the
    Phase-0 fixture's hand-authored table, never the fold's own output.
@@ -350,14 +350,15 @@ that accepts a free URL, proven by the committed compile-fail negative `test/neg
 (Phase-6 corpus, Phase-0-authored) failing *at the constructor locus* with "no `Url`/free-string constructor",
 paired with a closed-catalog-identity positive that compiles. Every subprocess is absolute-path-resolved,
 asserted by the shim capturing the full absolute `argv[0]` (never a bare `PATH`-relative name). The committed
-seeded mutant `resolve _ = <fixed 16-byte marker>` (§32.0-a) turns the stored-`ContentAddress` assertion red.
+seeded mutant `resolve _ = <fixed 16-byte marker>` ([Gate integrity](#gate-integrity) (a)) turns the stored-`ContentAddress` assertion red.
 **Docs to update**: `documents/engineering/content_addressing_doctrine.md`,
 `documents/engineering/service_capability_doctrine.md`, `documents/engineering/image_build_doctrine.md`,
 `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 Adopt [`content_addressing_doctrine.md §4.5`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)'s
-Tier-1 resolve-on-miss and [`service_capability_doctrine.md` §4.1](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored):
+Tier-1 resolve-on-miss, [`service_capability_doctrine.md` §4.1](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored), and
+[`image_build_doctrine.md §7`](../documents/engineering/image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)'s bake-vs-build split:
 implement the shared jit-build resolver so a named engine identity is materialized on first miss into the
 bounded cache — downloaded prebuilt or built from source with the Phase-15 baked toolchain — with **no arm to
 author a URL**, replacing infernix's `curl`-tar-at-image-build with the one shared resolve-on-miss path.
@@ -378,7 +379,7 @@ author a URL**, replacing infernix's `curl`-tar-at-image-build with the one shar
    proven by the argv-shim/`strace` observer recording zero backend subprocess on the warm path; there is no
    path that accepts a URL or free string, asserted by the committed compile-fail negative
    `test/negative/phase_32_url_arm.hs` failing at the constructor locus with its named error, paired with the
-   closed-catalog positive that compiles. The committed seeded mutant `resolve _ = <fixed-marker>` (§32.0-a)
+   closed-catalog positive that compiles. The committed seeded mutant `resolve _ = <fixed-marker>` ([Gate integrity](#gate-integrity) (a))
    must turn the stored-address assertion red.
 2. Every subprocess the resolver spawns is invoked by absolute path, never resolved against `PATH` — asserted
    by an OS-boundary argv-recording shim capturing the full absolute `argv[0]`, not a resolver self-report.
@@ -414,7 +415,7 @@ first-miss materializations and its digest-keyed single-flight table makes same-
 catalog-derived temporary footprint. A race that never overlaps (serialized by accident) does not satisfy
 this clause.
 **Docs to update**: `documents/engineering/content_addressing_doctrine.md`,
-`documents/engineering/daemon_topology_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+`DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 Adopt [`content_addressing_doctrine.md §4.5`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)'s
@@ -462,7 +463,7 @@ identity) and `test/live/EngineCacheGate.hs` (the Register-3 gate harness) — t
 detect); Phase 15 gate (the baked resolver/toolchain and the in-cluster `distribution` registry proving no
 public pull).
 **Independent Validation**: the gate `.dhall` names the one representative identity
-`EngineRuntime.LlamaCppCpu@<pinned-ver>` (§32.0); the harness asserts the first client request is a first-miss
+`EngineRuntime.LlamaCppCpu@<pinned-ver>` ([Gate integrity](#gate-integrity)); the harness asserts the first client request is a first-miss
 materialization by the per-node cache owner into its `CacheBudget`-bounded `emptyDir`, whose stored bytes
 **sha256-match the
 `test/oracle/phase_32_oracle.dhall` pin**, the named arm **actually executed** (the argv-shim/`strace`
@@ -485,8 +486,8 @@ bounded-parallel-derived capacity overflow, or an ephemeral request smaller than
 headroom is rejected by the Phase-7 fold at the Phase-8 **`provision-seal`** before any resolve, and each
 materialized artifact's
 measured final and temporary on-disk sizes are asserted `≤` its catalog-owned
-`AssetMaterializationDemand`. The committed seeded mutants `resolve _ = <fixed-marker>` (§32.0-a) and
-`prune = pure ()` (§32.0-b) must turn the
+`AssetMaterializationDemand`. The committed seeded mutants `resolve _ = <fixed-marker>` ([Gate integrity](#gate-integrity) (a)) and
+`prune = pure ()` ([Gate integrity](#gate-integrity) (b)) must turn the
 gate red. The run emits a Register-3 proven/tested/assumed ledger.
 **Docs to update**: `documents/engineering/content_addressing_doctrine.md`, `DEVELOPMENT_PLAN/README.md`
 (flip the Phase-32 status when the gate passes), `DEVELOPMENT_PLAN/substrates.md`.
@@ -501,7 +502,7 @@ overclaiming the model/kernel tiers (Phases 33/34).
 
 ### Deliverables
 - The gate `.dhall` naming exactly the one representative identity `EngineRuntime.LlamaCppCpu@<pinned-ver>`
-  (§32.0 concrete corpus), driving one cache-owner pod, two client pods on the same node, and the Phase-0-committed
+  ([Gate integrity](#gate-integrity) concrete corpus), driving one cache-owner pod, two client pods on the same node, and the Phase-0-committed
   resident-plus-temp over-budget, digest-size-conflict, deletion-credit, bounded-parallel-overflow, and
   ephemeral-under-reserved fixtures.
 - The Phase-0-committed oracle `test/oracle/phase_32_oracle.dhall` (expected `ContentAddress`, catalog-owned
@@ -536,10 +537,10 @@ overclaiming the model/kernel tiers (Phases 33/34).
    bounds plus writable/log headroom, and it has no writable `hostPath`.
    A second client on the node reuses the resident handle with no resolve, proven by unchanged resident
    inode/mtime and zero new pull. The committed seeded mutant `resolve _ = <marker>`
-   (§32.0-a) must turn this clause red.
+   ([Gate integrity](#gate-integrity) (a)) must turn this clause red.
 2. A postflight on-disk peak/final measurement confirms pin-aware eviction (pinned resident survives,
    unpinned evicted, measured bytes remain within `CacheBudget`); the committed mutant `prune = pure ()`
-   (§32.0-b) must turn this red. A resident-plus-temp one-byte overflow, digest-size conflict, early deletion
+   ([Gate integrity](#gate-integrity) (b)) must turn this red. A resident-plus-temp one-byte overflow, digest-size conflict, early deletion
    credit, bounded-parallel-derived overflow, and ephemeral-under-reserved owner each return their **tagged** `Left` at the
    Phase-7 fold before any resolve runs, and each materialized artifact's measured final/temp on-disk size is
    within its catalog-owned `AssetMaterializationDemand`.

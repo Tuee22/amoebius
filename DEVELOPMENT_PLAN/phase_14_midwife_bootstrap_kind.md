@@ -84,7 +84,7 @@ raw/reserved/allocatable plus current-free VRAM; and proves the decoded target's
 capacity/capability is no greater than and compatible with that inventory (the linux-cpu observation has no
 CUDA offering);
 **re-running the identical command reports already-converged and changes nothing** — where "changes nothing"
-means the observable triple `(docker/podman container list, `kind get clusters`, kubeconfig file bytes)` is
+means the observable triple `(docker/podman container id/name/image/state, `kind get clusters`, kubeconfig file bytes)` — the container element compared as a normalized id/name/image/state projection, not the volatile uptime/status column — is
 byte-for-byte identical before and after the re-run, and the `execve` audit log for the re-run contains **zero
 mutating package-manager or `kind create` invocations**; from at least one named partially-converged start
 state the identical run **converges without recreating the cluster** (divergence-repair, Sprint 14.4); **every
@@ -195,7 +195,9 @@ sentinel e.g. `"freebsd"`}, arch ∈ {`"x86_64"`/`amd64`, `"aarch64"`/`arm64`, o
 `"ppc64le"`}, GPU ∈ {present, absent} — the full 3×3×2 = 18-cell product, so that the unknown-OS and
 unknown-arch `Left` cases are exercised, not merely the four known-good substrates. The committed table pins
 the expected `Right Substrate` or `Left <reason>` for all 18 cells, including the two load-bearing hard
-failures (Intel-Mac `darwin`+`amd64` → `Left`, and Linux+GPU → `linux-cuda`). On the gate host, `detect`
+failures (Intel-Mac `darwin`+`amd64` → `Left`, and Linux+GPU → `linux-cuda`). No cell in this linux/darwin
+representative set produces the `windows` catalog member, so the `windows` output arm is pinned by the Windows
+phase's oracle, not this gate's. On the gate host, `detect`
 returns `linux-cpu`.
 **Docs to update**: `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/substrates.md`.
 
@@ -221,7 +223,7 @@ a knob.
    independent decision table — including the Intel-Mac and Linux+GPU hard-failure cells, and the two sentinel
    `Left` cells. **Specific-reason negatives (§M.8):** each `Left` cell asserts its *expected reason string/tag*
    (e.g. `apple-arm64-only` for `darwin`+`amd64`, `unknown-arch` for the arch sentinel), paired with the
-   positive that differs only in the foreclosed dimension (`darwin`+`arm64` → `Right macos-arm64`).
+   positive that differs only in the foreclosed dimension (`darwin`+`arm64` → `Right apple`).
 2. **Committed mutant M1 (§M.2):** re-run test 1 against the committed `classify` mutant with the GPU-promotion
    guard negated; assert the Linux+GPU cell flips and the test goes **red**. A run where M1 stays green is void.
 3. Run `detect` on the `linux-cpu` gate host; confirm it returns `linux-cpu`.
@@ -363,7 +365,7 @@ parameters/context/witness host context)
 **Blocked by**: Sprint 14.2, Sprint 14.3.
 **Independent Validation**: on a `linux-cpu` host, `amoebius bootstrap --distro=kind` yields exactly one `Ready`
 node; an immediate re-run reports already-converged and **changes nothing — the observable triple `(docker/
-podman container list, `kind get clusters`, kubeconfig file bytes)` is byte-identical before and after, and the
+podman container id/name/image/state, `kind get clusters`, kubeconfig file bytes)` is byte-identical before and after, and the
 re-run's `execve` audit log holds zero `kind create` or mutating package-manager calls**; from at least one
 **named partially-converged start state** the identical re-run **converges without recreating the cluster** and
 prints an explicit per-managed-resource discover/diff result showing an empty diff; and **every external
@@ -391,7 +393,7 @@ ephemeral storage or declare CUDA on this CPU-only target fail with their specif
 and cause zero workload/storage API writes or host backing allocations.
 **Docs to update**: `documents/engineering/cluster_lifecycle_doctrine.md`,
 `documents/engineering/substrate_doctrine.md`, `documents/engineering/resource_capacity_doctrine.md`,
-`DEVELOPMENT_PLAN/substrates.md`.
+`documents/engineering/dsl_doctrine.md`, `DEVELOPMENT_PLAN/substrates.md`.
 
 ### Objective
 Adopt [`cluster_lifecycle_doctrine.md` §2 — bring-up and bootstrap](../documents/engineering/cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap)
@@ -502,17 +504,11 @@ and discharging the live-inventory cross-check of
   not inside that reserve is topology-expanded with stable identity and explicit CPU/memory/ephemeral
   requests+limits, private allowances, image/runtime-storage metadata, controller policy, and maximum
   termination/replacement overlap. A missing addon ceiling is `UnknownCommitment`, not silently free.
-  These bootstrap add-ons may still use `default-scheduler` in this Phase-14 empty-cluster state. Phase 16
-  admits no guarded workload while that writer set exists. It first subtracts the exact observed add-on set as
-  foreign/static commitments and installs the scheduler/config/root in the derived
-  `amoebius-capacity-scheduler` namespace under exact `ResourceQuota pods=1`; exact active generation/digest
-  readback mints `BootstrapCapacitySchedulerReady` while the managed taint is still absent. That restricted
-  witness can patch only the finite bootstrap add-on/controller set to its provisioned
-  `amoebius-capacity` template. Phase 16 then observes every old UID absent with its release partition and
-  every replacement UID reservation-joined and Ready. Only after that equality may it install and validate the
-  managed-node taint, identity admission, and exclusive Binding RBAC and mint `ManagedCapacityReady`. After
-  that cutover, the scheduler bootstrap Pod is the sole `default-scheduler` exception; a crash/watch gap at any
-  stage re-observes rather than advancing from elapsed time.
+  These bootstrap add-ons may still use `default-scheduler` in this Phase-14 empty-cluster state; the later
+  cutover of these `default-scheduler` bootstrap add-ons onto the managed capacity scheduler — subtracting them
+  as foreign/static commitments, minting `BootstrapCapacitySchedulerReady` then `ManagedCapacityReady`, and
+  leaving the scheduler bootstrap Pod as the sole `default-scheduler` exception — is Phase 16's scope and is
+  specified there.
 - **Phase-0-committed divergent-start fixtures** (§M.1) with their expected converged observation, and the
   committed mutant M3 (reconciler replaced by a `kind get clusters | grep <name>` one-shot guard) that the
   divergence-repair validation turns red.
@@ -585,7 +581,7 @@ and discharging the live-inventory cross-check of
    audit plus host allocation observer must show **zero workload/storage API writes and zero durable/native-host-cache
    backing allocations after the failed preflight begins**.
 4. **Idempotence (the gate's core claim).** Re-run the identical command; assert it reports already-converged
-   and **changes nothing — the observable triple `(docker/podman container list, `kind get clusters`,
+   and **changes nothing — the observable triple `(docker/podman container id/name/image/state, `kind get clusters`,
    kubeconfig file bytes)` is byte-identical before and after the re-run, and the re-run's `execve` audit log
    contains zero `kind create` and zero mutating package-manager calls** — leaving the single node `Ready`, and
    printing the per-managed-resource empty-diff discover result.
@@ -623,6 +619,9 @@ The whole sprint (📋 Planned).
 - `documents/engineering/resource_capacity_doctrine.md` — record Phase 14 as the first live producer of the
   complete observed inventory and declared-capacity/capability cross-check, including version-pinned etcd
   transition geometry and `Unified | SplitRuntime` mount/quota/root readback.
+- `documents/engineering/dsl_doctrine.md` — record that the orchestration surface
+  (parameters/context/witness) is first carried by a live typed host context here (the pure Step/Chain kernel it
+  rides on was delivered pre-cluster), flipping that note from intent to a delivered-status pointer.
 
 **Cross-references to add:**
 - [README.md](README.md) — flip the Phase 14 tracker-row status once work begins and keep its link current.

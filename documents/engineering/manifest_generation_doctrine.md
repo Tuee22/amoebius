@@ -40,8 +40,9 @@ Two reasons motivate the decision, and they are different:
   construction over manifests amoebius did not generate. amoebius therefore renders **every** object it applies,
   including the install manifests of the operators it runs ([§4](#4-no-third-party-charts--no-third-party-software-operators-are-generated)).
 
-amoebius needs semantics around cluster manifest changes, and proofs of correctness / that there won't be a
-degenerate or broken state — exactly the guarantee this buys. Pure bind/expand and infrastructure planning,
+amoebius needs semantics around cluster manifest changes, and a render-layer guarantee that a degenerate or
+broken manifest set is not constructible — a property established where the spec is type-checked and composed,
+not a proof of live convergence. Pure bind/expand and infrastructure planning,
 the explicit already-materialized arm or validated/CAS-enacted/read-back initial-infrastructure batch, and
 then `provision` followed by `renderAll(ProvisionedSpec)` over typed ADTs are where those semantics live —
 the manifest set is a *value* amoebius can
@@ -78,7 +79,6 @@ and *how* those objects are applied and reconciled ([§5](#5-the-applyreconcile-
 
 ---
 
-<a id="2-the-typed-manifest-model-render-is-a-pure-total-function-to-objects"></a>
 ## 2. The typed manifest model: `renderAll` is the sole public pure function to objects
 
 The core is a per-projection renderer closed by one whole-deployment pure function:
@@ -251,7 +251,7 @@ rules feed it):
   the resource-to-capacity witness is owned by
   [resource_capacity_doctrine.md](./resource_capacity_doctrine.md); whether each part is a type-inhabitance or
   a decode-time check is classified by
-  [illegal_state_catalog.md §6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force).
+  [illegal_state_techniques.md §6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force).
 - **Every pod gets a hardened `securityContext`.** `renderAll` attaches a non-root, no-privilege-escalation,
   dropped-capabilities security context to every workload it emits and projects the required closed root-
   filesystem arm exactly; writable is explicit and bounded, never a default inferred from omission;
@@ -356,8 +356,6 @@ therefore narrow without weakening whole-deployment source uniqueness.
 > `discover → diff → enact` loop as [§5](#5-the-applyreconcile-engine-snapshot-bound-typed-actions).
 
 ---
-
-<a id="5-the-applyreconcile-engine-server-side-apply-owned-field-manager-prune-wait"></a>
 
 ## 5. The apply/reconcile engine: snapshot-bound typed actions
 
@@ -584,8 +582,6 @@ flowchart TD
 
 ---
 
-<a id="6-the-reconcile-state-model-desired-is-renderinforcespec-observed-is-etcd-a-diff-is-typed"></a>
-
 ## 6. The reconcile state model: desired is `renderAll(ProvisionedSpec)`, observed is live inventory, actions are typed
 
 This is the decision that makes "no Helm" coherent: **amoebius keeps no release store.** Helm persists each
@@ -798,8 +794,8 @@ lands in Phase 26 on the tier-(c) reconciler. This doc states the target shape a
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — `renderAll` consumes the capacity-checked IR; overcommit is rejected before `renderAll`
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the compute-engine/topology the rendered node set realizes
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — secrets-by-name; a rendered manifest never carries plaintext secret bytes
-- [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — retained `no-provisioner` PVs for StatefulSet storage; [§8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction) create-new→verified-migrate→retire-old is the DB-schema-migration `RolloutPhase` ([§5.1](./storage_lifecycle_doctrine.md#51-storage-is-independent-of-the-node-lifecycle))
-- [Content Addressing Doctrine](./content_addressing_doctrine.md) — the content-addressed store backing the [§6.1](./content_addressing_doctrine.md#61-proven--tested--assumed-spelled-out) release ledger; the [§2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) master table registers `releaseHash`
+- [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — retained `no-provisioner` PVs for StatefulSet storage; [§8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction) create-new→verified-migrate→retire-old is the DB-schema-migration `RolloutPhase` ([§5.1](#51-the-rolloutplan-ordered-readiness-gated-phases-on-this-same-reconciler-tier-c))
+- [Content Addressing Doctrine](./content_addressing_doctrine.md) — the content-addressed store backing the [§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional) release ledger; the [§2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) master table registers `releaseHash`
 - [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — `Release` / `releaseHash` ledger ([§2](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash)), the `Environment` promotion pointer / `PromotionGate` ([§3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer)–[§4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable)), and the `RolloutPlan` / `RolloutPhase` ([§5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)) this doc's tier-(c) reconciler enacts ([§5.1](#51-the-rolloutplan-ordered-readiness-gated-phases-on-this-same-reconciler-tier-c))
 - [Network Fabric Doctrine](./network_fabric_doctrine.md) — the Gateway-API `HTTPRoute` weight shift ([§6](./network_fabric_doctrine.md#6-the-service-mesh-verdict-no-linkerd-for-v1)) that is the canary `RolloutPhase` ([§5.1](#51-the-rolloutplan-ordered-readiness-gated-phases-on-this-same-reconciler-tier-c))
 - [Image Build Doctrine](./image_build_doctrine.md) — the build pipeline, baked base container, and registry refs

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_12_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, documents/engineering/deterministic_simulation_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_12_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md
 **Generated sections**: none
 
 > **Purpose**: Run the real amoebius binary over the pure `[Step]` plan against fake `kubectl`/`docker`/`pulumi`
@@ -20,7 +20,7 @@ kernel + `--dry-run` plan render) and runs on **no substrate** (`none`) in **Reg
 register, exercised in-process plus a handful of controlled fake tool binaries, with no apiserver, no broker,
 no cloud, and no Vault. It is the boundary register (Register 2) of the pre-cluster conformance harness
 ([`conformance_harness_doctrine.md §2`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation):
-the harness is Registers 1, 2, and 2.5; the Register-2.5 deterministic-simulation substrate is built and gated
+the harness is Registers 1, 2, and 2.5; the Register-2.5 deterministic-simulation activity is exercised
 separately in [Phase 12](phase_12_deterministic_sim_substrate.md); Register 3 is the acceptance gate of each
 *live* phase). Where a shape below is already
 exercised in a sibling system — prodbox validating its behaviour through a single thin IO seam with subprocess
@@ -56,9 +56,9 @@ invokes** — `kubectl`, `docker`, `pulumi` — over the Phase-10 fixtures, whil
 control that must record zero invocations** (amoebius renders and applies its own typed manifests and never
 shells to Helm)) against the fakes invoked by absolute path; the recorded
 argv sequence equals the **committed, hand-authored expected-argv transcript** (`test/boundary/golden/argv/`,
-Phase-0-pinned per §M-1/§M-3 — authored independently of the executor, no function reachable from the executor
+pinned at the start of Phase 11, before the executor implementation (the §M-1 named exception), per §M-3 — authored independently of the executor, no function reachable from the executor
 computes it) and the recorded applied-manifest bytes equal the Phase-9/10 `renderAll`/plan goldens byte-for-byte, and
-**each of the four tool transcripts is non-empty** (a zero-invocation transcript for any named tool is red).
+**each of the three invoked tool transcripts (`kubectl`/`docker`/`pulumi`) is non-empty** (a zero-invocation transcript for any invoked tool is red), while the `helm` negative-control transcript is asserted **empty**.
 The gate is not passed by assertion logic alone: it names **committed seeded mutants** (§M-2) that MUST turn the
 suite red — an executor argv mutant (drop a flag / reorder argv / swap a subcommand) and a byte mutant (one
 flipped manifest byte) — re-run each gate run, not once. The no-`PATH` invariant is proven by an **OS-boundary
@@ -96,6 +96,11 @@ check that runs on no substrate.
   pass-with-a-skip. Per [`conformance_harness_doctrine.md §5`](../documents/engineering/conformance_harness_doctrine.md#5-honesty-what-the-harness-does-and-does-not-establish)
   (honesty), a green boundary run is quoted as *"the binary emits the exact commands and applied bytes,"* never
   as *"the cluster is correct."*
+- [`generated_artifacts_doctrine.md §3`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)
+  — the rule (§3), *regeneration is deterministic and reproducible; the same source renders byte-identical
+  output*: the applied-manifest bytes the fakes capture are byte-for-byte the same rendered value as the
+  `--dry-run` preview (both consume the one rendered source), and neither is committed. This phase asserts that
+  identity at the boundary.
 
 ## Sprints
 
@@ -188,9 +193,9 @@ present only as a **negative control asserted to record zero invocations** (amoe
 against the fakes; the recorded argv sequence equals the **committed hand-authored expected-argv transcript**
 (§M-3: authored at fixture-authoring time from the spec, never by the executor's own `Step→argv` fold or any
 function reachable from it — a source gate rejects any import of executor argv-building code into the oracle);
-the recorded applied-manifest bytes equal the Phase-9/10 goldens byte-for-byte; **each of the four tool
-transcripts is asserted non-empty** (§M-7 — a tool the binary never routed through leaves an empty transcript
-and the suite is red, foreclosing a `kubectl`-only executor). The no-`PATH` invariant is detected by the
+the recorded applied-manifest bytes equal the Phase-9/10 goldens byte-for-byte; **each of the three invoked tool
+transcripts (`kubectl`/`docker`/`pulumi`) is asserted non-empty** (§M-7 — an invoked tool the binary never routed through leaves an empty transcript
+and the suite is red, foreclosing a `kubectl`-only executor; the `helm` negative-control transcript is asserted empty). The no-`PATH` invariant is detected by the
 **hostile decoy-`PATH` arrangement** (the one interpretation, §M-5, resolving the detection-mechanism
 ambiguity): the run executes with the fakes' directory absent from `PATH` and a decoy directory containing
 same-named executables that write a distinct sabotage-marker placed first on `PATH`; the suite is red if any
@@ -215,22 +220,22 @@ enforcement is owned by [Phase 22](phase_22_live_dsl_singleton.md)).
 
 ### Deliverables
 - The committed **representative plan corpus** — a `[Step]` fixture with at least one step per tool — and the
-  committed **hand-authored expected-argv transcripts** (`test/boundary/golden/argv/`, Phase-0-pinned per §M-1,
+  committed **hand-authored expected-argv transcripts** (`test/boundary/golden/argv/`, pinned at the start of Phase 11 before the executor implementation (the §M-1 named exception),
   authored independently of the executor per §M-3).
 - The committed **seeded mutants** named in the Gate (argv mutant, byte mutant, `PATH`-resolution mutant) with a
   harness that re-runs each and asserts `boundary-spec` red (§M-2).
 - `test/boundary/BoundarySpec.hs` asserting: the recorded argv stream equals the committed hand-authored
   expected-argv transcript; the applied-manifest bytes equal the Phase-9/10 goldens byte-for-byte (the same
   rendered value the `--dry-run` previews, per
-  [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md)); each of the
-  four tool transcripts is non-empty; and each fake was invoked by its exact absolute path under the hostile
+  [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md)); each of the three
+  invoked tool transcripts (`kubectl`/`docker`/`pulumi`) is non-empty and the `helm` transcript is empty; and each fake was invoked by its exact absolute path under the hostile
   decoy-`PATH` arrangement with no decoy sabotage-marker observed.
 - A Register-2 ledger led by a Tier-2-UNVERIFIED banner: the binary emits the exact commands and applied bytes,
   but no runtime-enforcement claim is made — a skipped-but-applicable Runtime move stays UNVERIFIED, never green.
 
 ### Validation
 1. `cabal test boundary-spec` is green — commands match the committed hand-authored argv transcript, applied
-   bytes match the Phase-9/10 goldens exactly, all four tool transcripts are non-empty, and invocation is by
+   bytes match the Phase-9/10 goldens exactly, the three invoked tool transcripts (`kubectl`/`docker`/`pulumi`) are non-empty and the `helm` transcript is empty, and invocation is by
    absolute path under the hostile decoy-`PATH` arrangement.
 2. Demonstrated negative controls (§M-2): each committed seeded mutant — argv mutant, byte mutant,
    `PATH`-resolution mutant — is re-run and turns `boundary-spec` red. A green run against any mutant fails the

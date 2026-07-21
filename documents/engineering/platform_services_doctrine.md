@@ -24,8 +24,8 @@ vary. This refines the prodbox **substrate-equivalence** rule (`home` vs `AWS`):
 cluster stands up the same *set*" while deliberately relaxing "the same *shape*." The structural enforcement
 of the set-invariant is [§12](#12-substrate-equivalence-as-a-structural-invariant).
 
-Why this matters: it is what makes amoebic spawning, ephemeral teardown/rebuild, and geo-replicated
-failover even *expressible*. A never-before-seen child cluster is the same machine as the parent; a
+Fungibility is what makes amoebic spawning, ephemeral teardown/rebuild, and geo-replicated
+failover expressible. A never-before-seen child cluster is the same machine as the parent; a
 cluster destroyed and rebuilt rebinds to the same shape. Fungibility is
 the precondition for every cross-cluster move in [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md)
 and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md).
@@ -142,8 +142,8 @@ the secret-by-name `SecretRef` contract, and the PKI trust anchor are all owned 
 
 ## 6. Pulsar — the event and workflow backbone (new vs prodbox)
 
-Pulsar is the cluster's nervous system: workflow commands, lifecycle events, and geo-replication streams
-all flow over it. **Flag explicitly: Pulsar is new relative to prodbox** — prodbox had no Pulsar — so
+Pulsar carries workflow commands, lifecycle events, and geo-replication streams.
+**Flag explicitly: Pulsar is new relative to prodbox** — prodbox had no Pulsar — so
 everything here is forward design, not inherited-proven behaviour.
 
 - **Native TCP binary protocol, no WebSockets.** The client is `amoebius-pulsar`, forked from
@@ -239,60 +239,31 @@ independent version and lifecycle, and clean per-namespace teardown.
 
 ### Tenant policy persistence is one provider-indexed transaction
 
-Tenant RBAC starts with `deriveTenantPolicies :: TenantSpec -> TenantPolicyDerivation`, the pure intermediate
-owned by [tenancy_doctrine.md §5](./tenancy_doctrine.md#5-rbac-is-derived-never-authored), never with a direct
-renderer. Its closed provider index has six arms, each with a canonical payload, exact target, persistence
-projection, and apply intent:
+Tenant RBAC persistence is one provider-indexed whole-deployment transaction, derived from
+`deriveTenantPolicies :: TenantSpec -> TenantPolicyDerivation` and owned end-to-end by
+[tenancy_doctrine.md §5](./tenancy_doctrine.md#5-rbac-is-derived-never-authored); this doc does not restate its
+mechanics. The platform-services fact recorded here is only *where each provider's tenant-policy state lands* —
+each of the six arms persists onto that provider's own standard platform backing:
 
-| Provider | Policy payload | Resource-bearing persistence |
-|---|---|---|
-| Keycloak | realms, roles, client scopes, route-auth rules | Keycloak schema/index rows and WAL |
-| Vault | policies and auth bindings | persisted versions, Raft logs, snapshots |
-| Pulsar | tenants, namespaces, ACLs | ZooKeeper entries, transaction logs, snapshots |
-| MinIO | IAM, service accounts, bucket policies | dynamic system metadata under budget/geometry/model |
-| Kubernetes API | generated RBAC and NetworkPolicy objects | serialized API objects, etcd revisions and Events |
-| Postgres | tenant database roles and grants | Postgres schema/index rows and WAL |
+- **Keycloak** and **Postgres** each persist onto their own per-consumer Patroni cluster
+  ([§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin)), and remain **distinct
+  provider/persistence arms even though both are Patroni-backed** — one more instance of the
+  one-cluster-per-consumer rule.
+- **Vault** persists onto its Raft store (versions, logs, snapshots) ([§5](#5-vault--the-secrets-root-reference-only)).
+- **Pulsar** persists onto its explicit ZooKeeper metadata store ([§6](#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox)).
+- **MinIO** persists as object-store metadata under its budget/geometry/model — storage-system metadata, not an
+  application object and not another arm of `ObjectStoreProducerDemand`.
+- **Kubernetes API** persists as serialized API objects with their etcd revisions and Events.
 
-Keycloak and Postgres remain distinct provider/persistence arms even when both ultimately use Patroni. MinIO
-policy records are storage-system metadata, not application objects and not another arm of
-`ObjectStoreProducerDemand`. The canonical demand shapes are defined by
-[resource_capacity_doctrine.md §5.1](./resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry).
+The canonical demand shapes are owned by
+[resource_capacity_doctrine.md §5.1](./resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry);
+the tenant-qualification, empty/diff planner, executor coalescing, target-change retention, MinIO physical fold,
+and sealed provider enactors are owned by [tenancy_doctrine.md §5](./tenancy_doctrine.md#5-rbac-is-derived-never-authored).
 
-All output/action/executor/MinIO-metadata identities are qualified by `TenantId`, and each nested source tenant
-must equal its outer key. The planner accepts a possibly empty desired tenant map and diffs the exact
-`desired ∪ observed` domain. An observed-only row retains source, target, action, and executor provenance and
-produces authenticated deletes. Deleting the final tenant and the exact empty no-op are therefore representable;
-a non-empty desired collection is not an invariant.
-
-Observed executors are one global target-keyed inventory, not copied inside every tenant. The plural binder
-resolves abstract `< Dedicated | SharedControlPlaneRole >` attachments and coalesces complete execution deltas by
-resolved target across the entire transaction. It sums all members before replacing a shared base once;
-dedicated targets are unique. Per-tenant executor copies, uncoalesced deltas, or a repeated base debit reject.
-
-Every action has optional old and desired provider targets. A target change retains both target-keyed physical
-high-waters: old and new Keycloak/Postgres databases and WAL, Vault backings, Pulsar metadata stores, MinIO
-stores/budgets/geometries/models, Kubernetes clusters/namespaces/etcd models, executor epochs, and failed or
-rollback residents. Desired absence alone never releases the old side.
-
-For MinIO, the global key is `(store,budget,geometry,model)`, and dynamic entry ids remain tenant-qualified.
-Concurrent old and new groups are resolved only against retained MinIO backings. One physical fold per store
-adds `metadataReservePerDrive` once per resident store and every dynamic group once. Observed readback carries
-the metadata model and separates static reserve from dynamic per-drive bytes, so a model mismatch,
-static-per-tenant debit, or dynamic ownership hole/overlap cannot normalize. `ProviderObjectQuota` remains a
-different, unsupported supply arm.
-
-Whole-deployment provision seals a private provider-indexed `ProvisionedTenantPolicyAction` for every operation,
-including tenant/source, payload digest, old and desired target, persistence high-water, provisioned executor,
-retention, and cleanup predicate. Only the matching provider enactor plus the fresh fingerprint-equal
-`ValidatedLiveTarget` may act. Read-only provider observers and post-action readback must prove the desired
-state or authenticated delete absence and then prove old-target cleanup before capacity is released. Failed
-apply retains old/new/action/rollback/executor residents. Raw derivations, binder-stage targets, and prior
-`Provisioned*` records are not enactor inputs.
-
-Phase 23 owns provider administrative apply/readback for all six arms. In particular, its Pulsar adapter applies
-and observes tenant/namespace/ACL policy but does not use an application client. Phase 24, after the native
-`amoebius-pulsar` client exists, owns the authenticated produce/consume round-trip gate. Administrative policy
-convergence in Phase 23 must not be reported as proof of the Phase-24 data path.
+Phase 23 owns provider administrative apply/readback for all six arms; its Pulsar adapter applies and observes
+tenant/namespace/ACL policy but does not use an application client. Phase 24, after the native `amoebius-pulsar`
+client exists, owns the authenticated produce/consume round-trip gate. Administrative policy convergence in
+Phase 23 must not be reported as proof of the Phase-24 data path.
 
 ---
 

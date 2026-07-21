@@ -66,7 +66,7 @@ Every amoebius cluster has exactly one StorageClass, and it is inert:
   the old `uid` is present. Retain therefore preserves the *bytes*; it does not by itself deliver rebind.
   Rebind is reconstructed by amoebius re-creating a fresh pre-bound PV whose `claimRef` omits `uid` and
   `resourceVersion` ([§6](#6-the-lossless-teardown-guarantee-deterministic-rebind)) and points at those
-  preserved bytes. Retain is the mechanical heart of durability; nothing else in this doc works without it.
+  preserved bytes.
 - **`volumeBindingMode: WaitForFirstConsumer`** — binding is deferred until the consuming Pod is scheduled,
   so a host-backed PV binds against the node the Pod actually landed on, not a node chosen blind.
 - **Every other StorageClass is removed**, and any default annotation on a competing class is stripped, so
@@ -352,7 +352,7 @@ EbsBackingMaterializationResult =
   }
 ```
 
-- **No unbounded constructor** (a type-foreclosed union shape, [illegal_state_catalog.md §6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
+- **No unbounded constructor** (a type-foreclosed union shape, [illegal_state_techniques.md §6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
   a value cannot denote unbounded storage. A `HostDisk`/`Ebs` backing is bounded by a physical/EBS size; a
   `CloudQuota` backing is bounded by a quota owned by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md); the
   content-addressed MinIO store is a `HostDisk`/`CloudQuota` backing owned by
@@ -385,7 +385,7 @@ EbsBackingMaterializationResult =
 - **The aggregate fold lives elsewhere.** This doc owns the *union shape* and the per-volume/uniform-template
   sizing ([§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim)); the **aggregate arithmetic** —
   uniform claim-group debit followed by `Σ(PV caps) ≤ backing`, and the Pulsar two-ceiling fold — is owned by
-  [resource_capacity_doctrine.md §5, §7](./resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm) (the [§4.6](../illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) capacity-accounting
+  [resource_capacity_doctrine.md §5](./resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm), [§7](./resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total) (the [§4.6](../illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) capacity-accounting
   technique). An app that would consume more storage than its backing
   ([illegal_state_catalog.md §3.19](../illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)) is rejected by that fold at the
   post-bind `provision-seal`; "unbounded"

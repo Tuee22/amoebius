@@ -73,7 +73,7 @@ authored before `amoebius-pulsar` exists (§M.1), not a value regenerated from t
   hand-computed canonical-CBOR byte strings; (c) the non-CBOR negative fixtures of Sprint 24.2 V4 with their
   expected compile diagnostics; (d) the gate topology's `RouteEntry` descriptor `round_trip_dedup.dhall` and a
   hand-written expected derived-topic table (the `persistent://<tenant>/<ns>/<workflow>.<phase>.linux-cpu`
-  strings), authored independently of `topicFor` (§M.3); (e) a pre-run snapshot of the standing Phase-18
+  strings), authored independently of `topicFor` (§M.3); (e) a pre-run snapshot of the standing Phase-19
   namespace's policy set.
 - **Topology algebra is on the gate path (§M.3).** The gate topology's produced and consumed topic names are
   asserted equal to the committed expected derived-topic table of (d) — the gate uses `topicFor`-derived topics,
@@ -90,14 +90,14 @@ authored before `amoebius-pulsar` exists (§M.1), not a value regenerated from t
 - **Leak-free is an external enumerate-and-compare sweep (§M.5).** "Leak-free" is defined as: after teardown,
   the harness enumerates all topics, subscriptions/cursors, and namespaces in the test tenant **by querying the
   standing broker's admin surface** (an observer external to the client under test, not the client's own
-  bookkeeping) and asserts the set is empty, and asserts the standing Phase-18 namespace's policy set
+  bookkeeping) and asserts the set is empty, and asserts the standing Phase-19 namespace's policy set
   (including the deduplication policy) equals the pre-run snapshot of (e).
 - **Idempotency forces an independent recompute (§M.6).** "Idempotent on re-run" means the topology is
   re-applied a second time against a **distinct test namespace** (cache-bypass: no reuse of the first run's
   namespace, cursors, or dedup cursor) and the setup/round-trip path is asserted to have actually executed on
   run 2 — a no-op served by leftover state from run 1 fails the gate.
 
-### Resource-provisioning contract
+## Resource provision — the native Pulsar client envelope
 
 This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
 [`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
@@ -177,8 +177,7 @@ provision.
   — *delivery: at-least-once with broker-side dedup*: at-least-once made effectively-once by **broker-side**
   namespace deduplication on `(producer_name, sequence_id)`; intra-cluster consensus is delegated, not
   re-proven.
-- [`substrate_doctrine.md`](../documents/engineering/substrate_doctrine.md#2-detection-a-pure-classification-over-three-reads) §2 — *lazy, absolute-path tool
-  discovery*: the supernova fork's `protoc`/`proto-lens` codegen is discovered lazily by full path through the
+- [`substrate_doctrine.md`](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) §3 — *the no-environment / no-`PATH` lazy tool-ensure contract*: the supernova fork's `protoc`/`proto-lens` codegen is discovered lazily by full path through the
   substrate package manager — no `PATH` lookup and no environment variable anywhere in the build or runtime
   path.
 
@@ -354,7 +353,7 @@ a runtime mystery — the illegal-state-unrepresentable principle applied to the
 3. Assert an `emit-only` workflow with unsourced reports validates, while the same graph without the exemption
    is rejected — a positive/negative pair differing only in the exemption flag (§M.8).
 4. Prove the algebra is on the gate path, not dead code (§M.3): the gate topology `round_trip_dedup.dhall`
-   carries a committed `RouteEntry` descriptor, and the Sprint-22.4 gate run asserts the actually-produced and
+   carries a committed `RouteEntry` descriptor, and the Sprint 24.4 gate run asserts the actually-produced and
    actually-consumed topic names equal the committed derived-topic table — the reconcile/gate path derives its
    topics through `topicFor`, never from hand-written strings.
 
@@ -424,7 +423,7 @@ command→event round-trip over the native protocol with dedup on and CBOR paylo
    state fails); re-enabling the namespace dedup policy on an already-enabled namespace is a no-op success
    (idempotent). **Leak-free teardown** is proven by an **external enumerate-and-compare sweep** (§M.5): after
    teardown, an observer external to the client queries the standing broker's admin surface and asserts the test
-   tenant contains **zero** topics, subscriptions/cursors, and namespaces, and asserts the standing Phase-18
+   tenant contains **zero** topics, subscriptions/cursors, and namespaces, and asserts the standing Phase-19
    namespace's policy set (including the deduplication policy) equals the Phase-0-committed pre-run snapshot —
    subscriptions, stray topics, and a left-enabled dedup policy each fail the assertion. Emit the Register-3
    ledger — the deferred content-store, workflow-runtime, and cross-cluster surfaces (Phase 25 and later)
@@ -469,7 +468,7 @@ gate — the interleaving a single-threaded test cannot reach.
 - The `PulsarDedupSimSpec` battery: the real dedup fold under `IOSimPOR` against the modeled Pulsar, asserting
   no-loss + no-double-apply under injected reorder/duplicate/crash-mid-ack/partition schedules.
 - A Register-2.5 proven/tested/assumed ledger — the fold upholds exactly-once under the modeled schedules and
-  faults; honest limit: modeled-Pulsar fidelity is **assumed**, discharged by the Sprint-22.4 Register-3 live
+  faults; honest limit: modeled-Pulsar fidelity is **assumed**, discharged by the Sprint 24.4 Register-3 live
   gate.
 
 ### Validation

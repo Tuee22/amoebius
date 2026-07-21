@@ -96,14 +96,19 @@ committed mutant and the async-default Patroni configuration foreclosed by a com
 committed in **Phase 0** before any `src/Amoebius/Platform/*` implementation exists (§M.1 oracle-pinning), and
 named as gate oracles in the Sprint 20.1–20.3 Deliverables:
 
-- **Derived-DAG order (§M.2 committed mutant, §M.3 independent oracle, §M.5 external-observer trace).** The
+- **Derived-DAG order (§M.2 committed mutant, §M.3 independent oracle, §M.4 coverage floor, §M.5 external-observer trace).** The
   bring-up order is asserted a pure function of the *declared* dependency edges by a Register-1 property
   (Sprint 20.2), checked against a committed hand-authored edge→order reference table
   `test/fixtures/phase20/dag-edges.golden` independent of the `BringUp` fold; and the *live* order is read from
   an external-observer bring-up trace (the apiserver watch / pod-readiness event stream at the OS boundary, not
   a compliance trace amoebius emits about itself). The gate names a committed seeded mutant —
   **`mutant/dag-drop-edge`**, deleting the `perconaOperator → PerconaPGCluster` edge — that MUST turn the order
-  property and the live precondition assertion red. A hardcoded sequential list cannot satisfy the "edge
+  property and the live precondition assertion red. The property carries a §M.4 cover/classify floor
+  requiring a stated minimum fraction of generated cases to exercise both the declared-edge mutation branch
+  and the injected-cycle branch, so neither is discharged vacuously by a generator that only ever emits
+  acyclic declared-edge sets; and a second committed seeded mutant — **`mutant/dag-inject-cycle`**, adding a
+  back-edge that makes the declared graph cyclic — independently pins the "introduced cycle is rejected"
+  branch. A hardcoded sequential list cannot satisfy the "edge
   change ⇒ order change / injected cycle rejected" property.
 - **Mandated Patroni config (§M.3 independent oracle, §M.2 committed mutant, §M.8 specific-reason negative).**
   Each rendered `PerconaPGCluster`'s Patroni configuration is asserted byte-equal to the committed
@@ -227,7 +232,9 @@ and Prometheus + Grafana — no more, no fewer. The full derived DAG spans these
 Adopt [`platform_services_doctrine.md §8 — Postgres, Patroni-via-Percona, one cluster per consumer, with pgAdmin`](../documents/engineering/platform_services_doctrine.md#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin),
 [`§7 — Prometheus / Grafana`](../documents/engineering/platform_services_doctrine.md#7-prometheus--grafana--observability-is-not-an-add-on)
 with [`monitoring_doctrine.md §3`](../documents/engineering/monitoring_doctrine.md#3-derivation-and-the-operator-read-model),
-and the lossless premise of [`chaos_failover_doctrine.md §6`](../documents/engineering/chaos_failover_doctrine.md#6-the-concentration-principle--where-the-obligation-lives):
+the lossless premise of [`chaos_failover_doctrine.md §6`](../documents/engineering/chaos_failover_doctrine.md#6-the-concentration-principle--where-the-obligation-lives),
+and [`resource_capacity_doctrine.md §3.1 — the systematic provision matrix`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+as the projection every execution unit and volume is checked against:
 stand up the Percona operator as a cluster-wide platform component reconciling per-consumer Patroni clusters —
 each with pgAdmin and the mandated synchronous configuration — and Prometheus/Grafana with derived rules and
 dashboards.
@@ -334,7 +341,7 @@ The whole sprint (📋 Planned).
 **Implementation**: `src/Amoebius/Platform/Services.hs`, `src/Amoebius/Platform/BringUp.hs` (target paths; not yet built)
 **Blocked by**: Sprint 20.1, Phase 19 (the backbone the DAG folds in), Phase 18 (the Vault-initialized-and-unsealed → secret-dependent-startup edge)
 **Independent Validation**: the full standard stack (Phase-19 backbone + the Sprint-20.1 services) is assembled as one acyclic derived readiness DAG whose edges are the §11 hard edges; the reconciler brings the set up strictly in that order, each dependent starting on its dependency's observed-ready condition (never a `threadDelay`); the live bring-up order is read from an **external-observer trace** (the apiserver watch / pod-readiness event stream at the OS boundary), the derived order asserted a pure function of the declared edges against the committed `test/fixtures/phase20/dag-edges.golden` table (independent of the `BringUp` fold), the committed `mutant/dag-drop-edge` (deleting the `perconaOperator → PerconaPGCluster` edge) turning both the order property and the live precondition red; no image request leaves the cluster for a public registry; the whole set is up, HA-shaped, and reachable in-cluster.
-**Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/engineering/readiness_ordering_doctrine.md`, `DEVELOPMENT_PLAN/README.md`
+**Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/engineering/readiness_ordering_doctrine.md`
 
 ### Objective
 Adopt [`platform_services_doctrine.md §11 — bring-up and dependency ordering`](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering)
@@ -360,10 +367,13 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
 - The gate oracles, **authored and committed in Phase 0 before any implementation** (§M.1): a Register-1
   property `prop_bringUpOrderDerivedFromEdges` asserting the derived bring-up order is a pure function of the
   *declared* dependency edges (adding or removing a declared edge changes the order; an introduced cycle is
-  rejected), checked against the committed hand-authored edge→order reference table
+  rejected) under a §M.4 cover/classify floor forcing a stated minimum fraction of cases through the
+  declared-edge mutation and injected-cycle branches so neither passes vacuously, checked against the committed
+  hand-authored edge→order reference table
   `test/fixtures/phase20/dag-edges.golden` — an oracle **independent of** the `BringUp` fold (§M.3); the
   committed baked-base-image digest oracle `test/fixtures/phase20/expected-base-digest.txt`; and the committed
-  seeded mutant **`mutant/dag-drop-edge`** (deletes the `perconaOperator → PerconaPGCluster` declared edge)
+  seeded mutants **`mutant/dag-drop-edge`** (deletes the `perconaOperator → PerconaPGCluster` declared edge)
+  and **`mutant/dag-inject-cycle`** (adds a back-edge making the declared graph cyclic)
   which the gate MUST turn red (§M.2 committed mutation quota) — committed and re-run, not run once.
 
 ### Validation
@@ -374,8 +384,11 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
    amoebius emits about itself. Beyond the observed order, assert **derivation**: the Register-1 property
    `prop_bringUpOrderDerivedFromEdges` (checked against the committed `test/fixtures/phase20/dag-edges.golden`
    reference table, independent of the `BringUp` fold) holds — the order is a pure function of the declared
-   edges, adding/removing a declared edge changes it, an introduced cycle is rejected — and the committed
-   seeded mutant `mutant/dag-drop-edge` turns this property (and the live precondition assertion) red. A
+   edges, adding/removing a declared edge changes it, an introduced cycle is rejected — under a §M.4
+   cover/classify floor keeping the edge-mutation and injected-cycle branches above a stated minimum fraction
+   of cases, and the committed
+   seeded mutants `mutant/dag-drop-edge` and `mutant/dag-inject-cycle` turn this property (and the live
+   precondition assertion) red. A
    hardcoded sequential list with wait-for-ready between steps does not satisfy this and MUST fail the property.
 2. Round-trip MinIO put/get and Pulsar produce/consume against the assembled stack; assert Postgres is a
    Patroni cluster, never a bare Pod, carrying the mandated synchronous config (§20.1 oracle).
@@ -406,7 +419,7 @@ The whole sprint (📋 Planned).
 **Implementation**: `test/Amoebius/Platform/BringUpSim.hs` (the `IOSimPOR` harness driving the *unmodified* Sprint-20.2 `src/Amoebius/Platform/BringUp.hs` orchestration; target paths, not yet built) over the Phase-11.4 modeled substrate `src/Amoebius/Sim/Env.hs` + `src/Amoebius/Sim/Fakes/*`
 **Blocked by**: Sprint 20.2 (the derived readiness-DAG bring-up this sprint drives unchanged), Sprint 20.1 (the services it assembles), Phase 11 Sprint 11.4 (the modeled fault-injectable environment — fake Pulsar/MinIO/apiserver/route53/Vault/clock — this runs against)
 **Independent Validation**: the exact Sprint-20.2 bring-up orchestration, written against `io-classes` with no real IO, runs under `IOSimPOR` against the Phase-11.4 fakes with injected partial failure / restart / partition on the modeled dependencies, and across the explored schedules asserts (a) no service starts before its readiness precondition, (b) the applicative-concurrent bring-up is deadlock-free and fail-closed on a missing/unhealthy dependency, (c) it never reports success until every service is Ready, and (d) a **concurrency witness** — on at least one explored schedule the bring-up intervals of two declared-dependency-independent services (MinIO and the Percona operator) **overlap**, proving genuine applicative concurrency a hand-sequenced total order cannot produce; the committed seeded mutant `mutant/dag-drop-edge` (Sprint 20.2) is asserted to turn assertion (a) red under `IOSimPOR`; each run is deterministically replayable from its seed on substrate `none` and emits a Register-2.5 ledger.
-**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`
+**Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md`
 
 ### Objective
 Adopt [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md) as [Register 2.5](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) over this phase's own bring-up: take the *real* Sprint-20.2 readiness-DAG orchestration — the derived DAG with **applicative concurrent deploy where services are independent and sequential where they depend**, the HA-always readiness ordering this phase owns — and run it unchanged under `IOSimPOR` against the Phase-11.4 modeled substrates, validating the ordering and fail-closed invariants deterministically in-process before the Register-3 live gate ever runs.

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_27_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Discharge the Register-3 residue of amoebius's one proof obligation — drive the built
@@ -51,7 +51,7 @@ hold — never a hand-maintained variable→module table.
 This phase consumes earlier phases and does not re-implement them: Phase 28's geo-replicated forest and
 invariant-confluence classifier, Phase 3's `GatewayMigration` `Model` + `interpret` + decode-time
 structural-fit fold, Phase 21's Keycloak-owned wild ingress, Phase 27's WireGuard fabric (whose hub role the
-`Planned` handover repoints), and Phase 11 Sprint 11.4's `io-classes` seams and modeled route53/Pulsar. A
+`Planned` handover repoints), and Phase 12's (Sprints 12.1/12.2) `io-classes` seams and modeled route53/Pulsar. A
 **stretched cluster is not geo-replication**: one etcd, one boundary owes no R9 budget and no Second-Axis
 obligation and is out of scope here.
 
@@ -89,7 +89,36 @@ and the modeled safety/liveness as *proven-for-the-model at scope 2* (a Phase-3 
 guarantee); layers outside Register 3 stay marked UNVERIFIED, and — as a Register-3 live-band gate — the runtime
 layer is marked *tested*, never *proven*.
 
-### Resource-provisioning contract
+## Gate integrity
+
+This phase's gate binds to the
+following named, committed artifacts so no self-authored harness or post-hoc fixture can pass it:
+- **Write-journal oracle (independent of the SUT).** The drill client writes every source-acked write ID to
+  `test/inject/journal/` (a store outside the forest, never the SUT's own replication log). "Committed write"
+  means *source-acked*, not *already-replicated*; the harness asserts **≥ 8** such IDs are
+  acked-but-not-yet-replicated at the quiesce/kill instant (a positive observed lag), then asserts set-equality
+  of journaled-vs-present IDs on the new owner. The ledger embeds the raw journal counts (acked,
+  un-replicated-at-cut, recovered), never a bare "loss = 0".
+- **Committed numeric budget fixture.** `test/dhall/phase_29_gateway_migration.dhall` fixes `lagBound = 5 s`,
+  `RTO = 60 s`; authored and committed in Phase 0; its hash is pinned in the gate record and re-checked at gate
+  time so a budget edited after measuring the drill fails the hash check.
+- **Committed seeded mutants (≥ 1 must go red).** From the §M operator set: (a) `verify-caught-up`-stub — the
+  `Planned` `verify-caught-up` edge is weakened to `const True` (dropped-guard); the journal oracle must catch
+  the lost un-replicated suffix red. (b) `promote-before-fence` — the `Failover` `PromotionGate` guard is negated
+  so it promotes without a proven watermark/fence (guard-negation); `NoWriteAfterStaleFailover` must go red. Both
+  mutants are committed under `test/inject/mutants/` and re-run every gate, not hand-run once.
+- **External-observer teardown check.** "Tears down leak-free" is scoped for Phase 29 (the flagged-credential +
+  postflight tag-sweep machinery of testing_doctrine §6–§7 is Phase 36) to: after teardown, an **OS-boundary
+  observer** — the route53 API (`ListResourceRecordSets`) and `pulumi stack ls`, read outside the forest —
+  reports zero surviving migration DNS records and zero surviving child stacks, while the retained
+  `no-provisioner` PVs that Sprint 29.2 deliberately preserves are explicitly exempt (named in the fixture as the
+  retained set).
+- **Machine-derived ledger + validator.** The ledger is generated from the run record (measured RPO/RTO,
+  observed max lag, the raw journal counts, drill seeds, timestamps, the teardown-observer result), and a
+  committed validator cross-checks every ledger figure against the harness's raw journal and the OS-boundary
+  observer, failing the gate on any mismatch or hand-edited field.
+
+## Resource provision — the sealed whole-deployment migration envelope
 
 This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
 [`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
@@ -142,35 +171,6 @@ remove the source proxy, target edge child, overlap peer graph, Pulumi executor,
 workflow collector, API object, etcd churn/model, or external journal; each must turn the gate red even if the
 RPO/RTO assertions would otherwise pass.
 
-## Gate integrity
-
-This phase's gate binds to the
-following named, committed artifacts so no self-authored harness or post-hoc fixture can pass it:
-- **Write-journal oracle (independent of the SUT).** The drill client writes every source-acked write ID to
-  `test/inject/journal/` (a store outside the forest, never the SUT's own replication log). "Committed write"
-  means *source-acked*, not *already-replicated*; the harness asserts **≥ 8** such IDs are
-  acked-but-not-yet-replicated at the quiesce/kill instant (a positive observed lag), then asserts set-equality
-  of journaled-vs-present IDs on the new owner. The ledger embeds the raw journal counts (acked,
-  un-replicated-at-cut, recovered), never a bare "loss = 0".
-- **Committed numeric budget fixture.** `test/dhall/phase_29_gateway_migration.dhall` fixes `lagBound = 5 s`,
-  `RTO = 60 s`; authored and committed in Phase 0; its hash is pinned in the gate record and re-checked at gate
-  time so a budget edited after measuring the drill fails the hash check.
-- **Committed seeded mutants (≥ 1 must go red).** From the §M operator set: (a) `verify-caught-up`-stub — the
-  `Planned` `verify-caught-up` edge is weakened to `const True` (dropped-guard); the journal oracle must catch
-  the lost un-replicated suffix red. (b) `promote-before-fence` — the `Failover` `PromotionGate` guard is negated
-  so it promotes without a proven watermark/fence (guard-negation); `NoWriteAfterStaleFailover` must go red. Both
-  mutants are committed under `test/inject/mutants/` and re-run every gate, not hand-run once.
-- **External-observer teardown check.** "Tears down leak-free" is scoped for Phase 29 (the flagged-credential +
-  postflight tag-sweep machinery of testing_doctrine §6–§7 is Phase 36) to: after teardown, an **OS-boundary
-  observer** — the route53 API (`ListResourceRecordSets`) and `pulumi stack ls`, read outside the forest —
-  reports zero surviving migration DNS records and zero surviving child stacks, while the retained
-  `no-provisioner` PVs that Sprint 29.2 deliberately preserves are explicitly exempt (named in the fixture as the
-  retained set).
-- **Machine-derived ledger + validator.** The ledger is generated from the run record (measured RPO/RTO,
-  observed max lag, the raw journal counts, drill seeds, timestamps, the teardown-observer result), and a
-  committed validator cross-checks every ledger figure against the harness's raw journal and the OS-boundary
-  observer, failing the gate on any mismatch or hand-edited field.
-
 ## Doctrine adopted
 
 - [`consistency_pacelc_doctrine.md §3`](../documents/engineering/consistency_pacelc_doctrine.md#3-the-one-configurable-axis--the-deployment-rules-pacelc-surface)
@@ -218,8 +218,9 @@ following named, committed artifacts so no self-authored harness or post-hoc fix
   route53/Pulsar, trace-validated against the Phase-3 emitted spec's `Next` relation before the Register-3 live
   drills, so the code↔model bridge is a formal, early, replayable check rather than only sampled live chaos.
 - [`testing_doctrine.md §3`](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down)
-  (the test-as-`InForceSpec` spin-up → run → always-tear-down contract) and §4 (the per-run
-  proven/tested/assumed ledger): the register this gate reaches and the ledger it emits.
+  (the test-as-`InForceSpec` spin-up → run → always-tear-down contract) and
+  [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
+  (the per-run proven/tested/assumed ledger): the register this gate reaches and the ledger it emits.
 
 ## Sprints
 
@@ -242,7 +243,7 @@ survivor *only after* its freshness gate proves a known commit watermark (or hol
 route53 and the WireGuard hub, accounting for the un-replicated suffix **only** by the R9 data-loss budget, never
 silently resolved to "absent."
 **Docs to update**: `documents/engineering/gateway_migration_doctrine.md`,
-`documents/engineering/chaos_failover_doctrine.md`, `documents/engineering/pulumi_iac_doctrine.md`.
+`documents/engineering/chaos_failover_doctrine.md`.
 
 ### Objective
 Adopt [`gateway_migration_doctrine.md §2`](../documents/engineering/gateway_migration_doctrine.md#2-the-planned-branch--a-coordinated-strong-consistency-handover)/[`§3`](../documents/engineering/gateway_migration_doctrine.md#3-the-failover-branch--an-availability-first-emergency-takeover),
@@ -341,9 +342,9 @@ The whole sprint (📋 Planned).
 **Implementation**: `test/sim/GatewayMigrationSimSpec.hs` (the `IOSimPOR` battery over the modeled
 route53 + geo-replicated Pulsar) and `test/sim/GatewayMigrationTrace.hs` (the trace-validator checking observed
 transitions against the emitted `Next`), driving the real `src/Amoebius/Multicluster/*` forest code lifted onto
-the Phase-11.4 `io-classes` `Env` interface — target paths, not yet built.
+the Phase-12 `io-classes` `Env` interface — target paths, not yet built.
 **Blocked by**: Sprint 29.1 (the built `Multicluster/*` forest code); Phase 28 (the geo-replicated forest);
-Phase 3 (the emitted TLA+ spec + `interpret`); Phase 11 Sprint 11.4 (the `io-classes` seams + the modeled
+Phase 3 (the emitted TLA+ spec + `interpret`); Phase 12 (Sprints 12.1/12.2 — the `io-classes` seams + the modeled
 route53/Pulsar).
 **Independent Validation**: the real `Multicluster/*` forest code runs under `IOSimPOR` against the modeled
 route53 (short-TTL, **no compare-and-swap**, propagation delay) and modeled geo-replicated Pulsar with injected
@@ -355,8 +356,7 @@ Phase-3 emitted spec's `Next` relation
 — pulling the runtime-fidelity (Tier-2) obligation **forward** from Register-3-only chaos into deterministic,
 replayable simulation. Substrate `none`, Register 2.5.
 **Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (Phase-29 status backlink),
-`documents/engineering/gateway_migration_model_doctrine.md` (§6 the Register-2.5 trace-validation bridge),
-`DEVELOPMENT_PLAN/system_components.md`.
+`documents/engineering/gateway_migration_model_doctrine.md` (§6 the Register-2.5 trace-validation bridge).
 
 ### Objective
 Adopt [`deterministic_simulation_doctrine.md §4`](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits)
@@ -425,10 +425,12 @@ and [`§19`](../documents/engineering/chaos_failover_doctrine.md#19-the-cross-bo
   asserting RPO=0 via the write-journal oracle, kill the lead to force `Failover` asserting rebind within the
   Phase-0-committed numeric budget (`lagBound = 5 s`, `RTO = 60 s`, hash-pinned), reconcile divergent
   histories, and always tear down leak-free (verified by the OS-boundary route53/`pulumi stack ls` observer) —
-  emitting the machine-derived per-run ledger artifact. **Committed in Phase 0 before the runtime exists**, along
-  with `test/inject/journal/` (the out-of-forest write-ID journal), `test/inject/mutants/` (the
-  `verify-caught-up`-stub and `promote-before-fence` seeded mutants that must go red), and the committed ledger
-  validator.
+  emitting the machine-derived per-run ledger artifact. The gate topology `.dhall`, `test/inject/journal/` (the
+  out-of-forest write-ID journal schema), and the committed ledger validator are **committed in Phase 0 before
+  the runtime exists**; the runtime-dependent `test/inject/mutants/` seeded mutants (the `verify-caught-up`-stub
+  and `promote-before-fence` mutants that must go red) mutate the Sprint-29.1 implementation, so they are
+  **committed at the start of Phase 29, before that implementation is trusted** (the §M.1
+  start-of-owning-phase form for oracles that depend on later code).
 - A machine-derived per-run proven/tested/assumed ledger that marks `Planned` RPO=0 **argued-design-level +
   drilled (tested)**, the `Failover` recovery time + reconciliation **tested (drilled)**, the data-loss /
   replication-lag bound **assumed (monitored, never proven)**, and the modeled safety/liveness

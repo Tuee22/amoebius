@@ -10,7 +10,7 @@
 > **modeled, fault-injectable environment** (fake Pulsar/MinIO/apiserver/route53/Vault/clock), so concurrent
 > schedules and environment faults are validated **in-process, deterministically replayable, before any live
 > deployment** — and the honest tradeoff this buys: it replaces a large *unvalidated-until-live* surface with a
-> small *modeled-environment-fidelity* premise. This is **Register 2.5** of the conformance spine.
+> small *modeled-environment-fidelity* premise — Register 2.5 of the conformance spine.
 
 ---
 
@@ -102,18 +102,13 @@ The register *definitions* are owned by [testing_doctrine.md §2](./testing_doct
 this doctrine owns the **shape** of the deterministic-simulation register and how it extends the pre-cluster
 spine ([conformance_harness_doctrine.md §4](./conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run)).
 
-- **Register 1 — pure/golden.** Decode → bind/expand → `planInfrastructure` → either golden-lock the
-  non-renderable infrastructure batch or supply its authenticated materialization fixture → provision →
-  `renderAll` → plan → dry-run; the formal
-  `Model` explorer + TLC. No effects.
-- **Register 2 — boundary integration with fakes.** The real binary over the `[Step]` plan against fake
-  subprocess tools recording argv+bytes ([phase_11](../../DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md)).
+- **Registers 1, 2, and 3** — pure/golden, boundary-integration-with-fakes, and live-infrastructure — are
+  defined by [testing_doctrine.md §2](./testing_doctrine.md#2-three-registers-of-amoebius-testing); the
+  pre-cluster spine they run on is [conformance_harness_doctrine.md §4](./conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run).
 - **Register 2.5 — deterministic simulation (this doctrine).** The real daemon/reconciler code under
   `IOSim`/`IOSimPOR` against the [§3](#3-the-simulated-environment-and-its-fault-model) modeled environment —
   exercising **concurrent schedules and injected environment faults**, which Registers 1 and 2 structurally
   cannot reach, and which Register 3 reaches only by sampling. Deterministically replayable, no cluster.
-- **Register 3 — live infrastructure.** The residue: that the real apiserver/broker/DNS behave as [§3](#3-the-simulated-environment-and-its-fault-model)
-  models them; real physics; real chaos.
 
 Register 2.5 is also where **trace validation** ([formal_model_doctrine.md §8](./formal_model_doctrine.md#8-trace-validation-the-earlier-codemodel-bridge))
 first runs against the built daemon: the simulated daemon's observed transitions are checked against the emitted
@@ -172,7 +167,7 @@ would find, exactly as a green Register-1 suite says nothing about Register 2.
 ## 8. Planning ownership
 
 This document is normative doctrine only. The io-classes environment substrate is built in the pre-cluster
-boundary phase ([phase_11](../../DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md)); each concurrency-bearing
+deterministic-simulation phase ([phase_12](../../DEVELOPMENT_PLAN/phase_12_deterministic_sim_substrate.md)); each concurrency-bearing
 live-band phase adds its Register-2.5 validation sprint before its Register-3 gate; the determinism seams are the
 [phase_31](../../DEVELOPMENT_PLAN/phase_31_determinism_kernel.md) kernel's. Phase order, status, and gates live
 only in [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Every prescriptive statement here is

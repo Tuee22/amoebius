@@ -27,7 +27,8 @@ stay stable. It is not self-contained framing — it owns only the deep treatmen
   [`illegal_state_techniques.md`](./illegal_state_techniques.md) — referenced here, not restated.
 
 Everything below is **design intent** (per [`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
-a type-check proves the spec composes into something internally coherent; it does **not** prove the running
+the catalog-owned honesty limit, instantiated for storage — a type-check proves the spec composes into
+something internally coherent; it does **not** prove the running
 cluster's PVC is bound, its disk is unfilled, or its bookies are healthy. Each entry names a **Layer** (the
 foreclosure layer, from [`illegal_state_techniques.md`](./illegal_state_techniques.md) §6) and a
 **Validation-locus** (the new orthogonal axis — where authoring/decoding/provisioning/rendering/runtime catches it).
@@ -121,7 +122,7 @@ residue (the burst back-pressure and backlog quota actually holding at runtime).
 
 ### 3.21 Capacity growth without an amoebius-owned scaling policy
 
-"Just let it autoscale to infinity" is how a bounded budget quietly becomes unbounded. amoebius makes growth
+An unbounded autoscaling ceiling is how a bounded budget becomes unbounded. amoebius makes growth
 representable **only** through a `Growable = Bounded | Autoscaled ScalingPolicy` union with **no
 bare-unbounded arm**: the sole path past a fixed cap carries a typed `ScalingPolicy` (capacity thresholds,
 instance price-shopping, a quota cap), and amoebius owns that logic. The fold re-runs against the grown bound,
@@ -208,7 +209,7 @@ is empty because its backing was lost. **Owner:** [`backup_recovery_doctrine.md`
 
 ### 3.58 Unbounded backup history
 
-"Keep every backup forever" is how a bounded medium quietly becomes unbounded storage. `BackupRetention` is a
+Keeping every backup indefinitely is how a bounded medium becomes unbounded storage. `BackupRetention` is a
 closed `KeepN | KeepWindow | Growable` union with no keep-forever arm, so backup history is bounded by the same
 discipline the Pulsar retention surface uses; the only path past a fixed bound is a `Growable` whose ceiling is
 a quota. **Owner:** [`backup_recovery_doctrine.md` §2](../engineering/backup_recovery_doctrine.md#2-the-backup-surface--a-closed-backuppolicy-deployment-rule).

@@ -16,7 +16,7 @@
 This document is a **map of intent**, not a map of `src/`. The amoebius tree is greenfield: **nothing in the
 tables below is built**. Every "Planned module path" is the *target* layout this plan commits to — the path a
 sprint's `Implementation` field will name and that becomes concrete only when that sprint is ✅ Done
-(`development_plan_standards.md` §F). Where this inventory leans on the sibling **prodbox** project for a
+([`development_plan_standards.md` §F](development_plan_standards.md#f-the-sprint-block-format)). Where this inventory leans on the sibling **prodbox** project for a
 proven pattern, that is cited as *evidence* a shape works, never as amoebius proof.
 
 The columns mean:
@@ -24,7 +24,7 @@ The columns mean:
 - **Component / Surface** — the named subsystem or behaviour.
 - **Owning doctrine** — the single doctrine document (and section) that is the SSoT for *what the surface
   must be*. Every row's doctrine is cited by its human section name in the prose above its table, per the
-  doctrine-citation rule (`development_plan_standards.md` §H).
+  doctrine-citation rule ([`development_plan_standards.md` §H](development_plan_standards.md#h-the-doctrine-citation-rule-cite-by-name)).
 - **Planned module path** — the intended Haskell module(s) / artifact(s). **PLANNED**: not yet built. Paths
   that carry a package prefix (`amoebius-pulsar/…`, `amoebius-store/…`, `amoebius-runtime/…`,
   `amoebius-pulumi/…`, `amoebius-release/…`) live in their own cabal package; bare `src/Amoebius/…` paths live in the main
@@ -33,7 +33,7 @@ The columns mean:
   its phase gate runs on its substrate; this inventory carries no status of its own — status lives only in
   the phase docs and the [README.md](README.md) Phase Overview.
 
-Status legend (full vocabulary in `development_plan_standards.md` §C): ✅ Done · 🔄 Active · 📋 Planned ·
+Status legend (full vocabulary in [`development_plan_standards.md` §C](development_plan_standards.md#c-status-vocabulary)): ✅ Done · 🔄 Active · 📋 Planned ·
 ⏸️ Blocked · 🧪 Live-proof-pending. **Pre-implementation, read every row as 📋 Planned.**
 
 ---
@@ -106,9 +106,9 @@ Types render Kubernetes manifests; Helm does not. The renderer is the pure, tota
 `renderAll :: ProvisionedSpec -> [K8sObject]`, which privately total-maps the sealed equal-keyed
 `ProvisionedRenderSourceSet`; each object is a typed Haskell record serialized via Aeson — the record *is*
 the manifest. No public service-valued renderer exists. Making the cluster match that object set is owned by
-[`manifest_generation_doctrine.md` §5 — The apply/reconcile engine: server-side apply, owned field manager, prune, wait](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions):
+[`manifest_generation_doctrine.md` §5 — The apply/reconcile engine: snapshot-bound typed actions](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions):
 server-side apply under a fixed `amoebius` field manager, ApplySet prune, wait-for-ready — run only by the
-control-plane singleton (§1), never by a CLI poke racing another writer.
+control-plane singleton ([§1](#1-the-single-binary--three-contexts-several-typed-roles)), never by a CLI poke racing another writer.
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
 |---|---|---|---|
@@ -133,7 +133,7 @@ the conditional `planInfrastructure` stage derives initial infrastructure demand
 `BoundDeployment`. It either proves the explicit already-materialized arm or yields one non-renderable,
 batch-owned plan whose validated CAS enaction and provider/host readback construct `ProvisionContext`; only the
 post-materialization whole-deployment provision seal may then construct the opaque `ProvisionedSpec`. Its
-private service/global projections contribute exactly one identity-keyed source set; §3 exposes only
+private service/global projections contribute exactly one identity-keyed source set; [§3](#3-manifests--typed-renderer--the-ssa-reconciler) exposes only
 whole-deployment `renderAll`.
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
@@ -157,8 +157,8 @@ owned by
 None of these services is pulled from a public registry: each third-party binary is **baked** into the
 multi-arch base image, owned by
 [`image_build_doctrine.md` §2 — The single distribution rule: bake the binaries, build the amoebius image, pull only in-cluster](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster).
-Each service below is rendered by the §3 typed renderer and applied by the §3 reconciler — these module paths
-are the per-service spec builders, not the providers' own binaries (those are baked; see §9). The stack comes
+Each service below is rendered by the [§3](#3-manifests--typed-renderer--the-ssa-reconciler) typed renderer and applied by the [§3](#3-manifests--typed-renderer--the-ssa-reconciler) reconciler — these module paths
+are the per-service spec builders, not the providers' own binaries (those are baked; see [§9](#9-substrate-tool-ensure--base-image-build)). The stack comes
 up in two live tiers: the **backbone** (MetalLB + MinIO + Pulsar HA) in Phase 19, then **services-2**
 (Percona/Patroni Postgres + pgAdmin, Prometheus/Grafana, and the derived readiness-DAG bring-up order) in
 Phase 20 — the per-row Phase column names which tier builds each surface.
@@ -186,7 +186,7 @@ and adding the production concerns, per
 [`pulsar_client_doctrine.md` §4 — Forked from supernova — what amoebius inherits and what it builds](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-inherits-and-what-it-builds).
 Its capability surface — lookup, produce, consume, subscribe, seek — is owned by
 [`pulsar_client_doctrine.md` §5 — The capability surface: lookup · produce · consume · subscribe · seek](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek).
-This is the `amoebius-pulsar` package, distinct from the §5 `Platform/Pulsar.hs` *spec builder* that renders
+This is the `amoebius-pulsar` package, distinct from the [§5](#5-platform-services--baked-binaries--the-distribution-registry) `Platform/Pulsar.hs` *spec builder* that renders
 the broker into the cluster and from the Phase-23 `Tenancy/Provider/Pulsar.hs` administrative-policy adapter.
 Phase 23 may apply/read back tenant/namespace/ACL state; the first authenticated tenant-credential
 produce/consume round trip is owned by Phase 24 because it requires this native client.
@@ -196,7 +196,7 @@ produce/consume round trip is owned by Phase 24 because it requires this native 
 | Wire framing / binary protocol (forked `proto-lens` `PulsarApi`) | [pulsar_client §3 / §4](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-inherits-and-what-it-builds) | `amoebius-pulsar/src/Amoebius/Pulsar/Frame.hs`, `amoebius-pulsar/src/Amoebius/Pulsar/Proto/PulsarApi.hs` (PLANNED) | [phase_24_pulsar_client.md](phase_24_pulsar_client.md) |
 | Connection / CONNECT handshake / LOOKUP discovery | [pulsar_client §4](../documents/engineering/pulsar_client_doctrine.md#4-forked-from-supernova--what-amoebius-inherits-and-what-it-builds) | `amoebius-pulsar/src/Amoebius/Pulsar/Connection.hs` (PLANNED) | [phase_24_pulsar_client.md](phase_24_pulsar_client.md) |
 | Producer / Consumer / Subscription / Seek + authenticated tenant-policy data-path gate | [pulsar_client §5](../documents/engineering/pulsar_client_doctrine.md#5-the-capability-surface-lookup--produce--consume--subscribe--seek) | `amoebius-pulsar/src/Amoebius/Pulsar/{Producer,Consumer,Subscription,Seek}.hs` (PLANNED) | [phase_24_pulsar_client.md](phase_24_pulsar_client.md) |
-| CBOR payload codec (exclusively CBOR bodies; `serialise`/`cborg`; canonical where content-addressed) | [pulsar_client §3.1](../documents/engineering/pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor), [illegal_state_catalog §3.23](../documents/illegal_state/illegal_state_catalog.md) | `amoebius-pulsar/src/Amoebius/Pulsar/Cbor.hs` (PLANNED; `serialise`/`cborg` dep in the `amoebius-pulsar` cabal package) | [phase_24_pulsar_client.md](phase_24_pulsar_client.md) |
+| CBOR payload codec (exclusively CBOR bodies; `serialise`/`cborg`; canonical where content-addressed) | [pulsar_client §3.1](../documents/engineering/pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor), [illegal_state_catalog §3.23](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent) | `amoebius-pulsar/src/Amoebius/Pulsar/Cbor.hs` (PLANNED; `serialise`/`cborg` dep in the `amoebius-pulsar` cabal package) | [phase_24_pulsar_client.md](phase_24_pulsar_client.md) |
 | Broker-side dedup wiring + declarative topology algebra | [pulsar_client §6 — The declarative topology algebra](../documents/engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra) | `amoebius-pulsar/src/Amoebius/Pulsar/{Dedup,Topology,Namespace}.hs` (PLANNED) | [phase_24_pulsar_client.md](phase_24_pulsar_client.md) |
 | Topic storage lifecycle (retention + size-triggered offload + backlog quota reconcile) | [pulsar_client §6.1](../documents/engineering/pulsar_client_doctrine.md), [resource_capacity §7](../documents/engineering/resource_capacity_doctrine.md) | `amoebius-pulsar/src/Amoebius/Pulsar/Retention.hs` (PLANNED) | [phase_24_pulsar_client.md](phase_24_pulsar_client.md) |
 
@@ -359,9 +359,9 @@ the client-rebind protocol of
 [`§4`](../documents/engineering/gateway_migration_doctrine.md#4-client-rebind--a-live-session-must-always-find-the-gateway),
 as the typed, edge-observed state machine of
 [`§5`](../documents/engineering/gateway_migration_doctrine.md#5-the-migration-as-a-typed-edge-observed-state-machine).
-Spawn + geo-replication land in Phase 28 (reusing the §10 Pulumi backend, Pulumi-from-inside first built
+Spawn + geo-replication land in Phase 28 (reusing the [§10](#10-pulumi-backend-iac) Pulumi backend, Pulumi-from-inside first built
 there); the gateway-migration drills + model-correspondence in Phase 29. This is the live runtime counterpart
-of the §11-listed Phase-3 design `Model`.
+of the [§11](#11-release-lifecycle--the-amoebius-release-package)-listed Phase-3 design `Model`.
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
 |---|---|---|---|
@@ -427,7 +427,7 @@ the foreclosure layers + validation-locus by
 ## Related Documents
 
 - [README.md](README.md) — the live tracker and Phase index this inventory's rows point into
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook (§F `Implementation`, §H doctrine-citation, §K honesty) this inventory obeys
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook ([§F](development_plan_standards.md#f-the-sprint-block-format) `Implementation`, [§H](development_plan_standards.md#h-the-doctrine-citation-rule-cite-by-name) doctrine-citation, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) honesty) this inventory obeys
 - [overview.md](overview.md) — the target architecture narrative behind these components
 - [substrates.md](substrates.md) — the substrate registry and per-phase substrate map
 - [Daemon Topology](../documents/engineering/daemon_topology_doctrine.md) — the one-binary / three-context owner

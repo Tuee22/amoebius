@@ -87,7 +87,7 @@ This discipline earns its cost only when **all three** of these hold:
 2. **Coordination only through shared, durable substrates** — actors share no in-memory state; they agree
    only through a log, a broker, an object store, or a database. In amoebius that substrate is the
    **coordination plane: Pulsar + MinIO + the signed, hash-chained commit log**
-   ([daemon_topology_doctrine.md §5.1](./daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership)).
+   ([daemon_topology_doctrine.md §5.2](./daemon_topology_doctrine.md#52-the-coordination-plane-is-for-worker-events-and-audit-not-leadership)).
 3. **A safety invariant no single actor can enforce alone** — *exactly one control-plane singleton*,
    *exactly-once effect under redelivery*, *no split-brain gateway across clusters* — belongs to a
    protocol spanning several actors plus the substrate, not to any one process.
@@ -129,8 +129,8 @@ trusted after it could have changed.** In its barest form:
 
 Between `t0` and `t1`, another actor can quietly invalidate the premise: a peer emits a fresher claim, a
 geo-replicated write lands, the elected owner yields. The branch is then taken on a **self-contradictory
-input** — a premise from one instant fused with evidence from another. The two singleton candidates in the
-Prologue are exactly this; so are the two clusters, with **replication lag** now playing the role of the
+input** — a premise from one instant fused with evidence from another. The two singleton candidates of
+[§1](#1-the-defect-this-doctrine-targets) are exactly this; so are the two clusters, with **replication lag** now playing the role of the
 gap between `t0` and `t1`.
 
 The shape wears two recurring disguises:
@@ -412,7 +412,7 @@ to exhaustion at a scope that **matches the real actor count**. The model's voca
 observation *types* — should be the very ones Extract named. In amoebius the liveness property is a
 `modelProperties` temporal goal under a **named fairness assumption**, checked by TLC (never the in-process
 explorer, which is safety-only) — the mechanics owned by
-[formal_model_doctrine.md §3/§6](./formal_model_doctrine.md#3-two-total-renderings); the fairness is itself a
+[formal_model_doctrine.md §3](./formal_model_doctrine.md#3-two-total-renderings)/[§6](./formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not); the fairness is itself a
 named *assumed* premise, sibling to the R8 synchrony premise.
 
 The canonical failover hazard the model must rule out is a **deposed actor that still believes it owns the

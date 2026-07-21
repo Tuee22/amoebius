@@ -102,6 +102,18 @@ renumbered.
   section (`§M`) is linked once at first mention. This exemption covers only list-clause shorthand, never a bare
   `§N` that names a *section*.
 
+### The illegal-state catalog is cited by its index name, resolved to its themed slice
+
+The illegal-state catalog is one logical SSoT — `illegal_state_catalog.md` is its **index** — whose numbered
+entries (`§3.N`, `§4.N`) physically live in themed sub-files (`illegal_state_capacity.md`,
+`illegal_state_security.md`, `illegal_state_multicluster.md`, …). A reference to a numbered entry therefore keeps
+**`illegal_state_catalog.md §3.N` in the visible text** — the logical catalog is the name readers cite — while the
+anchor **deep-links to the themed slice that owns the entry** — e.g. the visible text
+`illegal_state_catalog.md §3.17` resolving to `illegal_state_capacity.md#317-…` (the themed slice that owns
+`§3.17`). This is the **one sanctioned case where the visible filename differs from the link target**, because the index
+holds the enumeration and the slice holds the heading. Bidirectionality (above) is still checked against the
+**slice actually linked** — that slice's `Referenced by` lists the citing document, not the index.
+
 ---
 
 ## 5. Duplication rules

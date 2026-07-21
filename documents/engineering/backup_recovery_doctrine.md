@@ -293,21 +293,15 @@ secondary was never deployed, so the secondary's data plane must be **seeded fro
 Amoebius chooses **consistency over availability** here — it would rather stay down than promote a secondary
 whose seeded state cannot prove its freshness. This extends three surfaces, each staying with its owner.
 
-**The deployment-rule (owned by [`consistency_pacelc_doctrine.md`](./consistency_pacelc_doctrine.md)).** The
-PACELC surface gains a recovery-source shape:
-
-```dhall
-let RecoverySource =
-      < WarmReplica                                              -- a standby already deployed + async-replicating
-      | ColdSeedFromBackup : { backup : BackupPolicyRef, freshnessBound : PosDuration }
-      >
-```
+**The deployment-rule (owned by [`consistency_pacelc_doctrine.md` §3.7](./consistency_pacelc_doctrine.md#37-the-cold-dr-seed-recovery-source)).** The
+PACELC surface gains a recovery-source shape — the closed `RecoverySource` union (`WarmReplica` vs
+`ColdSeedFromBackup { backup, freshnessBound }`) and its `freshnessBound ≥ cadence` decode fold — defined and
+owned there, not restated here.
 
 `ColdSeedFromBackup` is the cross-cluster **cold-DR seed** posture: the standby is not deployed until needed,
-and when it is, its backing is seeded from the latest `Verified` `BackupArtifact`. The `freshnessBound` is the
-maximum staleness the seed may carry and still be promotable; a `freshnessBound` below the backup `cadence` is
-statically unsatisfiable — a seed can never be fresher than the newest generation — and is rejected at Gate 2,
-the same shape as the existing `rto ≥ dnsTtl + headroom` fold
+and when it is, its backing is seeded from the latest `Verified` `BackupArtifact`. The `freshnessBound` — the
+maximum staleness a seed may carry and still be promotable — is checked against the backup `cadence` at Gate 2
+by that surface's fold, in the same total checked-rejection shape as its `rto ≥ dnsTtl + headroom` relation
 ([`consistency_pacelc_doctrine.md` §3.5](./consistency_pacelc_doctrine.md#35-the-upload-time-feasibility-push-back)).
 Like `Planned`/`Failover`, the `Seed` recovery is a **world-triggered event** classified at the recovery edge,
 never an authored `mode` field ([`consistency_pacelc_doctrine.md` §3.4](./consistency_pacelc_doctrine.md#34-the-mode-is-world-triggered-not-authored)).
@@ -370,7 +364,7 @@ Per [`documentation_standards.md` §6](../documentation_standards.md#6-honesty-t
 | That a backup is put-only for amoebius and deletion is out of band | The create-vs-delete credential classes and `CloudAccountMutationCapability` → [`pulumi_iac_doctrine.md` §6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model), [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) |
 | The no-overcommit backup fold operands (working set + Job + retained generations) | The aggregate `Σ ≤ backing` fold and the `Growable` escape valve → [`resource_capacity_doctrine.md`](./resource_capacity_doctrine.md) |
 | That restore seeds a fresh coordinate and that a manual air-gap medium has no automatic-restore path | The no-destruction verb union and the reconcile enactment → [`inforcespec_migration_doctrine.md`](./inforcespec_migration_doctrine.md), [`cluster_lifecycle_doctrine.md`](./cluster_lifecycle_doctrine.md) |
-| The `RecoverySource` cold-seed posture and its consistency-over-availability choice | The PACELC posture surface and the `FreshnessWitness`/`NoTakeWithoutProvenFreshness` proof → [`consistency_pacelc_doctrine.md`](./consistency_pacelc_doctrine.md), [`gateway_migration_model_doctrine.md`](./gateway_migration_model_doctrine.md) |
+| The `BackupPolicyRef` a cold seed names, the seed/verify enactment, and the `BackupArtifact` it consumes | The `RecoverySource` type and the consistency-over-availability posture, the PACELC posture surface, and the `FreshnessWitness`/`NoTakeWithoutProvenFreshness` proof → [`consistency_pacelc_doctrine.md`](./consistency_pacelc_doctrine.md), [`gateway_migration_model_doctrine.md`](./gateway_migration_model_doctrine.md) |
 | The enumerated backup illegal states' owning rule | The catalog entries, techniques, and coverage matrix → [`illegal_state_storage.md`](../illegal_state/illegal_state_storage.md), [`illegal_state_multicluster.md`](../illegal_state/illegal_state_multicluster.md), [`illegal_state_techniques.md`](../illegal_state/illegal_state_techniques.md) |
 
 ---

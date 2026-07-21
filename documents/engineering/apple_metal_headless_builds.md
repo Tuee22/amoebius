@@ -8,7 +8,7 @@
 > **Purpose**: Single Source of Truth for how the Apple-Metal host worker is **built and run on Apple
 > Silicon** — headless, directly on the macOS host, through a **fixed host Metal bridge** with **runtime
 > MSL compilation** — and the rationale for the design's **hard no-Tart / no-VM / no-keychain / no-full-Xcode
-> / no-per-kernel-Swift-build** commitment. The host substrate that hosts this worker, the no-`PATH`/no-env
+> / no-per-kernel-Swift-build** commitment — the host substrate that hosts this worker, the no-`PATH`/no-env
 > lazy-tool-ensure contract, and the LoadBalancer-by-substrate choice are owned by
 > [substrate_doctrine.md](./substrate_doctrine.md); this doc owns only the **Apple build/run shape**.
 

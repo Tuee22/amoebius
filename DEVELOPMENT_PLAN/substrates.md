@@ -63,16 +63,16 @@ gates.
 > **declared** axis owned by
 > [`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md); EKS is therefore a
 > *managed provider entry* (below), **not** a fifth detected substrate. Each host entry also **advertises a
-> declared inventory**: physical and allocatable CPU/memory, logical pod-ephemeral capacity, a closed
-> nodefs/imagefs/containerfs layout with content/snapshot model and pull policy, disjoint
-> system/VM/cache/retained/build disk pools, and an accelerator device vector
-> (family/profile/count/per-device raw/reserved/allocatable VRAM, with current free observed live) or Apple
-> unified-memory shape. These are the operands the capacity fold
-> ([`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md) §4) checks
-> workload/VM/cache/engine demand against, cross-checked at runtime against observed allocatable, backing,
-> and device inventory (§2 of the substrate doctrine). The registry records that a complete `Capacity` is
-> declared per host/node; the fold and its layer are the
-> capacity doctrine's.
+> declared inventory** — a complete per-host/node `Capacity` (CPU/memory, pod-ephemeral capacity, the
+> nodefs/imagefs/containerfs layout, disjoint disk pools, and the accelerator device vector or Apple
+> unified-memory shape) whose model is owned by
+> [`resource_capacity_doctrine.md` §3](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
+> and whose fold checks workload/VM/cache/engine demand against it
+> ([§4](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)),
+> cross-checked at runtime against observed allocatable, backing, and device inventory
+> ([§2](../documents/engineering/substrate_doctrine.md#2-detection-a-pure-classification-over-three-reads)).
+> The registry records only **which substrate/engine each gate keys to**; the `Capacity` model, its fold, and
+> its layer are the capacity doctrine's.
 
 ### apple
 
@@ -109,7 +109,7 @@ gates.
 | GPU axis | NVIDIA present ⇒ **in-cluster** CUDA via the NVIDIA container runtime — the *contained-GPU* case ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained) contrast) |
 | Virtualization | none |
 | LoadBalancer | MetalLB |
-| What it validates | The Phase 34 gate — a jitML training run is bit-deterministic per its determinism contract and the HA coordinator fails over; CUDA stays confined behind a default-off cabal flag |
+| What it validates | The Phase 34 gate — a jitML training run is bit-deterministic per its determinism contract and the delegated single-writer Feed trainer fails over (Pulsar Failover + CAS, no election) |
 | Gate phase(s) | Phase 34 — the per-phase assignment is owned by [§4](#4-per-phase-substrate-map) |
 | Status | 📋 Planned |
 
@@ -122,7 +122,7 @@ gates.
 | GPU axis | CUDA present ⇒ **on-host worker node** — CUDA does not run performantly inside WSL2 ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)) |
 | Virtualization | WSL2 (Ubuntu-24.04 Linux distro) for the Linux-host role — see §3 |
 | LoadBalancer | MetalLB (when acting as a Linux cluster host) |
-| What it validates | No phase gate in 0–37 keys its single substrate to `windows`: Windows participates either as a Linux host (via WSL2) or as the Windows-CUDA host-worker case, which shares the Phase 35 host-compute doctrine whose gate substrate is `apple`. This round elevates the Windows-CUDA host worker to a **first-class** case alongside Apple-Metal — role parity, not evidence parity ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained), `daemon_topology_doctrine.md` §4). The standalone `windows` gate is a later-phase concern (README later phases) |
+| What it validates | No phase gate in 0–37 keys its single substrate to `windows`: Windows participates either as a Linux host (via WSL2) or as the Windows-CUDA host-worker case, which shares the Phase 35 host-compute doctrine whose gate substrate is `apple`. This round elevates the Windows-CUDA host worker to a **first-class** case alongside Apple-Metal — role parity, not evidence parity ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained), [`daemon_topology_doctrine.md` §4](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected)). The standalone `windows` gate is a later-phase concern (README later phases) |
 | Gate phase(s) | none in 0–37 (host-worker doctrine shared with Phase 35) |
 | Status | 📋 Planned |
 
@@ -132,11 +132,11 @@ gates.
 > amoebius-built behaviour; amoebius has not built Phase 14
 > ([`substrate_doctrine.md` §1](../documents/engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob)).
 
-> **Why `windows` is not split into `windows-cuda` (§F, this round's addition — normative in the doctrine).**
+> **Why `windows` is not split into `windows-cuda`.**
 > The amoebius four-name catalog keys each member on the **OS / VM-provider + wire strategy**, not on accelerator
 > presence: a Windows host's CUDA reaches the cluster as a **host worker** regardless (CUDA does not run
 > performantly under WSL2), so the deployment-shape-changing axis is captured by the Phase-35 host-worker
-> elevation (§B), not by a new substrate name. The seed's finer `windows-gpu` member therefore collapses to
+> elevation, not by a new substrate name. The seed's finer `windows-gpu` member therefore collapses to
 > `windows`, while the seed-attributed `linux-gpu` keeps its `linux-gpu` ⇔ amoebius `linux-cuda` mapping — the
 > seed strings above are quotations and are kept verbatim. `cuda` names the **NVIDIA accelerator family**; a
 > future non-NVIDIA accelerator (e.g. ROCm) would be its own substrate, which is why the amoebius name is
@@ -154,8 +154,8 @@ it has no host to detect and no `LinuxHost` witness. It is the `Managed Eks` arm
 | Kind | Provider-managed cluster (`Managed Eks`) — no host binary or host worker daemons; the same executable runs the mandatory in-cluster control-plane singleton, capacity-scheduler, and worker roles |
 | Detected substrate? | **No** — declared, provisioned over the cloud API from inside a parent ([`pulumi_iac_doctrine.md` §4](../documents/engineering/pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog)) |
 | Provider account | Required authored `Managed Eks.account : CloudAccountId`; it exact-joins the account quota ledger, credentials, observation, and every derived `ProviderInstanceId` |
-| Node capacity | From exact declared `ProviderNodeClass { name, sku, allocatable, quotaVcpu, zones, price, baseCount, maxCount }` values, not the managed control plane. `allocatable` is the complete `ProviderNodeCapacityTemplate { allocatableCpu, allocatableMemory, podSlots, cniSlots, attachableVolumes, localDisks, cpuOvercommit, localStorage, accelerator }`; each `localDisks` entry is a `PerInstanceDiskTemplate` with raw `InstanceStore.provisionedRawBytes` or an `EphemeralRootEbs` policy and usable `ProviderUsableDiskCarveTemplate.requiredUsableBytes` system/layout carves. Each selected instance becomes a distinct privately provisioned capacity before folding ([`resource_capacity_doctrine.md` §3](../documents/engineering/resource_capacity_doctrine.md)) |
-| Storage ceiling | Three non-interchangeable cases: SKU-pinned `InstanceStore.provisionedRawBytes` is per-instance raw supply and spends no EBS quota; an `EphemeralRootEbs` root derives and spends a provider-rounded raw request under `ProviderQuota.nodeRootStorage`; retained durable EBS uses the `Ebs` `StorageBacking` arm and spends `ProviderQuota.durable`. For either node-disk arm, private `ProvisionedPerInstanceDiskTemplate` derives presentation-pinned `mountedUsableBytes` before proving the usable system reserve plus unique usable carves fit; raw supply and usable carve bytes are never summed. The `CloudQuota` arm is only provider-object byte/count quota. “Unbounded” storage/compute exists only behind a quota-bounded `ScalingPolicy` |
+| Node capacity | From exact declared `ProviderNodeClass { name, sku, allocatable, quotaVcpu, zones, price, baseCount, maxCount }` values, not the managed control plane. `allocatable` is the complete `ProviderNodeCapacityTemplate { allocatableCpu, allocatableMemory, podSlots, cniSlots, attachableVolumes, localDisks, cpuOvercommit, localStorage, accelerator }`; each `localDisks` entry is a `PerInstanceDiskTemplate` with raw `InstanceStore.provisionedRawBytes` or an `EphemeralRootEbs` policy and usable `ProviderUsableDiskCarveTemplate.requiredUsableBytes` system/layout carves. Each selected instance becomes a distinct privately provisioned capacity before folding ([`resource_capacity_doctrine.md` §3](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)) |
+| Storage ceiling | Three non-interchangeable cases: SKU-pinned `InstanceStore.provisionedRawBytes` is per-instance raw supply and spends no EBS quota; an `EphemeralRootEbs` root derives and spends a provider-rounded raw request under `ProviderQuota.nodeRootStorage`; retained durable EBS uses the `Ebs` `StorageBacking` arm and spends `ProviderQuota.durable`. For either node-disk arm, private `ProvisionedPerInstanceDiskTemplate` derives presentation-pinned `mountedUsableBytes` before proving the usable system reserve plus unique usable carves fit. The `CloudQuota` arm is only provider-object byte/count quota. The never-sum-raw-and-usable ceiling and the quota-bounded `ScalingPolicy` escape valve are owned by [`resource_capacity_doctrine.md` §5](../documents/engineering/resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm) / [§6](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns) |
 | LoadBalancer | Cloud LoadBalancer (the one substrate-driven difference, [`substrate_doctrine.md` §7](../documents/engineering/substrate_doctrine.md#7-the-loadbalancer-is-the-one-substrate-driven-platform-difference)) |
 | Gate phase(s) | 30 (the `linux-cpu` parent drives the deploy; the provider target is not a hardware substrate) — owned by [§4](#4-per-phase-substrate-map) |
 | Status | 📋 Planned |
@@ -196,7 +196,7 @@ Lima VM on Apple presents as `linux-cpu` to everything above it.
 > [`resource_capacity_doctrine.md` §4](../documents/engineering/resource_capacity_doctrine.md)); the guest
 > Linux cluster folds against that sub-capacity, so "a VM asking for more than its host" is rejected at the
 > pure post-bind `provision-seal`
-> ([`illegal_state_catalog.md` §3.17](../documents/illegal_state/illegal_state_catalog.md)). A Lima/WSL2 VM is
+> ([`illegal_state_catalog.md` §3.17](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent)). A Lima/WSL2 VM is
 > also the **only `LinuxHost` witness** its non-Linux host can produce — which is why an rke2/kind cluster on
 > apple/windows must interpose one (I1, §3.14).
 
@@ -219,7 +219,7 @@ sprint breakdown lives in its phase document (`phase_00_documentation_suite.md` 
 | Phase | Name | Substrate | Why this substrate |
 |-------|------|-----------|--------------------|
 | 0 | Documentation suite (whole DSL) | `none` | The gate is the documentation lint — header metadata, SSoT/no-duplication, no orphan cross-links. No host, no cluster. |
-| 1 | Toolchain spike | `none` | A build-only probe of `dhall` + `io-sim` + resolver deps on the pinned toolchain; no host or cluster. |
+| 1 | Toolchain spike | `none` | A build-only probe of `dhall` + `io-sim`/`io-classes` + the jit-build resolver deps + `purescript-bridge` + the Pulsar `supernova` fork on the pinned toolchain; no host or cluster. |
 | 2 | Formal-model EDSL (`Model`/`interpret`/`emitTLA`) | `none` | Register 1: the in-process explorer + the `emitTLA` renderer + TLC on the generated `.tla` (safety `INVARIANT`s + fairness/temporal `PROPERTY`s) + the differential explorer↔TLC property; no host or cluster. |
 | 3 | Gateway-migration model (both branches) | `none` | Register 1: `emitTLA` + TLC (safety + liveness under fairness) + io-sim over the `GatewayMigration` `Model`, before any real resource. |
 | 4 | Dhall Gate-1 schema + smart-constructor prelude | `none` | Register 1: `dhall type` over the schema + corpus; authoring-time only, no binary. |
@@ -230,7 +230,7 @@ sprint breakdown lives in its phase document (`phase_00_documentation_suite.md` 
 | 9 | Pure `renderAll` + rendered-output goldens | `none` | Register 1: sole public whole-deployment `renderAll` + byte-for-byte manifest goldens; rendering never touches live infra, and no service-valued render boundary exists. |
 | 10 | chain/Step kernel + `--dry-run` plan render | `none` | Register 1: the pure `[Step]` plan + `--dry-run` golden; no effects. |
 | 11 | Boundary-integration fake-tool harness | `none` | Register 2: the binary runs the plan against fake `kubectl`/`docker`/`pulumi` by absolute path; recorded argv and applied bytes match the committed goldens; no cluster. |
-| 12 | Deterministic-simulation substrate | `none` | Register 2.5: the real daemon/reconciler code under `IOSim`/`IOSimPOR` against a modeled fault-injectable environment; same-seed → byte-identical trace; no cluster. |
+| 12 | Deterministic-simulation substrate | `none` | Register 2 (serves the Register-2.5 deterministic-simulation activity): the real daemon/reconciler code under `IOSim`/`IOSimPOR` against a modeled fault-injectable environment; same-seed → byte-identical trace; no cluster. |
 | 13 | SPA composition (representational) + demo-SPA local | `none` | Register 1/2: composition property + the PureScript demo SPA against a faked backend (Playwright); no cluster. |
 | 14 | Python midwife + substrate detect + single kind cluster | `linux-cpu` | The default substrate admits engine/process/etcd-transition demand, realizes the kubelet filesystem layout, and records logical ephemeral, physical content/snapshot, and presented backing inventory. |
 | 15 | Multi-arch base image + jit-build resolver + `distribution` registry | `linux-cpu` | Host build CPU/memory/scratch/cache/concurrency is snapshot-admitted; an explicit `ProvisionedBootstrapRegistry`/snapshot-bound action side-loads and initializes only registry/proxy objects, then equality-hands them into later whole-deployment ownership before atomic publication. |
@@ -289,11 +289,11 @@ keeps in
 ## Related Documents
 
 - [README.md](README.md) — the live tracker; the Phase index carries the same substrate column
-- [development_plan_standards.md](development_plan_standards.md) — §L one-substrate discipline, §I generated-section markers
+- [development_plan_standards.md](development_plan_standards.md) — [§L](development_plan_standards.md#l-one-substrate-discipline) one-substrate discipline, [§I](development_plan_standards.md#i-generated-section-markers) generated-section markers
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — the normative substrate catalog, detection, no-`PATH` contract, virtualization, and host-worker carve-out this registry projects
 - [Cluster Topology Doctrine](../documents/engineering/cluster_topology_doctrine.md) — the declared compute-engine axis (kind/rke2/EKS) this registry keeps distinct from the detected substrate
 - [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — the fold over the per-host `Capacity` this registry declares
-- [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — §9 the LoadBalancer + single wild-ingress path, §12 substrate equivalence as a structural invariant
+- [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — [§9](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) the LoadBalancer + single wild-ingress path, [§12](../documents/engineering/platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant) substrate equivalence as a structural invariant
 - [Host ↔ Cluster Comms Doctrine](../documents/engineering/host_cluster_comms_doctrine.md) — the host-worker wire (host-only NodePorts, no mTLS) behind Phase 35
 - [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — the composition lift and worker-role taxonomy
 - [Pulumi IaC Doctrine](../documents/engineering/pulumi_iac_doctrine.md) — provider-cluster provisioning behind Phase 30

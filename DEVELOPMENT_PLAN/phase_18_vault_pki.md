@@ -120,8 +120,8 @@ seeded mutant** (§M.2) that MUST turn the gate red, committed and re-run.
 - [`platform_services_doctrine.md §11`](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering)
   — *bring-up and dependency ordering*: the hard edge this phase installs — **Vault reachable, initialized, and
   unsealed before any secret-dependent startup** — as a witnessed readiness gate, never a timer.
-- [`resource_capacity_doctrine.md §5`](../documents/engineering/resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm) — the canonical
-  `VaultStorageDemand` and private `ProvisionedVaultStorageDemand`: every persisted source population and
+- [`resource_capacity_doctrine.md §5`](../documents/engineering/resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm) — *`StorageBudget`: bounded by construction, single-owner ceiling per arm*: the canonical
+  `VaultStorageDemand` and private `ProvisionedVaultStorageDemand` — every persisted source population and
   history is finite, the version-pinned Raft model includes WAL/snapshot/compaction/recovery peaks, and the
   file audit device has a named backing/presentation with finite rotation. A raw demand cannot author its own physical
   bytes, and neither renderer nor reconciler accepts an unprovisioned Vault storage value.
@@ -271,11 +271,16 @@ PKI) only** — public-edge TLS and the cross-cluster intermediate-CA hierarchy 
   (ZeroSSL/route53, Phase 21) and is not the distro's own self-signed cluster CA (the chicken-and-egg floor,
   [`vault_pki_doctrine.md §10`](../documents/engineering/vault_pki_doctrine.md#10-the-chicken-and-egg-floor-what-stays-outside-vault));
   the cross-cluster intermediate-CA hierarchy is deferred to federation and flagged **live-proof-pending**.
+- **Committed seeded mutant(s) (§M.2)**, committed and re-run, each MUST turn Validation red: (i) a *dropped-guard*
+  mutant of `Pki.hs` that issues an internal leaf while Vault is **sealed** instead of failing closed (must fail
+  the sealed-issuance check); and (ii) an *effect-swap* mutant of `Pki.hs` that returns a leaf signed by an
+  unrelated key so it does **not** chain back to the self-signed root CA (must fail the chain-verify check).
 
 ### Validation
 1. Assert `pki/` holds a self-signed root CA after bring-up.
 2. Issue an internal leaf cert from `pki/` and assert it chains to the self-signed root CA.
-3. Seal Vault and assert issuance fails closed (no certificate is produced).
+3. Seal Vault and assert issuance fails closed with the typed **`sealed`** reason (no certificate is produced) —
+   the run differing only in seal state from item 2's successful unsealed issuance (§M.8).
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -336,9 +341,13 @@ through the **built-in** client, with a typed, no-leak error model. The `Prodbox
    proving the login actually occurs rather than a pre-minted token. Assert the pod has no agent sidecar and no
    plaintext Secret mount (read from the argv/exec observer and the pod spec, §M.5).
 2. **Typed negatives + presence-oracle absence (disambiguated).** A read of a path outside the consumer's policy
-   is denied; each of the sealed / uninitialized / policy-missing / secret-missing reads returns **its specific
-   tag from `test/golden/vault/error-tags.golden`** (§M.8 — each negative asserts *why* it failed, paired with the
-   positive canary read that differs only in the foreclosed dimension). **Presence-oracle absence is operationally
+   is denied; the representative `TransitKey` unwrap is exercised — its positive unwrap succeeds, and a
+   policy-denied unwrap yields the typed **`decrypt-denied`** tag; a read against an unreachable Vault (no
+   listener) yields the typed **`unavailable`** tag; and each of the sealed / uninitialized / policy-missing /
+   secret-missing / unavailable / decrypt-denied reads returns **its specific tag from
+   `test/golden/vault/error-tags.golden`** (§M.8 — each negative asserts *why* it failed, paired with the
+   positive canary read or unwrap that differs only in the foreclosed dimension), so all six error tags and the
+   one `TransitKey` unwrap in the representative set (§M.7) are gated here. **Presence-oracle absence is operationally
    defined:** the emitted log line for `secret-missing`, `policy-missing`, and `sealed` must be **byte-identical
    except for the typed tag itself** (so log shape reveals nothing about whether a path/secret exists), and a grep
    of the Vault audit device and the consumer's structured logs finds **none** of: the requested mount/path, the
@@ -363,7 +372,8 @@ the daemon **never** proceeds — never issues from `pki/`, never accepts a `.dh
 while Vault is sealed or its freshness is unproven; every failing schedule is **deterministically replayable** from
 its seed; substrate `none`, **Register 2.5**.
 **Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md`,
-`documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+`documents/engineering/vault_pki_doctrine.md`, `documents/engineering/testing_doctrine.md`,
+`DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 Adopt [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md) and

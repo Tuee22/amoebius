@@ -83,7 +83,10 @@ is bound*; that is a reconcile-time fact whose verification is owned by
 runtime-enforcement proof there on purpose**, and never reports it here. In the register model this is
 exactly the split: the spec-composition proof is a **Register 1/2** (pre-cluster, in-process) property, front-loaded
 to the pre-cluster gates, while the cluster-enforcement claim is **Register 3** (live-infrastructure integrity, deferred to the
-real-resource phases).
+real-resource phases). This is the same split that
+[`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)
+draws in tier vocabulary: **Register 1/2** here is its **Tier-1** (design-time / in-process) band, and **Register 3** is its
+**Tier-2** runtime-enforcement residue (Phase 22).
 
 ```mermaid
 flowchart TD
@@ -127,12 +130,10 @@ entry: the **failure** (how it goes wrong in raw k8s), the **owning doctrine** (
 
 **The validation-locus axis.** Orthogonal to *which foreclosure layer* catches a state (type-reject vs
 decode-reject vs runtime-check — [`illegal_state_techniques.md`](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)) is *where in the toolchain* the failure surfaces. Every
-sub-catalog entry carries a **Validation-locus** tag drawn from five values, defined in
-[`illegal_state_techniques.md`](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force): `Gate-1-editor` (fails `dhall type` at authoring time),
-`Gate-2-decoder` (the total decoder returns `Left`), `provision-seal` (post-bind Phase-8 provision returns a
-`ProvisionError` before any `ProvisionedSpec` exists), `rendered-output-golden` (caught by a golden test on the
-*rendered* manifest, no cluster required), and `live-effect` (only observable at reconcile/runtime — the residue
-Register 3 owns). Most entries name a primary locus plus a live-effect residue.
+sub-catalog entry carries a **Validation-locus** tag drawn from five values —
+`Gate-1-editor`, `Gate-2-decoder`, `provision-seal`, `rendered-output-golden`, and `live-effect` — each
+defined in [`illegal_state_techniques.md` §6.1](./illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer),
+the SSoT for the axis. Most entries name a primary locus plus a live-effect residue.
 
 ### Storage — [`illegal_state_storage.md`](./illegal_state_storage.md)
 

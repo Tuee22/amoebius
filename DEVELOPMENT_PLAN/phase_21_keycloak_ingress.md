@@ -62,7 +62,7 @@ byte-for-byte.
 The gate is not discharged by a deny-all edge, a self-authored clean scan, a circular "derived" assertion, or
 a skipped teardown. It positively exercises OIDC enforcement, validates its own scanners against committed
 seeded violations, oracles "derived" against an independent graph-walk, and witnesses that a genuinely new
-cluster came up. See **Gate integrity** below.
+cluster came up (see [Gate integrity](#gate-integrity)).
 
 ### Representative set (concrete corpus, §M.7)
 
@@ -77,7 +77,7 @@ localhost-browser; a single host-side `curl` of the MetalLB address is **not** a
 three. The "test-realm user" is the Phase-0-committed `phase21-tester` realm/user fixture
 (`test/fixtures/phase21/realm.json`), authored before the edge exists.
 
-### Gate integrity (§M)
+## Gate integrity
 
 - **Oracle-pinning (§M.1):** the route inventory (`route-inventory.golden`), the test realm/user
   (`realm.json`), the expected derived-NetworkPolicy set (`netpol-expected.json`, see 21.3), and the marker
@@ -97,7 +97,7 @@ three. The "test-realm user" is the Phase-0-committed `phase21-tester` realm/use
   recording shim on the ACME client, a readiness-withholding harness), never a compliance trace the edge emits
   about itself.
 
-### Resource-provisioning contract
+## Resource provision — the edge / Patroni / ACME envelope
 
 This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
 [`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
@@ -160,10 +160,6 @@ before the first effect, while their exact-fit twins render and reconcile.
   `HostLocalPeer` endpoint that does not interconvert; this phase is the live realization of that
   render-foreclosed impossibility (and of [§3.6](../documents/illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other),
   the derived-allow-edge NetworkPolicy rule).
-- [`manifest_generation_doctrine.md` §5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
-  — **the apply/reconcile engine**: the Gateway, `HTTPRoute`, Keycloak, and the derived NetworkPolicies are
-  typed `K8sObject`s rendered by `renderAll` and enacted by the Phase-16 server-side-apply reconciler under the
-  fixed `amoebius` field manager — no Helm, no hand-authored YAML.
 - [`pulumi_iac_doctrine.md` §5](../documents/engineering/pulumi_iac_doctrine.md#5-dns-route53-and-tls-zerossl-the-provider-integrations-this-doctrine-owns)
   — **DNS (route53) and TLS (zerossl)**: the public-edge TLS wired through the edge is *referenced*, not
   re-specified here; certificate provisioning is owned by the Pulumi/IaC doctrine, and the ZeroSSL EAB material
@@ -241,7 +237,9 @@ The whole sprint (📋 Planned).
 
 ### Objective
 Adopt [`illegal_state_catalog.md` §3.7 — accidental insecure / backdoor ingress](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)
-live, together with the public-edge TLS integration of
+live — the running-cluster realization of the single sanctioned wild-ingress path of
+[`platform_services_doctrine.md` §9](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)
+— together with the public-edge TLS integration of
 [`pulumi_iac_doctrine.md` §5 — DNS (route53) and TLS (zerossl)](../documents/engineering/pulumi_iac_doctrine.md#5-dns-route53-and-tls-zerossl-the-provider-integrations-this-doctrine-owns):
 prove on the running cluster that the render-time impossibility of a self-published ingress holds, and that the
 one carve-out really is a *different type* of endpoint, not a wild one.

@@ -69,14 +69,16 @@ and:
   `--dry-run` render matches the plan golden byte-for-byte **and** whose manifest-bearing steps are
   identity-selected subsets of the one **Phase-9** `renderAll` golden for the fixture's whole
   `ProvisionedSpec`. Their disjoint identity union equals that complete object set byte-for-byte; no Step
-  invokes a per-service renderer. The reference side is Phase 9's independently committed output, not the
-  kernel's own.
+  invokes a per-service renderer. Both cfg fixtures are the same Phase-0-committed fixtures Phase 9
+  golden-locked, so a corresponding whole-deployment `renderAll` golden exists for each fixture's
+  `ProvisionedSpec`. The reference side is Phase 9's independently committed output, not the kernel's own.
 - **Structural step-set coverage (§3).** The plan contains exactly the step set in `expected_steps.json` for
   the cfg (asserted structurally against the hand table, not read back off the plan golden).
 - **Committed mutants (§2).** `cabal test chain-spec` turns **red** on each of ≥2 committed seeded mutants:
   (m1) a cfg mutant removing one service from `multi.cfg.json` (plan and descent goldens must diverge), and
-  (m2) a descent mutant weakening `nextFrameAfter` to place the out-of-frame step in-frame (`stepRun`-reach
-  guard negation). Each mutant is committed and re-run, not run once.
+  (m2) a descent mutant weakening `nextFrameAfter` to place the out-of-frame step in-frame (the
+  `descent/multi.descent.golden` byte-diverges; the zero-`stepRun` counter is invariant under m2, since no
+  `stepRun` runs during render). Each mutant is committed and re-run, not run once.
 - **Zero-`stepRun` via a canaried counter (§5).** Every `Step` is constructible only through the counting
   smart constructor, and the counter increments **when the `stepRun` IO action is executed** (not when the
   field thunk is forced). The battery asserts the counter reads **zero** over the whole render, and a
@@ -105,14 +107,18 @@ emitting its proven/tested/assumed ledger with model↔runtime correspondence an
   source, the `--dry-run` preview is byte-for-byte what a live apply would submit, and prerequisite checks (is
   a cluster reachable, are credentials present) belong on the *apply* path, never the *render* path.
 - [`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) §2 (Register 1
-  — pure/golden, in-process) and §4 (the spine's **Plan** step — *"`chain` produces the `[Step]` value;
+  — pure/golden, in-process) and
+  [§4](../documents/engineering/conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run)
+  (the spine's **Plan** step — *"`chain` produces the `[Step]` value;
   `--dry-run` renders it; a golden test pins the plan"*): this phase is exactly that spine step, golden-locked,
   with the single IO seam deferred to Register 3.
-- [`generated_artifacts_doctrine.md §3`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule): the rendered
+- [`generated_artifacts_doctrine.md §3 — The rule`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule): the rendered
   plan is emitted from the Haskell source of truth and **never committed** — the `--dry-run` preview is a golden
   fixture of the renderer, not a committed runtime artifact.
 - [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) §2 (**Register 1**, the register this
-  gate reaches) and §4 (the per-run proven/tested/assumed ledger the battery emits, marking model↔runtime
+  gate reaches) and
+  [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
+  (the per-run proven/tested/assumed ledger the battery emits, marking model↔runtime
   correspondence and runtime fidelity UNVERIFIED, owned by Phases 11/20).
 
 ## Sprints
@@ -134,8 +140,7 @@ from the `NFData` instance so forcing the plan cannot execute an action), with a
 builder invokes public `renderAll` once for the fixture's whole `ProvisionedSpec`; every Step embeds only an
 identity-selected subset of that value, and the disjoint union is byte-identical to the corresponding
 Phase-9 whole-deployment golden.
-**Docs to update**: `documents/engineering/dsl_doctrine.md` (§2 chain/Step-kernel status backlink),
-`DEVELOPMENT_PLAN/system_components.md` (register the `Amoebius.Kernel.*` modules).
+**Docs to update**: `documents/engineering/dsl_doctrine.md` (§2 chain/Step-kernel status backlink).
 
 ### Objective
 Adopt [`dsl_doctrine.md §2 — Dhall carries params, Haskell carries logic`](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic):
@@ -187,8 +192,7 @@ its `stepRun` is provably never reached — "provably never reached" defined as 
 plan to normal form succeeding with the counting-constructor counter still reading zero (the IO action is
 never executed). The committed descent mutant (m2) that weakens `nextFrameAfter` to place the out-of-frame
 step in-frame MUST turn this check red.
-**Docs to update**: `documents/engineering/dsl_doctrine.md` (§2 descent/seam status backlink),
-`DEVELOPMENT_PLAN/system_components.md`.
+**Docs to update**: `documents/engineering/dsl_doctrine.md` (§2 descent/seam status backlink).
 
 ### Objective
 Adopt [`dsl_doctrine.md §2`](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)'s
@@ -234,8 +238,7 @@ network/process/credential module (e.g. `Network.*`, `System.Process`, socket/HT
 suite runs inside `unshare -n` with `KUBECONFIG`/cloud-credential/`VAULT_*` env vars scrubbed, so any actual
 socket/apiserver/Vault contact fails at the OS boundary — the isolated namespace is the external observer.
 **Docs to update**: `documents/engineering/conformance_harness_doctrine.md` (§3 render-never-touches-infra
-backlink), `documents/engineering/generated_artifacts_doctrine.md` (the plan is emitted, never committed),
-`DEVELOPMENT_PLAN/system_components.md`.
+backlink), `documents/engineering/generated_artifacts_doctrine.md` (the plan is emitted, never committed).
 
 ### Objective
 Adopt [`conformance_harness_doctrine.md §3 — rendering never touches live infrastructure`](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure):
@@ -307,8 +310,9 @@ model↔runtime correspondence and runtime fidelity marked UNVERIFIED (owned by 
   plan value (with `stepRun` excluded from `NFData`) is permitted and does not increment the counter.
 - The two committed seeded mutants: `test/kernel/mutants/m1_cfg_drop_service` (removes a service from
   `multi.cfg.json` — plan and descent goldens must diverge) and `test/kernel/mutants/m2_descent_inframe`
-  (weakens `nextFrameAfter` so the out-of-frame step is placed in-frame — the zero-`stepRun`/descent check must
-  go red). The gate re-runs both; each MUST turn the suite red.
+  (weakens `nextFrameAfter` so the out-of-frame step is placed in-frame — the descent golden must byte-diverge;
+  the zero-`stepRun` counter is invariant under m2, since no `stepRun` runs during render). The gate re-runs
+  both; each MUST turn the suite red.
 - The gate command runs `cabal test chain-spec` inside `unshare -n` with `KUBECONFIG`/cloud-credential/`VAULT_*`
   env vars scrubbed, plus the committed static import-closure assertion that `Amoebius.Kernel.Plan` and the
   `--dry-run` path reach no network/process/credential module.
@@ -324,7 +328,8 @@ model↔runtime correspondence and runtime fidelity marked UNVERIFIED (owned by 
    zero-`stepRun`-execution assertion holds (with the canary case proving nonzero detection); the suite is red
    if the render drifts from its golden or if any action is executed during render.
 2. Both committed mutants turn the suite red: m1 (cfg service-drop) diverges the plan and descent goldens; m2
-   (descent guard-weaken) fails the zero-`stepRun`/descent check. Both are committed and re-run every gate.
+   (descent guard-weaken) byte-diverges the descent golden (the zero-`stepRun` counter is invariant under m2,
+   since no `stepRun` runs during render). Both are committed and re-run every gate.
 3. The committed import-closure static assertion passes: `Amoebius.Kernel.Plan` and the `--dry-run` path reach
    no network/process/credential module.
 

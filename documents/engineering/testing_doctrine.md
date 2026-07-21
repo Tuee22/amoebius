@@ -186,7 +186,7 @@ machine-visible by emitting a ledger.
   correctness layer outside the gate's register is a mandatory **UNVERIFIED** row; and a design-proof
   (substrate `none`) ledger's acceptance token reads *proven-for-the-model*, never *runtime proven*. A ledger
   is evidence because it is committed and externally checked, not because the code under test emitted it.
-- **Skipping an applicable move marks that layer UNVERIFIED — never green.** This is the cardinal honesty
+- **Skipping an applicable move marks that layer UNVERIFIED — never green.** This is the governing honesty
   rule, stated by the plan and inherited from the chaos doctrine: if a test move *applies* to a layer and
   the run does not perform it, the ledger records that layer as **UNVERIFIED**, not as silently passing. A
   topology that exercises a singleton-ownership invariant at the Decision layer but never injects the

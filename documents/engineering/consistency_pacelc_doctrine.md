@@ -17,8 +17,8 @@
 **The problem this doctrine prevents.** amoebius has already fixed its position on every PACELC axis (Abadi
 2010/2012: under a **P**artition choose **A**vailability or **C**onsistency; **E**lse, in the healthy case,
 choose **L**atency or **C**onsistency), but the choices are scattered across five doctrines that never meet.
-An author or reviewer asking "under partition, does amoebius choose availability or consistency, and where?"
-must reconstruct the answer from R7/R8/R9 ([`chaos_failover_doctrine.md` §13](./chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need),
+No single document states whether, under partition, amoebius chooses availability or consistency, or where;
+an author or reviewer must reconstruct it from R7/R8/R9 ([`chaos_failover_doctrine.md` §13](./chaos_failover_doctrine.md#13-the-supporting-rules--the-conditions-the-moves-need),
 [§18](./chaos_failover_doctrine.md#18-the-rules-scale-to-the-boundary)), the `<Planned | Failover>` taxonomy
 ([`gateway_migration_doctrine.md`](./gateway_migration_doctrine.md)), the consistency-boundary invariant
 ([`single_logical_data_plane_doctrine.md` §1](./single_logical_data_plane_doctrine.md#1-why-this-doctrine-exists-two-ways-to-say-run-this-elsewhere)),
@@ -295,5 +295,3 @@ Per the proven/tested/assumed discipline
 - [`illegal_state_multicluster.md`](../illegal_state/illegal_state_multicluster.md) — the PACELC illegal states this posture forecloses (§3.47–§3.51).
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md) — phase order, status, and the cross-cluster proof obligation.
 - [Documentation Standards](../documentation_standards.md) — header, SSoT, and the proven/tested/assumed honesty rule.
-</content>
-</invoke>

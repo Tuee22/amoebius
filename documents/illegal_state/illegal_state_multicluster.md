@@ -6,8 +6,9 @@
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering cross-cluster capacity folds,
-> stretched host workers / remote agents / member witnesses across the network fabric, and the session
-> rebind that survives a gateway migration.
+> stretched host workers / remote agents / member witnesses across the network fabric, the session
+> rebind that survives a gateway migration, and the geo-replication / gateway-failover and cold-seed
+> freshness illegal states.
 
 ---
 
@@ -34,7 +35,7 @@ the orthogonal axis defined in [`illegal_state_techniques.md`](./illegal_state_t
 the illegal state is caught (at the Dhall editor, in the total decoder, at the post-bind provision seal, in a
 golden test on the rendered manifest, or only as runtime residue). As throughout the catalog, everything here is **design intent**: a
 type-check proves the specification composes into something internally coherent, not that the running
-deployment enforces it (the load-bearing limit owned by [`illegal_state_catalog.md`](./illegal_state_catalog.md) §2).
+deployment enforces it (the load-bearing limit owned by [`illegal_state_catalog.md`](./illegal_state_catalog.md) [§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)).
 
 ---
 
@@ -44,14 +45,14 @@ deployment enforces it (the load-bearing limit owned by [`illegal_state_catalog.
 
 Distributing one workload across clusters looks like "just fold capacity over both," but
 `place :: Topology -> [Workload]` admits exactly **one** `Topology`, and a `Topology` is one cluster
-([`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) §4). A multi-cluster / fleet capacity fold
+([`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) [§4](../engineering/cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction)). A multi-cluster / fleet capacity fold
 therefore has **no constructor** — the same type-foreclosed "no arm" idiom that forecloses the worker pool as a fourth
 `ComputeEngine`. Distributing across clusters is **geo-replication** (N independent clusters, each its own
 `place`, related only by async Pulsar replication — outside the single-cluster `place` fold and enacted by
 Phase 28); it is **not** the stateless
 attach pool, which is single-cluster and already **inside** `place`'s elastic branch
-([`single_logical_data_plane_doctrine.md`](../engineering/single_logical_data_plane_doctrine.md) §4 re-runs the same `place`
-fold on the enlarged topology) — modeling the attach pool as cross-cluster machinery is the category error §5 of
+([`single_logical_data_plane_doctrine.md`](../engineering/single_logical_data_plane_doctrine.md) [§4](../engineering/single_logical_data_plane_doctrine.md#4-the-elastic-worker-pool-the-attach-topology) re-runs the same `place`
+fold on the enlarged topology) — modeling the attach pool as cross-cluster machinery is the category error [§5](../engineering/single_logical_data_plane_doctrine.md#5-the-category-error-this-doctrine-forecloses) of
 that doctrine forecloses. A single **stretched** cluster ([§3.35](#335-a-stretched-host-worker-with-no-declared-networking-capability)–[§3.39](./illegal_state_topology.md#339-a-split-site-etcd-quorum))
 is the canonical *legal* foil: it is **one** `Topology` whose nodes span two `Site`s and `place` runs **once**;
 folding its capacity as *two* `Topology`s is precisely this uninhabitable cross-cluster fold. **Owner:**
@@ -78,9 +79,9 @@ read off the host-worker inventory — `Site = s` → the co-located localhost c
 stretched attach constructor demanding `Networking c` and minting `FabricMember c` through it — so a caller
 **cannot** smuggle a remote worker onto the localhost path. A K1 host worker is control-plane-free and therefore
 representable on **any** `ComputeEngine`, including `Managed Eks`. **Owner:**
-[`single_logical_data_plane_doctrine.md`](../engineering/single_logical_data_plane_doctrine.md) §4 (the attach carrier +
+[`single_logical_data_plane_doctrine.md`](../engineering/single_logical_data_plane_doctrine.md) [§4](../engineering/single_logical_data_plane_doctrine.md#4-the-elastic-worker-pool-the-attach-topology) (the attach carrier +
 `ewpNetworking`); the `Networking` sum owned by [`network_fabric_doctrine.md`](../engineering/network_fabric_doctrine.md); the
-`Site` axis by [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) §8. **Technique:**
+`Site` axis by [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) [§8](../engineering/substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints). **Technique:**
 [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (the mandatory `ewpNetworking` field — a carrier without it has no
 inhabitant) + [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) (the
 host-worker-inventory `Site` fold routing an off-localhost worker onto the attach path). **Layer:** type-foreclosed
@@ -99,7 +100,7 @@ surfacing the split at reconcile. This round's node fold routes a declared-remot
 agent to `mkStretchedAgent`, which **demands** a `ReachesControlPlane c` witness minted **from** the declared
 `Networking`'s `VpnFabric` (a rendered `ControlPlanePeer` covering the apiserver VPN-IP + distro-mTLS over the
 tunnel). A stretched agent with no control-plane witness has **no constructor**. **Owner:**
-[`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) §4.1 (the node fold + `mkStretchedAgent`),
+[`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) [§4.1](../engineering/cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation) (the node fold + `mkStretchedAgent`),
 reading the witness minted by [`network_fabric_doctrine.md`](../engineering/network_fabric_doctrine.md). **Technique:**
 [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) (the `NonEmpty Node` `Site` fold)
 + [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) (the
@@ -117,8 +118,8 @@ The two stretched kinds must not blur — a host worker is a non-member data-pla
 handed control-plane reach or counted as a kubelet member. This round's total `witness` fold yields, on its
 host-worker arms, **only** `DataPlaneOnly (FabricMember c)`; the `Reach` sum has **no** path taking a
 `K1_HostWorker` into `ControlPlaneToo (ReachesControlPlane c)` — no constructor crosses the kinds. **Owner:**
-[`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) §4.1 (the `witness` fold) /
-[`single_logical_data_plane_doctrine.md`](../engineering/single_logical_data_plane_doctrine.md) §4 (the host worker as
+[`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) [§4.1](../engineering/cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation) (the `witness` fold) /
+[`single_logical_data_plane_doctrine.md`](../engineering/single_logical_data_plane_doctrine.md) [§4](../engineering/single_logical_data_plane_doctrine.md#4-the-elastic-worker-pool-the-attach-topology) (the host worker as
 attach-pool client, never a member). **Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
 (the `Reach` sum's kind-indexed constructors do not interconvert — the host-worker → `ControlPlaneToo` transition
 has no constructor) + [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) (the
@@ -235,7 +236,7 @@ floor, global uniqueness, or a sum-to-whole — as "confluent", so it is merged 
 false claim type-checks, because confluence (closed-under-merge) is undecidable in Dhall. amoebius's authorable
 `CrossBoundaryDisposition` union has **no `Confluent` arm**: an unclassified mutable multi-record invariant folds
 to non-confluent held by bounded authority, and the authorable arms are the bounded-authority mechanisms only
-(single-writer, escrow, disjoint-namespace, downgrade, restructure). The confluent classification is a proven,
+(single-writer, escrow, disjoint-namespace, downgrade, restructure). The confluent classification is a
 design-time model property carried by the model, never a spec value
 ([`consistency_pacelc_doctrine.md` §3.6](../engineering/consistency_pacelc_doctrine.md#36-the-cross-boundary-disposition)).
 **Owner:** [`consistency_pacelc_doctrine.md` §3.6](../engineering/consistency_pacelc_doctrine.md#36-the-cross-boundary-disposition),
@@ -328,7 +329,7 @@ authorable field) + `live-effect` residue (that the derived watermark reflects r
 - [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract that a valid `InForceSpec` cannot
   represent illegal state.
 
-Owning doctrines cited by the entries in this slice:
+Owning doctrines cited by the entries in this slice (a partial index; each entry's **Owner:** line above is authoritative):
 
 - [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) — owns `place` and the
   single-cluster-by-arity non-goal ([§3.31](#331-a-capacity-or-workload-fold-spanning-two-clusters)).
@@ -339,7 +340,7 @@ Owning doctrines cited by the entries in this slice:
   `mkStretchedAgent`, and the `witness` fold ([§3.31](#331-a-capacity-or-workload-fold-spanning-two-clusters), [§3.36](#336-a-declared-remote-full-agent-with-no-control-plane-witness), [§3.38](#338-a-host-worker-granted-a-control-plane-witness-or-treated-as-a-member)).
 - [`network_fabric_doctrine.md`](../engineering/network_fabric_doctrine.md) — the `Networking` sum and the minted fabric /
   control-plane witnesses ([§3.35](#335-a-stretched-host-worker-with-no-declared-networking-capability), [§3.36](#336-a-declared-remote-full-agent-with-no-control-plane-witness)).
-- [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) §8 — the `Site` axis
+- [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) [§8](../engineering/substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints) — the `Site` axis
   ([§3.35](#335-a-stretched-host-worker-with-no-declared-networking-capability)).
 - [`gateway_migration_doctrine.md`](../engineering/gateway_migration_doctrine.md) — the migration state machine and the
   client-rebind protocol ([§3.44](#344-a-session-that-cannot-rebind-on-gateway-migration)); the parent-owned

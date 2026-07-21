@@ -70,9 +70,12 @@ config; the **hub-role attach is asserted by an external-observer reachability p
 OS-level connect + underlay packet capture, never a singleton self-report); **≥2 committed seeded mutants** — a
 missing/rotated peer key, or a hub-role config that omits its `Endpoint` — MUST turn the gate red; and
 **secrets-in-Dhall is foreclosed** (an inline key literal is rejected; peer keys are `SecretRef` names) — a
-**Register-3** live-infrastructure check.
+**Register-3** live-infrastructure check. The gate-integrity hardening (representative set, oracle pins, and
+seeded mutants) is itemised in [Gate integrity](#gate-integrity).
 
-**Gate-integrity clauses (§M).** The gate is hardened as follows and passes only when every clause below holds:
+## Gate integrity
+
+The gate is hardened as follows (§M) and passes only when every clause below holds:
 
 - **Concrete representative set (§M.7).** "the fabric" is exactly the two-peer topology of
   `dhall/examples/wireguard_fabric.dhall`: one **gateway-role hub** node (holding a stable hub VPN-IP + stable
@@ -190,7 +193,13 @@ the gate red.
 - [`network_fabric_doctrine.md §6` — The service-mesh verdict: no Linkerd for v1](../documents/engineering/network_fabric_doctrine.md#6-the-service-mesh-verdict-no-linkerd-for-v1):
   a service mesh is **not** adopted; the fabric this phase delivers is WireGuard, and no Linkerd sidecar fleet is
   introduced. (Cited for the boundary; no mesh component is built here.)
-- [`resource_capacity_doctrine.md` §3–§4](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget):
+- [`vault_pki_doctrine.md §3.1` — The parent-custody KV secret family: SSH keys, WireGuard keys, and the `Rke2NodeToken`](../documents/engineering/vault_pki_doctrine.md#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken):
+  WireGuard peer keys are custodied as a **Vault-KV Curve25519 secret class** named by `SecretRef` — Vault mints
+  and parent-injects each keypair; they are never X.509 PKI certs and never gate an unseal.
+- [`manifest_generation_doctrine.md §2` — The typed manifest model: `renderAll` is the sole public pure function to objects](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects):
+  the peer config is a pure-`render()` product reconciled by the singleton like any other manifest, with keyless
+  and overlapping-IP peers foreclosed.
+- [`resource_capacity_doctrine.md` §3–§4 — The types: `Quantity`, `Capacity`, `Demand`, `Budget`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget):
   the raw `NetworkFabricSystemDemand` is an input to provisioning, not a free fixed subtraction; its private
   topology-expanded result is admitted as a named infrastructure reserve against the same node/candidate
   ledger used for workloads before the host reconcile may mutate anything.
@@ -449,4 +458,5 @@ The whole sprint (📋 Planned).
   demand, topology expansion, one-time named reserve debit, and pre-effect admission contract
 - [phase_18](phase_18_vault_pki.md) — the root Vault + `SecretRef`-by-name client custodying the peer keys
 - [phase_22](phase_22_live_dsl_singleton.md) — the control-plane singleton whose reconcile enacts the fabric
-- [phase_28](phase_28_multicluster_spawn_georepl.md) — the gateway migration that later repoints the WireGuard hub
+- [phase_28](phase_28_multicluster_spawn_georepl.md) — multi-cluster spawn + geo-replication (the deferred broker↔broker per-peer render obligation)
+- [phase_29](phase_29_gateway_migration_drills.md) — the gateway migration that later repoints the WireGuard hub

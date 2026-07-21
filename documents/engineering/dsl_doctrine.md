@@ -268,7 +268,7 @@ plugs into the surface:
     MonitoringSurface =
       < Slo : WorkflowMonitor | TensorBoard : { backing : ObjectStoreRef, access : AccessScope } >
 
-Three parts, each already load-bearing above: `extDhall` is a nested typed Dhall sub-catalog ([§4](#4-total-composability)'s
+Four parts, each already load-bearing above: `extDhall` is a nested typed Dhall sub-catalog ([§4](#4-total-composability)'s
 composition); `extChain :: cfg -> [Step]` is the extension's slice of the chain/Step algebra ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) — an
 extension carries *no* logic the DSL does not already carry as `[Step]`); `extCapabilities` are the
 capability declarations it exports into the capability surface
@@ -300,10 +300,10 @@ The `ExtensionSpec` seam is **Path 1**, and it is deliberately *not* open to the
 - **v1 — Path 1 (linked).** The closed set `{infernix, jitML}` is *vendored*: each links into
   the one binary through its `ExtensionSpec`. This is the only extension mechanism v1 ships.
 - **v2 — Path 2 (the Haskell extension DSL).** A non-vendored third party enters *only* through the future
-  **Haskell-as-DSL + custom AST checker + native JIT** — the forward pointer of [§8](#8-the-haskell-extension-dsl-forward-pointer-only), scheduled as provisional
-  **Phase 35**
+  **Haskell-as-DSL + custom AST checker + native JIT** — the forward pointer of [§8](#8-the-haskell-extension-dsl-forward-pointer-only), scheduled as a
+  later-phases candidate
   ([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md#candidate-phase-haskell-extension-dsl--custom-ast-checker--native-jit)).
-  Path 2 is Phase-35 design intent, not built.
+  Path 2 is later-phases design intent, not built.
 
 And the boundary that keeps the seam honest: **an arbitrary container app is NOT an extension.** A party
 unwilling to be linked gets no `ExtensionSpec`; it runs as an ordinary app-spec `.dhall` workload —
@@ -413,7 +413,7 @@ local `amoebius.dhall` `FrameConfig` is decoded from the sibling file; the uploa
 decoded from the singleton's decrypted in-memory payload. Both use the native `dhall` library in-process —
 `Dhall.inputFile auto` for file-backed values, and the corresponding in-memory decode for uploaded values
 (the exact file-backed call hostbootstrap uses is `decodeContextFile = inputFile auto`,
-`Context.hs`; the same pattern the sibling prodbox project documents in its `config_doctrine.md` [§4](#4-total-composability)). Two
+`Context.hs`; the same pattern the sibling prodbox project documents in its `config_doctrine.md` §4). Two
 things happen here:
 
 - **Decoding is total and fail-fast.** A malformed or out-of-domain value surfaces as an `Either`/
@@ -568,7 +568,7 @@ This doc is the SSoT for the **orchestration** DSL (the Dhall surface). The **ex
 Haskell-as-DSL plus its custom AST checker and native JIT — is a scheduled **later phase**, not specified
 here. In [§4](#4-total-composability)'s extension taxonomy this is **Path 2** — the *only* path by which a non-vendored third party
 extends amoebius (Path 1, the closed linked set `{infernix, jitML}`, is vendored) — scheduled
-as **Phase 40**
+as a later-phases candidate
 ([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md#candidate-phase-haskell-extension-dsl--custom-ast-checker--native-jit)).
 See also the "Later phases" entry in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). It is named here only so the
@@ -637,6 +637,6 @@ links back for status.
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the capacity/budget/scaling types the surface carries
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the compute-engine/topology types the surface carries
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — [§3.1](./pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor) runtime message payloads are CBOR, not Dhall
-- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — Phase 40 Haskell extension DSL ([§4](#4-total-composability)/[§8](#8-the-haskell-extension-dsl-forward-pointer-only) Path 2 for third parties)
+- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — later-phases candidate Haskell extension DSL ([§4](#4-total-composability)/[§8](#8-the-haskell-extension-dsl-forward-pointer-only) Path 2 for third parties)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

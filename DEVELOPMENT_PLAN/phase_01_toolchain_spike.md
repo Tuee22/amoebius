@@ -48,10 +48,12 @@ toolchain only.
 
 **Register:** 1 — pure/build, in-process, no cluster (§K).
 
-**Gate:** a single throwaway probe package that build-depends on `dhall`, `io-sim`, `io-classes`, **and** the
-enumerated `jit-build` resolver Haskell dependencies (the concrete Hackage list fixed under "Representative set"
-below — the probe's `build-depends` stanza must match that list exactly, not a category or a subset already in
-the stock closure) compiles and links under **GHC 9.12.4 / Cabal 3.16.1.0** from a clean package store
+**Gate:** a single throwaway probe package that build-depends on `dhall`, `io-sim`, `io-classes`, the
+`purescript-bridge` contract generator, the native Pulsar client's `supernova` fork plus its `proto-lens`
+codegen, **and** the enumerated `jit-build` resolver Haskell dependencies (the concrete Hackage list fixed under
+"Representative set" below — the probe's `build-depends` stanza must match that list exactly, not a category or a
+subset already in the stock closure) compiles and links under **GHC 9.12.4 / Cabal 3.16.1.0** from a clean
+package store
 (`cabal build` run after `rm -rf dist-newstyle` and against a `--store-dir` that holds none of the probed
 packages, so a stale store hit cannot mask an unbuildable config), **and** the two committed executable probes
 run green: `cabal run probe:decode` in-process decodes the Phase-0-committed positive fixture
@@ -67,7 +69,9 @@ blocker** (branch 2) passes only when the record carries the verbatim failing `c
 failing transcript per attempted remediation class** (bare `allow-newer`, source patch, and fork/pin), each
 naming the failing package and the compile-fail locus — a one-sentence "package X fails" does not pass. The
 Phase-0-seeded mutant `probe/mutants/drop-allow-newer` (the resolution's `allow-newer`/patch removed, or a
-bogus upper bound injected) MUST turn `cabal build` red with a version-mismatch/compile-fail locus, and the
+bogus upper bound injected — this being a buildability gate, §M.2's mutation-operator set is applied here as a
+dependency-resolution operator rather than a spec/impl one) MUST turn `cabal build` red with a
+version-mismatch/compile-fail locus, and the
 committed negative fixture `probe/fixtures/bad-type.dhall` MUST make `cabal run probe:decode` fail with its
 committed `dhall` type-error tag (not a parse or missing-file error); both are re-run each gate, not once. The
 gate emits the retained proven/tested/assumed ledger (§K) naming **Register 1** and marking every runtime,
@@ -76,9 +80,12 @@ runtime or deployability claim (Register 1).
 
 **Representative set (concrete corpus, §M.7):** the probe's third-party surface is exactly these named risks —
 (i) `dhall` and its transitive lag-prone deps `template-haskell`, `aeson`, `megaparsec`, `prettyprinter`;
-(ii) `io-sim` + `io-classes`; and (iii) the `jit-build` resolver's Haskell dependencies, enumerated as the
+(ii) `io-sim` + `io-classes`; (iii) the `jit-build` resolver's Haskell dependencies, enumerated as the
 concrete Hackage packages **`cryptohash-sha256` (content-hashing), `http-client` + `http-client-tls`
-(download), `typed-process` (process control), `tar`, `zlib`, `directory`, and `filepath`**. This list is the
+(download), `typed-process` (process control), `tar`, `zlib`, `directory`, and `filepath`**; (iv) the
+`purescript-bridge` contract generator (build-only, the SPA-composition phase's dependency); and (v) the native
+Pulsar client's `supernova` fork plus its `proto-lens` codegen (build-only, the Pulsar-client phase's
+dependency). This list is the
 authoritative "resolver Haskell dependencies" for the whole phase; `base`/`bytestring`/`process` and other
 stock-closure packages do **not** count toward it, and any change to the resolver's real dep set updates this
 list in the same change (mirrored in `DEVELOPMENT_PLAN/system_components.md`). Committed Phase-0 oracles (§M.1),

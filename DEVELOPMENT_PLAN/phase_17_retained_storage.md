@@ -134,8 +134,8 @@ seeded mutants named in [Gate integrity](#gate-integrity):
 - **Committed mutants go red.** The gate re-runs the committed seeded mutants of [Gate integrity](#gate-integrity)
   (**M-soft-delete**, **M-seed-marker**, **M-reclaim-delete**, **M-no-rebind**,
   **M-raw-host-directory**, **M-skip-durable-aggregate**, **M-sum-unequal-ordinals**,
-  **M-uniform-before-allocation**) and passes only if every one of them turns the gate red; a green mutant
-  fails the gate.
+  **M-uniform-before-allocation**, **M-collapse-uniform-backing-debits**) and passes only if every one of them
+  turns the gate red; a green mutant fails the gate.
 - **Honest ledger.** The gate emits its proven/tested/assumed ledger; the aggregate durable-backing fold and
   image-backed host hard cap are live-tested here. The Phase-22 control-plane singleton's no-PVC property
   (which has no realized subject at Phase 17) stays marked **UNVERIFIED**, not asserted as passing.
@@ -210,6 +210,10 @@ a green mutant fails the gate.
   applying the per-slot presentation and backing allocation policies, then fabricates one group size without
   retaining each private `ProvisionedVolumeDemand` witness. Must go red on the overhead/quantum boundary
   fixtures and the per-slot-witness-before-uniformity assertion (17.2 V1/V2).
+- **M-collapse-uniform-backing-debits** (wrong aggregation) — collapses the per-backing debit map into a single
+  aggregate so spare bytes on one named backing cover another short backing. Must go red on the second committed
+  `uniform_claim_skew_over_backing` case, where ordinals span two named backings whose aggregate fits but one
+  member backing is one byte short (17.2 V1).
 
 ## Doctrine adopted
 
@@ -273,7 +277,7 @@ StorageClass object); Phase 14 gate (an idempotent single-node `kind` cluster to
 `provisioner: kubernetes.io/no-provisioner`, `reclaimPolicy: Retain`, `volumeBindingMode: WaitForFirstConsumer`
 — and no other class and no `storageclass.kubernetes.io/is-default-class` annotation survives; a PVC created
 with no PV to bind stays `Pending` (never dynamically provisioned).
-**Docs to update**: `documents/engineering/storage_lifecycle_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`, this document.
+**Docs to update**: `documents/engineering/storage_lifecycle_doctrine.md`.
 
 ### Objective
 Adopt [`storage_lifecycle_doctrine.md §2 — one storage class, and it provisions nothing`](../documents/engineering/storage_lifecycle_doctrine.md#2-one-storage-class-and-it-provisions-nothing):
@@ -341,20 +345,26 @@ its private transition witness. Retained growth/shrink additionally proceeds onl
 `ValidatedStorageScalingAction`; stale allocation/backing/fingerprint readback or token reuse produces zero
 host, Job, PV, or PVC writes.
 **Docs to update**: `documents/engineering/storage_lifecycle_doctrine.md`,
-`documents/engineering/resource_capacity_doctrine.md`, `documents/engineering/manifest_generation_doctrine.md`,
-`DEVELOPMENT_PLAN/system_components.md`.
+`documents/engineering/resource_capacity_doctrine.md`, `documents/engineering/manifest_generation_doctrine.md`.
 
 ### Objective
 Adopt [`storage_lifecycle_doctrine.md §4 — deterministic PV naming and the explicit bind`](../documents/engineering/storage_lifecycle_doctrine.md#4-deterministic-pv-naming-and-the-explicit-bind),
 [`§5 — sizes are explicit, hard-capped, one-volume-per-claim`](../documents/engineering/storage_lifecycle_doctrine.md#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim),
-and [`§3 — PVCs are born only from StatefulSets`](../documents/engineering/storage_lifecycle_doctrine.md#3-pvcs-are-born-only-from-statefulsets):
+and [`§3 — PVCs are born only from StatefulSets`](../documents/engineering/storage_lifecycle_doctrine.md#3-pvcs-are-born-only-from-statefulsets),
+together with [`resource_capacity_doctrine.md §5`](../documents/engineering/resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)
+and its [`§5.1`](../documents/engineering/resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry)
+presentation/allocation and uniform-claim projection, and
+[`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
+for applying the rendered PVs through the reconciler:
 compute both ends of the bind from stable identity so rebinding is never assigned by a race, and confine the
 PVC creation path to exactly one shape.
 
 ### Deliverables
-- Deterministic PV generation from `(namespace, statefulset, ordinal)`: PV name
-  `<namespace>/<statefulset>/pv_<integer>`, explicit `claimRef` to the exact `(namespace, PVC-name)`, and node
-  affinity to the host-path node for host-backed volumes (the trivial single-node case on this substrate).
+- Deterministic PV generation from `(namespace, statefulset, ordinal)`: the logical identity
+  `<namespace>/<statefulset>/pv_<integer>` realized as the DNS-1123 `metadata.name`
+  `<namespace>-<statefulset>-pv-<integer>` with the verbatim identity carried in the `amoebius.io/pv-identity`
+  label, explicit `claimRef` to the exact `(namespace, PVC-name)`, and node affinity to the host-path node for
+  host-backed volumes (the trivial single-node case on this substrate).
 - An authorable `DeclaredVolumeDemand` per claim slot with logical bytes, geometry, backing, and explicit
   `attachment = NodeLocal | Csi { driver }`, with
   `VolumePresentation = Block | Filesystem { fsType, overheadModel }` and each backing's explicit
@@ -510,8 +520,9 @@ durable backing and no normal-operation path can.
 - The Phase-0-committed gate-integrity artifacts of [Gate integrity](#gate-integrity): the two-witness
   representative set, the `claimref_table.csv` / `storageclass_expected.yaml` oracles, the
   `no_retained_delete.sh` static check, and the seeded mutants **M-soft-delete**, **M-seed-marker**,
-  **M-reclaim-delete**, **M-no-rebind**, **M-raw-host-directory**, **M-skip-durable-aggregate**, and
-  **M-sum-unequal-ordinals**, and **M-uniform-before-allocation** the gate re-runs and requires red.
+  **M-reclaim-delete**, **M-no-rebind**, **M-raw-host-directory**, **M-skip-durable-aggregate**,
+  **M-sum-unequal-ordinals**, **M-uniform-before-allocation**, and **M-collapse-uniform-backing-debits** the
+  gate re-runs and requires red.
 
 ### Validation
 1. Run the cycle on the concrete representative set of [Gate integrity](#gate-integrity) (exactly two

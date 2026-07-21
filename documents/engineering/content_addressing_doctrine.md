@@ -404,7 +404,7 @@ deriveSplitMixSeed (SplitMixSeed masterSeed) streamIndex =
 with the SplitMix64 mixing function and golden-ratio gamma (`0x9E3779B97F4A7C15`). The decisive property:
 **a stream's seed is a pure function of `(masterSeed, streamIndex)` alone.** It does not depend on how many
 workers are running, on the order the scheduler dispatched them, or on which worker happened to draw which
-stream. Run the same experiment on 1 worker or 100, in any dispatch order, and game 37 is seeded identically
+stream. The same experiment on 1 worker or 100, in any dispatch order, seeds game 37 identically
 every time. The same derivation seeds HPO trial selection and the AlphaZero MCTS root noise. The per-substrate
 RNG split details (which substrate holds the stream — host daemon vs clustered pod) are owned by
 `jitML/documents/engineering/determinism_contract.md`.
@@ -681,8 +681,8 @@ lock. One caveat carried from the determinism contract: **determinism applies to
 only** — Pulsar message metadata (broker-assigned ids, timestamps) varies across runs and is never an input to
 any content hash.
 
-**Honesty.** Confluence here is a property of the *store*, proven-in-types by the immutability + lattice
-argument above. Whether two clusters *produce the same bytes to merge* in the first place is a separate
+**Honesty.** Confluence here is a property of the *store*: type-enforced immutability plus an argued
+lattice-join law (commutative/associative/idempotent), per the ledger above. Whether two clusters *produce the same bytes to merge* in the first place is a separate
 question, and its ceiling is [§6](#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic).
 
 ---
@@ -739,7 +739,7 @@ reaches:
 |-------|--------|---------|
 | `experimentHash` / store keys are total functions of pinned content (no dangling reference inhabits the type) | **Proven-in-types** | The type/`.dhall` layer — a typecheck, not a runtime observation |
 | A stream's seed is independent of worker count, scheduling, and assignment | **Proven-in-types** | `deriveSplitMixSeed` is pure over `(masterSeed, index)` |
-| Blob/manifest merge is conflict-free; pointer convergence is a lattice join | **Proven-in-types** (argued from immutability + commutative/associative/idempotent join) | The store algebra; *not* a built amoebius replication run |
+| Blob/manifest merge is conflict-free; pointer convergence is a lattice join | **Type-enforced immutability + argued join laws** — immutability is proven-in-types; the commutative/associative/idempotent join is argued, not type-checked | The store algebra; *not* a built amoebius replication run |
 | Same-substrate same-toolchain checkpoint reproduction is byte-identical | **Tested in the sibling `jitML`**, not proven in amoebius | A runtime comparison on matching hardware |
 | Off-policy RL same-seed full-run bit-equality | **Not asserted**; only the first-N-step prefix (bounded run) / per-checkpoint-segment (Continuous) is tested | A runtime prefix comparison of two fresh runs |
 | Cross-substrate bit-equality (training or inference) | **Explicitly not asserted** | Nothing — out of contract by design |

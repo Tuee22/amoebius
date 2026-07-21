@@ -7,16 +7,17 @@
 
 > **Purpose**: Prove — in-process, before any cluster exists — that a multi-service app spec composes with an
 > ML-workflow demo fragment into one decoding SPA value (`prop_spaCompositionDecodes`), and that the lifted
-> PureScript demo SPA, its contracts regenerated from the composed Haskell ADTs, runs locally against a faked
-> backend under Playwright.
+> PureScript demo SPAs (the infernix chat shell and the jitML RL-gaming shell), their contracts regenerated
+> from the composed Haskell ADTs, run locally against a faked backend under Playwright.
 
 ---
 
 ## Phase Status
 
 📋 Planned. Specified before implementation; every sprint below is 📋 Planned and every prescriptive statement
-is design intent, never a tested amoebius result. This phase opens after the Phase 11 boundary fake-tool gate
-passes and runs on **no substrate** (`none`) across **Registers 1 and 2** — it stands up no host and no
+is design intent, never a tested amoebius result. This phase opens after its numeric predecessor Phase 12 is
+validated (the README phase-order rule), substantively building on the Phase 11 boundary fake-tool harness it
+reuses, and runs on **no substrate** (`none`) across **Registers 1 and 2** — it stands up no host and no
 cluster, only an in-process composition-decode battery (Register 1) and a locally-served demo SPA driven
 against a faked backend (Register 2). Where a shape below is already exercised in a sibling system — the
 `infernix` and `jitML` `web/` PureScript demo SPAs, their `purescript-bridge` contract generation, and the
@@ -32,8 +33,8 @@ type (a multi-service surface whose dependencies are declared as **capability ne
 composition of an ML-workflow demo fragment into that surface as **shared-library use** (a nested
 infernix/jitML `.dhall`, which is application logic), the QuickCheck property `prop_spaCompositionDecodes`
 establishing that an app spec + a demo fragment always compose into one well-typed value that decodes through
-Gate 1 + Gate 2, and the lifted PureScript demo SPA whose contract types are **regenerated from the composed
-Haskell ADTs via `purescript-bridge`** (a build artifact, never committed) and driven end to end against a
+Gate 1 + Gate 2, and the lifted PureScript demo SPAs (the infernix chat shell and the jitML RL-gaming shell)
+whose contract types are **regenerated from the composed Haskell ADTs via `purescript-bridge`** (a build artifact, never committed) and driven end to end against a
 faked backend under Playwright. What is *not* here: the live deploy onto a cluster, the Keycloak/Envoy edge,
 the typed reconciler applying manifests, and any inference on a real substrate — all of that is
 [Phase 37](phase_37_spa_live_deploy.md). This phase front-loads exactly the parts of SPA composition that a
@@ -57,10 +58,11 @@ RL-gaming shell), their contract types regenerated from the composed Haskell ADT
 (never committed), run locally against a faked backend whose every recorded request/response is decoded/encoded
 through the composed ADTs' own serialization instances, and are each driven end to end under Playwright — all on
 no substrate, with the run emitting a proven/tested/assumed ledger that marks the live SPA deploy
-([Phase 37](phase_37_spa_live_deploy.md)) UNVERIFIED. The gate is red unless the committed seeded mutants named
-in [Gate integrity](#gate-integrity) (one per register) go red: a composed-ADT field-rename mutant must break the Register-1 round-trip
-battery, the golden, and the Register-2 `spago` build; and a seeded ill-composing generator mutant must make
-`prop_spaCompositionDecodes` fail. All goldens, positive/negative fixtures, expected-error tags, and mutants are
+([Phase 37](phase_37_spa_live_deploy.md)) UNVERIFIED. The gate is red unless the three committed seeded mutants
+named in [Gate integrity](#gate-integrity) (M-comp, M-field, M-neg) go red: the composed-ADT field-rename mutant
+(M-field) must break the Register-1 round-trip battery, the golden, and the Register-2 `spago` build; the
+ill-composing generator mutant (M-comp) must make `prop_spaCompositionDecodes` fail; and the invariant-clause
+delete mutant (M-neg) must let `illegal_spa_compose_minio.dhall` decode and turn the negative suite red. All goldens, positive/negative fixtures, expected-error tags, and mutants are
 authored and committed in Phase 0 before the implementation exists; a golden regenerated from the generator is
 not a test.
 
@@ -90,7 +92,8 @@ authored and committed in Phase 0, before `Amoebius.Spa.*` exists.
   QuickCheck-generated composed-ADT values with the Haskell serialization instances and decodes them via the
   generated PureScript types under `node`, red on any composed app/workflow ADT type absent from the emitted
   module — an oracle independent of the byte-for-byte golden and of the SUT's own emitter.
-- **Committed seeded mutants (§M-2), each committed and re-run, drawn from the operator set:**
+- **Committed seeded mutants, each committed and re-run — the §M-2 operator-set mutants are M-comp (union-arm
+  addition) and M-neg (invariant-clause delete); M-field is a code-level composed-ADT field mutation:**
   - **M-comp** (union-arm addition): a generator variant emitting a workflow fragment whose capability need is
     unsatisfiable on the surface — `prop_spaCompositionDecodes` MUST go red.
   - **M-field** (field rename on a composed ADT): renaming one composed-ADT field MUST break the Register-1
@@ -111,14 +114,18 @@ authored and committed in Phase 0, before `Amoebius.Spa.*` exists.
   union — `ObjectStore` / `Sql` / `MessageBus` / `Identity` / `Edge` — never as a product literal.
 - [`lift_and_compose_doctrine.md`](../documents/engineering/lift_and_compose_doctrine.md#4-the-demo-web-apps-purescript-spas-contracts-generated-from-haskell) §4 (the demo web
   apps as PureScript SPAs whose contracts are generated from the Haskell ADTs via `purescript-bridge`) and
-  §2/§3 (the reuse map): amoebius **lifts** the infernix/jitML `web/` demo-SPA shells and **regenerates** their
+  [`§2 — What lifts (the reuse map)`](../documents/engineering/lift_and_compose_doctrine.md#2-what-lifts-the-reuse-map) /
+  [`§3 — The friction envelope`](../documents/engineering/lift_and_compose_doctrine.md#3-the-friction-envelope-what-is-re-shaped-during-the-lift):
+  amoebius **lifts** the infernix/jitML `web/` demo-SPA shells and **regenerates** their
   contracts from the amoebius-composed types — a demo web app is application logic that *uses* its extension,
   never itself an extension. That the sibling shells run today is **sibling evidence, not an amoebius result**.
-- [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what) §2/§3: the
+- [`generated_artifacts_doctrine.md §2 — What is generated (and from what)`](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what)
+  and [`§3 — The rule`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule): the
   PureScript frontend contract is a build artifact emitted from the composed Haskell ADTs and **never
   committed**; only the Haskell source and the authored fixtures are versioned, and a Register-1 golden pins
   the emitted contract as a fixture of the *renderer's* behaviour.
-- [`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) §2/§3: the
+- [`conformance_harness_doctrine.md §2 — The registers, as amoebius uses them for pre-cluster validation`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation)
+  and [`§3 — The load-bearing invariant`](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure): the
   pre-cluster spine — **Register 1** explicitly includes the representational SPA composition and **Register 2**
   explicitly includes the demo SPAs run locally against a faked backend, driven end to end; rendering the
   composition and its contract never touches live infrastructure.
@@ -297,7 +304,7 @@ the infernix chat shell (a chat turn) *and* the jitML RL-gaming shell (one RL-ga
 end" is fixed as: the SPA loads, issues a real request over the wire to the local faked backend, and renders the
 response the backend returned (not a hardcoded DOM update). The faked backend (reusing the Phase-11 fake-tool
 seam) **decodes every recorded request and encodes every response through the composed Haskell ADTs' own
-serialization instances — the same source the Sprint-12.3 contract generator consumes — and is red on any
+serialization instances — the same source the Sprint-13.3 contract generator consumes — and is red on any
 payload that does not conform** (this ties the browser wire traffic to the composed ADTs, foreclosing an SPA and
 fake that agree only with each other). Call recording is read from an **OS-boundary observer** (the faked
 backend's argv/HTTP-access log at the process boundary), never a self-emitted compliance trace from the SPA. The

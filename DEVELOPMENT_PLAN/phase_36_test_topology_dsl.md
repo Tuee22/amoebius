@@ -83,11 +83,11 @@ flowchart LR
   inventory --> leak[Non-empty diff is a hard failure with the leak list]
 ```
 
-**Substrate:** per generated test — each emitted test `.dhall` is substrate-locked to exactly one substrate
+**Substrate:** per generated test (§L) — each emitted test `.dhall` is substrate-locked to exactly one substrate
 with no silent fallback; the canonical Register-3 gate run is exercised on `linux-cpu`, where an intra-cluster
 failover simulation needs no accelerator, while the harness itself is substrate-parametric.
 
-**Register:** 3 — live infrastructure; the substrate is chosen per generated test (§K).
+**Register:** 3 (§K) — live infrastructure; the substrate is chosen per generated test (§L).
 
 **Gate:** a generated test `.dhall` — produced by executing `amoebius suggest-test` for real on the gate host
 (real Phase-14 host classification; the SSH/AWS credential probe run for real, or its layer explicitly
@@ -552,7 +552,7 @@ Pulumi-only, and storage-migration-only shapes and compares each branch's exact 
 to `test/golden/phase_36_optional_resource_shapes.json`; no selected positive arm may be ignored. The
 Register-3 Gate, not this sprint, exercises the credential probe against real SSH/AWS and records the
 emitted→reviewed provenance.
-**Docs to update**: `documents/engineering/testing_doctrine.md`, `documents/engineering/substrate_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+**Docs to update**: `documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 Adopt [`testing_doctrine.md §5 — suggest-test: detect the world, emit a representative test .dhall`](../documents/engineering/testing_doctrine.md#5-suggest-test-detect-the-world-emit-a-representative-test-dhall):
@@ -618,7 +618,11 @@ the emitted chaos schedule injects a *delegated* failover.
    exact unique shard sum/count/link constraints, co-resident per-device aggregation, and
    raw-fits-but-net-is-one-byte-short rejection; Metal cases exercise the co-resident shared-memory peak.
    Omitting one source/work item or selecting only a favorable epoch rejects, while the canonical linux-cpu
-   target emits `accelerator = None`.
+   target emits `accelerator = None`. Reject-branch coverage — that the structured "no representative topology
+   fits" result actually fires — is not left to a randomized generator floor: it is discharged by the
+   enumerated committed one-short mutants (the pinned `phase_36_resource_overcommit_*`/`phase_36_missing_capability`
+   and `drop_*` variants of Validation 3), each of which forces a specific reject before any effect, rather than
+   by a cover/classify fraction over the perturbation generator.
 3. Exercise the closed optional-branch fixture matrix. For registry publication, independently shorten OCI
    stored bytes, upload workspace/failed-partial retention, backing/quota, build scratch/cache or proxy
    CPU/memory/ephemeral/image/pod/IP/CSI supply. For Pulumi, shorten executor CPU/memory/ephemeral/log/
@@ -877,6 +881,15 @@ The whole sprint (📋 Planned).
   the ledger emitter); status of those realizations lives here in the plan, never as doctrine status. Reconcile
   the §5 "leadership election" prose with the delegated-failover posture (single-instance a k8s/etcd property;
   worker takeover a Pulsar subscription).
+- `documents/engineering/app_vs_deployment_doctrine.md` — §3's deployment-rules surface gains the realized
+  test-topology layer (Sprint 36.1): the `TestTopology` is an ordinary deployment-rules layer over a production
+  app/platform spec and the chaos/failover schedule attaches on that surface, keeping application logic and
+  deployment rules separate DSL surfaces; realization status lives here in the plan, never as doctrine status.
+- `documents/engineering/resource_capacity_doctrine.md` — §3.1's systematic provision matrix / §4's total
+  provision fold gain the `suggest-test` sizing + runner-recheck realization (CPU, memory, logical Pod-local
+  ephemeral, layout-routed node storage, runtime-metadata component→role→layout maps, presented durable/cache,
+  CUDA/Metal owner epochs, and every provider-quota class); only the opaque provisioned topology reaches
+  allocation, and the status of that realization lives here in the plan.
 - `documents/engineering/storage_lifecycle_doctrine.md` — §7.1 gains the realized automated test-reclaim owner
   (`src/Amoebius/Test/Sweep.hs`, `src/Amoebius/Test/Harness.hs`); §8 remains explicitly outside this harness,
   with production backing deletion an external privileged operator action.

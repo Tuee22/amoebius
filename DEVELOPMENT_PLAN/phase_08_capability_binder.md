@@ -190,7 +190,8 @@ runs on no substrate.
 ## Sprint 8.1: The closed capability union + the no-product-arm Gate-1 foreclosure 📋
 
 **Status**: Planned
-**Implementation**: `dhall/amoebius/Capability.dhall` (the closed eight-arm capability union on the app surface
+**Implementation**: `dhall/amoebius/Capability.dhall` (the closed nine-arm capability union — the eight
+ordinary capabilities plus a reserved `InferenceEngine` head — on the app surface
 + the app-surface `CapabilityNeed` records — buckets against `ObjectStore`, a database against `Sql`, topic
 lifecycles against `MessageBus`, etc.); `src/Amoebius/Capability/Types.hs` (the Haskell `CapabilityNeed` and
 the `BoundServiceSpec` skeleton the binder targets) — target paths, not yet built.
@@ -201,8 +202,9 @@ gate (the GADT-indexed IR + total decoder the `BoundServiceSpec` is a projection
 error locus** — an *unknown-constructor / no-such-alternative* type error on the capability union — paired with
 its positive `legal_objectstore_singlenode` differing only in that the product name is replaced by the
 `ObjectStore` capability, so the negative cannot pass for an unrelated reason (typo, missing field); a unit
-check confirms the union has exactly nine arms (the eight ordinary capabilities plus the `InferenceEngine` head
-from Sprint 8.3) and no product arm and no "other service" escape arm, enumerated against a **Phase-0-committed
+check confirms the union has exactly nine arms (the eight ordinary capabilities plus the reserved
+`InferenceEngine` head this sprint delivers, whose `EngineRuntime` lane union Sprint 8.3 fills) and no product
+arm and no "other service" escape arm, enumerated against a **Phase-0-committed
 hand-authored arm list** independent of the union's own definition.
 **Docs to update**: `documents/engineering/service_capability_doctrine.md` (Phase-8 status backlink),
 `documents/engineering/app_vs_deployment_doctrine.md` (the app-surface capability-resource read-side),
@@ -215,9 +217,10 @@ build the closed capability union as the whole vocabulary an app has for a depen
 capability is the only move available and naming a product is not a word the grammar contains.
 
 ### Deliverables
-- The closed eight-arm capability union (`ObjectStore`, `SecretStore`, `MessageBus`, `Sql`, `Identity`,
-  `Observability`, `Registry`, `Edge`) on the app surface, with **no product arm** and no generic
-  "some other service" arm — `minio` has no syntax.
+- The closed nine-arm capability union — the eight ordinary capabilities (`ObjectStore`, `SecretStore`,
+  `MessageBus`, `Sql`, `Identity`, `Observability`, `Registry`, `Edge`) plus a reserved `InferenceEngine` head
+  (Sprint 8.3 fills its `EngineRuntime` lane union / families / owner demands) — on the app surface, with
+  **no product arm** and no generic "some other service" arm — `minio` has no syntax.
 - The app-surface `CapabilityNeed` records (buckets, a database, topic lifecycles, OIDC rules, published
   routes) read as *resources of a capability*, and the `BoundServiceSpec` skeleton the binder projects into.
 - An in-file honesty note that this union is the app-facing *what*; the provider/shape *how* is Sprint 8.2, and
@@ -595,7 +598,9 @@ illegal_unbound_capability,illegal_unbuilt_provider,illegal_engine_family_unavai
 illegal_cuda_on_cpu_target,illegal_accelerator_count_shortage,illegal_accelerator_vram_shortage,
 illegal_accelerator_source_workload_mismatch,illegal_accelerator_policy_domain_mismatch,
 illegal_accelerator_residency_placement,illegal_accelerator_coexistence_overcommit,
-illegal_monitoring_work_over_budget,illegal_post_bind_expansion_overcommit}.dhall` — target
+illegal_monitoring_work_over_budget,illegal_post_bind_expansion_overcommit,
+illegal_controller_child_unbounded,illegal_elastic_per_node_expansion_overcommit,
+illegal_prior_provision_ref_{missing,stale,wrong_generation,wrong_arm}}.dhall` — target
 paths, not yet built.
 **Blocked by**: Sprint 8.1, Sprint 8.2, Sprint 8.3; Phase 4 gate (the positive Gate-1 corpus).
 **Independent Validation**: `cabal test capability-spec` is green — each of the **nine per-arm** positive needs
@@ -607,7 +612,7 @@ confirms all nine arms are covered; the QuickCheck totality property fires each 
 (`checkCoverage`); each Gate-1 negative fails `dhall type` **at its asserted error locus**; each genuine
 Gate-2/decode negative returns a structured `Left` **tagged with its specific `DecodeError`**; and each
 post-bind capacity, placement, or accelerator negative returns its specific `ProvisionError` at the
-`provision-seal` locus. Every negative is annotated with its catalog entry (§3.12 / §3.25 / §3.27 / §3.30)
+`provision-seal` locus. Every negative is annotated with its catalog entry (§3.12 / §3.25)
 and foreclosure layer and paired with a minimally-differing positive. The CUDA-on-CPU, device-count, and VRAM
 negatives fail after binding but before `renderAll` with zero provisioned values; the monitoring negative
 exceeds one derived cardinality axis by one and

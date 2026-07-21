@@ -354,7 +354,8 @@ one-field negatives fail before any apiserver, ledger, Binding, host, provider, 
 
 ### Objective
 
-Make desired state the separately validated identity index of the exact Phase-9
+Adopt [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)
+— the reconcile state model. Make desired state the separately validated identity index of the exact Phase-9
 `renderAll provisionedSpec :: [K8sObject]` owner union; make observed state a coherent
 snapshot of Kubernetes objects, actual Pod/process identities, scheduler records, completions, and physical
 allocations, including ledger-only host reservation identities; and mint only the typed actions justified by
@@ -476,7 +477,8 @@ SSA field ownership.
 
 ### Objective
 
-Build the stateful scheduler and generic typed-action dispatcher. Scoped ordinary-object actions may use SSA;
+Adopt [`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
+— the apply/reconcile engine. Build the stateful scheduler and generic typed-action dispatcher. Scoped ordinary-object actions may use SSA;
 all other effects must consume their dedicated capability. The scheduler must authenticate, reserve by CAS,
 and then Bind, with its own demand and bootstrap dependency represented and observed. The host precursor must
 hold the same provisioned mandatory Lease that the Phase-22 singleton later receives by an observed handoff.
@@ -590,7 +592,8 @@ authorize object deletion.
 
 ### Objective
 
-Enact the non-SSA members of `ValidatedExecutionTransitionAction` as explicit observation/effect stages.
+Adopt [`manifest_generation_doctrine.md §5`](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
+— the apply/reconcile engine. Enact the non-SSA members of `ValidatedExecutionTransitionAction` as explicit observation/effect stages.
 Ownership labels are candidate discovery only. Every delete, resume, host start, completion write, and cleanup
 must carry a fresh snapshot-bound capability proving its exact predecessor and dependency state. Job
 completion write/readback/cleanup is implemented against the abstract effect boundary and validated in pure,
@@ -629,9 +632,10 @@ fake, and IOSim executions here; the live Phase-16 environment intentionally sup
 2. Register-2/2.5 transition tests cover ordinary host exit, CUDA device holds/free VRAM, and Metal drain/
    allocation/cache release; one missing release component and one stale observation reject before start.
    CUDA/Metal live substrate proof remains owned by their substrate-specific phases.
-3. Register-1/2 and Sprint-16.5 IOSim Job tests cover all-success and backoff-exhausted failure waves,
-   completion-write failure, wrong digest/outcome/revision, cleanup before persistence/deadline,
-   retained-axis partition, restart after modeled persistence, and no-rerun until new revision. In the live
+3. Register-1/2 Job tests, available at this sprint's completion, cover all-success and backoff-exhausted
+   failure waves, completion-write failure, wrong digest/outcome/revision, cleanup before persistence/deadline,
+   retained-axis partition, restart after modeled persistence, and no-rerun until new revision; the exhaustive
+   IOSim schedules over these same variants are additionally exercised later in Sprint 16.5. In the live
    Phase-16 run, an independent apiserver observer proves the terminal UID remains, no Job-completion object is
    written, and no delete occurs. The first live object-store/apiserver persist-before-delete proof is the
    Phase-25 gate.
@@ -740,7 +744,8 @@ overlapping writers, an unguarded Pod, overspend, or premature deletion; counter
 
 Adopt [`deterministic_simulation_doctrine.md §4`](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits):
 validate the *built* reconciler/scheduler/staged-action schedules under injected faults
-**in-process and deterministically replayable**, before the Register-3 live gate — closing the code-schedule gap
+**in-process and deterministically replayable**, at Register 2.5 — one rung below the Register-3 live gate in
+the register ladder, not chronologically ahead of it — closing the code-schedule gap
 the pure-value tests and the live gate each leave open ([`chaos_failover_doctrine.md §10`](../documents/engineering/chaos_failover_doctrine.md#10-simulate--the-pure-program-lifted-io-sim)).
 
 ### Deliverables

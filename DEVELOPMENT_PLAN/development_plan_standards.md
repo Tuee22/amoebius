@@ -21,7 +21,7 @@ document adds no plan-specific register rules.
 ## A. Header metadata (same block as the doctrine suite)
 
 Every file in `DEVELOPMENT_PLAN/` opens with the standard block from
-[`documents/documentation_standards.md` §3](../documents/documentation_standards.md):
+[`documents/documentation_standards.md` §3](../documents/documentation_standards.md#3-required-header-metadata):
 
 ```markdown
 # <Title>
@@ -34,16 +34,16 @@ Every file in `DEVELOPMENT_PLAN/` opens with the standard block from
 > **Purpose**: <one sentence>
 ```
 
-- `**Referenced by**` lists the **actual** inbound links (bidirectional rule, documentation_standards §4) —
+- `**Referenced by**` lists the **actual** inbound links (bidirectional rule, [documentation_standards.md §4](../documents/documentation_standards.md#4-cross-referencing)) —
   not a blanket "everything." It is reconciled from the true link graph, never hand-guessed.
-- `**Generated sections**` is `none` unless the file contains tool-generated blocks (§I); then it names their
+- `**Generated sections**` is `none` unless the file contains tool-generated blocks ([§I](#i-generated-section-markers)); then it names their
   ids, comma-separated.
 - `**Status**` is `Authoritative source` for every plan doc (the plan is the SSoT for sequencing/status);
   the README is additionally the *live tracker*.
 
 ## B. Canonical file layout (snake_case)
 
-`DEVELOPMENT_PLAN/` uses **`snake_case.md`** for every file (per documentation_standards §2; the only
+`DEVELOPMENT_PLAN/` uses **`snake_case.md`** for every file (per [documentation_standards.md §2](../documents/documentation_standards.md#2-naming); the only
 ALL-CAPS exception is `README.md`). The canonical set:
 
 | File | Role |
@@ -60,7 +60,7 @@ ALL-CAPS exception is `README.md`). The canonical set:
 This deviates from prodbox's hyphenated names (`phase-3-gateway-dns.md`) on purpose: amoebius's
 documentation standard mandates snake_case. The *structure* mirrors prodbox; the *naming* follows amoebius.
 
-**Generated artifacts are never a committed module path.** A phase's `Implementation` field (§F) names
+**Generated artifacts are never a committed module path.** A phase's `Implementation` field ([§F](#f-the-sprint-block-format)) names
 authored Haskell/Dhall *source*, never a generated artifact — a rendered k8s manifest, an emitted TLA+
 `.tla`/`.cfg`, a reflected Dhall schema, or a PureScript contract are emitted from a Haskell source of truth
 and not committed ([`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md)).
@@ -75,10 +75,10 @@ One vocabulary, used in the README Phase Overview, in each phase's **Phase Statu
 | 🔄 **Active** | In progress now. |
 | 📋 **Planned** | Specified, not started. (The default for every phase and sprint pre-implementation.) |
 | ⏸️ **Blocked** | Waiting on a named earlier-or-same-phase sprint or an external prerequisite. |
-| 🧪 **Live-proof pending** | Code merged; the live/substrate proof has not yet run (the honesty gap, §K). |
+| 🧪 **Live-proof pending** | Code merged; the live/substrate proof has not yet run (the honesty gap, [§K](#k-honesty-proven--tested--assumed)). |
 
 Status lives **only** in the plan. A doctrine doc never carries status; it states the target shape and links
-back here (documentation_standards §1, §6).
+back here ([documentation_standards.md §1](../documents/documentation_standards.md#1-philosophy), [§6](../documents/documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ## D. The per-phase document skeleton
 
@@ -222,11 +222,11 @@ marking it generated is reserved for when the generator does.
 
 ## K. Honesty (proven / tested / assumed)
 
-The plan inherits the chaos/failover moral rule (documentation_standards §6,
+The plan inherits the chaos/failover moral rule ([documentation_standards.md §6](../documents/documentation_standards.md#6-honesty-the-proventestedassumed-discipline),
 [`chaos_failover_doctrine.md`](../documents/engineering/chaos_failover_doctrine.md)): **never mark a sprint
 ✅ Done on the strength of "it compiles."** A sprint whose live/substrate proof has not run is
 🧪 Live-proof-pending, not Done. A phase gate is passed only when its acceptance test actually ran in its
-register on its substrate (§L). Pre-implementation, every phase and sprint is 📋 Planned and every prescriptive
+register on its substrate ([§L](#l-one-substrate-discipline)). Pre-implementation, every phase and sprint is 📋 Planned and every prescriptive
 statement is design intent.
 
 **Validation happens in registers, and the ledger names the register(s) it reached.** A phase gate runs
@@ -254,7 +254,7 @@ unbroken; a `**Register:**` field is never `2.5`. The Register-2.5 run emits its
 ledger (its result is *tested against a modeled environment*, with the environment's fidelity to the real
 substrate recorded **assumed**), which does not by itself advance a `PromotionGate`.
 
-A **design-proof / in-process phase** — one whose substrate is `none` (§L) and whose gate is an in-process
+A **design-proof / in-process phase** — one whose substrate is `none` ([§L](#l-one-substrate-discipline)) and whose gate is an in-process
 type/model check rather than a live-substrate run, e.g. the pre-cluster band, [phases 1–13](README.md) —
 emits a ledger whose acceptance token reads **"spec-composition proven"** / **"proven for the model"**, never
 **"runtime proven"**: a green Dhall typecheck, Haskell decoder, or TLC run establishes that the spec composes
@@ -262,7 +262,7 @@ and the protocol is sound in the abstract, not that any cluster enforces it. Fro
 proof *ahead of* the later phase that builds the runtime it will correspond to is legitimate — **provided**
 that same ledger marks the model↔code correspondence and the runtime fidelity **UNVERIFIED** until that later
 phase discharges them. This front-loading introduces no forward dependency and does not bend the
-contiguous-numbering / no-fractional-phase-id rule (§E): the design phase keeps its own integer id and its
+contiguous-numbering / no-fractional-phase-id rule ([§E](#e-one-canonical-phase-model)): the design phase keeps its own integer id and its
 own single-substrate (`none`) gate.
 
 **A ✅ Done flip records its evidence.** A phase or sprint moves to ✅ Done only when its acceptance gate has
@@ -272,7 +272,7 @@ unbacked edit of a Markdown cell; the recorded command is what lets any reader r
 the ledger. The documentation lint ([§M](#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)) rejects a ✅ Done
 row that carries no recorded command, date, substrate, and ledger hash.
 
-**Status is single-sourced and consistent.** Status lives only in the plan (documentation_standards §1). The
+**Status is single-sourced and consistent.** Status lives only in the plan ([documentation_standards.md §1](../documents/documentation_standards.md#1-philosophy)). The
 marker in a phase's README Phase-Overview row and the marker in that phase doc's `## Phase Status` line **must
 be identical**; the documentation lint checks this equality and fails on drift.
 
@@ -351,8 +351,8 @@ happy-path, or self-fulfilling fixture can pass is not a gate. Every phase **Gat
 
 These clauses are what a phase's **Gate** and each sprint's **Validation** are checked against. The Phase-0
 documentation lint verifies that every gate line names its committed fixtures, its mutant(s), and its
-independent oracle; the honesty ledger ([§K](#k-honesty-proven--tested--assumed)) records the result. The
-load-bearing principle: **the party that writes the implementation must not be the sole author of the oracle it
+independent oracle; the honesty ledger ([§K](#k-honesty-proven--tested--assumed)) records the result.
+**The party that writes the implementation must not be the sole author of the oracle it
 is checked against** — Phase 0 pins the oracle first.
 
 <a id="gate-integrity-delegation"></a>
@@ -370,7 +370,7 @@ whose apparatus lives one hop away.
 
 [§C](#c-status-vocabulary) names five status markers and [§K](#k-honesty-proven--tested--assumed) defines one
 transition: a phase moves **to** ✅ Done only when its gate ran and the run's command, date, substrate, and
-ledger hash are recorded. This section defines the reverse and lateral moves §C left implicit, so that
+ledger hash are recorded. This section defines the reverse and lateral moves [§C](#c-status-vocabulary) left implicit, so that
 changing a phase after it is gated is a recorded act, not a silent Markdown edit.
 
 - **A reverse transition is recorded, never silent.** Moving a phase ✅ Done → 🔄 Active or 📋 Planned, or a

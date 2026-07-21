@@ -11,7 +11,7 @@
 
 ---
 
-## 1. The whole surface: two channels, both localhost-only
+## 1. The host-origin surface: two channels, both localhost-only
 
 Everything that reaches an amoebius cluster from the *wild* — WAN, LAN, even a
 browser on the same machine — traverses a single authenticated ingress edge that Keycloak owns
@@ -108,7 +108,7 @@ Concretely:
   MinIO store. That is the entire interaction shape. The native-protocol client, topic algebra, and
   at-least-once + dedup semantics are owned by [pulsar_client_doctrine.md](./pulsar_client_doctrine.md);
   the artifact store is owned by the content-addressing doctrine
-  (see [platform_services_doctrine.md §4 and §6](./platform_services_doctrine.md#4-minio--the-object-substrate)).
+  (see [platform_services_doctrine.md §4](./platform_services_doctrine.md#4-minio--the-object-substrate) and [§6](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox)).
 - **The host daemon and an in-cluster worker are the same kind of thing.** A daemon is a worker role that
   happens to run on the host for hardware reasons; its *coordination* is identical to a worker Pod's. The
   daemon roles, the control-plane singleton's authority, and its single-instance delegation are owned by
@@ -128,11 +128,11 @@ No WebSockets anywhere: the daemon speaks the native Pulsar TCP binary protocol 
 `amoebius-pulsar` client, which is a locked invariant of
 [pulsar_client_doctrine.md](./pulsar_client_doctrine.md).
 
-**This is a workload-plane rule, not an admin-plane one** — [§1](#1-the-whole-surface-two-channels-both-localhost-only) draws that split up front. The operator admin control plane it excludes — administering the cluster's own configuration
+**This is a workload-plane rule, not an admin-plane one** — [§1](#1-the-host-origin-surface-two-channels-both-localhost-only) draws that split up front. The operator admin control plane it excludes — administering the cluster's own configuration
 (Vault init/unseal, delivering a new `.dhall`), a *control* concern rather than worker coordination — rides the
 distinct privileged REST channel (the operator CLI → the amoebius NodePort service → the control-plane
 singleton), owned by [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api).
-That channel is privileged, not wild (so it is not a Keycloak bypass, [§1](#1-the-whole-surface-two-channels-both-localhost-only)),
+That channel is privileged, not wild (so it is not a Keycloak bypass, [§1](#1-the-host-origin-surface-two-channels-both-localhost-only)),
 and channel 1 ([§4](#4-channel-1--the-host-binary--kube-apiserver-via-distro-mtls)) is retired to
 bootstrap-only once it takes over. The "no bespoke channel" verdict here is about the *bulk worker wire*, which
 this doc still owns in full.
@@ -228,9 +228,9 @@ The rest of [§6](#6-the-host-only-restriction-in-practice-and-its-sibling-prece
 "authenticated-fabric-origin" for "host-origin" as the network restriction, with WireGuard providing the
 authentication a shared loopback did not need.
 
-**Stretched-cluster addenda (this round's stretched-cluster work).** When a cluster is *stretched* across the
+**Stretched-cluster addenda.** When a cluster is *stretched* across the
 WAN — a node whose declared locality differs from the control plane's — two further reach-shapes surface. Neither
-disturbs the two-channel picture of [§1](#1-the-whole-surface-two-channels-both-localhost-only); this doc records
+disturbs the two-channel picture of [§1](#1-the-host-origin-surface-two-channels-both-localhost-only); this doc records
 only where each attaches and defers the wire itself to
 [network_fabric_doctrine.md](./network_fabric_doctrine.md).
 
@@ -240,7 +240,7 @@ only where each attaches and defers the wire itself to
   [network_fabric_doctrine.md §5](./network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric)
   and [§4](./network_fabric_doctrine.md#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it). It
   is **not** channel 1 — that stays the host binary's localhost apiserver path
-  ([§1](#1-the-whole-surface-two-channels-both-localhost-only) table row 1, unaffected) — and **not** channel 2,
+  ([§1](#1-the-host-origin-surface-two-channels-both-localhost-only) table row 1, unaffected) — and **not** channel 2,
   which is data-plane Pulsar/MinIO peering. The control-plane span is a third, network_fabric-owned reach this doc
   names but does not own. (Design intent for the stretched-cluster round; on `Managed Eks` control planes this
   span is representable only as a provider-native capability, per network_fabric / cluster_topology, never an
@@ -258,7 +258,7 @@ only where each attaches and defers the wire itself to
   ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path))
   still holds. The gateway *wire* — including the authentication/encryption a shared loopback did not need — is
   owned by [network_fabric_doctrine.md §5](./network_fabric_doctrine.md#5-the-security-boundary-generalizes-localhost--authenticated-fabric);
-  this doc owns only that channel 2 may ride it. The `Gateway`-arm reach constructor is a **named seam this round
+  this doc owns only that channel 2 may ride it. The `Gateway`-arm reach constructor is a **named seam this doctrine
   introduces, not a built path** — its host-worker-through-a-gateway inhabitant is deferred.
 
 ---

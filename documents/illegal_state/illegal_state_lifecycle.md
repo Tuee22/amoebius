@@ -6,8 +6,9 @@
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering the lifecycle band — the readiness
-> race (condition, never duration), unverified environment promotion, and unmonitored workflows/extensions —
-> with the honest limit that a type-check proves the *spec composes*, not that the *running cluster enforces it*.
+> race (condition, never duration), unverified environment promotion, unmonitored workflows/extensions, and a
+> chaos fault targeting an undeclared component — with the honest limit that a type-check proves the
+> *spec composes*, not that the *running cluster enforces it*.
 
 ---
 
@@ -16,7 +17,8 @@
 This document is a **themed slice** of the illegal-state catalog: the lifecycle illegal states — the
 duration-gated / hand-ordered bring-up race ([§3.41](#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race)),
 the unverified environment promotion ([§3.26](#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence)),
-and the unmonitored workflow or extension ([§3.43](#343-an-unmonitored-workflow-or-extension-or-an-unauthenticated-monitoring-surface)).
+the unmonitored workflow or extension ([§3.43](#343-an-unmonitored-workflow-or-extension-or-an-unauthenticated-monitoring-surface)),
+and a chaos fault targeting a component the spec never declared ([§3.46](#346-a-chaos-fault-targeting-a-component-the-spec-never-declared)).
 It owns nothing of the catalog's framing.
 
 - The **catalog index** and the **load-bearing honesty limit** (a type-check proves the spec composes, not
@@ -30,11 +32,10 @@ It owns nothing of the catalog's framing.
 - The *normative rule* behind each entry lives in that entry's owning doctrine (readiness/ordering, release
   lifecycle, monitoring, …). This doc names the owner and never restates its content.
 
-Everything below is **design intent** for the type discipline, per the honesty discipline the catalog states
-([`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
-a green type-check proves the *specification* composes into something internally coherent — the spec value is
-well-formed, every reference resolves, every required field is present — and proves **nothing** about whether the
-*running cluster* renders, admits, schedules, and reconciles it. Read every "unrepresentable" and
+Everything below is **design intent** for the type discipline, per the honesty limit owned by
+[`illegal_state_catalog.md` §2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)
+(restated by [`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)) —
+referenced, not restated: a type-check proves the *spec composes*, not that the *running cluster enforces it*. Read every "unrepresentable" and
 "uninhabitable" below as design intent for the type discipline, never as a tested amoebius behaviour; the
 runtime-enforcement proof is deferred on purpose to
 [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the testing tier.
@@ -119,7 +120,7 @@ orthogonal to the foreclosure layer above.
 
 Raw k8s treats monitoring as an optional add-on: a Deployment can run with no scrape target, no alert rule, and
 no dashboard, and a metrics or debug endpoint can be published to the wild with no authentication — so a
-workflow compiles, deploys, and then goes dark, and a monitoring surface can leak. amoebius makes monitoring a
+workflow compiles, deploys, and then emits no monitoring signal, and a monitoring surface can leak. amoebius makes monitoring a
 **mandatory, non-vacuous property of the workflow and extension types**: a `Workflow` requires a
 `WorkflowMonitor`, every `RouteEntry` requires a `Liveness`, and an `ExtensionSpec` requires a `NonEmpty`
 `extMonitoring` (jitML → TensorBoard) — each an absent-arm required field, so an unmonitored workflow or

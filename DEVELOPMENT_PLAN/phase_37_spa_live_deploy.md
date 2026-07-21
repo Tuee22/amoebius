@@ -82,7 +82,7 @@ The gate runs over the **representative set pinned in [Gate integrity](#gate-int
 and is **red unless every committed seeded mutant named in [Gate integrity](#gate-integrity) goes red**. Three load-bearing observables are
 pinned so no stub, canned handler, or alternate exposure passes: (a) the inference round-trip counts **only** when
 the returned bytes **byte-match the Phase-0-committed Phase-33 reproducible golden**
-(`spa_gate/infernix_cpu_response.cbor`, authored from Phase-33's reproducible CPU output for the fixed
+(`spa_gate/infernix_cpu_response.cbor`, byte-identical to Phase-33's reproducible CPU output for the fixed
 `spa_gate/prompt.json`, never regenerated from the deployed workflow) for the run's unchanged `experimentHash`
 `H_spa`, **and** the run's canonical-CBOR manifest + `.ready` sentinel appear in the Phase-25 content store under
 that `experimentHash` namespace; (b) the engine is proven jit-resolved by a **cache-empty preflight** plus a
@@ -117,9 +117,10 @@ artifacts named here are authored and committed **in Phase 0**, before `Amoebius
 - **Committed oracle pins (Phase 0, §M-1 / §M-3):**
   - `spa_gate/infernix_cpu_response.cbor` — the expected inference response, **byte-identical to Phase-33's
     reproducible CPU output** for the fixed prompt `spa_gate/prompt.json` at pinned `experimentHash` `H_spa`;
-    authored from the Phase-33 reproducible build, independent of the deployed workflow's emitter.
+    fixed at Phase 0 from an independent offline reference, and required to equal that reproducible output
+    rather than sourced from it, so it stays independent of the deployed workflow's emitter.
   - `spa_gate/engine_identity.txt` — the expected named Phase-32 catalog engine identity (content hash) the
-    resolver must materialize; authored from the catalog, independent of the resolver's runtime output.
+    resolver must materialize; fixed at Phase 0 as the required identity, independent of the resolver's runtime output.
   - `spa_gate/expected_exposures.txt` — a hand-authored table naming the single permitted wild exposure (the
     Keycloak-fronted `HTTPRoute` name) and asserting no other `Service`/`NodePort`/`Ingress`/`LoadBalancer` in the
     tenant namespace; the reference side of the exposure check, never derived from the SUT's render output.
@@ -349,7 +350,8 @@ typed reconciler onto the HA stack, a re-run is a no-op (owned field manager, Ap
 deployment-rules layer with a different `Replicated.desiredReplicas` composes with the *same* SPA spec — the SPA app-spec normal
 form (its hash) unchanged across both.
 **Docs to update**: `documents/engineering/app_vs_deployment_doctrine.md`,
-`documents/engineering/service_capability_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`, this document.
+`documents/engineering/service_capability_doctrine.md`, `documents/engineering/daemon_topology_doctrine.md`,
+`DEVELOPMENT_PLAN/system_components.md`, this document.
 
 ### Objective
 Adopt [`app_vs_deployment_doctrine.md §3 — the deployment-rules surface`](../documents/engineering/app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)
@@ -637,6 +639,9 @@ The whole sprint (📋 Planned).
   on first miss into the CacheBudget-bounded content-addressed cache and reused, never baked or URL-fetched.
 - `documents/engineering/platform_services_doctrine.md` — note the SPA's published surface as a live consumer of
   the §9 single wild-ingress path (Keycloak over Envoy/Gateway API) on the §2 HA-always charts.
+- `documents/engineering/daemon_topology_doctrine.md` — note §3.1 realized live: the SPA is deployed by the
+  Deployment-`replicas=1` control-plane singleton whose single-instance is a k8s/etcd property, with zero
+  amoebius election over the run (OS-boundary audit-log proven).
 - `documents/engineering/testing_doctrine.md` — record the Phase-37 gate `InForceSpec` as a worked Register-3
   spin-up/run-workflow/tear-down composition test emitting a per-run proven/tested/assumed ledger.
 

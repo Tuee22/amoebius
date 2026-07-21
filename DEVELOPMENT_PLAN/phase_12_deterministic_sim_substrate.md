@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Build the `io-classes` environment substrate and the modeled, fault-injectable
@@ -124,8 +124,9 @@ gate is red on any bare-`IO`-typed signature or any `forkIO`/`Control.Concurrent
 the `MonadFork`/`io-classes` class methods. The gate is red if that scope is **empty** (the `Env` interface plus
 its two interpreters must be in it), guarding against a vacuously-green empty scope.
 **Docs to update**: `documents/engineering/deterministic_simulation_doctrine.md` (Phase-12 status backlink),
-`documents/engineering/testing_doctrine.md` (the Register-2.5 substrate), `DEVELOPMENT_PLAN/system_components.md`,
-this document.
+`documents/engineering/testing_doctrine.md` (the Register-2.5 substrate),
+`documents/engineering/chaos_failover_doctrine.md` (§10 "build it pure; lift it whole" ladder, realized by the two
+interpreters), `DEVELOPMENT_PLAN/system_components.md`, this document.
 
 ### Objective
 Adopt [`deterministic_simulation_doctrine.md §2`](../documents/engineering/deterministic_simulation_doctrine.md#2-the-io-classes-environment-abstraction--build-it-pure-lift-it-whole)
@@ -215,7 +216,8 @@ the gate. The suite emits a **Register-2 proven/tested/assumed ledger** marking 
 against a modeled environment* and the modeled-env fidelity to the real substrate **ASSUMED / UNVERIFIED**
 (§K), discharged later by a Register-3 conformance check.
 **Docs to update**: `DEVELOPMENT_PLAN/README.md` (flip the Phase-12 status when the gate passes),
-`documents/engineering/deterministic_simulation_doctrine.md`, `documents/engineering/testing_doctrine.md`.
+`documents/engineering/deterministic_simulation_doctrine.md`, `documents/engineering/testing_doctrine.md`,
+`documents/engineering/conformance_harness_doctrine.md` (§2 the Register-2.5 entry this substrate serves).
 
 ### Objective
 Adopt [`deterministic_simulation_doctrine.md §4/§5`](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits)
@@ -258,6 +260,8 @@ The whole sprint (📋 Planned).
   ASSUMED).
 - `documents/engineering/chaos_failover_doctrine.md` — annotate §10 that the "build it pure; lift it whole" ladder
   is realized by the `Env m` interface and its two interpreters.
+- `documents/engineering/conformance_harness_doctrine.md` — backlink §2's Register-2.5 deterministic-simulation
+  entry to the in-process Phase-12 substrate that serves it.
 
 **Cross-references to add:**
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-12 status when the gate passes; link this document.

@@ -46,11 +46,11 @@ cluster whose nodes or host workers sit at more than one network locality, reach
 store, and **no** async geo-replication link, so it owes **no** R9 data-loss budget and **no** Second-Axis
 obligation — the [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) machinery it is exempt from. Within
 a stretched cluster the "run this elsewhere" question refines by *kind*: a **stretched host worker** is a
-non-member **client** — the attach shape of §4, holding no store and needing only data-plane + Vault reach —
+non-member **client** — the attach shape of [§4](#4-the-elastic-worker-pool-the-attach-topology), holding no store and needing only data-plane + Vault reach —
 while a **stretched full node** is a **member** kubelet carrying a control-plane reachability witness
 (`ReachesControlPlane c`), a different kind owned by
 [cluster_topology_doctrine.md](./cluster_topology_doctrine.md). This round's doctrine introduces that two-kind
-stretched split; the *why* it stays one boundary (a cluster is *the* consistency boundary) is exactly §1's
+stretched split; the *why* it stays one boundary (a cluster is *the* consistency boundary) is exactly [§1](#1-why-this-doctrine-exists-two-ways-to-say-run-this-elsewhere)'s
 opening invariant, unchanged.
 
 ---
@@ -79,7 +79,7 @@ still **one** cluster (one etcd, one boundary), **not** the right column's secon
 reached over the WAN, carrying a control-plane witness
 ([cluster_topology_doctrine.md](./cluster_topology_doctrine.md)). Distance is a **networking** fact, never a
 **boundary** fact; neither stretched kind mints a second store, so neither drags in the second-cluster
-machinery. This round's stretched-cluster doctrine introduces both kinds; §4 owns the host-worker (attach)
+machinery. This round's stretched-cluster doctrine introduces both kinds; [§4](#4-the-elastic-worker-pool-the-attach-topology) owns the host-worker (attach)
 kind, and the member/kubelet kind is owned by
 [cluster_topology_doctrine.md](./cluster_topology_doctrine.md).
 
@@ -211,7 +211,7 @@ data Deprovision = Deprovision { releaseCompute :: ComputeSet }  -- NO deleteSto
   and never defines it; the change is a **refine-by-role** — cross-references that spoke of the
   pool's "VPN fabric" now read "networking capability," with no heading retitled. The `Vpn` arm is
   the existing WireGuard fabric-join; the `Gateway` arm is a secure-gateway path whose constructor
-  is design intent, deferred. Either arm mints the *same* `FabricMember c` (§3), so the pool's
+  is design intent, deferred. Either arm mints the *same* `FabricMember c` ([§3](#3-the-binding-reachability-is-a-type-not-a-runtime-probe)), so the pool's
   client-of-the-one-store theorem is unchanged. The networking field is **mandatory**: an attach
   pool with no declared networking capability has no constructor (the generalization of the
   already-mandatory `ewpFabric`).
@@ -227,7 +227,7 @@ data Deprovision = Deprovision { releaseCompute :: ComputeSet }  -- NO deleteSto
   plane) uses the host-local channel; an off-locality worker is routed onto **this** attach path,
   demanding a `Networking c`. The full-node (member/kubelet) stretched case — which *does* carry a
   control-plane reachability witness (`ReachesControlPlane c`) — is a **different kind**, owned by
-  [cluster_topology_doctrine.md](./cluster_topology_doctrine.md), not this attach shape (§§1–2).
+  [cluster_topology_doctrine.md](./cluster_topology_doctrine.md), not this attach shape ([§1](#1-why-this-doctrine-exists-two-ways-to-say-run-this-elsewhere)–[§2](#2-the-two-topologies)).
 
 ---
 

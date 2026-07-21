@@ -36,7 +36,7 @@ singleton-election obligation; this is the only boundary amoebius model-checks.
 Both branches are in scope. The `Planned` coordinated handover (target RPO = 0) and the `Failover`
 availability-first emergency takeover (bounded rebind, named-and-capped divergence) are authored as **one**
 reifiable Haskell `Model` value — state variables, the guarded `Planned` and `Failover` transitions, and the
-four named invariants — from which the Phase-2 `interpret` (the runtime decision core) and `emitTLA` (the
+five named invariants — from which the Phase-2 `interpret` (the runtime decision core) and `emitTLA` (the
 generated, never-committed `.tla`/`.cfg`) are total renderings, so the model↔code correspondence holds by
 construction rather than by a hand-maintained table. TLC proves it, io-sim agrees over the same value, and a
 decode-time structural-fit fold reduces every accepted spec to the proven scope-2 envelope — TLC is never on
@@ -49,14 +49,17 @@ explorer), analogous to the Phase-0 documentation lint and the Phase-2 kernel ro
 
 **Gate:** `emitTLA` renders the concrete `GatewayMigration` `Model` to a generated, never-committed
 `.tla`/`.cfg` on which TLC reaches every named **safety** invariant — `UniqueGatewayOwner`,
-`SessionAlwaysRebindable`, `PlannedIsLossless`, `NoWriteAfterStaleFailover` — with no counterexample **and**
+`SessionAlwaysRebindable`, `PlannedIsLossless`, `NoWriteAfterStaleFailover`, `NoTakeWithoutProvenFreshness` —
+with no counterexample **and**
 proves the **liveness** `PROPERTY`s `MergeConverges` / `SessionEventuallyRebinds` under the declared weak
 fairness, at bounded scope for **both** the `Planned` and `Failover` branches, the run passing its vacuity
 check — **defined** (§M.4) as the conjunction of two committed sub-checks: (a) *antecedent-reachability* —
 every implication-form invariant has its antecedent reached on some enumerated state (a data-aware
 `PlannedIsLossless` whose promoted-log clause is exercised, an over-budget path that reaches
-`NoWriteAfterStaleFailover`'s guard), and (b) *no dead action* — every declared action, **including the
-environment actions `client-write`, `replication-tick`, and `active-crash`** authored in Sprint 3.1, is
+`NoWriteAfterStaleFailover`'s guard, a cold-seed path that reaches `NoTakeWithoutProvenFreshness`'s
+`FreshnessWitness` guard), and (b) *no dead action* — every declared action, **including the
+environment actions `client-write`, `replication-tick`, `active-crash`, and `cold-seed`** authored in
+Sprint 3.1, is
 enabled on some reachable state; an invariant whose antecedent is unreachable or whose falsifying mutant (below)
 does not exist fails vacuity — its **fairness-sensitivity** check (each liveness `PROPERTY` goes red with
 fairness removed), and its scope-2 pairwise cutoff check (the decode-time structural-fit fold's
@@ -71,14 +74,16 @@ depth/interleaving bound recorded in the harness and ledger** (not N random seed
 **TESTED (bounded-exhaustive schedules)**; and **every** mutant of a mechanical mutation-operator set over the
 fragment (guard negation/weakening, effect swap, dropped effect entry/`UNCHANGED`, quantifier flip, fairness
 drop, invariant-clause delete) is caught, **including a committed per-invariant mutant catalogue (§M.2) that
-names, for each of the four safety invariants, at least one seeded mutant violating exactly that invariant and
+names, for each of the five safety invariants, at least one seeded mutant violating exactly that invariant and
 red in all safety instruments — specifically a `verify-caught-up`-passes-while-offsets-lag mutant caught by the
-data-aware `PlannedIsLossless` and an over-budget-divergence mutant caught by `NoWriteAfterStaleFailover`** —
+data-aware `PlannedIsLossless`, an over-budget-divergence mutant caught by `NoWriteAfterStaleFailover`, and a
+take-without-witness mutant caught by `NoTakeWithoutProvenFreshness`** —
 each safety mutant (a transition that drops the fence or decommissions before `drain-complete`) red in all
 instruments, each fairness-drop/liveness mutant (a stall that never reconverges) red only in TLC's `PROPERTY` —
 so a single surviving mutant, or any safety invariant with no committed falsifying mutant, fails the gate.
 **Oracle-pinning (§M.1):** the oracles this gate checks against — the `emitTLA GatewayMigration` byte-for-byte
-`.tla`/`.cfg` golden, the hand-derived expected reachable-distinct-state fingerprint set the explorer/TLC run
+`.tla`/`.cfg` golden (a committed test fixture under `test/formal/golden/`, distinct from the never-committed
+emitted `gen/tla/` output), the hand-derived expected reachable-distinct-state fingerprint set the explorer/TLC run
 is compared to, and the per-invariant expected-outcome catalogue (which invariant each seeded mutant must
 violate) — are **authored and committed in Phase 0 before `interpret`/`emitTLA` exist**, exactly as
 [`phase_02`](phase_02_formal_model_kernel.md#phase-summary) §M.1
@@ -93,8 +98,14 @@ Register 1, in-process, substrate `none`.
   delegated and **not** re-proven, and there is no singleton-election model.
 - [`gateway_migration_model_doctrine.md §2` and §3](../documents/engineering/gateway_migration_model_doctrine.md#3-the-model)
   — *the two branches* and *the `Model`*: `GatewayMigration = <Planned | Failover>` is one reifiable value
-  whose state variables, guarded transitions, and four named invariants (`UniqueGatewayOwner`,
-  `SessionAlwaysRebindable`, `PlannedIsLossless`, `NoWriteAfterStaleFailover`) this phase authors in full.
+  whose state variables, guarded transitions, and five named invariants (`UniqueGatewayOwner`,
+  `SessionAlwaysRebindable`, `PlannedIsLossless`, `NoWriteAfterStaleFailover`, `NoTakeWithoutProvenFreshness`)
+  this phase authors in full.
+- [`backup_recovery_doctrine.md §8`](../documents/engineering/backup_recovery_doctrine.md#8-the-gateway-dovetail-seed-from-backup-under-consistency-over-availability)
+  — *the gateway dovetail — seed from backup under consistency-over-availability*: the fifth invariant
+  `NoTakeWithoutProvenFreshness` generalizes the `Planned` `verify-caught-up` precondition into a
+  `FreshnessWitness` guard on the promote / gateway-take transition that a cold backup-seeded standby also
+  discharges within its declared `freshnessBound`.
 - [`gateway_migration_model_doctrine.md §4`](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove)
   — *simulate and prove*: both instruments read the same `Model` — io-sim's `IOSimPOR` scheduler over the
   lifted decision core, and TLC over the `emitTLA`-rendered spec — and a validated model is green in both and
@@ -124,12 +135,15 @@ paths, not yet built.
 **Blocked by**: Phase 2 gate (the `Model`/`interpret`/`emitTLA` kernel and the in-process explorer).
 **Independent Validation**: the value typechecks against the Phase-2 `Model` EDSL and the reachability explorer
 enumerates a non-empty, constraint-bounded state space that visits **both** a `Planned` and a `Failover`
-transition; the explorer confirms the environment actions (`client-write`, `replication-tick`, `active-crash`)
-each fire on some reachable state — so the replication-offset/log variables carry live dynamics and are not
-inert — and confirms a reachable state where `PlannedIsLossless`'s promoted-log clause and one where
-`NoWriteAfterStaleFailover`'s divergence budget are each materially exercised (non-vacuous antecedents); no
+transition; the explorer confirms the environment actions (`client-write`, `replication-tick`, `active-crash`,
+`cold-seed`) each fire on some reachable state — so the replication-offset/log variables carry live dynamics
+and are not inert — and confirms a reachable state where `PlannedIsLossless`'s promoted-log clause, one where
+`NoWriteAfterStaleFailover`'s divergence budget, and one where `NoTakeWithoutProvenFreshness`'s
+`FreshnessWitness` guard are each materially exercised (non-vacuous antecedents); no
 invariant references an undeclared variable.
 **Docs to update**: `documents/engineering/gateway_migration_model_doctrine.md` (Phase-3 status backlink),
+`documents/engineering/backup_recovery_doctrine.md` (§8 — the `FreshnessWitness` /
+`NoTakeWithoutProvenFreshness` proof at model scope),
 `DEVELOPMENT_PLAN/system_components.md` (the single formal `GatewayMigration` `Model` row).
 
 ### Objective
@@ -171,8 +185,9 @@ seeded from backup within its `freshnessBound` also discharges
 
 ### Validation
 1. The value typechecks; the explorer visits both branches and enumerates a bounded, non-empty state space;
-   every invariant is well-formed over the declared variables; the environment actions each fire and the
-   `PlannedIsLossless` promoted-log clause and `NoWriteAfterStaleFailover` divergence budget are each materially
+   every invariant is well-formed over the declared variables; the environment actions (including `cold-seed`)
+   each fire and the `PlannedIsLossless` promoted-log clause, the `NoWriteAfterStaleFailover` divergence budget,
+   and the `NoTakeWithoutProvenFreshness` `FreshnessWitness` guard are each materially
    exercised on some reachable state (no inert data variable).
 
 ### Remaining Work
@@ -189,12 +204,13 @@ paths, not yet built.
 **both** branches, **and** proves each liveness `PROPERTY` (`MergeConverges`, `SessionEventuallyRebinds`) under
 the declared weak fairness; a vacuity check — **defined** as (a) *antecedent-reachability*: every implication-form
 invariant has its antecedent reached on some enumerated state (in particular the data-aware `PlannedIsLossless`
-promoted-log clause and the `NoWriteAfterStaleFailover` over-budget path are each reachable), and (b) *no dead
+promoted-log clause, the `NoWriteAfterStaleFailover` over-budget path, and the `NoTakeWithoutProvenFreshness`
+cold-seed / `FreshnessWitness` antecedent are each reachable), and (b) *no dead
 action*: every declared action **including the environment actions `client-write`, `replication-tick`,
-`active-crash`** is enabled on some reachable state — confirms each invariant is non-trivially satisfied and no
-action is dead, and a **fairness-sensitivity** check confirms each liveness `PROPERTY` goes red when its fairness
-annotation is removed (it was not vacuously true); the emitted `.tla`/`.cfg` are absent from version control (a
-`.gitignore` entry and a committed-artifact scan confirm it).
+`active-crash`, `cold-seed`** is enabled on some reachable state — confirms each invariant is non-trivially
+satisfied and no action is dead, and a **fairness-sensitivity** check confirms each liveness `PROPERTY` goes red
+when its fairness annotation is removed (it was not vacuously true); the emitted `.tla`/`.cfg` under `gen/tla/`
+are absent from version control (a `.gitignore` entry and a committed-artifact scan of `gen/` confirm it).
 **Docs to update**: `documents/engineering/gateway_migration_model_doctrine.md` (§4 prove row →
 proven-for-the-model when green), `documents/engineering/generated_artifacts_doctrine.md` (the emitted
 `.tla`/`.cfg` registered as generated).
@@ -210,15 +226,18 @@ exhaustively model-check it at the bounded scope, proving both branches reach ev
   over both the `Planned` and `Failover` branch scenarios, checking the `INVARIANT`s (safety) and the
   `PROPERTY`s (liveness, under the emitted `WF_`/`SF_` fairness).
 - A vacuity assertion — (a) antecedent-reachability of every implication-form invariant (the `PlannedIsLossless`
-  promoted-log clause and the `NoWriteAfterStaleFailover` over-budget path each reached) and (b) no dead action
-  across control-plane **and** environment actions (`client-write`, `replication-tick`, `active-crash`) — a
+  promoted-log clause, the `NoWriteAfterStaleFailover` over-budget path, and the `NoTakeWithoutProvenFreshness`
+  cold-seed antecedent each reached) and (b) no dead action
+  across control-plane **and** environment actions (`client-write`, `replication-tick`, `active-crash`,
+  `cold-seed`) — a
   **fairness-sensitivity** assertion (each liveness `PROPERTY` fails with fairness removed), and the
   scope-bound `CONSTRAINT` carried through from the `Model` on the **safety** runs only — the **liveness**
   `PROPERTY` runs instead finitize the model via `CONSTANTS` and finite, saturating variable domains and run
   **`CONSTRAINT`-free**, since a state `CONSTRAINT` truncates the behaviour graph and distorts `WF`/`SF`
   enabledness, admitting a spurious green liveness within the bound
   ([`formal_model_doctrine.md §6`](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not)).
-- A committed-artifact scan proving no `.tla`/`.cfg` is versioned.
+- A committed-artifact scan proving no emitted `.tla`/`.cfg` under `gen/` is versioned (the committed Phase-0
+  golden fixture under `test/formal/golden/` is exempt).
 
 ### Validation
 1. TLC is green — every safety invariant and every liveness `PROPERTY`, both branches, no counterexample at
@@ -239,9 +258,10 @@ built.
 correct model — `IOSimPOR` exploring schedules **exhaustively within a committed depth/interleaving bound
 recorded in the harness and ledger** (bounded-exhaustive, not N random seeds); **every** mutant of a mechanical
 mutation-operator set over the fragment is caught, **including the committed per-invariant mutant catalogue**:
-for each of the four safety invariants at least one seeded mutant that violates exactly that invariant and is
+for each of the five safety invariants at least one seeded mutant that violates exactly that invariant and is
 red in TLC, io-sim, and the explorer — notably a `verify-caught-up`-passes-while-offsets-lag mutant caught by
-the data-aware `PlannedIsLossless` and an over-budget-divergence mutant caught by `NoWriteAfterStaleFailover`,
+the data-aware `PlannedIsLossless`, an over-budget-divergence mutant caught by `NoWriteAfterStaleFailover`, and
+a take-without-witness mutant caught by `NoTakeWithoutProvenFreshness`,
 so no safety invariant can be inert; each generic safety mutant (drop the fence / decommission before
 `drain-complete`) red in TLC, io-sim, and the explorer, each fairness-drop/liveness mutant red only in TLC's
 `PROPERTY`.
@@ -269,12 +289,14 @@ sensitivity to one seeded fault — the operational form of correspondence-by-co
   stall/livelock that reaches no illegal state but never reconverges) red only in TLC's `PROPERTY` — a single
   surviving mutant fails the gate, demonstrating the liveness check catches faults the safety instruments miss.
 - A **committed per-invariant mutant catalogue** (§M.2), pinned before the correct `Model` is finalized: for
-  **each** of the four safety invariants (`UniqueGatewayOwner`, `SessionAlwaysRebindable`, `PlannedIsLossless`,
-  `NoWriteAfterStaleFailover`) at least one named committed mutant that violates **exactly** that invariant and
+  **each** of the five safety invariants (`UniqueGatewayOwner`, `SessionAlwaysRebindable`, `PlannedIsLossless`,
+  `NoWriteAfterStaleFailover`, `NoTakeWithoutProvenFreshness`) at least one named committed mutant that violates
+  **exactly** that invariant and
   is red in TLC, io-sim, and the explorer — including the `verify-caught-up`-passes-while-offsets-lag mutant
-  (must go red under the data-aware `PlannedIsLossless`) and the over-budget-divergence mutant (must go red
-  under `NoWriteAfterStaleFailover`); a safety invariant with no committed falsifying mutant fails the gate, so
-  neither guarantee can pass vacuously.
+  (must go red under the data-aware `PlannedIsLossless`), the over-budget-divergence mutant (must go red
+  under `NoWriteAfterStaleFailover`), and the take-without-witness mutant (must go red under
+  `NoTakeWithoutProvenFreshness`); a safety invariant with no committed falsifying mutant fails the gate, so
+  no guarantee can pass vacuously.
 - An assertion that the correct model is green in all instruments; each safety mutant (generic and
   per-invariant) is red in all three; the liveness mutant is red in TLC and (correctly) not flagged by the
   safety-only instruments.
@@ -380,6 +402,8 @@ The whole sprint (📋 Planned).
   Register-3 chaos injection against a running forest deferred to the multi-cluster phase.
 - `documents/engineering/formal_model_doctrine.md` — record the concrete `GatewayMigration` `Model` as
   authored and validated, and correspondence-by-construction discharged for this one model.
+- `documents/engineering/backup_recovery_doctrine.md` — the §8 gateway dovetail: at green, the
+  `FreshnessWitness` / `NoTakeWithoutProvenFreshness` proof flips to proven-for-the-model at model scope.
 - `documents/engineering/generated_artifacts_doctrine.md` — register the emitted `GatewayMigration.{tla,cfg}`
   as generated, never committed.
 - `documents/engineering/chaos_failover_doctrine.md` — the Model → proven-for-the-model, Simulate →

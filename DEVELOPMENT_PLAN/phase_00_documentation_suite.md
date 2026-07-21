@@ -133,6 +133,11 @@ name.
 
 ## Sprints
 
+> Note: the per-sprint **Independent Validation** blocks below describe what the Sprint 0.5 documentation lint
+> checks over each sprint's docs; they are realized once that lint lands. There is no in-sequence, tool-present
+> validation at each sprint's own point in the order — the phase gate is a single end-of-phase two-sided run,
+> so "validated in isolation" names the per-doc-group scope of the check, not the moment it can first execute.
+
 ## Sprint 0.1: Documentation standards + plan-suite spine 📋
 
 **Status**: Planned
@@ -143,7 +148,7 @@ name.
 yet complete)
 **Blocked by**: none
 **Independent Validation**: lint the spine files in isolation — each carries a valid header block, the status
-vocabulary and per-phase/per-sprint skeletons are defined, the ~33-phase overview table is internally
+vocabulary and per-phase/per-sprint skeletons are defined, the 38-phase overview table is internally
 consistent, and every intra-plan link resolves.
 **Docs to update**: the spine files above and `documents/engineering/README.md`
 
@@ -153,7 +158,7 @@ Adopt [`documentation_standards.md §3`](../documents/documentation_standards.md
 *Required header metadata* — with the SSoT-first philosophy and bidirectional cross-referencing: establish the
 header/link mechanics and the plan-suite structure every other document and phase obeys. The naming and header
 conventions adapt the sibling prodbox project's documentation discipline (sibling evidence, then specialized for
-amoebius's snake_case rule), and the tracker is rebuilt for the ~33 single-gate phases.
+amoebius's snake_case rule), and the tracker is rebuilt for the 38 single-gate phases.
 
 ### Deliverables
 
@@ -162,7 +167,7 @@ amoebius's snake_case rule), and the tracker is rebuilt for the ~33 single-gate 
 - The plan rulebook (`development_plan_standards.md`): the §A–§M disciplines (header, snake_case layout, status
   vocabulary, per-phase skeleton, one-phase model, sprint block format, Documentation Requirements,
   doctrine-citation rule, generated markers, cross-ref path rules, honesty, one-substrate, gate integrity).
-- The live tracker (`README.md`): the Document Index, the ~33-phase Overview table with its one-line gates and
+- The live tracker (`README.md`): the Document Index, the 38-phase Overview table with its one-line gates and
   substrate/register columns, the status vocabulary, the phase discipline, and the cross-cutting invariants.
 - `overview.md`, `system_components.md`, `substrates.md`, `legacy_tracking_for_deletion.md`, `later_phases.md`,
   and the per-phase docs' spine.
@@ -182,14 +187,17 @@ The whole sprint (📋 Planned).
 
 **Status**: Planned
 **Implementation**: `documents/engineering/dsl_doctrine.md`, `app_vs_deployment_doctrine.md`,
-`illegal_state_catalog.md`, `service_capability_doctrine.md`, `tenancy_doctrine.md`,
-`lift_and_compose_doctrine.md`, `generated_artifacts_doctrine.md`, `conformance_harness_doctrine.md` (target
-documentation files; not yet complete)
+`illegal_state_catalog.md` (the pure index) and its eight themed sub-catalogs (`illegal_state_storage.md`,
+`illegal_state_topology.md`, `illegal_state_capacity.md`, `illegal_state_security.md`,
+`illegal_state_capability_messaging.md`, `illegal_state_ml_asset.md`, `illegal_state_multicluster.md`,
+`illegal_state_lifecycle.md`) and the `illegal_state_techniques.md` coverage matrix, `service_capability_doctrine.md`,
+`tenancy_doctrine.md`, `lift_and_compose_doctrine.md`, `generated_artifacts_doctrine.md`,
+`conformance_harness_doctrine.md` (target documentation files; not yet complete)
 **Blocked by**: Sprint 0.1
 **Independent Validation**: lint the DSL-core and method docs together — the illegal-state catalog links to the
 DSL contract rather than restating it; the three-register model and the generated-never-committed rule are each
 owned by exactly one doc and referenced elsewhere.
-**Docs to update**: the eight docs above and `documents/engineering/README.md`
+**Docs to update**: the docs above and `documents/engineering/README.md`
 
 ### Objective
 
@@ -207,7 +215,11 @@ doctrines (the three validation registers, the generated-never-committed rule, a
 
 ### Deliverables
 
-- `dsl_doctrine.md`, `app_vs_deployment_doctrine.md`, `illegal_state_catalog.md`,
+- `dsl_doctrine.md`, `app_vs_deployment_doctrine.md`, `illegal_state_catalog.md` (the pure index) with its
+  eight themed sub-catalogs (`illegal_state_storage.md`, `illegal_state_topology.md`,
+  `illegal_state_capacity.md`, `illegal_state_security.md`, `illegal_state_capability_messaging.md`,
+  `illegal_state_ml_asset.md`, `illegal_state_multicluster.md`, `illegal_state_lifecycle.md`) and the
+  `illegal_state_techniques.md` coverage matrix that check (g) validates,
   `service_capability_doctrine.md`, `tenancy_doctrine.md`.
 - `conformance_harness_doctrine.md`: the three registers and the rendering-never-touches-live invariant.
 - `generated_artifacts_doctrine.md`: the emit-from-source, never-commit rule for manifests, the `.tla`/`.cfg`,
@@ -324,10 +336,11 @@ which first appears in the pre-cluster implementation band, Phase 2+)
 **Blocked by**: Sprint 0.1, Sprint 0.2, Sprint 0.3, Sprint 0.4
 **Independent Validation**: run the lint **two-sided** — clean over the whole `documents/` + `DEVELOPMENT_PLAN/`
 tree, **and** non-zero on every fixture in the committed `tools/doc_lint_corpus/` (a bad header (a); a
-near-duplicate paragraph (d); a dangling anchor (b); a one-way `Referenced by` (c); a drifted status marker
+near-duplicate paragraph (d); a dangling anchor and a bare `§N` prose reference (b); a one-way `Referenced by` (c); a drifted status marker
 (e); a gate line missing its committed mutant/oracle (f); and — for catalog integrity (g), one per sub-check —
 a catalog entry missing its `**Validation-locus:**`, non-contiguous catalog numbering, a catalog index bullet
-with a dangling anchor, and a catalog entry with no technique-matrix row). The malformed-ledger negative lives
+with a dangling anchor, and a catalog entry with no technique-matrix row; and a doctrine doc missing its
+`DEVELOPMENT_PLAN/README.md` back-link (h)). The malformed-ledger negative lives
 in `ledger_lint`'s own corpus, not here.
 **Docs to update**: the five verification docs above, `DEVELOPMENT_PLAN/README.md` (record the gate command),
 `documents/engineering/README.md`
@@ -355,7 +368,13 @@ checker that *is* the Phase 0 gate.
 - `tla_modelling_assumptions.md`: a `Deprecated` redirect stub pointing at the two docs above.
 - `tools/doc_lint.sh`: a pure text/link checker (no amoebius-binary dependency), run **two-sided** — it must
   pass clean on the suite **and** fail on every fixture in the committed `tools/doc_lint_corpus/`. It checks,
-  mechanically: (a) valid header metadata; (b) every anchored relative link resolves under the §4 slug rule;
+  mechanically: (a) valid header metadata — decomposed per the documentation standard's five facets: a `Status`
+drawn from the enum with vague values banned, a `Supersedes` field, a `Referenced by` field, `Generated
+sections` keys that match the real in-body markers, and a one-sentence `Purpose` — each an independently
+seeded sub-check; (b) every anchored relative link resolves under the §4 slug rule,
+and **no bare `§N` section reference** appears outside a Markdown link label, heading, fenced/Mermaid block,
+`§M.N` clause-shorthand, or external-project reference — a section citation must be an anchor link, never bare
+`§N` prose (the lint flags any `§`-plus-digit occurring in prose that is not one of those forms);
   (c) every `Referenced by` header reconciled in both directions from the true link graph; (d) **near-duplicate
   normative content** by a named method — sentence-shingle overlap above a stated threshold between two governed
   docs outside quoted/exempt blocks (semantic SSoT *ownership* is a documented hand review, not a lint verdict);
@@ -373,7 +392,9 @@ checker that *is* the Phase 0 gate.
   and holds no `### 3.N` entries) carries a `**Validation-locus:**` field, entry numbering is contiguous with
   no gaps or duplicates, every [`illegal_state_catalog.md`](../documents/illegal_state/illegal_state_catalog.md)
   index bullet's anchor resolves to a real heading, and every entry carries a row in the
-  [`illegal_state_techniques.md`](../documents/illegal_state/illegal_state_techniques.md) coverage matrix.
+  [`illegal_state_techniques.md`](../documents/illegal_state/illegal_state_techniques.md) coverage matrix; and
+  (h) **plan back-link** — every doctrine doc under `documents/engineering/` contains a link back to
+  `DEVELOPMENT_PLAN/README.md`, guarding the documentation standard's back-link rule against future rot.
   Check (g) is the **catalog-side** half of the coverage obligation of
   [`testing_doctrine.md §9`](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation) —
   it validates the enumeration the fixture join will later consume. The *fixture* half (an entry with no
@@ -382,9 +403,15 @@ checker that *is* the Phase 0 gate.
   [`phase_06`](phase_06_illegal_state_corpus.md) Sprint 6.1 owns, and no fixture exists to join against
   until then. An explicit `<a id="...">` is a valid anchor target for (b) and (g): the suite uses it to keep
   inbound links alive across a heading rename.
-- `tools/doc_lint_corpus/`: the **committed** seeded-negative fixtures — **at least one per check (a)–(f), and
-  one per sub-check of (g)**, so every check and sub-check has a fixture that turns it red — that the lint
-  must turn red; this is what makes the lint falsifiable rather than a checker that can always exit 0. The
+- `tools/doc_lint_corpus/`: the **committed** seeded-negative fixtures — **at least one per check (a)–(f) and (h) —
+  with (a) decomposed into one negative per header facet (status-enum-membership, supersedes, referenced-by,
+  generated-sections-keys-match-markers, and one-sentence-purpose) — and one per sub-check of (g)**, so every
+  check, header facet, and sub-check has a fixture that turns it red — that the lint
+  must turn red; this is what makes the lint falsifiable rather than a checker that can always exit 0. Each
+  fixture is a **minimal single-defect mutation** of an otherwise-conforming document — differing from a
+  passing positive only in the one seeded flaw — and the lint must detect that specific seeded defect (naming
+  the failing check), not the fixture's filename or identity, so a stub that keys on fixture identity
+  (`if path in known_corpus: exit 1`) cannot pass both sides. The
   malformed-ledger negative is **not** in this corpus; it lives in `ledger_lint`'s own corpus below.
 - `tools/ledger_lint`: a schema checker for the proven/tested/assumed ledger
   ([`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)) —
@@ -398,11 +425,13 @@ checker that *is* the Phase 0 gate.
 
 1. The lint runs **two-sided**: clean over the full suite once Sprints 0.1–0.4 have landed, **and** non-zero
    (with an actionable message) on every fixture in the committed `tools/doc_lint_corpus/` — the Phase 0 gate.
-2. The committed negative corpus covers each check — a broken header (a), a dangling anchor (b), a one-way
+2. The committed negative corpus covers each check — a broken header (a), a dangling anchor and a bare `§N`
+   prose reference (b), a one-way
    bidirectional link (c), a near-duplicate normative paragraph (d), a drifted status marker (e), a gate line
    missing its committed mutant/oracle (f), and — for catalog integrity (g) — a catalog entry missing its
    `**Validation-locus:**`, non-contiguous catalog numbering, a catalog index bullet with a dangling anchor,
-   and a catalog entry with no technique-matrix row — each causing a
+   and a catalog entry with no technique-matrix row — plus a doctrine doc missing its
+   `DEVELOPMENT_PLAN/README.md` back-link (h) — each causing a
    non-zero exit with a message naming the offending file and check; `ledger_lint` likewise fails on its
    malformed-ledger negatives.
 3. The formal-model docs unambiguously separate what a green model-check proves (the protocol, in the abstract)

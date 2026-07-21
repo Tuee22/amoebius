@@ -14,8 +14,8 @@
 
 ## 1. Why capabilities, not products
 
-**An app should be able to say "I need an ObjectStore," not "I need
-MinIO."** Whether that object storage is served by MinIO, by a cloud S3, or by something amoebius has not
+**An app declares a need for an ObjectStore, never for
+MinIO.** Whether that object storage is served by MinIO, by a cloud S3, or by something amoebius has not
 written yet is an implementation detail of the *platform* — and the moment an app spec writes the word
 `minio`, it has welded itself to one realization and lost the right to run anywhere the platform decides to
 realize that capability differently.
@@ -192,11 +192,10 @@ flowchart TD
   checked -->|rendered into typed manifests and applied by the typed reconciler| live[Running provider on this cluster]
 ```
 
-<a id="41-the-inferenceengine-capability--the-engine-is-substrate-selected-and-jit-resolved-never-authored"></a>
 ### 4.1 The InferenceEngine capability — the engine is target-offering-selected and jit-resolved, never authored
 
-ML serving adds a **ninth capability, `InferenceEngine`** — the abstract interface an ML workload names when it
-says *"I serve inference,"* exactly as an app names `ObjectStore` when it says "I keep durable objects." It
+ML serving adds a **ninth capability, `InferenceEngine`** — the abstract interface an ML workload names to
+declare it serves inference, exactly as an app names `ObjectStore` to declare it keeps durable objects. It
 exercises the [§4](#4-capability--provider--shape-the-binding) binding at its strictest: where a generic capability's provider *defaults* to the [§3](#3-one-canonical-provider-the-type-admits-alternates)
 canonical (part 2 above) and could later admit an alternate, an `InferenceEngine`'s provider is a union with
 **no arm to author a download** — it is **selected from an eligible target node/host offering derived from
@@ -564,7 +563,7 @@ surface, never asserted here.
 This document is normative capability-model doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md),
 never restated here. For orientation only (the plan is authoritative): the **manifest generation + typed
-reconciler that render and apply a chosen shape** land with platform services in **Phases 15 and 18**, and the
+reconciler that render and apply a chosen shape** land with platform services in **Phase 16**, and the
 **capability abstraction itself — capability needs, the alternate-admitting provider binding, and per-cluster
 shapes** — lands with the DSL type families in **Phase 8**. This doc states the target shape and links back for
 status.

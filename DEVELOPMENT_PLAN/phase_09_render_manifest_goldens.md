@@ -85,7 +85,7 @@ analogous to the Phase-5 decode battery and the Phase-4 `dhall type` corpus.
 **Gate:** `cabal test render-golden` is green against Phase-0-pinned oracles — the pure, total
 `renderAll :: ProvisionedSpec -> [K8sObject]` emits, **for the concrete corpus** (the full Phase-8 provisioned output set:
 every capability arm × both deployment shapes {`SingleNode`, `Distributed`}, enumerated explicitly in Sprint 9.3's
-Deliverables and jointly covering every `K8sObject` sum variant at least once), an object set the
+Deliverables and jointly covering every renderable `K8sObject` sum variant at least once), an object set the
 **byte-for-byte** goldens pin exactly, and the three rendered-output-golden illegal-state properties hold
 **non-vacuously** on the emitted objects. The goldens are authored and **committed in Phase 0** under
 `test/manifest/golden/<deployment-id>.json` *before* `renderAll` exists, under a single pinned **canonical Aeson
@@ -249,7 +249,7 @@ transitive module surface. A QuickCheck property asserts the by-construction inv
 it generates decoded inputs plus target inventories and retains only values constructed through the real
 bind/provision boundary; it carries
 `cover`/`checkCoverage` obligations (coverage failure is a hard test failure) forcing each capability arm, both
-deployment shapes {`SingleNode`, `Distributed`}, and every `K8sObject` sum variant to appear at a stated
+deployment shapes {`SingleNode`, `Distributed`}, and every renderable `K8sObject` sum variant to appear at a stated
 minimum frequency — so the property demonstrably exercises the whole spec surface, not one happy-path shape.
 An export-list check proves the public manifest facade exposes `renderAll` but not
 `renderSourcePrivate` or any service-valued renderer; the internal serializer remains reachable only by the
@@ -327,7 +327,7 @@ request, with the closed root-filesystem arm projected exactly; access-/persiste
    report no partial call and no `IO`/`unsafePerformIO`/partial-`Prelude` name reachable from `renderAll`; a
    QuickCheck property over arbitrary legal whole-deployment `ProvisionedSpec` values constructed through the real
    provision fold — with `cover`/`checkCoverage` obligations
-   (hard-failing) that force each capability arm, both shapes, and every `K8sObject` variant to fire at its
+   (hard-failing) that force each capability arm, both shapes, and every renderable `K8sObject` variant to fire at its
    stated minimum — confirms every emitted pod is hardened, every NetworkPolicy is default-deny + derived-allow,
    and every resource-bearing object exactly projects its checked CPU, memory, pod-ephemeral,
    per-container private allowance, bounded disk-/access-indexed memory-volume, selected-platform image
@@ -383,7 +383,7 @@ Phase-0-committed golden fixtures, one per deployment, under the canonical Aeson
 test-side allow-edge oracle `test/manifest/DepGraphOracle.hs` (a hand-authored re-derivation of allow edges
 from the declared dependency graph, not a call into `renderAll`), and the **concrete corpus** — the full Phase-8
 binder output set: every capability arm × both deployment shapes {`SingleNode`, `Distributed`}, jointly
-covering every `K8sObject` sum variant at least once — target paths, not yet built.
+covering every renderable `K8sObject` sum variant at least once — target paths, not yet built.
 **Blocked by**: Sprint 9.2; Phase 8 gate (the whole-deployment `ProvisionedSpec` corpus the goldens render from).
 **Independent Validation**: `cabal test render-golden` is green — the emitted `[K8sObject]` matches its
 Phase-0-committed byte-for-byte golden under the canonical encoding and every rendered-output-golden
@@ -396,6 +396,8 @@ golden regenerated to match its (illegal) output so the byte diff alone cannot b
 **Docs to update**: `documents/engineering/conformance_harness_doctrine.md` (record the rendered-output-golden
 locus realized in Register 1), `documents/illegal_state/illegal_state_catalog.md` (annotate §3.6/§3.7/§3.11
 with realized foreclosure layer = rendered-output-golden, Register 1),
+`documents/engineering/namespace_layout_doctrine.md` (backlink the one-namespace-per-capability rule to the
+Phase-9 render-golden battery — the rendered-output enactment that gates its foreclosure),
 `documents/engineering/generated_artifacts_doctrine.md`, `DEVELOPMENT_PLAN/README.md` (flip the Phase-9 status
 when the gate passes).
 
@@ -503,6 +505,10 @@ The whole sprint (📋 Planned).
 - `documents/illegal_state/illegal_state_catalog.md` — annotate §3.6 / §3.7 / §3.11 with their realized
   foreclosure layer (rendered-output-golden → Register 1); keep the runtime-checked (layer-3) enforcement
   claim deferred to the live band.
+- `documents/engineering/namespace_layout_doctrine.md` — backlink the one-namespace-per-platform-capability
+  rule: the render-golden battery is the rendered-output enactment that gates the namespace-layout
+  foreclosure (every emitted object lands in its doctrine-derived namespace, and a free-text or
+  cross-capability namespace is not a value `renderAll` can emit).
 - `documents/engineering/generated_artifacts_doctrine.md` — note that the rendered `[K8sObject]` set is
   emitted from Haskell and never committed; the byte-for-byte golden is a test fixture of the renderer.
 

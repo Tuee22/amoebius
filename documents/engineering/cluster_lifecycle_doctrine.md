@@ -41,7 +41,7 @@ is one amoebius **builds** end to end: the host binary owns bring-up from the mi
 **surfaces** over the cloud provider's API — provisioned via Pulumi from inside an existing cluster, never
 touching a host amoebius does not have; amoebius wires up only what the provider itself exposes and **builds
 no capability the provider does not**, the same *surface, don't build* discipline owned by
-[pulumi_iac_doctrine.md §0/§4](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision).
+[pulumi_iac_doctrine.md §0](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision)/[§4](./pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog).
 One consequence rides on this axis: because a provider-managed control plane is **hostless** (no `LinuxHost`,
 and no host-level worker daemons — the table above), a **full member node stretched onto a provider-managed
 control plane** is representable only through a provider-native capability the `Managed` arm *surfaces* (e.g.
@@ -59,8 +59,8 @@ a host; every later cluster is *spawned* by a parent ([§3](#3-amoebic-spawning-
 the standard service set, initialized, and reconciling toward its `.dhall`.
 
 - **The midwife CLI is a thin igniter, not the orchestrator.** Its only job is to ensure the package
-  manager, ensure `ghcup`, install the pinned toolchain (GHC **9.12.4**, Cabal 3.16.1.0 — the
-  [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) toolchain pin; 9.14.1 is a deferred, later-phase bump per the plan's Toolchain section),
+  manager, ensure `ghcup`, install the pinned toolchain (the
+  [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) toolchain pin),
   build the binary, and call `bootstrap`. From that call onward the **binary** owns everything. The script
   itself and substrate detection are owned by [substrate_doctrine.md](./substrate_doctrine.md);
   this doc owns the lifecycle ordering the binary then drives. Bootstrap also establishes the
@@ -248,7 +248,7 @@ per-system proof obligation concentrates. That entire **async cross-cluster boun
 confluence "Second Axis", with its proven/tested/assumed ledger) is owned by
 [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Intra-cluster synchronous HA is *delegated* to
 MinIO / Pulsar / Postgres-Patroni, which do their own consensus
-([platform_services_doctrine.md §6, §8](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox)).
+([platform_services_doctrine.md §6](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox), [§8](./platform_services_doctrine.md#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin)).
 
 The distinction matters because it tells the operator and the code which guarantee is in force: a graceful
 teardown that *skips* the cleanup steps is silently downgrading itself to a chaos event and forfeiting the
@@ -437,13 +437,8 @@ sibling's** reconciler-with-predicates doctrine
 
 This document is normative cluster-lifecycle doctrine only. Delivery sequencing, completion status,
 validation gates, and remaining work are owned by
-[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
-only (the plan is authoritative): bootstrap + a single kind cluster land in **Phase 14**; the baked image in
-**Phase 15**; the SSA reconciler in **Phase 16**; retained storage in **Phase 17**; root Vault/PKI in
-**Phase 18**; platform services in **Phases 19–20**; the control-plane singleton in **Phase 22**; amoebic
-spawning + geo-replication in **Phase 28**; gateway failover + Route53 repoint in **Phase 29**;
-provider-managed clusters + dynamic node provisioning in **Phase 30**; and the test-only teardown safety
-harness in **Phase 36**. This doc states the target shape and links back for status.
+[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. This doc states
+the target shape and links back to the plan for phase sequencing and status.
 
 ---
 
@@ -454,7 +449,7 @@ everything else in this doctrine does: as a **reconcile** ([§9](#9-how-bring-up
 **declared, typed server/agent topology**. That topology — the closed `Rke2Servers` union
 `< Single | Ha3 | Ha5 >` (the only legal odd etcd quorums {1,3,5}) plus
 `agents : Fixed [Rke2AgentNode] | Autoscaled { floor : [Rke2AgentNode], policy : ScalingPolicy }` — is owned
-by [cluster_topology_doctrine.md §2/§4](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm); this doc owns only the lifecycle
+by [cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)/[§4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction); this doc owns only the lifecycle
 verbs that stand it up. There is no rke2 state machine, exactly as there is no lifecycle state machine ([§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)).
 
 This section is normative design, not a delivered live claim. Phases 4–7 own the pure node/reserve/template
@@ -507,7 +502,7 @@ unassigned Phase-N gate. Phase 28's acceptance forest uses child `kind` clusters
   `Rke2AgentPool.Autoscaled` and grows the **agent pool beyond its declared floor within its finite quota**; it
   can never mint or drop an etcd voter. A 0- or 2-server (no-quorum / split-brain) control plane has no
   constructor at all — **type-foreclosed unrepresentable** via the closed `Rke2Servers` union
-  ([cluster_topology_doctrine.md §2/§4](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm);
+  ([cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)/[§4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction);
   [illegal_state_catalog.md §3.24](../illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)). Host distinctness across `servers ∪ agentFloor`
   is the **decode-foreclosed** `mkRke2` decode fold, likewise owned by cluster_topology.
 - **The server/agent axis is orthogonal.** Whether a host is a server or an agent is **DECLARED**, and it is

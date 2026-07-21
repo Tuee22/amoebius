@@ -38,7 +38,7 @@ proof — stay with their existing owners and are linked, never restated.
 
 **What it forecloses.** Naming a gateway change without committing to a guarantee. The cost is that a gateway
 migration is now a first-class deployment-rules concept with a committed guarantee per arm; there is no untyped
-"repoint DNS and hope" path. The mode is **world-triggered, not an authored field**: an operator initiates a
+DNS-repoint path that commits to no data-loss guarantee. The mode is **world-triggered, not an authored field**: an operator initiates a
 `Planned` migration by editing the parent-owned pairing (or a `ScalingPolicy` initiates one on a home→cloud
 move), and `Failover` is the automatic, availability-first response to a vanished active — never an
 operator-selected posture. The unified PACELC deployment-rules surface that carries the failover budget and
@@ -270,6 +270,6 @@ status.
 - [Consistency & PACELC Doctrine](./consistency_pacelc_doctrine.md) — the whole-stance PACELC posture and the unified deployment-rules surface (the R8 lag bound, R9 RTO budget, and per-app participation flag) that this taxonomy's budget and pairing feed into.
 - [Illegal-State Catalog](../illegal_state/illegal_state_catalog.md) — the "session that cannot rebind on migration" entry (§3.44) and the GADT-indexed-state-machine technique (§4.3).
 - [DSL Doctrine](./dsl_doctrine.md) — the typed `GatewayFailover` forest relation as a parent-minted, child-projected subtree field.
-- [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — the formal model of the `Failover` branch (Phase 3).
+- [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — the formal model of both the `Planned` and `Failover` branches (Phase 3).
 - [Development Plan → Phase 29](../../DEVELOPMENT_PLAN/README.md) — phase order, status, and the failover acceptance gate.
 - [Documentation Standards](../documentation_standards.md) — header, SSoT, and the proven/tested/assumed honesty rule.

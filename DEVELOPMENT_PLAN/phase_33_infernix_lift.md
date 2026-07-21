@@ -120,8 +120,10 @@ dimension: the divergent-input case asserts the distinct `experimentHash` digest
 constructor**. **At least one committed seeded mutant must turn the gate red** (§M.2), committed and re-run, not
 hand-picked once: the mutant `mutants/phase_33/wallclock_seed.hs` (effect swap — the pure decode reads
 `getCurrentTime` in place of the derived SplitMix seed) must fail part (b); the mutant
-`mutants/phase_33/identity_hash.hs` (dropped fold — `deriveExperimentHash` ignores the changed input) must fail
-part (c). The whole `InForceSpec` topology spins up, runs, and **tears down leak-free — defined as an empty
+`mutants/phase_33/identity_hash.hs` (dropped effect/UNCHANGED — `deriveExperimentHash` drops the changed-input
+term from its fold) must fail
+part (c). The whole `InfernixReproSpec` / `phase_33_infernix_repro.dhall` `InForceSpec` topology spins up, runs,
+and **tears down leak-free — defined as an empty
 postflight sweep of test-flagged resources ([`testing_doctrine.md §7`](../documents/engineering/testing_doctrine.md#7-the-elevated-harness-is-the-sole-automated-deleter-of-test-owned-durable-storage-leak-free-cycles), the
 flag-and-elevated-sweep mechanism), not merely a successful `kind` cluster delete** — emitting a
 proven/tested/assumed ledger that records same-substrate reproduction as *tested*, the seam lift as
@@ -344,8 +346,10 @@ alone may change.
 Adopt [`lift_and_compose_doctrine.md §2`](../documents/engineering/lift_and_compose_doctrine.md#2-what-lifts-the-reuse-map) and
 [`app_vs_deployment_doctrine.md §7`](../documents/engineering/app_vs_deployment_doctrine.md#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule):
 package infernix as a shared Haskell library unified under the DSL (its `.dhall` nests inside the `InForceSpec`)
-and cut its model store over to the Phase-25 content-addressed store behind a **reversible adapter seam** — the
-first of the one-subsystem-at-a-time migration moves.
+and cut its model store over to the Phase-25 three-tier content-addressed store of
+[`content_addressing_doctrine.md §2`](../documents/engineering/content_addressing_doctrine.md#2-the-three-tier-store-blobs--manifests--pointers),
+keyed under the `experimentHash` namespace of [`§3`](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran),
+behind a **reversible adapter seam** — the first of the one-subsystem-at-a-time migration moves.
 
 ### Deliverables
 - An `Infernix.Adapter.Store` seam with two interchangeable backends (legacy infernix store ↔ the amoebius
@@ -463,7 +467,7 @@ The whole sprint (📋 Planned).
 kernel-derived SplitMix seed and produces byte-identical output for an unchanged `experimentHash`, with all I/O at
 the interpreter boundary and no ambient-entropy or wall-clock read inside the stage.
 **Docs to update**: `documents/engineering/content_addressing_doctrine.md`,
-`documents/engineering/app_vs_deployment_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+`DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 Adopt [`content_addressing_doctrine.md §4`](../documents/engineering/content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed)
@@ -531,8 +535,9 @@ ledger artifact. The committed seeded mutants `mutants/phase_33/wallclock_seed.h
 `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`.
 
 ### Objective
-Adopt [`app_vs_deployment_doctrine.md §6`](../documents/engineering/app_vs_deployment_doctrine.md#6-the-proof-case-a-demo-web-app-as-application-logic-only)/[`§8`](../documents/engineering/app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic)
-and [`content_addressing_doctrine.md §4`](../documents/engineering/content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed):
+Adopt [`app_vs_deployment_doctrine.md §6`](../documents/engineering/app_vs_deployment_doctrine.md#6-the-proof-case-a-demo-web-app-as-application-logic-only)/[`§8`](../documents/engineering/app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic),
+[`content_addressing_doctrine.md §4`](../documents/engineering/content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed),
+and [`lift_and_compose_doctrine.md §5`](../documents/engineering/lift_and_compose_doctrine.md#5-evidence-not-proof):
 assemble the phase's single Register-3 gate — the lifted infernix CPU inference reproduces byte-identically under
 one `experimentHash`, and its PureScript demo web app deploys as application-logic-only — proving both the
 lift-and-compose re-homing and the app-vs-deployment split on live linux-cpu.
@@ -561,7 +566,7 @@ lift-and-compose re-homing and the app-vs-deployment split on live linux-cpu.
   `test/fixtures/phase_33/resource_shape.json` (independent build/worker/SPA/cold-overlap witness), and the
   one-short/dropped-envelope fixtures under `mutants/phase_33/`.
 - The **committed seeded mutants** `mutants/phase_33/wallclock_seed.hs` (effect swap → fails the determinism
-  check) and `mutants/phase_33/identity_hash.hs` (dropped fold → fails the divergence check), each committed and
+  check) and `mutants/phase_33/identity_hash.hs` (dropped effect/UNCHANGED → fails the divergence check), each committed and
   re-run so the gate demonstrably goes red on them (§M.2).
 - The lifted PureScript demo web app deployed **application-logic-only** — authored once as logic that uses the
   infernix extension, with its HA Deployment cardinality/rollout, substrate, and inference binding an orthogonal deployment-rules

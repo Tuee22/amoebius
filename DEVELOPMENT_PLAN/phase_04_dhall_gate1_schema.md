@@ -271,7 +271,10 @@ carries the acceptance token *spec-composition proven*, never *runtime proven*.
   for insecure ingress gives no syntax to request it; a record that requires a reference gives no way to
   omit it. Gate 2 (the in-process typed decoder) is deferred to [Phase 5](phase_05_gadt_decoder_gate2.md);
   whole-deployment feasibility and the opaque deployable seal are Phase 8.
-- [`illegal_state_catalog.md §1/§2/§3/§6`](../documents/illegal_state/illegal_state_catalog.md): the catalog of
+- [`illegal_state_catalog.md §1 — Illegal states fail to type-check`](../documents/illegal_state/illegal_state_catalog.md#1-illegal-states-fail-to-type-check),
+  [`§2 — the load-bearing limit`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it),
+  [`§3 — the catalog`](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent),
+  and [`§4 — planning ownership`](../documents/illegal_state/illegal_state_catalog.md#4-planning-ownership): the catalog of
   illegal states and the typing techniques that foreclose each, adopted **at the honest foreclosure layer**.
   The layer-1 type-foreclosed entries — closed unions, required fields, no-arm — are discharged at Gate 1
   here; decoder-local checked rejections defer to Phase 5, whole-deployment resource/target checks defer to
@@ -282,7 +285,9 @@ carries the acceptance token *spec-composition proven*, never *runtime proven*.
   the one pure resource vocabulary. Gate 1 owns the **presence and closed shape** of every
   `ResourceEnvelope`/`Capacity` declaration; Phases 5, 7, and 8 own normalization, arithmetic feasibility, and
   post-bind provisioning respectively. Explicit declarations here are not a claim that the target has enough
-  real capacity.
+  real capacity. This doctrine carries no Documentation-Requirements doc-sync line here because its honest
+  verification layer flips at Phase 7 (capacity arithmetic), not at Gate 1; its absence from the doc-update
+  block is therefore intentional.
 
 ## Sprints
 
@@ -541,7 +546,7 @@ schema; the harness exit code is a single green/red over the whole positive set.
 `documents/engineering/dsl_doctrine.md` (Gate-1 corpus backlink).
 
 ### Objective
-Adopt [`illegal_state_catalog.md §1`](../documents/illegal_state/illegal_state_catalog.md): assemble the
+Adopt [`illegal_state_catalog.md §1 — Illegal states fail to type-check`](../documents/illegal_state/illegal_state_catalog.md#1-illegal-states-fail-to-type-check): assemble the
 positive fixtures that a legal amoebius world is authored from and prove they pass the Gate-1 typechecker —
 the authoring-time demonstration that the schema *admits* every intended world.
 
@@ -597,7 +602,9 @@ annotation), `DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md` (backlink: the de
 there).
 
 ### Objective
-Adopt [`illegal_state_catalog.md §2/§3/§6`](../documents/illegal_state/illegal_state_catalog.md): assemble the
+Adopt [`illegal_state_catalog.md §2 — the load-bearing limit`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it),
+[`§3 — the catalog`](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent),
+and [`§4 — planning ownership`](../documents/illegal_state/illegal_state_catalog.md#4-planning-ownership): assemble the
 Gate-1-class negative corpus — the fixtures the schema makes unspellable — and prove each fails `dhall type`,
 honestly recording which foreclosures are complete at Gate 1 and which are only conventional here and finished
 at Gate 2.
@@ -635,8 +642,9 @@ at Gate 2.
    `<entry>.err` golden naming the targeted type/arm/field (§M.8); red if either the paired positive fails or
    the error text diverges from its golden.
 3. The harness re-runs the committed seeded mutant `mutants/gate1_capability_custom_arm.dhall` and is red
-   unless the mutant is detected (its product-named negative type-checks or the arm-inventory oracle passes)
-   (§M.2).
+   unless the mutant is caught — i.e. the arm-inventory oracle goes red on the extra `Custom : Text` arm. If
+   instead the mutant passes the arm-inventory oracle or lets the product-named negative type-check, the
+   mutant has escaped and the seeded-mutant gate is invalid (§M.2).
 4. The partial-foreclosure ledger at `DEVELOPMENT_PLAN/ledgers/phase_04_gate1.md` maps all eight negatives to
    a catalog entry and a foreclosure layer and is committed; the gate is incomplete without it.
 

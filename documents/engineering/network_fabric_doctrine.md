@@ -9,8 +9,8 @@
 > WireGuard configured directly by amoebius (never Netmaker)**, with peer keys custodied in Vault, peer config
 > *rendered* from the node inventory and reconciled by the singleton, a hub bound to the gateway *role* so the
 > fabric moves with the gateway on failover — and for the verdict that a service mesh (Linkerd) is **not
-> adopted for v1**. It also generalizes the host-comms security boundary from "localhost-only" to "reachable
-> only over the authenticated fabric."
+> adopted for v1**, and for the generalization of the host-comms security boundary from "localhost-only" to
+> "reachable only over the authenticated fabric."
 
 ---
 
@@ -39,7 +39,7 @@ if it has a route to that store that no one else can use.
 the home **store** (the data-plane half). A **stretched cluster** poses the harder half — a full k8s node (a
 kubelet) whose declared network locality differs from the control plane's yet which registers in the *one*
 apiserver/etcd across the WAN. That kubelet↔apiserver span is the **control-plane** half of the same open gap,
-and this round routes it over the same fabric: a stretched full node (the K2 case, owned by
+and this doctrine routes it over the same fabric: a stretched full node (the K2 case, owned by
 [cluster_topology_doctrine.md §4.1](./cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation))
 reaches its apiserver over `wg0` on **self-managed rke2 only**. This doctrine adds the endpoint index and the
 `render()` obligation for that span ([§3](#3-keys-config-and-distribution--wireguard-as-just-another-reconcile),
@@ -67,7 +67,10 @@ Harbor/Helm of networking: the duplicated-control-plane pattern amoebius rejects
 | Its own node/peer inventory | The typed node inventory ([substrate_doctrine.md](./substrate_doctrine.md)) + the Dhall spec |
 
 Five duplicated control planes, five second state stores. Amoebius configures the
-raw WireGuard *primitive* it owns end to end, and runs none of Netmaker's machinery.
+raw WireGuard *primitive* it owns end to end, and runs none of Netmaker's machinery. What this forecloses:
+raw-WireGuard-only gives up Netmaker's turnkey conveniences — automatic mesh management, NAT-traversal
+helpers, and an operator UI — each of which amoebius must instead supply through its own rendered-config
+reconcile rather than adopt off the shelf.
 
 ---
 
@@ -170,7 +173,7 @@ break:
   here.** Every *stretched* constructor — the K1 host-worker attach carrier and the K2 full-node agent alike —
   must consume exactly one `Networking c`, and this doc is its single owner. The `Vpn` arm is the WireGuard
   fabric above ([§2](#2-raw-wireguard-not-netmaker)–[§4](#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)). OPEN (constructor deferred; witness type present).
-  `Networking c = Vpn (VpnFabric c) | Gateway (SecureGatewayReach c)` — the `Gateway` arm has a witness type but
+  The `Gateway` arm has a witness type but
   no inhabitant yet. Current position: `Vpn` (WireGuard) is the only shipping arm; `Gateway` lands with the
   non-VPN remote-attach phase. Safe deferral: no stretched constructor can omit `Networking`. The stretched
   constructors in
@@ -208,8 +211,8 @@ break:
 
 ## 6. The service-mesh verdict: no Linkerd for v1
 
-A service mesh (Linkerd) is **not adopted for v1.** For a Pulsar-centric *async* architecture its marquee
-features have little surface to act on, and each is already covered:
+A service mesh (Linkerd) is **not adopted for v1.** For a Pulsar-centric *async* architecture the features it
+exists to provide have little surface to act on, and each is already covered:
 
 | Mesh feature | Why it is redundant / declined here |
 |---|---|

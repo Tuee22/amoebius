@@ -14,9 +14,10 @@
 
 ## 1. Scope
 
-This document is a **themed slice** of the illegal-state catalog: the security, ingress, and secrets entries,
-faithfully reproduced from [`illegal_state_catalog.md`](./illegal_state_catalog.md) and reorganized as their
-own doc. It owns nothing new. The **catalog index** (which states are illegal, in full) and the **load-bearing
+This document is a **themed slice** of the illegal-state catalog: the security, ingress, and secrets entries
+drawn from [`illegal_state_catalog.md`](./illegal_state_catalog.md) and reorganized as their own doc,
+reproducing each entry body faithfully. What this slice **authoritatively owns** is the per-entry
+**Validation-locus** classification it adds to each entry below. The **catalog index** (which states are illegal, in full) and the **load-bearing
 honesty limit** (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned
 by [`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the
 **coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three foreclosure layers** ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the
@@ -167,16 +168,15 @@ shape).
 In raw k8s a Deployment may omit resource requests/limits — a noisy-neighbour or OOM-the-node risk — and run
 as root with a writable root filesystem and full Linux capabilities. amoebius **generates** every workload
 object from a typed record that *requires* a complete resource envelope: refined non-zero CPU, memory, and
-pod `ephemeral-storage` requests+limits for every app/sidecar/init container; a size bound for every
-disk-backed scratch/cache volume; per-container private writable/log allowances covered by that container's
-ephemeral request/limit and, with shared volume bounds, by the effective pod request; writer-indexed
-memory-backed volumes with access/persistence and exactly one reservation carrier per resident lifecycle epoch;
-platform-specific OCI content/snapshot/import metadata routed by the node's closed filesystem layout and
-finite pull policy; checked durable claim presentation/usable/raw sizes; and, for the
-accelerator-owner pod, a derived integer
-extended-resource request/limit on its named owner container plus the pod's required affinity. It also
-attaches a hardened (non-root,
-no-privilege-escalation, dropped-capabilities, read-only-root-by-default) `securityContext`. Binding and
+pod `ephemeral-storage` requests+limits for every app/sidecar/init container, plus per-container private
+writable/log allowances covered by that container's ephemeral request/limit and, with shared volume bounds, by
+the effective pod request. That same record fixes the storage envelope: a size bound for every disk-backed
+scratch/cache volume; writer-indexed memory-backed volumes with access/persistence and exactly one reservation
+carrier per resident lifecycle epoch; platform-specific OCI content/snapshot/import metadata routed by the
+node's closed filesystem layout and finite pull policy; and checked durable claim presentation/usable/raw
+sizes. For the accelerator-owner pod it derives an integer extended-resource request/limit on its named owner
+container plus the pod's required affinity. It also attaches a hardened (non-root, no-privilege-escalation,
+dropped-capabilities, read-only-root-by-default) `securityContext`. Binding and
 provisioning must first construct the opaque whole-deployment `ProvisionedSpec`; only deployment-global
 `renderAll :: ProvisionedSpec -> [K8sObject]` crosses the seal, so neither an incomplete resource projection nor an
 unprovisionable target/workload pair can reach manifest generation. There is nothing to lint because there

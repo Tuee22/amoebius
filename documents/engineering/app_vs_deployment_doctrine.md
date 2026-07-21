@@ -281,9 +281,8 @@ on the application-logic surface. The clean way to hold this with [§7](#7-infer
   at what replica count — is a deployment rule.
 
 The typed shape of that dependency is the **`ExtensionSpec`** contract. Each in-tree extension in the v1
-closed set — **{infernix, jitML}** — plugs in by contributing one
-`ExtensionSpec { extDhall, extChain, extCapabilities }`: a typed Dhall sub-catalog **nested inside the
-`InForceSpec`** ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)), a `cfg -> [Step]` chain, and the `List Capability` it declares. These specs are
+closed set — **{infernix, jitML}** — plugs in by contributing one `ExtensionSpec` — a typed Dhall sub-catalog **nested inside the
+`InForceSpec`** ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)), whose full record shape is owned by [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability). These specs are
 merged at **compile/link time into the single binary** — there is no per-extension image and no `dlopen`.
 That the app *contributes* an `ExtensionSpec` is application logic (it travels with the app); the
 *placement* of the linked workload stays a deployment rule ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)). The `ExtensionSpec` grammar and its

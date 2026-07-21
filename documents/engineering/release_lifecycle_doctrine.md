@@ -5,17 +5,11 @@
 **Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
-> **Purpose**: Define delivery — build, promote, roll out — as **typed composition on primitives amoebius
-> already owns**, with **no external CI/CD control plane** (no Argo, no Flux, no Tekton — the Helm/Harbor of
-> delivery). The four values: the immutable `Release` ledger keyed by `releaseHash`; the per-`Environment`
-> (`Dev`/`Staging`/`Prod`) ETag-CAS promotion pointer; the `PromotionGate` that makes promote-unverified→prod
-> **unrepresentable**; and the readiness-gated `RolloutPlan` / `RolloutPhase` apply (schema-migration as a
-> phase, canary, rollback) on the in-cluster SSA reconciler. This document **owns** the `environment`
-> promotion-pointer kind, the `PromotionGate` and its environment→required-evidence mapping, and the
-> `RolloutPlan`/`RolloutPhase` apply model. It **composes** — not re-owns — the immutable `Release` ledger
-> ([manifest_generation_doctrine.md §6.1](./manifest_generation_doctrine.md#61-the-release-ledger-the-applied-log-is-canonical-not-optional)),
-> the ETag-CAS protocol ([content_addressing_doctrine.md §2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)),
-> and the test-evidence ledger ([testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)), and points at their authoritative homes.
+> **Purpose**: Single Source of Truth for delivery as **typed composition on primitives amoebius already
+> owns** — the immutable `Release` ledger keyed by `releaseHash`, the per-`Environment`
+> (`Dev`/`Staging`/`Prod`) ETag-CAS promotion pointer, the `PromotionGate` that makes promote-unverified→prod
+> **unrepresentable**, and the readiness-gated `RolloutPlan`/`RolloutPhase` apply — with **no external CI/CD
+> control plane** (no Argo, no Flux, no Tekton).
 
 ---
 
@@ -50,15 +44,28 @@ elsewhere. There is nothing to install, nothing to poll, and nothing to reconcil
   independent typed dimensions (substrate detected; daemon-role elected; rke2 server/agent declared;
   environment declared) — it rides the same reconciler, never a bespoke delivery engine.
 
+**What refusing a second control plane forecloses.** The rule gives up pull-based git-ops reconciliation from
+external repositories and the third-party pipeline ecosystems (Argo/Flux/Tekton and the tooling built around
+them) that assume such an intermediary: amoebius cannot consume a delivery flow it does not itself render and
+type, so any workflow expressed only as an external pipeline's CRDs or polling loop is out of reach by
+construction.
+
+**This document owns vs. composes.** This document **owns** the `environment` promotion-pointer kind, the
+`PromotionGate` and its environment→required-evidence mapping, and the `RolloutPlan`/`RolloutPhase` apply
+model. It **composes** — not re-owns — the immutable `Release` ledger
+([manifest_generation_doctrine.md §6.1](./manifest_generation_doctrine.md#61-the-release-ledger-the-applied-log-is-canonical-not-optional)),
+the ETag-CAS protocol ([content_addressing_doctrine.md §2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)),
+and the test-evidence ledger ([testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)), and points at their authoritative homes.
+
 **What this doctrine owns vs. defers.** This document owns only the *composition* — the four delivery values
 and how they chain. Every primitive they compose is owned elsewhere:
 
 | Concern | Owned by |
 |---------|----------|
-| `releaseHash`, the hash/pointer master registry, the content-addressed store the ledger writes into | [content_addressing_doctrine.md §2.3 / §4](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) |
-| The SSA/ApplySet reconciler `RolloutPlan` enacts, and the *optional applied-log* this doctrine promotes to canonical | [manifest_generation_doctrine.md §5 / §6](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) |
+| `releaseHash`, the hash/pointer master registry, the content-addressed store the ledger writes into | [content_addressing_doctrine.md §2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) / [§4](./content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) |
+| The SSA/ApplySet reconciler `RolloutPlan` enacts, and the *optional applied-log* this doctrine promotes to canonical | [manifest_generation_doctrine.md §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) / [§6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed) |
 | The per-run proven/tested/assumed evidence ledger a `PromotionGate` reads | [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) |
-| That env differences are **deployment rules**, and app bytes are byte-identical across environments | [app_vs_deployment_doctrine.md §3 / §4](./app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs) |
+| That env differences are **deployment rules**, and app bytes are byte-identical across environments | [app_vs_deployment_doctrine.md §3](./app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs) / [§4](./app_vs_deployment_doctrine.md#4-the-dividing-line--a-litmus-test) |
 | `create-new → verified-migrate → retire-old` for the schema-migration phase | [storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction) |
 | Gateway-API `HTTPRoute` `backendRefs` weights the canary shifts | [network_fabric_doctrine.md](./network_fabric_doctrine.md) |
 | The control-plane singleton that runs the promote/rollout half | [daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) |
@@ -126,7 +133,7 @@ data Release = Release
 No sibling keeps a content-addressed *release* ledger; the closest evidence is that jitML and infernix already
 key ML *artifacts* by a `sha256(resolved-dhall ‖ substrate-fingerprint)` `experimentHash`
 ([content_addressing_doctrine.md §3](./content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran)),
-so the "identity = what was requested ‖ where it ran" fold is proven for runs and **generalized** here to
+so the "identity = what was requested ‖ where it ran" fold is demonstrated for runs and **generalized** here to
 deployment generations. That is sibling evidence, not an amoebius result.
 
 ---
@@ -166,7 +173,7 @@ data Environment = Dev | Staging | Prod          -- closed union; no fourth, unn
 
 ### Sibling evidence
 
-The ETag-CAS pointer flip is proven in the sibling content store for `trial` pointers (best/latest over ML
+The ETag-CAS pointer flip is demonstrated in the sibling content store for `trial` pointers (best/latest over ML
 manifests); the `environment` pointer **reuses that exact protocol** for a new pointee (`Release`). Sibling
 evidence for the mechanism, not an amoebius result for environment promotion.
 
@@ -314,7 +321,7 @@ data ProvisionedRolloutWork       -- private constructors only
 jitML's `src/JitML/Cluster/Helm.hs` defines exactly this shape — a `HelmPhase`
 (`HarborPhase | PlatformPhase | FinalPhase`), a `releasePhase :: HelmPhase` field on each release, and a
 `helmPhasedRolloutPlan` that applies them in readiness-gated phase order — the **`RolloutPhase` pattern,
-proven in a sibling** (but bound to Helm, which amoebius drops). jitML's `src/JitML/Bootstrap.hs` splits its
+demonstrated in a sibling** (but bound to Helm, which amoebius drops). jitML's `src/JitML/Bootstrap.hs` splits its
 rollout in two around the Postgres schema grant (`livePreGrantSubprocessesForPort → postgresSchemaGrantIO →
 livePostGrantSubprocessesForPort`), which is **the schema-migration-as-a-phase shape, LIVE in a sibling** and
 the concrete evidence behind the Phase-26 rollout shape. By contrast, hostbootstrap's only delivery gate
@@ -330,12 +337,12 @@ elsewhere:
 
 | Concern | Owned by |
 |---------|----------|
-| The `releaseHash` formula, the hash/pointer master registry, ETag-CAS pointer mechanics, the content-addressed store | [content_addressing_doctrine.md §2.3 / §4](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) |
-| The SSA/ApplySet reconciler, wait-for-ready, prune, and the applied-log this doctrine promotes to canonical | [manifest_generation_doctrine.md §5 / §6](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) |
+| The `releaseHash` formula, the hash/pointer master registry, ETag-CAS pointer mechanics, the content-addressed store | [content_addressing_doctrine.md §2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds) / [§4](./content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed) |
+| The SSA/ApplySet reconciler, wait-for-ready, prune, and the applied-log this doctrine promotes to canonical | [manifest_generation_doctrine.md §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) / [§6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed) |
 | The proven/tested/assumed evidence ledger the `PromotionGate` reads, and the no-skip / UNVERIFIED rule | [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) |
 | The Extract → Model → Inject chaos methodology and the layer-strength grammar | [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) |
-| That environment differences are deployment rules and app bytes are identical across environments | [app_vs_deployment_doctrine.md §3 / §4](./app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs) |
-| `create-new → verified-migrate → retire-old` and the durable-data-deletion prohibition the schema phase inherits | [storage_lifecycle_doctrine.md §7 / §8](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation) |
+| That environment differences are deployment rules and app bytes are identical across environments | [app_vs_deployment_doctrine.md §3](./app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs) / [§4](./app_vs_deployment_doctrine.md#4-the-dividing-line--a-litmus-test) |
+| `create-new → verified-migrate → retire-old` and the durable-data-deletion prohibition the schema phase inherits | [storage_lifecycle_doctrine.md §7](./storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation) / [§8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction) |
 | Gateway-API `HTTPRoute` weights the canary shifts, and the no-mesh verdict | [network_fabric_doctrine.md](./network_fabric_doctrine.md) |
 | Pulsar subscription / consumer-group cutover mechanics | [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) |
 | The build half of the pipeline (multi-arch images, the `distribution` registry) | [image_build_doctrine.md](./image_build_doctrine.md) |

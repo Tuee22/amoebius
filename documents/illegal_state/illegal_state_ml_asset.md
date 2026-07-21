@@ -5,7 +5,7 @@
 **Referenced by**: DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_32_jitbuild_engine_cache.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
-> **Purpose**: The themed slice of the illegal-state catalog covering the engine/model/kernel asset
+> **Purpose**: The themed slice of the illegal-state catalog covering the engine/model asset
 > lifecycle (jit-build cache), continuous-training cadence, feed merge order, and cross-app model grants —
 > the ML-asset states a valid `InForceSpec` cannot represent.
 
@@ -60,7 +60,7 @@ mirrors, [§3.26](./illegal_state_lifecycle.md#326-an-unverified-environment-pro
 `.ready` proves staging *completeness* (bytes written), **not** training *provenance*; the witness closes that
 gap, and naming a model for import IS an explicit content-addressed import-with-provenance (there is no bare
 stage-by-name-without-provenance constructor). The provenance-gated constructor is owned by
-[`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) §4.5; this refines the serve gate — it does
+[`content_addressing_doctrine.md` §4.5](../engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss); this refines the serve gate — it does
 **not** add a second catalog entry. **(c) A model with no landing
 engine.** A `ModelArtifact` must be servable by an `EngineRuntime` present on the deployment's substrate; an
 unmatched model has no landing engine — a **decode-foreclosed total relation** ([§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)), the same relation-over-a-
@@ -75,7 +75,7 @@ for the model↔engine relation and the catalog-derived
 `ProvisionedCacheDemand.derivedPeak = digest-deduped residents + bounded concurrent materialization ≤ CacheBudget`
 cache fold (checked total folds, not an absence of inhabitants); runtime-checked residue — that the
 first-miss resolve succeeds, the staged bytes actually load on the substrate, and that an imported model's pin/tag is **truthful** (owned by
-[`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) §6.1).
+[`content_addressing_doctrine.md` §6.1](../engineering/content_addressing_doctrine.md#61-proven--tested--assumed-spelled-out)).
 
 **Validation-locus:** `Gate-1-editor` (the closed `EngineRuntime` union with no arbitrary-`Url` arm fails
 `dhall type` the moment an engine is named by URL) + `Gate-2-decoder` (the `.ready`-and-provenance-witness-gated

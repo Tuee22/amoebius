@@ -19,11 +19,11 @@ capacity / placement / accelerator entries and adds, per entry, the orthogonal *
 
 The material this slice deliberately does **not** restate lives with its owners:
 
-- The **catalog index** (which entries exist, the §1–§2 framing) and the **load-bearing honesty limit**
+- The **catalog index** (which entries exist, the introductory framing) and the **load-bearing honesty limit**
   (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned by
   [`illegal_state_catalog.md`](./illegal_state_catalog.md).
-- The **seven typing techniques** ([§4](./illegal_state_techniques.md)), the **coverage matrix** ([§5](./illegal_state_techniques.md)),
-  the **three-layer foreclosure** model (type-foreclosed / decode-foreclosed / runtime-checked, [§6](./illegal_state_techniques.md)),
+- The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)),
+  the **three-layer foreclosure** model (type-foreclosed / decode-foreclosed / runtime-checked, [§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
   and the **validation-locus axis** itself are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md).
   The five loci referenced below — `Gate-1-editor` (fails `dhall type` at authoring time), `Gate-2-decoder`
   (the total decoder returns `Left`), `provision-seal` (post-bind Phase-8 provision returns a `ProvisionError`
@@ -236,7 +236,7 @@ runtime actually grant those devices only to the owner).
 ### 3.29 A host worker whose Demand overflows its physical host
 
 A host-level accelerator worker (an Apple-Metal or Windows-CUDA native subprocess,
-[`substrate_doctrine.md`](../engineering/substrate_doctrine.md) §5) runs beside the Lima/WSL2 VM that backs the in-cluster
+[`substrate_doctrine.md` §5](../engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)) runs beside the Lima/WSL2 VM that backs the in-cluster
 node, both drawing on the same **physical host**; raw tooling accounts neither, so a host binary that
 over-subscribes surfaces at runtime as thrash or OOM. This round adds a **host → host-worker** arm to the
 capacity nesting: a host worker's CPU, memory/unified-memory, and host-cache storage demand folds against its
@@ -251,7 +251,7 @@ decode-foreclosed provision rejection. **Owner:** [`resource_capacity_doctrine.m
 host→host-worker fold arithmetic), consuming the host-worker `Demand` owned by
 [`platform_services_doctrine.md` §10](../engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope)
 (extended to "every container **and every host-level worker subprocess**") and the physical-host `Capacity` +
-system-reserved netting owned by [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) §8. **Technique:**
+system-reserved netting owned by [`substrate_doctrine.md` §8](../engineering/substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints). **Technique:**
 [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
 (the capacity-accounting total fold, host→host-worker arm). **Layer:** decode-foreclosed — a checked rejection of a
 constructible value, never "unrepresentable" (a capacity check is decode-foreclosed, [§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it));
@@ -297,7 +297,7 @@ cluster-wide `vram` sum. An undeclared accelerator-memory envelope is rejected r
 an Apple host declaring independent VRAM violates the closed unified-memory capacity shape. A producing
 node's footprint does **not** transfer as the serving-node demand — fit is recomputed for the chosen
 serving/training/JIT placement and replica count.
-**Owner:** [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) §8 (the device-vector versus
+**Owner:** [`substrate_doctrine.md` §8](../engineering/substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints) (the device-vector versus
 unified-memory capacity shape) + [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md)
 (device placement and net usable device-memory arithmetic) +
 [`service_capability_doctrine.md`](../engineering/service_capability_doctrine.md) /
@@ -323,9 +323,9 @@ actually fits under real batch/context).
 ## Cross-references
 
 - [`illegal_state_catalog.md`](./illegal_state_catalog.md) — the parent catalog: the full entry index, the
-  §1–§2 framing, and the load-bearing honesty limit ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)).
-- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques ([§4](./illegal_state_techniques.md)),
-  the coverage matrix ([§5](./illegal_state_techniques.md)), the three-layer foreclosure model ([§6](./illegal_state_techniques.md)),
+  introductory framing, and the load-bearing honesty limit ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)).
+- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques ([§4](./illegal_state_techniques.md#4-the-typing-techniques)),
+  the coverage matrix ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the three-layer foreclosure model ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
   and the **validation-locus axis** the per-entry `**Validation-locus:**` lines above draw on.
 - [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract that a valid `InForceSpec` cannot
   represent illegal state.
@@ -335,7 +335,7 @@ actually fits under real batch/context).
   [§3.29](#329-a-host-worker-whose-demand-overflows-its-physical-host), and the device/unified-memory
   placement arithmetic for [§3.30](#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool)).
 - [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) — substrate/arch capabilities, the closed node-taint set +
-  node inventory, per-host `Capacity` (including §8 physical-host pools and accelerator device vectors) cited by [§3.5](#35-undeployable-pods-taints-tolerations--affinity),
+  node inventory, per-host `Capacity` (including [§8](../engineering/substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints) physical-host pools and accelerator device vectors) cited by [§3.5](#35-undeployable-pods-taints-tolerations--affinity),
   [§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded),
   [§3.22](#322-a-hand-authored-un-derived-toleration), [§3.29](#329-a-host-worker-whose-demand-overflows-its-physical-host), and [§3.30](#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool).
 - [`platform_services_doctrine.md`](../engineering/platform_services_doctrine.md) — the derived-toleration rule (parallel to

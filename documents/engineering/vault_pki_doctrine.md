@@ -311,7 +311,7 @@ operator memorized password (entered on init / unseal; stored nowhere persistent
 The consequence is exactly the [§2](#2-vault-is-the-fail-closed-secrets-root) brick, viewed from the top: **no password this boot → root Vault
 stays sealed → nothing below it can come up.** The concrete realization — a password-AEAD-sealed
 *unlock bundle*, where it is stored, and how the bootstrap path reaches it before Vault is up — is
-proven in prodbox (`vault_doctrine.md [§6](#6-parentchild-unseal-two-sanctioned-modes)`–`§6.1`); amoebius keeps that backend deliberately *pluggable*
+proven in prodbox (`vault_doctrine.md §6`–`§6.1`); amoebius keeps that backend deliberately *pluggable*
 (a sealed object in durable MinIO, a host-side `.age` file, a cloud KMS, a TPM/YubiKey identity) behind
 one interface, because the load-bearing property is only that the unseal material is **password-AEAD-
 sealed and never plaintext at rest**, not which vault holds the ciphertext. The *channel* by which the
@@ -344,7 +344,7 @@ Both are legal; neither is a human prompt. Mode (b) is the stricter, fail-closed
 choice, and it is the mode prodbox realizes in full: a child Vault configured with a transit seal
 pointed at its parent, so the child *literally cannot unseal without a live, unsealed parent*, with the
 child's recovery keys and initial root token custodied in the parent's Vault KV
-(prodbox `cluster_federation_doctrine.md [§2](#2-vault-is-the-fail-closed-secrets-root)`–[§3](#3-the-secretref-contract-a-name-never-a-value)). amoebius treats prodbox's transit-seal tree as the
+(prodbox `cluster_federation_doctrine.md §2–§3`). amoebius treats prodbox's transit-seal tree as the
 **evidence-backed realization of mode (b)**, while keeping mode (a) available for clusters that should
 hold their own unseal key locally.
 
@@ -430,7 +430,7 @@ a child's scoped `InForceSpec` names only its own.
 
 > **Honesty.** Parent→child secret injection is *specified* here and scheduled with amoebic spawning;
 > prodbox proves the adjacent custody flow (a parent writing a child's init keys and downstream
-> metadata into the parent's own Vault KV, `cluster_federation_doctrine.md [§3](#3-the-secretref-contract-a-name-never-a-value)`), which is evidence for
+> metadata into the parent's own Vault KV, `cluster_federation_doctrine.md §3`), which is evidence for
 > the trust channel but is *not* itself the same "inject arbitrary named secrets into the child's Vault"
 > operation. Treat this as design intent, not a tested amoebius result.
 
@@ -479,7 +479,7 @@ flowchart TD
 
 > **Honesty.** The Vault-PKI-as-root-anchor design is specified here; prodbox uses Vault as its TLS/PKI
 > authority with cert-manager driving ZeroSSL and Vault holding the EAB material
-> (`vault_doctrine.md [§11](#11-error-model-and-no-leak-logging)`), and the native-Vault-PKI internal-CA hierarchy is a deferred,
+> (`vault_doctrine.md §11`), and the native-Vault-PKI internal-CA hierarchy is a deferred,
 > live-proof-pending option even there. Read the cross-cluster CA hierarchy as amoebius's intended end
 > state, not a tested result.
 
@@ -489,8 +489,8 @@ flowchart TD
 
 There is exactly **one** in-cluster secret-delivery path: a workload authenticates to Vault with its
 Kubernetes service account and reads only what its policy grants. This is the amoebius adoption of
-prodbox's proven model (`secret_derivation_doctrine.md [§5](#5-the-root-cluster-single-node-password-encrypted-unseal)`–[§6](#6-parentchild-unseal-two-sanctioned-modes),
-[prodbox `vault_doctrine.md [§12](#12-planning-ownership)`]); the inventory table there is the evidence, not restated here.
+prodbox's proven model (`secret_derivation_doctrine.md §5–§6`,
+prodbox `vault_doctrine.md §12`); the inventory table there is the evidence, not restated here.
 
 - **Vault Kubernetes auth per consumer.** Each component has a service account; a Vault role bound to
   that namespace + service account; a least-privilege policy granting read on exactly its own KV paths
@@ -605,7 +605,7 @@ states the target shape and links back for status.
 - [DSL Doctrine](./dsl_doctrine.md) — secrets-are-names-not-values (the DSL-surface rule this doc's mechanism serves)
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — single-node-root bootstrap, amoebic spawning, and the child unseal lifecycle
 - [Platform Services Doctrine](./platform_services_doctrine.md) — Vault as a standard HA platform service and the Vault-ready ordering edge
-- [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — [§5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers) [§4 init-follows-readiness / fail-closed](#4-init-follows-readiness-fail-closed-vault-init) is the event-driven resolution of the readiness race, not a wait around it
+- [Readiness Ordering Doctrine](./readiness_ordering_doctrine.md) — readiness_ordering [§5](./readiness_ordering_doctrine.md#5-the-bootstrap-tier-local-observed-witnesses-never-timers) and this doc's [§4 init-follows-readiness / fail-closed](#4-init-follows-readiness-fail-closed-vault-init) are the event-driven resolution of the readiness race, not a wait around it
 - [Storage Lifecycle Doctrine](./storage_lifecycle_doctrine.md) — the retained Vault backing, deterministic PV rebind, and init-once / unseal-on-rebuild durability
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — Vault-Transit-envelope encryption of the MinIO Pulumi backend and the public-edge ZeroSSL/route53 path
 - [Content Addressing & Determinism](./content_addressing_doctrine.md) — the content-addressed model store the Tier-2 staging credentials write to ([§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss))

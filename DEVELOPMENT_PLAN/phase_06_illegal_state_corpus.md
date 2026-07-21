@@ -1,4 +1,4 @@
-# Phase 6: Illegal-state corpus + property tests + validation-locus ledger
+# Phase 6: Illegal-state corpus + validation-locus ledger
 
 **Status**: Authoritative source
 **Supersedes**: N/A
@@ -60,9 +60,12 @@ and the per-entry validation-locus ledger (`Gate-1-editor` / `Gate-2-decoder` / 
 `rendered-output-golden` / `live-effect`) is emitted with every catalog entry mapped to its truth-maker locus and a separate
 `owner_phase` / `case_family` disposition, with both **reconciled against the catalog-reconciled committed
 `locus_registry.tsv`** (the independent oracle of §3), red on any divergence — a **Register-1** in-process
-check that runs on no substrate.
+check that runs on no substrate. The committed gate-integrity apparatus (§M) that discharges the eight clauses
+— the representative set, oracle pins, and seeded mutants — is itemised in [Gate integrity](#gate-integrity).
 
-**Gate integrity (§M).** This gate satisfies the eight §M clauses through the following committed apparatus.
+## Gate integrity
+
+This gate satisfies the eight §M clauses through the following committed apparatus.
 The existing fixture/error oracles are Phase-0-pinned; the owner/family catalog enrichment identified below
 must be hand-authored and committed at the start of Phase 6, before the corpus/ledger implementation that
 consumes it (§1 oracle-pinning):
@@ -134,12 +137,12 @@ alone, before any fixture exists to join against.
 
 ## Doctrine adopted
 
-- [`illegal_state_catalog.md §6 — Three layers of foreclosure (and the honesty they force)`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force):
+- [`illegal_state_techniques.md §6 — Three layers of foreclosure (and the honesty they force)`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force):
   the three foreclosure layers (`type-foreclosed` / `decode-foreclosed` / `runtime-checked`) and the
   **Gate-1-vs-Gate-2 caveat** — Dhall has no opaque types, so the corpus must **split** its negatives into
   *Gate-1-must-fail-`dhall type`* and *Gate-2-must-fail-decode*, and never bill a Gate-2-only foreclosure as a
   Gate-1 type-check failure. This phase reifies that split as fixtures.
-- [`illegal_state_catalog.md §5 — Coverage matrix`](../documents/illegal_state/illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)
+- [`illegal_state_techniques.md §5 — Coverage matrix`](../documents/illegal_state/illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)
   and [`§2 — the load-bearing limit`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it):
   the coverage matrix is the checklist the corpus must exhaust — one fixture per Register-1-settleable entry —
   and §2's limit is honored verbatim: *a type-check proves the spec composes, not that the cluster enforces
@@ -148,7 +151,8 @@ alone, before any fixture exists to join against.
   the **two typed gates** — Gate 1 (the Dhall typechecker) and Gate 2 (the in-process `Dhall.inputFile auto`
   decoder). This phase exercises both against the exhaustive negative corpus and pins the type-foreclosed
   residue with the compile-fail golden that gives the GADT indices their teeth.
-- [`resource_capacity_doctrine.md §3/§4`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget):
+- [`resource_capacity_doctrine.md §3 — The types: Quantity, Capacity, Demand, Budget`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
+  and [`§4 — The total fold: fits, carve, place, and the nesting`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting):
   the complete resource envelope and opaque post-bind checked boundary. This phase exhausts the resource
   **shape/normalization** cases its predecessors own (including the missing-envelope §3.11 negative) and
   derives every later capacity, storage, accelerator, VRAM, and missing-capability deferral from registry
@@ -189,7 +193,7 @@ diverges from its golden.
 `DEVELOPMENT_PLAN/system_components.md` (corpus inventory), this document.
 
 ### Objective
-Adopt [`illegal_state_catalog.md §5/§6`](../documents/illegal_state/illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state):
+Adopt [`illegal_state_techniques.md §5/§6`](../documents/illegal_state/illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state):
 assemble the corpus that exercises the type discipline exhaustively over the coverage matrix, **honestly split
 by the locus that rejects each fixture** — Gate-1 negatives that must fail `dhall type`, Gate-2 negatives that
 must pass `dhall type` and decode-reject — never billing a Gate-2-only foreclosure as a Gate-1 failure.
@@ -280,7 +284,7 @@ red; and a companion positive module (the legal vocabulary) compiles.
 the entries pinned here), `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
-Adopt the [`illegal_state_catalog.md §6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)
+Adopt the [`illegal_state_techniques.md §6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)
 `type-foreclosed` layer at its strongest: give the GADT indices their teeth by proving the illegal value has
 **no inhabitant** — it does not merely decode to a `Left`, it does not compile at all. This is the residue the
 Phase-4 honesty caveat routed here, since Dhall has no opaque types.
@@ -321,7 +325,7 @@ the suite is red if that mutant survives any property.
 `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
-Adopt [`illegal_state_catalog.md §6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)
+Adopt [`illegal_state_techniques.md §6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)
 and [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact): establish the
 closure / round-trip / fold-totality / composition-preservation properties of the type discipline, labelled
 honestly — **TESTED (sampled)** for infinite domains, upgraded to **PROVEN** only where a finite domain is
@@ -375,7 +379,7 @@ registry owner without being reclassified. The enriched catalog and registry are
 
 ### Objective
 Adopt [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) and
-[`illegal_state_catalog.md §6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force):
+[`illegal_state_techniques.md §6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force):
 emit the per-entry validation-locus ledger — the honest map from every catalog entry to the one locus that
 settles it — and gate on it, so no entry is silently unvalidated and no deferred entry is silently claimed.
 The truth-maker locus and delivery ownership stay separate: Register-1 rows owned by Phases 4–6 are discharged
@@ -447,8 +451,9 @@ The whole sprint (📋 Planned).
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
   design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the DSL vision
-- [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — §5 the coverage matrix this
-  corpus exhausts; §6 the three foreclosure layers and the honest Gate-1-vs-Gate-2 split
+- [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — the catalog index and its §2
+  load-bearing limit; the §5 coverage matrix this corpus exhausts and the §6 three foreclosure layers with the
+  honest Gate-1-vs-Gate-2 split live in `illegal_state_techniques.md`
 - [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — §5 the two typed gates exercised against the corpus
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — §2 Register 1, §4 the per-run ledger the
   validation-locus ledger specializes

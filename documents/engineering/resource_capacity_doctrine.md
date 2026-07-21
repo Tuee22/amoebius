@@ -8172,8 +8172,6 @@ the *two-ceiling arithmetic*):
 
 ---
 
-<a id="8-where-the-numbers-come-from-declared-at-decode-cross-checked-at-runtime"></a>
-
 ## 8. Where the numbers come from: declared in pure input, provisioned before render, cross-checked at runtime
 
 For overcommit to be a pure checked rejection rather than only a runtime error, the capacity the fold checks

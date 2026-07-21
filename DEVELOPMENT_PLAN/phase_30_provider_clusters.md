@@ -321,7 +321,10 @@ Adopt [`pulumi_iac_doctrine.md §1 — Pulumi runs only from inside an existing 
 and the provider-cluster catalog entry in [`§4 — What Pulumi provisions`](../documents/engineering/pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog):
 make "spin up a provider-managed cluster" something the cluster does under its Deployment-`replicas=1` singleton
 — never something a laptop shell does behind the cluster's back — with state held as a Vault-enveloped MinIO
-object set, generalizing Phase 28's SSH-keyed self-managed spawn to a cloud-keyed provider spawn.
+object set, generalizing Phase 28's SSH-keyed self-managed spawn to a cloud-keyed provider spawn. The
+`pulumi` binary and cloud plugin are ensured under
+[`substrate_doctrine.md §3 — the no-environment / no-`PATH` lazy tool-ensure contract`](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract):
+discovered lazily by full path, with no `PULUMI_*`/`AWS_*`/`PATH` side-channel exported into any child process.
 
 ### Deliverables
 
@@ -784,7 +787,9 @@ the deployment-rules surface and never inside an app's logic.
 
 - An `Amoebius.Cluster.NodeProvisioner` that reads the declared elastic-node rule — a typed `ScalingPolicy`
   ([`resource_capacity_doctrine.md §6`](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns))
-  driven by **load**, **spot-instance cost**, and **workflow completion** — computes the desired node set, and
+  driven by **load** and **workflow completion** (spot-instance-cost-driven scaling is a declared future signal
+  class, deferred and not exercised by this phase's gate corpus or seeded mutants) — computes the desired node
+  set, and
   drives the live set toward it through the Phase 16 reconciler; no bespoke node state machine. Each
   provisioning step selects from named `ProviderNodeClass` values carrying a catalog-pinned provider SKU,
   allocatable CPU plus finite
@@ -1071,6 +1076,17 @@ The whole sprint (📋 Planned).
   Helm path is introduced.
 - `documents/engineering/substrate_doctrine.md` — record that `pulumi` + the cloud plugin conform to the
   no-env/no-`PATH` lazy-tool-ensure contract on the linux-cpu parent.
+- `documents/engineering/resource_capacity_doctrine.md` — record that
+  [`§6`](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)
+  (`Growable`/`ScalingPolicy`) and
+  [`§3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+  (the systematic provision matrix) gain the live node-scaling enaction: dynamic node provisioning is the
+  runtime realization of a typed `ScalingPolicy` against the worst-case elastic count under the provider-quota
+  ceiling; flip the relevant honest layer once the gate runs.
+- `documents/engineering/app_vs_deployment_doctrine.md` — record that
+  [`§3`](../documents/engineering/app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)
+  (the deployment-rules surface) gains the node-elasticity reference: node scaling lives on the
+  deployment-rules DSL surface, never in app logic.
 - `documents/engineering/testing_doctrine.md` — record the Phase 30 per-run ledger artifact and the explicit
   deferral of elevated durable-EBS reclamation to Phase 36.
 

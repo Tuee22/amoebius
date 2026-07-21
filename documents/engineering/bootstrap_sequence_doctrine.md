@@ -164,7 +164,7 @@ The handoff is **one-way, observed-gated, and transfers control-surface authorit
 - **What does *not* transfer: host-worker supervision.** The sudo host daemon keeps supervising host-level
   worker subprocesses (Apple-Metal / Windows-CUDA inference), which remain Pulsar/MinIO peers on **channel
   2** ([`host_cluster_comms_doctrine.md` §3](./host_cluster_comms_doctrine.md#3-there-is-no-bespoke-control-channel--coordination-is-pulsar--minio)).
-  "Midwife then defers" is about the *control* surface, not the host daemon's whole existence.
+  "Midwife then defers" is about the *control* surface, not the host daemon's continued supervision role.
 - **Re-running is a no-op.** Because bring-up is a reconcile
   ([`cluster_lifecycle_doctrine.md` §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)),
   a crash before release re-enters as the bootstrap holder and re-observes its exact state; a crash after
@@ -190,7 +190,7 @@ second binary.
     and a root token**; the singleton decrypts/stores the envelope in-process
     ([`vault_pki_doctrine.md` §4](./vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init))
     and reconciles toward it. This is how a new desired-state Dhall value reaches an already-running root — the operator flow
-    the reconcile mechanics ([`daemon_topology_doctrine.md` §6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine) hot-reload) only hinted at.
+    the reconcile mechanics only hinted at ([`daemon_topology_doctrine.md` §6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine), hot-reload).
   - **`kv put/get/list/delete` — secret KV-CRUD.** The operator CRUDs Vault KV secrets **by name** over the same
     admin REST (requires an unsealed Vault and the root token). This is how a production `InForceSpec`'s named
     `SecretRef`s come to *exist in Vault before the `.dhall` is uploaded*: secret material crosses

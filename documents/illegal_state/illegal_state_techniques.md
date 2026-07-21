@@ -18,7 +18,7 @@
 This document is the **techniques** slice of the illegal-state catalog. It owns the seven reusable typing
 techniques ([§4](#4-the-typing-techniques)), the coverage matrix ([§5](#5-coverage-matrix--which-technique-forecloses-which-illegal-state)),
 the three-layer foreclosure model ([§6](#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and — new in
-this doc — the **validation-locus axis** (defined in [§6](#6-three-layers-of-foreclosure-and-the-honesty-they-force))
+this doc — the **validation-locus axis** (defined in [§6.1](#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer))
 that classifies each illegal state by *where in the pipeline it is caught*, orthogonally to the foreclosure layer.
 
 The **catalog index** — the enumerated `### 3.x` illegal-state entries themselves — and the load-bearing honesty
@@ -31,7 +31,7 @@ below cite it.
 
 Everything here is **design intent**, not a tested amoebius result: the type discipline it describes (the spec
 composes; no illegal value is constructible) is a **Tier-1** (design-time / in-process) property targeted for
-in-process validation in the **pre-cluster gates (Phases 4–7)** (Dhall Gate 1 `dhall type` + the Haskell decoder Gate 2 + QuickCheck), while
+in-process validation in the **pre-cluster gates (Phases 4–9)** (Dhall Gate 1 `dhall type` + the Haskell decoder Gate 2 + QuickCheck), while
 its **runtime enforcement** remains **Phase 22** (Tier 2). Status and gates live only in
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
 
@@ -272,13 +272,13 @@ Forecloses [§3.13](./illegal_state_topology.md#313-a-compute-engine-incompatibl
 | 3.42 Admin mutation without root-token cap + unsealed-Vault witness | 4.2 `RootToken` capability + 4.3 `Unsealed`-edge-gated `dhall update` handle (channel-1 verb retired at handoff) | [bootstrap_sequence](../engineering/bootstrap_sequence_doctrine.md), [vault_pki §4](../engineering/vault_pki_doctrine.md#4-init-follows-readiness-fail-closed-vault-init) |
 | 3.43 Unmonitored workflow/extension or unauthenticated monitoring surface | 4.1 mandatory monitor/liveness/extMonitoring + absent Off/Public arms + 4.7 coverage fold + 4.6 rule-feasibility Σ | [monitoring](../engineering/monitoring_doctrine.md), [pulsar_client §6](../engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra) |
 | 3.44 A session that cannot rebind on gateway migration | 4.3 migration GADT (decommission handle only from a drain-complete index) | [gateway_migration](../engineering/gateway_migration_doctrine.md) |
+| 3.45 A cross-tenant or hand-authored RBAC binding | 4.2 phantom tenant tags + 4.4 tenant→role ownership index (every grant is the image of one total function of the typed tenant→role graph) | [tenancy §5](../engineering/tenancy_doctrine.md#5-rbac-is-derived-never-authored), [vault_pki](../engineering/vault_pki_doctrine.md) |
 | 3.46 A chaos fault targeting a component the spec never declared | 4.2 phantom-typed `FaultTarget` reference (resolves only against a declared component) + 4.1 `NonEmpty` schedule | [chaos_failover §11.1](../engineering/chaos_failover_doctrine.md#111-the-typed-fault-schedule-chaosschedule--faulttarget), [testing](../engineering/testing_doctrine.md) |
 | 3.47 Failover data-loss budget authored below the replication-lag bound | 4.1 binding-by-construction (RPO derived = lag; no separate field) | [consistency_pacelc](../engineering/consistency_pacelc_doctrine.md), [chaos_failover §18](../engineering/chaos_failover_doctrine.md#18-the-rules-scale-to-the-boundary) |
 | 3.48 Geo-replication pair whose active == standby | 4.4 distinctness fold (`active ≠ standby`) | [consistency_pacelc](../engineering/consistency_pacelc_doctrine.md), [gateway_migration](../engineering/gateway_migration_doctrine.md) |
 | 3.49 Child-authored gateway-failover pairing | 4.4 parent-scope ownership index + 4.2 phantom scope tag | [gateway_migration](../engineering/gateway_migration_doctrine.md), [consistency_pacelc](../engineering/consistency_pacelc_doctrine.md) |
 | 3.50 Standing spec authoring an emergency `Failover` | 4.3 mode-is-an-observed-edge + 4.1 no `mode` field | [consistency_pacelc](../engineering/consistency_pacelc_doctrine.md), [gateway_migration](../engineering/gateway_migration_doctrine.md) |
 | 3.51 Operator-authored `Confluent` disposition | 4.2 closed union w/o `Confluent` arm | [consistency_pacelc](../engineering/consistency_pacelc_doctrine.md), [chaos_failover §17](../engineering/chaos_failover_doctrine.md#17-the-boundary-and-its-classifier) |
-| 3.45 A cross-tenant or hand-authored RBAC binding | 4.2 phantom tenant tags + 4.4 tenant→role ownership index (every grant is the image of one total function of the typed tenant→role graph) | [tenancy §5](../engineering/tenancy_doctrine.md#5-rbac-is-derived-never-authored), [vault_pki](../engineering/vault_pki_doctrine.md) |
 | 3.52 Gateway-failover graph reusing one cluster across two DNS records | 4.4 distinctness fold over cluster identities across the migration graph (resource independence) | [gateway_migration_model §5](../engineering/gateway_migration_model_doctrine.md#5-one-and-done-plus-a-per-inforcespec-structural-fit), [consistency_pacelc §3.3](../engineering/consistency_pacelc_doctrine.md#33-the-ir-and-its-decode-foreclosures-haskell-gate-2) |
 | 3.53 A backup larger than its bounded medium | 4.6 summed backup demand (working set + Job + retained generations) ≤ medium backing | [backup_recovery](../engineering/backup_recovery_doctrine.md), [resource_capacity](../engineering/resource_capacity_doctrine.md) |
 | 3.54 Deleting a backup in an append-only system | 4.2 closed union with no delete arm + 4.3 (medium object-lock at runtime) | [backup_recovery](../engineering/backup_recovery_doctrine.md), [inforcespec_migration](../engineering/inforcespec_migration_doctrine.md) |
@@ -469,6 +469,6 @@ about the running cluster ([§2](./illegal_state_catalog.md#2-the-load-bearing-l
 - [Release Lifecycle Doctrine](../engineering/release_lifecycle_doctrine.md) — the evidence-gated `PromotionGate` handle ([§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed))
 - [Pulumi IaC Doctrine](../engineering/pulumi_iac_doctrine.md) — route53 / zerossl name→address binding ([§4.5](#45-content-address-totality--names-are-total-functions-of-content))
 - [Chaos / Failover Doctrine](../engineering/chaos_failover_doctrine.md) — the `runtime-checked` / `live-effect` residue (the honest limit)
-- [Documentation Standards](../documentation_standards.md) — §6 proven/tested/assumed honesty discipline
-- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — status, gates, and the Tier-1 (Phases 4–7) / Tier-2 (Phase 22) tier split
+- [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) — proven/tested/assumed honesty discipline
+- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — status, gates, and the Tier-1 (Phases 4–9) / Tier-2 (Phase 22) tier split
 - [Engineering Doctrine Index](../engineering/README.md)

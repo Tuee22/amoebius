@@ -87,7 +87,7 @@ route53, zerossl, self-managed children) where a checkpoint earns its keep, and 
 
 A laptop shell that can `pulumi up` is a laptop that holds long-lived cloud
 credentials, a plaintext state file, and the unilateral power to mutate live infrastructure — exactly the
-ad-hoc, env-var-driven, secret-on-disk shape amoebius exists to abolish. So amoebius makes Pulumi a
+ad-hoc, env-var-driven, secret-on-disk shape the cluster-capability model removes. So amoebius makes Pulumi a
 *cluster capability*, not a host tool: **"via pulumi, amoebius may spawn other k8s clusters … in all cases
 these deployments are to be tracked using pulumi, using minio backend, locally encrypted via vault
 transport engine"** and **"eks clusters, along with all pulumi deploys of all assets, only happens within
@@ -190,8 +190,7 @@ opaque ciphertext.
   be a Transit-enveloped MinIO object set and never anything weaker.
 - **Parent-owned child state is keyed per child.** When a parent spawns a child, the parent's checkpoint for
   that child-infrastructure deploy and the child's subtree spec are enveloped under the child's **own per-child
-  Transit key**
-  (`transit/amoebius-<child-id>-config`), not a single shared parent key — so a child's checkpoint is opaque
+  Transit key**, not a single shared parent key — so a child's checkpoint is opaque
   to its siblings even under an unsealed parent. The per-child key mechanism and policy are owned by
   [vault_pki_doctrine.md §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes); this doc
   only requires that every object in the child's backend namespace use it.
@@ -230,7 +229,7 @@ A leak is almost always a *lifetime mismatch* — state that outlived its resour
 checkpoint pointing at nothing) or resources that outlived their state (orphans Pulumi can no longer see).
 amoebius forecloses both by classifying every deploy and pinning **state lifetime to resource lifetime,
 per class.** This generalizes the prodbox **State-Lifetime Rule**
-(`prodbox/documents/engineering/lifecycle_reconciliation_doctrine.md [§2](#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio)`) from "AWS stacks" to "anything an
+(`prodbox/documents/engineering/lifecycle_reconciliation_doctrine.md §2`) from "AWS stacks" to "anything an
 amoebius forest can Pulumi-deploy."
 
 | Lifetime class | Examples | State (checkpoint) lifetime | Credential class ([§6](#6-the-ebs-create-vs-delete-credential-model)) |

@@ -146,7 +146,7 @@ independent of the decoder's own output (§M clause 3).
   unique whole-deployment render-source set. Private service projections contribute sources but never cross
   the public boundary; a raw decoded or merely bound value can never reach Phase 9's `renderAll`.
 - [`illegal_state_catalog.md §2`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)
-  and [`§6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)
+  and [`illegal_state_techniques.md §6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)
   — the load-bearing limit and the three layers of foreclosure: layers 1–2 (type-/decode-foreclosed) are
   Register-1 and honestly discharged here; layer 3 (runtime-checked) stays deferred. Honors §2 verbatim: *a
   type-check proves the spec composes, not that the cluster enforces it.*
@@ -202,9 +202,12 @@ ownership indices) — target paths, not yet built.
 proven by **committed minimal-pair compile-fail fixtures** (not absence-by-omission). For each of §4.2 (phantom
 tenant), §4.3 (GADT transition index), and §4.4 (ownership index) the phase commits **two source fixtures
 differing only in the one index** (tenant tag / state index / owner): the **legal twin must compile** *and*
-must be the exact constructor a **named Phase-4 positive fixture demonstrably decodes through** (the fixture
+must be the exact constructor a **named Phase-4 positive fixture is committed to decode through** (the fixture
 header cites which `legal_*.dhall`), while the **illegal twin must fail `ghc -fno-code` with a type error whose
-message names that same constructor/index**. Because the legal twin is a required-to-compile, actually-decoded
+message names that same constructor/index**. Because `decodeCluster` lands in Sprint 5.3, the compile-time
+minimal pair — legal twin compiles, illegal twin fails at its committed locus — is what Sprint 5.2 validates
+standalone; the actual decode-through round-trip to the cited positive is confirmed at the Sprint 5.4 gate once
+`decodeCluster` exists. Because the legal twin is a required-to-compile, actually-decoded
 constructor, an impoverished vocabulary that spells cross-tenant references freely fails its legal twin (or
 fails to decode the cited positive), so the pair cannot be satisfied by a strawman `mkCrossTenantRef` that was
 simply never defined. The compile-fail message locus (expected type-error text) is committed in Phase 0
@@ -430,11 +433,14 @@ structural owner. These are the ADTs that make an illegal combination un-spellab
   type error naming the same constructor/index), plus each pair's committed expected type-error locus.
 
 ### Validation
-1. For each of §4.2/§4.3/§4.4, the committed minimal pair holds: the legal twin compiles **and** is the
-   constructor a named Phase-4 positive fixture decodes through, and the illegal twin fails `ghc -fno-code`
-   with a type error naming that same constructor/index (matching the committed locus). The check is red if the
-   legal twin fails to compile or to decode its cited positive (foreclosing absence-by-omission), or if the
-   illegal twin's failure locus does not match. The legal vocabulary compiles.
+1. For each of §4.2/§4.3/§4.4, the committed minimal pair holds at compile time: the legal twin compiles
+   **and** is the constructor a named Phase-4 positive fixture is committed to decode through, and the illegal
+   twin fails `ghc -fno-code` with a type error naming that same constructor/index (matching the committed
+   locus). The compile-time pair is Sprint 5.2's standalone check; the decode-through round-trip to the cited
+   positive is confirmed at the Sprint 5.4 gate once `decodeCluster` exists (Sprint 5.3). The check is red if
+   the legal twin fails to compile, if its cited positive later fails to decode through it at the gate
+   (foreclosing absence-by-omission), or if the illegal twin's failure locus does not match. The legal
+   vocabulary compiles.
 2. Every named positive fixture decodes with a complete normalized resource/capacity tree, and a structural
    traversal finds no execution unit without id/revision and one kind/cardinality/policy/resource-compatible
    private body; no zero-progress Deployment, invalid/both-positive DaemonSet rolling pair, feature-gated or

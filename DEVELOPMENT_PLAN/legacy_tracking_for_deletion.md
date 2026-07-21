@@ -24,7 +24,7 @@ the superseding mechanism is the live one; until then every "removed" verb below
 tested amoebius result.
 
 Where a row leans on the sibling prodbox/infernix/jitML system as justification, that is **evidence from a
-sibling system, not proof in amoebius** (the honesty rule, [development_plan_standards.md](development_plan_standards.md) §K).
+sibling system, not proof in amoebius** (the honesty rule, [development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 ---
 
@@ -66,8 +66,8 @@ phase's gate actually passes on its substrate and the superseding mechanism is t
 - **Charts vs software (the Helm rows).** Dropping the five operator charts does **not** drop the five
   operators. Harbor is the one operator/service that is genuinely *replaced* (by `distribution`); MetalLB,
   Envoy Gateway, cert-manager, and Percona survive as **baked binaries with generated CRs**. Only the Helm
-  *delivery mechanism* — the charts and the `helm` dependency — is removed. The distinction is the whole
-  point of [`manifest_generation_doctrine.md` §4 — no third-party charts ≠ no third-party software](../documents/engineering/manifest_generation_doctrine.md#4-no-third-party-charts--no-third-party-software-operators-are-generated).
+  *delivery mechanism* — the charts and the `helm` dependency — is removed. The distinction — charts and the
+  `helm` dependency are removed, the operators are not — is the subject of [`manifest_generation_doctrine.md` §4 — no third-party charts ≠ no third-party software](../documents/engineering/manifest_generation_doctrine.md#4-no-third-party-charts--no-third-party-software-operators-are-generated).
 
 - **Why two phases on the transport rows.** The native `amoebius-pulsar` client lands in
   [Phase 24](phase_24_pulsar_client.md), but the sibling transports are only *deleted* when
@@ -85,10 +85,10 @@ phase's gate actually passes on its substrate and the superseding mechanism is t
 - **Sibling evidence, not amoebius proof.** Every justification above that points at prodbox / infernix /
   jitML behaviour is evidence from a sibling system. None of it is an amoebius result, because no amoebius
   phase has been built. Read each "Why slated" as design intent (the honesty rule,
-  [development_plan_standards.md](development_plan_standards.md) §K).
+  [development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 - **No fractional phases, no forward dependencies.** Owning-phase assignments above respect the one-phase
-  model and strict numeric order ([development_plan_standards.md](development_plan_standards.md) §E): every
+  model and strict numeric order ([development_plan_standards.md §E](development_plan_standards.md#e-one-canonical-phase-model)): every
   removal is pinned to an existing, contiguously-numbered phase, never to a fractional or later-than-its-cause
   id.
 
@@ -96,7 +96,7 @@ phase's gate actually passes on its substrate and the superseding mechanism is t
 
 ## Related Documents
 - [README.md](README.md) — the live tracker: phase order, status, and gates that drive every owning-phase column
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook (status vocabulary §C, one-phase model §E, doctrine-citation §H, honesty §K) this ledger obeys
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook (status vocabulary [§C](development_plan_standards.md#c-status-vocabulary), one-phase model [§E](development_plan_standards.md#e-one-canonical-phase-model), doctrine-citation [§H](development_plan_standards.md#h-the-doctrine-citation-rule-cite-by-name), honesty [§K](development_plan_standards.md#k-honesty-proven--tested--assumed)) this ledger obeys
 - [system_components.md](system_components.md) — the target amoebius modules that absorb or replace each slated artifact
 - [substrates.md](substrates.md) — the substrate registry the substrate-equivalence row ranges over
 - [phase_19_platform_backbone.md](phase_19_platform_backbone.md) — owns the no-Helm platform render, the baked operators, `distribution`, multi-arch, and the substrate-equivalence check

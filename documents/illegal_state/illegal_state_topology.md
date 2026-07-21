@@ -131,9 +131,9 @@ authority beside the control-plane singleton" shape the doctrine rejects; when/i
 **new provider-native arm the `Managed` arm surfaces** (provisioned over the cloud API), never amoebius-built
 machinery. A stretched **host worker** on EKS needs no such arm — it is control-plane-free
 ([§3.35](./illegal_state_multicluster.md#335-a-stretched-host-worker-with-no-declared-networking-capability)). **Owner:**
-[`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) §2/§4.1 (the hostless `Managed` arm), on the
+[`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) [§2](../engineering/cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)/[§4.1](../engineering/cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation) (the hostless `Managed` arm), on the
 surface-provider-vs-build discipline owned by [`cluster_lifecycle_doctrine.md`](../engineering/cluster_lifecycle_doctrine.md)
-§1 + [`pulumi_iac_doctrine.md`](../engineering/pulumi_iac_doctrine.md). **Technique:**
+[§1](../engineering/cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape) + [`pulumi_iac_doctrine.md`](../engineering/pulumi_iac_doctrine.md). **Technique:**
 [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed provider-arm union —
 the hybrid arm is absent, so the state has no inhabitant). **Layer:** type-foreclosed uninhabitable until a provider-native
 arm is surfaced; runtime-checked residue — that the provider's hybrid mechanism actually joins the node.
@@ -148,8 +148,8 @@ split-`Site` quorum has **no inhabitant** — a **type-foreclosed phantom-`Site`
 odd-quorum count union of [§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain) (that
 entry forecloses even/zero *cardinalities*; this forecloses a *split locality* at a legal cardinality).
 Control-plane machinery (the co-located quorum, `mkStretchedAgent`) is full-node-only; host workers carry no
-quorum. **Owner:** [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) §4.1 (the `Site`-indexed
-`Rke2Servers`); the `Site` axis owned by [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) §8. **Technique:**
+quorum. **Owner:** [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) [§4.1](../engineering/cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation) (the `Site`-indexed
+`Rke2Servers`); the `Site` axis owned by [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) [§8](../engineering/substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints). **Technique:**
 [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a phantom `Site` index the server arms
 must unify on) + [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) (the
 servers/agents collection shape). **Layer:** type-foreclosed uninhabitable; runtime-checked residue — that the co-located members
@@ -173,8 +173,8 @@ actually keep a low-latency majority.
   union, the hostless `Managed` arm, the node fold, and the `Site`-indexed server set.
 - [`substrate_doctrine.md`](../engineering/substrate_doctrine.md) — the node inventory and detected substrates
   ([§3.13](#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)), the
-  Linux-VM synthesis (§4, [§3.14](#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm)),
-  and the `Site` axis (§8, [§3.39](#339-a-split-site-etcd-quorum)).
+  Linux-VM synthesis ([§4](../engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux), [§3.14](#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm)),
+  and the `Site` axis ([§8](../engineering/substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints), [§3.39](#339-a-split-site-etcd-quorum)).
 - [`cluster_lifecycle_doctrine.md`](../engineering/cluster_lifecycle_doctrine.md) and
   [`pulumi_iac_doctrine.md`](../engineering/pulumi_iac_doctrine.md) — the surface-provider-vs-build discipline behind the
   hostless `Managed` arm ([§3.37](#337-a-full-stretched-node-on-a-managed-eks-control-plane-without-a-provider-native-hybrid-arm)).

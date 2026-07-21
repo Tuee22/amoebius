@@ -68,7 +68,9 @@ guard, each of the three Phase-0-committed negative fixtures (`illegal_cross_ten
 `illegal_cross_tenant_user`, `illegal_handauthored_grant`) **fails at Gate 1 / Gate 2 before any binary acts**
 **carrying its committed expected reason tag** (`CrossTenantRef{enclosing=t1, foreign=t2}`, `TwoTenantUser`,
 `HandAuthoredGrant`) matched against the Phase-0 hand-authored expected-tag table, **each paired with its
-byte-identical positive twin** (differing only in the foreign id corrected to `t1`) that must decode and deploy;
+minimal positive twin** (differing only in its foreclosed dimension — the foreign id corrected to `t1` for
+`illegal_cross_tenant_ref` and `illegal_cross_tenant_user`, the hand-authored grant replaced by its derived
+`deriveTenantPolicies` form for `illegal_handauthored_grant`) that must decode and deploy;
 and the committed seeded mutant of the tenant-unification fold (guard-negation: the `RoleBinding`
 resource-tenant vs enclosing-tenant equality inverted) is re-run and **must turn the gate red** — a
 **Register-3** live-infrastructure check (the author-time foreclosure itself was already proven in-process in
@@ -79,7 +81,7 @@ does not claim a Pulsar application-client round trip: the native `amoebius-puls
 land until Phase 24, whose gate owns the authenticated tenant-credential produce/consume assertion. This
 ordering is deliberate; provider-policy convergence may precede the client that exercises the resulting grant.
 
-### Resource-provisioning contract
+## Resource provision — tenant projection, policy transaction, and MinIO metadata seal
 
 This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
 [`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
@@ -253,7 +255,7 @@ external earlier-phase prereq).
 cluster in that namespace; the `replicas=1` singleton reconciles all three to ready and a re-run is a no-op; no
 bare `postgres` Pod and no cross-namespace bucket is produced.
 **Docs to update**: `documents/engineering/tenancy_doctrine.md`, `documents/engineering/service_capability_doctrine.md`,
-`documents/engineering/app_vs_deployment_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+`DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
 Adopt [`service_capability_doctrine.md §4`](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding),
@@ -327,9 +329,10 @@ illegal-state corpus (the phantom-tag `Ref t` mechanism + the cross-tenant-ref n
 external earlier-phase prereq).
 **Independent Validation**: decoding a `TenantSpec t` fixture yields only tenant `t`'s subtree; a well-typed
 fixture whose `RoleBinding` names a `Ref t' (t' ≠ t)` resource returns a structured decode `Left` (Gate 2),
-or fails `dhall type` where the tag is a static phantom (Gate 1) — the same negative fixture proven in-process
-in the pre-cluster band, here re-run against the live decode path; a user belonging to two tenants cannot be
-typed.
+or fails `dhall type` where the tag is a static phantom (Gate 1) — exercising the cross-tenant-ref foreclosure
+whose mechanism and corpus were proven in-process in the Phase-6 pre-cluster band, here re-run against the live
+decode path (the Phase-23 gate `.dhall` fixture and its `expected_tags.dhall` oracle are themselves
+Phase-0-pinned, §M.1); a user belonging to two tenants cannot be typed.
 **Docs to update**: `documents/engineering/tenancy_doctrine.md`, `documents/illegal_state/illegal_state_catalog.md`
 (per-entry layer reconciliation for §4.2), `DEVELOPMENT_PLAN/system_components.md`.
 
@@ -524,8 +527,9 @@ fails before any binary acts.
   bucket, topic, and secret, catalog §4.2), `illegal_cross_tenant_user` (a `UserSpec` in two tenants), and
   `illegal_handauthored_grant` (a hand-authored provider policy, catalog §3.45) — each asserted to fail at
   Gate 1 or Gate 2, annotated with its foreclosure layer, and each **carrying its committed expected reason
-  tag**. Each negative ships its **minimal byte-identical positive twin** (foreign id corrected to `t1`) that
-  must decode and deploy.
+  tag**. Each negative ships its **minimal positive twin**, differing only in its foreclosed dimension (the
+  foreign id corrected to `t1` for the two cross-tenant fixtures; the hand-authored grant replaced by its
+  derived `deriveTenantPolicies` form for `illegal_handauthored_grant`), that must decode and deploy.
 - The **Phase-0-committed independent oracle** `test/fixtures/phase23/expected_tags.dhall` — a hand-authored
   table mapping each negative fixture to its expected reason tag (`CrossTenantRef{enclosing, foreign}`,
   `TwoTenantUser`, `HandAuthoredGrant`), authored independently of the `project`/unification fold, never
@@ -555,7 +559,9 @@ fails before any binary acts.
    tag** (`CrossTenantRef{enclosing=t1, foreign=t2}` for `illegal_cross_tenant_ref`, `TwoTenantUser` for
    `illegal_cross_tenant_user`, `HandAuthoredGrant` for `illegal_handauthored_grant`) matched against the
    Phase-0 hand-authored expected-tag table `test/fixtures/phase23/expected_tags.dhall`, **each paired with its
-   byte-identical positive twin** (foreign id corrected to `t1`) that decodes and deploys — a rejection carrying
+   minimal positive twin** differing only in its foreclosed dimension (the foreign id corrected to `t1` for the
+   two cross-tenant fixtures; the hand-authored grant replaced by its derived form for
+   `illegal_handauthored_grant`) that decodes and deploys — a rejection carrying
    the wrong tag, or a positive twin that fails, fails the gate. The committed guard-negation mutant of the
    tenant-unification fold is re-run and **must turn the gate red**. The Register-3 ledger is present and
    honestly classifies each foreclosure and each deferred residue (no runtime-checked claim reported as proven).

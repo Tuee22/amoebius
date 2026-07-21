@@ -184,6 +184,11 @@ here.
 **Defect.** `FaultInjection` elides timing. Doctrine examples describe periodic injection, and the type
 carries no field able to express it.
 
+**Why an unbounded or wall-clock schedule fails.** The tempting default is to express timing against real
+elapsed time, since that is how the doctrine examples read informally. A wall-clock schedule cannot be
+replayed: the same run against the same source produces a different fault ordering, so it yields no
+Register-2.5 evidence and no golden ledger match.
+
 **The rule.** Add a bounded schedule, constrained by the determinism rule that forbids asserting on
 wall-clock: logical or simulated time under Register 2.5, bounded relative offsets under Register 3. Every
 bound is finite and declared, per the bound-everything rule.
@@ -232,12 +237,11 @@ obligation at the asynchronous cross-cluster gateway migration. Each `FaultKind`
 its drill stresses. The drill evidence is held by a write journal maintained outside the system under test.
 Numeric budgets are hash-pinned so a budget edited after measurement fails its check. Liveness properties
 carry a fairness-sensitivity check that must turn red when fairness is removed, and model checks carry
-antecedent-reachability and no-dead-action conditions so a green result cannot be vacuous. That combination
-exceeds what most deployed systems attempt.
+antecedent-reachability and no-dead-action conditions so a green result cannot be vacuous.
 
 Two changes are recommended, both already stated elsewhere in this document: the typed expectation surface
 of [§4.1](#41-a-typed-expectation-surface-on-the-test-topology), and resolving the `independent` conflict
-recorded in [§5](#6-defects-found-in-the-current-corpus).
+recorded in [§6.2](#62-independent-was-defined-two-incompatible-ways--resolved).
 
 Broader chaos coverage is **not** recommended. Per
 [chaos_failover_doctrine.md §6](./chaos_failover_doctrine.md#6-the-concentration-principle--where-the-obligation-lives),
@@ -265,8 +269,9 @@ requires the Runtime/chaos layer ***tested***, and the strength table at
 classifies live injection as **tested (the faults chosen), never proven**. Read literally, prod required a
 strength no applicable move can emit, so no `Release` could ever advance to `Prod`.
 
-**Resolved:** the testing doctrine is authoritative. `release_lifecycle_doctrine.md` §4 now requires
-*tested* and states why that is the layer's highest achievable strength rather than a concession, so the
+**Resolved:** the testing doctrine is authoritative.
+[release_lifecycle_doctrine.md §4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable)
+now requires *tested* and states why that is the layer's highest achievable strength rather than a concession, so the
 wording cannot drift back. `DEVELOPMENT_PLAN/phase_26_release_lifecycle.md` propagated the same claim in
 four places; a first pass corrected only one (`:194`), and an audit found the other three surviving in the
 Sprint 26.3 validation, deliverable, and the committed `evidence_strength.txt` oracle it produces. All four

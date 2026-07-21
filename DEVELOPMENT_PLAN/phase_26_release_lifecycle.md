@@ -40,8 +40,9 @@ is a compare-and-swap of that environment's pointer from the old `releaseHash` t
 app bytes are byte-identical across environments. Third, the **`PromotionGate`**: a typed precondition whose
 `advance` constructor demands an `EvidenceWitness` read from the typed per-run proven/tested/assumed evidence
 ledger, so an
-under-verified `Release` has **no `advance` value to hand the CAS** — promote-unverified→prod is
-type-foreclosed unrepresentable, not a runtime check that fires. Fourth, the readiness-gated
+under-verified `Release` has **no `advance` value to hand the CAS** — the illegal state, an advance
+without an evidence witness, is unrepresentable (no `advance` value), while the missing-witness refusal
+surfaces as a reason-tagged `Left` at runtime. Fourth, the readiness-gated
 **`RolloutPlan`/`RolloutPhase`** apply on the Phase-22 in-cluster SSA reconciler: an ordered plan whose each
 phase is observed done from live object state (never a `threadDelay`), with a **DB schema-migration
 `RolloutPhase`** obeying `create-new → verified-migrate → retire-old`.
@@ -81,7 +82,7 @@ read from an **external observer at the OS/API boundary** (the API-server audit 
 field-manager apply sequence, never the reconciler's self-report), each phase gated on live object status, and
 the plan **includes a DB schema-migration `RolloutPhase`** obeying `create-new → verified-migrate → retire-old`
 against the standing Phase-23 Postgres (the retire phase never denotes byte destruction). The whole topology
-spins up, runs, tears down **leak-free**, and **re-runs idempotently under a distinct `experiment-hash`
+spins up, runs, tears down **leak-free**, and **re-runs idempotently under a distinct per-run store
 namespace** (a cache-bypassing independent recompute of the `releaseHash`, not a store-hit), emitting a
 committed proven/tested/assumed ledger that names its register (3) and substrate (linux-cpu) and marks the
 runtime layer **tested, never proven** and the cross-cluster/canary layers **UNVERIFIED**. The gate is checked
@@ -91,9 +92,9 @@ be refused (`release_unverified` → `Prod`) is **admitted** — and on the addi
 The representative set is exactly the `release_lifecycle.dhall` topology's **one trivial app with three
 environment pointers (`Dev`/`Staging`/`Prod`), three committed `Release` entries (`release_verified`,
 `release_unverified`, `release_protocol_unverified`), and one `RolloutPlan` of three ordered phases (base-apply → DB schema-migration →
-finalize)** over the standing single-node platform stack plus one Postgres.
+finalize, where the `finalize` phase enacts retire-old)** over the standing single-node platform stack plus one Postgres.
 
-### Resource-provisioning contract
+## Resource provision — release execution, the content/pointer store, and schema migration
 
 This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
 [`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
@@ -168,9 +169,10 @@ the section it adopts; individual sprints cite the same sections where they buil
 - [`inforcespec_migration_doctrine.md §3`](../documents/engineering/inforcespec_migration_doctrine.md#3-the-dsl-exposes-no-destructive-verb--the-closed-storagemutation-union)
   — **the no-destruction InForceSpec-migration invariants.** A RolloutPlan that evolves the live spec is checked
   at `dhall update`: the StorageMutation closed union, the decode-time orphan / retention-shrink rejection, and
-  the owner-immutability diff fold foreclose a promotion that would strand or silently destroy retained data;
-  the phase corpus includes an orphaned-retained-coordinate and an owner-retag negative, each Gate-2
-  decode-rejected.
+  the owner-immutability diff fold foreclose a promotion that would strand or silently destroy retained data.
+  This phase realizes that no-destruction guarantee at the store boundary as the schema-migration
+  `create-new → verified-migrate → retire-old` discipline, where no `RolloutPhase` — the retire step included —
+  denotes durable-byte destruction (Sprint 26.4).
 - [`release_lifecycle_doctrine.md §1`](../documents/engineering/release_lifecycle_doctrine.md#1-no-external-cicd-control-plane--delivery-is-typed-composition-on-primitives-amoebius-owns)
   — *no external CI/CD control plane — delivery is typed composition*: this phase installs no second control
   plane; the whole lifecycle is a handful of typed values composed over the Phase-22 reconciler and the
@@ -187,6 +189,11 @@ the section it adopts; individual sprints cite the same sections where they buil
   mutable pointer into the immutable ledger; promotion is an ETag-CAS of that pointer
   ([`content_addressing_doctrine.md §2.3`](../documents/engineering/content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds),
   the `environment` pointer kind), then a converge — app bytes byte-identical across environments.
+- [`app_vs_deployment_doctrine.md §3`](../documents/engineering/app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)
+  — *the deployment-rules surface — how the same app runs*: environment differences ride the deployment-rules
+  surface, so the same immutable `Release`'s app bytes are byte-identical across `Dev`/`Staging`/`Prod` — no
+  `if prod then …` in an app spec and no rebuild between environments (realized by Sprint 26.2's app-bytes
+  invariance).
 - [`release_lifecycle_doctrine.md §4`](../documents/engineering/release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable)
   — *`PromotionGate`: promote-unverified→prod is unrepresentable*: `advance` demands an `EvidenceWitness` read
   from the test-topology evidence ledger
@@ -454,12 +461,13 @@ healthy — never a `threadDelay`), and only then does the next phase apply. The
 from an external observer at the OS/API boundary** (the API-server audit log / the run's ApplySet apply
 sequence), never the reconciler's self-emitted trace. The DB schema-migration `RolloutPhase` obeys
 `create-new → verified-migrate → retire-old`: the migrate phase provisions the new schema, migrates and
-**verifies** the copy, and only a later phase retires the old — the retire step inheriting the
+**verifies** the copy, and only the later `finalize` phase retires the old — the retire step inheriting the
 durable-data-deletion prohibition so **no `.dhall` value denotes "discard these bytes"**.
 **Docs to update**: `documents/engineering/release_lifecycle_doctrine.md` (§5),
 `documents/engineering/manifest_generation_doctrine.md` (§5 — the SSA reconciler the plan enacts on),
 `documents/engineering/readiness_ordering_doctrine.md` (§3 — readiness a condition, never a duration),
 `documents/engineering/storage_lifecycle_doctrine.md` (§8 — create-new → verified-migrate → retire-old),
+`documents/engineering/inforcespec_migration_doctrine.md` (§3 — the no-destruction invariants the schema-migration phase inherits),
 `DEVELOPMENT_PLAN/README.md`.
 
 ### Objective
@@ -476,7 +484,7 @@ values end-to-end.
   it introduces **no new reconciler**.
 - A **DB schema-migration `RolloutPhase`** against the standing Phase-23 Postgres obeying
   `create-new → verified-migrate → retire-old`: provision the new schema/columns, migrate and **verify** the
-  copy, then retire the old in a later phase — the retire step inheriting the durable-data-deletion
+  copy, then retire the old in the later `finalize` phase — the retire step inheriting the durable-data-deletion
   prohibition. This is the delivery home of the promoted schema-migration candidate.
 - The corresponding `SchemaMigrationDemand` and private `ProvisionedSchemaMigration`: exact old/new schemas
   and indexes, row/data high-water, copy/verify WAL, temporary workspace model, full executor-Job
@@ -489,7 +497,7 @@ values end-to-end.
 - The gate `release_lifecycle.dhall` test topology — the named **representative set: one trivial app with three
   environment pointers (`Dev`/`Staging`/`Prod`), three committed `Release` entries (`release_verified`,
   `release_unverified`, `release_protocol_unverified`), and one `RolloutPlan` of three ordered phases (base-apply → DB schema-migration →
-  finalize)** over the standing platform stack plus one Postgres — and its `ReleaseLifecycleSpec`: write the
+  finalize, where the `finalize` phase enacts retire-old)** over the standing platform stack plus one Postgres — and its `ReleaseLifecycleSpec`: write the
   ledger, refuse the under-verified promotion, advance the satisfied one, roll out in order, and always tear
   down, emitting a per-run ledger artifact.
 - **Phase-0-pinned oracles and committed mutants (authored before the runtime exists):** the committed
@@ -498,7 +506,7 @@ values end-to-end.
   committed post-migration verify oracle `test/golden/migrated_rows.txt` (the expected verified row set of the
   schema migration, independent of the migrator's own count); and committed seeded mutants the gate MUST turn
   **red** — `mutant/gate-admits-unverified` (Sprint 26.3; the phase-level mandated mutant — the promotion that
-  SHOULD be refused but is admitted), `mutant/rollout-reorders-retire` (operator: effect reorder — a
+  SHOULD be refused but is admitted), `mutant/rollout-reorders-retire` (operator: effect swap — a
   `RolloutPlan` that retires-old **before** verified-migrate, violating `create-new → verified-migrate →
   retire-old` and risking byte loss), and `mutant/phase-gate-selfreport` (operator: effect swap — a
   `RolloutPhase` that gates the next phase on a self-emitted "done" log rather than observed live object
@@ -513,7 +521,7 @@ values end-to-end.
    `RolloutPlan` applies its phases in the order of the committed `rollout_order.txt`, **read from the
    API-server audit observer** (not the reconciler's self-report), each phase gated on observed live status.
 2. Assert the **DB schema-migration `RolloutPhase`** provisions the new schema, migrates and **verifies** the
-   copy against the committed `migrated_rows.txt` oracle, and only a later phase retires the old — asserting no
+   copy against the committed `migrated_rows.txt` oracle, and only the later `finalize` phase retires the old — asserting no
    phase, including retire, denotes durable-byte destruction. Assert `mutant/rollout-reorders-retire` turns
    this validation **red** (retire-before-verified-migrate is a gate failure).
    In the same run, make each schema/index/row, WAL, temporary workspace, executor CPU/memory/ephemeral/image/
@@ -524,10 +532,10 @@ values end-to-end.
    promotion advances the pointer that should not move), and `mutant/phase-gate-selfreport` turns it **red**
    (the external-observer apply-order trace catches a phase gated on a self-report rather than live status).
 4. Assert **leak-free teardown** — the postflight sweep inventories every applied k8s object (by the run's
-   ApplySet/field manager), every pointer/ledger entry under the run's `experiment-hash` prefix, and the
+   ApplySet/field manager), every pointer/ledger entry under the run's per-run store namespace prefix, and the
    Postgres schemas the migration phase created, emitting the full inventory plus the named retained set into
    the per-run ledger; any non-empty remainder outside the retained set fails the gate — and **re-runs
-   idempotently under a distinct `experiment-hash` namespace** (a cache-bypassing independent recompute of the
+   idempotently under a distinct per-run store namespace** (a cache-bypassing independent recompute of the
    `releaseHash`, never a store-hit), the compute path asserted to have executed.
 5. Assert the run emits a committed **proven/tested/assumed ledger** naming its register (3) and substrate
    (linux-cpu), marking the **runtime layer tested — never proven** (§K, a live-band Register-3 gate), the
@@ -570,6 +578,9 @@ The whole sprint (📋 Planned).
   supplies no Runtime witness for `Prod`.
 - `documents/engineering/storage_lifecycle_doctrine.md` — record the §8 `create-new → verified-migrate →
   retire-old` DB schema-migration `RolloutPhase` and the durable-data-deletion prohibition it inherits.
+- `documents/engineering/inforcespec_migration_doctrine.md` — record that §3's no-destruction
+  InForceSpec-migration invariants are inherited by the DB schema-migration `RolloutPhase`, whose retire step
+  denotes no durable-byte destruction.
 - `documents/illegal_state/illegal_state_lifecycle.md` — record that §3.26 (an unverified environment
   promotion) is realized as the type-foreclosed `PromotionGate` with live-wiring evidence from this gate.
 
@@ -603,6 +614,8 @@ The whole sprint (📋 Planned).
   the `ReadinessGate` on a `RolloutPhase` is a condition, never a duration
 - [Storage Lifecycle Doctrine](../documents/engineering/storage_lifecycle_doctrine.md) — [§8](../documents/engineering/storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction)
   `create-new → verified-migrate → retire-old` for the schema-migration `RolloutPhase`
+- [InForceSpec Migration Doctrine](../documents/engineering/inforcespec_migration_doctrine.md) — [§3](../documents/engineering/inforcespec_migration_doctrine.md#3-the-dsl-exposes-no-destructive-verb--the-closed-storagemutation-union)
+  the no-destruction InForceSpec-migration invariants the DB schema-migration `RolloutPhase` inherits
 - [App vs Deployment Doctrine](../documents/engineering/app_vs_deployment_doctrine.md) — [§3](../documents/engineering/app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)
   env differences are deployment rules; app bytes byte-identical across environments
 - [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — [§3.26](../documents/illegal_state/illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence)

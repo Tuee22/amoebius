@@ -94,9 +94,9 @@ success`/`If-None-Match` response on a second PUT (§M.6):
    substrate fingerprint — yields a **different** `experimentHash`, occupies a different store namespace, and is
    allowed to differ in output there. This leg is asserted **jointly** with legs 2–3 so that hash-divergence
    alone (a property of SHA-256, not of amoebius) cannot pass it.
-5. **Committed mutant goes red (§M.2):** the committed seeded mutant `Determinism.hs::const-output` — the pure
-   stage rewritten to return a constant byte string ignoring seed and input (operator: dropped-effect) — is
-   committed under `test/mutants/` and MUST turn legs 2 and 3 red when re-run; the gate names it and the CI
+5. **Committed mutant goes red (§M.2):** the committed seeded mutant `test/mutants/Determinism_const_output.hs` —
+   the pure stage rewritten to return a constant byte string ignoring seed and input (operator: dropped-effect) —
+   is committed under `test/mutants/` and MUST turn legs 2 and 3 red when re-run; the gate names it and the CI
    record shows it red.
 6. **Ledger honesty (§K):** the run emits a proven/tested/assumed ledger recording that same-substrate
    reproduction was *tested on linux-cpu*, identity/seed totality was *proven-in-types*, and cross-substrate
@@ -228,6 +228,12 @@ names the section it implements; individual sprints cite the same sections where
 - [`substrate_doctrine.md §3`](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) — *the no-env / no-`PATH`,
   full-path-probe substrate contract*: the linux-cpu substrate fingerprint consumed by `experimentHash` is
   gathered by absolute-path subprocess probes only, never from `PATH` or environment variables.
+- [`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
+  and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)
+  — *the canonical provision matrix and the total carve/place fold*: the live recompute runs instantiate the
+  resource matrix and the sealed whole-deployment provision boundary, and the Phase-0 resource witness and
+  mutants (`test/golden/phase_31_resource_shape.json`, `test/mutants/phase_31/*`) validate that provisioning as
+  part of the gate.
 - [`illegal_state_catalog.md`](../documents/illegal_state/illegal_state_catalog.md) §4.5 — *the totality
   technique*: there is no constructor for a store key from a free string and no inhabitant of "a seed read from
   ambient entropy"; these are states that cannot be written down, not states fixed at runtime.
@@ -395,7 +401,7 @@ siblings (different output bytes); (c) a divergent `experimentHash` and distinct
 `..._flipped_metric.dhall` sibling and for a substrate-fingerprint substitution; and emits a
 proven/tested/assumed ledger artifact. The committed mutant `test/mutants/Determinism_const_output.hs` MUST
 turn legs (b) red (§M.2).
-**Docs to update**: `documents/engineering/content_addressing_doctrine.md`, `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`.
+**Docs to update**: `documents/engineering/content_addressing_doctrine.md`, `documents/engineering/resource_capacity_doctrine.md`, `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`.
 
 ### Objective
 Adopt [`content_addressing_doctrine.md §4 — determinism by construction`](../documents/engineering/content_addressing_doctrine.md#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed)
@@ -453,6 +459,10 @@ The whole sprint (📋 Planned).
   (`ContentAddress`/`ExperimentHash`/`Rng`/`Determinism`) to the doctrine's cross-reference set.
 - `documents/engineering/substrate_doctrine.md` — record that the linux-cpu substrate fingerprint consumed by
   `experimentHash` is first exercised here, gathered by full-path probes with no env/`PATH` read.
+- `documents/engineering/resource_capacity_doctrine.md` — the canonical provision matrix and sealed
+  whole-deployment provision boundary are instantiated by the live recompute runs and gate-validated by the
+  Phase-0 resource witness (`test/golden/phase_31_resource_shape.json`) and resource mutants
+  (`test/mutants/phase_31/*`); record that linux-cpu datapoint here in the plan, never as doctrine status.
 
 **Cross-references to add:**
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-31 status when the gate passes; link this document.

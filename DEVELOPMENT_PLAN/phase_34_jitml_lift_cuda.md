@@ -160,12 +160,16 @@ can pass:
   one-byte-short overlap appears to fit — each source/epoch mutant must turn the independent provision oracle
   red. A
   gate run in which any committed mutant stays green is itself a failure.
-- **Reference oracles are independent (§M.1/§M.3).** Expected manifest SHAs, expected step counts, and the
+- **Reference oracles are independent (§M.1/§M.3).** Expected step counts, the
   expected CAS-conflict count, CUDA device inventory, expected wholesale extended-resource allocation, and
   zero-effects negative result, plus the exact owner/cache/coordinator/SPA/build/failover resource witness
   `test/fixtures/phase_34/resource_shape.json`, are hand-authored and committed in Phase 0 in
   `test/fixtures/phase_34/` **before** the implementation exists; none is regenerated from the SUT's own encoder
-  or fold.
+  or fold. The manifest SHA is not among these pre-implementation oracles: a SHA-256 over the canonical-CBOR
+  manifest of GPU-computed floating-point tensors is not knowable a priori, so same-substrate bit-equality
+  rests on the two-fresh-runs equality cross-check, the ≥ 200-step / ≥ 10M-param floors, and the OS-boundary
+  GPU-execution witness — a manifest SHA committed after the first green run is a downstream regression pin,
+  never a §M.1 pre-implementation oracle.
 
 ## Resource provision — the CUDA run, failover, and demo app
 
@@ -349,6 +353,10 @@ store effects.
   failover boundary and its formal gateway-migration model are owned by
   [`§16`](../documents/engineering/chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
   and scheduled for Phase 28, not here.
+- [`monitoring_doctrine.md` §5](../documents/engineering/monitoring_doctrine.md#5-extensible-surfaces-tensorboard)
+  — *extensible surfaces: TensorBoard*: the mandatory `TensorBoard` monitoring surface is carried on the jitML
+  `ExtensionSpec`, so an unmonitored jitML run is unrepresentable and `tfevents` land in the per-experiment
+  `tb/` prefix on the Phase-25 store.
 - [`testing_doctrine.md` §2](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing),
   [`§3`](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down),
   [`§4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
@@ -373,7 +381,7 @@ do not exist on it); two writers with equal logical checkpoint content emit iden
 MinIO required for the pure layer.
 **Docs to update**: `documents/engineering/lift_and_compose_doctrine.md`,
 `documents/engineering/app_vs_deployment_doctrine.md`, `documents/engineering/content_addressing_doctrine.md`,
-`DEVELOPMENT_PLAN/system_components.md`, this document.
+`documents/engineering/monitoring_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`, this document.
 
 ### Objective
 Adopt [`lift_and_compose_doctrine.md` §2](../documents/engineering/lift_and_compose_doctrine.md#2-what-lifts-the-reuse-map) and
@@ -536,8 +544,9 @@ deriving every RNG stream from `(masterSeed, streamIndex)` alone.
    ledger must show it independently executed every stage and
    issued its own blob/manifest PUTs, and each run's checkpoint manifest must **embed the executed step count and
    the dispatched engine identity** matching an OS-boundary GPU-execution witness (device-hold + CUDA
-   kernel-launch trace) before the SHA comparison is accepted. The comparison is against the Phase-0 committed
-   expected-SHA fixture and between the two fresh runs, never against a run-1 store adoption. This equivalence is
+   kernel-launch trace) before the SHA comparison is accepted. The comparison is between the two fresh runs,
+   never against a run-1 store adoption; any committed manifest-SHA fixture is a post-first-run regression pin,
+   not a Phase-0 pre-implementation oracle. This equivalence is
    reported as tested (sibling-evidence contract), not proven. The committed manifest-encoder mutant
    (tensor-sort dropped) and the CUDA-selector CPU-fallback mutant must turn this assertion red when re-run.
 
@@ -618,7 +627,8 @@ The whole sprint (📋 Planned).
 
 **Status**: Planned
 **Implementation**: `web/jitml/` (the lifted PureScript SPA shell), `src/Amoebius/JitML/Contracts.hs` (the
-purescript-bridge contract source), `test/dhall/phase_34_jitml_cuda.dhall`, `test/live/JitMLCudaGate.hs`
+purescript-bridge contract source), `test/live/JitMLCudaGate.hs` (the authored gate harness that emits the
+never-committed `test/dhall/phase_34_jitml_cuda.dhall` and drives it)
 (target paths; not yet built) — the demo app deployment and the end-to-end gate topology.
 **Blocked by**: Sprint 34.3 (bit-determinism), Sprint 34.4 (the delegated Feed trainer failover); Phase 33 gate
 (external prereq — the infernix demo web app pattern this reuses); Phase 13 (the representational SPA-composition
@@ -664,9 +674,10 @@ delegated trainer failover, and the application-logic-only demo — into the sin
   and bounded host trace-harness envelope from the phase resource contract. The failover transition must fit
   as a whole and the owner replacement must wait for observed device release before any new owner exists.
 - **Phase-0-committed gate oracles and mutants** (authored before any implementation, §M.1/§M.2/§M.3): the
-  workload corpus `test/dhall/phase_34_det_workloads.dhall`; the hand-authored expected-manifest-SHA,
+  workload corpus `test/dhall/phase_34_det_workloads.dhall`; the hand-authored
   expected-executed-step-count, expected-step-sequence, and expected-CAS-conflict-count fixtures under
-  `test/fixtures/phase_34/`; the pinned CUDA inventory, expected owner extended-resource allocation, and
+  `test/fixtures/phase_34/` (the manifest-SHA fixture is pinned only after the first green run, as a downstream
+  regression pin, not a pre-implementation oracle); the pinned CUDA inventory, expected owner extended-resource allocation, and
   CPU-only/count/VRAM zero-effects negatives, including raw-fits-but-net-allocatable-fails and
   raw/net-fit-but-current-free-fails; omitted-work-item, favorable-epoch, per-device-overlap-one-short,
   policy-domain-mismatch, and malformed-shard negatives; a mismatched link graph; the single-writer decision truth table
@@ -692,8 +703,9 @@ delegated trainer failover, and the application-logic-only demo — into the sin
    first-`N`-step prefix, `N = max(20, rl_steps/10)`, for off-policy). Each run's ledger
    must show independent execution of every stage with its own blob/manifest PUTs (no store-hit adoption, §M.6),
    and each manifest must embed the executed step count and dispatched engine identity matching an OS-boundary
-   GPU-execution witness (device-hold + CUDA kernel-launch trace, §M.5). SHAs are checked against the Phase-0
-   committed expected-SHA fixture; the ceiling's not-asserted rows are recorded. The committed manifest-encoder
+   GPU-execution witness (device-hold + CUDA kernel-launch trace, §M.5). SHAs are checked between the two fresh
+   runs (a committed manifest-SHA fixture, if present, is only a post-first-run regression pin, not a Phase-0
+   pre-implementation oracle); the ceiling's not-asserted rows are recorded. The committed manifest-encoder
    mutant, CUDA-CPU-fallback mutant, dropped-owner-allocation mutant, omitted-work-item mutant,
    favorable-epoch mutant, and dropped-co-resident-debit mutant must turn this red.
 2. **Gate (delegated failover).** Killing the active Feed trainer **between a blob PUT and its pointer CAS**
@@ -705,7 +717,7 @@ delegated trainer failover, and the application-logic-only demo — into the sin
    `latest` merely advancing. The committed `AdvancePredicate` monotonicity mutant must turn this red.
 3. **Gate (app-logic-only).** The demo web app deploys as an app that uses the extension, its contracts a
    regenerated uncommitted build artifact (asserted absent from the committed tree). The topology **tears down
-   leak-free**, defined concretely as a postflight sweep asserting empty across **all four registers**: (a) the
+   leak-free**, defined concretely as a postflight sweep asserting empty across **all four resource surfaces**: (a) the
    test namespace(s) deleted, (b) no residual MinIO objects under the experiment's `jitml-checkpoints/<hash>/`
    and `tb/` prefixes, (c) the `CacheBudget` cache holds no orphaned gate-only entries, and (d) no lingering GPU
    processes hold the linux-cuda device (accelerator-owner device-hold released) — a namespace-only check is

@@ -112,9 +112,9 @@ mutation authority.
   nothing. A second **effect-swap** mutant (the harness principal, not the singleton SA, issues the writes)
   MUST also go red via the attribution clause above.
 
-### Resource-provisioning contract
+## Resource provision — the singleton's sealed whole-deployment envelope
 
-This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary from
+This phase applies — as consumed background, not a newly adopted doctrine — the canonical resource matrix and sealed whole-deployment provision boundary from
 [`resource_capacity_doctrine.md §3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
 and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting);
 the singleton receives no bootstrap exception from those folds.
@@ -136,8 +136,8 @@ resource-indexed release. Rendered `replicas=1` is a projection of that witness,
 Pod during actual replacement overlap.
 
 The mandatory `ProvisionedMandatoryReconcilerLease` is a deployment-global render source, not optional
-singleton decoration. Its closed authority transition is `BootstrapHostHolder → SameLeaseUnheld →
-InClusterSingletonHolder PodUid`; there is no direct first-to-third continuation and no anonymous holder.
+singleton decoration. Its closed authority transition is `BootstrapHeld → ReleasedForHandoff →
+SingletonHeld PodUid`; there is no direct first-to-third continuation and no anonymous holder.
 Provisioning includes the Lease object bytes, exact bootstrap and singleton RBAC subjects, duration/deadline/
 retry policy, maximum bootstrap renewals, release update on the still-present object, singleton acquisition/renewals, lost-
 response retries, and replacement-Pod holder churn in `EtcdLogicalDemand`. Live preflight joins holder identity
@@ -238,9 +238,8 @@ refuse before the first apiserver or object-store mutation.
 daemon spine); `src/Amoebius/ControlPlane/Reconcile.hs` (the `discover → diff → enact → re-observe` loop
 wrapping the Phase-16 typed reconciler and its observed-Pod/runtime-storage normalization);
 `src/Amoebius/ControlPlane/AuthorityHandoff.hs` (bootstrap-holder drain/release/readback and singleton acquire);
-`src/Amoebius/Capacity/RuntimeStorage.hs` (shared component-role/layout and scope-indexed node-accounting fold);
-the singleton's own generated `Deployment replicas=1` manifest,
-rendered and applied by the Phase-16 reconciler (no Helm) — target paths, not yet built.
+`src/Amoebius/Capacity/RuntimeStorage.hs` (shared component-role/layout and scope-indexed node-accounting fold)
+— target paths, not yet built.
 **Blocked by**: Phase 16 gate (the typed renderer + SSA reconciler and observed bootstrap-host Lease holder —
 the singleton is itself a rendered, applied object); Phase 18 gate (root Vault — the singleton is the in-cluster principal that operates Vault);
 Phase 14 gate (the `kind` cluster + the host-daemon→singleton handoff the midwife begins).

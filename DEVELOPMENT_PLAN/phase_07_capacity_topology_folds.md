@@ -7,8 +7,8 @@
 
 > **Purpose**: Build the pure capacity-accounting fold (`fits`/`carve`/`place`) and the compute-engine/topology
 > relation as total, in-process Haskell, and prove under QuickCheck that they hold on the positive corpus and
-> reject every capacity/topology negative when consumed by the Phase-8 post-bind provision seal — before any
-> host or cluster exists.
+> reject every capacity/topology negative directly, on hand-authored demand/capacity fixtures — the same folds the
+> Phase-8 post-bind provision seal later invokes — before any host or cluster exists.
 
 ---
 
@@ -68,15 +68,17 @@ QuickCheck — every generated positive input yields a sound headroom/placement/
 folds are **provably total** (interpreted concretely in [Gate integrity](#gate-integrity): compile-time exhaustiveness under
 `-Werror=incomplete-patterns` on every `Amoebius.Capacity.*` / `Amoebius.Dsl.Topology` module **and** a
 sampled QuickCheck no-crash run — both, not either) — and the pure folds return their structured
-`ProvisionError`/`Left` on each capacity/topology negative fixture when invoked through the post-bind
-provision harness in the **representative set named in [Gate integrity](#gate-integrity)** (engine↔substrate
+`ProvisionError`/`Left` on each capacity/topology negative fixture when invoked **directly on the hand-authored
+demand/capacity fixture that isolates its insufficient axis** (no `bind`/`provision` call; the Phase-8 gate
+re-exercises these same folds through its post-bind provision seal) in the **representative set named in
+[Gate integrity](#gate-integrity)** (engine↔substrate
   mismatch, a reused rke2 host, host/VM/cluster overcommit, CPU-limit-policy, per-container/private,
   memory-writer, pod-ephemeral, finite-limit/physical-peak, node-local filesystem/image,
   OCI content/snapshot/model,
   filesystem-layout alias/support, provider node-root backing/quota, cache/backing, retention, taint, CUDA
   family/count/net-allocatable-VRAM, and Apple-Metal-profile failures, plus elastic largest-candidate, per-node-overhead,
-  per-class-maximum, and outer-quota failures), while the positive
-`legal_multisubstrate_cluster` and `legal_managed_eks` fixtures place feasibly. Every fixture, golden, and
+  per-class-maximum, and outer-quota failures), while the three positive fixtures named in
+[Gate integrity](#gate-integrity) place feasibly. Every fixture, golden, and
 expected `Left`-tag it checks against is **authored and committed in Phase 0 before the
 `Amoebius.Capacity.*` / `Amoebius.Dsl.Topology` implementation exists** (§M.1); the gate turns red under the
 **committed per-fold seeded-mutant battery named in [Gate integrity](#gate-integrity)** (§M.2) and green only when an
@@ -491,7 +493,8 @@ only (the substrate node inventory and PV sizes are owned elsewhere).
   `DiskCarveId`. It is joined to an attested observed NodeId/backing/device materialization only at live
   readiness, where every template reference must map exactly once. A missing constraint target or missing, extra, or
   ineligible slot rejects. No caller may
-  replace any arm with a scalar peak. `provision` alone expands the unit into
+  replace any arm with a scalar peak. The pure expansion fold this phase delivers — invoked later by the
+  Phase-8 `provision` seal — alone expands the unit into
   `MaterializedExecutionInstance`s and complete `ExecutionEpoch`s. Every instance id is derived from and
   exact-joins one planned `(ExecutionUnitId, revision, ordinal, kind)` slot key; duplicate, orphan, wrong-revision, dropped,
   or swapped instances reject.
@@ -548,7 +551,8 @@ only (the substrate node inventory and PV sizes are owned elsewhere).
   nodefs/containerfs. Aliased roles are summed before their backing is checked once. They are never repeated as
   logical Pod ephemeral storage.
 
-  For every planned epoch fingerprint, pure `provision` builds one
+  For every planned epoch fingerprint, the pure fold this phase delivers — invoked by the Phase-8
+  `provision` seal — builds one
   `ProvisionedNodeRuntimeStorageAccounting` per node. The same pure fold, invoked by snapshot-bound live
   preflight, builds the observed-inventory-fingerprint form. Its exact accounting-id domain equals the assigned
   planned slots or eligible observed Pod UIDs respectively; its qualified `(accounting id, component id)` keys are disjoint
@@ -950,11 +954,12 @@ validation-locus ledger) — target paths, not yet built. All forty fixtures and
 `Left`-tags
 are authored and committed in Phase 0 before the implementation exists (§M.1, [Gate integrity](#gate-integrity)).
 **Blocked by**: Sprint 7.1, Sprint 7.2, Sprint 7.3; Phase 4 gate (the positive Gate-1 corpus).
-**Independent Validation**: the gate decodes and binds each positive fixture, runs the conditional
-`planInfrastructure` arm, constructs `ProvisionContext` only from the explicit already-materialized fixture
-or receipt-bound modeled materialization, and only then calls `provision` to obtain a feasible opaque result;
-each fold negative returns a structured `ProvisionError`/`Left` at the provision
-seal — **each negative asserting its specific expected tag** (e.g.
+**Independent Validation**: the gate applies the Phase-7 folds (`fits`/`podFits`/`carve`/`place` and the
+storage/scheduler/runtime-storage helper folds) **directly to each hand-authored demand/capacity fixture** — no
+`bind`, `planInfrastructure`, `ProvisionContext`, or `provision` call (those are Phase-8 deliverables, and the
+Phase-8 gate re-exercises these same folds through its post-bind provision seal) — so each positive fixture
+yields a sound feasible result and each negative fixture returns the fold's structured `ProvisionError`/`Left`
+on its isolated insufficient axis — **each negative asserting its specific expected tag** (e.g.
 `illegal_elastic_pod_exceeds_largest_candidate` → `Left Unschedulable`,
 `illegal_elastic_worst_case_instances_over_quota` → `Left Overcommit`, `illegal_store_over_backing` →
 `Left (StorageOverBacking …)`, `illegal_filesystem_layout_swapped` →

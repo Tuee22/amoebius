@@ -55,11 +55,17 @@ sides: equality is over the set of **canonical fingerprints of *distinct reachab
 states*, not its *states generated* counter), with `CHECK_DEADLOCK` set explicitly on both sides and with a
 state satisfying the model's `CONSTRAINT` boundary **checked-but-not-expanded** on both sides (a boundary state
 is counted and invariant-checked, its successors are not enumerated) — so the two implementations cannot count
-under incompatible conventions. Both readings **go red under every** mutant of a mechanical mutation-operator
-set over the *model* fragment (guard negation/weakening, effect swap, dropped effect entry/`UNCHANGED`,
-quantifier flip, fairness drop, invariant-clause delete) rather than one hand-picked strawman; TLC proves the
-model's liveness `PROPERTY` under weak fairness and reports it red both with fairness removed and under the
-fairness-drop/liveness mutants. The gate's **representative set** is named explicitly: the single committed
+under incompatible conventions. Every mutant of a mechanical mutation-operator set over the *model* fragment
+(guard negation/weakening, effect swap, dropped effect entry/`UNCHANGED`, quantifier flip, fairness drop,
+invariant-clause delete) is caught rather than one hand-picked strawman, partitioned by detection mechanism:
+the **safety mutants** (guard negation/weakening, effect swap, dropped effect entry/`UNCHANGED`, quantifier
+flip) redden **both readings** — the in-process explorer and TLC reach the same safety counterexample; the
+**fairness-drop/liveness mutant** reddens TLC's liveness `PROPERTY` only (the safety-only in-process explorer
+cannot see it); and the **spec-weakening mutants** that drop an obligation rather than introduce a reachable
+violation (invariant-clause delete, and the fairness annotation the fairness-drop removes) are caught by the
+emitted `INVARIANT`/`PROPERTY` set diverging from the Phase-0-pinned expected invariant/property set and byte
+golden, not by a red reachability verdict. TLC proves the model's liveness `PROPERTY` under weak fairness and
+reports it red with fairness removed. The gate's **representative set** is named explicitly: the single committed
 `ToyModel` (the bounded two-process mutual-exclusion model of Sprint 2.1) plus the QuickCheck fragment
 generator described below; no other model is in scope for Phase 2. A QuickCheck generator over the fragment
 finds no explorer/TLC disagreement (identical verdict and identical canonical distinct-state fingerprint sets,
@@ -70,7 +76,11 @@ QuickCheck `checkCoverage` **asserts every fragment constructor fires**: each of
 comparison, finite-set membership, finite quantifier, and function literal/update/application, and each of
 `WeakFair`/`StrongFair` and `Always`/`Eventually`/`LeadsTo`, appears in at least 20% of generated models — so a
 generator restricted to the easy boolean two-variable subset fails the coverage obligation instead of passing
-vacuously. The differential suite is itself proven to have teeth by **two committed seeded renderer mutants**
+vacuously. A `cover`/`classify` floor additionally requires a minimum fraction of the generated models to be
+**safety-violating** (a reachable counterexample exists) and to reach a `CONSTRAINT` boundary state, so
+explorer↔TLC agreement on the red/boundary branch — not only the both-green branch — is exercised by the
+generated distribution itself, not solely by the `ToyModel` mutation set. The differential suite is itself
+proven to have teeth by **two committed seeded renderer mutants**
 in `emitTLA` — `emitTLA-mut-01` (a dropped `UNCHANGED` conjunct on an action's non-effected variables) and
 `emitTLA-mut-02` (a finite quantifier mistranslated `\A`↔`\E`) — each of which the differential generator
 **must expose** as an explorer/TLC divergence, symmetric to the model-mutation check, so a renderer that is
@@ -111,6 +121,11 @@ renderings agree, not that any cluster enforces anything.
   and [`§3`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule) — **what is generated and the
   rule**: the `emitTLA` row of the generated-artifacts table, stamped generated and emitted by a subcommand,
   with a golden test pinning the *renderer's* behaviour rather than committing the artifact.
+- [`conformance_harness_doctrine.md §2`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation)
+  and [`§3`](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure)
+  — the **registers and the no-live-infrastructure invariant**: this phase's Register-1 in-process explorer +
+  TLC pairing is an instance of "rendering never touches live infrastructure" — validation runs entirely
+  in-process over golden/emitted artifacts and stands up no host and no cluster.
 
 ## Sprints
 
@@ -273,8 +288,10 @@ run over **>=200 non-degenerate models** (>=1 enabled action, >=2 reachable stat
 the Gate appears in >=20% of generated models; this is the **safety-scoped** differential faithfulness test
 (liveness/fairness rendering is not covered by it).
 **Docs to update**: `documents/engineering/formal_model_doctrine.md` (§4/§6 — the correspondence + honesty
-ledger this gate emits), `DEVELOPMENT_PLAN/README.md` (flip the Phase-2 status when the gate passes),
-`DEVELOPMENT_PLAN/substrates.md` (the Phase-2 `none` gate row).
+ledger this gate emits), `documents/engineering/conformance_harness_doctrine.md` (§2/§3 — the Register-1
+in-process explorer + TLC pairing as a no-live-infrastructure instance). The Phase-2 status flip in
+`DEVELOPMENT_PLAN/README.md` and the `none` gate row in `DEVELOPMENT_PLAN/substrates.md` are carried in this
+phase's Documentation Requirements (Cross-references to add), not here.
 
 ### Objective
 Adopt [`formal_model_doctrine.md §4 — correspondence by construction`](../documents/engineering/formal_model_doctrine.md#4-correspondence-by-construction)
@@ -304,13 +321,21 @@ operational form of "the two renderings mean the same thing."
   finite-set membership, finite quantifier, function literal/update/application), each `Fairness`
   (`WeakFair`/`StrongFair`), and each `Temporal` (`Always`/`Eventually`/`LeadsTo`) appears in >=20% of
   generated models — so a generator drawing only the easy boolean subset fails rather than passing vacuously.
-  The claim is **scoped to the safety sub-fragment** (the liveness/fairness rendering is not covered)
+  The obligations also include a `cover`/`classify` floor on the **safety-violating** branch (a minimum
+  fraction of generated models carry a reachable counterexample) and on `CONSTRAINT`-boundary states, so the
+  red/boundary path of the explorer↔TLC differential is exercised by the generated distribution, not only by
+  the `ToyModel` mutation set. The claim is **scoped to the safety sub-fragment** (the liveness/fairness
+  rendering is not covered by it — the `Fairness`/`Temporal` coverage floor exists only to keep the *safety*
+  differential robust when liveness annotations are present; liveness rendering faithfulness is validated on
+  `ToyModel` alone — round-trip, fairness-sensitivity, and the fairness-drop mutants — not across the generated
+  distribution)
   ([`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-correspondence-by-construction)).
 - **Two committed seeded renderer mutants** proving the differential suite has teeth against `emitTLA` bugs (not
   only model bugs): `emitTLA-mut-01` (a deliberately dropped `UNCHANGED` conjunct) and `emitTLA-mut-02` (a
   finite quantifier `\A`↔`\E` mistranslation), committed under `test/formal/mutants/`, each of which the
   differential generator must expose as an explorer/TLC divergence — a surviving renderer mutant fails the gate.
-- The **committed, schema-checked Register-1 ledger** (§K), whose schema is defined in this phase: rows for
+- The **committed, schema-checked Register-1 ledger** (§K; its schema, linter, and commit status owned by
+  `testing_doctrine.md` and Phase 0), whose Phase-2 rows are:
   (a) safety proven-for-the-model at the declared bound with the recorded reachable-distinct-state count; (b)
   liveness proven under the named fairness with the recorded fairness-sensitivity outcome; (c) the
   differential-test case count and per-constructor coverage percentages; (d) model-correspondence-to-Phase-3-code

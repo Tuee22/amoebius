@@ -258,7 +258,7 @@ cache-write operands, observed resident cache + derived concurrent write delta, 
 `archConcurrency`/`stageConcurrency` — and returns a single-use
 token required to start BuildKit. One-field overdraw and changed-snapshot fixtures start no builder and write
 no scratch/cache.
-**Docs to update**: `documents/engineering/image_build_doctrine.md`, `documents/engineering/content_addressing_doctrine.md`.
+**Docs to update**: `documents/engineering/image_build_doctrine.md`, `documents/engineering/content_addressing_doctrine.md`, `documents/engineering/resource_capacity_doctrine.md`.
 
 ### Objective
 Adopt [`image_build_doctrine.md` §7 — what amoebius bakes vs builds](../documents/engineering/image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)
@@ -271,8 +271,10 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
 
 ### Deliverables
 - A multi-arch base `Dockerfile` baking each platform binary by the supply-chain preference order, plus the
-  jit-build resolver and its toolchain layer; the amoebius runtime image built at GHC 9.12.4 with infernix/jitML
-  linked as extension libraries.
+  jit-build resolver and its toolchain layer; the amoebius runtime image built at GHC 9.12.4 shipping the
+  amoebius binary alone (infernix and jitML are linked into the runtime image only when their lifts land, at
+  [Phase 33](phase_33_infernix_lift.md) / [Phase 34](phase_34_jitml_lift_cuda.md), never here, so Phase 15
+  carries no forward dependency on the extension lifts).
 - A pure `BuildExecutionEnvelope` plus
   `observeBuildHost → deriveBuildTransition → validate → ValidatedBuildTarget` boundary. It includes
   a non-empty acyclic platform/stage graph with per-stage host/engine-VM CPU/memory reservation+ceiling,
@@ -472,7 +474,7 @@ The whole sprint (📋 Planned).
 **Implementation**: `src/Amoebius/Image/Gate.hs` / a `pb` gate subcommand + `test/live/RegistryGate.hs` (the Register-3 gate harness) — target paths, not yet built.
 **Blocked by**: Sprint 15.3 (the atomically-published tag), Sprint 15.2 (the running registry).
 **Independent Validation**: the egress denial is realized as a **node-level host firewall / IP-CIDR blackhole** of the resolved public-registry endpoints (or an enforcing-CNI FQDN policy) — **not** a vanilla `kindnetd` `NetworkPolicy`, which `kindnetd` does not enforce and which cannot match FQDNs (§M ambiguity resolution). Its enforcement is proven by a **negative control** (§M.8): under the *same* policy, a canary pod referencing `docker.io/library/busybox` **FAILS `ImagePull`** with the committed expected reason (`ErrImagePull`/`ImagePullBackOff` from a connection-timeout to the public endpoint), paired with the positive that an in-cluster `distribution` pull of the same shape succeeds. Under that enforced denial the registry stands up and the base-image manifest list publishes and resolves with **zero** requests leaving for a public registry, asserted from the **OS-boundary observer** (§M.5) — node `containerd` logs + a packet capture spanning the entire standup-and-publish window, showing zero TCP connections to the resolved endpoints of the [Gate integrity](#gate-integrity) public-registry set; never a self-emitted compliance trace. The denial scope covers in-cluster standup/publication/pull; the **host-side `buildx` build is outside it** and legitimately reaches upstream (§2/§9). Both `linux/amd64` and `linux/arm64` resolve under the one digest-pinned tag; a re-run of the whole build → side-load → standup → publish flow is idempotent, defined as **zero mutating (`PUT`/`POST`/`PATCH`) requests** in the registry access log during the second run (§M.6 — not a permitted full rebuild-and-re-push). The committed mutant `mutant/phase15/noop-egress-policy` (a vanilla unenforced `NetworkPolicy` substituted for the enforcing firewall) MUST turn the negative-control assertion red (§M.2).
-**Docs to update**: `DEVELOPMENT_PLAN/README.md` (flip the Phase-15 status when the gate passes), `documents/engineering/image_build_doctrine.md`, `DEVELOPMENT_PLAN/substrates.md`.
+**Docs to update**: `documents/engineering/image_build_doctrine.md`, `documents/engineering/testing_doctrine.md`.
 
 ### Objective
 Adopt [`image_build_doctrine.md` §2](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)
@@ -516,8 +518,13 @@ The whole sprint (📋 Planned).
 - `documents/engineering/content_addressing_doctrine.md` — annotate §4.5 that the base image contributes the
   jit-build resolver + toolchain by OCI digest while the engine payloads remain content-addressed cache assets,
   resolved on first miss (the resolver's own live proof lands in Phase 32).
+- `documents/engineering/resource_capacity_doctrine.md` — §3.1's host-build-as-first-class-provision claim
+  gains its first validation: the `BuildExecutionEnvelope` snapshot admission runs on linux-cpu, separate from
+  the resulting `ImageArtifact`'s node image-store fit.
 - `documents/engineering/platform_services_doctrine.md` — the §3 registry-as-single-image-source note flips from
   design intent to a delivered `distribution` standup, with the MinIO-backed S3 driver still a Phase-19 target.
+- `documents/engineering/testing_doctrine.md` — §2's three-register model records its first Register-3
+  (live-infrastructure) gate reached on linux-cpu, with a proven/tested/assumed ledger naming that register.
 
 **Cross-references to add:**
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-15 row from Planned to its delivered status and link this document.

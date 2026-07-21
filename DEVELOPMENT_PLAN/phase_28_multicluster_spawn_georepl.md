@@ -197,8 +197,9 @@ the following named, committed artifacts so no self-authored harness or post-hoc
   honest. The R7/R8/R9 boundary rules and the §19 cross-boundary ledger are consumed by [Phase
   29](phase_29_gateway_migration_drills.md).
 - [`testing_doctrine.md §3`](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down)
-  (the test-as-`InForceSpec` spin-up → run → always-tear-down contract) and §4 (the per-run
-  proven/tested/assumed ledger): the register this gate reaches and the ledger it emits.
+  (the test-as-`InForceSpec` spin-up → run → always-tear-down contract) and
+  [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
+  (the per-run proven/tested/assumed ledger): the register this gate reaches and the ledger it emits.
 
 ## Sprints
 
@@ -206,6 +207,7 @@ the following named, committed artifacts so no self-authored harness or post-hoc
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Multicluster/Spawn.hs`, `src/Amoebius/Dsl/ChildInForceSpec.hs`,
+`amoebius-pulumi/src/Amoebius/Pulumi/Engine.hs`, `src/Amoebius/Pulumi/Backend/EncryptedMinio.hs`,
 `pulumi/child-cluster/Pulumi.yaml`, `src/Amoebius/Multicluster/ChildUnseal.hs`,
 `src/Amoebius/Vault/TransitChildKey.hs`, `src/Amoebius/Multicluster/SecretInjection.hs` — target paths, not yet
 built.
@@ -228,8 +230,7 @@ parent's Vault unsealed; a named `SecretRef` resolves to bytes the parent inject
 or an env var; and each child, registered as a managed resource carrying its own `destroy`, tears down leak-free
 via one `reconcileAbsent` loop.
 **Docs to update**: `documents/engineering/cluster_lifecycle_doctrine.md`,
-`documents/engineering/vault_pki_doctrine.md`, `documents/engineering/pulumi_iac_doctrine.md`,
-`documents/engineering/dsl_doctrine.md`.
+`documents/engineering/vault_pki_doctrine.md`, `documents/engineering/pulumi_iac_doctrine.md`.
 
 ### Objective
 
@@ -574,7 +575,7 @@ mutable multi-record invariant is sorted by the §17 classifier into confluent (
 (held by bounded authority) against the committed independent classification table, an unclassified invariant
 defaulting to non-confluent; and the forest tears down leak-free by the OS-boundary observer.
 **Docs to update**: `documents/engineering/chaos_failover_doctrine.md`,
-`documents/engineering/content_addressing_doctrine.md`, `documents/engineering/platform_services_doctrine.md`.
+`documents/engineering/content_addressing_doctrine.md`.
 
 ### Objective
 
@@ -627,7 +628,6 @@ The whole sprint (📋 Planned).
   paths.
 - `documents/engineering/pulumi_iac_doctrine.md` — record the child-cluster spawn program and its
   Vault-enveloped MinIO backend as realized spawn owners.
-- `documents/engineering/platform_services_doctrine.md` — record the Pulsar/MinIO/Patroni geo-replication wiring.
 - `documents/engineering/testing_doctrine.md` — record the Register-3 spawn + geo-replication live-gate ledger
   this phase emits.
 

@@ -5,7 +5,7 @@
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md
 **Generated sections**: none
 
-> **Purpose**: The holding pen for the in-scope, high-numbered phases that are real commitments but do not
+> **Purpose**: The candidate pool of in-scope, high-numbered phases that are real commitments but do not
 > yet warrant their own `phase_NN_<slug>.md` — each a one-line scope and a provisional gate, all 📋 Planned
 > design intent until promoted to a numbered phase.
 
@@ -20,18 +20,18 @@ the suite:
 
 - **All 📋 Planned, all design intent.** Nothing here is implemented; every scope line and every gate is a
   target shape, never a tested amoebius result (honesty rule,
-  [development_plan_standards.md §K](development_plan_standards.md)). Where a candidate leans on the sibling
+  [development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed)). Where a candidate leans on the sibling
   prodbox or hostbootstrap projects, that is *sibling evidence*, not amoebius proof.
 - **Promotion means a contiguous number.** When a candidate is picked up, it is appended as the next
-  `phase_NN_<slug>.md` with a full skeleton ([development_plan_standards.md §D](development_plan_standards.md)),
-  a concrete single-substrate gate ([§L](development_plan_standards.md)), and a contiguous id — Phase 38, 39,
-  … with no gaps or fractional ids ([§E](development_plan_standards.md)). The provisional numbers below are
+  `phase_NN_<slug>.md` with a full skeleton ([development_plan_standards.md §D](development_plan_standards.md#d-the-per-phase-document-skeleton)),
+  a concrete single-substrate gate ([§L](development_plan_standards.md#l-one-substrate-discipline)), and a contiguous id — Phase 38, 39,
+  … with no gaps or fractional ids ([§E](development_plan_standards.md#e-one-canonical-phase-model)). The provisional numbers below are
   *ordering hints only*; the real id is assigned at promotion.
 - **No forward dependencies.** A later phase consumes earlier phases; nothing in Phases 0–37 is allowed to
-  declare a `Blocked by` that points here ([§E](development_plan_standards.md)). These candidates sit strictly
+  declare a `Blocked by` that points here ([§E](development_plan_standards.md#e-one-canonical-phase-model)). These candidates sit strictly
   *after* the live-SPA-deploy gate of Phase 37.
 - **One substrate per gate.** Each candidate names at most one provisional acceptance substrate; a candidate
-  that would need more than one is split before promotion ([§L](development_plan_standards.md)).
+  that would need more than one is split before promotion ([§L](development_plan_standards.md#l-one-substrate-discipline)).
 
 The candidates are independent of one another and may be promoted in any order relative to each other; the
 provisional ids reflect a *likely* sequencing, not a dependency chain.
@@ -82,11 +82,11 @@ move data *without* representing destruction.
 as a *phase of the delivery doctrine* rather than a standalone engine: a DB-schema migration is a
 **`RolloutPhase`** — an ordered, readiness-gated phase obeying create-new → verified-migrate → retire-old,
 enacted as one step of a `RolloutPlan` on the in-cluster SSA/ApplySet reconciler
-([`release_lifecycle_doctrine.md` §5 — `RolloutPlan` / `RolloutPhase`](../documents/engineering/release_lifecycle_doctrine.md)).
+([`release_lifecycle_doctrine.md` §5 — `RolloutPlan` / `RolloutPhase`](../documents/engineering/release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)).
 Its "zero silent data loss" gate is exactly the `storage_lifecycle` create-new→migrate→retire discipline carried
 on that phase, so the migration *ordering + idempotence* work belongs to the release rollout, not to a separate
 mechanism. The manifest-change-correctness half stays as stated — the hardening of the typed reconcile diff
-(`manifest_generation_doctrine.md` §6, above) — because a typed diff that refuses a destructive
+([`manifest_generation_doctrine.md` §6, above](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)) — because a typed diff that refuses a destructive
 immutable-field replace is a precondition the `RolloutPlan`'s phases depend on. This remains 📋 Planned design
 intent: jitML's `Bootstrap.hs` schema-grant pre/post-migration phase is *sibling evidence* that the phased shape
 runs in a sibling, not an amoebius result.
@@ -147,7 +147,7 @@ faithfulness claim may move from **tested** to **proven**.
 
 This is a **surgical** track, not a broad proof-assistant layer — those two properties are the only places a
 proof assistant earns its keep, precisely because they are small, closed, and load-bearing, and are today only
-property-tested (`formal_model_doctrine.md §4`; the confluence ledger's own rule that a closure claim "is proof
+property-tested ([`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-correspondence-by-construction); the confluence ledger's own rule that a closure claim "is proof
 only when its closure argument is shown"). It is explicitly deferred because it *hardens* claims the Phase-2/3/7
 differential and closure property-tests already exercise; the property tests are the affordable first line, and
 this candidate upgrades them to proof only where the payoff is a genuine ledger promotion. A first sprint is an
@@ -211,7 +211,7 @@ exist, but `provision` returns `Left` and therefore cannot construct the opaque 
 deployable representation. The discipline is **folded into Phase 4** for source/schema shapes, **Phase 7** for
 the pure fold implementation and generated properties, **Phase 8** for full bind/expansion plus the opaque
 provision seal, and **Phase 9** for the closed `renderAll` consumer. None requires an external effect or a
-forward live-phase dependency (§E one-canonical-phase). Its **runtime**
+forward live-phase dependency ([development_plan_standards.md §E](development_plan_standards.md#e-one-canonical-phase-model) one-canonical-phase). Its **runtime**
 residues distribute to the phases that already own each substrate: the Pulsar two-ceiling offload to Phase
 19, the Lima `LinuxHost` witness + host/VM capacity cross-check to Phase 35, live kind topology to Phases
 14/28, and the `Managed EKS` arm + `ScalingPolicy` enaction + cloud quota to Phase 30. So there is **zero phase renumber**:
