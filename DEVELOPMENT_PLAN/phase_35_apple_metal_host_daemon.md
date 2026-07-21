@@ -287,7 +287,7 @@ where they adopt them.
   (*why no mTLS is safe here*), the loopback-NodePort realization and prodbox precedent of [`§6`](../documents/engineering/host_cluster_comms_doctrine.md#6-the-host-only-restriction-in-practice-and-its-sibling-precedent),
   and the type-excluded illegal states of [`§7`](../documents/engineering/host_cluster_comms_doctrine.md#7-what-the-dsl-makes-unrepresentable-here)
   (*what the DSL makes unrepresentable here*).
-- [`substrate_doctrine.md §5`](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)
+- [`substrate_doctrine.md §5`](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)
   — *host worker nodes: substrate-specific hardware that refuses to be contained*: this phase implements the
   apple host worker (Apple-Metal on unified memory) as a managed subprocess of the host binary with the
   Load → Prereq → Acquire → Ready → Serve → Drain → Exit role lifecycle, built via the virtualized-substrate
@@ -506,7 +506,7 @@ Adopt [`apple_metal_headless_builds.md §1 — the commitment: headless, on-host
 [`§3 — Architecture`](../documents/engineering/apple_metal_headless_builds.md#3-architecture),
 [`§4 — Build and prerequisite model`](../documents/engineering/apple_metal_headless_builds.md#4-build-and-prerequisite-model),
 and [`§6 — Why Tart is not viable`](../documents/engineering/apple_metal_headless_builds.md#6-why-tart-is-not-viable-the-no-vm-rationale),
-with the host-worker build rule of [`substrate_doctrine.md §5`](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained):
+with the host-worker build rule of [`substrate_doctrine.md §5`](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized):
 build the Apple-Metal worker **headless, directly on the host — with no macOS VM (no Tart)** — so build
 provenance is host-controlled without inheriting VM lifecycle, keychain, or SwiftPM surfaces. The
 headless fixed-bridge shape is proven in the sibling jitML project (sibling evidence, not an amoebius result);
@@ -569,7 +569,7 @@ The whole sprint (📋 Planned).
 **Docs to update**: `documents/engineering/substrate_doctrine.md`
 
 ### Objective
-Adopt [`substrate_doctrine.md §5 — host worker nodes: substrate-specific hardware that refuses to be contained`](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained):
+Adopt [`substrate_doctrine.md §5 — host worker nodes: substrate-specific hardware that refuses to be contained`](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized):
 run the Apple-Metal worker as a **managed subprocess of the host binary** — the one place amoebius compute
 lives outside a cluster pod — with the stateless-role lifecycle and a guaranteed drain, so the worker has a
 defined startup and a clean shutdown rather than an unmanaged background process.

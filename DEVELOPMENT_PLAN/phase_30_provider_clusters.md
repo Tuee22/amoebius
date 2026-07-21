@@ -271,7 +271,7 @@ under test (§M.3).
   — *third-party binaries are baked; workloads pull only in-cluster*: the upstream AWS EBS CSI
   controller/node implementation and required sidecars are consumed as baked binaries under typed manifests,
   never as a public image or Helm chart.
-- [`resource_capacity_doctrine.md §6`](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)
+- [`resource_capacity_doctrine.md §6`](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)
   and [`§3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
   — *`Growable` / `ScalingPolicy`: the escape valve amoebius owns* and *the systematic provision matrix*:
   dynamic node provisioning is the runtime enaction of a typed `ScalingPolicy`; every provider node class
@@ -786,7 +786,7 @@ the deployment-rules surface and never inside an app's logic.
 ### Deliverables
 
 - An `Amoebius.Cluster.NodeProvisioner` that reads the declared elastic-node rule — a typed `ScalingPolicy`
-  ([`resource_capacity_doctrine.md §6`](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns))
+  ([`resource_capacity_doctrine.md §6`](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm))
   driven by **load** and **workflow completion** (spot-instance-cost-driven scaling is a declared future signal
   class, deferred and not exercised by this phase's gate corpus or seeded mutants) — computes the desired node
   set, and
@@ -1077,7 +1077,7 @@ The whole sprint (📋 Planned).
 - `documents/engineering/substrate_doctrine.md` — record that `pulumi` + the cloud plugin conform to the
   no-env/no-`PATH` lazy-tool-ensure contract on the linux-cpu parent.
 - `documents/engineering/resource_capacity_doctrine.md` — record that
-  [`§6`](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)
+  [`§6`](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)
   (`Growable`/`ScalingPolicy`) and
   [`§3.1`](../documents/engineering/resource_capacity_doctrine.md#31-the-systematic-provision-matrix)
   (the systematic provision matrix) gain the live node-scaling enaction: dynamic node provisioning is the

@@ -45,7 +45,7 @@ This document owns the *capacity arithmetic* and nothing else. It owns:
 4. The closed `StorageBudget` union — no *unbounded* arm — and how each arm names its single ceiling owner
    ([§5](#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)).
 5. The `Growable` / `ScalingPolicy` escape valve: dynamic provisioning owned by amoebius, the only path by
-   which a bounded budget grows ([§6](#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)).
+   which a bounded budget grows ([§6](#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)).
 
 It **consumes, never restates**, the domain numbers it folds: the per-host/node CPU, memory, logical
 ephemeral and physical filesystem/content/snapshot storage, accelerator, and
@@ -103,7 +103,7 @@ genuine sums, not packings, so they carry no completeness caveat; the bin-pack i
 placement** upgrade, [§4](#4-the-total-fold-fits-carve-place-and-the-nesting).)
 
 The type-foreclosed pieces near capacity live elsewhere and are cited, not claimed here: the `StorageBudget` union
-having **no unbounded arm** ([§5](#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)) and the `Growable` union having **no bare-unbounded arm** ([§6](#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)) are type-foreclosed
+having **no unbounded arm** ([§5](#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)) and the `Growable` union having **no bare-unbounded arm** ([§6](#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)) are type-foreclosed
 *union shapes* — a value simply cannot name "unbounded" without a policy. The *arithmetic* over those bounded
 values is always a checked, post-bind provisioning rejection.
 
@@ -369,7 +369,7 @@ pure value; they are never a second source of truth.
   derivation is pure and version-pinned; a naive sum that disagrees with the rendered pod is a test failure.
 - **`Budget`** — a capacity an owner is allowed to consume against, fixed or quota-capped growable
   ([§5](#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm),
-  [§6](#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)).
+  [§6](#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)).
 - **`ProvisionedSpec` / private service projections** — opaque post-fold values whose constructors are not
   exported. `provision` is the only constructor: it derives all demands, binds each to an offering/backing,
   and stores the placement/capability witnesses in the whole deployment. Private service projections
@@ -6934,7 +6934,7 @@ The nesting is where the illegal states [§3.17](../illegal_state/illegal_state_
   Thus one class may safely produce two nodes without either node spending the other's disk or GPU, while a
   materialized `NodeCapacity` still uses globally unique concrete ids and the alias checks above.
 
-The fold is **total and re-runnable**: after any `Growable` policy grows a capacity ([§6](#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)) the fold re-runs
+The fold is **total and re-runnable**: after any `Growable` policy grows a capacity ([§6](#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)) the fold re-runs
 against the new bound, so growth never silently invalidates an earlier check.
 
 **`provision` seals the result before render.**
@@ -7985,7 +7985,7 @@ uniformStatefulSetClaims
 
 ---
 
-## 6. `Growable` / `ScalingPolicy`: the escape valve amoebius owns
+## 6. `Growable` / `ScalingPolicy`: the quota-bounded dynamic-provisioning arm
 
 Bounded capacity would be overly restrictive if it could never grow — but growth must be *amoebius's
 decision under a typed policy*, never a blank "unbounded." So the **only** way a `Budget` exceeds a fixed cap

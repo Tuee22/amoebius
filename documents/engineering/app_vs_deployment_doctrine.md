@@ -121,7 +121,7 @@ The deployment-rules surface declares:
 - **Dynamic node provisioning policy.** Scaling nodes by arbitrary logic — load, spot-instance cost, or
   workflow completion — is a deployment rule, owned operationally by
   [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md), and typed as a `ScalingPolicy` owned by
-  [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns).
+  [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm).
 - **Resource budgets, storage backings, and the compute engine.** The per-host/cluster capacities and storage
   budgets a workload must fit, the `StorageBacking` each app's storage draws from, and the compute engine +
   node topology (kind / rke2 / EKS) are all deployment rules — an app declares *what* it needs, never *how

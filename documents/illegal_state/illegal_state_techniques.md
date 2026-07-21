@@ -324,7 +324,9 @@ are three layers, and a conformant claim names which one it is reaching:
    spec at all. These are **not** in this catalog's promise; their verification is owned by
    [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the testing doctrine ([§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)).
 
-**The two-tier mapping.** Layers 1–2 (`type-foreclosed` + `decode-foreclosed`) are the **Tier-1** design-time /
+**The two-tier mapping.** (This *Tier* vocabulary is the same split the plan and the catalog name in *Register*
+terms: **Tier-1 corresponds to Registers 1–2** and **Tier-2 to Register 3** — one pre-cluster/runtime boundary
+under two names.) Layers 1–2 (`type-foreclosed` + `decode-foreclosed`) are the **Tier-1** design-time /
 in-process integrity band — the spec composes and the type discipline holds in the abstract — validated
 **in-process in the pre-cluster gates (Phases 4–9)** (Dhall Gate 1, Haskell decoder Gate 2, QuickCheck,
 bind/expand, the opaque provision seal, and `renderAll` goldens). Layer 3

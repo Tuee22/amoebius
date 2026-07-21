@@ -40,7 +40,7 @@ strategy ([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-ho
 images expressible — it feeds the buildx pipeline owned by
 [image_build_doctrine.md](./image_build_doctrine.md). amoebius supports mixed-arch clusters; it does
 **not** support Windows containers (in or outside WSL2) — Windows participates either as a Linux host (via
-WSL2) or as the on-host CUDA worker case ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)).
+WSL2) or as the on-host CUDA worker case ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)).
 
 > **Honesty.** The four-name catalog is the amoebius DSL surface. The seed detector in the `hostbootstrap`
 > library distinguishes a *finer* granularity — `apple-silicon`, `linux-cpu`, `linux-gpu`, `windows-cpu`,
@@ -65,7 +65,7 @@ WSL2) or as the on-host CUDA worker case ([§5](#5-host-worker-nodes-substrate-s
 > **Why `windows` is not split into `windows-cuda` the way `linux` splits into `linux-cuda`.** The amoebius
 > substrate name keys the **OS / VM-provider + wire strategy**, not accelerator presence. A Windows host
 > reaches the cluster's GPU compute as an on-host worker *regardless* of how its in-cluster node is wired
-> ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)), so the
+> ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)), so the
 > deployment-shape-changing axis is already captured by the host-worker case, not by a second substrate name
 > — the amoebius DSL collapses the seed's `windows-gpu` into `windows`. On Linux, by contrast, GPU presence
 > *does* change the **in-cluster** deployment shape (the NVIDIA container runtime becomes a reconciler
@@ -108,7 +108,7 @@ Two classification rules are load-bearing and stated as hard failures, not warni
 
 - **Apple is always `arm64`.** macOS on a non-`arm64` architecture is rejected outright — there is no
   Intel-Mac substrate. Apple Silicon's unified memory is why the Apple substrate is treated distinctly
-  ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)), and that is an `arm64` fact.
+  ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)), and that is an `arm64` fact.
 - **GPU presence promotes the substrate.** A Linux host with an NVIDIA GPU classifies as `linux-cuda`
   (seed: `linux-gpu`), not `linux-cpu`; the CUDA container runtime is then a reconciler precondition ([§3](#3-the-no-environment--no-path-lazy-tool-ensure-contract)).
 
@@ -260,7 +260,7 @@ and `dlopen`'d, and generated Metal Shading Language is compiled *at runtime* in
 `MTLDevice.makeLibrary(source:options:)`. No VM, no login-keychain dependency, no SwiftPM/per-kernel Swift
 build, no full Xcode, no offline `metal` compiler. The full requirements, architecture, prerequisite model,
 and the "why not a VM" rationale are owned by
-[apple_metal_headless_builds.md](./apple_metal_headless_builds.md); [§5](#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained) below owns only *which hardware forces
+[apple_metal_headless_builds.md](./apple_metal_headless_builds.md); [§5](#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized) below owns only *which hardware forces
 a host worker*.
 
 > **Honesty.** Lima, WSL2, and Incus are implemented VM providers in the `hostbootstrap` seed. The headless,
@@ -271,7 +271,7 @@ a host worker*.
 
 ---
 
-## 5. Host worker nodes: substrate-specific hardware that refuses to be contained
+## 5. Host worker nodes: substrate-specific hardware that cannot be containerized
 
 Containers and VMs are the default, but two classes of hardware **cannot be reached performantly through
 them**, and for those amoebius builds and manages a non-containerized **host worker node** — a long-running
@@ -537,7 +537,7 @@ single list they all read.
 
 The per-host `Capacity` above is the number the **in-cluster** bin-pack trusts, and on apple/windows the only
 `LinuxHost` it describes is the Lima/WSL2 **VM's** kube-allocatable ([§4](#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)).
-A host that *also* runs a **host worker** ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained))
+A host that *also* runs a **host worker** ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized))
 needs a second, larger declaration: the **physical-host total** — the whole bare machine's allocatable
 CPU, memory, and local storage — against which the host-tier fold packs *both* the VM's carve and the host
 worker's `Demand`. Local storage is partitioned by identity into disjoint top-level pools: system reserve, VM
@@ -618,7 +618,7 @@ at reconcile as the three-valued `discover = Unreachable → refuse`
 ([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine))
 — so a declared-vs-real `Site` mismatch is runtime-checked residue, the ceiling every §8 declared fact lives
 at. Crucially this inventory carries a `Site` for **both** kinds of host it lists: **in-cluster cluster
-`Node`s** *and* the **host-worker physical hosts** ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained),
+`Node`s** *and* the **host-worker physical hosts** ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized),
 whose per-host `Capacity` is [§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)'s
 operand). The fold that **classifies stretchedness** from these declared `Site`s — which node or host worker
 is remote, and what reachability witness that demands — runs over **both** inventories and is owned by

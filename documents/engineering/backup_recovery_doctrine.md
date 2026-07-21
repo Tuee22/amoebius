@@ -198,7 +198,7 @@ medium's backing:
   space, so the retained set is `cadence`-many generations across the retention window; a policy whose
   window × cadence bytes exceed the medium's bounded quota is rejected at `provision-seal` unless it declares a
   `Growable` retention whose ceiling is itself a quota
-  ([`resource_capacity_doctrine.md` §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)).
+  ([`resource_capacity_doctrine.md` §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)).
   Backing up more data than the medium holds returns a `ProvisionError`, constructs no `ProvisionedSpec`, and
   cannot render — the same mechanism as durable-backing overcommit.
 - **The medium is a disjoint backing.** The backup medium's bytes are a distinct `StorageBacking` from the

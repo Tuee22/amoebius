@@ -162,7 +162,7 @@ workload as Pulsar/MinIO clients. It is a **deployment rule**, not app logic
 - **Its trigger already exists.** Scenario (a) — "run the batch job on AWS only when spot instances are below
   a price threshold" — needs no new type: `ScalingPolicy` already carries *instance price-shopping (a
   candidate instance-type set + a price ceiling)*, owned by
-  [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns). The pool binds that policy; it does
+  [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm). The pool binds that policy; it does
   not reinvent it.
 - **Statelessness is the teardown guarantee.** The workload's durable state is entirely in `DataPlane home`
   (a Pulsar topic + a KV bucket). The spot nodes are stateless clients: per

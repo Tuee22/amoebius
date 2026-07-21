@@ -43,7 +43,7 @@ future ML family is **Phase-N design intent**, entering later through the same l
 [`dsl_doctrine.md`](./dsl_doctrine.md)); it is not a v1 member, and nothing in this doctrine is written for one.
 
 **What this doc does not own.** This doctrine owns the shared *mechanism*. It does **not** re-derive the
-*totality typing* that makes names un-forgeable — that is technique [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) in
+*totality typing* that makes names un-forgeable — that is technique [§4.5](../illegal_state/illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content) in
 [`illegal_state_catalog.md`](../illegal_state/illegal_state_catalog.md). It does **not** own the per-substrate floating-point
 contract or the JIT cache key — those are owned by the sibling `jitML` project's
 `jitML/documents/engineering/determinism_contract.md`, which this doc references rather than restates. And it
@@ -416,7 +416,7 @@ from ambient entropy." A stream's seed is reachable only through `deriveSplitMix
 typed `SplitMixSeed` and a `Word64` index — both pinned. An artifact's name is reachable only by hashing real
 bytes (`deriveExperimentHash`, `blobKey`, `manifestContentSha`); there is no constructor that takes a free
 string. So "use whatever entropy the worker had" and "point at a checkpoint that was never written" are not
-states that can be *fixed at runtime* — they are states that cannot be *written down*. This is the totality technique [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)
+states that can be *fixed at runtime* — they are states that cannot be *written down*. This is the totality technique [§4.5](../illegal_state/illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content)
 in [`illegal_state_catalog.md`](../illegal_state/illegal_state_catalog.md), applied to seeds and store keys; this doc owns the
 content-addressing/determinism *use* of it, the catalog owns the typing discipline.
 

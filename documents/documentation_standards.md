@@ -114,6 +114,15 @@ anchor **deep-links to the themed slice that owns the entry** — e.g. the visib
 holds the enumeration and the slice holds the heading. Bidirectionality (above) is still checked against the
 **slice actually linked** — that slice's `Referenced by` lists the citing document, not the index.
 
+### `§N` in a plan-suite task-note is shorthand, not a reader cross-reference
+
+A `§N` inside a **`Docs to update` entry, a `Documentation Requirements` bullet, or a `(§N backlink)`
+parenthetical** — where the owning document is named in that same entry — is build-task shorthand (like the
+`§M.N` list-clause form above), recording *which section a later phase will backlink*; it need not be a separate
+anchor link. The anchor-link mandate governs a section reference a **reader follows to navigate** — in body
+prose, a heading's cross-reference, or a Related-Documents description — not this task metadata. When such a note
+is promoted into reader-facing prose it takes the anchor-link form.
+
 ---
 
 ## 5. Duplication rules

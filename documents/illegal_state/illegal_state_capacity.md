@@ -236,7 +236,7 @@ runtime actually grant those devices only to the owner).
 ### 3.29 A host worker whose Demand overflows its physical host
 
 A host-level accelerator worker (an Apple-Metal or Windows-CUDA native subprocess,
-[`substrate_doctrine.md` §5](../engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)) runs beside the Lima/WSL2 VM that backs the in-cluster
+[`substrate_doctrine.md` §5](../engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)) runs beside the Lima/WSL2 VM that backs the in-cluster
 node, both drawing on the same **physical host**; raw tooling accounts neither, so a host binary that
 over-subscribes surfaces at runtime as thrash or OOM. This round adds a **host → host-worker** arm to the
 capacity nesting: a host worker's CPU, memory/unified-memory, and host-cache storage demand folds against its

@@ -600,8 +600,12 @@ illegal_accelerator_source_workload_mismatch,illegal_accelerator_policy_domain_m
 illegal_accelerator_residency_placement,illegal_accelerator_coexistence_overcommit,
 illegal_monitoring_work_over_budget,illegal_post_bind_expansion_overcommit,
 illegal_controller_child_unbounded,illegal_elastic_per_node_expansion_overcommit,
+illegal_cyclic_extension,illegal_shadowing_extension,
 illegal_prior_provision_ref_{missing,stale,wrong_generation,wrong_arm}}.dhall` — target
-paths, not yet built.
+paths, not yet built. The `illegal_cyclic_extension` (a provide-and-require self-loop) and
+`illegal_shadowing_extension` (an anti-shadow merge) negatives each pair with a minimal legal
+`{infernix, jitML}` positive and fail Gate 2 at the committed `extRequires`-graph locus
+([`capability_extension_doctrine.md §3`](../documents/engineering/capability_extension_doctrine.md#3-the-provide-and-require-contract)).
 **Blocked by**: Sprint 8.1, Sprint 8.2, Sprint 8.3; Phase 4 gate (the positive Gate-1 corpus).
 **Independent Validation**: `cabal test capability-spec` is green — each of the **nine per-arm** positive needs
 binds to a well-typed `BoundServiceSpec` under both shapes and provisions to opaque whole-deployment
@@ -633,6 +637,8 @@ the eighteen committed seeded mutants (`mutant_copy_shape_tag`, `mutant_catchall
 each turn the suite **red** when substituted; the run emits a Register-1 proven/tested/assumed ledger whose
 coverage-assertion machinery is red if any named fixture, negative reason, or mutant is absent.
 **Docs to update**: `documents/engineering/service_capability_doctrine.md`,
+`documents/engineering/capability_extension_doctrine.md` (§3 provide/require graph — the `extRequires`
+acyclicity / no-shadow foreclosure this gate's cyclic/shadowing negatives exercise),
 `documents/illegal_state/illegal_state_catalog.md` (§3.12/§3.25 → realized layer),
 `documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/README.md` (flip the Phase-8 status when the
 gate passes), `DEVELOPMENT_PLAN/substrates.md` (the Phase-8 `none` gate row).
@@ -782,6 +788,9 @@ The whole sprint (📋 Planned).
   provider+shape binding), §4.1 (the `InferenceEngine` engine union), and §8 (the illegal-state instances) to
   the implemented `Amoebius.Capability.*`; confirm the alternate-admitting provider union stayed one-arm and
   the `EngineRuntime` union stayed URL-free.
+- `documents/engineering/capability_extension_doctrine.md` — backlink §3 (the provide/require contract) to the
+  implemented `extRequires` acyclicity/no-shadow check whose `illegal_cyclic_extension` /
+  `illegal_shadowing_extension` negatives this gate exercises.
 - `documents/illegal_state/illegal_state_catalog.md` — annotate §3.12 (product in app logic) and §3.25 (engine by
   URL) with their realized layer (type-foreclosed, Gate 1) and the family-unavailable-on-lane state as
   a checked rejection at the post-bind `provision-seal` locus; keep the runtime-checked residue (provider up,

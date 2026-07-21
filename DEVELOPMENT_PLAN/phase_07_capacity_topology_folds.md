@@ -207,7 +207,7 @@ clauses require for Phase 7; it strengthens, never weakens, the Gate and sprint 
   admits an unplaceable one). The QuickCheck properties assert soundness only; completeness is deliberately not
   claimed.
 - [`resource_capacity_doctrine.md §5`](../documents/engineering/resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm),
-  [`§6`](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns),
+  [`§6`](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm),
   and [`§7`](../documents/engineering/resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total)
   — the storage arithmetic: the closed `StorageBudget` union (no unbounded arm), the `Growable`/`ScalingPolicy`
   escape valve (no bare-unbounded arm), the logical→physical BookKeeper/MinIO placement plus complete

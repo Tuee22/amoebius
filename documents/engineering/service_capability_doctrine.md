@@ -250,7 +250,7 @@ catalog owned by [substrate_doctrine.md §1](./substrate_doctrine.md#1-the-subst
 **host-level** on `windows` (a native subprocess reaching the cluster only over a host-only NodePort) — one engine
 arm, two bootstraps; the pod-vs-subprocess realization and the `(substrate, bootstrap)` wiring are owned by
 [daemon_topology_doctrine.md §4](./daemon_topology_doctrine.md#4-worker-daemons--n-unelected) and
-[substrate_doctrine.md §5](./substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained),
+[substrate_doctrine.md §5](./substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized),
 referenced here (this doctrine is scoped to the engine as a substrate-selected, jit-resolved capability, not to where its process runs).
 **Windows honesty note.** Unlike the Apple-Metal host worker — which has a build-shape sibling doc,
 [apple_metal_headless_builds.md](./apple_metal_headless_builds.md) — the on-host Windows-`Cuda` build/run path is

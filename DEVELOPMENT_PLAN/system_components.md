@@ -361,7 +361,7 @@ as the typed, edge-observed state machine of
 [`§5`](../documents/engineering/gateway_migration_doctrine.md#5-the-migration-as-a-typed-edge-observed-state-machine).
 Spawn + geo-replication land in Phase 28 (reusing the [§10](#10-pulumi-backend-iac) Pulumi backend, Pulumi-from-inside first built
 there); the gateway-migration drills + model-correspondence in Phase 29. This is the live runtime counterpart
-of the [§11](#11-release-lifecycle--the-amoebius-release-package)-listed Phase-3 design `Model`.
+of the [§14](#14-the-pre-cluster-register-12-design-first-validation-surface)-listed Phase-3 design `Model`.
 
 | Component / Surface | Owning doctrine | Planned module path | Phase |
 |---|---|---|---|

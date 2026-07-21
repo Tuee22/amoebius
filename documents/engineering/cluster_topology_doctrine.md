@@ -419,12 +419,12 @@ different moves, never fused:
 - **Agents grow only through the `Autoscaled` arm.** Adding data-plane capacity is representable only as
   `Autoscaled { floor, policy }`; the policy's candidate classes and quota are part of the pure topology before
   Pulumi node provisioning enacts it
-  ([resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns),
+  ([resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm),
   [pulumi_iac_doctrine.md §4](./pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog)).
 - **Quorum is fixed by declaration.** The server count is *not* an autoscaled quantity: moving `Single → Ha3`
   (or `Ha3 → Ha5`) is a **deliberate re-provision of the control plane**, authored in the `.dhall`, never a
   `ScalingPolicy` outcome. Quorum is pinned by the declared `Rke2Servers` arm; the capacity arithmetic over the
-  resulting node set is owned by [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns).
+  resulting node set is owned by [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm).
 
 **Rollout is a lifecycle verb, not a type.** The server/agent bring-up — the first server running etcd
 `cluster-init` and minting the join token, further servers and all agents joining by a `server:` URL plus that
@@ -453,7 +453,7 @@ This doc owns the classifier and the K2 (full-node) control-plane witness; the K
 `Networking` sum are **consumed, not restated**.
 
 - **K1 — a non-member host worker** (an Apple-Metal / Windows-CUDA native subprocess,
-  [substrate_doctrine.md §5](./substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained))
+  [substrate_doctrine.md §5](./substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized))
   needs only data-plane + Vault reach and **no** apiserver reachability. The classifier's K1 arm yields only a
   `DataPlaneOnly (FabricMember c)` — the **one** data-plane witness owned by
   [single_logical_data_plane_doctrine.md §3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe),
@@ -565,7 +565,7 @@ This doctrine owns the *shape* of a legal cluster; two siblings own what rides o
   by [cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md) (the root-single-node rule in [§2](./cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap), the
   provider-managed vs self-managed split in [§1](./cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape)). This doc supplies the *types* those verbs act on; it does not
   restate the verbs. Dynamic growth of the node set is a `ScalingPolicy`
-  ([resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)) enacted as Pulumi node provisioning
+  ([resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)) enacted as Pulumi node provisioning
   ([pulumi_iac_doctrine.md §4](./pulumi_iac_doctrine.md#4-what-pulumi-provisions-the-resource-catalog)).
 - **Host-worker capacity and stretched reachability (cross-refs only; [§1](#1-two-axes-the-substrate-is-detected-the-engine-is-declared) disclaims capacity ownership).**
   A host-level accelerator worker's `Demand` folds against its **own physical-host `Capacity`** via
@@ -606,7 +606,7 @@ states the target shape and links back for status, per [documentation_standards.
 - [Engineering Doctrine Index](./README.md)
 - [Substrate Doctrine](./substrate_doctrine.md) — the detected substrate catalog, virtualization providers, and node inventory this axis ranges over
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — the catalog ([§3.13](../illegal_state/illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)-[§3.16](../illegal_state/illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused), [§3.24](../illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)) and technique ([§4.7](../illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)) this doctrine realizes
-- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the `place` fold over this `Topology`, and the `ScalingPolicy` ([§6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)) that grows the `agents` list while server quorum stays declared
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the `place` fold over this `Topology`, and the `ScalingPolicy` ([§6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)) that grows the `agents` list while server quorum stays declared
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — the bring-up / spawn / teardown verbs over these engines, including the rke2 server/agent rollout (reconciler tier (b))
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — provisioning the `Managed Eks` arm and dynamic nodes
 - [DSL Doctrine](./dsl_doctrine.md) — the surface that carries the `ComputeEngine` field

@@ -16,7 +16,7 @@
 
 ## 1. The commitment: headless, on-host, no VM
 
-The Apple-Metal host worker ([substrate_doctrine.md §5](./substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained))
+The Apple-Metal host worker ([substrate_doctrine.md §5](./substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized))
 compiles and executes Metal **in the macOS host process itself** — never inside a VM. Metal needs Apple
 Silicon **unified memory**, so it cannot run in a Linux container or a Linux VM; the design's answer is not
 a *macOS* VM either, but the host directly. There is exactly one build event and one runtime-compile event,
@@ -52,7 +52,7 @@ flowchart TD
 
 - **No interactive session dependency.** A build or cache miss must work from an SSH session, a daemon
   context, a CI runner, and a `launchd` background service — the host worker runs as a managed subprocess
-  ([substrate_doctrine.md §5](./substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-refuses-to-be-contained)),
+  ([substrate_doctrine.md §5](./substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)),
   never an interactive foreground app.
 - **No keychain requirement.** No unlocked `login.keychain-db`, Secure Enclave prompt, or
   `security unlock-keychain`. (This is the exact blocker that rules out Tart — [§6](#6-why-tart-is-not-viable-the-no-vm-rationale).)

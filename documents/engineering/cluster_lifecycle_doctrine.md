@@ -365,7 +365,7 @@ provider vCPU, accelerator allocation, node-root EBS bytes/count, and durable by
 their distinct quota fields; pod/CNI and driver-indexed CSI attachment slots must also fit. A missing or
 mismatched account key, unknown quota field, or one-short slot/quota observation makes growth refuse
 before mutation. This is the escape valve that lets a bounded
-budget grow, owned by [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns); "unbounded" node or
+budget grow, owned by [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm); "unbounded" node or
 storage growth is representable **only** through such a policy. The provider-side mechanics — provisioning EC2/managed
 nodes via Pulsar-driven Pulumi, and one provider-rounded per-PV EBS whose raw size matches the private PVC/PV
 provision (identity/cardinality 1:1:1, not logical-byte equality) and is **decoupled from the
@@ -498,7 +498,7 @@ unassigned Phase-N gate. Phase 28's acceptance forest uses child `kind` clusters
 - **A quorum change is a deliberate re-provision, never autoscale.** Changing the server arm
   (`Single`→`Ha3`, `Ha3`→`Ha5`) is a **declared topology change** reconciled toward — a deliberate
   re-provision, **never** triggered by a `ScalingPolicy`. The `ScalingPolicy` escape valve ([§8](#8-dynamic-node-provisioning);
-  [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)) exists only in
+  [resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)) exists only in
   `Rke2AgentPool.Autoscaled` and grows the **agent pool beyond its declared floor within its finite quota**; it
   can never mint or drop an etcd voter. A 0- or 2-server (no-quorum / split-brain) control plane has no
   constructor at all — **type-foreclosed unrepresentable** via the closed `Rke2Servers` union

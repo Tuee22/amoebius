@@ -390,7 +390,7 @@ EbsBackingMaterializationResult =
   ([illegal_state_catalog.md §3.19](../illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)) is rejected by that fold at the
   post-bind `provision-seal`; "unbounded"
   is representable **only** through a `Growable` scaling policy whose ceiling is itself a quota
-  ([resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-escape-valve-amoebius-owns)).
+  ([resource_capacity_doctrine.md §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)).
 - **Declared-vs-observed fail-closed check.** Before storage mutation or pod apply, the reconciler observes
   the actual host extent/EBS raw size, volume mode/fsType, mounted usable capacity, and provider quota. If raw
   bytes are smaller than `provisionedBytes`, usable bytes are smaller than `requiredUsableBytes`, presentation
