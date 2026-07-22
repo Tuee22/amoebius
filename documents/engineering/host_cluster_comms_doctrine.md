@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_21_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_35_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_25_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_41_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define exactly how the host amoebius binary and any host-level worker daemons talk to the
@@ -87,7 +87,7 @@ This takes option (c)'s security goal — *no malicious network traffic can use 
 achieves it by **network restriction** instead of by crypto or by a single bottlenecking socket, while
 keeping option (b)'s bandwidth headroom (a real socket per stream) without paying (b)'s mTLS tax.
 
-> **Honesty.** This is a *resolved design decision* for Phase 35, argued from the threat model and bandwidth
+> **Honesty.** This is a *resolved design decision* for Phase 41, argued from the threat model and bandwidth
 > economics below — **not** a tested or proven amoebius result. The loopback-NodePort pattern has a sibling
 > precedent in prodbox ([§6](#6-the-host-only-restriction-in-practice-and-its-sibling-precedent)), which is evidence from another system, not proof here. Status and gates live
 > only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
@@ -278,7 +278,7 @@ the comms-relevant requirement each substrate must satisfy:
 - **This generalizes a pattern proven in the sibling prodbox project**, where in-cluster Harbor is reached
   by host-origin clients at `127.0.0.1:30080` over a NodePort bound to loopback (prodbox CLAUDE.md,
   "Substrate Equivalence"). That is **evidence from another system, not proof in amoebius** — amoebius has
-  not yet built Phase 35. It is precedent for *feasibility*, not a tested amoebius guarantee.
+  not yet built Phase 41. It is precedent for *feasibility*, not a tested amoebius guarantee.
 - **The DSL never lets a substrate "fix" a missing piece by widening exposure.** If a substrate's node
   networking makes the loopback binding awkward, the resolution is to extend that substrate's installer to
   honor the host-only contract — not to publish the port wider. Substrate equivalence is structural
@@ -339,7 +339,7 @@ secrets-by-name, never the method.
 
 This document is normative host↔cluster comms doctrine only. Delivery sequencing, completion status, and
 validation gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) — host
-compute daemons (the Apple-Metal / Windows-CUDA Pulsar+MinIO peers) land in **Phase 35**. This doc never
+compute daemons (the Apple-Metal / Windows-CUDA Pulsar+MinIO peers) land in **Phase 41**. This doc never
 maintains a competing status ledger; it states the target shape and links back for status.
 
 ---

@@ -2,7 +2,7 @@
 
 **Status**: Reference only
 **Supersedes**: N/A
-**Referenced by**: README.md, documents/engineering/README.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md
+**Referenced by**: documents/engineering/README.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md
 **Generated sections**: none
 
 > **Purpose**: Top-level index of the amoebius documentation — the two doctrine families

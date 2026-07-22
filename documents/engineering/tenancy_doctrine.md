@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the amoebius tenant axis — the first-class `TenantId` orthogonal to the cluster axis, the `TenantSpec`/`UserSpec`/`RoleBinding` types by which a valid `InForceSpec` cannot name a foreign tenant's resource, cross-tenant sharing as an append-only revocable capability edge (never a re-tag), the rule that provider RBAC is derived from the tenant→role graph rather than authored, and the tenant-admin surface that reduces to a scope-narrowed admin mutation.
@@ -150,9 +150,9 @@ equality; equal bytes or a provider version alone never establish content equali
 old, new, failed-action, rollback, and execution capacity until action readback and old-target cleanup succeed.
 No caller-authored prior `Provisioned*` value is transition input.
 
-Phase 23 implements and gates provider **administrative** apply/readback for all six arms. For Pulsar this means
-tenant/namespace/ACL state only. The authenticated native-client produce/consume round trip belongs to Phase 24,
-after `amoebius-pulsar` exists; Phase 23 must record that data-path check as unverified rather than inferring it
+Phase 27 implements and gates provider **administrative** apply/readback for all six arms. For Pulsar this means
+tenant/namespace/ACL state only. The authenticated native-client produce/consume round trip belongs to Phase 28,
+after `amoebius-pulsar` exists; Phase 27 must record that data-path check as unverified rather than inferring it
 from administrative convergence.
 
 There is no DSL surface with which to hand-author a Vault policy, a Pulsar ACL, or an SQL grant — precisely as there is none for a NetworkPolicy. A hand-authored, un-derived provider grant is the RBAC face of the derive-don't-author discipline catalogued for NetworkPolicies and tolerations ([illegal_state_catalog.md §4.4](../illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally), [§3.22](../illegal_state/illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration)); a *cross-tenant* binding is foreclosed as a cross-tenant reference ([§3.8](../illegal_state/illegal_state_security.md#38-cross-tenant-references-and-literal-secrets), technique [§4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)).
@@ -169,7 +169,7 @@ A tenant administrator creates tenants, users, and role bindings through the *sa
 
 The scoping is the same projection type that bounds a child cluster: a tenant-admin's action is typed `TenantSpec t` and can only append to or modify `project(spec, t)`. Because `Ref t1 a → Ref t2 a` has no constructor, a tenant-admin's mutation **structurally cannot touch another tenant's or the cluster's subtree**. This is the multi-tenant generalization of the single-operator rule that the cluster is driven only through the singleton admin REST: the root operator's `dhall update` mutates the forest; a tenant-admin's scope-narrowed `dhall update` mutates only its own `TenantSpec t`.
 
-A browser front end (a tenancy-administration single-page app) is a *client* of this surface, not a separate doctrine: it renders the typed operations above and submits their fragments through the admin REST. It is distinct from the Phase-13 composition of single-page apps *as deployed workloads* ([../../DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md](../../DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md)); the two share the term "SPA" and nothing else.
+A browser front end (a tenancy-administration single-page app) is a *client* of this surface, not a separate doctrine: it renders the typed operations above and submits their fragments through the admin REST. It is distinct from the Phase-16 composition of single-page apps *as deployed workloads* ([../../DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md](../../DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md)); the two share the term "SPA" and nothing else.
 
 **Reach, though, is not the operator's private channel.** The operator's admin NodePort is node-local and never wild ([bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api), the admin-plane reach class); a tenant-admin — and its SPA — is a *remote* principal, so it reaches this surface as an **authenticated, Keycloak-fronted client of the wild edge** ([platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), whose scope-narrowed `dhall update` is mediated to the singleton by an in-cluster tenant-admin service — **never** by exposing the operator's node-local admin NodePort to the wild. "The *same* admin control plane" therefore means the same typed `dhall update` semantics and the same two DSL gates, **not** the same transport: the operator's reach is private/node-local, the tenant-admin's is Keycloak-authenticated wild ingress narrowed to `project(spec, t)`.
 

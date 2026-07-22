@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/substrate_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the amoebius **declared** compute-engine axis — the `ComputeEngine`
@@ -34,7 +34,7 @@ topology it induces; it owns **no** substrate names, no detection, no VM-provide
 numbers (those are [substrate_doctrine.md](./substrate_doctrine.md) and
 [resource_capacity_doctrine.md](./resource_capacity_doctrine.md)).
 
-Everything below is **design intent for Phase 4** (the type discipline) with runtime realization in Phases 28/29/30. Status and gates live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
+Everything below is **design intent for Phase 4** (the type discipline) with runtime realization in Phases 32/33/34. Status and gates live only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
 
@@ -246,7 +246,7 @@ the virtualization provider.
 - **Honesty.** The witness demand is type-foreclosed (no constructor). That the Lima/WSL2 VM *actually boots* and
   presents a working kernel is runtime-checked, owned by
   [substrate_doctrine.md §4](./substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux)
-  and exercised in Phase 35.
+  and exercised in Phase 41.
 
 ---
 
@@ -583,7 +583,7 @@ This doctrine owns the *shape* of a legal cluster; two siblings own what rides o
 > **Honesty.** Everything here is Phase-0 design intent. The type demands ([§3](#3-the-linuxhost-witness-rke2kind-on-a-host-with-no-linux-node-is-uninhabitable)-[§5](#5-the-compatibility-relation-technique-47-only-compatible-pairs-have-a-constructor)) are type-foreclosed/decode-foreclosed
 > spec-layer properties *when implemented as specified* (Phase 4); the runtime residue — the VM actually
 > booting, N rke2 nodes actually joining on N hosts, an EKS cluster actually coming up — is runtime-checked, owned by
-> the Phase 35/29/30 gates and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Where a mechanism
+> the Phase 41/33/34 gates and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md). Where a mechanism
 > generalizes hostbootstrap's virtualization providers or prodbox's EKS reality, that is sibling evidence,
 > not amoebius proof ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
@@ -594,9 +594,9 @@ This doctrine owns the *shape* of a legal cluster; two siblings own what rides o
 This document is normative topology doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the `ComputeEngine` /
 `LinuxHost` / `Topology` types and the compatibility relation land in **Phase 4** (with the negative `.dhall`
-gate); the Lima `LinuxHost` witness is exercised on **Phase 35** (`apple`); live kind topology lands in
-**Phases 14/28**, while live multi-node rke2 remains an explicitly unassigned Phase-N gate; the `Managed Eks`
-arm lands in **Phase 30**. This doc never maintains a competing status ledger; it
+gate); the Lima `LinuxHost` witness is exercised on **Phase 41** (`apple`); live kind topology lands in
+**Phases 17/32**, while live multi-node rke2 remains an explicitly unassigned Phase-N gate; the `Managed Eks`
+arm lands in **Phase 34**. This doc never maintains a competing status ledger; it
 states the target shape and links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
 ---

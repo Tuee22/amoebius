@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, documents/README.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, documents/README.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: The mechanism slice of the illegal-state catalog — the seven reusable typing techniques that
@@ -31,8 +31,8 @@ below cite it.
 
 Everything here is **design intent**, not a tested amoebius result: the type discipline it describes (the spec
 composes; no illegal value is constructible) is a **Tier-1** (design-time / in-process) property targeted for
-in-process validation in the **pre-cluster gates (Phases 4–9)** (Dhall Gate 1 `dhall type` + the Haskell decoder Gate 2 + QuickCheck), while
-its **runtime enforcement** remains **Phase 22** (Tier 2). Status and gates live only in
+in-process validation in the **pre-cluster gates (Phases 4–13)** (Dhall Gate 1 `dhall type` + the Haskell decoder Gate 2 + QuickCheck), while
+its **runtime enforcement** remains **Phase 26** (Tier 2). Status and gates live only in
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -328,7 +328,7 @@ are three layers, and a conformant claim names which one it is reaching:
 terms: **Tier-1 corresponds to Registers 1–2** and **Tier-2 to Register 3** — one pre-cluster/runtime boundary
 under two names.) Layers 1–2 (`type-foreclosed` + `decode-foreclosed`) are the **Tier-1** design-time /
 in-process integrity band — the spec composes and the type discipline holds in the abstract — validated
-**in-process in the pre-cluster gates (Phases 4–9)** (Dhall Gate 1, Haskell decoder Gate 2, QuickCheck,
+**in-process in the pre-cluster gates (Phases 4–13)** (Dhall Gate 1, Haskell decoder Gate 2, QuickCheck,
 bind/expand, the opaque provision seal, and `renderAll` goldens). Layer 3
 (`runtime-checked`) is **Tier-2** runtime-enforcement integrity — that the running cluster enforces what the spec
 composed — and stays **deferred and UNVERIFIED** until its live real-resource phase (owned by
@@ -370,7 +370,7 @@ growing capacity, and the cloud honoring the quota — are always runtime-checke
 [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the testing doctrine, never asserted here.
 
 > **Honesty.** amoebius has built no phase yet. Every `type-foreclosed` and `decode-foreclosed` claim above is the *intended*
-> **Tier-1** (design-time / in-process) property of the type discipline — targeted for in-process validation in the **pre-cluster gates (Phases 4–9)**,
+> **Tier-1** (design-time / in-process) property of the type discipline — targeted for in-process validation in the **pre-cluster gates (Phases 4–13)**,
 > not a tested result; the **Tier-2** `runtime-checked` residue is explicitly deferred to its live phase. Where a technique
 > generalizes a behaviour proven in prodbox (single-owner SSoT, Keycloak-owns-ingress), that proof is
 > evidence from a sibling system, not proof in amoebius.
@@ -407,7 +407,7 @@ The five loci:
    residual teeth of the [§4.1](#41-pvcpv-binding-by-construction)–[§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
    `type-foreclosed` foreclosures actually land.
 3. **`provision-seal` — post-bind whole-deployment provisioning returns `Left`.** Gate 2 has already produced
-   decoded, unprovisioned declarations. Phase 8 expands the complete source set and `provision` runs every
+   decoded, unprovisioned declarations. Phase 10 expands the complete source set and `provision` runs every
    capacity, placement, storage/retention, provider-quota, accelerator-count, and net-VRAM fold against the
    exact target inventory. Failure returns `ProvisionError`; success alone constructs the opaque
    `ProvisionedSpec`. This is the concrete locus for the whole-deployment face of `decode-foreclosed`.
@@ -433,7 +433,7 @@ monitor field, the absent `Off`/`Public` arms), `Gate-2-decoder` (the coverage /
 `rendered-output-golden` (the derived rules/panels in the emitted objects), and `live-effect` (that the alert actually
 fires) — and the foreclosure *layer* of each part is stated separately in the entry. The loci also map loosely onto
 the two-tier band: `Gate-1-editor`, `Gate-2-decoder`, `provision-seal`, and `rendered-output-golden` are
-**Tier-1** design-time / in-process gates (validated in the **pre-cluster band, Phases 4–9**), while
+**Tier-1** design-time / in-process gates (validated in the **pre-cluster band, Phases 4–13**), while
 `live-effect` is the **Tier-2** runtime-enforcement residue
 deferred to its live phase.
 
@@ -472,5 +472,5 @@ about the running cluster ([§2](./illegal_state_catalog.md#2-the-load-bearing-l
 - [Pulumi IaC Doctrine](../engineering/pulumi_iac_doctrine.md) — route53 / zerossl name→address binding ([§4.5](#45-content-address-totality--names-are-total-functions-of-content))
 - [Chaos / Failover Doctrine](../engineering/chaos_failover_doctrine.md) — the `runtime-checked` / `live-effect` residue (the honest limit)
 - [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) — proven/tested/assumed honesty discipline
-- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — status, gates, and the Tier-1 (Phases 4–9) / Tier-2 (Phase 22) tier split
+- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — status, gates, and the Tier-1 (Phases 4–13) / Tier-2 (Phase 26) tier split
 - [Engineering Doctrine Index](../engineering/README.md)

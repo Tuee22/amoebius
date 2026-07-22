@@ -26,7 +26,7 @@ The material this slice deliberately does **not** restate lives with its owners:
   the **three-layer foreclosure** model (type-foreclosed / decode-foreclosed / runtime-checked, [§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
   and the **validation-locus axis** itself are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md).
   The five loci referenced below — `Gate-1-editor` (fails `dhall type` at authoring time), `Gate-2-decoder`
-  (the total decoder returns `Left`), `provision-seal` (post-bind Phase-8 provision returns a `ProvisionError`
+  (the total decoder returns `Left`), `provision-seal` (post-bind Phase-10 provision returns a `ProvisionError`
   before any `ProvisionedSpec` exists), `rendered-output-golden` (caught by a golden test on the *rendered*
   manifest), and `live-effect` (only at reconcile / runtime) — are defined there; this slice only names, per
   entry, where each illegal state is caught.

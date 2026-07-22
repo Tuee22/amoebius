@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for delivery as **typed composition on primitives amoebius already
@@ -283,7 +283,7 @@ data ProvisionedRolloutWork       -- private constructors only
   overlap—before a DDL statement. The migrate phase uses only the private `ProvisionedSchemaMigration`,
   migrates and **verifies** the copy, and only a later phase retires the old — with the
   retire step inheriting the durable-data-deletion prohibition. This is the delivery home of the schema-migration
-  half of **Phase 26** (release lifecycle); the remaining manifest-change-correctness hardening stays in
+  half of **Phase 30** (release lifecycle); the remaining manifest-change-correctness hardening stays in
   [DEVELOPMENT_PLAN/later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md). The schema-migration engine is a
   `RolloutPhase`, and the manifest-change-correctness half hardens the typed diff of
   [manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed).
@@ -311,7 +311,7 @@ data ProvisionedRolloutWork       -- private constructors only
 > so a `RolloutPhase` applies **rendered objects**, never a `helm install`. The pattern is borrowed; the Helm
 > is dropped.
 
-> **Layer / honesty.** The `RolloutPlan` is **Phase-26 design intent** enacted by the Phase-16 SSA reconciler,
+> **Layer / honesty.** The `RolloutPlan` is **Phase-30 design intent** enacted by the Phase-19 SSA reconciler,
 > which is itself unbuilt. Ordering, readiness-gating, canary weights, and rollback are real, documented
 > Kubernetes / Gateway-API mechanisms; *that amoebius wires them into this plan type* is specified here and
 > unproven until the phase lands.
@@ -324,7 +324,7 @@ jitML's `src/JitML/Cluster/Helm.hs` defines exactly this shape — a `HelmPhase`
 demonstrated in a sibling** (but bound to Helm, which amoebius drops). jitML's `src/JitML/Bootstrap.hs` splits its
 rollout in two around the Postgres schema grant (`livePreGrantSubprocessesForPort → postgresSchemaGrantIO →
 livePostGrantSubprocessesForPort`), which is **the schema-migration-as-a-phase shape, LIVE in a sibling** and
-the concrete evidence behind the Phase-26 rollout shape. By contrast, hostbootstrap's only delivery gate
+the concrete evidence behind the Phase-30 rollout shape. By contrast, hostbootstrap's only delivery gate
 is the build-time `check-code`, with no rollout-phase or promotion concept at all. All sibling evidence, not
 amoebius results.
 
@@ -353,8 +353,8 @@ elsewhere:
 completion status, and validation gates are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the environment/promotion values compose with the SSA reconciler landing in
-**Phase 16** and the test-topology / evidence-ledger work in **Phase 36**; the DB-schema-migration
-`RolloutPhase` lands in **Phase 26**, while the remaining manifest-change-correctness hardening and the generic
+**Phase 19** and the test-topology / evidence-ledger work in **Phase 42**; the DB-schema-migration
+`RolloutPhase` lands in **Phase 30**, while the remaining manifest-change-correctness hardening and the generic
 third-party extension mechanism remain in [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md). This doc states the target shape and links back for status.
 
 ---
@@ -376,12 +376,12 @@ third-party extension mechanism remain in [Later Phases](../../DEVELOPMENT_PLAN/
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) the control-plane singleton that runs promote/rollout; the host daemon that builds
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — reconciler tiers (a) cloud-IaC and (b) the tag-discovery host reconciler, distinct from tier (c)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
-- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — the remaining manifest-change-correctness hardening after Phase 26 homes the schema-migration rollout
+- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — the remaining manifest-change-correctness hardening after Phase 30 homes the schema-migration rollout
 - [Documentation Standards](../documentation_standards.md)
 
 > **Honesty.** Everything here is Phase-0 **reference-only design intent**. The `Release` ledger, the
 > `Environment` promotion pointer, the `PromotionGate`, and the `RolloutPlan`/`RolloutPhase` are **unbuilt in
-> amoebius** and compose primitives that are themselves Phase-16-and-later. The shapes are **generalized from
+> amoebius** and compose primitives that are themselves Phase-19-and-later. The shapes are **generalized from
 > siblings** — jitML's phased readiness-gated rollout and its pre/post-grant schema phase, infernix's
 > `.ready`-gated artifact, the content store's ETag-CAS `trial` pointer — each of which is **sibling evidence,
 > not proof in amoebius**. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every

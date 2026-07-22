@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_15_base_image_registry.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_32_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_18_base_image_registry.md, DEVELOPMENT_PLAN/phase_23_platform_backbone.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_36_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define how amoebius bakes third-party service binaries into one multi-arch base container and
@@ -145,7 +145,7 @@ time on the missing arch, not at publish time. So amoebius treats a multi-arch i
   inherits prodbox's retry-then-fail-loud publication posture (`local_registry_pipeline.md` §5); for its
   multi-arch images the unit of success is the complete manifest list.
 
-> **Honesty.** Fail-closed atomic publication is the *specified* contract for Phase 15, not a tested amoebius
+> **Honesty.** Fail-closed atomic publication is the *specified* contract for Phase 18, not a tested amoebius
 > result. buildx's single-push manifest-list behaviour is a real registry mechanism; that amoebius wires it
 > exactly this way is design intent until validated. See
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
@@ -156,7 +156,7 @@ time on the missing arch, not at publish time. So amoebius treats a multi-arch i
 
 This is an explicitly open design question: whether to implement a versioned tagging system or just use
 `:latest`. It is flagged here as a
-[DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) decision (Phase 15); this section records the **trade and
+[DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) decision (Phase 18); this section records the **trade and
 the recommended default**, not a frozen mechanism.
 
 amoebius's core properties are fungibility and reproducibility — a cluster that was destroyed must rebind to
@@ -259,7 +259,7 @@ build, on-host MSL compilation, not the container image.)
   in which host worker nodes exist precisely for substrate-specific hardware
   ([substrate_doctrine.md](./substrate_doctrine.md)).
 - **Why in-pod is the eventual target, not the v1 default.** An in-pod builder removes the host build
-  dependency for cloud-managed substrates that have no operator host (the Phase 30 stateless in-cluster
+  dependency for cloud-managed substrates that have no operator host (the Phase 34 stateless in-cluster
   daemon). The cost is a builder pod that needs privileged build access and its own multi-arch story —
   deferred, not adopted by default.
 - **The build location does not change the output contract.** Wherever it runs, the builder emits the [§3](#3-buildx-multi-arch--amd64-and-arm64-one-manifest-list)
@@ -304,8 +304,14 @@ fall into two classes, and the third-party services are **baked**, not mirrored.
   pod-level runtime role. infernix and jitML are linked in as extension
   libraries, not separate images.
 - **The infernix/jitML engine runtimes are jit-resolved, not baked.** What the base image *does* bake for the
-  ML layer is the **jit-build resolver and its build toolchain** — the source-build inputs (`nvcc`, `g++`, the
-  Apple-Metal bridge, the pinned compilers) the resolver needs to build an engine from source on a cache miss.
+  ML layer is the **jit-build resolver and its build toolchain** — the Linux source-build inputs (`nvcc`,
+  `g++`, the pinned compilers) the resolver needs to build an engine from source on a cache miss. The
+  **Apple-Metal bridge is not among the baked inputs**: it is a macOS Mach-O **host-resident** dylib source-built
+  headless *on the Apple host* with `/usr/bin/clang` in the apple-substrate phase (Phase 41 —
+  [apple_metal_headless_builds.md §1](./apple_metal_headless_builds.md#1-the-commitment-headless-on-host-no-vm),
+  [§3.1](./apple_metal_headless_builds.md#31-fixed-host-metal-bridge)) and **cannot run in a Linux container or a
+  Linux VM**, so it is **never baked into the multi-arch `linux/amd64`+`arm64` base image** — the base image bakes
+  only the Linux resolver toolchain, and the Metal bridge is a Phase-41 on-host build.
   The engine *payloads* themselves (`llama.cpp`, `whisper.cpp`, the ONNX runtime, Audiveris, the adapters) are
   **named catalog identities** the shared `jit-build` resolver **downloads-or-builds on first miss into the
   `CacheBudget`-bounded content-addressed cache** — none is baked into the image, and none is authored by URL.
@@ -387,10 +393,10 @@ which forces a concrete divergence from prodbox's mechanics:
 prodbox had a real chicken-and-egg: it could not publish into a Harbor that was not yet up, and Harbor could
 not come up if its own prerequisite images could only be pulled from a Harbor that did not yet exist.
 **Baking plus one typed action dissolves this.** The registry is the single-binary `distribution`, baked into
-the base image, so there is no pre-registry public pull and no third-party image mirror. But Phase 15 still
+the base image, so there is no pre-registry public pull and no third-party image mirror. But Phase 18 still
 precedes the full scheduler/reconciler deployment and therefore cannot pretend a standalone service is a
 whole `ProvisionedSpec`. It constructs an explicit resource-complete `ProvisionedBootstrapRegistry`, validates
-it against a fresh Phase-14 snapshot, and mints a single-use `BootstrapRegistryAction` that side-loads the
+it against a fresh Phase-17 snapshot, and mints a single-use `BootstrapRegistryAction` that side-loads the
 image and initializes only the exact registry/proxy object domain. The action uses the same package-private
 source serializer as `renderAll`; it exposes no public per-service renderer. Enactment CAS-consumes its
 snapshot-indexed token and returns a receipt on both applied and ambiguous outcomes; an ambiguous response
@@ -403,7 +409,7 @@ move to MinIO's S3 driver after MinIO is serving
 ([platform_services_doctrine.md §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering)) —
 is a separate ordinary migration, not this bootstrap cycle. This doc records the build-side consequence:
 
-- **The base image is built and side-loaded before registry object initialization.** Phase 14's empty cluster
+- **The base image is built and side-loaded before registry object initialization.** Phase 17's empty cluster
   already exists. The only upstream contact is the base-image *build* (apt/binary/source downloads on the
   builder, [§2](#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)/[§7](#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)); once that image is admitted and side-loaded, the registry/proxy
   run from it with no public pull. The cluster-bring-up readiness edge
@@ -426,7 +432,7 @@ is a separate ordinary migration, not this bootstrap cycle. This doc records the
 
 ## 10. Honesty and planning ownership
 
-> **Honesty.** Every prescriptive statement here is *design intent for Phase 15*
+> **Honesty.** Every prescriptive statement here is *design intent for Phase 18*
 > (the `distribution` registry + baked service binaries + buildx multi-arch amoebius images,
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)), generalized from a pipeline proven
 > in `prodbox` but **not yet built in amoebius**. Per

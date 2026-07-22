@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, documents/engineering/README.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, documents/engineering/README.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the Kubernetes namespace partition — one namespace per platform

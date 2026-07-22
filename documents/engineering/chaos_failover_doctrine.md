@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_12_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_24_pulsar_client.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_28_pulsar_client.md, DEVELOPMENT_PLAN/phase_29_content_store_workflow.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/phase_32_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_33_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_36_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: The amoebius concurrency-and-failover doctrine — *Extract* the decision into a value, *Model* the protocol into a proof, *Inject* faults into the deployment — plus the proven/tested/assumed ledger and the invariant-confluence **cross-cluster boundary** that governs asynchronous geo-replication and gateway migration (both `Planned` and `Failover`), the **one** boundary where a per-system proof obligation concentrates on amoebius itself.
@@ -19,7 +19,7 @@ codebase uses: pure functions and ADTs, the type system, QuickCheck, the **Plan 
 generalization** of the prodbox sibling's chaos-hardening doctrine
 (`/home/matthewnowak/prodbox/documents/engineering/chaos_hardening_doctrine.md`), lifted from
 "the prodbox gateway single-writer" to "the amoebius control-plane singleton," and from prodbox's
-*forward-looking* async-replication appendices to amoebius's **first-class Phase-29 cross-cluster failover
+*forward-looking* async-replication appendices to amoebius's **first-class Phase-33 cross-cluster failover
 obligation**.
 
 **One SSoT line, held throughout.** This doctrine owns the **method**, the **ledger discipline**, and the
@@ -39,7 +39,7 @@ substrate by [content_addressing_doctrine.md](./content_addressing_doctrine.md).
 narrative in those subsystems but never restates their normative content. Status, phase order, and
 adoption sequencing live only in [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
-> **Honesty up front.** amoebius has not built Phases 2–11. Every prescriptive statement below is **design
+> **Honesty up front.** amoebius has not built Phases 2–14. Every prescriptive statement below is **design
 > intent**, and every result attributed to prodbox is **evidence from a sibling system**, not a tested or
 > proven amoebius result. The proven/tested/assumed rule ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline))
 > is this document's own moral core ([§12](#12-the-moral-core--proven-tested-assumed)); it is enforced on the document itself.
@@ -434,7 +434,7 @@ are owned by
 proven for the model at scope, needing no runtime); model↔code correspondence **holds by construction** there
 (`interpret` and `emitTLA` render one `Model`, so no correspondence table or divergence record is deferred),
 while the residual **runtime-fidelity** check — that the built forest's real physics hold — is the **Tier-2**
-obligation confirmed by **Register-3 chaos injection** in **Phase 29**. The sibling prodbox spec
+obligation confirmed by **Register-3 chaos injection** in **Phase 33**. The sibling prodbox spec
 (`/home/matthewnowak/prodbox/documents/engineering/tla/gateway_orders_rule.tla`, six invariants explored to
 ~4.4M states at scope 3, `prodbox dev tla-check`) is **evidence from a sibling system, not an amoebius
 proof** — its invariants `UniqueOwner` / `NoTugOfWar` / `SingletonTakeover` are exactly the shape amoebius
@@ -664,7 +664,7 @@ reported as proven. Keep this ledger explicitly:
 |---|---|---|---|
 | GADT-indexed state machine | Illegal in-process transitions are compile errors | **Proven** (machine-checked, exhaustive) | Anything across processes |
 | **Extract** — pure decision + property test | The branch is a total function of typed inputs; unknowns and distinguished states are explicit; safety-critical freshness is fenced | **Proven** for purity / totality / fence wiring; **tested** (sampled) for the property unless the input space is finite and exhausted | That the protocol composing these decisions is sound; that an unfenced observation is current |
-| **Model** — design model-checking | The *algorithm* upholds the (possibly *conditional*, R7) **safety** invariant and, under a named fairness, the **liveness** property, under modeled crash/reorder, within scope | **Proven for the model** at TLC-green — safety on every reachable state, liveness (TLC-only) **under the assumed fairness `F`** (fairness-sensitivity checked); correspondence holds **by construction** but only between the spec and the **decision core** `interpret` (one `Model` → `interpret` + `emitTLA`), **not** the effectful daemon; the three instruments over one `Model` = **one** protocol proof (TLC) + renderer cross-checks, not three; **assumed** for runtime fidelity — bridged early by **trace validation** (Register 2.5 sim, Register 3 live) and confirmed by Register-3 chaos (Phase 29) — and for actor counts beyond scope | That the built runtime's real physics refine the model; behaviour above scope; real-time / clock-skew / fairness premises (R8, F) |
+| **Model** — design model-checking | The *algorithm* upholds the (possibly *conditional*, R7) **safety** invariant and, under a named fairness, the **liveness** property, under modeled crash/reorder, within scope | **Proven for the model** at TLC-green — safety on every reachable state, liveness (TLC-only) **under the assumed fairness `F`** (fairness-sensitivity checked); correspondence holds **by construction** but only between the spec and the **decision core** `interpret` (one `Model` → `interpret` + `emitTLA`), **not** the effectful daemon; the three instruments over one `Model` = **one** protocol proof (TLC) + renderer cross-checks, not three; **assumed** for runtime fidelity — bridged early by **trace validation** (Register 2.5 sim, Register 3 live) and confirmed by Register-3 chaos (Phase 33) — and for actor counts beyond scope | That the built runtime's real physics refine the model; behaviour above scope; real-time / clock-skew / fairness premises (R8, F) |
 | **Simulate** — deterministic simulation (Register 2.5) | The pure decision upholds the invariant under in-process schedules against peer stubs (Tier-1, Phase 3); **and** the *built daemon/reconciler code*, run under `IOSim`/`IOSimPOR` against a **modeled faulty environment** (fake Pulsar/MinIO/apiserver/route53/Vault/clock), upholds the invariants under injected partition/reorder/redelivery/crash — deterministically replayable, no cluster | **Tested** — sampled schedules + injected environment faults; the modeled-environment's fidelity to the real substrate is **assumed** (discharged by a narrow Register-3 conformance suite) | Schedules/faults not explored; that the real Pulsar/k8s behave as the sim models them (Register 3); real-time physics |
 | **Inject** — live fault injection | The deployed forest survived the injected faults | **Tested** (the faults chosen), never proven | Faults/interleavings not injected; that the invariant is *sound* |
 | Synchrony / real-time assumption (R8) | The timing premise (clock skew, lease, heartbeat) is named, bounded, monitored | **Assumed** — monitored at runtime, never proven by any move | Behaviour when the bound is exceeded; that it holds in the field |
@@ -673,14 +673,14 @@ reported as proven. Keep this ledger explicitly:
 (Three further rows — the cross-boundary consistency premise, the failover budget, and the
 invariant-confluence classification — belong to the Second Axis and are recorded in [§19](#19-the-cross-boundary-ledger-and-conformance-rows).)
 
-**Applied to amoebius today, the ledger is blunt — and that is by design.** Nothing in Phases 2–11 is
+**Applied to amoebius today, the ledger is blunt — and that is by design.** Nothing in Phases 2–14 is
 built. So **every** layer above is, for amoebius, **UNVERIFIED** pending implementation; the only
 *proven* facts available are sibling prodbox results, which are **evidence, not amoebius proof.** The
 [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md) phase-discipline rule makes this binding: *every
 validation emits a proven/tested/assumed ledger artifact, and skipping an applicable test move marks that
 correctness layer UNVERIFIED, never green.* When the gateway-migration design-model is TLC-checked
 (the pre-cluster formal phase, Register 1), the multi-cluster runtime is built, and its model↔code correspondence is
-closed (Phase 29, the deferred Tier-2), its ledger will read like prodbox's; until then, claiming the
+closed (Phase 33, the deferred Tier-2), its ledger will read like prodbox's; until then, claiming the
 singleton is "hardened" because prodbox proved a sibling invariant is exactly what this section forbids.
 
 The rule, stated once and meant absolutely: **never report a tested, assumed, or merely argued result as
@@ -826,7 +826,7 @@ honoured by a **named, weaker-but-honest** instrument, never left as an unremark
 idempotency (R3)** is discharged not by a separate model-check but by a finite decision property of the dedup
 fold plus a **Register-2.5 deterministic-simulation** run (the real fold under `IOSimPOR` against a modeled
 broker with injected reorder/duplicate/crash-mid-ack — [deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md),
-Phase 24; Pulsar's own consensus is delegated, not modelled); the **impossibility-bounded (R7)** and
+Phase 28; Pulsar's own consensus is delegated, not modelled); the **impossibility-bounded (R7)** and
 cross-boundary rows ([§19](#19-the-cross-boundary-ledger-and-conformance-rows)) apply only to active-active
 schemas amoebius does **not** run, so their Models are **illustrative and deferred with no owning phase**
 (Appendix C says this of itself) and the cell reads "required *if that shape is built*." A **Model** cell is
@@ -842,7 +842,7 @@ explicit "deferred, no owning phase" — never by a silent gap.
 > that describes the subsystem, **the analysis can stop here** — Appendix A is the worked example. Read on only if
 > the subsystem's data is geo-replicated across more than one cluster with *asynchronous* replication between them.
 
-For amoebius this gate is not a rare edge case — it is **Phase 28**. The moment a parent spawns a child and
+For amoebius this gate is not a rare edge case — it is **Phase 32**. The moment a parent spawns a child and
 the two geo-replicate, the forest crosses this line, and the [§3](#3-the-defect-class--one-shape-two-disguises) defect returns in a new and more dangerous
 form. Recall the fourth blindness ([§5](#5-three-layers-and-the-blindness-that-binds-them)): **every move is blind to the cluster boundary unless the boundary
 is modeled in.** Extract's convergent fold is pure *because its input converges* — and is blind to the fact
@@ -1103,7 +1103,7 @@ silently violates under partition. Build the first kind, and record which kind w
 > cluster goes down mid geo-sync and the gateway is failed over to it?** It crosses the cluster boundary
 > (R1/[§17](#17-the-boundary-and-its-classifier), R9), rests on a bounded-staleness / data-loss premise and an explicit failover budget (R8, R9),
 > and reconciles divergent histories under an availability-first choice (R7). It is **forward-looking**:
-> amoebius runs no cross-cluster geo-replication today, but Phase 28 is exactly this shape, so the doctrine
+> amoebius runs no cross-cluster geo-replication today, but Phase 32 is exactly this shape, so the doctrine
 > works it through before the need is live.
 
 **The system.** Two sibling child clusters with the same parent geo-replicate a realtime workflow
@@ -1219,7 +1219,7 @@ replication-lag bound (R8/R9), monitored never proven; the PACELC latency-for-co
 runtime fidelity and behaviour beyond 2 clusters. **Under the two-tier schedule, the two-cluster
 design-model's safety/liveness properties are *proven for the model at scope 2* in Phase 3 (design-first), and
 model↔code correspondence holds by construction; the runtime fidelity (real physics) and live
-cross-cluster-failover-in-a-running-forest remain UNVERIFIED — the Tier-2 Phase-29 obligation, and the single
+cross-cluster-failover-in-a-running-forest remain UNVERIFIED — the Tier-2 Phase-33 obligation, and the single
 place the per-system proof concentrates.**
 
 **Appendix B rests on doctrine (zero orphans).**
@@ -1376,10 +1376,10 @@ needs it.
 
 ## Cross-references
 
-- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — phase order, adoption ownership, and validation closure (Phase 29 carries the cross-cluster failover proof). This doctrine maintains no competing status ledger.
+- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — phase order, adoption ownership, and validation closure (Phase 33 carries the cross-cluster failover proof). This doctrine maintains no competing status ledger.
 - [Documentation Standards](../documentation_standards.md) — the proven/tested/assumed honesty rule this doctrine owns.
 - [Engineering Doctrine Index](./README.md)
-- [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — SSoT for the concrete formal spec and invariant catalog (the Tier-1 design-model, authored design-first in Phase 3, covering **both** the `Planned` and `Failover` branches); model↔code correspondence holds by construction, and the runtime-fidelity confirmation is the deferred Tier-2 obligation (Phase 29, via Register-3 chaos) this doctrine's Model move requires.
+- [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — SSoT for the concrete formal spec and invariant catalog (the Tier-1 design-model, authored design-first in Phase 3, covering **both** the `Planned` and `Failover` branches); model↔code correspondence holds by construction, and the runtime-fidelity confirmation is the deferred Tier-2 obligation (Phase 33, via Register-3 chaos) this doctrine's Model move requires.
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the control-plane singleton (a Deployment `replicas=1`, single-instance delegated to k8s/etcd, no election).
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — graceful teardown (lossless) versus chaos-failover (bounded loss), and push-back on an unsatisfiable root `InForceSpec`.
 - [Gateway Migration Doctrine](./gateway_migration_doctrine.md) — the `GatewayMigration = <Planned | Failover>` taxonomy; the `Failover` branch is this doctrine's Second-Axis obligation, and its reconciliation-on-return is worked in Appendix B.

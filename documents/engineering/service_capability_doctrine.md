@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, DEVELOPMENT_PLAN/phase_32_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the abstraction by which amoebius application logic names abstract
@@ -120,7 +120,7 @@ the provider. But a union arm is not an adapter. amoebius **does not build a pro
 need**: the alternates are headroom in the type, not shipped code. Claiming MinIO is swappable for S3 *today*
 would be reporting a designed extension point as a built one.
 
-> **Honesty.** "One canonical provider, type admits alternates" is Phase 8 design intent. The alternate arms
+> **Honesty.** "One canonical provider, type admits alternates" is Phase 10 design intent. The alternate arms
 > are deliberately unbuilt; the canonical bindings above are the only providers amoebius implements. Status
 > lives only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
@@ -421,7 +421,7 @@ canonical provider deployed honestly at small scale, never a hand-special-cased 
 single-node `Sql` is a one-member Patroni cluster, never a bare `postgres` Pod. The dial got richer; it did
 not get bypassed.
 
-> **Honesty.** Per-cluster structural shapes are Phase 9 design intent. The sibling **prodbox** project is
+> **Honesty.** Per-cluster structural shapes are Phase 13 design intent. The sibling **prodbox** project is
 > evidence that typed records render the manifests a provider needs — its
 > `prodbox/src/Prodbox/Lib/Storage.hs` (sibling source)
 > renders `Namespace`/`PV`/`PVC`/`StorageClass` from a typed `ChartStorageSpec → ChartStorageBinding →
@@ -563,9 +563,9 @@ surface, never asserted here.
 This document is normative capability-model doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md),
 never restated here. For orientation only (the plan is authoritative): the **manifest generation + typed
-reconciler that render and apply a chosen shape** land with platform services in **Phase 16**, and the
+reconciler that render and apply a chosen shape** land with platform services in **Phase 19**, and the
 **capability abstraction itself — capability needs, the alternate-admitting provider binding, and per-cluster
-shapes** — lands with the DSL type families in **Phase 8**. This doc states the target shape and links back for
+shapes** — lands with the DSL type families in **Phase 10**. This doc states the target shape and links back for
 status.
 
 ---
@@ -586,7 +586,7 @@ status.
 - [Documentation Standards](../documentation_standards.md)
 
 > **Honesty.** Everything in this doctrine is Phase 0 design intent, specified before implementation:
-> manifest generation and the typed reconciler are Phase 16, and the capability abstraction is Phase 8. It is
+> manifest generation and the typed reconciler are Phase 19, and the capability abstraction is Phase 10. It is
 > generalized from evidence in the sibling **prodbox** project (typed-Haskell→Aeson→`kubectl apply` rendering,
 > a chart-platform planner) but **not yet built or proven in amoebius**, and prodbox itself names products and
 > enforces the very substrate-equivalence lint this doctrine reverses. Per

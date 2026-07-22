@@ -22,7 +22,7 @@ stay stable. It is not self-contained framing — it owns only the deep treatmen
   [`illegal_state_catalog.md`](./illegal_state_catalog.md) — referenced here, not restated.
 - The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three-layer foreclosure**
   ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the orthogonal question of *where* each state is caught —
-  `Gate-1-editor`, `Gate-2-decoder`, `provision-seal` (post-bind Phase-8 provision returns a `ProvisionError`
+  `Gate-1-editor`, `Gate-2-decoder`, `provision-seal` (post-bind Phase-10 provision returns a `ProvisionError`
   before any `ProvisionedSpec` exists), `rendered-output-golden`, `live-effect`) are owned by
   [`illegal_state_techniques.md`](./illegal_state_techniques.md) — referenced here, not restated.
 

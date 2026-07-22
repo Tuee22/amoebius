@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_11_boundary_fake_tool_harness.md, DEVELOPMENT_PLAN/phase_12_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_14_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_15_base_image_registry.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_17_retained_storage.md, DEVELOPMENT_PLAN/phase_18_vault_pki.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_21_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_22_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, DEVELOPMENT_PLAN/phase_24_pulsar_client.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_27_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_31_determinism_kernel.md, DEVELOPMENT_PLAN/phase_32_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_33_infernix_lift.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_35_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_18_base_image_registry.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_21_retained_storage.md, DEVELOPMENT_PLAN/phase_22_vault_pki.md, DEVELOPMENT_PLAN/phase_23_platform_backbone.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_25_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/phase_28_pulsar_client.md, DEVELOPMENT_PLAN/phase_29_content_store_workflow.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/phase_31_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_32_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_33_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_36_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_39_infernix_lift.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_41_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: The rulebook for the amoebius `DEVELOPMENT_PLAN/` suite — the canonical file layout, the
@@ -54,7 +54,7 @@ ALL-CAPS exception is `README.md`). The canonical set:
 | `system_components.md` | Target component inventory: surface → owning doctrine → planned module path. |
 | `substrates.md` | Substrate registry + per-phase substrate map; sole home of generated tables. |
 | `legacy_tracking_for_deletion.md` | The migration-removal ledger (what the convergence retires, and when). |
-| `phase_NN_<slug>.md` | One document per phase, zero-padded `NN` for sort order (`phase_00_documentation_suite.md` … `phase_37_spa_live_deploy.md`). |
+| `phase_NN_<slug>.md` | One document per phase, zero-padded `NN` for sort order (`phase_00_documentation_suite.md` … `phase_43_spa_live_deploy.md`). |
 | `later_phases.md` | The in-scope, high-numbered phases not yet given their own document. |
 
 This deviates from prodbox's hyphenated names (`phase-3-gateway-dns.md`) on purpose: amoebius's
@@ -233,12 +233,14 @@ statement is design intent.
 in **exactly one register** ([`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md),
 [`testing_doctrine.md` §2](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing)):
 **Register 1** (pure/golden, in-process, no cluster), **Register 2** (boundary integration with fake tools, no
-cluster), and **Register 3** (live infrastructure) — with exactly two deliberate exceptions at the two ends of
+cluster), and **Register 3** (live infrastructure) — with exactly three deliberate exceptions at the two ends of
 the count: **Phase 0** (the documentation-lint gate) reaches **no** register (it validates text and the link
-graph, not amoebius behaviour), and **Phase 13** (the representational SPA phase) is the single gate that
-spans **two** — Register 1 (the composition property decodes) *and* Register 2 (the PureScript demo SPA against
-a faked backend), both in-process, no cluster. The pre-cluster band (phases 1–13, substrate `none`) discharges
-Registers 1–2; the live band (phases 14–37) is Register 3. **Rendering a plan / `--dry-run` must never require
+graph, not amoebius behaviour), and two gates each span **two** registers — **Phase 14** (the chain/Step kernel
++ `--dry-run` + boundary fake-tool harness) across Register 1 (the in-process `chain`/`Step` corpus) *and*
+Register 2 (the boundary fake-tool harness), and **Phase 16** (the representational SPA phase) across Register 1
+(the composition property decodes) *and* Register 2 (the PureScript demo SPA against a faked backend), both
+in-process, no cluster. The pre-cluster band (phases 1–16, substrate `none`) discharges
+Registers 1–2; the live band (phases 17–43) is Register 3. **Rendering a plan / `--dry-run` must never require
 live infrastructure.** The per-phase proven/tested/assumed ledger names the register(s) its gate reached; a
 Register-1/2 in-process ledger marks the Register-3 runtime layer UNVERIFIED and can never advance a production
 `PromotionGate`.
@@ -255,7 +257,7 @@ ledger (its result is *tested against a modeled environment*, with the environme
 substrate recorded **assumed**), which does not by itself advance a `PromotionGate`.
 
 A **design-proof / in-process phase** — one whose substrate is `none` ([§L](#l-one-substrate-discipline)) and whose gate is an in-process
-type/model check rather than a live-substrate run, e.g. the pre-cluster band, [phases 1–13](README.md) —
+type/model check rather than a live-substrate run, e.g. the pre-cluster band, [phases 1–16](README.md) —
 emits a ledger whose acceptance token reads **"spec-composition proven"** / **"proven for the model"**, never
 **"runtime proven"**: a green Dhall typecheck, Haskell decoder, or TLC run establishes that the spec composes
 and the protocol is sound in the abstract, not that any cluster enforces it. Front-loading such a design
@@ -295,10 +297,10 @@ split until each gate is single-substrate.
 **Two named forms satisfy the one-substrate rule without naming a fixed catalog member on the parent gate**, and
 both keep the discipline checkable rather than bending it:
 
-- **Deferred-to-generation** (Phase 36, `per generated test`). A gate that *emits* a test `.dhall` names the
+- **Deferred-to-generation** (Phase 42, `per generated test`). A gate that *emits* a test `.dhall` names the
   **rule** that each generated test is substrate-locked to exactly one substrate, chosen at generation time — the
   single-substrate property holds per generated artifact, not as a fixed member on the emitting gate.
-- **Parent-drives-provider** (Phase 30, `linux-cpu → provider`). The gate runs on one hardware substrate (the
+- **Parent-drives-provider** (Phase 34, `linux-cpu → provider`). The gate runs on one hardware substrate (the
   `linux-cpu` parent) and *targets* a provider it does not itself run — EKS is a **declared managed engine, not a
   detected substrate** ([`substrates.md` §2](substrates.md#2-substrate-inventory)). The single substrate the gate
   keys to is the parent's; the provider is a compute-engine axis, never a fifth substrate.

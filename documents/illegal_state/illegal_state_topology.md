@@ -23,7 +23,7 @@ It owns nothing but the faithful reproduction of these entries. The catalog **in
 owned by [`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques**, the
 **coverage matrix**, the **three foreclosure layers**, and the **validation-locus axis** (the orthogonal
 axis — `Gate-1-editor` / `Gate-2-decoder` / `provision-seal` / `rendered-output-golden` / `live-effect` — added
-on each entry below; `provision-seal` is post-bind Phase-8 provision returning a `ProvisionError` before any
+on each entry below; `provision-seal` is post-bind Phase-10 provision returning a `ProvisionError` before any
 `ProvisionedSpec`) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice references
 them and does not restate them.
 

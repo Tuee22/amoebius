@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_17_retained_storage.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_21_retained_storage.md, DEVELOPMENT_PLAN/phase_32_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_33_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for amoebius cluster bring-up and teardown across kind / rke2 / provider clusters — bootstrap, recursive **amoebic spawning**, graceful teardown-with-cleanup versus chaos-failover, push-back on an unsatisfiable root `InForceSpec`, dynamic node provisioning, and ephemeral spin-up/down with deterministic rebind.
@@ -88,8 +88,8 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
   readiness-edge rule (a condition never a duration; the bootstrap tier's `discover`/`RuntimeWitness` gates)
   is owned by [readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md).
 - **Bring-up is itself a reconcile.** "Come up" is not a one-shot script; it is the [§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) reconciler driving
-  the world toward the `.dhall`. Host-level idempotent cluster bring-up is first accepted in Phase 14; the
-  Phase-16 SSA reconciler, driven from the `.dhall` by the Phase-22 singleton, owns in-cluster convergence.
+  the world toward the `.dhall`. Host-level idempotent cluster bring-up is first accepted in Phase 17; the
+  Phase-19 SSA reconciler, driven from the `.dhall` by the Phase-26 singleton, owns in-cluster convergence.
 - **A stretched rke2 agent joins only once it is reachable.** Growing a cluster with a **stretched** agent —
   a full member node whose declared network-locality `Site` differs from the control-plane servers' `Site`
   ([substrate_doctrine.md §8.3](./substrate_doctrine.md#83-site-the-declared-network-locality-axis-cluster-nodes-and-host-worker-hosts)) —
@@ -178,7 +178,7 @@ Two encapsulation rules make the forest safe to reason about:
   [monitoring_doctrine.md](./monitoring_doctrine.md).
 
 > **Honesty.** Amoebic spawning, per-child unseal, and geo-replicated children are *specified* here and
-> scheduled for Phase 28; nothing in this section is a tested amoebius result. Status and gates live only in
+> scheduled for Phase 32; nothing in this section is a tested amoebius result. Status and gates live only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and
 > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)).
@@ -427,7 +427,7 @@ sibling's** reconciler-with-predicates doctrine
   are owned by [daemon_topology_doctrine.md](./daemon_topology_doctrine.md).
 
 > **Honesty.** This reconciler model is *proven in prodbox* for AWS teardown; that is **evidence from a
-> sibling system, not proof in amoebius**, which has not built Phases 2–3/9–10. Read every prescriptive
+> sibling system, not proof in amoebius**, which has not built Phases 2–3/13–14. Read every prescriptive
 > statement here as design intent, never as a tested amoebius result
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
@@ -452,9 +452,9 @@ everything else in this doctrine does: as a **reconcile** ([§9](#9-how-bring-up
 by [cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)/[§4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction); this doc owns only the lifecycle
 verbs that stand it up. There is no rke2 state machine, exactly as there is no lifecycle state machine ([§9](#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)).
 
-This section is normative design, not a delivered live claim. Phases 4–7 own the pure node/reserve/template
+This section is normative design, not a delivered live claim. Phases 4–9 own the pure node/reserve/template
 model; live multi-node rke2 host admission, snapshot-bound join, and enforcement remain an explicitly
-unassigned Phase-N gate. Phase 28's acceptance forest uses child `kind` clusters only.
+unassigned Phase-N gate. Phase 32's acceptance forest uses child `kind` clusters only.
 
 - **Root = the zero-secret degenerate.** The root cluster is
   `{ servers = Rke2Servers.Single { host, capacity, systemReserve }, agents = Fixed [] }` — the target

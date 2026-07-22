@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Stand up the GADT-indexed Haskell IR and the total, fail-fast `Dhall.inputFile auto` decoder
@@ -53,9 +53,9 @@ The pure decode code carries no `error`/`undefined`/partial head (checked non-pa
 `Dhall.inputFile auto` alone throws (`DhallErrors`, IO exceptions) rather than returning `Left`, the
 exception-catch wrapper catches those and maps them to a structured `Left DecodeError` (fail-closed) so no
 throw escapes into a half-applied effect. What is *not* here: the chain
-/ reconcile / singleton runtime (Phase 22), the pure capacity/topology fold implementation and properties
-(Phase 7) consumed by the conditional infrastructure-planning/post-materialization provision seal (Phase 8),
-the capability→provider binder (Phase 8), and
+/ reconcile / singleton runtime (Phase 26), the pure capacity/topology fold implementation and properties
+(Phase 7) consumed by the conditional infrastructure-planning/post-materialization provision seal (Phase 11),
+the capability→provider binder (Phase 10), and
 the exhaustive illegal-state corpus with its per-entry validation-locus
 ledger and QuickCheck properties (Phase 6). This phase checks the decoder is non-partial, fail-closed, and structurally
 rejecting on a representative Gate-2 negative set; the exhaustive corpus rides on top of it next.
@@ -141,10 +141,10 @@ independent of the decoder's own output (§M clause 3).
   Phase 7.
 - [`resource_capacity_doctrine.md §3/§4`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
   — the complete pure resource vocabulary and its checked-construction boundary. This phase carries and
-  normalizes the declarations in `ClusterIR`; Phase 7 implements the arithmetic/placement folds; Phase 8 runs
+  normalizes the declarations in `ClusterIR`; Phase 7 implements the arithmetic/placement folds; Phase 11 runs
   them after capability binding and provider expansion to construct an opaque `ProvisionedSpec` and its
   unique whole-deployment render-source set. Private service projections contribute sources but never cross
-  the public boundary; a raw decoded or merely bound value can never reach Phase 9's `renderAll`.
+  the public boundary; a raw decoded or merely bound value can never reach Phase 13's `renderAll`.
 - [`illegal_state_catalog.md §2`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)
   and [`illegal_state_techniques.md §6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)
   — the load-bearing limit and the three layers of foreclosure: layers 1–2 (type-/decode-foreclosed) are
@@ -232,7 +232,7 @@ structural owner. These are the ADTs that make an illegal combination un-spellab
   `Once | PerNode` under a
   supervisor. Deployment, StatefulSet, and DaemonSet retain only their kind-valid policies; StatefulSet is
   native serial partition zero and DaemonSet rolling is exactly `Surge | Unavailable`. The body also contains
-  a complete structurally compatible Pod/host `ResourceEnvelope` and the identity required for Phase 8's
+  a complete structurally compatible Pod/host `ResourceEnvelope` and the identity required for Phase 10's
   exactly-once `BoundExecutionSet` join. The Deployment rollout constructor is private and returns
   `Left (UnspellableCombination "rollout.rollingProgress")` for `{ maxSurge = 0, maxUnavailable = 0 }`.
   `{ 1, 0 }` and `{ 0, 1 }` are required positive controls, so the guard cannot be strengthened into an
@@ -264,14 +264,14 @@ structural owner. These are the ADTs that make an illegal combination un-spellab
   `VolumePresentation = Block | Filesystem { fsType, overheadModel }`; each selected volume-producing host/
   provider backing preserves
   `allocation : BackingAllocationPolicy { minimumBytes, quantumBytes }`. No raw IR field can author physical
-  bytes; Phase 8's post-bind `provision` boundary constructs the private rounded `ProvisionedVolumeDemand`
+  bytes; Phase 11's post-bind `provision` boundary constructs the private rounded `ProvisionedVolumeDemand`
   consumed by render, using the geometry and folds implemented in Phase 7.
 - Canonical bounded service-storage inputs remain structural rather than being collapsed to caller-authored
   peak scalars. `InClusterCacheDemand`/`HostCacheDemand` preserve `CachePopulationDemand` with the exact
   catalog asset identity/digest/resident/temporary bytes and finite first-miss concurrency.
   `RegistryStorageIntent` preserves exact image-digest identities, finite upload concurrency, failure
   window/count, GC horizon, model, mutation policy, required storage budget, and typed interim-volume/MinIO
-  backend; Phase 8 alone exact-joins those digests to `RegistryStoredArtifact` metadata and constructs
+  backend; Phase 10 alone exact-joins those digests to `RegistryStoredArtifact` metadata and constructs
   `RegistryStorageDemand`.
   Every deployment preserves exactly one raw
   `FirstDeployment | UpdateFrom PriorProvisionRefSource`; Gate 2 requires the update's `Execution` resource
@@ -288,7 +288,7 @@ structural owner. These are the ADTs that make an illegal combination un-spellab
   fixed “database size”; it contains no `ControllerChildEnvelope` or provisioned child.
   `VaultStorageDemand` preserves the exact bounded persisted-object versions, maximum active leases, pinned
   Raft model/claim set, and rotated audit file/backups/retention plus named ephemeral or retained backing.
-  Only private cache/registry/Vault witnesses constructed at Phase 8's post-bind `provision` boundary, using
+  Only private cache/registry/Vault witnesses constructed at Phase 11's post-bind `provision` boundary, using
   Phase 7's folds, may carry derived peaks.
 - Every durable platform declaration retains normalized `BookKeeperGeometry` (ensemble/write/ack quorums,
   segment bytes, bookie claim slots, journal/index reserve, finite fault bound), `MinioErasureGeometry`
@@ -298,7 +298,7 @@ structural owner. These are the ADTs that make an illegal combination un-spellab
   admission cost model, and `StorageBudgetId`). The six-arm closed producer union retains app/content/registry,
   Pulsar-offload segment/rate/lag/failure operands, Pulumi exact state fields/revisions/failures, and the
   closed control-plane state entry kinds in `ObjectStoreProducerIntent`. `ObjectStoreGatewayIntent` preserves
-  only gateway identity and execution-model selection; Phase 8 merges producer writer policies and constructs
+  only gateway identity and execution-model selection; Phase 10 merges producer writer policies and constructs
   `ObjectStoreProducerDemand` plus `ObjectStoreAdmissionGatewayDemand`. Gate 2
   retains only the fault-policy bounds, never a caller-curated list
   of favorable failure scenarios, and retains the `(StatefulSet, volumeClaimTemplate, ordinal)` identity needed
@@ -352,7 +352,7 @@ structural owner. These are the ADTs that make an illegal combination un-spellab
   `carves : NonEmpty ProviderUsableDiskCarveTemplate`, each exactly
   `{ id, requiredUsableBytes }`. Gate 2 preserves `InstanceStore.provisionedRawBytes` as fixed SKU raw supply
   and every carve's `requiredUsableBytes` as mounted-filesystem usable demand; it never normalizes one unit
-  into the other. The EBS arm deliberately has no author-supplied byte request. Phase 7 derives a private
+  into the other. The EBS arm deliberately has no author-supplied byte request. Phase 9 derives a private
   `ProvisionedNodeRootVolumeRequest { volumeType, requiredUsableBytes, presentation, allocation, sizeGiB,
   provisionedBytes, witness }` from system reserve plus the unique carve set and catalog/provider allocation
   rules, then privately constructs `ProvisionedPerInstanceDiskTemplate`. For either backing arm that private
@@ -384,7 +384,7 @@ structural owner. These are the ADTs that make an illegal combination un-spellab
   presentation : VolumePresentation }, tsdbCostModel }`. Counts/rate become `PositiveNatural`, intervals become
   `FiniteDuration`, and CPU, memory, and storage remain unit-tagged quantities with an exact StatefulSet
   claim/backing/presentation; omission, a
-  defaulted field, scalar query-temp, or a descriptor-independent fixed Prometheus provision has no normalized bypass. Phase 8
+  defaulted field, scalar query-temp, or a descriptor-independent fixed Prometheus provision has no normalized bypass. Phase 10
   owns the later descriptor-count and cost fold; Gate 2 guarantees the fold's operand survived decode.
 - Every normalized build retains a mandatory `BuildExecutionEnvelope`: a non-empty list of
   `BuildStageDemand` values with branded stage id, platform, dependency ids, per-stage `HostResources`, and
@@ -393,7 +393,7 @@ structural owner. These are the ADTs that make an illegal combination un-spellab
   `Serial | BoundedParallel PositiveNatural` architecture and stage concurrency policies. The decoder proves
   dependency references are closed and the graph acyclic; Phase 7 derives maxima over every legal concurrent
   set. All quantities and references survive in their refined domains; there is no optional, editable-
-  aggregate, or descriptor-independent builder-resource bypass. Phase 15 owns snapshot-bound live admission,
+  aggregate, or descriptor-independent builder-resource bypass. Phase 18 owns snapshot-bound live admission,
   not decoding.
 - Every normalized `KindEngineDemand` retains non-empty ordinal-indexed node-container runtime, full
   `NodeCapacity`, and in-node `KindControlPlane | KindWorker` reserve plus a distinct host-only
@@ -420,12 +420,12 @@ structural owner. These are the ADTs that make an illegal combination un-spellab
   or optional/defaulted applicable history requirement returns a structured decode error. Each autoscaled
   rke2 candidate retains the template-local agent reserve/system-carve reference and declared raw per-instance
   host CPU/memory/disk supply, distinct from the managed-provider SKU/no-reserve arm. Missing raw host supply,
-  process-template qualification, or SKU identity is a decoder-field-inventory failure. Phase 14 owns kind
+  process-template qualification, or SKU identity is a decoder-field-inventory failure. Phase 17 owns kind
   fit/enforcement; live multi-node rke2 admission/enforcement
   remains an explicitly unassigned Phase-N gate and no current live phase may claim it.
 - An in-file honesty note that binding/capacity/topology totals (§4.6/§4.7) are *not* foreclosed by these
   types — the decoded declarations are intentionally **unprovisioned**. Phase 7 owns the total feasibility
-  folds and Phase 8 invokes them on the fully expanded `BoundDeployment`; only their private constructor
+  folds and Phase 11 invokes them on the fully expanded `BoundDeployment`; only their private constructor
   produces `ProvisionedSpec`. `ClusterIR` and `BoundDeployment` are forbidden renderer inputs and a structural
   type-inventory check rejects any `Provisioned*` field in either.
 - The committed minimal-pair compile-fail fixtures: for each of §4.2/§4.3/§4.4, a legal twin (compiles; cited
@@ -584,11 +584,11 @@ exercised here → layer-2 Register-1), `documents/engineering/testing_doctrine.
 Adopt [`testing_doctrine.md §2 — Register 1`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing): assemble the
 in-process decode battery that exercises the fail-closed decoder over every positive fixture and confirms it
 returns a structured `Left` on each representative Gate-2 negative, emitting a Register-1 proven/tested/assumed ledger
-with model↔runtime correspondence marked UNVERIFIED (owned by Phase 22). The exhaustive per-catalog-entry
+with model↔runtime correspondence marked UNVERIFIED (owned by Phase 26). The exhaustive per-catalog-entry
 corpus, the QuickCheck closure/round-trip/fold-totality properties, and the per-entry validation-locus ledger
 are the front-loaded next phase ([Phase 6](phase_06_illegal_state_corpus.md)); the capacity/topology fold
-negatives are [Phase 7](phase_07_capacity_topology_folds.md), and provider-expanded/capability feasibility is
-checked at [Phase 8](phase_08_capability_binder.md)'s conditional post-bind infrastructure-planning and
+negatives are [Phase 7](phase_07_capacity_core_folds.md), and provider-expanded/capability feasibility is
+checked at [Phase 11](phase_11_provision_seal.md)'s conditional post-bind infrastructure-planning and
 provisioning boundary.
 
 ### Deliverables
@@ -690,10 +690,10 @@ The whole sprint (📋 Planned).
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/dsl_doctrine.md` — backlink §5's Gate 2 to the in-process Phase-5 decoder; keep the
-  runtime-enforcement half as Tier-2 residue owned by Phase 22.
+  runtime-enforcement half as Tier-2 residue owned by Phase 26.
 - `documents/illegal_state/illegal_state_catalog.md` — annotate each entry the IR type-/decode-forecloses here
   with its realized foreclosure layer (layers 1–2 → Register-1); keep runtime-checked entries (layer 3)
-  deferred, and keep capacity/topology/provider-feasibility entries deferred to the Phase-7 fold and Phase-8
+  deferred, and keep capacity/topology/provider-feasibility entries deferred to the Phase-7 fold and Phase-11
   conditional infrastructure-planning/materialization/provisioning boundary.
 - `documents/engineering/testing_doctrine.md` — record the Register-1 in-process ledger variant this gate
   emits (correspondence and runtime fidelity UNVERIFIED).
@@ -716,7 +716,7 @@ The whole sprint (📋 Planned).
 - [phase_04](phase_04_dhall_gate1_schema.md) — Gate 1, the Dhall schema this decoder mirrors
 - [phase_06](phase_06_illegal_state_corpus.md) — the exhaustive illegal-state corpus, properties, and
   validation-locus ledger built atop this decoder
-- [phase_07](phase_07_capacity_topology_folds.md) — the pure capacity/topology fold implementation and
-  properties deferred from here; Phase 8 invokes them after bind/expansion while deriving the conditional
+- [phase_07](phase_07_capacity_core_folds.md) — the pure capacity/topology fold implementation and
+  properties deferred from here; Phase 11 invokes them after bind/expansion while deriving the conditional
   infrastructure plan and again at the post-materialization provision seal
-- [phase_22](phase_22_live_dsl_singleton.md) — the Tier-2 runtime-enforcement half of the DSL
+- [phase_26](phase_26_live_dsl_singleton.md) — the Tier-2 runtime-enforcement half of the DSL

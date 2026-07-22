@@ -272,9 +272,9 @@ strength no applicable move can emit, so no `Release` could ever advance to `Pro
 **Resolved:** the testing doctrine is authoritative.
 [release_lifecycle_doctrine.md §4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable)
 now requires *tested* and states why that is the layer's highest achievable strength rather than a concession, so the
-wording cannot drift back. `DEVELOPMENT_PLAN/phase_26_release_lifecycle.md` propagated the same claim in
+wording cannot drift back. `DEVELOPMENT_PLAN/phase_30_release_lifecycle.md` propagated the same claim in
 four places; a first pass corrected only one (`:194`), and an audit found the other three surviving in the
-Sprint 26.3 validation, deliverable, and the committed `evidence_strength.txt` oracle it produces. All four
+Sprint 30.3 validation, deliverable, and the committed `evidence_strength.txt` oracle it produces. All four
 now read *tested*. The lesson is recorded in the verification discipline: an absence-check whose pattern
 could not span a newline reported the defect closed when three instances remained.
 

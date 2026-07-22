@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for how an `InForceSpec` evolves between generations — an ordered,
@@ -133,7 +133,7 @@ reference from the prior `ProvisionedSpec` context before deriving physical peak
 `SchemaMigrationIntent` from exact old/new
 table/index identities and its cost policy. Provisioning derives presentation-rounded replacement bytes,
 old+new+workspace/temp/WAL high-water, provider byte/count overlap, and complete copy/verify or schema
-executor `PodResourceEnvelope`s. The Phase-16 live snapshot must fit those backings, CPU/memory/ephemeral,
+executor `PodResourceEnvelope`s. The Phase-19 live snapshot must fit those backings, CPU/memory/ephemeral,
 pod/CNI/CSI slots, and image bytes before the expand phase receives a mutation continuation. A steady old or
 target shape fitting alone is insufficient
 ([resource_capacity_doctrine.md §5.1](./resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry)).
@@ -285,7 +285,7 @@ This document is normative `InForceSpec`-migration doctrine only. It states the 
 is a typed diff whose verb surface admits no destruction, whose `Shrink` is a verified pipeline, whose orphan
 check is decode-time, and whose sharing is an append-only revocable edge. Every statement here is **design
 intent**, not a built or tested amoebius capability. Delivery sequencing, completion status, and validation
-gates — including the DB schema-migration `RolloutPhase` (delivered in Phase 26 and
+gates — including the DB schema-migration `RolloutPhase` (delivered in Phase 30 and
 [release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)
 homes), the verified-shrink migration
 ([storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction)),

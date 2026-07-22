@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_33_infernix_lift.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_39_infernix_lift.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md
 **Generated sections**: none
 
 > **Purpose**: Define the hard separation between an app's **application logic** (what it *is* to a user)
@@ -35,8 +35,8 @@ which surface, and why the line must never be crossed (DEVELOPMENT_PLAN
 cross-cutting invariant "Application logic and deployment rules are separate DSL surfaces").
 
 > **Honesty.** This split is *specified* doctrine for Phase 4 (the DSL type families) — with its in-process
-> design validation front-loaded to the pre-cluster gates (Phases 4–7) — and *demonstrated* live by the infernix demo web app in Phase 33
-> and the jitML demo web app in Phase 34 (composed as an SPA in Phase 37); none of these phases has been built.
+> design validation front-loaded to the pre-cluster gates (Phases 4–9) — and *demonstrated* live by the infernix demo web app in Phase 39
+> and the jitML demo web app in Phase 40 (composed as an SPA in Phase 43); none of these phases has been built.
 > Read every prescriptive statement here as design intent, never as a tested amoebius result. Status and gates live only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
@@ -230,9 +230,9 @@ workflow ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-dep
 engine welded into the app.
 
 > **Honesty.** This is Phase-0 design intent, not a proven amoebius result. The application-logic-only
-> demonstration lands **live** with the infernix demo web app in **Phase 33** and the jitML demo web app in
-> **Phase 34**, and the two are composed as a live SPA in **Phase 37**; the surfaces' in-process design
-> validation is front-loaded to the **pre-cluster gates (Phases 4–7)** (see [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)).
+> demonstration lands **live** with the infernix demo web app in **Phase 39** and the jitML demo web app in
+> **Phase 40**, and the two are composed as a live SPA in **Phase 43**; the surfaces' in-process design
+> validation is front-loaded to the **pre-cluster gates (Phases 4–9)** (see [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)).
 > None of these phases has been built.
 
 ---
@@ -323,7 +323,7 @@ Cashing out "zero app change":
 - The app spec is **byte-identical** across the single-cluster and N-cluster deployments; the diff is
   entirely in the deployment-rules layer.
 
-> **Honesty.** Geo-replication is **Phase 28**; cross-cluster gateway failover is **Phase 29**; neither is
+> **Honesty.** Geo-replication is **Phase 32**; cross-cluster gateway failover is **Phase 33**; neither is
 > started. Synchronous
 > intra-cluster HA is delegated to the systems that do their own consensus (MinIO / Pulsar / Postgres /
 > Patroni); the **asynchronous** cross-cluster boundary — what happens if a cluster dies mid-geo-sync and amoebius
@@ -393,9 +393,9 @@ mechanics it points at:
 This document is normative classification doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md):
 the two DSL surfaces land with the type families in **Phase 4** (their in-process design validation
-front-loaded to the **pre-cluster gates (Phases 4–7)**), the application-logic-only demonstration lands with the infernix demo web app
-in **Phase 33** and the jitML demo web app in **Phase 34** (composed as an SPA in **Phase 37**), and the
-zero-app-change geo-replication case is **Phase 28**. This doc never maintains a competing status
+front-loaded to the **pre-cluster gates (Phases 4–9)**), the application-logic-only demonstration lands with the infernix demo web app
+in **Phase 39** and the jitML demo web app in **Phase 40** (composed as an SPA in **Phase 43**), and the
+zero-app-change geo-replication case is **Phase 32**. This doc never maintains a competing status
 ledger; it states the target shape and links back for status.
 
 ---

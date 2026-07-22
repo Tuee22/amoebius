@@ -144,11 +144,11 @@ name.
 **Implementation**: `documents/documentation_standards.md`, `DEVELOPMENT_PLAN/development_plan_standards.md`,
 `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/overview.md`, `DEVELOPMENT_PLAN/system_components.md`,
 `DEVELOPMENT_PLAN/substrates.md`, `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`,
-`DEVELOPMENT_PLAN/later_phases.md`, and the `phase_00`…`phase_37` phase docs (target documentation files; not
+`DEVELOPMENT_PLAN/later_phases.md`, and the `phase_00`…`phase_43` phase docs (target documentation files; not
 yet complete)
 **Blocked by**: none
 **Independent Validation**: lint the spine files in isolation — each carries a valid header block, the status
-vocabulary and per-phase/per-sprint skeletons are defined, the 38-phase overview table is internally
+vocabulary and per-phase/per-sprint skeletons are defined, the 44-phase overview table is internally
 consistent, and every intra-plan link resolves.
 **Docs to update**: the spine files above and `documents/engineering/README.md`
 
@@ -167,7 +167,7 @@ amoebius's snake_case rule), and the tracker is rebuilt for the 38 single-gate p
 - The plan rulebook (`development_plan_standards.md`): the §A–§M disciplines (header, snake_case layout, status
   vocabulary, per-phase skeleton, one-phase model, sprint block format, Documentation Requirements,
   doctrine-citation rule, generated markers, cross-ref path rules, honesty, one-substrate, gate integrity).
-- The live tracker (`README.md`): the Document Index, the 38-phase Overview table with its one-line gates and
+- The live tracker (`README.md`): the Document Index, the 44-phase Overview table with its one-line gates and
   substrate/register columns, the status vocabulary, the phase discipline, and the cross-cutting invariants.
 - `overview.md`, `system_components.md`, `substrates.md`, `legacy_tracking_for_deletion.md`, `later_phases.md`,
   and the per-phase docs' spine.

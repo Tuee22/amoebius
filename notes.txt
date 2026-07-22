@@ -9,3 +9,5 @@
   ColdSeedFromBackup down-primary posture (seed a secondary and take the gateway only after proven freshness —
   consistency over availability). Illegal states enumerated at illegal_state_storage.md §3.53-3.68 and
   illegal_state_multicluster.md §3.69-3.71; the freshness guard extends the Phase-3 formal model.
+
+- how do we ensure eg deploying on aws has a valid key, the resources are correct for the workflow, 

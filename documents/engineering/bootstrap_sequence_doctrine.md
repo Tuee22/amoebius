@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_14_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the ordered path from a bare host to a reconciling cluster — the
@@ -280,9 +280,9 @@ this doc specifies the single-node-root answer the plan adopts and does not sett
 This document is normative bootstrap-sequence + admin-control-plane doctrine only. Delivery sequencing,
 status, and gates are owned by [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md), never
 restated here. For orientation only (the plan is authoritative): the **ordered sequence + host→singleton
-handoff** ride **Phases 10 and 13** (kernel + bootstrap + kind); the **`vault init/unseal` admin endpoint** rides
-**Phase 18** (root Vault/PKI); the **`dhall update` endpoint + the singleton REST surface** ride
-**Phase 22** (the control-plane singleton). This doc states the target shape and links back for status.
+handoff** ride **Phases 14 and 16** (kernel + bootstrap + kind); the **`vault init/unseal` admin endpoint** rides
+**Phase 22** (root Vault/PKI); the **`dhall update` endpoint + the singleton REST surface** ride
+**Phase 26** (the control-plane singleton). This doc states the target shape and links back for status.
 
 > **Honesty.** Everything here is Phase 0 design intent, specified before implementation. The "midwife then
 > defers" host-daemon model and the reconcile-driven bring-up are *proven in the prodbox / hostbootstrap

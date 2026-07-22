@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_24_pulsar_client.md, documents/engineering/pulsar_client_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_28_pulsar_client.md, documents/engineering/pulsar_client_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering the states in which an application
@@ -23,7 +23,7 @@ type-check proves the specification composes, never that the running cluster enf
 [`illegal_state_catalog.md`](./illegal_state_catalog.md) — referenced here, not restated. The **seven typing
 techniques**, the **coverage matrix**, the **three foreclosure layers**, and the orthogonal
 **validation-locus axis** (`Gate-1-editor` / `Gate-2-decoder` / `provision-seal` /
-`rendered-output-golden` / `live-effect`; `provision-seal` is post-bind Phase-8 provision returning a
+`rendered-output-golden` / `live-effect`; `provision-seal` is post-bind Phase-10 provision returning a
 `ProvisionError` before any `ProvisionedSpec` exists) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md) — likewise referenced, not
 restated. Each entry below names its owning doctrine, which remains the SSoT for the normative rule.
 

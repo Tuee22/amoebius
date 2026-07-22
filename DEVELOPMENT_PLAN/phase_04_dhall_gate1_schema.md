@@ -270,7 +270,7 @@ carries the acceptance token *spec-composition proven*, never *runtime proven*.
   of the later `decode → bind/expand → plan/resolve infrastructure → provision → ProvisionedSpec → renderAll` contract. A union with no arm
   for insecure ingress gives no syntax to request it; a record that requires a reference gives no way to
   omit it. Gate 2 (the in-process typed decoder) is deferred to [Phase 5](phase_05_gadt_decoder_gate2.md);
-  whole-deployment feasibility and the opaque deployable seal are Phase 8.
+  whole-deployment feasibility and the opaque deployable seal are Phase 11.
 - [`illegal_state_catalog.md §1 — Illegal states fail to type-check`](../documents/illegal_state/illegal_state_catalog.md#1-illegal-states-fail-to-type-check),
   [`§2 — the load-bearing limit`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it),
   [`§3 — the catalog`](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent),
@@ -278,7 +278,7 @@ carries the acceptance token *spec-composition proven*, never *runtime proven*.
   illegal states and the typing techniques that foreclose each, adopted **at the honest foreclosure layer**.
   The layer-1 type-foreclosed entries — closed unions, required fields, no-arm — are discharged at Gate 1
   here; decoder-local checked rejections defer to Phase 5, whole-deployment resource/target checks defer to
-  Phase 8's `provision-seal`, and runtime-checked entries defer to the live band. The catalog's §2 limit is
+  Phase 11's `provision-seal`, and runtime-checked entries defer to the live band. The catalog's §2 limit is
   honored verbatim: *a type-check proves the spec composes, not that the
   cluster enforces it.*
 - [`resource_capacity_doctrine.md §3`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget):

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_12_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_18_vault_pki.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_24_pulsar_client.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_31_determinism_kernel.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_22_vault_pki.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_28_pulsar_client.md, DEVELOPMENT_PLAN/phase_29_content_store_workflow.md, DEVELOPMENT_PLAN/phase_33_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for **deterministic simulation testing (DST)** in amoebius — running the
@@ -140,7 +140,7 @@ a DST green is quoted as *"the code upholds the invariants under the modeled sch
 
 DST and reproducible ML share **one** determinism substrate. The seed derivation and the `MonadTime`/`MonadTimer`
 clock seams that make an ML run bit-reproducible ([content_addressing_doctrine.md](./content_addressing_doctrine.md),
-the determinism kernel [phase_31](../../DEVELOPMENT_PLAN/phase_31_determinism_kernel.md)) are the **same** seams
+the determinism kernel [phase_31](../../DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md)) are the **same** seams
 that make a simulation deterministically replayable. Injecting time and randomness through typed seams rather
 than reading wall-clock or ambient entropy (rule R2) is what makes both "deterministic by construction"; the
 kernel builds the seams once, and DST and ML reproducibility are two readings of them.
@@ -167,9 +167,9 @@ would find, exactly as a green Register-1 suite says nothing about Register 2.
 ## 8. Planning ownership
 
 This document is normative doctrine only. The io-classes environment substrate is built in the pre-cluster
-deterministic-simulation phase ([phase_12](../../DEVELOPMENT_PLAN/phase_12_deterministic_sim_substrate.md)); each concurrency-bearing
+deterministic-simulation phase ([phase_12](../../DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md)); each concurrency-bearing
 live-band phase adds its Register-2.5 validation sprint before its Register-3 gate; the determinism seams are the
-[phase_31](../../DEVELOPMENT_PLAN/phase_31_determinism_kernel.md) kernel's. Phase order, status, and gates live
+[phase_31](../../DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md) kernel's. Phase order, status, and gates live
 only in [DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Every prescriptive statement here is
 design intent, never a tested amoebius result.
 

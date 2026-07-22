@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_17_retained_storage.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_21_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_27_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_21_retained_storage.md, DEVELOPMENT_PLAN/phase_23_platform_backbone.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_25_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/phase_31_network_fabric_wireguard.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for how amoebius turns a typed cluster spec into running Kubernetes
@@ -88,14 +88,14 @@ type K8sObjectIdentity =
   (ApiGroup, ApiVersion, Kind, Maybe NamespaceId, KubernetesObjectName)
 type KubernetesObjectId = K8sObjectIdentity -- compatibility alias, not a second identity
 
--- Phase 8 seals one unique source per Kubernetes object identity.
+-- Phase 10 seals one unique source per Kubernetes object identity.
 renderSourcePrivate :: ProvisionedRenderSource identity -> K8sObject
 
 -- Whole-deployment closure. KubernetesObjectId is (group/version/kind, namespace, name).
 renderAll :: ProvisionedSpec -> [K8sObject]
 ```
 
-Phase 8 constructs `ProvisionedRenderSourceSet` without depending on this Phase-9 object/Aeson model. Its
+Phase 10 constructs `ProvisionedRenderSourceSet` without depending on this Phase-13 object/Aeson model. Its
 private `renderSourcePrivate` maps one already-owned source to one object and cannot independently apply a
 list. Deployment-level `renderAll` owns the **complete set of typed Kubernetes objects** — `Namespace` /
 `Node` /
@@ -109,7 +109,7 @@ exactly as prodbox already serializes its supporting objects ([§1](#1-why-this-
 and no `values.yaml`; the *record* is the manifest.
 
 `renderAll` is not an unchecked list concatenation. It traverses the unique
-`K8sObjectIdentity → ProvisionedRenderSource K8sObjectIdentity` map already sealed by Phase 8. Each key equals
+`K8sObjectIdentity → ProvisionedRenderSource K8sObjectIdentity` map already sealed by Phase 10. Each key equals
 the source's embedded identity and has exactly one
 structural source owner; duplicate candidates or an omitted source-domain member fail
 `provisionRenderSources` before `ProvisionedSpec`, without depending on this later renderer. A deliberately
@@ -184,7 +184,7 @@ Three properties make this the right shape:
   kind cluster, no apiserver, no golden-YAML diffing of templated strings. This is the manifest-layer face
   of the project's pure-FP testing posture.
 - **Composable per the dependency graph.** `renderAll` maps every service/global render source in the
-  Phase-8-sealed unique source inventory. Ordering and connectivity are derived
+  Phase-10-sealed unique source inventory. Ordering and connectivity are derived
   from the declared dependency graph, not hand-authored
   ([§3](#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)). One spec value renders the
   whole cluster, and duplicate ownership cannot be hidden by list order.
@@ -334,7 +334,7 @@ This is also where the registry itself changes shape. amoebius's image registry 
 `distribution` OCI registry (`registry:2`) — baked like MinIO and Vault — which **replaces Harbor**: no
 Trivy scanning, no UI, no robot RBAC, no replication, by design. *Which* provider backs the Registry
 capability is owned by [service_capability_doctrine.md](./service_capability_doctrine.md); the generation
-consequence has one explicit bootstrap edge. Phase 15 cannot fabricate a minimal `ProvisionedServiceSpec` or
+consequence has one explicit bootstrap edge. Phase 18 cannot fabricate a minimal `ProvisionedServiceSpec` or
 call a service renderer before the whole deployment and its scheduler exist. Instead,
 `provisionBootstrapRegistry` constructs a resource-complete `ProvisionedBootstrapRegistry`; a fresh snapshot
 may mint one `BootstrapRegistryAction` that side-loads its image and initializes only its equal-keyed
@@ -499,7 +499,7 @@ flowchart TD
   observe -->|new state| preflight
 ```
 
-> **Honesty.** This engine is **design intent for Phase 16**, not a built amoebius result. SSA field
+> **Honesty.** This engine is **design intent for Phase 19**, not a built amoebius result. SSA field
 > managers, Kubernetes Binding, and resourceVersion compare-and-swap are real Kubernetes mechanisms;
 > *that amoebius wires them into this specific reconciler* is specified here and unproven until the phase
 > lands. The idempotent `discover → diff → enact` shape it specializes is *proven in prodbox* for AWS/cluster
@@ -575,8 +575,8 @@ flowchart TD
 > **no Helm**. This is
 > sibling evidence, not an amoebius result.
 
-> **Honesty.** The `RolloutPlan` is **Phase-26 design intent** — it rides the tier-(c) typed-action reconciler, itself
-> Phase 16 and unbuilt; the DB-schema-migration `RolloutPhase` is part of that Phase-26 shape, proven
+> **Honesty.** The `RolloutPlan` is **Phase-30 design intent** — it rides the tier-(c) typed-action reconciler, itself
+> Phase 19 and unbuilt; the DB-schema-migration `RolloutPhase` is part of that Phase-30 shape, proven
 > *only* as the Helm-driven pattern in the jitML sibling. Read as the contract amoebius intends, never as a
 > tested amoebius result.
 
@@ -714,7 +714,7 @@ the reconciler converges *toward*.
   and are owned by release_lifecycle_doctrine.md [§3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer)–[§4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable), not here.
 
 > **Honesty.** The release ledger is **Phase-N design intent** — it composes with the content-store phase
-> ([§9](#9-planning-ownership)) and the tier-(c) reconciler (Phase 16), neither built in amoebius. Content-addressed immutable storage
+> ([§9](#9-planning-ownership)) and the tier-(c) reconciler (Phase 19), neither built in amoebius. Content-addressed immutable storage
 > is proven mechanism; *that amoebius records each converged generation as a `releaseHash`-keyed `Release` and
 > promotes environments by CAS over it* is specified across this [§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional) and release_lifecycle_doctrine.md and is
 > unbuilt.
@@ -734,8 +734,8 @@ three-replica Patroni — a difference of *object structure*, not merely of a `v
 This is precisely what a values-only Helm chart handles badly and a typed renderer handles cleanly. A single
 chart parameterized by a `replicas` value cannot, without templating contortions, emit a *different set and
 shape* of objects for "single-node" vs. "distributed"; a typed
-Phase 8's private `ProvisionedServiceObjectSource` constructors pattern-match the shape and enter the unique
-whole-deployment source map; Phase 9's `renderSourcePrivate` total-maps those sources before `renderAll`
+Phase 10's private `ProvisionedServiceObjectSource` constructors pattern-match the shape and enter the unique
+whole-deployment source map; Phase 13's `renderSourcePrivate` total-maps those sources before `renderAll`
 returns the deployment set. Each shape remains independently type-checked. The
 capability abstraction — capabilities named by role (`ObjectStore`, `SecretStore`, `MessageBus`, `Sql`,
 `Identity`, `Observability`, `Registry`, `Edge`), one canonical provider each, the type *admitting* alternates
@@ -743,7 +743,7 @@ later, and the per-cluster shapes — is owned by [service_capability_doctrine.m
 **this doc owns only the rendering consequence**: generation, not templating, is what makes per-cluster
 structural shapes expressible while keeping each shape best-practice-by-construction ([§3](#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)).
 
-> **Honesty.** Per-cluster structural shapes are design intent (the Phase 8 capability binder and Phase 9 per-cluster `renderAll` output), and the
+> **Honesty.** Per-cluster structural shapes are design intent (the Phase 10 capability binder and Phase 13 per-cluster `renderAll` output), and the
 > reversal of prodbox's substrate-equivalence lint is a deliberate amoebius decision, not an inherited-proven
 > behaviour. prodbox's equivalence lint is the *evidence* that structural divergence is the thing worth
 > controlling; amoebius chooses to control it by typing rather than by forbidding it.
@@ -772,11 +772,11 @@ This document is normative manifest-generation-and-reconcile doctrine only. Deli
 status, validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the **typed manifest renderer and the server-side-apply reconciler** land
-in **Phases 9 and 16**; the **capability abstraction and per-cluster shapes** ride the Phase-8 binder and
-Phase-9 renderer; the **content-addressed release ledger ([§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional))** composes with the
-Phase-25 content store; and the **`RolloutPlan` / `RolloutPhase`** enactment, including its
+in **Phases 13 and 19**; the **capability abstraction and per-cluster shapes** ride the Phase-10 binder and
+Phase-13 renderer; the **content-addressed release ledger ([§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional))** composes with the
+Phase-29 content store; and the **`RolloutPlan` / `RolloutPhase`** enactment, including its
 DB-schema-migration phase ([§5.1](#51-the-rolloutplan-ordered-readiness-gated-phases-on-this-same-reconciler-tier-c)),
-lands in Phase 26 on the tier-(c) reconciler. This doc states the target shape and links back for status.
+lands in Phase 30 on the tier-(c) reconciler. This doc states the target shape and links back for status.
 
 ---
 
@@ -806,7 +806,7 @@ lands in Phase 26 on the tier-(c) reconciler. This doc states the target shape a
 - [Documentation Standards](../documentation_standards.md)
 
 > **Honesty.** Everything in this doctrine is Phase 0 **design intent**: the typed manifest renderer and the
-> server-side-apply reconciler are Phase 16, and the capability abstraction is Phase 8 — neither is built or
+> server-side-apply reconciler are Phase 19, and the capability abstraction is Phase 10 — neither is built or
 > proven in amoebius. The approach is **generalized from the prodbox sibling**, which already renders a slice
 > of its object set from typed Haskell to Aeson and applies it with `kubectl`, stamps every object with an
 > owner label, and orchestrates a pure deployment planner — but prodbox still ships its workloads as Helm

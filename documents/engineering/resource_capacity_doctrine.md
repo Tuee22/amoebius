@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_topology_folds.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_09_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_15_base_image_registry.md, DEVELOPMENT_PLAN/phase_16_renderer_reconciler.md, DEVELOPMENT_PLAN/phase_17_retained_storage.md, DEVELOPMENT_PLAN/phase_18_vault_pki.md, DEVELOPMENT_PLAN/phase_19_platform_backbone.md, DEVELOPMENT_PLAN/phase_20_platform_services_2.md, DEVELOPMENT_PLAN/phase_21_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_22_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, DEVELOPMENT_PLAN/phase_24_pulsar_client.md, DEVELOPMENT_PLAN/phase_25_content_store_workflow.md, DEVELOPMENT_PLAN/phase_26_release_lifecycle.md, DEVELOPMENT_PLAN/phase_27_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_28_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_30_provider_clusters.md, DEVELOPMENT_PLAN/phase_31_determinism_kernel.md, DEVELOPMENT_PLAN/phase_32_jitbuild_engine_cache.md, DEVELOPMENT_PLAN/phase_33_infernix_lift.md, DEVELOPMENT_PLAN/phase_34_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_35_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_36_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_37_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_18_base_image_registry.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_21_retained_storage.md, DEVELOPMENT_PLAN/phase_22_vault_pki.md, DEVELOPMENT_PLAN/phase_23_platform_backbone.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_25_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/phase_28_pulsar_client.md, DEVELOPMENT_PLAN/phase_29_content_store_workflow.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/phase_31_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_32_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_33_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_36_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_39_infernix_lift.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_41_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the amoebius resource-provisioning model — the pure
@@ -62,7 +62,7 @@ illegal and the technique that forecloses them is
 [illegal_state_catalog.md §3.17-§3.21 / §4.6](../illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded); this doc is the normative home of
 the model that catalog names.
 
-Everything below is **design intent for Phase 4** (the source types), Phases 7–9 (the pure
+Everything below is **design intent for Phase 4** (the source types), Phases 7–13 (the pure
 provision/fold/render boundary), and the later live phases that enact and cross-check it. Status and gates live only in
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
@@ -77,7 +77,7 @@ historical layer taxonomy, concretely evaluated at the post-bind `provision-seal
 uninhabitable-by-type proof.** Dhall (and the GADT-indexed Haskell it decodes into) has **no dependent
 arithmetic**: capacity is a *value*, not a type index, so neither "a feasible packing exists" nor "the sum fits"
 can be a statement about type inhabitance. Each is a **total smart constructor / fold** that inspects a
-constructible value and rejects it (`Left Overcommit` / `Left Unschedulable`) during Phase-8 provisioning,
+constructible value and rejects it (`Left Overcommit` / `Left Unschedulable`) during Phase-10 provisioning,
 after the complete source inventory is bound and before `ProvisionedSpec` or `renderAll` exists. Per the three
 foreclosure layers ([illegal_state_catalog.md §6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
 this remains `decode-foreclosed`: a *spec-layer guarantee* (the spec never reaches the interpreter), but a
@@ -122,7 +122,7 @@ flowchart TD
   infra -->|InfrastructureRequired| batch[Non-renderable ProvisionedProviderActionBatch]
   batch -->|fresh provider/host validation + CAS enactment| receipt[Receipt-bound observed materialization]
   receipt --> context
-  context -->|Phase 8 provision seal: placement, capability, geometry and budget folds| fold{All pod, host, build, engine, monitoring, storage and accelerator demands feasible?}
+  context -->|Phase 11 provision seal: placement, capability, geometry and budget folds| fold{All pod, host, build, engine, monitoring, storage and accelerator demands feasible?}
   fold -->|yes| ir[Opaque ProvisionedSpec plus placement/capability witnesses]
   fold -->|no| reject[Structured Left: Overcommit, Unschedulable, or MissingCapability]
   ir -->|pure renderAll, then reconcile| runtime[Live cluster: requests/limits, volumes, device resources, scheduler, quota]
@@ -2032,7 +2032,7 @@ enactBootstrapRegistry
 -- transport outcome returns a receipt; OutcomeUnknown exposes only re-observation, never the old action.
 
 -- This explicit cycle-break exists before the scheduler image can be pulled. It provisions and initializes
--- only the registry/proxy objects through a typed action using the same private source serializer as Phase 9;
+-- only the registry/proxy objects through a typed action using the same private source serializer as Phase 13;
 -- it does not expose per-service render/apply. A later whole-deployment ProvisionedSpec may adopt those exact
 -- identities only after observing equal source/field digests and transfers ownership once.
 
@@ -6586,7 +6586,7 @@ Checked construction adds identity/derivation obligations that the record spelli
   model, finite concurrency, failure window, maximum failures, and GC horizon to include simultaneous upload
   workspace and retained partial uploads as a model-derived object-extent multiset. The same private
   `ProvisionedRegistryStorageDemand` retains the digest map, structured `objectStorePeak`, and scalar
-  `derivedPeak`: the scalar sizes only the interim bounded filesystem volume, while Phase 19 feeds the
+  `derivedPeak`: the scalar sizes only the interim bounded filesystem volume, while Phase 23 feeds the
   structured resident objects and transient extents through MinIO's per-object stripe/parity/metadata
   geometry. Equal-byte peaks with different object counts therefore need not have equal physical demand.
   Its private admission witness configures the only mutating registry path: a local proxy authenticates the
@@ -6744,7 +6744,7 @@ sweeper. `maxBackups` excludes the active file, hence the explicit `+ 1`. Event/
 | Closed object-store producers | six closed arms—app bucket, content namespace, registry, Pulsar offload, Pulumi checkpoint, and control-plane state—each with a required `StorageBudgetId`, exact resident identities, structural retained/transient/failure extents, and mutation admission | shared MinIO geometry/backing or provider object-store quota, partitioned by store/tenant/bucket/full key | prove source↔producer equality; union equal physical ids only; reject size conflicts; concatenate future/transient extents; preserve every writer witness before per-object geometry; a missing arm or scalar byte aggregate rejects | sole-routable snapshot-bound object-write gateway enforces identity/count/size/retention/concurrency plus bucket quota; direct S3 PUT is denied and observed bytes remain charged until deletion |
 | Derived tenant-policy persistence and apply | provider-indexed Keycloak/Vault/Pulsar/MinIO/Kubernetes-API/Postgres payload+target+persistence projections; qualified tenant output/action/executor identities; abstract `Dedicated \| SharedControlPlaneRole` attachment; bounded execution/failure/churn; deployment-global observed state | complete desired∪observed tenant domain, exact `BoundDeployment` budget/base-execution inventory, global observed executor targets, topology SQL/Raft/ZooKeeper/etcd, and retained MinIO backing/geometry/model supply | tagged Create/Replace/Delete/NoOp; admit zero tenants and final-tenant deletion; preserve old+new target high-water; merge complete executor deltas by target/base once; merge MinIO `(store,budget,geometry,model)` groups with static+dynamic per-drive totals once; every cross-tenant key, provider/action shape, target/model, omission, duplicate, uncoalesced, or double-add mismatch rejects | `ProvisionedSpec` seals provider payloads/commands, private executor refs, target high-waters, and store-global MinIO logical+physical results; only snapshot-bound validated actions enact; readback proves digests, coalescing, cleanup, and component peaks |
 | Object-store mutation gateway | exact writer/admission map and versioned execution cost model derived from all six producer arms | ordinary pod/image/slot/nodefs capacity after full producer merge | derive and place the gateway pod including image, CPU/memory/ephemeral/log/writable bytes, replicas, and rollout overlap; children/storage fitting does not excuse a short gateway | exact private route, writer capabilities, limits, resources, and live readback; backend mutation credentials/routes are absent |
-| Registry storage/publication + rehome | digest-keyed artifact intent plus finite upload policy; for rehome, an opaque `PriorRegistryProvisionRef`, target intent, and copy policy | exact prior provision resolved from `ProvisionContext`, interim bounded ephemeral volume and/or the Phase-19 MinIO geometry/backing ledger, transfer workspace, and executor capacity | exact-join artifact intent to OCI objects; resolve the prior ref; derive the source→target identity map; fit old+new+workspace and transfer/verify pod; retain both on failure | exact interim or structured MinIO demand, exclusive mutating admission, transfer Job, verified cutover, and post-cutover pull; source is reclaimed only after observed privileged deletion |
+| Registry storage/publication + rehome | digest-keyed artifact intent plus finite upload policy; for rehome, an opaque `PriorRegistryProvisionRef`, target intent, and copy policy | exact prior provision resolved from `ProvisionContext`, interim bounded ephemeral volume and/or the Phase-23 MinIO geometry/backing ledger, transfer workspace, and executor capacity | exact-join artifact intent to OCI objects; resolve the prior ref; derive the source→target identity map; fit old+new+workspace and transfer/verify pod; retain both on failure | exact interim or structured MinIO demand, exclusive mutating admission, transfer Job, verified cutover, and post-cutover pull; source is reclaimed only after observed privileged deletion |
 | Pulsar metadata store | exact ZooKeeper persistent/session-ephemeral paths, transaction/session/watch bounds, member pod envelopes, durable member volumes, and failure bound | node/pod/image/slot capacity plus per-member retained backings | derive snapshots, transaction logs, metadata and recovery overlap with the pinned model; fit every member and ordinal independently before broker start; BookKeeper capacity cannot fund ZooKeeper | exact ZooKeeper ensemble/resources/retention/volumes, readiness before brokers, and live per-member high-water/readback |
 | Patroni SQL | exact database identity, binder-derived operator/controller children, exact table/index objects, finite WAL/checkpoint/failover/recovery demand, `StorageBudgetId`, declared volume, and bounded writer admission | pod/image/slot/CSI capacity plus per-ordinal retained backing | derive steady/failover/recovery/old/new/surge child epochs and physical volume peak; place the sole SQL admission proxy; a consumer addition creates a new demand and cannot reuse another witness | exact CR resources/replicas/failover controls/PVC, namespace quota/webhook and SQL-gateway boundaries, and live child/volume/writer normalization |
 | Vault Raft + audit | exact bounded KV/Transit/PKI/auth/version/lease population; pinned Raft WAL/snapshot/compaction/recovery model; rotated audit-file policy | named retained Raft claim/backing per ordinal plus explicit pod-ephemeral or retained audit backing | derive per-ordinal usable/raw volume demand including old+new compaction and recovery; derive audit `(backups+1)×file`; reject one byte under before unseal/write | exact Vault storage/rotation/snapshot flags, PVC/PV presentation, and live high-water/backing checks |
@@ -7166,7 +7166,7 @@ ProvisionedKubernetesObjectKind =
   >
 
 CanonicalProvisionedKubernetesFields =
-  private Phase-8 object-source AST containing only fields copied from provisioned identities and witnesses
+  private Phase-10 object-source AST containing only fields copied from provisioned identities and witnesses
 
 RenderReconcileMode =
   < DeclarativeApply :
@@ -7202,7 +7202,7 @@ ProvisionedRenderSource identity =
   , sourceEquality : RenderSourceProvisionedPartEqualityWitness
   }
 
-ProvisionedRenderSourceSet = -- constructed in Phase 8; does not depend on Phase-9 K8sObject/Aeson types
+ProvisionedRenderSourceSet = -- constructed in Phase 11; does not depend on Phase-13 K8sObject/Aeson types
   { sources      : Map K8sObjectIdentity (ProvisionedRenderSource K8sObjectIdentity)
   , keyEquality  : RenderSourceMapKeyEmbeddedIdentityEqualityWitness
   , sourceDomain : WholeDeploymentRenderSourceDomainWitness
@@ -7294,12 +7294,12 @@ compatibility and every capacity/storage fold,
   deployment-global scheduler/admission/quota/RBAC/Lease/CRD sources), and constructs the new opaque
   `ProvisionedSpec`. Namespace, scheduler, quota, admission, RBAC, Lease, or CRD objects needed by multiple
   services have one global source owner and therefore render once; a second source for the same identity
-  rejects in Phase 8 without depending on Phase-9 renderer bytes or list order. Missing, stale, wrong-arm, or
+  rejects in Phase 11 without depending on Phase-13 renderer bytes or list order. Missing, stale, wrong-arm, or
   wrong-generation prior refs reject; an execution projection with mismatched deployment, source-unit,
   revision, ordinal, or resource identity also rejects. `FirstDeployment` denotes an exact empty prior
   execution map and cannot smuggle an implicit latest generation or non-empty predecessor. No authored field
-  can supply a prior envelope, prior rounded bytes, or a prior witness. Phase 9 defines the `K8sObject` model
-  and total private `renderSourcePrivate`; only deployment-level `renderAll` crosses the seal. Thus Phase 8
+  can supply a prior envelope, prior rounded bytes, or a prior witness. Phase 13 defines the `K8sObject` model
+  and total private `renderSourcePrivate`; only deployment-level `renderAll` crosses the seal. Thus Phase 11
   does not depend on a later renderer, and per-service callers cannot independently duplicate shared objects.
 `BoundDeployment` contains no `Provisioned*` record: it contains only normalized intents, unprovisioned demands,
 opaque prior refs, and execution envelopes. Every **deployable/render-source** `Provisioned*` record lives
@@ -7365,7 +7365,7 @@ topology's `NodeSupply` ([cluster_topology_doctrine.md §4](./cluster_topology_d
      real pod→node witness. Unplaced workloads continue into the candidate cover.
   2. **Derive effective candidate capacity, then construct a class-count cover.** For each candidate class,
      subtract every topology-expanded per-node execution unit required on that class — CNI/device-plugin and
-     other DaemonSet-like services, the Phase-32 cache owner, and an accelerator owner where applicable — from
+     other DaemonSet-like services, the Phase-38 cache owner, and an accelerator owner where applicable — from
      declared allocatable CPU/memory/ephemeral/device/storage capacity. This is one subtraction per selected
      node, not hidden overhead. Each remaining atomic pod must `podFits` one such effective instance across CPU
      request and finite CPU-limit budget, memory, ephemeral storage, storage locality/zone, accelerator
@@ -8105,7 +8105,7 @@ ProviderWorkerScalingPolicy account nodeClasses quota = -- opaque refinement
   is a consensus decision, not an elastic-capacity one. So the elastic axis and the quorum axis stay
   orthogonal: the price-shopping / threshold policy above ranges over agents; the fold re-runs ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting), below)
   against the grown *agent* set only. The pure policy/reserve fold is Phase 7, but live rke2-agent acquisition,
-  snapshot admission, join, and enforcement remain an explicitly unassigned Phase-N gate. Phase 30 enacts
+  snapshot admission, join, and enforcement remain an explicitly unassigned Phase-N gate. Phase 37 enacts
   only the distinct managed-provider-worker arm; it does not silently provide rke2. The closed-union quorum
   shape is type-foreclosed and owned by cluster topology, not claimed here.
 - **The fold re-runs after growth ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)).** A `Growable` budget the provision seal checked is re-checked
@@ -8177,7 +8177,7 @@ the *two-ceiling arithmetic*):
 For overcommit to be a pure checked rejection rather than only a runtime error, the capacity the fold checks
 against must be a **pure-model input** — a demand cannot be provisioned against a number learned only after
 effects. Amoebius therefore **declares** capacity in the spec/inventory model, completes bind/expansion, runs
-the fold at the Phase-8 `provision-seal`, and then **cross-checks** the declaration against reality at
+the fold at the Phase-10 `provision-seal`, and then **cross-checks** the declaration against reality at
 reconcile (runtime-checked). Gate-2 decode never constructs `ProvisionedSpec`.
 
 - **Declared in pure input; checked at the provision seal.** Each host/node advertises an **allocatable**
@@ -9471,7 +9471,7 @@ To keep SSoT boundaries crisp:
 | Per-volume presentation, usable/raw hard-cap semantics, backing allocation policy, and the `StorageBacking` union shape | [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) |
 | Per-container CPU/memory/ephemeral-storage declaration, bounded pod-local scratch/cache, and per-host-worker resource envelope | [platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope) |
 | Host image-build stage graph, build scratch/cache semantics, and host-vs-pod builder choice | [image_build_doctrine.md §6](./image_build_doctrine.md#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1) |
-| Kind bootstrap and enforcement of named engine-process/control-plane storage quotas | [../../DEVELOPMENT_PLAN/phase_14_midwife_bootstrap_kind.md](../../DEVELOPMENT_PLAN/phase_14_midwife_bootstrap_kind.md) |
+| Kind bootstrap and enforcement of named engine-process/control-plane storage quotas | [../../DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md](../../DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md) |
 | Cloud quota provisioning; dynamic node provisioning enaction; per-PV EBS | [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) |
 | The Pulsar topic-lifecycle policy (retention, size-triggered offload, backlog quota) | [pulsar_client_doctrine.md §6](./pulsar_client_doctrine.md#6-the-declarative-topology-algebra) |
 | The content-addressed MinIO store as a storage backing | [content_addressing_doctrine.md](./content_addressing_doctrine.md) |
@@ -9893,7 +9893,7 @@ and one-short mutants for `maxInstances`, `maxVcpu`, each `acceleratorCaps` entr
 `ClusterBudget` or provider action is constructed.
 
 Distributing a workload across clusters is **geo-replication** — *N* independent clusters, each running its own
-`place` over its own `Topology`, related only by async transport (Phase-28 design intent,
+`place` over its own `Topology`, related only by async transport (Phase-32 design intent,
 [app_vs_deployment_doctrine.md §9](./app_vs_deployment_doctrine.md#9-composition-one-cluster--n-geo-replicated-clusters-zero-app-change)).
 It is emphatically **not** the stateless attach pool, which is **single-cluster** and lives **inside** `place`'s
 elastic branch: [single_logical_data_plane_doctrine.md §4](./single_logical_data_plane_doctrine.md#4-the-elastic-worker-pool-the-attach-topology)
@@ -9903,7 +9903,7 @@ forecloses. The **reason** a cluster is the *pod-placement* boundary — the pha
 `FabricMember` — is owned by [single_logical_data_plane_doctrine.md §1](./single_logical_data_plane_doctrine.md#1-why-this-doctrine-exists-two-ways-to-say-run-this-elsewhere)
 and [§3](./single_logical_data_plane_doctrine.md#3-the-binding-reachability-is-a-type-not-a-runtime-probe); this
 subsection consumes that WHY, it does not restate it. The only runtime-checked residue is the deferred geo-replication
-enaction (Phase 28). A **stretched cluster** does not breach this arity: it is **one** `Topology` whose nodes span
+enaction (Phase 32). A **stretched cluster** does not breach this arity: it is **one** `Topology` whose nodes span
 two `Site`s, folded **once** ([§4](#4-the-total-fold-fits-carve-place-and-the-nesting)).
 
 ### 9.2 Monitoring cost folds through the standard machinery, and the forest has no parent-rollup budget
@@ -9949,12 +9949,12 @@ there is **no** parent-rollup storage to budget — a vacuous parent-side `Stora
 This document is normative capacity doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the capacity/topology
 type discipline lands in **Phases 4 and 7** (the negative `.dhall` gate and the capacity/topology fold), with
-runtime realization of kubelet layout/image-store and engine/etcd transitions in **Phase 14**, host build and
-registry admission in **Phase 15**, presentation-rounded retained/uniform claims in **Phase 17**, Vault
-Raft/audit storage in **Phase 18**, BookKeeper/MinIO geometry in **Phase 19**, monitoring-work binding in
-**Phase 8** and TSDB live projection in **Phase 20**, failed-write orphan/GC admission in **Phase 25**, kernel
-fabric demand in **Phase 27**, the host/VM presentation cross-check in **Phase 35**, and the `ScalingPolicy`
-enaction in **Phase 30**. This doc never maintains a competing status ledger; it states the target shape and
+runtime realization of kubelet layout/image-store and engine/etcd transitions in **Phase 17**, host build and
+registry admission in **Phase 18**, presentation-rounded retained/uniform claims in **Phase 21**, Vault
+Raft/audit storage in **Phase 22**, BookKeeper/MinIO geometry in **Phase 23**, monitoring-work binding in
+**Phase 10** and TSDB live projection in **Phase 24**, failed-write orphan/GC admission in **Phase 29**, kernel
+fabric demand in **Phase 31**, the host/VM presentation cross-check in **Phase 41**, and the `ScalingPolicy`
+enaction in **Phase 37**. This doc never maintains a competing status ledger; it states the target shape and
 links back for status, per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
 ---

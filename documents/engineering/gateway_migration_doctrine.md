@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_29_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_33_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for how amoebius moves the wild-ingress gateway between clusters — the typed `GatewayMigration = <Planned | Failover>` taxonomy, the planned strong-consistency handover, the unplanned survivor-wins failover, and the client-rebind protocol that keeps a live session bindable throughout.
@@ -88,7 +88,7 @@ proper begins only from a target that already holds the source's state.
    per-cluster (stretched-cluster) construct owned by that cluster, never a shared address repointed here.
 
 **Guarantee — RPO=0.** No committed write is lost — the `PlannedIsLossless` model invariant, proven-for-the-model
-at scope 2 (the runtime fidelity of the caught-up verification stays assumed until Phase 29;
+at scope 2 (the runtime fidelity of the caught-up verification stays assumed until Phase 33;
 [§6](#6-honesty-and-layer-markers)) — because writes were frozen and the replica was verified
 caught-up before authority moved. This is a coordinated cross-cluster switchover (Patroni-style), **not** an
 asynchronous [Second-Axis](./chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
@@ -213,10 +213,10 @@ source it admits is owned by [`backup_recovery_doctrine.md` §8](./backup_recove
 
 ## 6. Honesty and layer markers
 
-The forest/geo-replication substrate is **Phase 28**; everything in this document's gateway-migration/DNS
-failover runtime and acceptance is **design intent for Phase 29**. Nothing here is built or verified today. Phase order, status, and
+The forest/geo-replication substrate is **Phase 32**; everything in this document's gateway-migration/DNS
+failover runtime and acceptance is **design intent for Phase 33**. Nothing here is built or verified today. Phase order, status, and
 the acceptance gate are owned by
-[DEVELOPMENT_PLAN/README.md → Phase 29](../../DEVELOPMENT_PLAN/README.md); this document never restates phase
+[DEVELOPMENT_PLAN/README.md → Phase 33](../../DEVELOPMENT_PLAN/README.md); this document never restates phase
 status.
 
 - The `Planned` branch's **RPO=0** is the model invariant **`PlannedIsLossless`** — cutover is reachable only
@@ -225,15 +225,15 @@ status.
   [§6](./gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty)), not merely argued. What stays
   **assumed** is the *runtime physics* the model abstracts — that the caught-up verification and the
   MinIO/Pulsar/Patroni lossless delegation actually hold live — a **runtime-observed** caught-up edge, not a
-  constructive type-level impossibility, confirmed only by the Register-3 chaos injection of Phase 29. Per the
+  constructive type-level impossibility, confirmed only by the Register-3 chaos injection of Phase 33. Per the
   honesty rule ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)),
-  the model property is *proven-for-the-model* and the runtime fidelity is *assumed until Phase 29*.
+  the model property is *proven-for-the-model* and the runtime fidelity is *assumed until Phase 33*.
 - **Both** branches are the subject of amoebius's one proof obligation, owned by
   [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) and set in the concentration
   principle of [chaos_failover_doctrine.md](./chaos_failover_doctrine.md): the `Failover` async correctness via
   `NoWriteAfterStaleFailover` (safety) and `MergeConverges` (liveness), and the `Planned` handover via
   `PlannedIsLossless` — one reifiable `Model`, simulated (io-sim) and proven (TLC) at design time, with
-  model↔code correspondence **by construction** (no deferred correspondence table). What remains for Phase 29
+  model↔code correspondence **by construction** (no deferred correspondence table). What remains for Phase 33
   is Register-3 chaos injection against the running forest — confirming the abstracted physics hold — never a
   paper correspondence.
 - The typed `GatewayFailover { active : ClusterId, standby : ClusterId, dnsRecord, hubRole }` forest relation
@@ -271,5 +271,5 @@ status.
 - [Illegal-State Catalog](../illegal_state/illegal_state_catalog.md) — the "session that cannot rebind on migration" entry (§3.44) and the GADT-indexed-state-machine technique (§4.3).
 - [DSL Doctrine](./dsl_doctrine.md) — the typed `GatewayFailover` forest relation as a parent-minted, child-projected subtree field.
 - [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — the formal model of both the `Planned` and `Failover` branches (Phase 3).
-- [Development Plan → Phase 29](../../DEVELOPMENT_PLAN/README.md) — phase order, status, and the failover acceptance gate.
+- [Development Plan → Phase 33](../../DEVELOPMENT_PLAN/README.md) — phase order, status, and the failover acceptance gate.
 - [Documentation Standards](../documentation_standards.md) — header, SSoT, and the proven/tested/assumed honesty rule.

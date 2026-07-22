@@ -84,7 +84,15 @@ proven to have teeth by **two committed seeded renderer mutants**
 in `emitTLA` — `emitTLA-mut-01` (a dropped `UNCHANGED` conjunct on an action's non-effected variables) and
 `emitTLA-mut-02` (a finite quantifier mistranslated `\A`↔`\E`) — each of which the differential generator
 **must expose** as an explorer/TLC divergence, symmetric to the model-mutation check, so a renderer that is
-correct only on the constructors `ToyModel` happens to exercise cannot pass. The oracles this gate checks
+correct only on the constructors `ToyModel` happens to exercise cannot pass. Because that differential check is
+legitimately **safety-scoped**, the three liveness/fairness constructors it cannot see — `StrongFair`
+(`SF_vars`), `Always` (`[]`), and `Eventually` (`<>`) — are pinned instead by the byte-for-byte `emitTLA`
+golden itself, **not** by any in-process liveness checker: the Sprint 2.1 structural assertion forces
+`ToyModel` to carry all five liveness/fairness constructors, so the Phase-0-committed golden fixes the rendered
+bytes of every one (`WF_vars`/`SF_vars` conjuncts, `[]`/`<>`/`~>` operators), and **two further committed
+liveness-path renderer mutants** — `emitTLA-mut-03` (`StrongFair` rendered as `WF_vars`) and `emitTLA-mut-04`
+(`Always` rendered as `<>`), committed under `test/formal/mutants/` — which the golden **must turn red**, close
+the gap that a renderer swapping `StrongFair`→`WeakFair` or `[]`↔`<>` would otherwise slip through. The oracles this gate checks
 against — the hand-derived `ToyModel` reachable-distinct-state count and safety verdict, the `emitTLA ToyModel`
 byte-for-byte golden, and the mutation-operator/renderer-mutant catalog with their expected red outcomes — are
 **authored and committed in Phase 0 before `interpret`/`emitTLA` exist** (§M.1); a golden regenerated from the
@@ -155,19 +163,28 @@ emitting faithful TLA+ rather than hand-writing it.
   LeadsTo Expr Expr`, carried by the `modelFairness`/`modelProperties` fields
   ([`formal_model_doctrine.md §2`](../documents/engineering/formal_model_doctrine.md#2-the-model-is-data)).
 - A worked small model (`ToyModel` — e.g. a bounded two-process mutual exclusion) authored purely inside the
-  fragment, carrying at least one named safety invariant, a bounding constraint, and — under a weak-fairness
-  annotation — at least one liveness property (e.g. *each process eventually enters its critical section*).
+  fragment, carrying at least one named safety invariant, a bounding constraint, and — so the Phase-0 byte
+  golden can pin the rendered bytes of **all five** liveness/fairness constructors — both a `WeakFair` and a
+  `StrongFair` action annotation and at least one each of an `Always`, an `Eventually`, and a `LeadsTo`
+  temporal property (e.g. *each process eventually enters its critical section* as the `LeadsTo`/`Eventually`
+  witnesses, with the `StrongFair` annotation on an action a fair scheduler must not starve).
 
 ### Validation
 1. The fragment types and `ToyModel` compile on the pinned toolchain; `ToyModel`'s transition relation is
    fully reified (a value in the fragment, not an opaque function) — checked by construction.
 2. `ToyModel` is not a boolean-only strawman: it **exercises the harder fragment constructors** the round-trip
    must render faithfully — at least one finite quantifier over a finite set and at least one function
-   literal/update/application in a guard or effect, and both a `WeakFair` annotation and a `LeadsTo` liveness
-   property — so the Sprint 2.4 round-trip and mutation checks cannot pass while quantifier/function/fairness
-   translation stays stubbed. This is a committed structural assertion over the `ToyModel` value (a test that
-   walks its `Expr`/`Action`/`Temporal` nodes and fails if any of these constructor classes is absent), pinned
-   in Phase 0.
+   literal/update/application in a guard or effect, **both** a `WeakFair` and a `StrongFair` action annotation,
+   and at least one each of an `Always`, an `Eventually`, and a `LeadsTo` temporal property — so the Sprint 2.4
+   round-trip and mutation checks cannot pass while quantifier/function/fairness translation stays stubbed, and
+   so the Sprint 2.3 byte golden pins the rendered bytes of **all five** liveness/fairness constructors
+   (`WF_vars`/`SF_vars` conjuncts, `[]`/`<>`/`~>` operators), not just the `WeakFair`+`LeadsTo` pair. This
+   closes a faithfulness gap the **safety-scoped** differential test (§M) cannot: because that round-trip
+   oracle is safety-only, a renderer that emits `StrongFair` as `WF_vars` or swaps `[]`↔`<>` is invisible to
+   it and is caught **only** by the byte golden over a `ToyModel` that actually carries those constructors.
+   This is a committed structural assertion over the `ToyModel` value (a test that walks its
+   `Expr`/`Action`/`Temporal` nodes and fails if any of these constructor classes — including `StrongFair`,
+   `Always`, and `Eventually` — is absent), pinned in Phase 0.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -215,8 +232,9 @@ The whole sprint (📋 Planned).
 
 **Status**: Planned
 **Implementation**: `src/Amoebius/Formal/EmitTLA.hs` (`emitTLA`), `src/Amoebius/Cli/Formal.hs` (the
-`amoebius dev model emit`/`check` subcommand), `test/formal/EmitGoldenSpec.hs`; emitted output lands in an
-ignored build dir (`.build/spec/tla/`) — target paths, not yet built.
+`amoebius dev model emit`/`check` subcommand), `test/formal/EmitGoldenSpec.hs`, and the two committed
+liveness-path renderer mutants `emitTLA-mut-03`/`emitTLA-mut-04` under `test/formal/mutants/`; emitted output
+lands in an ignored build dir (`.build/spec/tla/`) — target paths, not yet built.
 **Blocked by**: Sprint 2.1.
 **Independent Validation**: `emitTLA ToyModel` renders a `.tla` + `.cfg`; the renderer is byte-for-byte
 golden-locked against a **Phase-0-committed golden authored before `EmitTLA.hs` exists** (§M.1 — a golden
@@ -252,12 +270,27 @@ never committed.
 - A Register-1 golden test pinning the *renderer's* byte-for-byte output against the Phase-0-committed
   `test/formal/golden/ToyModel.{tla,cfg}.golden` fixtures (authored before `EmitTLA.hs`) — the golden is a
   fixture of the renderer, not a committed spec, and is not regenerated from the renderer's own output.
+- Because the Sprint 2.1 structural assertion forces `ToyModel` to carry **all five** liveness/fairness
+  constructors, this same byte golden is the **only** oracle that pins liveness/fairness *rendering*
+  faithfulness (the Sprint 2.4 differential test is legitimately safety-scoped and cannot see a
+  `SF_vars`→`WF_vars` or `[]`↔`<>` swap): it fixes the `WF_vars`/`SF_vars` conjuncts and the `[]`/`<>`/`~>`
+  operators byte-for-byte. **Two committed liveness-path renderer mutants** prove that oracle has teeth —
+  `emitTLA-mut-03` (`StrongFair` rendered as `WF_vars`, breaking the golden's `SF_vars` conjunct) and
+  `emitTLA-mut-04` (`Always` rendered as `<>`, breaking the golden's `[]` operator), committed under
+  `test/formal/mutants/`, each paired with the positive it breaks (§M.2 — the correct golden byte is the
+  positive, the mutant that flips it the negative) and each of which the byte golden **must turn red**; a
+  surviving liveness-path renderer mutant fails the gate.
 
 ### Validation
 1. `emitTLA ToyModel` is byte-for-byte golden-locked against the Phase-0-committed
    `test/formal/golden/ToyModel.{tla,cfg}.golden` fixtures; the emitted files appear only under the ignored
    build path and carry the generated stamp; the `git ls-files -- '*.tla' '*.cfg'` scan returns empty (the
    `.golden`-suffixed fixtures do not match it).
+2. The byte golden pins the rendered bytes of **all five** liveness/fairness constructors carried by `ToyModel`
+   (`WF_vars`/`SF_vars` conjuncts, `[]`/`<>`/`~>` operators), and the two committed liveness-path renderer
+   mutants `emitTLA-mut-03` (`StrongFair`→`WF_vars`) and `emitTLA-mut-04` (`Always`→`<>`) each turn the golden
+   **red** — so a renderer that mistranslates a fairness or temporal constructor cannot pass, even though the
+   Sprint 2.4 differential oracle stays legitimately safety-scoped.
 
 ### Remaining Work
 The whole sprint (📋 Planned).

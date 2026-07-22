@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_08_capability_binder.md, DEVELOPMENT_PLAN/phase_10_chain_kernel_dryrun.md, DEVELOPMENT_PLAN/phase_13_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_14_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_22_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_23_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for what the amoebius Dhall DSL is — a typed orchestration surface
@@ -224,7 +224,7 @@ Total composability runs along four concrete axes, each owned in detail by a sib
   [app_vs_deployment_doctrine.md §8](./app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic),
   a demo web app is *application logic that uses* its extension — **not** itself an extension (an arbitrary
   container app is never an extension) — so it composes as an ordinary app-spec fragment, and these two demo
-  web apps are the **SPA-composition fixtures** (SPA composition itself is front-loaded to Phase 13, below).
+  web apps are the **SPA-composition fixtures** (SPA composition itself is front-loaded to Phase 16, below).
 - **Child-cluster-in-parent.** The name *amoebius* is the recursion: a cluster spawns children, which
   spawn their own. A child receives only its own scoped `InForceSpec` — *"including
   their childrens'"* but nothing about siblings — and the whole tree is rolled out from the root. The
@@ -237,11 +237,11 @@ runs a workflow, and tears down resources — the same composition, with a teard
 obligation. The testing surface is owned by the testing doctrine; it is named here only as proof that even
 *testing* is expressed in the one composable DSL rather than a parallel harness language.
 
-**SPA composition, front-loaded to Phase 13.** Composing a multi-service app together with an ML-workflow
+**SPA composition, front-loaded to Phase 16.** Composing a multi-service app together with an ML-workflow
 **demo web app** (the infernix/jitML fixtures above) as **typed Dhall fragments** — a single-page-app
 composition over this same extension seam — has its *representational / type-level* validity front-loaded to
-**Phase 13**, where it is proven at the Tier-1 design/spec layer (the same authoring-time gates of
-[§5](#5-the-illegal-state-unrepresentable-contract)); only the **live SPA deploy** stays in **Phase 37**.
+**Phase 16**, where it is proven at the Tier-1 design/spec layer (the same authoring-time gates of
+[§5](#5-the-illegal-state-unrepresentable-contract)); only the **live SPA deploy** stays in **Phase 43**.
 
 ```mermaid
 flowchart TD
@@ -426,7 +426,7 @@ things happen here:
 
 ### Post-gate seal — bind/expand, conditionally materialize infrastructure, provision
 
-The pure Phase-8 binder expands the complete source inventory and produces an unprovisioned
+The pure Phase-10 binder expands the complete source inventory and produces an unprovisioned
 `BoundDeployment`. `planInfrastructure :: ProvisionTargetSupply -> BoundDeployment -> Either ProvisionError
 InfrastructurePlanningResult` derives the whole demand from that value and the declared standalone supply or
 opaque forest-member budget; it never accepts a second caller-authored demand vector. The result is a closed
@@ -446,7 +446,7 @@ Either authenticated materialization arm constructs `ProvisionContext`. `provisi
 to the exact `BoundDeployment`, checks CPU, memory, storage, slots, accelerators, VRAM, quotas, controller
 multiplicity, materialized identities, and every other whole-deployment demand, and returns `Either
 ProvisionError ProvisionedSpec`. Its success arm is opaque and constructor-private. Only that
-`ProvisionedSpec` can cross the Phase-9 deployment-level `renderAll` boundary. Thus a capacity sum is a
+`ProvisionedSpec` can cross the Phase-13 deployment-level `renderAll` boundary. Thus a capacity sum is a
 checked rejection of constructible input, never a dependent-type inhabitance proof, and a promised
 infrastructure identity cannot be smuggled into a manifest before provider/host readback.
 
@@ -457,15 +457,15 @@ post-materialization provision seal rejects mismatched readback or remaining inc
 success produces the sole representation that `renderAll` accepts. Runtime enforcement remains a separate
 claim.
 
-**Where the contract shape is discharged: front-loaded to Phases 4–9 (Tier 1).** Gate 1 is
+**Where the contract shape is discharged: front-loaded to Phases 4–13 (Tier 1).** Gate 1 is
 `dhall type` at authoring time; Gate 2 is the in-process `Dhall.inputFile auto` decode and its focused
-properties (Phases 4–7); Phase 8 owns binding, pure infrastructure-plan construction, modeled/fixture
-materialization validation, and the opaque provision seal; Phase 9 proves the sole public `renderAll`
+properties (Phases 4–9); Phase 10 owns binding, pure infrastructure-plan construction, modeled/fixture
+materialization validation, and the opaque provision seal; Phase 13 proves the sole public `renderAll`
 boundary and its goldens. These contract/golden checks are pure or in-process and need no cluster. Live CAS
 enaction and provider/host readback of an `InfrastructureRequired` plan are exercised only by the later live
-infrastructure phases; they are not silently claimed by the Phase-8 type gate. What also stays deferred is the
+infrastructure phases; they are not silently claimed by the Phase-10 type gate. What also stays deferred is the
 **Tier-2 runtime-enforcement residue** — that the *running* cluster enforces what the sealed spec composes —
-owned by **Phase 22**. A green typecheck or decode alone proves neither target feasibility nor live
+owned by **Phase 26**. A green typecheck or decode alone proves neither target feasibility nor live
 enforcement.
 
 ### Recursion: a child's spec is a typed subtree projection
@@ -503,9 +503,9 @@ its building phase, not yet built.
 > plus provision-seal mechanism; it does **not** claim every illegal state is excluded by type inhabitance —
 > each catalog entry states whether its foreclosure is type-, decode-, provision-, or runtime-checked. Per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), a typing argument is evidence, not a
-> tested or proven result: the pure contract is front-loaded to the pre-cluster gates, Phases 4–9 (Tier 1), while
+> tested or proven result: the pure contract is front-loaded to the pre-cluster gates, Phases 4–13 (Tier 1), while
 > runtime enforcement — that the running cluster enforces what the spec composed — stays the Tier-2 residue
-> deferred to Phase 22.
+> deferred to Phase 26.
 
 ---
 
@@ -602,20 +602,20 @@ remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT
 orchestration Dhall DSL's **in-process contract validation** — the two typed gates of
 [§5](#5-the-illegal-state-unrepresentable-contract), followed by bind/expand, conditional infrastructure
 planning/materialization fixtures, and the opaque provision seal (Tier 1: Dhall typecheck + decoder +
-QuickCheck + whole-deployment plan/provision + `renderAll` goldens) — is **front-loaded to Phases 4–9**,
+QuickCheck + whole-deployment plan/provision + `renderAll` goldens) — is **front-loaded to Phases 4–13**,
 while live enaction/readback of a required initial-infrastructure batch belongs to the later live
 infrastructure phase that owns that substrate. The DSL's
 **runtime-enforcement** half (the live deploy + singleton reconcile that makes the running cluster
-enforce what the spec composed, Tier 2) lands in **Phase 22**, atop the Phase 10 `dsl-step`/`chain` kernel
+enforce what the spec composed, Tier 2) lands in **Phase 26**, atop the Phase 14 `dsl-step`/`chain` kernel
 seeded from hostbootstrap. This doc never maintains a competing status ledger; it states the target shape and
 links back for status.
 
 > **Honesty.** Everything in this doctrine is Phase 0 design intent, specified before implementation. Where
 > it borrows behaviour proven in prodbox or implemented in hostbootstrap, that is *evidence from a sibling
-> system*, not proof in amoebius — which has built neither the front-loaded pre-cluster (Phases 4–9)
+> system*, not proof in amoebius — which has built neither the front-loaded pre-cluster (Phases 4–13)
 > in-process validation of this contract (Tier 1: Dhall typecheck + decoder + QuickCheck + conditional
 > infrastructure-plan/materialization fixtures + provision seal + `renderAll` goldens) nor the later live
-> infrastructure enaction/readback and Phase 22 runtime enforcement (Tier 2)
+> infrastructure enaction/readback and Phase 26 runtime enforcement (Tier 2)
 > that makes the running cluster enforce what the spec composed. Read every prescriptive statement here
 > as the contract amoebius intends to satisfy, never as a tested amoebius result
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
