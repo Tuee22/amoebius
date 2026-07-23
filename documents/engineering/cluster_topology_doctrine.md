@@ -527,20 +527,27 @@ collection**.
   substrate catalog and the per-host node inventory owned by [substrate_doctrine.md](./substrate_doctrine.md)
   ([§4.4](../illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) ownership index), so the compatibility check is against one authoritative list, never a guess.
 
+Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
+
 ```mermaid
 flowchart LR
-  engine[Declared ComputeEngine: Kind or Rke2 or Managed Eks] -->|needs a host of the right kind| host{Compatible host witness available?}
-  host -->|linux-cpu or linux-cuda| direct[LinuxHost is the host itself]
-  host -->|apple| lima[LinuxHost only via limaHost, Lima VM]
-  host -->|windows| wsl[LinuxHost only via wsl2Host, WSL2 distro]
-  host -->|managed| slot[Hostless provider slot, no LinuxHost]
-  direct -->|compatible-pair smart ctor| node[Node]
+  engine[Declared ComputeEngine: Kind or Rke2 or Managed Eks]:::intent -->|needs a host of the right kind| host{Compatible host witness available?}:::decision
+  host -->|linux-cpu or linux-cuda| direct((("LinuxHost is the host itself"))):::seal
+  host -->|apple| lima((("LinuxHost only via limaHost, Lima VM"))):::seal
+  host -->|windows| wsl((("LinuxHost only via wsl2Host, WSL2 distro"))):::seal
+  host -->|managed| slot[Hostless provider slot, no LinuxHost]:::intent
+  direct -->|compatible-pair smart ctor| node((("Node"))):::seal
   lima --> node
   wsl --> node
   slot --> node
-  node -->|elementwise fold over fixed/floor nodes and candidate classes| topo[Topology, incompatible pair yields Left]
-  topo -->|capacity fold| cap[resource_capacity place fold]
+  node -->|elementwise fold over fixed/floor nodes and candidate classes| topo((("Topology, incompatible pair yields Left"))):::seal
+  topo -->|capacity fold| cap[["resource_capacity place fold"]]:::intent
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef decision fill:#fdf3d8,stroke:#b8791b,color:#5c3a06,stroke-width:1px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
 ```
+
+*Design intent (Phase 4): a type-level compatibility pipeline — a declared engine meets a substrate-gated `LinuxHost` witness (or a hostless provider slot) at a compatible-pair smart constructor, and an elementwise fold yields a `Topology` or a `Left`; that the Lima/WSL2 VM actually boots is runtime-checked, not proven here.*
 
 ---
 

@@ -75,16 +75,23 @@ size-1 group provisioned and observed by this sub-phase alone; the `Managed Eks`
 witness (a foreclosure already unrepresentable in the pre-cluster band — the Dhall Gate-1 schema in Phase 4,
 the GADT decoder in Phase 5, and the capacity/topology folds in Phase 7).
 
+Diagram vocabulary: [diagram_conventions.md](../documents/engineering/diagram_conventions.md).
 ```mermaid
 flowchart LR
-  parent[linux-cpu parent: Deployment replicas=1 singleton runs the Pulumi engine, no election] --> exec[ProvisionedPulumiExecutionDemand: executor Job + plugin/workspace peaks placed first]
-  exec --> deploy[pulumi up via cloud keys over the cloud API]
-  parent --> backend[PulumiCheckpointObjectDemand: Vault-Transit-enveloped checkpoint objects in MinIO, exclusive mutation gateway]
-  deploy --> eks[Provider child: EKS control plane plus base managed node group, accelerator = None]
-  observe[observeProviderAccount: read-only quota/usage/SKU snapshot] --> validate[planInfrastructure to ValidatedInfrastructurePlan: prove fit, partition quota]
+  parent["linux-cpu parent: Deployment replicas=1 singleton runs the Pulumi engine, no election"]:::intent --> exec((("ProvisionedPulumiExecutionDemand: executor Job + plugin/workspace peaks placed first"))):::seal
+  exec --> deploy[/"pulumi up via cloud keys over the cloud API"/]:::effect
+  parent --> backend["PulumiCheckpointObjectDemand: Vault-Transit-enveloped checkpoint objects in MinIO, exclusive mutation gateway"]:::intent
+  deploy --> eks["Provider child: EKS control plane plus base managed node group, accelerator = None"]:::runtime
+  observe[/"observeProviderAccount: read-only quota/usage/SKU snapshot"/]:::effect --> validate{{"planInfrastructure to ValidatedInfrastructurePlan: prove fit, partition quota"}}:::gate
   validate --> deploy
-  deploy --> gate[Gate: control plane plus base node group ready; enveloped checkpoint in MinIO; sealed-Vault refuses; execve has no PULUMI_/AWS_/PATH]
+  deploy --> gate{{"Gate: control plane plus base node group ready; enveloped checkpoint in MinIO; sealed-Vault refuses; execve has no PULUMI_/AWS_/PATH"}}:::gate
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
+*Design intent. `observeProviderAccount` and `pulumi up` are the effectful seams and the ValidatedInfrastructurePlan gate proves fit at Tier-1; the provisioned executor is a constructor-private seal, while the running EKS control plane and base node group are runtime-checked, not proven here.*
 
 **Substrate:** linux-cpu → provider — the §L Parent-drives-provider escape form. The acceptance gate runs on
 exactly one hardware substrate, the linux-cpu parent `kind` cluster from inside which the Pulumi engine issues

@@ -107,14 +107,22 @@ This is the principal generalization over prodbox, which published **native-host
 (`local_registry_pipeline.md` §6 step 4, §3). amoebius lifts native-host-architecture-only builds to always building
 both arches as one manifest list.
 
+Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
+
 ```mermaid
 flowchart TD
-  src[amoebius source plus Dockerfile] --> bx[docker buildx build platform amd64 plus arm64]
-  bx --> ml[single OCI manifest list one tag]
-  ml -->|atomic push| reg[Registry project on this cluster: distribution]
-  reg -->|amd64 node selects amd64| amd[amd64 node pull]
-  reg -->|arm64 node selects arm64| arm[arm64 node pull]
+  src["amoebius source plus Dockerfile"]:::intent --> bx[/"docker buildx build platform amd64 plus arm64"/]:::effect
+  bx --> ml((("single OCI manifest list one tag"))):::seal
+  ml -->|atomic push| reg["Registry project on this cluster: distribution"]:::runtime
+  reg -->|amd64 node selects amd64| amd["amd64 node pull"]:::runtime
+  reg -->|arm64 node selects arm64| arm["arm64 node pull"]:::runtime
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
+
+*Design intent. The buildx build is the effectful seam and the manifest list its sealed success artifact; the running registry and the amd64/arm64 node pulls are runtime-checked, not proven here.*
 
 ---
 

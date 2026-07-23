@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for how amoebius sequences bring-up — a dependent starts on a
@@ -64,15 +64,23 @@ owned by the reconciler ([§6](#6-the-runtime-enactor-the-reconciler-observes-ne
 explicitly: amoebius forecloses the *shape that races*, and honestly delegates the *observation that
 resolves it*.
 
+Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
+
 ```mermaid
 flowchart TD
-  spec[Bring-up spec: a readiness DAG] -->|no AfterDuration arm, type-foreclosed| shape[Every edge is a condition, not a duration]
-  spec -->|mkBringUpOrder acyclic + complete, decode-foreclosed| order[Order derived from the declared dependency graph]
-  shape --> enact[Reconciler enacts]
+  spec["Bring-up spec: a readiness DAG"]:::intent -->|no AfterDuration arm, type-foreclosed| shape{{"Every edge is a condition, not a duration"}}:::gate
+  spec -->|mkBringUpOrder acyclic + complete, decode-foreclosed| order{{"Order derived from the declared dependency graph"}}:::gate
+  shape --> enact[/"Reconciler enacts"/]:::effect
   order --> enact
-  enact -->|discover observes the live condition, never a timer| live[Dependent starts once the dependency is observed ready]
-  live -->|the condition actually becoming true is runtime-checked| chaos[owned by the reconciler + chaos_failover_doctrine]
+  enact -->|discover observes the live condition, never a timer| live["Dependent starts once the dependency is observed ready"]:::runtime
+  live -->|the condition actually becoming true is runtime-checked| chaos["owned by the reconciler + chaos_failover_doctrine"]:::runtime
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
+
+*Design intent: the type gate forecloses the duration arm and the decode gate the ordering; the reconciler enact is the one effect, and the dependent actually starting on the observed edge is runtime-checked, not proven here.*
 
 ---
 

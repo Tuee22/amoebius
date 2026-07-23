@@ -82,23 +82,32 @@ node-scoped** — re-materializable on first miss, deliberately *not* the durabl
 the cache costs a re-resolve, never data loss. The engine lane exercised here is `linux-cpu` only; the
 Apple-Metal and `Cuda` lanes are out of contract for this gate.
 
+Diagram vocabulary: [diagram_conventions.md](../documents/engineering/diagram_conventions.md).
+
 ```mermaid
 flowchart LR
-  dhall[Resolved dhall normal form] --> eh[experimentHash primitive]
-  subfp[linux-cpu substrate fingerprint] --> eh
-  ca[ContentAddress typeclass] --> store[Phase 29 content-addressed store]
+  dhall["Resolved dhall normal form"]:::intent --> eh[["experimentHash primitive"]]:::intent
+  subfp["linux-cpu substrate fingerprint"]:::intent --> eh
+  ca[["ContentAddress typeclass"]]:::intent --> store[/"Phase 29 content-addressed store"/]:::effect
   eh --> store
-  master[masterSeed in the dhall] --> seed[deriveSplitMixSeed primitive]
-  store --> stage[Pure seeded compute stage]
+  master["masterSeed in the dhall"]:::intent --> seed[["deriveSplitMixSeed primitive"]]:::intent
+  store --> stage[["Pure seeded compute stage"]]:::intent
   seed --> stage
-  stage --> gateA[Same experimentHash gives byte-identical output]
-  ca --> cache[CacheBudget-bounded content-addressed cache]
-  engid[EngineRuntime named catalog identity] --> resolver[jit-build resolver]
-  resolver -->|"cache HIT: return handle"| handle[Engine handle]
+  stage --> gateA["Same experimentHash gives byte-identical output"]:::runtime
+  ca --> cache[/"CacheBudget-bounded content-addressed cache"/]:::effect
+  engid["EngineRuntime named catalog identity"]:::intent --> resolver[/"jit-build resolver"/]:::effect
+  resolver -->|"cache HIT: return handle"| handle((("Engine handle"))):::seal
   resolver -->|"cache MISS: resolve = download or build"| cache
   cache -->|"per-node owner: second client pod reuses resident handle"| handle
-  overbudget[more cached than fits] -->|provision-seal rejection| reject[structured ProvisionError]
+  overbudget["more cached than fits"]:::intent -->|provision-seal rejection| reject>"structured ProvisionError"]:::refuse
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
+
+*Design intent. The determinism kernel primitives and the seeded stage are pure Tier-1 folds; the Phase-29 store, the node cache, and the jit-build resolver are the effectful IO seams and the engine handle their opaque success seal; an over-budget demand is refused at the provision-seal, while byte-identical output and live cache residency are runtime-checked on linux-cpu, not proven here.*
 
 **Substrate:** linux-cpu — the whole gate runs on a single-node `kind` cluster on a linux-cpu host in
 Register 3 (live infrastructure); no apple, linux-cuda, or windows substrate is touched, and cross-substrate

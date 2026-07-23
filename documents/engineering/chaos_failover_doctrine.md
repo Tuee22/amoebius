@@ -336,16 +336,23 @@ captured with an explicit freshness contract** — effectful code may *capture* 
 result, but it **must not compute the branch in the middle of a race.** Every decision follows a four-stage
 pipeline:
 
+Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
+
 ```mermaid
 flowchart TD
-  T1["anti-pattern: read premise"] --> T2["probe authority"]
-  T2 --> T3["branch inside effects"]
-  T3 --> T4["act on possibly stale premise"]
-  L1["1. snapshot + fence"] --> L2["2. bounded typed Observation"]
-  L2 --> L3["3. pure Decision"]
-  L3 --> L4["4. revalidate fence, then apply"]
+  T1[/"anti-pattern: read premise"/]:::effect --> T2[/"probe authority"/]:::effect
+  T2 --> T3{"branch inside effects"}:::decision
+  T3 --> T4[/"act on possibly stale premise"/]:::effect
+  L1[/"1. snapshot + fence"/]:::effect --> L2{{"2. bounded typed Observation"}}:::gate
+  L2 --> L3{"3. pure Decision"}:::decision
+  L3 --> L4[/"4. revalidate fence, then apply"/]:::effect
   T4 -->|"refactor into"| L1
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef decision fill:#fdf3d8,stroke:#b8791b,color:#5c3a06,stroke-width:1px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
 ```
+
+*Design intent. Two effectful seams — the snapshot/fence capture and the revalidate-then-apply — bracket a pure three-valued Observation gate and a pure Decision; the anti-pattern instead folds read, probe, branch, and act into one race. The fence's live freshness is runtime-checked at apply, not proven here.*
 
 Three sub-rules make it sound:
 

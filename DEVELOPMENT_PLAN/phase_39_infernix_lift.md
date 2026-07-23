@@ -58,19 +58,26 @@ The full behind-Keycloak/Envoy SPA composition is Phase 43; this phase deploys t
 via the Deployment-`replicas=1` control-plane singleton (Phase 26), whose single-instance stays a k8s/etcd
 property with no bespoke election.
 
+Diagram vocabulary: [diagram_conventions.md](../documents/engineering/diagram_conventions.md).
+
 ```mermaid
 flowchart LR
-  infernix[infernix inference core lifted intact] --> store[Store seam onto the Phase 29 content store]
-  infernix --> pulsar[Transport seam onto the native CBOR Pulsar client]
-  infernix --> vault[Creds seam onto a Vault SecretRef]
-  infernix --> engine[Engine seam onto the Phase 38 jit-build CacheBudget cache]
-  store --> decode[Pure CPU decode over the Phase 38 experimentHash kernel]
+  infernix["infernix inference core lifted intact"]:::provenPB --> store[/"Store seam onto the Phase 29 content store"/]:::effect
+  infernix --> pulsar[/"Transport seam onto the native CBOR Pulsar client"/]:::effect
+  infernix --> vault[/"Creds seam onto a Vault SecretRef"/]:::effect
+  infernix --> engine[/"Engine seam onto the Phase 38 jit-build CacheBudget cache"/]:::effect
+  store --> decode[["Pure CPU decode over the Phase 38 experimentHash kernel"]]:::intent
   engine --> decode
   vault --> decode
   pulsar --> decode
-  decode --> gate[Same experimentHash gives byte-identical output]
-  decode --> app[Demo web app deploys application-logic-only]
+  decode --> gate((("Same experimentHash gives byte-identical output"))):::runtime
+  decode --> app["Demo web app deploys application-logic-only"]:::runtime
+  classDef provenPB fill:#dbeafe,stroke:#1e5fa8,color:#0b2f57,stroke-width:2px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
+*Design intent. The lifted infernix core is sibling evidence; the four re-homing seams are the effectful IO boundary and the CPU decode is a pure Tier-1 fold; the same-`experimentHash` reproduction and the live demo-app deployment are runtime-checked, not proven here.*
 
 **Substrate:** linux-cpu — the whole gate runs on a single-node `kind` cluster on a linux-cpu host in
 Register 3 (live infrastructure); no accelerator is in scope (the CUDA training lift is Phase 40), so

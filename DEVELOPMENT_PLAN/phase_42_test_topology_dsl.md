@@ -68,20 +68,29 @@ the `replicas=1` singleton (Phase 26), the native Pulsar client and Pulsar-`Fail
 (Phases 28–29), the retained `no-provisioner` PV model (Phase 21), substrate detection (Phase 17),
 Vault secret-by-name injection (Phase 22), and the leak-free provider teardown (Phase 37).
 
+Diagram vocabulary: [diagram_conventions.md](../documents/engineering/diagram_conventions.md).
+
 ```mermaid
 flowchart LR
-  detect[suggest-test detects substrate plus credential authority] --> gen[Emit representative test dhall]
-  gen --> review[Operator reviews the proposal]
-  review --> up[Elevated harness spins up resources tagged test-owned]
-  up --> run[Run workflow and inject a delegated failover]
-  run --> kill[Kill the active worker]
-  kill --> takeover[Pulsar promotes the name-ordered standby: no amoebius election]
-  takeover --> down[Mandatory idempotent teardown on every exit]
-  down --> sweep[Elevated harness sweeps test-flagged resources]
-  sweep --> inventory[Independent API, host-backing, cloud pre/post inventory diff]
-  inventory --> empty[Diff empty plus per-run ledger]
-  inventory --> leak[Non-empty diff is a hard failure with the leak list]
+  detect[/"suggest-test detects substrate plus credential authority"/]:::effect --> gen[["Emit representative test dhall"]]:::intent
+  gen --> review{"Operator reviews the proposal"}:::decision
+  review --> up[/"Elevated harness spins up resources tagged test-owned"/]:::effect
+  up --> run[/"Run workflow and inject a delegated failover"/]:::effect
+  run --> kill[/"Kill the active worker"/]:::effect
+  kill --> takeover["Pulsar promotes the name-ordered standby: no amoebius election"]:::runtime
+  takeover --> down[/"Mandatory idempotent teardown on every exit"/]:::effect
+  down --> sweep[/"Elevated harness sweeps test-flagged resources"/]:::effect
+  sweep --> inventory{"Independent API, host-backing, cloud pre/post inventory diff"}:::decision
+  inventory --> empty((("Diff empty plus per-run ledger"))):::seal
+  inventory --> leak>"Non-empty diff is a hard failure with the leak list"]:::refuse
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef decision fill:#fdf3d8,stroke:#b8791b,color:#5c3a06,stroke-width:1px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
+  classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
+*Design intent. Detect, spin-up, run/inject, kill, teardown and sweep are the effectful seams; the inventory diff is the decision that either seals a clean run with its ledger or refuses fail-closed on a leak; the Pulsar-delegated standby takeover is runtime-checked on the running cluster, not proven here.*
 
 **Substrate:** per generated test (§L) — each emitted test `.dhall` is substrate-locked to exactly one substrate
 with no silent fallback; the canonical Register-3 gate run is exercised on `linux-cpu`, where an intra-cluster

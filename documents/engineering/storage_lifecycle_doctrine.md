@@ -136,17 +136,23 @@ pins each PV to its claim *before the claim exists*.
   trivial case; on a multi-node kind/rke2 cluster each ordinal's PV is pinned to the node holding its
   bytes. (Provider/EBS volumes are node-independent — [§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim).)
 
+Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
+
 ```mermaid
 flowchart TD
-  sts[StatefulSet volumeClaimTemplate] -->|renders one PVC per ordinal| pvc[PVC data-statefulset-ordinal]
-  ident[Identity: namespace, statefulset, ordinal] -->|pure function| pvname[Logical key namespace/statefulset/pv_integer rendered to legal name namespace-statefulset-pv-n]
-  ident -->|pure function| claimref[claimRef: namespace, PVC name]
-  pvname -->|carries| pv[Retained PV]
+  sts[StatefulSet volumeClaimTemplate]:::intent -->|renders one PVC per ordinal| pvc[PVC data-statefulset-ordinal]:::intent
+  ident[Identity: namespace, statefulset, ordinal]:::intent -->|pure function| pvname[Logical key namespace/statefulset/pv_integer rendered to legal name namespace-statefulset-pv-n]:::intent
+  ident -->|pure function| claimref[claimRef: namespace, PVC name]:::intent
+  pvname -->|carries| pv[Retained PV]:::intent
   claimref -->|carries| pv
   pvc -->|WaitForFirstConsumer binds to the claimRef-pinned PV| pv
-  pv -->|host-backed: node-affinity pin| host[Host path on one node]
-  pv -->|provider-backed: one EBS per PV| ebs[EBS volume rounded to provider allocation geometry]
+  pv -->|host-backed: node-affinity pin| host[Host path on one node]:::runtime
+  pv -->|provider-backed: one EBS per PV| ebs[EBS volume rounded to provider allocation geometry]:::runtime
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
+
+*Design intent. The PV name and claimRef are pure functions of (namespace, statefulset, ordinal), so the same ordinal computes the same bind on every rebuild; the physical host path and EBS volume are runtime-checked backing residue, not proven here.*
 
 ---
 
@@ -417,13 +423,17 @@ no-provisioner PVC/PV policy, which guarantees identical rebinding by fresh-PV r
 
 ```mermaid
 flowchart TD
-  run1[Cluster running, PVC bound to PV] -->|cluster delete: Retain preserves backing bytes| retained[Backing store preserved: EBS volume or host path. PV object may be gone kind delete cluster or Released with stale claimRef.uid]
-  retained -->|cluster recreate: amoebius makes a fresh uid-less pre-bound PV over the preserved bytes| freshpv[Fresh PV, claimRef namespace and PVC name, no uid, no resourceVersion]
-  retained -->|same StatefulSet recomputes same PVC| pvc2[Identical PVC, same name and namespace]
-  freshpv -->|claimRef and PV name match by identity| rebind[Recreated PVC binds to the fresh PV]
+  run1[Cluster running, PVC bound to PV]:::runtime -->|cluster delete: Retain preserves backing bytes| retained[Backing store preserved: EBS volume or host path. PV object may be gone kind delete cluster or Released with stale claimRef.uid]:::runtime
+  retained -->|cluster recreate: amoebius makes a fresh uid-less pre-bound PV over the preserved bytes| freshpv[Fresh PV, claimRef namespace and PVC name, no uid, no resourceVersion]:::intent
+  retained -->|same StatefulSet recomputes same PVC| pvc2[Identical PVC, same name and namespace]:::intent
+  freshpv -->|claimRef and PV name match by identity| rebind[/Recreated PVC binds to the fresh PV\]:::intent
   pvc2 --> rebind
-  rebind -->|same bytes, no restore| run2[Cluster running again on original data]
+  rebind -->|same bytes, no restore| run2[Cluster running again on original data]:::runtime
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
+
+*Design intent. Deterministic rebind reconstructs the bind from a uid-less pre-bound PV and a recomputed PVC — two halves that meet by identity; the running clusters and the surviving backing bytes are runtime-checked, not proven here.*
 
 **Deterministic rebind is guaranteed only when all of these hold** (adapted and generalized from the
 prodbox rebinding rules):

@@ -305,13 +305,19 @@ The extreme case proves the doctrine: take an app running on a single kind clust
 geographically-distributed clusters with automatic gateway failover — **and change not one byte of the app
 spec.** Everything that makes that move happen lives in deployment rules and platform idioms.
 
+Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
+
 ```mermaid
 flowchart TD
-  app[App spec dhall written once: UI, LB services, auth rules, durable storage, Pulsar topics, shared libraries] -->|joined with| r1[Deployment rules A: single cluster, replicas=1]
-  app -->|same bytes, joined with| r2[Deployment rules B: N clusters, geo-replicated, gateway failover]
-  r1 -->|renders| d1[Deployment: one cluster, one region]
-  r2 -->|renders| d2[Deployment: N geo-replicated clusters, route53 failover]
+  app["App spec dhall written once: UI, LB services, auth rules, durable storage, Pulsar topics, shared libraries"]:::intent -->|joined with| r1["Deployment rules A: single cluster, replicas=1"]:::intent
+  app -->|same bytes, joined with| r2["Deployment rules B: N clusters, geo-replicated, gateway failover"]:::intent
+  r1 -->|renders| d1["Deployment: one cluster, one region"]:::runtime
+  r2 -->|renders| d2["Deployment: N geo-replicated clusters, route53 failover"]:::runtime
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
+
+*Design intent. The app spec and the deployment-rules layers are Tier-1 in-process values; the rendered deployments are the running-cluster residue, runtime-checked and not proven here.*
 
 Cashing out "zero app change":
 

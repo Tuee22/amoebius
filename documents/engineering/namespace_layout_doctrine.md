@@ -90,17 +90,21 @@ The concrete provider set, its HA-always deployment, and its bring-up ordering a
 [platform_services_doctrine.md](./platform_services_doctrine.md); this doctrine owns only that the set is
 partitioned one-namespace-per-capability plus the two closed control roles and that the partition is derived.
 
+Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
+
 ```mermaid
 flowchart TD
-  capset[Fixed capability set: ObjectStore, SecretStore, MessageBus, Sql, Identity, Observability, Registry, Edge] -->|pure function per capability| nsplat[One platform namespace each: amoebius-minio ... amoebius-edge]
-  schedrole[Closed capacity-scheduler role] -->|pure role-to-namespace function| nssched[amoebius-capacity-scheduler: exact pods=1]
-  singleton[Control-plane singleton, not a capability] -->|its own namespace| nscp[amoebius-control-plane]
-  appset[Declared apps] -->|one namespace per app, owned by service_capability and tenancy| nsapp[Per-app namespaces]
-  nsplat -->|default-deny boundary| policy[Derived NetworkPolicies follow the dependency graph]
+  capset["Fixed capability set: ObjectStore, SecretStore, MessageBus, Sql, Identity, Observability, Registry, Edge"]:::intent -->|pure function per capability| nsplat["One platform namespace each: amoebius-minio ... amoebius-edge"]:::intent
+  schedrole["Closed capacity-scheduler role"]:::intent -->|pure role-to-namespace function| nssched["amoebius-capacity-scheduler: exact pods=1"]:::intent
+  singleton["Control-plane singleton, not a capability"]:::intent -->|its own namespace| nscp["amoebius-control-plane"]:::intent
+  appset["Declared apps"]:::intent -->|one namespace per app, owned by service_capability and tenancy| nsapp["Per-app namespaces"]:::intent
+  nsplat -->|default-deny boundary| policy["Derived NetworkPolicies follow the dependency graph"]:::intent
   nssched -->|default-deny plus derived apiserver edge| policy
   nscp -->|default-deny boundary| policy
   nsapp -->|default-deny boundary| policy
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
 ```
+*Design intent. Each namespace and its default-deny boundary is a pure function of the fixed capability set, the closed scheduler role, the singleton, and the declared apps; the running cluster's actual east-west enforcement is runtime-checked, not proven here.*
 
 ---
 

@@ -111,12 +111,18 @@ WireGuard fits the amoebius disciplines cleanly because it is a *primitive*, not
   `discover` (`wg show`) → diff against `render(inventory)` → enact (`wg set`). No Netmaker agent, no side
   channel; peer-set changes propagate as reconciles rolled out from the root.
 
+Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
+
 ```mermaid
 flowchart TD
-  inv[Typed node inventory in the InForceSpec] -->|render, pure| cfg[WireGuard peer configs]
-  cfg -->|singleton reconcile: wg show, diff, wg set| iface[wg0 interface on each node]
-  vault[Vault KV: Curve25519 peer keypairs] -->|secrets-by-name, parent-injected| iface
+  inv["Typed node inventory in the InForceSpec"]:::intent -->|render, pure| cfg["WireGuard peer configs"]:::intent
+  cfg -->|singleton reconcile: wg show, diff, wg set| iface[/"wg0 interface on each node"/]:::effect
+  vault["Vault KV: Curve25519 peer keypairs"]:::intent -->|secrets-by-name, parent-injected| iface
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
 ```
+
+*Design intent. Rendered peer configs and Vault-injected keys are Tier-1 in-process; the wg0 interface is the one effectful seam where `wg set` enacts — runtime-checked, not proven here.*
 
 ---
 

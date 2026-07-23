@@ -51,14 +51,20 @@ Vault-enveloped MinIO bucket; the workflow workers stay unelected; no geo-replic
 gateway migration is claimed here (geo-replication is Phase 32; gateway migration is Phase 33). It proves that the established live surfaces compose
 end to end for a spec-driven single-page app.
 
+Diagram vocabulary: [diagram_conventions.md](../documents/engineering/diagram_conventions.md).
+
 ```mermaid
 flowchart LR
-  spa[Phase-16 decode-proven SPA .dhall: capability needs plus nested infernix workflow] --> compose[Compose with linux-cpu deployment-rules layer: Deployment cardinality and rollout, provider plus shape, inference substrate]
-  compose --> apply[Typed SSA reconciler applies under the replicas=1 singleton onto the HA stack]
-  apply --> edge[Edge publish renders an HTTPRoute gated by Keycloak over Envoy Gateway API]
-  edge --> infer[Inference request round-trips through the composed infernix workflow: engine jit-resolved into the CacheBudget cache]
-  infer --> teardown[Idempotent leak-free teardown plus per-run ledger]
+  spa["Phase-16 decode-proven SPA .dhall: capability needs plus nested infernix workflow"]:::intent --> compose[["Compose with linux-cpu deployment-rules layer: Deployment cardinality and rollout, provider plus shape, inference substrate"]]:::intent
+  compose --> apply[/"Typed SSA reconciler applies under the replicas=1 singleton onto the HA stack"/]:::effect
+  apply --> edge[/"Edge publish renders an HTTPRoute gated by Keycloak over Envoy Gateway API"/]:::effect
+  edge --> infer[/"Inference request round-trips through the composed infernix workflow: engine jit-resolved into the CacheBudget cache"/]:::effect
+  infer --> teardown[/"Idempotent leak-free teardown plus per-run ledger"/]:::effect
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
 ```
+
+*Design intent, 📋 Planned on linux-cpu (Register 3): the Phase-16-decode-proven SPA value and its composition with the deployment-rules layer are Tier-1 in-process, while the SSA apply, edge publish, inference round-trip, and leak-free teardown are the effectful seam whose running-cluster residue is runtime-checked, not proven here.*
 
 **Substrate:** linux-cpu — the whole gate composes and deploys the SPA on a single `linux-cpu` `kind` cluster
 in Register 3 and exercises a CPU-bound infernix inference round-trip; no apple, linux-cuda, or windows

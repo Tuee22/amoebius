@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_21_retained_storage.md, DEVELOPMENT_PLAN/phase_32_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_33_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_21_retained_storage.md, DEVELOPMENT_PLAN/phase_32_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_33_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for amoebius cluster bring-up and teardown across kind / rke2 / provider clusters — bootstrap, recursive **amoebic spawning**, graceful teardown-with-cleanup versus chaos-failover, push-back on an unsatisfiable root `InForceSpec`, dynamic node provisioning, and ephemeral spin-up/down with deterministic rebind.
@@ -119,14 +119,19 @@ This is the feature that **names the project**. A cluster can spawn one or more 
 children can in turn spawn children of their own; and so on, recursively. The
 result is a *forest*: a root at the top, an arbitrary tree of descendants below.
 
+Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
+
 ```mermaid
 flowchart TD
-  root[Root cluster: single-node kind or rke2, owns the PKI trust anchor] -->|spawns via Pulumi, injects ChildInForceSpec and secrets| childa[Child cluster A: kind or rke2 or provider]
-  root -->|spawns via Pulumi, injects ChildInForceSpec and secrets| childb[Child cluster B]
-  childa -->|spawns its own child, injects GrandchildInForceSpec| grand[Grandchild cluster]
+  root["Root cluster: single-node kind or rke2, owns the PKI trust anchor"]:::intent -->|spawns via Pulumi, injects ChildInForceSpec and secrets| childa["Child cluster A: kind or rke2 or provider"]:::intent
+  root -->|spawns via Pulumi, injects ChildInForceSpec and secrets| childb["Child cluster B"]:::intent
+  childa -->|spawns its own child, injects GrandchildInForceSpec| grand["Grandchild cluster"]:::intent
   root -->|self-signed trust anchor flows down the tree| childa
   root -->|self-signed trust anchor flows down the tree| childb
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
 ```
+
+*Design intent. Recursive amoebic spawning is Tier-1 amoebius design intent; each spawn is a Pulumi deploy whose live enforcement is not proven here.*
 
 **Spawning is a Pulumi deploy from inside an existing cluster.** A parent provisions a child — `kind` or
 `rke2` via one or more SSH keys, or a provider cluster via cloud keys — tracking the deploy in Pulumi with
@@ -274,13 +279,19 @@ make the root `InForceSpec` **unsatisfiable**. amoebius refuses to do that silen
 
 ```mermaid
 flowchart TD
-  start[Operator requests graceful teardown of cluster C] --> check{Can the remaining forest still satisfy the root InForceSpec without C?}
-  check -->|yes| proceed[Proceed: clean up, hand off, release compute, preserve storage]
-  check -->|no| pushback[Push back: warn what stops working and which .dhall failback applies]
-  pushback --> override{Operator issues the explicit override?}
-  override -->|no| abort[Abort: cluster stays up, root InForceSpec stays satisfied]
-  override -->|yes| degrade[Proceed under override: fall back to the declared .dhall failback]
+  start["Operator requests graceful teardown of cluster C"]:::intent --> check{"Can the remaining forest still satisfy the root InForceSpec without C?"}:::decision
+  check -->|yes| proceed[/"Proceed: clean up, hand off, release compute, preserve storage"/]:::effect
+  check -->|no| pushback["Push back: warn what stops working and which .dhall failback applies"]:::refuse
+  pushback --> override{"Operator issues the explicit override?"}:::decision
+  override -->|no| abort>"Abort: cluster stays up, root InForceSpec stays satisfied"]:::refuse
+  override -->|yes| degrade[/"Proceed under override: fall back to the declared .dhall failback"/]:::effect
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef decision fill:#fdf3d8,stroke:#b8791b,color:#5c3a06,stroke-width:1px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
+
+*Design intent. The teardown push-back and override decision is Tier-1 design intent; the satisfiability check runs at reconcile time and is not proven here.*
 
 - **Push-back, not a hard wall.** When a teardown would stop the root `InForceSpec` from being satisfied, the
   command **pushes back with a warning**: it names what is going to stop working and the `.dhall`
@@ -385,6 +396,43 @@ re-observe.* There is no giant lifecycle state machine. This pattern is **genera
 sibling's** reconciler-with-predicates doctrine
 (`/home/matthewnowak/prodbox/documents/engineering/lifecycle_reconciliation_doctrine.md`), lifted from
 "AWS-resource-leak prevention" to "any cluster / child / node / stack / PV the forest can create."
+
+```mermaid
+flowchart TD
+  spec["Root InForceSpec: persistent desired state"]:::intent
+  discover[["discover: query the live authority at the moment of use"]]:::provenPB
+  obs{{"three-valued observation"}}:::gate
+  present["Present"]:::intent
+  absent["Absent"]:::intent
+  unreach["Unreachable"]:::intent
+  diff{"diff against the dhall: live matches desired?"}:::decision
+  enact[/"enact the diff: create or destroy, idempotent"/]:::effect
+  refuse>"Refuse: fail-closed, zero mutation"]:::refuse
+  stable["Stable: loop converged"]:::intent
+  rt["Bounded-time convergence"]:::runtime
+  spec --> discover
+  discover --> obs
+  obs -->|"observed present"| present
+  obs -->|"observed absent"| absent
+  obs -->|"could not observe"| unreach
+  unreach --> refuse
+  present --> diff
+  absent --> diff
+  diff -->|"converged"| stable
+  diff -->|"drift"| enact
+  enact -->|"re-observe"| discover
+  stable -->|"actual convergence is runtime-checked"| rt
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef provenPB fill:#dbeafe,stroke:#1e5fa8,color:#0b2f57,stroke-width:2px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef decision fill:#fdf3d8,stroke:#b8791b,color:#5c3a06,stroke-width:1px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
+  classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
+```
+
+*Design intent. The reconciler loop and three-valued observation are proven in the sibling prodbox project; bounded-time convergence is runtime-checked.*
 
 - **`discover → diff → enact → re-observe`, idempotent by construction.** The loop runs until stable or it
   times out. Re-running a half-finished bring-up or teardown **converges** instead of erroring — crash

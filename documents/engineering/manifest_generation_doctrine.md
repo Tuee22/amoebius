@@ -189,23 +189,29 @@ Three properties make this the right shape:
   ([§3](#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)). One spec value renders the
   whole cluster, and duplicate ownership cannot be hidden by list order.
 
+Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
+
 ```mermaid
 flowchart TD
-  spec[Decoded typed InForceSpec plus declared target] -->|bind and expand| bound[BoundDeployment]
-  bound -->|derive exact demand against supply or forest budget| planner[planInfrastructure]
-  planner -->|NoInfrastructureRequired| present[Explicit already-materialized state]
-  planner -->|InfrastructureRequired| infra[ProvisionedInfrastructurePlan: one provider-action batch]
-  infra -->|fresh snapshot validation and CAS enaction| receipt[Receipt-bound provider or host readback]
-  receipt --> materialized[ObservedInfrastructureMaterialization]
-  present --> context[ProvisionContext]
+  spec[Decoded typed InForceSpec plus declared target]:::intent -->|bind and expand| bound[BoundDeployment]:::intent
+  bound -->|derive exact demand against supply or forest budget| planner[["planInfrastructure"]]:::intent
+  planner -->|NoInfrastructureRequired| present[Explicit already-materialized state]:::intent
+  planner -->|InfrastructureRequired| infra[ProvisionedInfrastructurePlan: one provider-action batch]:::intent
+  infra -->|fresh snapshot validation and CAS enaction| receipt[/"Receipt-bound provider or host readback"/]:::effect
+  receipt --> materialized[ObservedInfrastructureMaterialization]:::intent
+  present --> context[ProvisionContext]:::intent
   materialized --> context
-  context -->|post-materialization provision seal| provisioned[Opaque ProvisionedSpec]
+  context -->|post-materialization provision seal| provisioned((("Opaque ProvisionedSpec"))):::seal
   bound -->|same exact bound intent| provisioned
-  provisioned -->|renderAll; exact keyed owner union| objs[Typed K8s object records]
-  objs -->|Aeson serialize| json[JSON object set, no template, no values yaml]
-  json -->|dry-run prints exactly this| preview[Operator preview]
-  json -->|desired baseline for live typed-action planning| engine[The amoebius reconciler]
+  provisioned -->|renderAll; exact keyed owner union| objs[Typed K8s object records]:::intent
+  objs -->|Aeson serialize| json[JSON object set, no template, no values yaml]:::intent
+  json -->|dry-run prints exactly this| preview[Operator preview]:::intent
+  json -->|desired baseline for live typed-action planning| engine[/"The amoebius reconciler"/]:::effect
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
 ```
+*Design intent. The bind/plan/provision pipeline is Tier-1 in-process and closes on the opaque `ProvisionedSpec` seal; the infrastructure readback and the downstream reconciler are the effectful seams, and the running-cluster residue is runtime-checked, not proven here.*
 
 ---
 
@@ -476,28 +482,36 @@ plus scoped SSA and observed readiness, are amoebius's new code ([§8](#8-reusab
 
 ```mermaid
 flowchart TD
-  checked[Whole ProvisionedSpec] --> desired[renderAll: exact keyed desired union]
-  live[Pods/processes, owner chains, resources] --> normalize[Normalize observed commitments]
-  ledger[State-indexed scheduler ledger + CAS version] --> normalize
-  desired --> preflight[Whole-transition preflight]
+  checked((("Whole ProvisionedSpec"))):::seal --> desired[["renderAll: exact keyed desired union"]]:::intent
+  live[Pods/processes, owner chains, resources]:::runtime --> normalize[["Normalize observed commitments"]]:::intent
+  ledger[State-indexed scheduler ledger + CAS version]:::runtime --> normalize
+  desired --> preflight{{"Whole-transition preflight"}}:::gate
   normalize --> preflight
-  preflight -->|match + fresh fingerprint| token[ValidatedLiveTarget with typed actions]
-  preflight -->|mismatch| refuse[Zero writes; re-observe]
-  token --> enact{Action kind}
-  enact -->|ordinary object| ssa[Scoped SSA]
-  enact -->|guarded Pod| sched[CAS Reserved, CAS BindingInFlight, Binding, CAS Bound]
-  enact -->|serial/host/device| staged[Fresh-observation staged action]
-  enact -->|Job terminal| jobplan{Provisioned completion gateway?}
-  jobplan -->|DeferredUntilGateway| retain[Retain terminal Pod and all debits; re-observe]
-  jobplan -->|Persistable| complete[Persist completion, observe it, then cleanup]
-  ssa --> observe[Re-observe readiness/state]
+  preflight -->|match + fresh fingerprint| token((("ValidatedLiveTarget with typed actions"))):::seal
+  preflight -->|mismatch| refuse>"Zero writes; re-observe"]:::refuse
+  token --> enact{Action kind}:::decision
+  enact -->|ordinary object| ssa[/"Scoped SSA"/]:::effect
+  enact -->|guarded Pod| sched[/"CAS Reserved, CAS BindingInFlight, Binding, CAS Bound"/]:::effect
+  enact -->|serial/host/device| staged[/"Fresh-observation staged action"/]:::effect
+  enact -->|Job terminal| jobplan{Provisioned completion gateway?}:::decision
+  jobplan -->|DeferredUntilGateway| retain[/"Retain terminal Pod and all debits; re-observe"/]:::effect
+  jobplan -->|Persistable| complete[/"Persist completion, observe it, then cleanup"/]:::effect
+  ssa --> observe[/"Re-observe readiness/state"/]:::effect
   sched --> observe
   staged --> observe
   retain --> observe
   complete --> observe
-  observe -->|converged| done[Generation converged]
+  observe -->|converged| done[Generation converged]:::intent
   observe -->|new state| preflight
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef decision fill:#fdf3d8,stroke:#b8791b,color:#5c3a06,stroke-width:1px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
+  classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
+*Design intent for Phase 19. The `ProvisionedSpec` seal and `renderAll` desired union are Tier-1; the live inventory and scheduler ledger are runtime-checked observed residue; the preflight gate mints the single-use `ValidatedLiveTarget` seal or refuses with zero writes, and SSA/CAS/staged/completion are the effectful seams — none proven in amoebius here.*
 
 > **Honesty.** This engine is **design intent for Phase 19**, not a built amoebius result. SSA field
 > managers, Kubernetes Binding, and resourceVersion compare-and-swap are real Kubernetes mechanisms;
@@ -552,13 +566,16 @@ data RolloutPhase = RolloutPhase
 
 ```mermaid
 flowchart TD
-  plan[RolloutPlan: ordered owner-closed phase projections] --> p1[Observe and enact phase 1 typed actions]
-  p1 --> g1[Observe readiness]
-  g1 -->|ready| p2[Re-observe and enact phase 2 typed actions]
-  p2 --> g2[Wait for readiness]
-  g2 -->|ready| pn[Final phase converged]
-  g1 -->|failure| rb[Re-apply prior generation or CAS pointer back]
+  plan[RolloutPlan: ordered owner-closed phase projections]:::intent --> p1[/"Observe and enact phase 1 typed actions"/]:::effect
+  p1 --> g1[/"Observe readiness"/]:::effect
+  g1 -->|ready| p2[/"Re-observe and enact phase 2 typed actions"/]:::effect
+  p2 --> g2[/"Wait for readiness"/]:::effect
+  g2 -->|ready| pn[Final phase converged]:::intent
+  g1 -->|failure| rb[/"Re-apply prior generation or CAS pointer back"/]:::effect
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
 ```
+*Design intent for Phase 30. The `RolloutPlan` is a Tier-1 typed value; each phase's enact/observe step and the rollback are effectful seams on the tier-(c) reconciler, and the readiness gating that orders them is runtime-checked, not proven here.*
 
 > **Sibling evidence (the PATTERN, not Helm; not an amoebius result).** jitML's
 > `~/jitML/src/JitML/Cluster/Helm.hs` carries exactly this shape: a closed
@@ -653,25 +670,32 @@ applied*, not a competing source of desired state.
 
 ```mermaid
 flowchart TD
-  dhall[InForceSpec in Vault-Transit MinIO envelope] -->|bind and expand| bound[BoundDeployment]
-  bound -->|derive demand against declared supply or forest budget| infraPlan[planInfrastructure]
-  infraPlan -->|explicit no-action materialization or validated CAS batch and receipt readback| context[ProvisionContext]
-  context -->|post-materialization provision, pure| checked[Opaque ProvisionedSpec]
+  dhall[InForceSpec in Vault-Transit MinIO envelope]:::intent -->|bind and expand| bound[BoundDeployment]:::intent
+  bound -->|derive demand against declared supply or forest budget| infraPlan[["planInfrastructure"]]:::intent
+  infraPlan -->|explicit no-action materialization or validated CAS batch and receipt readback| context[ProvisionContext]:::intent
+  context -->|post-materialization provision, pure| checked((("Opaque ProvisionedSpec"))):::seal
   bound -->|exact source intent| checked
-  checked -->|renderAll, pure exact owner union| desired[Desired object set]
-  live[Observed Pod UIDs/process IDs and owner chains] --> normalize[Normalized commitments]
-  ledger[Scheduler records and Job completions] --> normalize
-  inventory[Backing/host/device/runtime allocation snapshot] --> normalize
-  desired --> transition[Typed residual and transition envelope]
+  checked -->|renderAll, pure exact owner union| desired[Desired object set]:::intent
+  live[Observed Pod UIDs/process IDs and owner chains]:::runtime --> normalize[Normalized commitments]:::intent
+  ledger[Scheduler records and Job completions]:::runtime --> normalize
+  inventory[Backing/host/device/runtime allocation snapshot]:::runtime --> normalize
+  desired --> transition[Typed residual and transition envelope]:::intent
   normalize --> transition
   checked --> transition
-  transition --> preflight[Validate whole transition and snapshot fingerprint]
-  preflight -->|match| token[Single-use ValidatedLiveTarget plus typed actions]
-  preflight -->|mismatch or changed snapshot| refuse[Refuse or replan with zero writes]
-  token --> enact[SSA, scheduler CAS/Binding, staged action, or authenticated delete]
+  transition --> preflight{{"Validate whole transition and snapshot fingerprint"}}:::gate
+  preflight -->|match| token((("Single-use ValidatedLiveTarget plus typed actions"))):::seal
+  preflight -->|mismatch or changed snapshot| refuse>"Refuse or replan with zero writes"]:::refuse
+  token --> enact[/"SSA, scheduler CAS/Binding, staged action, or authenticated delete"/]:::effect
   enact --> live
-  live -->|after convergence, content-addressed applied-generation record| log[Release ledger: history, rollback, drift]
+  live -->|after convergence, content-addressed applied-generation record| log[Release ledger: history, rollback, drift]:::intent
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
+  classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
+*Design intent. Desired state is the Tier-1 `decode → provision → renderAll` result sealing on `ProvisionedSpec`; the observed Pod/ledger/allocation inputs are runtime-checked residue, the preflight gate mints the `ValidatedLiveTarget` seal or refuses with zero writes, and the single enact seam is the one effect — not proven in amoebius here.*
 
 ### 6.1 The release ledger: the applied-log is canonical, not optional
 

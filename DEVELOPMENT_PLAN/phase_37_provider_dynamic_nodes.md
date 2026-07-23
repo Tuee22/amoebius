@@ -80,17 +80,25 @@ those bearing the amoebius run tag. The retained durable per-PV EBS is the **sol
 (a retained durable volume is not a leak — it is its class behaving correctly); its elevated-harness reclamation
 is [Phase 42](phase_42_test_topology_dsl.md) work, deferred and never depended on here.
 
+Diagram vocabulary: [diagram_conventions.md](../documents/engineering/diagram_conventions.md).
+
 ```mermaid
 flowchart LR
-  signal[declared ScalingPolicy signal: load / workflow-completion] --> fold[re-run Phase 7/8/9 fold against grown bound + provider-quota + account residual]
-  fold -->|inside carve and quota| enact[Amoebius.Pulumi.NodeGroup add under the singleton]
-  fold -->|over quota / no fitting class / Unreachable| refuse[structured reject, zero cloud mutation]
-  enact --> join[tainted quarantine → supply/layout/device readback → scheduler-generation CAS → node-scoped authority]
-  join --> noop[re-run at stable target: zero mutating cloud-API calls]
-  noop --> teardown[Amoebius.Pulumi.Teardown: reconcileAbsent over ephemeral subset]
-  teardown --> sweep[independent run-owned OS-boundary sweep: run-tag + VPC id + eks:cluster-name / kubernetes.io/cluster]
-  sweep -->|zero ephemeral, durable EBS sole survivor| green[gate green + proven/tested/assumed ledger]
+  signal["declared ScalingPolicy signal: load / workflow-completion"]:::intent --> fold{{"re-run Phase 7/8/9 fold against grown bound + provider-quota + account residual"}}:::gate
+  fold -->|inside carve and quota| enact[/"Amoebius.Pulumi.NodeGroup add under the singleton"/]:::effect
+  fold -->|over quota / no fitting class / Unreachable| refuse>"structured reject, zero cloud mutation"]:::refuse
+  enact --> join[/"tainted quarantine → supply/layout/device readback → scheduler-generation CAS → node-scoped authority"/]:::effect
+  join --> noop[/"re-run at stable target: zero mutating cloud-API calls"/]:::effect
+  noop --> teardown[/"Amoebius.Pulumi.Teardown: reconcileAbsent over ephemeral subset"/]:::effect
+  teardown --> sweep[/"independent run-owned OS-boundary sweep: run-tag + VPC id + eks:cluster-name / kubernetes.io/cluster"/]:::effect
+  sweep -->|zero ephemeral, durable EBS sole survivor| green((("gate green + proven/tested/assumed ledger"))):::seal
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
 ```
+*Design intent for a Register-3 live gate. The ScalingPolicy signal value and the Phase 7/8/9 capacity fold reject over-quota in-process at Tier-1; the enact, live-join readback, no-op re-observe, teardown, and independent run-owned sweep are effect-boundary IO whose joined-node and leak-free residue is tested on the live EKS target, not proven here.*
 
 **Substrate:** linux-cpu → provider — the [§L](development_plan_standards.md#l-one-substrate-discipline)
 Parent-drives-provider escape form. The acceptance gate runs on exactly one hardware substrate, the linux-cpu

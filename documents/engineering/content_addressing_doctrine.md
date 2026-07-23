@@ -195,14 +195,21 @@ manifest's existing `parent` field is a **namespace-independent manifest SHA** (
 — it names a checkpoint by content, not by an `experimentHash`-scoped path, so a `parent` / adopted checkpoint
 resolves **cross-bucket and cross-substrate-namespace** ([§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss), [§4.6](#46-the-training-run-topology-fine-tune-chains-and-continuous-feeds-without-an-unbounded-arm)).
 
+Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
+
 ```mermaid
 flowchart TD
-  parts[Checkpoint parts: weights, optimizer, rng, replay] -->|"sha256(bytes), If-None-Match * (412 = success)"| blobs[blobs/sha256 write-once]
-  blobs -->|named by their SHAs inside| manifest[manifests/sha256 canonical CBOR]
-  manifest -->|"manifest-sha = sha256(canonical-cbor)"| ptr[pointers latest / best metric / trial id]
-  ptr -->|"If-Match etag CAS: single atomic commit point"| head[Adopted HEAD]
-  head -->|"reader sees old-etag or new-etag bytes, both name immutable manifests"| reader[Inference / resume reader]
+  parts["Checkpoint parts: weights, optimizer, rng, replay"]:::intent -->|"sha256(bytes), If-None-Match * (412 = success)"| blobs["blobs/sha256 write-once"]:::intent
+  blobs -->|named by their SHAs inside| manifest["manifests/sha256 canonical CBOR"]:::intent
+  manifest -->|"manifest-sha = sha256(canonical-cbor)"| ptr[/"pointers latest / best metric / trial id"/]:::effect
+  ptr -->|"If-Match etag CAS: single atomic commit point"| head((("Adopted HEAD"))):::seal
+  head -->|"reader sees old-etag or new-etag bytes, both name immutable manifests"| reader["Inference / resume reader"]:::intent
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
 ```
+
+*Design intent: the blob and manifest tiers are content-addressed values, the pointer CAS is the single effectful commit seam, and the Adopted HEAD is its sealed commit; the `If-Match` linearizability underneath is runtime-checked, not proven here.*
 
 ### 2.2 Why this shape removes the races
 
@@ -365,13 +372,17 @@ separate, **tested/assumed** contract, scoped honestly in the determinism-ceilin
 
 ```mermaid
 flowchart TD
-  dhall[Resolved Dhall + substrate fingerprint] -->|"sha256 join"| eh[experimentHash]
-  eh -->|namespaces| store[Content-addressed store]
-  store -->|"every input is a hash: re-run pins the same bytes"| stage[Pure stages: no I/O in the math]
-  master[masterSeed declared in the .dhall] -->|"deriveSplitMixSeed master index"| seed[Per-stream SplitMix seed]
+  dhall["Resolved Dhall + substrate fingerprint"]:::intent -->|"sha256 join"| eh[["experimentHash"]]:::intent
+  eh -->|namespaces| store["Content-addressed store"]:::intent
+  store -->|"every input is a hash: re-run pins the same bytes"| stage[["Pure stages: no I/O in the math"]]:::intent
+  master["masterSeed declared in the .dhall"]:::intent -->|"deriveSplitMixSeed master index"| seed["Per-stream SplitMix seed"]:::intent
   seed -->|"independent of worker count, scheduling, assignment"| stage
-  stage -->|"same inputs + same derived seed"| repro[Same-substrate reproducible artifact]
+  stage -->|"same inputs + same derived seed"| repro((("Same-substrate reproducible artifact"))):::runtime
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
+
+*Design intent: identity, input pinning, and seed derivation are total pure folds proven-in-types; the same-substrate reproducibility of the produced artifact is runtime-checked (tested in the sibling), not proven here.*
 
 ### 4.1 Leg one — pinned content-addressed inputs
 

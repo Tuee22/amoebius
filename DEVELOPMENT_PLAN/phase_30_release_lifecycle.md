@@ -146,18 +146,26 @@ transition, API-object revision/Event, and etcd term. A raw-bound render, scalar
 old-schema retention, omitted release object, dropped desired API object, missing churn operand, or missing
 etcd model must refuse before effects.
 
+Diagram vocabulary: [diagram_conventions.md](../documents/engineering/diagram_conventions.md).
+
 ```mermaid
 flowchart LR
-  build[Built generation] --> ledger[Release ledger write: content-addressed releaseHash]
-  ledger --> gate{PromotionGate: EvidenceWitness for target env?}
-  gate -->|no Runtime witness| refuse[Refused: no advance value, pointer unmoved]
-  gate -->|witness present| cas[ETag-CAS advance Environment pointer]
-  cas --> plan[RolloutPlan: ordered readiness-gated phases]
-  plan --> p1[Base apply]
-  p1 --> p2[DB schema-migration RolloutPhase: create-new to verified-migrate to retire-old]
-  p2 --> p3[Finalize]
-  p3 --> teardown[Idempotent leak-free teardown plus per-run ledger]
+  build[Built generation]:::intent --> ledger[/Release ledger write: content-addressed releaseHash/]:::effect
+  ledger --> gate{{PromotionGate: EvidenceWitness for target env?}}:::gate
+  gate -->|no Runtime witness| refuse>Refused: no advance value, pointer unmoved]:::refuse
+  gate -->|witness present| cas[/ETag-CAS advance Environment pointer/]:::effect
+  cas --> plan[RolloutPlan: ordered readiness-gated phases]:::intent
+  plan --> p1[/Base apply/]:::effect
+  p1 --> p2[/DB schema-migration RolloutPhase: create-new to verified-migrate to retire-old/]:::effect
+  p2 --> p3[/Finalize/]:::effect
+  p3 --> teardown[/Idempotent leak-free teardown plus per-run ledger/]:::effect
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
+
+*Design intent. The PromotionGate rejects at Tier-1 and its refuse is fail-closed; the ledger write, ETag-CAS advance, and readiness-gated phase applies are the effectful seams whose live convergence on linux-cpu is runtime-checked, not proven here.*
 
 ## Doctrine adopted
 

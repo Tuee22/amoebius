@@ -201,13 +201,20 @@ The per-subsystem shapes:
 | Rename | dual-name → copy-verify → drop-alias |
 | Reader cutover | Pulsar subscription cutover, or Gateway-API `HTTPRoute` weight shift |
 
+Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
+
 ```mermaid
 flowchart LR
-  expand[Expand: stand up new coordinate] --> migrate[Migrate: copy live bytes]
-  migrate --> verify[Verify the copy]
-  verify --> contract[Contract: retire old, elevated reclaim]
-  verify --> abort[Verification fails: keep both, fail loud]
+  expand[/"Expand: stand up new coordinate"/]:::effect --> migrate[/"Migrate: copy live bytes"/]:::effect
+  migrate --> verify{"Verify the copy"}:::runtime
+  verify --> contract[/"Contract: retire old, elevated reclaim"/]:::effect
+  verify --> abort>"Verification fails: keep both, fail loud"]:::refuse
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
+
+*Design intent. The expand/migrate/contract phases ride the reconcile's effectful enact seam; the copy verification is runtime-checked residue, not proven here, and a failed verify refuses fail-closed, retiring nothing.*
 
 - **Each phase gates on an observed readiness edge, never a timer.** The next phase applies only when the
   prior phase's readiness gate is observed from live state

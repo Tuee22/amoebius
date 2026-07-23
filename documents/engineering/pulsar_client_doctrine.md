@@ -167,14 +167,22 @@ is **unrepresentable** ([illegal_state_catalog.md §3.23](../illegal_state/illeg
   surface tracked by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). Any codegen tool
   is discovered lazily by full path (no env, no `PATH`), as `protoc` is ([§3](#3-the-native-binary-protocol)).
 
+Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
+
 ```mermaid
 flowchart TD
-  value[Typed workflow value, Serialise a] -->|encodeCbor, canonical if content-addressed| body[CBOR payload body]
-  body -->|becomes the raw payload tail| frame[Frame: protobuf command plus metadata, CRC32C, CBOR payload]
-  frame -->|SEND| broker[Broker sees opaque BYTES]
-  broker -->|MESSAGE| recv[Consumer]
-  recv -->|decode, total Either| out[Right a, or Left DecodeError, never a silent misread]
+  value["Typed workflow value, Serialise a"]:::intent -->|encodeCbor, canonical if content-addressed| body["CBOR payload body"]:::intent
+  body -->|becomes the raw payload tail| frame["Frame: protobuf command plus metadata, CRC32C, CBOR payload"]:::intent
+  frame -->|SEND| broker[/"Broker sees opaque BYTES"/]:::effect
+  broker -->|MESSAGE| recv["Consumer"]:::runtime
+  recv -->|decode, total Either| out{{"Right a, or Left DecodeError, never a silent misread"}}:::gate
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
 ```
+
+*Design intent. The CBOR encode and frame chain is Tier-1 in-process and the receive-side decode is a total gate; the broker seam and the running consumer are runtime-checked, not proven here.*
 
 > **Honesty.** The CBOR-payload rule is Phase-28 design intent, not a tested amoebius result. Canonical CBOR
 > is *proven in the sibling jitML content store* (`encodeManifestCbor`) — that is sibling evidence, not
@@ -332,11 +340,17 @@ The DSL *surface* that lets an app declare its topic lifecycles is owned by
 
 ```mermaid
 flowchart TD
-  descriptor[Typed RouteEntry descriptor] -->|topicFor derivation| topics[Derived topic set]
-  descriptor -->|validateTopology| check[One-sided / duplicate / empty-lane check]
-  check -->|Right unit| reconcile[Coordinator reconciles topics]
-  check -->|Left errors| reject[Reject graph with full violation list]
+  descriptor["Typed RouteEntry descriptor"]:::intent -->|topicFor derivation| topics["Derived topic set"]:::intent
+  descriptor -->|validateTopology| check{{"One-sided / duplicate / empty-lane check"}}:::gate
+  check -->|Right unit| reconcile[/"Coordinator reconciles topics"/]:::effect
+  check -->|Left errors| reject>"Reject graph with full violation list"]:::refuse
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
+
+*Design intent. The validateTopology gate rejects an unroutable graph at Tier-1 with the full violation list; only a valid graph reaches the effectful coordinator reconcile.*
 
 ### 6.1 Topic storage lifecycle: bounded, tiered, retained — and the hot tier never overflows
 
@@ -405,13 +419,19 @@ broker-side dedup namespace policy ([§7](#7-delivery-at-least-once-with-broker-
 
 ```mermaid
 flowchart TD
-  produce[Producer writes to a topic] -->|hot tier| bk[BookKeeper closed ledgers, bounded by size high-water mark]
-  bk -->|size trigger, optionally sooner by time| offload[Offload closed ledgers to S3 target]
-  offload -->|retention deletes after deletion lag| free[BookKeeper space reclaimed]
-  bk -->|hot cap plus headroom at most bookie disk, provision fold| avail[Hot tier admitted at provision-seal]
-  offload -->|logical retained + write/orphan peak, then provider quota or MinIO per-drive erasure/healing fold| durable[Durable physical demand admitted at provision-seal]
-  bk -->|high-water mark reached before offload catches up| hold[Backlog quota holds producer, runtime-checked fail-safe]
+  produce[/"Producer writes to a topic"/]:::effect -->|hot tier| bk["BookKeeper closed ledgers, bounded by size high-water mark"]:::intent
+  bk -->|size trigger, optionally sooner by time| offload[/"Offload closed ledgers to S3 target"/]:::effect
+  offload -->|retention deletes after deletion lag| free["BookKeeper space reclaimed"]:::intent
+  bk -->|hot cap plus headroom at most bookie disk, provision fold| avail((("Hot tier admitted at provision-seal"))):::seal
+  offload -->|logical retained + write/orphan peak, then provider quota or MinIO per-drive erasure/healing fold| durable((("Durable physical demand admitted at provision-seal"))):::seal
+  bk -->|high-water mark reached before offload catches up| hold["Backlog quota holds producer, runtime-checked fail-safe"]:::runtime
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
+
+*Design intent. The two-ceiling capacity fold admits the hot and durable tiers at a provision-seal; the backlog-quota hold is runtime-checked, not proven here.*
 
 ### 6.2 A topic as a cursor-anchored replayable training feed
 

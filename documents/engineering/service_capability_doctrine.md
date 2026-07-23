@@ -183,14 +183,21 @@ the exclusive object-write admission witness before the demand joins every other
 deployment binding assigns every bucket exactly one closed `StorageBudget` and its backing/quota owner;
 missing or mismatched budget ownership cannot reach provision.
 
+Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
+
 ```mermaid
 flowchart TD
-  app[Application logic: names a capability need, e.g. ObjectStore with buckets] -->|written once, travels| need[Capability need]
-  rules[Deployment rules: pick provider default-canonical and shape] -->|bind| need
-  need -->|capability plus provider plus shape| bound[Bound capability]
-  bound -->|expand all resource envelopes and provision against target topology| checked[Provisioned deployment with capacity and capability witnesses]
-  checked -->|rendered into typed manifests and applied by the typed reconciler| live[Running provider on this cluster]
+  app["Application logic: names a capability need, e.g. ObjectStore with buckets"]:::intent -->|written once, travels| need["Capability need"]:::intent
+  rules["Deployment rules: pick provider default-canonical and shape"]:::intent -->|bind| need
+  need -->|capability plus provider plus shape| bound["Bound capability"]:::intent
+  bound -->|expand all resource envelopes and provision against target topology| checked((("Provisioned deployment with capacity and capability witnesses"))):::seal
+  checked -->|rendered into typed manifests and applied by the typed reconciler| live["Running provider on this cluster"]:::runtime
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
 ```
+
+*Design intent. Binding folds capability, provider, and shape into a Tier-1 sealed ProvisionedSpec; the running provider on this cluster is runtime-checked, not proven here.*
 
 ### 4.1 The InferenceEngine capability — the engine is target-offering-selected and jit-resolved, never authored
 

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for what the amoebius Dhall DSL is — a typed orchestration surface
@@ -79,16 +79,24 @@ That split is load-bearing in three ways:
   owned by [substrate_doctrine.md](./substrate_doctrine.md). The relevance here is that it is the *chain
   steps*, written in Haskell, that invoke tools by absolute path — never a Dhall-embedded shell string.
 
+Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
+
 ```mermaid
 flowchart TD
-  author[Operator authors typed InForceSpec Dhall] -->|imports and composition| expr[One Dhall expression]
-  expr -->|Dhall typechecker total and pure| typed[Well-typed Dhall value]
-  expr -->|schema mismatch| reject1[Rejected before any effect]
-  typed -->|decode into Haskell ADTs| decoded[Typed Haskell config value]
-  typed -->|out-of-domain or unspellable combination| reject2[Decode failure fail fast]
-  decoded -->|pure chain cfg to Steps| chain[chain produces a list of Steps]
-  chain -->|recursive interpreter runs each Step in its frame| effects[Cluster reconcile actions]
+  author["Operator authors typed InForceSpec Dhall"]:::intent -->|imports and composition| expr["One Dhall expression"]:::intent
+  expr -->|Dhall typechecker total and pure| typed["Well-typed Dhall value"]:::provenPB
+  expr -->|schema mismatch| reject1>"Rejected before any effect"]:::refuse
+  typed -->|decode into Haskell ADTs| decoded["Typed Haskell config value"]:::intent
+  typed -->|out-of-domain or unspellable combination| reject2>"Decode failure fail fast"]:::refuse
+  decoded -->|pure chain cfg to Steps| chain[["chain produces a list of Steps"]]:::intent
+  chain -->|recursive interpreter runs each Step in its frame| effects[/"Cluster reconcile actions"/]:::effect
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef provenPB fill:#dbeafe,stroke:#1e5fa8,color:#0b2f57,stroke-width:2px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
+
+*Design intent. The Dhall typecheck and GADT decode rest on proven-in-sibling totality; the chain-to-effects seam is Tier-1 design intent, its runtime enactment not proven here.*
 
 ---
 
@@ -245,12 +253,15 @@ composition over this same extension seam — has its *representational / type-l
 
 ```mermaid
 flowchart TD
-  root[Root InForceSpec] -->|imports| deploy[Deployment-rules surface replicas chaos geo failover]
-  root -->|imports| apps[App specs]
-  apps -->|imports| ext[Extension-lib specs infernix and jitML]
-  root -->|projects| child[Child InForceSpec subtree]
-  child -->|projects| grandchild[Grandchild InForceSpec subtree]
+  root["Root InForceSpec"]:::intent -->|imports| deploy["Deployment-rules surface replicas chaos geo failover"]:::intent
+  root -->|imports| apps["App specs"]:::intent
+  apps -->|imports| ext["Extension-lib specs infernix and jitML"]:::intent
+  root -->|projects| child["Child InForceSpec subtree"]:::intent
+  child -->|projects| grandchild["Grandchild InForceSpec subtree"]:::intent
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
 ```
+
+*Design intent. InForceSpec import and subtree projection composition is Tier-1 amoebius design intent.*
 
 ### The v1 extension seam: `ExtensionSpec` (linked, not loaded)
 
@@ -456,6 +467,46 @@ unfit declared supply/budget or returns the explicit no-action arm / the sole va
 post-materialization provision seal rejects mismatched readback or remaining incompatible demand. The final
 success produces the sole representation that `renderAll` accepts. Runtime enforcement remains a separate
 claim.
+
+```mermaid
+flowchart TD
+  author["Operator authors typed InForceSpec"]:::intent
+  g1{{"Gate 1: Dhall typecheck, total and pure"}}:::gate
+  typed["Well-typed Dhall value"]:::provenPB
+  g2{{"Gate 2: Haskell GADT decode, fail-fast"}}:::gate
+  bound["BoundDeployment: unprovisioned intent"]:::intent
+  plan[["planInfrastructure: demand from intent and supply"]]:::intent
+  prov[["provision: whole-deployment capacity join"]]:::intent
+  sealed((("ProvisionedSpec: opaque, constructor-private"))):::seal
+  render["renderAll: typed Kubernetes manifests"]:::intent
+  live["Running cluster enforcement"]:::runtime
+  rej1>"Rejected before any effect"]:::refuse
+  rej2>"Decode failure, out-of-domain"]:::refuse
+  rej3>"Left ProvisionError, zero writes"]:::refuse
+  author --> g1
+  g1 -->|"schema mismatch"| rej1
+  g1 -->|"well-typed"| typed
+  typed --> g2
+  g2 -->|"unspellable"| rej2
+  g2 -->|"decoded ADTs"| bound
+  bound --> plan
+  plan -->|"unfit supply or budget"| rej3
+  plan -->|"validated batch"| prov
+  prov -->|"remaining incompatible demand"| rej3
+  prov -->|"success"| sealed
+  sealed --> render
+  render -->|"apply, NOT proven here"| live
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef provenPB fill:#dbeafe,stroke:#1e5fa8,color:#0b2f57,stroke-width:2px
+  classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
+  classDef decision fill:#fdf3d8,stroke:#b8791b,color:#5c3a06,stroke-width:1px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
+  classDef runtime  fill:#e4e4e7,stroke:#71717a,color:#2f2f35,stroke-width:1px
+```
+
+*Design intent. The well-typed value rests on proven-in-sibling Dhall totality and decode; the seal and render are Tier-1 design intent; the running-cluster enforcement is Tier-2 runtime-checked.*
 
 **Where the contract shape is discharged: front-loaded to Phases 4–13 (Tier 1).** Gate 1 is
 `dhall type` at authoring time; Gate 2 is the in-process `Dhall.inputFile auto` decode and its focused

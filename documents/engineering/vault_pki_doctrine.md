@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_22_vault_pki.md, DEVELOPMENT_PLAN/phase_23_platform_backbone.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/phase_31_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_32_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_39_infernix_lift.md, DEVELOPMENT_PLAN/phase_41_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_22_vault_pki.md, DEVELOPMENT_PLAN/phase_23_platform_backbone.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/phase_31_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_32_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_39_infernix_lift.md, DEVELOPMENT_PLAN/phase_41_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for amoebius secrets and trust — Vault as the fail-closed secrets root, the SecretRef-by-name contract, the root cluster's single-node password-encrypted unseal, the two sanctioned parent/child unseal modes, parent-injects-secrets-into-child, and the root-owned PKI trust anchor for the whole forest.
@@ -365,13 +365,20 @@ the parent ([§10](#10-the-chicken-and-egg-floor-what-stays-outside-vault) item 
 
 ```mermaid
 flowchart TD
-  childinit[Child Vault initialized once on an empty durable PV] --> mode{Which unseal mode does the ChildInForceSpec declare?}
-  mode -->|mode a| selfsecret[Self-unseal: child reads its own unseal key from a Kubernetes secret]
-  mode -->|mode b| requestunlock[Parent-held unlock: child requests an unlock from the parent]
-  requestunlock -->|parent sealed or unreachable| brick[Child cannot unseal: fail-closed brick cascades down the tree]
-  requestunlock -->|parent unsealed| unsealed[Child Vault unsealed]
+  childinit["Child Vault initialized once on an empty durable PV"]:::intent --> mode{"Which unseal mode does the ChildInForceSpec declare?"}:::decision
+  mode -->|mode a| selfsecret[/"Self-unseal: child reads its own unseal key from a Kubernetes secret"/]:::effect
+  mode -->|mode b| requestunlock[/"Parent-held unlock: child requests an unlock from the parent"/]:::effect
+  requestunlock -->|parent sealed or unreachable| brick>"Child cannot unseal: fail-closed brick cascades down the tree"]:::refuse
+  requestunlock -->|parent unsealed| unsealed((("Child Vault unsealed"))):::seal
   selfsecret --> unsealed
+  classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef decision fill:#fdf3d8,stroke:#b8791b,color:#5c3a06,stroke-width:1px
+  classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
+  classDef seal     fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
 ```
+
+*Design intent. The child's declared seal mode routes it to self-unseal or a parent-held unlock; only a live unsealed parent yields an unsealed child, and a sealed parent fails closed to a brick that cascades down the tree. The mode-(b) transit-seal tree is proven in the sibling prodbox project; the forest generalization is design intent.*
 
 Two encapsulation rules make the forest safe to reason about, and both are owned upstream — recorded
 here only because they are *unseal-trust* facts:
@@ -408,6 +415,29 @@ Section 3 says the DSL holds only a *name*. This section closes the loop: the by
 child's Vault because **the parent puts them there**. *Parents directly inject the secrets into the
 child's Vault* — the DSL names *where* a secret will be, and the parent
 materializes *what* it is into the child during spawn/reconcile.
+
+Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
+
+```mermaid
+flowchart TD
+  name["SecretRef: a name in the child InForceSpec"]:::intent
+  parent[/"parent resolves the closure of needed secrets"/]:::effect
+  seeded((("SeededProof: every needed secret present"))):::seal
+  inject[/"parent injects bytes into child Vault"/]:::effect
+  child["child receives its InForceSpec"]:::intent
+  missing>"Left: a needed secret is absent, handoff refused"]:::refuse
+  name --> parent
+  parent -->|"all present"| seeded
+  parent -->|"any missing"| missing
+  seeded --> inject
+  inject --> child
+  classDef intent  fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
+  classDef effect  fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
+  classDef seal    fill:#d3f0dd,stroke:#1f8a4c,color:#0c3a1f,stroke-width:2px
+  classDef refuse  fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
+```
+
+*Design intent. The DSL names where a secret lives; the parent injects the bytes into the child's Vault, and the child receives its spec only after every needed secret is proven seeded. The SecretRef-by-name and parent-custody flow are proven in the sibling prodbox project; the SeededProof gate is design intent.*
 
 The end-to-end path, in order:
 
