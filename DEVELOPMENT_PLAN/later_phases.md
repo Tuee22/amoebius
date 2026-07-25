@@ -36,28 +36,9 @@ the suite:
 The candidates are independent of one another and may be promoted in any order relative to each other; the
 provisional ids reflect a *likely* sequencing, not a dependency chain.
 
----
-
-## Candidate phase: GHC 9.14.1 toolchain bump
-
-**Status**: 📋 Planned (provisional Phase 44)
-**Provisional substrate**: none (a toolchain/build-graph change, validated by rebuild + the full suite)
-**Scope** (one line): move the single shared pin from GHC **9.12.4** to **9.14.1** across every package, and
-re-derive the `allow-newer` set the `dhall` library's transitive deps require on the new compiler.
-**Provisional gate**: the whole workspace builds clean on GHC 9.14.1 under the new pin, and every prior
-phase's acceptance gate still passes unchanged on the bumped toolchain (no behavioural regression).
-
-The current plan deliberately ships on GHC **9.12.4**, with GHC 9.14.1 marked a *deferred,
-later-phase bump* — this is stated as doctrine in the DSL toolchain note,
-[`dsl_doctrine.md` §9 — Toolchain note](../documents/engineering/dsl_doctrine.md#9-toolchain-note), and in the
-README "Toolchain" line. The bump is its own phase precisely because the binding cost is not the language
-version but the Hackage version skew: amoebius decodes Dhall in-process via `Dhall.inputFile auto`, and the
-`dhall` library's transitive dependency closure needs an `allow-newer` set that has to be re-pinned and
-re-proven on 9.14.1. This candidate owns that re-pin and its validation, not any feature work.
-
 ## Candidate phase: DB schema-migration automation + manifest-change correctness semantics
 
-**Status**: 📋 Planned (provisional Phase 45)
+**Status**: 📋 Planned (provisional Phase 44)
 **Provisional substrate**: linux-cpu
 **Scope** (one line): a typed, ordered, idempotent schema-migration engine for the Patroni-via-Percona
 Postgres clusters, unified with a precise account of what a *manifest change* means when the desired object
@@ -93,7 +74,7 @@ runs in a sibling, not an amoebius result.
 
 ## Candidate phase: Haskell extension DSL + custom AST checker + native JIT
 
-**Status**: 📋 Planned (provisional Phase 46)
+**Status**: 📋 Planned (provisional Phase 45)
 **Provisional substrate**: linux-cuda (the JIT path exercises the GPU compute substrate)
 **Scope** (one line): the second, *extension* language of the vision — Haskell-as-DSL validated by a custom
 AST checker, with full access to the amoebius libraries and a native JIT, into which jitML is absorbed as
@@ -113,9 +94,159 @@ This candidate is where that forward pointer is redeemed — the custom AST chec
 and the JIT that subsumes jitML — and it is correctly a later phase because the README treats v1 as a complete
 orchestrator for arbitrary containers without it.
 
-## Candidate phase: Niche substrate — dual-boot same-cluster
+## Candidate phase: Native desktop + mobile application surfaces
+
+**Status**: 📋 Planned (provisional Phase 46)
+**Provisional substrate**: one client platform per eventual acceptance gate
+**Scope** (one line): extend the typed application-composition and generated-contract model beyond browser SPAs
+to native desktop applications on macOS, Windows, and Linux and native mobile applications on Apple and Android
+phones and tablets (iPhone/iPad and Android phone/tablet), using the platform's native language, UI, packaging,
+signing, distribution, and lifecycle model.
+**Provisional acceptance direction**: a representative native client generated or built from the same
+amoebius-owned application/workflow contract performs an authenticated infernix or jitML interaction on one
+named client platform; a contract, language/toolchain, CPU architecture, OS/API level, entitlement, signing,
+package, or distribution-channel mismatch cannot produce a runnable or publishable artifact.
+
+SPAs remain a supported application surface; native clients are an additional closed family rather than a
+replacement. The intended platform arms include macOS, Windows, and Linux desktop, Apple phone/tablet, and
+Android phone/tablet. Each arm selects only compatible implementation and packaging choices—for example Swift
+and the Apple-native UI/toolchain surface for Apple clients, Kotlin and the Android-native UI/toolchain surface
+for Android clients, and explicitly selected native toolchains for Windows and Linux. A free-authored language,
+target triple, package kind, signing identity, entitlement, or store channel is not accepted as proof of
+compatibility.
+
+The existing JIT/content-addressed pattern is extended **subject to the target platform's execution and
+distribution rules**. Typed Haskell application/workflow ADTs remain the contract source; platform bindings and
+client contract types are deterministic generated build artifacts rather than parallel handwritten truths.
+Native code, models, kernels, and other runtime material are resolved by content identity into a bounded cache
+where the platform permits it. Where a client platform requires ahead-of-time compilation, signing, review, or
+immutable executable bundles, the same catalog identity resolves to a precompiled signed artifact—there is no
+pretence that arbitrary runtime code generation is portable or permitted.
+
+The illegal-state discipline applies across the whole relation:
+`ClientPlatform → NativeLanguage/Toolchain → Architecture/API profile → Package/Signing/Distribution`.
+Only constructors valid for that platform exist, and the provision/build seal consumes observed toolchain,
+device/emulator, signing, and entitlement witnesses before producing a deployable client artifact. infernix and
+jitML are consumed through the same generated application/workflow contracts as the SPA surface; neither native
+client invents a separate wire schema or silently substitutes an incompatible compute/runtime path.
+
+## Candidate phase: Additional cloud providers
 
 **Status**: 📋 Planned (provisional Phase 47)
+**Provisional substrate**: provider (one provider per eventual acceptance gate)
+**Scope** (one line): extend the provider-native provisioning, observation, quota, credential, managed-cluster,
+node-supply, storage, networking, and teardown surfaces beyond AWS to GCP, Azure, and subsequently admitted
+cloud providers without weakening the typed plan/validate/enact boundary.
+**Provisional acceptance direction**: for each admitted provider, the same desired topology is lowered through
+that provider's closed action and resource families, validated against fresh provider-native observations, and
+enacted and torn down without leaking resources; a credential, quota, region/zone, resource identity, or action
+from another provider cannot produce an enactable value and causes zero effects.
+
+This is a family of provider additions, not a promise that every provider lands together or in a fixed order.
+AWS remains the first live provider and the evidence-bearing shape. Each additional provider must extend the
+closed provider union and supply its own typed credentials, resource identities, capabilities, observations,
+quotas, mutation actions, cleanup rules, and managed-cluster arm where applicable. There is no generic
+stringly-typed escape hatch: an Azure identity cannot inhabit a GCP action, an AWS quota witness cannot admit
+an Azure node class, and a provider feature absent from the closed capability relation is unsupported rather
+than guessed. The provider-independent desired topology may be shared; the provisioned and validated actions
+remain provider-indexed and single-use.
+
+## Candidate phase: Additional GPU families + vendor-neutral compute protocols
+
+**Status**: 📋 Planned (provisional Phase 48)
+**Provisional substrate**: varies by GPU family (one family and one substrate per eventual acceptance gate)
+**Scope** (one line): extend the shared infernix/jitML engine and accelerator-owner model beyond NVIDIA CUDA
+to AMD and Intel GPUs and explicitly admitted open/vendor-neutral compute protocols, with observed
+family/profile/device/memory/runtime compatibility sealed before dispatch.
+**Provisional acceptance direction**: a representative infernix workload and jitML vectorized workload execute
+through an admitted non-CUDA GPU backend with an external device-execution witness, while family/runtime/profile,
+device-count, memory-residency, ownership, or execution-shape mismatches are rejected before effects.
+
+GPU support preserves wholesale, identity-complete accelerator ownership and the existing
+source/workload/coexistence accounting rather than treating a GPU as a boolean feature. Every backend is a
+closed family with an observed offering, compatible runtime/protocol set, stable device identities, memory
+geometry and reserve, owner policy, and execution witness. "Open protocols" means specifically admitted
+vendor-neutral protocols or runtimes, not an arbitrary backend name; the concrete protocol set is chosen when
+a candidate is promoted.
+
+The workload/engine relation is structural: **GPU execution is available only to vectorized/batch work**,
+including offline batch RL. A non-vectorized/online RL workload has no GPU-target constructor, so it cannot
+survive Dhall decoding and provisioning as a GPU deployment. This restriction applies equally to CUDA, AMD,
+Intel, and vendor-neutral GPU backends. Both infernix and jitML consume the same provisioned engine selection;
+neither library may silently fall back to another engine.
+
+## Candidate phase: Neural processing units / neural engines
+
+**Status**: 📋 Planned (provisional Phase 49)
+**Provisional substrate**: varies by NPU/SoC family (one family and one substrate per eventual acceptance gate)
+**Scope** (one line): add neural-engine execution for infernix and jitML across explicitly supported Apple
+Silicon, Qualcomm Snapdragon, Google Tensor, MediaTek, Intel Core Ultra, AMD Ryzen AI, and NVIDIA SoC families,
+with family-specific runtime, operator, memory, residency, and availability witnesses behind one typed engine
+interface.
+**Provisional acceptance direction**: on each admitted neural-engine family, representative vectorized and
+non-vectorized infernix/jitML workloads select only compatible operators and memory geometry and produce an
+external execution witness; unsupported operators, runtimes, profiles, placements, or false accelerator
+claims are rejected before effects with no CPU/GPU fallback.
+
+An NPU is neither a generic GPU nor merely a faster CPU. Each admitted family owns a closed profile describing
+the runtime/API, supported operator and numeric surfaces, memory model (including unified-memory systems),
+concurrency/residency limits, host/cluster boundary, and how execution is independently observed. Marketing
+names alone never constitute a capability witness.
+
+Unlike GPUs, **CPU and neural-engine targets admit both execution shapes**: vectorized/batch workloads such as
+offline batch RL, and non-vectorized/streaming workloads such as online RL. The intended indexed relation is:
+`Vectorized → CPU | GPU | NeuralEngine`; `NonVectorized → CPU | NeuralEngine`. The Dhall surface uses
+corresponding closed unions and the Haskell decoder/provision seal preserves the index, making
+`NonVectorized → GPU` unrepresentable rather than a runtime convention. infernix and jitML share this relation,
+their engine catalog and the no-silent-fallback rule.
+
+## Candidate phase: MoE teacher → student model-distillation framework
+
+**Status**: 📋 Planned (provisional Phase 50)
+**Provisional substrate**: one accelerator/engine family per eventual acceptance gate
+**Scope** (one line): use a large mixture-of-experts teacher model (for example, a DeepSeek-V3-class model) to
+generate a provenance-complete training corpus for fine-tuning a smaller student model, optimizing the offline
+generation run for aggregate token throughput rather than interactive per-token latency.
+**Provisional acceptance direction**: a pinned teacher, prompt/source corpus, sampling policy, filter, and
+student-training specification produce a content-addressed dataset and fine-tuned student while the observed
+run demonstrates sustained per-expert batching and aggregate token throughput; missing expert weights,
+unbounded queues, memory-overcommitted residency plans, incomplete provenance, objective/scheduler mismatches,
+or silent token loss/reordering are rejected before or during the typed transition with no publishable dataset.
+
+This is an **offline, long-running data-generation workload**, not the interactive inference path. Its objective
+is total useful teacher tokens per unit time across the run. Time-to-first-token and latency for an individual
+sequence may be substantially worse when doing so improves aggregate throughput. The workload objective is a
+closed choice—at minimum `InteractiveLatency | OfflineTokenThroughput`—and the MoE distillation scheduler is
+constructible only for `OfflineTokenThroughput`; an interactive endpoint cannot silently acquire its
+latency-sacrificing queue and residency policy.
+
+The teacher's router and expert execution are decoupled by typed asynchronous queues. Whenever a sequence has
+an activation ready to route, the router assigns that work to the selected expert queue without waiting for
+the expert to finish unrelated work. Each expert therefore receives a continuous bounded queue from many
+sequences, and the executor forms efficient same-expert batches. Routing does not speculate past unavailable
+activations or violate per-sequence token dependencies: asynchronous means the router and experts progress
+independently across ready sequences, not that causal order is discarded.
+
+Expert residency is a provisioned state machine rather than an ad-hoc cache. Queue length, oldest-work age,
+batch opportunity, expert weight size, transfer/load cost, device memory, mandatory runtime reserve, and
+currently in-flight batches determine load, retain, evict, and unload transitions. Hysteresis and minimum
+residency prevent load/unload thrashing; bounded queues and explicit backpressure prevent the throughput
+optimization from becoming an unbounded-memory claim. An expert may execute only after its exact
+content-addressed weights and compatible numeric/runtime profile are resident under an identity-complete
+memory witness. Eviction cannot strand or silently discard queued or in-flight work.
+
+The distillation surface is also closed and provenance-bearing:
+`TeacherIdentity + SourceCorpus + PromptTemplate + SamplingPolicy + OutputFilter + DatasetPolicy +
+StudentIdentity + FineTunePolicy`. Every generated example records the teacher/model and tokenizer digests,
+source/prompt identity, sampling parameters and derived seed, output/filter decision, and dataset shard
+identity. Only verified shards enter the immutable dataset manifest used by jitML fine-tuning; infernix may
+serve or evaluate the teacher and student through the same engine catalog. A run with unknown licensing or
+retention policy, an unpinned teacher/tokenizer, an unbounded dataset, or a dataset manifest that does not
+close over its examples cannot produce the opaque publishable dataset or fine-tuned-model artifact.
+
+## Candidate phase: Niche substrate — dual-boot same-cluster
+
+**Status**: 📋 Planned (provisional Phase 51)
 **Provisional substrate**: windows.
 **Scope** (one line): admit a *dual-boot, same-cluster* host into the substrate model.
 **Provisional gate**: a dual-boot host joins and rejoins the same cluster across an OS switch without
@@ -130,7 +261,7 @@ neither belongs in this candidate's gate.
 
 ## Candidate phase: Surgical proof-assistant track (`emitTLA` faithfulness + fold-closure)
 
-**Status**: 📋 Planned (provisional Phase 48)
+**Status**: 📋 Planned (provisional Phase 52)
 **Provisional substrate**: none (a pure-proof track, validated by the proof checker + the existing suite)
 **Scope** (one line): discharge — machine-checked — the **two** load-bearing meta-properties the rest of the
 suite currently only *tests*: (a) the `emitTLA`/`interpret` **faithfulness meta-theorem** (each `Expr`/`Temporal`
@@ -171,7 +302,7 @@ re-open it as a candidate phase.
 
 ## Candidate phase: Live backup / restore / cold-DR seed
 
-**Status**: 📋 Planned (provisional Phase 49)
+**Status**: 📋 Planned (provisional Phase 53)
 **Provisional substrate**: linux-cpu → provider (the write-but-never-delete cloud credential is enacted on the
 provider substrate, as with the durable-EBS create-vs-delete model)
 **Scope** (one line): the live enactment of the backup surface — the put-only backup credential, the
@@ -239,8 +370,13 @@ enforcement. Promoting that gate is required before an rke2 mutation continuatio
   at promotion
 - [phase_18_base_image_registry.md](phase_18_base_image_registry.md) — where the "one
   base container with everything" question is resolved (not deferred)
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — §8 the extension-DSL forward pointer, §9 the
-  deferred GHC 9.14.1 toolchain bump
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — §8 the extension-DSL forward pointer
+- [App vs Deployment Doctrine](../documents/engineering/app_vs_deployment_doctrine.md) — the application logic
+  and deployment-rule split the native-client candidate preserves
+- [Lift and Compose Doctrine](../documents/engineering/lift_and_compose_doctrine.md) — the existing
+  Haskell-contract-to-PureScript-SPA pattern the native-client family extends
+- [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — generated client
+  bindings remain build artifacts, never a second committed contract truth
 - [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — §6 the typed
   reconcile state model the manifest-change correctness candidate extends
 - [Image Build Doctrine](../documents/engineering/image_build_doctrine.md) — §2 the baked-binary base

@@ -190,7 +190,7 @@ runtime fidelity UNVERIFIED until that phase discharges them
 - **Phase 41 — Apple-Metal host compute daemon** (`apple`) → [phase_41](phase_41_apple_metal_host_daemon.md): physical CPU/unified-memory/storage admits the Lima VM, Metal worker, and host cache; outputs use the provisioned mutation gateway and raw MinIO remains unexposed.
 - **Phase 42 — Test-topology DSL + suggest-test + elevated harness** (`per generated test`) → [phase_42](phase_42_test_topology_dsl.md): a generated test provisions every observed resource class plus closed registry-publication, Pulumi/checkpoint, and migration/copy branches, then tears down with every applicable delta empty.
 - **Phase 43 — Live SPA deploy** (`linux-cpu`) → [phase_43](phase_43_spa_live_deploy.md): full app/rollout, survivors, cold tenant, object/topic/database, image, slot, and API/etcd transition provisions before apply; the composed inference path round-trips behind Keycloak/Envoy.
-- **Phases 44+ — Later phases** (`varies`) → [later_phases.md](later_phases.md): each high-numbered in-scope phase gets its own gate when reached (GHC 9.14 bump, schema-migration automation, the Haskell extension DSL + AST checker + JIT, niche substrates incl. Windows-CUDA).
+- **Phases 44+ — Later phases** (`varies`) → [later_phases.md](later_phases.md): each high-numbered in-scope phase gets its own gate when reached (schema migrations, extension DSL/JIT, native apps, additional cloud/GPU/NPU families, throughput-oriented MoE distillation, niche substrates, proof hardening, live backup).
 
 The substrate per gate is registered authoritatively in [substrates.md](substrates.md); the per-phase gate
 ideally *is* an `InForceSpec` topology that spins resources up, runs a workflow, and tears them down — the
@@ -209,8 +209,7 @@ self-tearing-down test topology of [`testing_doctrine.md`](../documents/engineer
   Per [development_plan_standards.md §K](development_plan_standards.md#k-honesty-proven--tested--assumed), a
   sprint is never marked Done on "it compiles," and a gate is passed only when its acceptance test actually
   ran on its substrate.
-- **Toolchain pin:** GHC **9.12.4**, Cabal 3.16.1.0, one shared pin across all packages.
-  (GHC 9.14.1 is a deferred later-phase bump.)
+- **Toolchain pin:** GHC **9.12.4**, Cabal 3.16.1.0, one permanent shared pin across all packages.
 - **Evidence vs. proof:** the sibling `prodbox` project is cited throughout the doctrine as a working
   precedent for the root control-plane behaviour, the AWS/Pulumi reality, the ZeroSSL/route53 path, and the
   chaos-hardening ledger. Those are *evidence the shape works*, never amoebius results — amoebius has run

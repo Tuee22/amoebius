@@ -204,9 +204,8 @@ cache, not baked (above). The list is the concrete providers behind the capabili
 
 ## Toolchain
 
-GHC **9.12.4**, Cabal 3.16.1.0, one shared pin across all packages. (GHC 9.14.1 is a
-deferred, later-phase bump — see the later-phases backlog (44+).) The pre-binary **midwife** is a **Python `pb` CLI** (not a shell
-script), unified with the operator CLI.
+GHC **9.12.4**, Cabal 3.16.1.0, one permanent shared pin across all packages. The pre-binary **midwife** is a
+**Python `pb` CLI** (not a shell script), unified with the operator CLI.
 
 The formal-model phases (Phase 2, Phase 3) run TLC through a **pinned `tla2tools.jar`** (a fixed release) on a
 **JRE ≥ 17** floor; both are pinned here and located by the Phase-2/3 harness — a JVM toolchain independent of
@@ -298,7 +297,7 @@ ordered by substrate; phases **44+** are the backlog.
 | 41 | Apple-Metal host compute daemon | apple | 3 | physical CPU/unified memory/storage fit system reserve + a presentation/quantum-derived Lima disk + Metal worker + host cache; outputs route through the provisioned mutation gateway, raw MinIO stays unexposed, and every high-water is read back | 📋 Planned | [phase_41](phase_41_apple_metal_host_daemon.md) |
 | 42 | Test-topology DSL + suggest-test + elevated harness | per generated test | 3 | a generated test provisions all observed compute/storage/accelerator/quota classes plus closed registry-publication, Pulumi/checkpoint, and old+new migration/copy-Job branches, runs a delegated-failover simulation on its single named substrate, then tears down with every applicable resource-class delta empty | 📋 Planned | [phase_42](phase_42_test_topology_dsl.md) |
 | 43 | Live SPA deploy | linux-cpu | 3 | the full app/rollout, surviving platform/workflow/cache, cold-tenant rematerialization, object/topic/database, image, slot, and API/etcd transition provisions before apply; the composed inference path round-trips behind Keycloak/Envoy | 📋 Planned | [phase_43](phase_43_spa_live_deploy.md) |
-| 44+ | Later phases | varies | — | each high-numbered in-scope phase gets its own gate when reached (GHC 9.14 bump, schema-migration automation, the Haskell extension DSL + AST checker + JIT, niche substrates incl. Windows-CUDA) | 📋 Planned | [later_phases](later_phases.md) |
+| 44+ | Later phases | varies | — | each high-numbered in-scope phase gets its own gate when reached (schema migrations, extension DSL/JIT, native apps, additional cloud/GPU/NPU families, throughput-oriented MoE distillation, niche substrates, proof hardening, live backup) | 📋 Planned | [later_phases](later_phases.md) |
 
 The detailed objective, sprint breakdown, doctrine adoptions, and gate for each phase live in that phase's
 own document (linked above); this tracker holds only the one-line gate and status. The standing rules a

@@ -630,10 +630,11 @@ not the future Haskell extension language.
 
 ## 9. Toolchain note
 
-Amoebius decodes Dhall in-process under **GHC 9.12.4** (DEVELOPMENT_PLAN "Toolchain"; the deferred 9.14.1 is a later-phase bump). Because of Hackage version skew, the `dhall` library's transitive
-dependencies require `allow-newer` to build on the pinned GHC — the precise toolchain pins and `allow-newer`
-set are owned by the dependency-management surface tracked in
-[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), not restated here. There is **no**
+Amoebius decodes Dhall in-process under the permanent **GHC 9.12.4** project pin (DEVELOPMENT_PLAN
+"Toolchain"). Because of Hackage version skew, the `dhall` library's transitive dependencies require
+`allow-newer` to build on the pinned GHC — the precise toolchain pins and `allow-newer` set are owned by the
+dependency-management surface tracked in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md),
+not restated here. There is **no**
 intermediate JSON projection on the supported path: file-backed frame config is the typed `amoebius.dhall`
 expression, and uploaded desired state is the decrypted `InForceSpec` Dhall expression decoded in-process
 ([§5](#5-the-illegal-state-unrepresentable-contract)).

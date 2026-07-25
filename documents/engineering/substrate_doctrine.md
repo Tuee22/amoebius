@@ -376,8 +376,8 @@ The contract, on the canonical Apple lane (`pb bootstrap` mode):
    with the install instruction otherwise). So the midwife ensures `brew` **pre-binary**.
 2. **Ensure `ghcup` via the package manager** (`brew install ghcup`).
 3. **Install the pinned toolchain: GHC 9.12.4 and Cabal 3.16.1.0** via `ghcup`, and ensure they are
-   available on the host. (GHC 9.14.1 is a deferred later-phase bump; the committed pin is 9.12.4 /
-   3.16.1.0; see [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).)
+   available on the host. This is the permanent project toolchain pin; see
+   [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 4. **Build the project Haskell binary** (`cabal build`).
 5. **Hand off to the binary.** The midwife's final act is to `exec` the freshly built binary's `bootstrap`
    subcommand with its mandatory distro flag — `amoebius bootstrap --distro={kind,rke2} [--replicas=n]`
