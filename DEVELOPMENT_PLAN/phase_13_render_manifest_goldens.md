@@ -94,7 +94,11 @@ deployment keyed by `ProvisionedSpec` id — so "drifts by a single byte" is una
 from the renderer's own output** (a golden regenerated from `renderAll` is not a test). The three properties, with
 their predicates fixed: **(a)** every emitted pod carries a hardened `securityContext`, and its resource fields
   are an exact projection of the provision witness — every app/sidecar/init container has non-zero CPU, memory,
-  and `ephemeral-storage` requests+limits; `ReadOnlyRootfs` renders
+  and `ephemeral-storage` requests+limits, and where the pod declares compute headroom the rendered request is
+  the **pre-summed reserved total** the witness already carries: Kubernetes has one `requests` field, so the
+  manifest necessarily shows required plus pad, and the renderer projects that number rather than adding the
+  pad itself — recomputing the sum here would be exactly the re-derivation predicate (c) forbids, and the
+  required/pad split survives on the reservation ledger, not in the manifest; `ReadOnlyRootfs` renders
   `securityContext.readOnlyRootFilesystem: true`, while `WritableRootfs` renders false and its explicit
   allowance fits its own container and,
   with bounded shared disk volumes, the effective pod ephemeral request; every memory-backed volume's
@@ -446,7 +450,8 @@ states — directly on the emitted objects, all without a cluster.
   guard weakening),
   each committed and re-run and each of which must turn its *targeted property* (not the byte diff) red — its
   golden regenerated to the mutant's output so only the property can fail: **R1** alter a checked CPU/memory
-  request or limit; **R2** omit/mismatch the root-filesystem security projection, omit a checked
+  request or limit, or render a padded pod's **required** requests in place of its reserved total, which
+  silently under-declares to the kubelet everything the scheduler ledger reserved; **R2** omit/mismatch the root-filesystem security projection, omit a checked
   `ephemeral-storage` request/limit or lower the request below bounded volumes plus lifecycle-effective
   private allowances, or let one container's private allowance exceed its own
   limit; **R3** remove or exceed a checked disk-backed `emptyDir.sizeLimit`; **R4** drop memory-volume

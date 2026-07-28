@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_23_platform_backbone.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/phase_31_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_23_platform_backbone.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/phase_31_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Turn the pre-cluster-proven DSL into a live deploy — hand the mandatory reconciler Lease from
@@ -74,7 +74,11 @@ pre-cluster (Phase-6) negative corpus, re-run against the same live deploy path,
 Gate 2 — a **Register-3** live-infrastructure check. Before the singleton's first mutation, the gate observes
 the exact bootstrap-host holder drain and release, holder absence at a fresh resourceVersion, then acquisition
 by the authenticated singleton Pod UID; the apiserver audit/watch history admits no overlapping holder or
-mutation authority.
+mutation authority. That `.dhall` is delivered **only** through the singleton's admin REST surface — the
+operator drives `vault init/unseal` → `dhall update` → `kv put/get/list/delete` and nothing else — with the
+operator password never persisted, every seal-critical verb refused from a non-node-local reach before any Vault
+contact, and every named `SecretRef` whose capability probe fails rejected before any reconcile with its own
+distinct reason tag.
 
 **Gate-integrity clauses (§M).** The gate is hardened as follows and passes only when every clause below holds:
 
@@ -104,13 +108,19 @@ mutation authority.
   `…/expected-enact-pass2.json`), the perturbation target list (`…/perturb-targets.txt`), and the negative
   corpus's expected Gate-1/Gate-2 rejection-tag table (`…/negative-expected-tags.tsv`, hand-authored,
   independent of the singleton's own decoder output — §M.3) are all **committed in Phase 0 before
-  `Singleton.hs`/`Reconcile.hs`/`Deploy.hs` exist**; none is regenerated from implementation output.
+  `Singleton.hs`/`Reconcile.hs`/`Deploy.hs` exist**; none is regenerated from implementation output. The
+  admin-surface oracles of [Sprint 26.4](#sprint-264-the-admin-rest-surface--vault-initunseal-dhall-update-secret-kv-crud-)
+  — `test/golden/admin/reach-matrix.tsv`, `test/golden/admin/admission-tags.tsv`, and the paired
+  `test/fixtures/admin/secrets-capability/` corpus — are pinned on the same terms, before `AdminApi.hs` exists.
 - **Committed seeded mutant (§M.2).** The gate names **≥1 committed seeded mutant** that MUST turn it red:
   the **dropped-effect** mutant `Reconcile.hs::enact` that returns success without issuing the SSA patch (so
   the perturbed platform component is never restored) — committed under
   `test/fixtures/phase22/mutants/enact-noop.patch` and re-run each gate, asserted red because pass-1 restores
   nothing. A second **effect-swap** mutant (the harness principal, not the singleton SA, issues the writes)
-  MUST also go red via the attribution clause above.
+  MUST also go red via the attribution clause above. [Sprint 26.4](#sprint-264-the-admin-rest-surface--vault-initunseal-dhall-update-secret-kv-crud-)
+  adds three more that MUST each turn the gate red: `persist-password` (dropped effect), `reach-any` (guard
+  weakening on the seal-critical reach), and `admit-unproven-secret` (guard weakening on `dhall update`
+  admission).
 
 ## Resource provision — the singleton's sealed whole-deployment envelope
 
@@ -302,7 +312,8 @@ bootstrap-host-to-singleton Lease handoff, and no amoebius election.
   re-observes with no authority. Holder identity/object UID/resourceVersion and every observation enter the
   fingerprint; unknown or changed state restarts the read-only prefix.
 - Secret authority fused to the role (operates root Vault as the single in-cluster writer) and the admin-REST
-  control surface stub through which the operator `pb` client later drives the cluster.
+  control surface stub through which the operator `pb` client later drives the cluster — promoted to the real
+  four-endpoint surface by [Sprint 26.4](#sprint-264-the-admin-rest-surface--vault-initunseal-dhall-update-secret-kv-crud-).
 
 ### Validation
 1. The singleton manifest is a `Deployment replicas=1` with no PVC. During initial handoff, assert the Pod
@@ -501,6 +512,127 @@ the pre-cluster band; here the guard confirms the live deploy path never admits 
 ### Remaining Work
 The whole sprint (📋 Planned).
 
+## Sprint 26.4: The admin REST surface — `vault init/unseal`, `dhall update`, secret KV-CRUD 📋
+
+**Status**: Planned
+**Implementation**: `src/Amoebius/ControlPlane/AdminApi.hs` (the four endpoint families, their reach classes,
+and the `dhall update` admission gate), `pb/pb/admin.py` (the **admin-REST client** mode of the two-mode `pb`
+CLI, deferred to "the singleton" by [phase_17](phase_17_midwife_bootstrap_kind.md) Sprint 17.3 and owned here) —
+target paths, not yet built. This sprint promotes Sprint 26.1's admin-REST **control-surface stub** to the real
+surface; it does not re-implement the Sprint-22.1 Argon2id→AEAD unlock envelope, the Phase-22 Vault client, or
+the Sprint-26.2 reconcile loop — it is the operator-facing channel into all three.
+**Blocked by**: Sprint 26.1 (the singleton that hosts the surface, and the stub this replaces); Sprint 26.2 (the
+reconcile loop `dhall update` drives); Phase 22 gate (the root Vault, its unlock-material envelope, and the
+built-in Vault client the KV verbs and the admission gate call). **Not circular:** Phase 22 unseals under the
+Phase-19 bootstrap-host authority, which is the only authority that exists before this surface; this sprint adds
+the operator-facing endpoint that fronts that same mechanism once the singleton holds the Lease
+([`bootstrap_sequence_doctrine.md` §4](../documents/engineering/bootstrap_sequence_doctrine.md#4-the-host-daemon--singleton-handoff), step 8 of §3 exposes the surface *at* the handoff point).
+**Independent Validation**: an operator drives the full post-handoff sequence **only** through the amoebius
+NodePort admin surface — `vault init/unseal`, then `dhall update`, then `kv put/get/list/delete` — and the
+cluster reconciles toward the delivered `InForceSpec`. The operator password crosses CLI → NodePort → singleton
+and is **never persisted**: an OS-boundary observer (§M.5 — a write/`strace` observer over the singleton process
+and its container filesystem plus the apiserver audit log, never a log the endpoint emits about itself) shows it
+in no file, no environment variable, no k8s object, and no log line. Each seal-critical call attempted from a
+non-node-local reach is **refused before any Vault contact** with its own reach-violation tag. Each `dhall
+update` whose named `SecretRef` fails its capability probe is rejected **before any reconcile** with its own
+distinct reason tag, and the apiserver audit log records zero writes for that attempt.
+**Docs to update**: `documents/engineering/bootstrap_sequence_doctrine.md`,
+`documents/engineering/substrate_doctrine.md`, `documents/engineering/vault_pki_doctrine.md`,
+`documents/engineering/tenancy_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`.
+
+### Objective
+Adopt [`bootstrap_sequence_doctrine.md` §5 — the admin control plane: the CLI ↔ the singleton REST API](../documents/engineering/bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api)
+in full, read with [`vault_pki_doctrine.md` §5 — the root cluster single-node password-encrypted unseal](../documents/engineering/vault_pki_doctrine.md#5-the-root-cluster-single-node-password-encrypted-unseal)
+and [`dsl_doctrine.md` §6 — secrets are names, never values](../documents/engineering/dsl_doctrine.md#6-secrets-are-names-never-values):
+deliver the **one surface** through which the operator drives a running cluster, so that "amoebius-level control
+is the singleton's sole authority, reached only through the admin REST" has an inhabitant rather than a stub.
+Two properties are load-bearing and are what this sprint's gate actually proves:
+
+- **The reach is regime-split.** Seal-critical operations (`vault init/unseal`, including every reboot's unseal)
+  are **node-local only** and **Vault-independent by construction** — they need no fabric, no gateway, and no
+  secret from the Vault they are about to unseal. Post-unseal admin (`dhall update`, KV-CRUD) *may additionally*
+  ride the authenticated WireGuard fabric once it exists
+  ([`host_cluster_comms_doctrine.md` §5.1](../documents/engineering/host_cluster_comms_doctrine.md#51-the-generalization-localhost-or-the-authenticated-wireguard-fabric)).
+  Unseal is **never** over the fabric: the fabric's peer keys are themselves Vault-KV
+  ([`vault_pki_doctrine.md` §3.1](../documents/engineering/vault_pki_doctrine.md#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken)),
+  so a fabric reach presupposes the unsealed Vault it is trying to produce.
+- **`dhall update` admission is runtime-checked, and honestly labelled so (§K).** A named `SecretRef`'s
+  *existence* is a decode-time check; its *capability* is proven **live at upload**, against real hosts and
+  cloud APIs. This is the one place in the phase where a gate reaches outside the cluster, and the ledger must
+  say so rather than reporting it alongside the decode-time foreclosures.
+
+The surface is **privileged, not wild** — network-restricted to the operator's trusted reach, never the
+LB→Envoy→Keycloak door — so "Keycloak owns all *wild* ingress"
+([`platform_services_doctrine.md` §9](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path))
+is untouched by its existence.
+
+### Deliverables
+- **`vault init/unseal`** — authenticated by the operator password (the Argon2id→AEAD unlock material of Sprint
+  22.1, cited not restated), filling the *pluggable pre-Vault unseal seam* that doctrine leaves open. The
+  password is transported and never persisted; `unseal` against an already-unsealed Vault is a typed no-op,
+  never a re-init.
+- **`dhall update`** — deliver a new `InForceSpec` to a running cluster (requires an unsealed Vault and a root
+  token). The singleton decrypts/stores the envelope in-process and reconciles toward it via Sprint 26.2's loop.
+  Admission **actively proves each named secret before admitting the upload**: the secret exists in Vault, an
+  SSH key connects to each static host the spec names and that host's declared CPU, memory,
+  pod-ephemeral/durable/native-cache pools, accelerator device vector and per-device memory match observation,
+  and a cloud credential carries the IAM permissions and compute/storage/accelerator quotas to provision what
+  the spec declares. Rejection is fail-fast, before any reconcile.
+- **`kv put/get/list/delete`** — secret KV-CRUD by name, the path by which a production `InForceSpec`'s named
+  `SecretRef`s come to exist in Vault *before* the `.dhall` is uploaded. Secret material crosses **by value**
+  here and is stored enveloped; the `.dhall` itself still carries only the name
+  ([`vault_pki_doctrine.md` §3](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)).
+- **The `pb` admin-REST client mode** — the second mode of the two-mode Python CLI, completing the deferral
+  Sprint 17.3 records. It is a client of this surface and adds no second control path.
+- **The reach-class enforcement** as typed structure rather than deployment convention, so a seal-critical verb
+  has no constructor reachable from a non-node-local source.
+- **Phase-0-pinned oracles (§M.1)**, authored before `AdminApi.hs` exists: `test/golden/admin/reach-matrix.tsv`
+  (hand-authored (endpoint family × reach class) → admit/refuse plus the exact refusal tag, independent of the
+  implementation — §M.3); `test/golden/admin/admission-tags.tsv` (one row per foreclosed admission cause with
+  its distinct reason tag); and the paired corpus `test/fixtures/admin/secrets-capability/` — four
+  negative/positive pairs (absent secret · SSH key that cannot connect · host short of its declared resources ·
+  cloud credential lacking permission or quota), each pair differing **only** in the foreclosed dimension (§M.8).
+- **Committed seeded mutants (§M.2)**, committed and re-run, each MUST turn Validation red: (i) a
+  *dropped-effect* mutant `mutants/persist-password.patch` that writes the operator password to the container
+  filesystem (must fail the §M.5 non-persistence observer); (ii) a *guard-weakening* mutant
+  `mutants/reach-any.patch` that accepts a seal-critical verb over any reach (must fail the reach matrix); and
+  (iii) a *guard-weakening* mutant `mutants/admit-unproven-secret.patch` that admits an upload whose named
+  secret fails its capability probe (must fail the paired corpus).
+- A **Register-3** proven/tested/assumed ledger recording the admission gate as **runtime-checked, live**, and
+  marking explicitly UNVERIFIED: the tenant-admin scope-narrowed `dhall update`
+  ([phase_27](phase_27_app_tenancy.md)) and the parent→child `ParentReachChannel` use of this surface
+  ([phase_35](phase_35_provider_child_bringup.md)), neither of which this phase exercises.
+
+> **Named open item — the HTTP server.** This sprint specifies the admin surface's endpoints, reach classes,
+> admission gate, and oracles; it does **not** name the Haskell HTTP server library that serves them, nor the
+> library serving the daemon spine's `/healthz` / `/readyz` / `/metrics`
+> ([`daemon_topology_doctrine.md` §6](../documents/engineering/daemon_topology_doctrine.md)). That choice is a
+> **recorded open seam**, not an omission: no HTTP server appears in the Phase-1 probe's authoritative
+> representative set ([phase_01](phase_01_toolchain_spike.md)), so it currently resolves after
+> `cabal.project.freeze` is written. Whoever implements this sprint owns the decision and the freeze
+> consequence.
+
+### Validation
+1. **The post-handoff operator sequence, end to end.** After Sprint 26.1's observed handoff, drive `vault
+   init/unseal` → `dhall update` → `kv put/get/list/delete` through the NodePort surface only, and assert the
+   cluster converges to the delivered `InForceSpec` via the Sprint-26.2 loop. Assert from the §M.5 OS-boundary
+   observer that the operator password appears in no file, environment variable, k8s object, or log line; the
+   committed `persist-password` mutant MUST turn this red.
+2. **The reach matrix (§M.3).** For every (endpoint family × reach class) cell, assert the observed
+   admit/refuse decision and the exact refusal tag equal `reach-matrix.tsv`. A seal-critical verb attempted over
+   a fabric or LAN source is refused **before any Vault contact** (asserted from the Vault audit device: zero
+   contact for the refused attempt, not merely a failed one). The committed `reach-any` mutant MUST turn this red.
+3. **Specific-reason admission negatives (§M.8).** Each of the four `secrets-capability` negatives is rejected
+   with its **own** tag from `admission-tags.tsv` — a generic "rejected" fails the check — and each is paired
+   with a positive differing only in the foreclosed dimension that is admitted. Assert the apiserver audit log
+   records **zero** writes for every rejected attempt (rejection precedes reconcile, not merely precedes
+   convergence). The committed `admit-unproven-secret` mutant MUST turn this red.
+4. **The ledger** is emitted and honestly classifies the admission gate as runtime-checked/live, marking the
+   tenant-admin and parent→child uses UNVERIFIED; a ledger reporting either as proven fails the gate.
+
+### Remaining Work
+The whole sprint (📋 Planned).
+
 ## Documentation Requirements
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
@@ -514,14 +646,24 @@ The whole sprint (📋 Planned).
   that runs the typed reconciler's loop, and that its own manifest is a generated `Deployment replicas=1`.
 - `documents/engineering/testing_doctrine.md` — record the Register-3 ledger variant this gate emits (tenancy
   and gateway-migration correspondence UNVERIFIED).
+- `documents/engineering/bootstrap_sequence_doctrine.md` — the §5 admin-control-plane honesty note flips from
+  "Phase 0 design intent" to a delivered four-endpoint surface with its Register-3 ledger attached; the §7
+  planning-ownership orientation records that the whole surface — seal-critical verbs included — lands with the
+  singleton in this phase, since no singleton exists to host an endpoint before it.
+- `documents/engineering/substrate_doctrine.md` — the §6 midwife-contract note that `pb`'s second mode is "a
+  later phase" resolves to Sprint 26.4.
 
 **Cross-references to add:**
 - `DEVELOPMENT_PLAN/README.md` — flip the Phase-26 status when the gate passes; link this document.
 - `DEVELOPMENT_PLAN/substrates.md` — confirm the Phase-26 linux-cpu gate row (the replicas=1 singleton, no
   election).
-- `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/ControlPlane/{Singleton,Reconcile,Deploy}.hs`
+- `DEVELOPMENT_PLAN/system_components.md` — register `src/Amoebius/ControlPlane/{Singleton,Reconcile,Deploy,AdminApi}.hs`
   as Phase-26 design-first rows, and re-anchor the in-cluster-singleton row to the current
   `#3-the-control-plane-singleton` (no election).
+- `DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md` — Sprint 17.3's deferred `pb` admin-REST client mode
+  now names Sprint 26.4 as its owner.
+- `DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md` — its post-handoff child admin-REST bring-up can now
+  name Sprint 26.4 in `Blocked by`.
 
 ## Related Documents
 - [README.md](README.md) — the live tracker and phase order this document serves
@@ -533,6 +675,16 @@ The whole sprint (📋 Planned).
   as a Deployment `replicas=1`, single-instance delegated to k8s/etcd, and the shared daemon spine
 - [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — the two typed gates and the illegal-state contract
   guarding the live deploy path
+- [Bootstrap Sequence Doctrine](../documents/engineering/bootstrap_sequence_doctrine.md) — the §5 admin control
+  plane (CLI ↔ singleton REST) delivered by Sprint 26.4, and the §4 handoff point at which it is exposed
+- [Vault / PKI Doctrine](../documents/engineering/vault_pki_doctrine.md) — the password-encrypted unseal and the
+  `SecretRef`-is-a-name contract the admin endpoints front
+- [phase_17](phase_17_midwife_bootstrap_kind.md) — the two-mode `pb` CLI whose admin-REST client mode Sprint
+  17.3 defers to the singleton and Sprint 26.4 owns
+- [phase_22](phase_22_vault_pki.md) — the root Vault, unlock-material envelope, and built-in Vault client the
+  admin endpoints call
+- [phase_35](phase_35_provider_child_bringup.md) — the parent→child bring-up that drives a child through this
+  same surface over its `ParentReachChannel`
 - [phase_19](phase_19_object_reconciler.md) — the typed renderer + SSA reconciler that renders and applies
   the singleton and its manifests
 - [phase_23](phase_23_platform_backbone.md) — the standard platform-service stack the live `.dhall` deploys

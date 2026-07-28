@@ -91,7 +91,10 @@ descriptor-derived `MonitoringWorkBudget` cost enter the corresponding host/pod
 folds rather than an overhead constant. An in-cluster cache-owner `emptyDir` is a pod-ephemeral consumer, not a second cache-pool
 debit.
 
-The scheduler-reservation proof uses CPU, memory, and pod `ephemeral-storage` **requests**. A separate
+The scheduler-reservation proof uses CPU, memory, and pod `ephemeral-storage` **reserved** demand — the
+declared requests plus any declared compute headroom pad, which is `Zero` on every axis for a workload that
+declares none ([§3.72](#372-a-compute-headroom-pad-that-reserves-past-its-own-limit),
+[§3.73](#373-a-padded-reservation-that-overcommits-allocatable)). A separate
 finite-limit/physical-peak proof sums declared memory and pod-ephemeral **limits**, durable caps, native-cache
 peak budgets, and other bounded consumers, so requests alone cannot overclaim physical sufficiency. Memory is
 a reactive kernel boundary and local ephemeral storage is a kubelet measurement/eviction boundary, not a
@@ -317,6 +320,72 @@ boundary, and an undeclared envelope is rejected) + `Gate-1-editor` (an Apple ho
 declaring a separate `vram` arm fails the closed capacity shape) + `live-effect` (residue — observed devices
 and per-device raw/reserved/allocatable/current-free memory match the declaration/residual and the workload
 actually fits under real batch/context).
+
+### 3.72 A compute headroom pad that reserves past its own limit
+
+Declared compute headroom is the one authorable over-reservation in the capacity model
+([`resource_capacity_doctrine.md` §3](../engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)):
+a workload may reserve more of a node than it requires, provided the excess carries a closed
+`VerticalGrowth | BurstAbsorption | NeighbourIsolation | DefragmentationReserve` reason. What it may not do is
+reserve capacity it could never lawfully consume. The pad is bounded by the workload's own declared ceiling —
+`requests + pad ≤ limits` per axis on the pod arm, `reservation + pad ≤ ceiling` on the native-host arm —
+strengthening the existing `requests ≤ limits`. A pad exceeding that bound would hold node capacity against a
+workload the kernel, cgroup, or supervisor would stop before it ever reached, which is waste with no available
+justification rather than headroom.
+
+The bound is what keeps the rest of the fold honest. Because `reserved ≤ limits` holds by construction, the
+finite-limit/physical-peak proof of [§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)
+already covers the padded reservation on memory and pod ephemeral storage; reservation fit stays independently
+load-bearing on CPU alone, whose limits are bounded by `CpuOvercommitPolicy` rather than by allocatable. An
+unbounded pad would break that containment and require a fourth compute proof beside the three `place`
+returns.
+
+Two adjacent shapes are foreclosed with it. A pad whose axes are all `Zero` has no constructor: "no headroom"
+is `Optional None` and has exactly one representation, never a vector of zeroes that a later fold might treat
+as a declared-but-empty reserve. And the padded total itself is not authorable anywhere — `requests`,
+`limits`, and the pad are declared; `reserved` is minted only by `provision`, exactly as a volume's
+`provisionedBytes` is derived from its `requiredUsableBytes` and an author-supplied value rejects.
+**Owner:** [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md), consuming complete
+workload envelopes from
+[`platform_services_doctrine.md` §10](../engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope).
+**Technique:**
+[§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
+(binding-by-construction: the pad and the ceiling it must respect are fields of one checked record).
+**Layer:** decode-foreclosed.
+**Validation-locus:** `Gate-1-editor` (no schema field carries a reserved/padded total, and the headroom
+reason is required rather than defaultable, so an authored reservation has nowhere to be written) +
+`Gate-2-decoder` (the smart constructor checks `requests + pad ≤ limits` per axis alongside the existing
+`requests ≤ limits`, and the all-`Zero` pad fails `PositiveHeadroomAxisWitness` construction) + `live-effect`
+(residue — the rendered `requests` carries the padded total and the kubelet reserves exactly it).
+
+### 3.73 A padded reservation that overcommits allocatable
+
+Declared compute headroom competes for the same node capacity as the requests it extends; there is no separate
+pool it is drawn from. A fold that admitted a workload set by summing only the required requests, while the
+scheduler ledger debited the padded totals, would overcommit the node by exactly the declared headroom — the
+capacity would be held, but nothing would have proven it exists. This is the sibling of the storage rule that
+"the padding on smaller ordinals remains reserved": over-reservation is charged, never forgiven.
+
+So the placement's **reservation fit** is stated over `Σ effective reserved`, not `Σ effective requests`, and
+the pad participates in the first-fit-decreasing bin-pack that produces the `place` witness. A declared pad
+therefore genuinely reduces how many pods share a node, which is the entire point of the `NeighbourIsolation`
+and `DefragmentationReserve` reasons — a pad that did not change packing would be decoration.
+
+The reservation ledger carries the same obligation across time. The three pad axes sit beside the request and
+limit debits rather than folded into them, so the required and reserved components stay separable on the row:
+release and terminal retention partition all nine compute scalars exactly, and a partition that returned a
+row's request while keeping its pad would leak headroom against a workload that no longer exists. On
+reconcile, surviving amoebius rows contribute their reserved total for the same reason — a row that
+surrendered its pad would let a second workload pack into space the first still holds. Foreign and system pods
+have no envelope and therefore no pad, and continue to contribute their observed requests.
+**Owner:** [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md), consuming physical
+inventory from [`substrate_doctrine.md`](../engineering/substrate_doctrine.md). **Technique:**
+[§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
+(capacity-accounting total fold over the reserved demand). **Layer:** decode-foreclosed.
+**Validation-locus:** `provision-seal` (the post-bind reservation fit sums effective reserved and returns
+`Left Overcommit` before a `ProvisionedSpec` exists, including the requests-fit/reserved-fails boundary) +
+`live-effect` (residue — each pre-Binding CAS re-folds the whole reservation ledger, pad included, against
+re-observed residual capacity, and the pad is never added as a numeric delta to a cached residual).
 
 ---
 

@@ -137,7 +137,7 @@ duplicate that corpus — it partitions it along the storage seam.
   exact-fit, presentation/quantum-rounding exact-fit, and ZooKeeper/Patroni/Vault recovery-fits plus a
   control-plane-storage-steady-fits row) and `legal_managed_eks` (a fixed-`InstanceStore` root-fits row and a
   derived-root-EBS-within-`nodeRootStorage`-quota row). All are committed in Phase 0 (§M.1) as part of the
-  forty-fixture corpus; the compute/topology base-fold negatives (`illegal_engine_substrate_mismatch`,
+  forty-one-fixture corpus; the compute/topology base-fold negatives (`illegal_engine_substrate_mismatch`,
   `illegal_rke2_reused_host`, `illegal_overcommit_*`, the elastic-branch negatives,
   `illegal_untolerated_taint`, `illegal_memory_backed_underreserved`,
   `illegal_tmpfs_init_persistence_underreserved`, …) are owned by
@@ -530,7 +530,7 @@ illegal_incluster_cache_bound_mismatch}.dhall` (the five storage-geometry/cache 
 `test/dsl/StorageGeometryGate.hs` (the gate battery + validation-locus ledger) — target paths, not yet built.
 All five negatives, the reused positive rows, and their expected results / `Left`-tags are authored and
 committed in Phase 0 before the implementation exists (§M.1, [Gate integrity](#gate-integrity)) as part of the
-forty-fixture corpus.
+forty-one-fixture corpus.
 **Blocked by**: Sprint 8.1, Sprint 8.2, Sprint 8.3; Phase 4 gate (the positive Gate-1 corpus).
 **Independent Validation**: the gate applies the Phase-8 storage-geometry folds directly to each hand-authored
 logical-demand/backing fixture — no `bind`, `planInfrastructure`, `ProvisionContext`, or `provision` call (those

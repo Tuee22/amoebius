@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the ordered path from a bare host to a reconciling cluster — the
@@ -279,10 +279,15 @@ this doc specifies the single-node-root answer the plan adopts and does not sett
 
 This document is normative bootstrap-sequence + admin-control-plane doctrine only. Delivery sequencing,
 status, and gates are owned by [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md), never
-restated here. For orientation only (the plan is authoritative): the **ordered sequence + host→singleton
-handoff** ride **Phases 14 and 16** (kernel + bootstrap + kind); the **`vault init/unseal` admin endpoint** rides
-**Phase 22** (root Vault/PKI); the **`dhall update` endpoint + the singleton REST surface** ride
-**Phase 26** (the control-plane singleton). This doc states the target shape and links back for status.
+restated here. For orientation only (the plan is authoritative): the **chain/Step kernel** the ordered sequence
+is enacted through rides **Phase 14**, and the **midwife + single-node kind bring-up** rides **Phase 17**; the
+**host→singleton handoff** itself rides **Phase 26** (the control-plane singleton). The **whole admin REST
+surface** — `vault init/unseal`, `dhall update`, and secret KV-CRUD alike — rides **Phase 26 Sprint 26.4**,
+because [§3](#3-the-ordered-bootstrap-sequence) step 8 exposes the surface *at* the handoff point: there is no
+singleton to host an endpoint before it. **Phase 22** (root Vault/PKI) delivers the Vault, the
+password-sealed unlock-material envelope, and the built-in client that the `vault init/unseal` endpoint fronts —
+unsealing there is driven under the Phase-19 bootstrap-host authority, the only authority that exists that
+early. This doc states the target shape and links back for status.
 
 > **Honesty.** Everything here is Phase 0 design intent, specified before implementation. The "midwife then
 > defers" host-daemon model and the reconcile-driven bring-up are *proven in the prodbox / hostbootstrap

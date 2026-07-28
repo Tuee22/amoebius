@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_36_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_36_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md
 **Generated sections**: none
 
 > **Purpose**: Bring a provider-managed EKS child — deployed and checkpoint-observed by
@@ -380,11 +380,12 @@ The whole sprint (📋 Planned).
 Vault init/unseal, projected `.dhall` delivery, and the singleton's standard-service convergence), converging
 through the Phase-19 reconciler and consuming the Phase 18/21–25 platform-service manifests (target paths; not yet
 built)
-**Blocked by**: Sprint 35.2; Phase 19 gate (the object reconciler — observe→diff→scoped-SSA→staged-enact — that
-converges the manifests); Phase 18 gate (the base image + in-cluster `distribution` registry the services are
-baked into); Phases 21–25 gates (retained storage, root Vault/PKI, the platform backbone MinIO/Pulsar, platform
-services-2 Postgres/observability, and Keycloak-owned ingress — the standard service set converged here) — all
-external earlier-phase prerequisites.
+**Blocked by**: Sprint 35.2; [phase_26](phase_26_live_dsl_singleton.md) Sprint 26.4 (the admin REST surface —
+`vault init/unseal`, `dhall update` — this sprint drives the child through); Phase 19 gate (the object
+reconciler — observe→diff→scoped-SSA→staged-enact — that converges the manifests); Phase 18 gate (the base image
++ in-cluster `distribution` registry the services are baked into); Phases 21–25 gates (retained storage, root
+Vault/PKI, the platform backbone MinIO/Pulsar, platform services-2 Postgres/observability, and Keycloak-owned
+ingress — the standard service set converged here) — all external earlier-phase prerequisites.
 **Independent Validation**: through the child admin REST after handoff, the run initializes/unseals Vault,
 delivers the child's projected `.dhall`, and the singleton converges the **complete** standard HA platform-service
 stack (registry, MinIO, Vault, Pulsar, Prometheus/Grafana, Postgres, Envoy/Gateway API, Keycloak, cloud

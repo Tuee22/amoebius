@@ -43,7 +43,12 @@ It owns the private kind-indexed `BoundExecutionBody` and its expansion:
   `DaemonSetRolloutPolicy`, finite Job completions/parallelism/backoff/terminal retention, and supervised
   `HostProcessCardinality` + replacement policy — and the expansion into identity-keyed
   `MaterializedExecutionInstance`s, complete empty-capable `ExecutionEpoch`s, and `ProvisionedExecutionEpochs`.
-- The scheduler-reservation algebra: `CompleteResourceReservation`, the zero-capable release partitions, the
+- The scheduler-reservation algebra: `CompleteResourceReservation` — whose `PodComputeReservationAxes` carries
+  the three declared-headroom pad scalars beside the request and limit debits, so the required and reserved
+  components of a row stay separable and its `ResourceEnvelopeReservationProjectionWitness` proves the
+  reservation is the envelope's required projection composed with its declared pad rather than an
+  independently authored vector — the zero-capable release partitions, which partition all nine compute
+  scalars exactly so a released row returns its pad rather than leaking it, the
   aggregate scheduler/host reservation ledger, `ProvisionedExecutionSchedulingGuard`, the Reserved →
   BindingInFlight → Bound states around Kubernetes Binding, the aggregate root-ledger CAS, the
   `LedgerOnlyAbsentRecovery` state-selected debit for a Pod whose ledger row lingers, and the private
@@ -132,10 +137,10 @@ in-process check that runs on no substrate.
 
 This section pins the concrete interpretations the [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
 clauses require for Phase 9; it strengthens, never weakens, the Gate and sprint Validations above. It is this
-phase's **partition** of the forty fixtures / per-fold mutant battery of the original capacity/topology corpus
+phase's **partition** of the forty-one fixtures / per-fold mutant battery of the original capacity/topology corpus
 — the base-fold and topology slice is owned by [phase_07_capacity_core_folds.md](phase_07_capacity_core_folds.md)
 and the storage-geometry slice by [phase_08_storage_geometry_folds.md](phase_08_storage_geometry_folds.md); all
-forty fixtures and their expected `Left`-tags are committed once in Phase 0 (§M.1), and each sub-phase asserts
+forty-one fixtures and their expected `Left`-tags are committed once in Phase 0 (§M.1), and each sub-phase asserts
 only its seam's slice.
 
 - **Representative set (§M.7).** This phase's fold-negative corpus is *exactly* the eighteen named fixtures on

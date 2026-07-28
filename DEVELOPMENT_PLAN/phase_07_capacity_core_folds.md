@@ -76,9 +76,10 @@ fold and the `ComputeEngine`/`Topology` relation are **provably total** (interpr
 `-Werror=incomplete-uni-patterns` on every `Amoebius.Capacity.{Types,Fold}` / `Amoebius.Dsl.Topology` base
 module **and** a sampled QuickCheck no-crash run — both, not either) and **sound** (every generated positive
 input yields a sound headroom/placement/compatibility result and no over-committed or incompatible spec is
-admitted); each of the **fourteen base capacity/topology negative fixtures** named in
+admitted); each of the **fifteen base capacity/topology negative fixtures** named in
 [Gate integrity](#gate-integrity) (engine↔substrate mismatch, a reused rke2 host, host/VM/cluster overcommit,
-CPU-limit-policy, pod-ephemeral overcommit, an untolerated taint, a memory-backed volume under-reservation, a
+CPU-limit-policy, pod-ephemeral overcommit, a padded-reservation overcommit that fits on requests alone, an
+untolerated taint, a memory-backed volume under-reservation, a
 tmpfs init-persistence under-reservation, and
 the four elastic failures — largest-candidate, per-node-overhead, per-class-maximum, and outer-quota) returns
 the base fold's specific committed structured
@@ -96,17 +97,18 @@ placement; and the **committed per-fold seeded-mutant battery** named in [Gate i
 
 This section pins the concrete interpretations the [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
 clauses require for Phase 7; it strengthens, never weakens, the Gate and sprint Validations above. The source
-capacity/topology phase committed a forty-fixture corpus (thirty-seven negatives + three positives) in Phase 0;
+capacity/topology phase committed a forty-one-fixture corpus (thirty-eight negatives + three positives) in Phase 0;
 this sub-phase **partitions** that corpus along its seam and keys its gate to **only its base slice**. The
 storage-geometry fixtures are exercised by [phase_08_storage_geometry_folds.md](phase_08_storage_geometry_folds.md)
 and the execution/accelerator/provider-root fixtures by
 [phase_09_execution_accelerator_folds.md](phase_09_execution_accelerator_folds.md); the full corpus is not
 re-checked here.
 
-- **Representative set (§M.7).** This sub-phase's fold-negative corpus is *exactly* the fourteen named base
+- **Representative set (§M.7).** This sub-phase's fold-negative corpus is *exactly* the fifteen named base
   fixtures — `illegal_engine_substrate_mismatch`, `illegal_rke2_reused_host`,
   `illegal_overcommit_host`, `illegal_overcommit_vm`, `illegal_overcommit_cluster`,
   `illegal_cpu_limit_over_policy`, `illegal_pod_ephemeral_overcommit`,
+  `illegal_padded_reservation_overcommit`,
   `illegal_elastic_pod_exceeds_largest_candidate`, `illegal_elastic_class_max_exhausted`,
   `illegal_elastic_per_node_overhead_unplaceable`, `illegal_elastic_worst_case_instances_over_quota`,
   `illegal_untolerated_taint`, `illegal_memory_backed_underreserved`, and
@@ -131,7 +133,7 @@ re-checked here.
   `illegal_accelerator_vram_reserve_boundary`, `illegal_apple_metal_profile_mismatch`,
   `illegal_shared_accelerator_double_owner`) and the positive
   `legal_tmpfs_two_concurrent_writers_single_debit` are routed to phases 8 and 9 and are **not** in this gate's
-  representative set. All forty fixtures are committed in Phase 0 (§M.1); each is exercised by exactly one
+  representative set. All forty-one fixtures are committed in Phase 0 (§M.1); each is exercised by exactly one
   sub-phase.
 - **Committed per-fold seeded-mutant battery (§M.2).** One committed mutant per base fold, each individually
   required to turn the suite red, drawn from the operator set: `fits` (drop the `memory` axis), `carve`
@@ -317,7 +319,11 @@ reading declared numbers only (the substrate node inventory and PV sizes are own
   plus log allowance, and explicit `PodLocalStorageDemand` over bounded disk-backed volumes. Every private
   allowance must fit its own container ephemeral request/limit; disk-volume bounds plus the lifecycle-effective
   private allowance fit the pod request/limit; each effective pod envelope is charged once.
-  `Capacity`/`Demand`/`Budget` keep `requests ≤ limits`. Every `NodeCapacity` carries the required
+  `Capacity`/`Demand`/`Budget` keep `requests ≤ limits`, and where a pod or host worker declares compute
+  headroom they keep the strengthened `requests + pad ≤ limits` (`reservation + pad ≤ ceiling` on the host arm)
+  that [Phase 5](phase_05_gadt_decoder_gate2.md) refines. The pad enters the effective demand once, after the
+  init-versus-app maximum resolves, beside pod overhead; the reserved total it produces is minted here and has
+  no authorable source. Every `NodeCapacity` carries the required
   `NoCpuOvercommit | BoundedCpuOvercommit RatioAtLeastOne` policy and its role-indexed CPU/memory reserve, so
   allocatable = raw − reserve. (The in-cluster cache nesting, durable
   `DeclaredVolumeDemand` geometry, OCI/image accounting, and kubelet/CRI runtime metadata are refinements owned
@@ -327,10 +333,15 @@ reading declared numbers only (the substrate node inventory and PV sizes are own
   witness + per-class effective capacity after topology-expanded per-node units + a sound candidate-class count
   cover within each `maxCount` + selected cover within the outer instance/vCPU quota. Both branches spend one
   pod slot per simultaneously live pod and driver-scoped unique-PVC attach slots. The returned witness proves
-  both request reservation and finite-limit fit, including memory/ephemeral limits and storage locality/pools,
-  and nests host → VM → workload. The CPU-limit fit consumes the node's `NoCpuOvercommit |
+  both reserved reservation and finite-limit fit, including memory/ephemeral limits and storage locality/pools,
+  and nests host → VM → workload. The reservation fit sums **effective reserved** — required requests plus
+  declared pad — so a pad genuinely consumes bin-pack space and a workload set that fits on requests alone but
+  not on reserved is `Left Overcommit`. The CPU-limit fit consumes the node's `NoCpuOvercommit |
   BoundedCpuOvercommit RatioAtLeastOne` policy: `Σ effective CPU limits ≤ the finite policy-derived CPU-limit
-  budget`.
+  budget`. Because `reserved ≤ limits` holds by construction, reservation fit is implied on memory and
+  ephemeral storage by the finite-limit fit and stays independently load-bearing on CPU alone; the fold
+  nonetheless states all three, since the implication is a consequence of the bound rather than a shortcut the
+  implementation may take.
 - An in-file honesty note: every capacity **sum** here is a total checked provision-seal operation,
   sound-not-complete for the compute bin-pack; the base fold is idempotent under re-invocation, so a later
   `Growable` growth re-run ([phase_08_storage_geometry_folds.md](phase_08_storage_geometry_folds.md)) never
@@ -381,8 +392,12 @@ packable one) for the single sound-not-complete check, compute `place`, and neve
   **implementation-independent witness validator** (§M.3) that reads the generated fixture's declared
   allocatables directly and **never calls `podFits` or `place`**: for every node in the returned `Placement`,
   it recomputes effective app/sidecar/ordinary-init/restartable-init-sidecar requests and limits under the
-  pinned Kubernetes semantics plus pod overhead; asserts **Σ requests ≤ allocatable** for CPU/memory/ephemeral
-  storage; asserts **Σ effective CPU limits ≤ the node's finite policy-derived CPU-limit budget**; asserts
+  pinned Kubernetes semantics plus pod overhead, then **re-derives each pod's declared headroom pad from the
+  fixture's own authored `ComputeHeadroomDemand`** — never reading it off the returned placement or the
+  reservation witness, which would make the check circular in exactly the way §M.3 forbids — and adds it once
+  to obtain effective reserved; asserts **Σ reserved ≤ allocatable** for CPU/memory/ephemeral
+  storage; asserts **`requests + pad ≤ limits`** per axis for every padded pod; asserts
+  **Σ effective CPU limits ≤ the node's finite policy-derived CPU-limit budget**; asserts
   **Σ effective memory/ephemeral limits ≤ allocatable**; spends one pod slot per simultaneously live pod and
   driver-scoped unique-PVC CSI attach slots (same-PVC dedups, different PVCs add); proves the pod's ephemeral
   request covers all disk-backed volume bounds plus lifecycle-effective private allowances, proves each
@@ -394,8 +409,10 @@ packable one) for the single sound-not-complete check, compute `place`, and neve
   Thus two 3-CPU pods on one 4-CPU node is rejected independently of `place`. `place` may return `Left` on a
   packable spec but never a witness the independent validator rejects (the one-directional soundness caveat).
   This validator carries **one seeded mutant per base resource/capability axis** (drop CPU, memory, ephemeral
-  storage, pod-slot/CSI-attach fit and unique-PVC dedup, CPU-limit policy, elastic class maximum, and elastic
-  per-node expansion), each individually required to turn the suite red (§M.2, [Gate integrity](#gate-integrity)).
+  storage, pod-slot/CSI-attach fit and unique-PVC dedup, CPU-limit policy, elastic class maximum, elastic
+  per-node expansion, and **drop the pad** — reserve only the required requests, which must turn the suite red
+  on the padded fixtures or the headroom is decoration the fold never charges for), each individually required
+  to turn the suite red (§M.2, [Gate integrity](#gate-integrity)).
 - Equivalence (both-directions) properties for the elementwise-compatibility relation: it accepts a
   heterogeneous multi-substrate fixed/elastic `NodeSupply` **iff** every fixed/floor node and candidate class is
   compatible, and returns the exact incompatible entry set otherwise. The reference side of this
@@ -431,16 +448,17 @@ The whole sprint (📋 Planned).
 **Status**: Planned
 **Implementation**: `dhall/examples/{illegal_engine_substrate_mismatch,illegal_rke2_reused_host,
 illegal_overcommit_host,illegal_overcommit_vm,illegal_overcommit_cluster,illegal_cpu_limit_over_policy,
-illegal_pod_ephemeral_overcommit,illegal_elastic_pod_exceeds_largest_candidate,
+illegal_pod_ephemeral_overcommit,illegal_padded_reservation_overcommit,
+illegal_elastic_pod_exceeds_largest_candidate,
 illegal_elastic_class_max_exhausted,illegal_elastic_per_node_overhead_unplaceable,
 illegal_elastic_worst_case_instances_over_quota,illegal_untolerated_taint,illegal_memory_backed_underreserved,
-illegal_tmpfs_init_persistence_underreserved}.dhall` (the fourteen base `provision-seal` fold negatives,
-including the four elastic-branch negatives plus the taint / memory-backed / tmpfs folds) + the three `ghc -fno-code` expect-fail compile goldens
+illegal_tmpfs_init_persistence_underreserved}.dhall` (the fifteen base `provision-seal` fold negatives,
+including the four elastic-branch negatives plus the taint / memory-backed / tmpfs / padded-reservation folds) + the three `ghc -fno-code` expect-fail compile goldens
 (`bareAppleHost`, `bareWindowsHost`, even-server quorum) + reuse of `legal_multisubstrate_cluster` /
 `legal_managed_eks`; `test/dsl/CapacityTopologyGate.hs` (the base gate battery + validation-locus ledger) —
 target paths, not yet built. These fixtures and their expected results / `Left`-tags are authored and committed
 in Phase 0 before the implementation exists (§M.1, [Gate integrity](#gate-integrity)); the remaining
-storage/execution/accelerator fixtures of the committed forty-fixture corpus are exercised by phases 8 and 9,
+storage/execution/accelerator fixtures of the committed forty-one-fixture corpus are exercised by phases 8 and 9,
 not here.
 **Blocked by**: Sprint 7.1, Sprint 7.2, Sprint 7.3; Phase 4 gate (the positive Gate-1 corpus).
 **Independent Validation**: the gate applies the Phase-7 base folds (`fits`/`podFits`/`carve`/`place` and the
@@ -505,7 +523,7 @@ validation-locus ledger that names the honest foreclosure layer of each.
   push-back soundness, not an amoebius result.
 
 ### Validation
-1. `cabal test dsl-spec` is green — every one of the fourteen base fold negatives
+1. `cabal test dsl-spec` is green — every one of the fifteen base fold negatives
    ([Gate integrity](#gate-integrity) representative set, including the four elastic negatives) returns its
    **specific committed** tagged `Left`, the three expect-fail compile goldens fail with their committed
    expected type error, both positives place feasibly, the QuickCheck battery holds at its coverage minima, and

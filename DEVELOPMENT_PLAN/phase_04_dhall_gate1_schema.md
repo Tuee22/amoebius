@@ -236,6 +236,8 @@ nonzero exit on a negative is not sufficient.
   index/manifest/config/compressed-layer stored-byte field, one snapshot-chain/unpacked-byte field, provider
   root `backing`/presentation, `InstanceStore.provisionedRawBytes`, a
   `ProviderUsableDiskCarveTemplate.requiredUsableBytes`, or EBS policy/allocation,
+  a present `ComputeHeadroomDemand`'s `reason` or `pad` (either alone, since a pad without a justification and
+  a justification without a pad are both foreclosed), or the `VerticalGrowth` arm's `horizon`,
   `PhysicalDiskPartition.allocatableRawBytes`, a
   `NamedDiskCarve` parent index/arm/geometry field, raw-VM presentation/allocation/layout, the
   node-root-storage quota arm, `VolumePresentation`, `MonitoringWorkBudget.volume.presentation`, backing
@@ -323,7 +325,17 @@ an authoring-time boundary that fires before any binary runs.
 - The pure resource declarations of
   [`resource_capacity_doctrine.md §3`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget):
   unit-tagged quantity fields; `PodResourceVec = { cpu, memory, ephemeralStorage }`;
-  `Resources = { requests, limits }`; raw `ExecutionUnitIntent` with stable id/revision and one kind-specific
+  `Resources = { requests, limits }`; the optional declared compute headroom
+  `ComputeHeadroomDemand = { reason, pad }` on `PodResourceEnvelope` and its
+  `HostComputeHeadroomDemand` mirror on `HostResources`, whose `reason` is the closed
+  `⟨VerticalGrowth {horizon}|BurstAbsorption|NeighbourIsolation|DefragmentationReserve⟩` and whose `pad` is a
+  `Residualized` vector — required and non-defaultable when the headroom is present, so a pad has a stated
+  justification or no constructor at all, exactly as an rke2 agent has no editable empty control-plane
+  placeholder. Gate 1 offers **no reserved/padded-total field anywhere**: `requests`, `limits`, and the pad are
+  authorable, the reservation they sum to is not, mirroring the deliberately absent authorable rounded
+  physical-byte shortcut for durable and root-EBS creation. The `requests + pad ≤ limits` bound and the
+  all-`Zero` pad rejection are cross-field and arithmetic, so Gate 1 proves only presence and closed shape and
+  [Phase 5](phase_05_gadt_decoder_gate2.md) refines both; raw `ExecutionUnitIntent` with stable id/revision and one kind-specific
   controller arm; the structural
   `NodeEligibilitySelector = { allOf : Set NodeEligibilityConstraint }`, where the constraint is the closed
   union `EngineRole | ProviderClass | Site | AcceleratorProfile | CarriesTaint` over typed inventory handles

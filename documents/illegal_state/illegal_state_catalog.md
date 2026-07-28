@@ -188,6 +188,8 @@ the SSoT for the axis. Most entries name a primary locus plus a live-effect resi
 - [§3.28](./illegal_state_capacity.md#328-two-accelerator-owners-on-one-node-or-a-fractional-accelerator-claim) — Two accelerator owners on one node, or a fractional accelerator claim
 - [§3.29](./illegal_state_capacity.md#329-a-host-worker-whose-demand-overflows-its-physical-host) — A host worker whose Demand overflows its physical host
 - [§3.30](./illegal_state_capacity.md#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool) — An accelerator memory envelope that cannot fit the selected devices or unified-memory pool
+- [§3.72](./illegal_state_capacity.md#372-a-compute-headroom-pad-that-reserves-past-its-own-limit) — A compute headroom pad that reserves past its own limit
+- [§3.73](./illegal_state_capacity.md#373-a-padded-reservation-that-overcommits-allocatable) — A padded reservation that overcommits allocatable
 
 ### Security, ingress & secrets — [`illegal_state_security.md`](./illegal_state_security.md)
 

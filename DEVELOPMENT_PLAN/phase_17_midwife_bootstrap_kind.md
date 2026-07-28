@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_18_base_image_registry.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/resource_capacity_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_18_base_image_registry.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/resource_capacity_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Specify the first live phase — the Python `pb` midwife that ensures a toolchain and builds the
@@ -61,7 +61,8 @@ cannot satisfy the pure declaration.
 The midwife is a **Python `pb` CLI, not a shell script**. amoebius owns no shell script; the earlier
 `bootstrap.sh` igniter is retired ([legacy_tracking_for_deletion.md](legacy_tracking_for_deletion.md)). `pb`
 is one CLI with two modes — **midwife** (bare host → toolchain → build → `exec` the binary, this phase) and
-**admin-REST client** (the operator CLI that drives the singleton after handoff, a later phase) — so the
+**admin-REST client** (the operator CLI that drives the singleton after handoff, delivered by
+[phase_26](phase_26_live_dsl_singleton.md) Sprint 26.4) — so the
 per-substrate pre-binary surface is exactly the package-manager-root bootstrap and nothing else.
 
 **Substrate:** linux-cpu (the default validation substrate; tracked in [substrates.md](substrates.md), per
@@ -299,7 +300,8 @@ The whole sprint (📋 Planned).
 
 **Status**: Planned
 **Implementation**: `pb/pyproject.toml`, `pb/pb/cli.py`, `pb/pb/midwife.py` (target: the two-mode `pb` CLI; this
-sprint delivers the **midwife** mode only — the admin-REST client mode lands with the singleton). No shell
+sprint delivers the **midwife** mode only — the admin-REST client mode lands with the singleton in
+[phase_26](phase_26_live_dsl_singleton.md) Sprint 26.4). No shell
 script: amoebius owns none.
 **Blocked by**: Phase 1 gate (the pinned toolchain builds the binary).
 **Independent Validation**: on a bare `linux-cpu` host **whose cleanliness is machine-verified by a
@@ -613,7 +615,8 @@ The whole sprint (📋 Planned).
   Python `pb` midwife land, flip the §9 planning-ownership orientation note for this phase from intent to a
   delivered-status pointer (status stays in the plan) and reconcile any seed-vs-target discovery caveats in §3.
 - `documents/engineering/bootstrap_sequence_doctrine.md` — record that `pb`'s **midwife** mode is delivered here
-  and that its **admin-REST client** mode (§5) remains a later phase.
+  and that its **admin-REST client** mode (§5) is owned by [phase_26](phase_26_live_dsl_singleton.md)
+  Sprint 26.4, not left to an unassigned "later phase".
 - `documents/engineering/cluster_lifecycle_doctrine.md` — confirm the §2/§9 "bring-up is itself a reconcile"
   no-op shape is exercised by this phase's gate.
 - `documents/engineering/resource_capacity_doctrine.md` — record Phase 17 as the first live producer of the
@@ -643,6 +646,6 @@ The whole sprint (📋 Planned).
 - [Cluster Lifecycle Doctrine](../documents/engineering/cluster_lifecycle_doctrine.md) — two cluster kinds and
   bring-up-as-reconcile.
 - [Bootstrap Sequence Doctrine](../documents/engineering/bootstrap_sequence_doctrine.md) — the unified `pb` CLI's
-  two modes (midwife here; admin-REST client later).
+  two modes (midwife here; admin-REST client in [phase_26](phase_26_live_dsl_singleton.md) Sprint 26.4).
 - [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — the parameters/context/witness orchestration surface
   the `bootstrap` command carries.

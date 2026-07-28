@@ -226,12 +226,20 @@ must pass `dhall type` and decode-reject — never billing a Gate-2-only foreclo
   `UnspellableCombination` tag, paired with independently exercised `{ 1, 0 }` and `{ 0, 1 }` positives.
   DaemonSet both-positive, StatefulSet unsupported feature/nonzero-partition, Job missing terminal retention,
   CUDA rolling, and Metal/host-policy mismatches each have a minimally differing legal controller twin.
+  The declared-compute-headroom cases belong here rather than to the deferred set below, because both are
+  cross-field checks the Phase-5 smart constructor owns: `illegal_decode_headroom_over_limit`, whose pad
+  breaches `requests + pad ≤ limits` on one axis, and `illegal_decode_headroom_all_zero`, whose pad is `Zero`
+  on every axis and so has no `PositiveHeadroomAxisWitness`. Each mutates a single construct of a legal twin
+  that declares lawful headroom, so the pinned tag proves the pad rule fired rather than an unrelated shape
+  error.
 - **Provisioning-deferred negatives are selected by tags, never section-number ranges.** A registry row with
   `validation_locus = provision-seal`, an `owner_phase` of `Phase-7` or `Phase-10`, and a `case_family` of
   `topology`, `capacity`, `storage`, `cache`, `accelerator`, or `capability-provision` carries no rejecting
   fixture in Phase 6 and is ledgered with that owner. The generated selection must include every current
   aggregate and atomic fit case: engine/substrate incompatibility and host reuse; host/VM/cluster and
-  elastic-quota overcommit; pod ephemeral-storage and finite-limit/physical-peak overflow;
+  elastic-quota overcommit; pod ephemeral-storage and finite-limit/physical-peak overflow; a padded
+  reservation that fits on required requests alone but overcommits allocatable once declared headroom is
+  charged;
   durable/native-cache-pool and
   in-cluster-cache-nesting violations; Pulsar two-ceiling overflow; affinity/taint unplaceability; CUDA
   requested on a CPU-only target;

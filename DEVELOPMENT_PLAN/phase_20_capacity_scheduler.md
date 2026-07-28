@@ -149,7 +149,9 @@ committed/re-run, not run once:
 - **`bind-before-reservation-CAS`** (effect-swap/ordering) — submits Kubernetes Binding before the `Reserved`
   CAS succeeds; must fail the external reservation-CRD auditing (no Binding may precede a successful CAS);
 - **`numeric-add-instead-of-whole-ledger-refold`** (fold-weakening) — placement adds a numeric delta instead
-  of re-folding the whole reservation ledger; must fail the two-candidate residual race;
+  of re-folding the whole reservation ledger; must fail the two-candidate residual race. Declared compute
+  headroom makes this mutant's shape more tempting rather than less — `reserved = required + pad` reads like a
+  delta to add to a cached residual — so the pad is folded with everything else or not at all;
 - **`same-UID-double-debit`** (union-arm/idempotence) — a same-UID retry mints a second reservation record;
   the external "every UID debited once" assertion goes red;
 - **`bound-deleted-on-restart`** (dropped-`UNCHANGED`) — recovery deletes a `Bound`/`Terminating` reservation
@@ -183,13 +185,18 @@ planner — not regenerated from the scheduler's own output.
 - **Image** — the Phase-18 side-loaded/preloaded multi-arch amoebius base image (never a public-registry pull),
   so the scheduler does not depend on the registry controller it must cut over.
 - **Pod envelope** — the complete pinned bootstrap Pod: non-zero CPU/memory request+limit, explicit logical
-  `ephemeral-storage`, unique-node affinity, and `restartPolicy`/probe fields; its single Pod uses the
+  `ephemeral-storage`, no declared compute headroom (the scheduler sizes its own row exactly and has no growth,
+  burst, isolation, or defragmentation claim on the node it bootstraps), unique-node affinity, and
+  `restartPolicy`/probe fields; its single Pod uses the
   **default scheduler** (the sole structural exception) and a static reservation row merged into the same
   identity-aware fold (equal shared image extents deduplicate, compute/slots add).
 - **Namespace/quota** — the `amoebius-capacity-scheduler` namespace and its exact `ResourceQuota pods=1`.
 - **Reservation state** — the reservation CRD, config, and aggregate root; the canonical reservation
   serializer derives entry bytes, and `maxEntries` derives from the **maximum normalized Pod-UID population
-  including retained terminal records**, never an authored scalar.
+  including retained terminal records**, never an authored scalar. The three compute-headroom pad scalars are
+  part of the canonically pinned compute-axis field set, so they enlarge the derived entry bytes and therefore
+  the `maxEntries` and `EtcdChurnBudget` provisions; they are not an optional tail a serializer may omit for
+  rows whose pad is `Zero`.
 - **RBAC/admission** — the restricted cutover-only RBAC first, then the full exclusive-Binding RBAC, the
   general identity-admission webhook, and the managed-node taint policy installed only at cutover.
 - **API/etcd** — the serialized API objects, etcd logical bytes, and the `EtcdChurnBudget` CAS-churn
@@ -267,8 +274,12 @@ double-debited, no absent Pod makes a debit disappear, and no unclassified recor
   have **no** constructor.
 - The closed `LedgerOnlyAbsentRecovery` arms: an absent Pod retains the exact full or terminal-retained debit
   for `Reserved`, `BindingInFlight`, `Bound`, `Terminating`, or `TerminalRetained` until that state's
-  release/cleanup evidence and whole-root CAS succeed. Positive recovery fixtures cover an absent-Pod row in
+  release/cleanup evidence and whole-root CAS succeed. The retained debit is the **padded** debit: a row that
+  surrendered its declared headroom while retaining its requests would let a second workload pack into space
+  the first still holds. Positive recovery fixtures cover an absent-Pod row in
   every closed ledger state and prove each remains charged until its state-specific CAS.
+  The unequal-axis rejection above is correspondingly pad-sensitive — a row whose pad axes disagree with its
+  template's fails to construct, exactly as a mismatched request or limit debit does.
 - The host-aware observed identity union consumed from Phase 19 —
   `KubernetesPod PodUid | HostProcess HostProcessInstanceId | HostReservation HostReservationId` — with its
   ledger-only third arm: host `Reserved`, no-process `LaunchInFlight`, and post-process retained-artifact rows

@@ -245,7 +245,16 @@ structural owner. These are the ADTs that make an illegal combination un-spellab
   typed reference to one declared disk-backed pod volume and therefore a nested consumer of pod ephemeral
   storage, never a second allocation. CPU is normalized to millicores; memory, pod ephemeral storage,
   durable/cache storage, and accelerator residency to bytes; accelerator count remains a positive wholesale
-  whole-device quantity. CUDA/Metal owner inputs preserve exact equal-keyed served-model/training-job/JIT/
+  whole-device quantity. An optional `ComputeHeadroomDemand`/`HostComputeHeadroomDemand` normalizes its pad on
+  the same axes into the zero-capable `Residual` representation, and its checked construction proves two
+  things Gate 1 cannot state: that the pad respects the workload's own ceiling —
+  `requests + pad ≤ limits` per axis on the pod arm, `reservation + pad ≤ ceiling` on the host arm, a strict
+  strengthening of the `requests ≤ limits` refinement it sits beside — and that at least one axis is
+  `Remaining`, so `PositiveHeadroomAxisWitness` has no all-`Zero` inhabitant and "no headroom" keeps exactly
+  one representation. A pad breaching its ceiling or padding no axis returns the structured
+  `UnspellableCombination` class at the exact field path, not a surviving scalar. The reserved total the pad
+  contributes to remains underivable here as it is unauthorable in Gate 1: Phase 7 folds it and Phase 11's
+  post-bind `provision` boundary alone constructs it. CUDA/Metal owner inputs preserve exact equal-keyed served-model/training-job/JIT/
   library source and workload maps, structural residency placement, and finite class-based coexistence maps.
   `domains(maxResidentByClass) = domains(maxRunningByClass) = classes(sources)`; missing/extra classes reject.
   Residency bytes mean total for `Unsharded`/`Sharded` and per device for `ReplicatedPerDevice`; sharded bytes

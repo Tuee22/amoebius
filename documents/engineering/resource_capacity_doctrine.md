@@ -158,10 +158,13 @@ pure value; they are never a second source of truth.
 - **`PodResourceVec`** — the three schedulable built-in Kubernetes resource axes every app, sidecar,
   controller, operator, platform, and init container declares: `cpu`, `memory`, and `ephemeralStorage`.
   `Resources = { requests, limits }` carries two `PodResourceVec`s and requires `requests ≤ limits` per axis.
-  `requests` is the scheduler reservation folded by `place`; `limits` is the rendered finite consumption
-  boundary. The provision proof carries **both** obligations: reservation feasibility over requests, and
+  `requests` is the workload's **required** reservation floor; `limits` is the rendered finite consumption
+  boundary. The reservation folded by `place` is `reserved = requests + pad`, where `pad` is the optional
+  explained compute headroom of the next bullet and is `Zero` on every axis when no headroom is declared, so a
+  workload that declares none reserves exactly its requests and the fold is unchanged.
+  The provision proof carries **both** obligations: reservation feasibility over reserved, and
   finite-ceiling/physical-peak fit over memory and ephemeral-storage limits on the returned placement. CPU remains throttleable:
-  its summed requests must fit allocatable CPU, and summed effective CPU limits must fit the limit budget
+  its summed reserved must fit allocatable CPU, and summed effective CPU limits must fit the limit budget
   derived from the node's closed
   `CpuOvercommitPolicy = NoCpuOvercommit | BoundedCpuOvercommit { maxLimitToAllocatable : RatioAtLeastOne }`.
   Thus overcommit is an explicit finite pure provision, never an unrepresented convention. No writable layer,
@@ -172,6 +175,31 @@ pure value; they are never a second source of truth.
   private `ProvisionedCacheDemand` before materialization, and node filesystem carves retain hard physical
   headroom/eviction reserve. The pure fit proves no admitted declared peak exceeds those bounds; timing of
   kubelet measurement/eviction remains runtime-checked residue.
+- **Compute headroom** — the one authorable way to reserve more of a host than a workload requires, and the
+  only over-reservation in this doctrine that is declared rather than derived. Elsewhere reserved-above-required
+  exists only where granularity forces it and the excess is computed: a volume's `provisionedBytes` above its
+  `requiredUsableBytes`, a uniform claim template's padding on smaller ordinals, a wholesale accelerator owner
+  taking a node's full device offering, one indivisible pod slot per live pod. Compute has no such forcing
+  granularity, so slack there had no representation at all and could only be smuggled into `requests`, where
+  nothing records that it is slack or why. `ComputeHeadroomDemand` gives it a name, a reason, and a debit.
+  The demand is optional and pod-scoped: `PodResourceEnvelope.headroom` and, on the native-host arm,
+  `HostResources.headroom`. It carries a closed `ComputeHeadroomReason` —
+  `VerticalGrowth { horizon } | BurstAbsorption | NeighbourIsolation | DefragmentationReserve` — and a
+  `Residualized` pad vector whose axes may individually be `Zero` but not all be `Zero`, so "no headroom" has
+  exactly one representation (`headroom = None`) rather than two. There is no free-text arm and no defaultable
+  empty placeholder: a pad that cannot be explained by one of the four reasons has no constructor, exactly as a
+  provider-managed node has no invented host reserve rather than an unexplained one.
+  **The pad is bounded by the workload's own ceiling: `requests + pad ≤ limits` per axis** (`reservation + pad ≤
+  ceiling` on the host arm), strengthening `requests ≤ limits`. The largest expressible reservation is therefore
+  exactly the declared limit — headroom closes the gap between what a workload reserves and what it is already
+  permitted to consume, and can never hold capacity the workload could not lawfully use. One consequence is
+  worth stating plainly: because `reserved ≤ limits` and the finite-ceiling proof already asserts summed
+  effective memory/ephemeral-storage limits within allocatable, reservation fit on those two axes is now
+  *implied* by a proof that already exists. Reservation fit remains independently load-bearing on CPU alone,
+  where limits are policy-bounded by `CpuOvercommitPolicy` and may exceed allocatable by design.
+  The padded total is never authorable. `requests`/`limits` and the pad are declared; `reserved` is minted only
+  by `provision`, has no Gate-1 or Gate-2 surface, and is carried on the reservation ledger beside the request
+  and limit debits so it is released on teardown rather than retained forever.
 - **Accelerator demand** — a closed requirement separate from the open-for-every-container
   `PodResourceVec`. The pod arm admits
   `PodAcceleratorDemand = None | Cuda { owner : ContainerId, demand : CudaOwnerDemand }`; the native-host arm
@@ -376,6 +404,21 @@ pure value; they are never a second source of truth.
   init request/limit, plus declared pod/runtime overhead. Restartable init-sidecars are accumulated with the
   app and later init stages according to their lifecycle rather than treated as one-shot maxima. This
   derivation is pure and version-pinned; a naive sum that disagrees with the rendered pod is a test failure.
+  Declared compute headroom enters this derivation at exactly one point — **after** the lattice above resolves,
+  beside pod/runtime overhead, never inside the init-versus-app maximum:
+
+  ```text
+  effectiveRequired := max(Σ app+sidecar requests, largest init request)
+                       + restartable-init accumulation
+                       + overhead
+  effectiveReserved := effectiveRequired + headroom.pad     -- provision only
+                       subject to  effectiveReserved ≤ effectiveLimits
+  ```
+
+  Pod scope is what makes that insertion point unambiguous: a per-container pad would have to answer whether an
+  init container's headroom participates in the maximum and whether a restartable-init sidecar's accumulates,
+  questions no existing addend answers. `effectiveReserved` is the value `place` folds and the value rendered
+  into `requests`; it is summed here, in `provision`, and never recomputed by the renderer.
 - **`Budget`** — a capacity an owner is allowed to consume against, fixed or quota-capped growable
   ([§5](#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm),
   [§6](#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)).
@@ -409,6 +452,39 @@ CpuOvercommitPolicy =
   < NoCpuOvercommit
   | BoundedCpuOvercommit : { maxLimitToAllocatable : RatioAtLeastOne }
   >
+
+ComputeHeadroomReason =
+  < VerticalGrowth      : { horizon : FiniteDuration }
+  | BurstAbsorption
+  | NeighbourIsolation
+  | DefragmentationReserve
+  >
+
+ComputeHeadroomDemand =
+  { reason           : ComputeHeadroomReason
+  , pad              : Residualized PodResourceVec
+  , someAxisPositive : PositiveHeadroomAxisWitness
+  }
+
+HostComputeHeadroomDemand =
+  { reason           : ComputeHeadroomReason
+  , pad              : Residualized HostResourceVec
+  , someAxisPositive : PositiveHeadroomAxisWitness
+  }
+
+ComputeAxis =
+  < Cpu | Memory | EphemeralStorage >
+-- The host arm has no ephemeral axis, so a HostComputeHeadroomDemand naming
+-- EphemeralStorage has no constructor.
+
+PositiveHeadroomAxisWitness =
+  { paddedAxes       : NonEmpty ComputeAxis
+  , zeroAxesExact    : Required
+  , someAxisPositive : Required
+  , axesWithinArm    : Required
+  }
+-- An all-Zero pad has no constructor: "no headroom" is Optional None, never a
+-- vector of zeroes. paddedAxes is exactly the set of axes whose pad is Remaining.
 
 ContainerLifecycle =
   < App | Sidecar | Init | RestartableInit >
@@ -2121,6 +2197,7 @@ ProvisionedVaultStorageDemand = -- private constructor
 PodResourceEnvelope =
   { containers  : NonEmpty ContainerEnvelope
   , overhead    : Optional PodResourceVec
+  , headroom    : Optional ComputeHeadroomDemand
   , podLocal    : PodLocalStorageDemand
   , runtimeMetadata : PodRuntimeMetadataSource
   , durable     : List DeclaredVolumeDemand
@@ -2148,6 +2225,7 @@ HostRuntimeEnforcement =
 HostResources =
   { reservation : HostResourceVec
   , ceiling     : HostResourceVec
+  , headroom    : Optional HostComputeHeadroomDemand
   , enforcement : HostRuntimeEnforcement
   }
 
@@ -2163,13 +2241,21 @@ ResourceEnvelope =
 
 PodComputeReservationAxes =
   { cpuRequest        : Quantity Cpu
+  , cpuPad            : Residual Cpu
   , cpuLimitDebit     : Quantity Cpu
   , memoryRequest     : Quantity Bytes
+  , memoryPad         : Residual Bytes
   , memoryLimitDebit  : Quantity Bytes
   , logicalEphemeralRequest    : Quantity Bytes
+  , logicalEphemeralPad        : Residual Bytes
   , logicalEphemeralLimitDebit : Quantity Bytes
   , renderedRequestLimitEquality : PodRenderedRequestLimitEqualityWitness
   }
+-- The pad axes are the declared compute headroom, carried beside the request they
+-- extend rather than folded into it, so the required and reserved components stay
+-- separable on the ledger: the debit is request + pad, the release returns both, and
+-- a row cannot silently reclassify slack as requirement. A pod with no declared
+-- headroom carries Zero on all three and the ledger is arithmetically unchanged.
 
 PodSlotReservationAxes =
   { podSlots : Natural
@@ -2181,12 +2267,19 @@ PodSlotReservationAxes =
 
 PodComputeReservationPartitionAxes =
   { cpuRequest                : Residual Cpu
+  , cpuPad                    : Residual Cpu
   , cpuLimitDebit             : Residual Cpu
   , memoryRequest             : Residual Bytes
+  , memoryPad                 : Residual Bytes
   , memoryLimitDebit          : Residual Bytes
   , logicalEphemeralRequest   : Residual Bytes
+  , logicalEphemeralPad       : Residual Bytes
   , logicalEphemeralLimitDebit: Residual Bytes
   }
+-- Release/retention partitions every axis the reservation debited, pad included. A
+-- partition that returns the request but not its pad leaks headroom permanently, so
+-- the pad axes are not optional here: reserved, released, and retained each carry all
+-- nine scalars and their partition is exact.
 
 CsiAttachmentReservation =
   { target         : ProvisionedNodeTarget
@@ -2398,6 +2491,63 @@ ReservationModelFingerprintSet =
   , sourceEquality : ReservationAndRuntimeStorageModelEqualityWitness
   }
 
+-- The reservation-projection witnesses. Each fixes which envelope-derived quantities a
+-- ledger row may carry, so no row can be minted from independently authored numbers.
+-- Declared compute headroom is the one term that is authored rather than derived, so
+-- each witness names it separately and keeps the required component recoverable from
+-- the reserved total: the reservation is the projection of the envelope's required
+-- demand composed with its declared pad, not the projection alone.
+
+PodRenderedRequestLimitEqualityWitness envelope axes rendered =
+  { effectiveRequired             : PodResourceVec
+  , declaredPad                   : Residualized PodResourceVec
+  , effectiveReserved             : PodResourceVec
+  , effectiveLimits               : PodResourceVec
+  , requiredFromEnvelope          : Required
+  , padFromEnvelopeHeadroom       : Required
+  , reservedIsRequiredPlusPad     : Required
+  , reservedWithinLimits          : Required
+  , axesRequestEqualsRequired     : axes.cpuRequest == effectiveRequired.cpu
+  , axesPadEqualsDeclaredPad      : Required
+  , axesLimitDebitEqualsLimits    : Required
+  , renderedRequestsEqualReserved : Required
+  , renderedLimitsEqualLimits     : Required
+  }
+-- Required and pad are both retained, so "how much of this reservation is slack, and
+-- why" is answerable from the row rather than lost in a sum. Kubernetes has one
+-- requests field, so the manifest necessarily carries the padded total and the split
+-- survives only here; renderedRequestsEqualReserved is that tie, and it is why the
+-- renderer projects a pre-summed number instead of adding the pad itself.
+
+ResourceEnvelopeReservationProjectionWitness envelope reservation =
+  { envelopeSource            : ResourceEnvelope
+  , podArm                    : Required
+  , compute                   : PodRenderedRequestLimitEqualityWitness
+  , slotsFromLiveEpochs       : Required
+  , componentsFromEnvelope    : Required
+  , devicesFromWholesaleOwner : Required
+  , noIndependentAxis         : Required
+  , headroomAbsentImpliesZeroPad : Required
+  }
+-- noIndependentAxis is the load-bearing clause: every scalar, slot, component, and
+-- device hold on the row is a projection of this envelope, and the only authored
+-- addend is the envelope's own declared headroom. A pod whose envelope declares no
+-- headroom projects Zero pad on all three axes, which is the pre-headroom behaviour.
+
+HostResourceEnvelopeReservationProjectionWitness envelope reservation =
+  { envelopeSource         : ResourceEnvelope
+  , hostWorkerArm          : Required
+  , effectiveReservation   : HostResourceVec
+  , declaredPad            : Residualized HostResourceVec
+  , effectiveReserved      : HostResourceVec
+  , reservedIsReservationPlusPad : Required
+  , reservedWithinCeiling  : Required
+  , localComponentsFromEnvelope  : Required
+  , acceleratorFromHostOwner     : Required
+  , noIndependentAxis      : Required
+  , headroomAbsentImpliesZeroPad : Required
+  }
+
 CompleteResourceReservation owner = -- private, canonical scheduler-ledger value
   { owner                 : owner
   , target                : ProvisionedNodeTarget
@@ -2465,6 +2615,11 @@ ResourceReservationPartition owner =
 RetainedResourceReservation owner = -- private refinement
   { base             : ResourceReservationPartition owner
   , zeroCompute      : ZeroComputeReservationWitness
+  -- zeroCompute covers all nine compute scalars, pad axes included. A terminal-retained
+  -- row that zeroes its requests but keeps its pad would hold headroom forever against
+  -- a workload that no longer exists. Until release evidence and the whole-root CAS
+  -- succeed the row retains the exact full padded debit; at retention it releases all
+  -- nine or none.
   , zeroDevices      : EmptyCudaDeviceReservationWitness
   , slotRetention    : PodSlotReleaseAndRetentionEqualityWitness
   , observedResident : ObservedResidentResourceEqualityWitness
@@ -2608,6 +2763,9 @@ CompleteResourceReservationSchema owner =
   , serializer         : CanonicalSchedulerReservationSerializerModel
   , foldRule           : RecomputeWholeLedgerSetBeforeCas
   }
+-- computeAxes is canonically pinned, so the three pad scalars are part of the frozen
+-- field set: they change the serialized entry size and therefore the ledger's derived
+-- maxEntries and etcd churn budget. They are not an optional tail a reader may skip.
 
 LivePodResourceReservationSchema = CompleteResourceReservationSchema PodUid
 StaticResourceReservationSchema = CompleteResourceReservationSchema ExecutionUnitId
@@ -2633,6 +2791,11 @@ CompleteHostResourceReservation owner =
   , sourceEquality  : HostResourceEnvelopeReservationProjectionWitness
   , backingEquality : HostReservationBackingGroupingWitness
   }
+-- runtime : HostResources carries reservation, ceiling, and the optional declared
+-- headroom together, so the host arm needs no separate pad field: its debit is
+-- reservation + pad, bounded by ceiling, exactly mirroring the pod arm's
+-- requests + pad bounded by limits. The two arms of the closed ResourceEnvelope union
+-- stay symmetric on this axis.
 
 CompleteHostResourceReservationSchema owner =
   { identity    : owner
@@ -6736,8 +6899,9 @@ sweeper. `maxBackups` excludes the active file, hence the explicit `+ 1`. Event/
 
 | Provision | Pure demand | Pure supply | Decode/provision obligation | Rendered/runtime projection |
 |---|---|---|---|---|
-| CPU | pod `requests.cpu`/`limits.cpu` or host-worker reservation/ceiling | node allocatable CPU + closed `CpuOvercommitPolicy`; host allocatable CPU | effective pod requests fit allocatable; summed pod limits fit the finite policy-derived limit budget; host-worker reservation and ceiling both fit; reservation ≤ ceiling; host enforcement constructor matches substrate or rejects | container CPU requests/limits; Linux cgroup or Windows Job control, or explicitly reactive finite Apple supervisor sampling/termination |
-| Memory | pod `requests.memory`/`limits.memory` or host-worker reservation/ceiling | node/host allocatable memory | lifecycle epochs assign every resident tmpfs volume to exactly one request carrier per epoch; each epoch's live working sets + unique resident volumes fit the effective pod request/limit; every possible charged accessor's limit covers writable volumes; Apple unified memory is charged here; host enforcement constructor matches substrate | container memory requests/limits; bounded access-/persistence-indexed memory-backed `emptyDir`; Linux/Windows kernel policy or explicitly reactive Apple RSS/unified-memory supervision |
+| CPU | pod `requests.cpu`/`limits.cpu` plus optional headroom pad, or host-worker reservation/ceiling plus optional headroom pad | node allocatable CPU + closed `CpuOvercommitPolicy`; host allocatable CPU | effective pod reserved (requests + pad) fits allocatable; `requests + pad ≤ limits`; summed pod limits fit the finite policy-derived limit budget; host-worker reservation and ceiling both fit; `reservation + pad ≤ ceiling`; host enforcement constructor matches substrate or rejects | container CPU requests/limits, the request carrying the padded total; Linux cgroup or Windows Job control, or explicitly reactive finite Apple supervisor sampling/termination |
+| Memory | pod `requests.memory`/`limits.memory` plus optional headroom pad, or host-worker reservation/ceiling plus optional headroom pad | node/host allocatable memory | lifecycle epochs assign every resident tmpfs volume to exactly one request carrier per epoch; each epoch's live working sets + unique resident volumes fit the effective pod request/limit; effective reserved fits allocatable and stays within the limit; every possible charged accessor's limit covers writable volumes; Apple unified memory is charged here; host enforcement constructor matches substrate | container memory requests/limits, the request carrying the padded total; bounded access-/persistence-indexed memory-backed `emptyDir`; Linux/Windows kernel policy or explicitly reactive Apple RSS/unified-memory supervision |
+| Declared compute headroom | optional pod `PodResourceEnvelope.headroom` or host `HostResources.headroom`: a closed `VerticalGrowth \| BurstAbsorption \| NeighbourIsolation \| DefragmentationReserve` reason plus a `Residualized` pad whose axes are not all `Zero` | the same node/host allocatable the requests fold against — headroom competes for real capacity, never a separate pool | pad enters the effective demand once, after the init/app maximum, beside pod overhead; `requests + pad ≤ limits` per axis; the padded total has no authorable field and is minted only by `provision`; the ledger carries request and pad separately so release returns both | nothing of its own — Kubernetes has one `requests` field, so the pad is summed at provision and the manifest renders the reserved total; the required/pad split survives only on the reservation ledger |
 | Pod and CSI attachment slots | one slot per simultaneously live pod; one driver-scoped attachment per unique mounted CSI PVC | node `allocatablePods`, remaining CNI/IP capacity, and per-driver attach limits from node/SKU/`CSINode`; provider candidate policies | atomic pod placement spends both slot maps; DaemonSets, admission/copy/Pulumi Jobs, controller children, old/new/surge/terminating overlap all count; repeated mounts of one PVC dedup; account volume quota cannot replace node attach fit | provider CNI/maxPods and CSI node configuration plus live Node/CSINode/attachment observation; unknown or lower real limits refuse |
 | Ordinary workload multiplicity/rollout | whole-deployment `FirstDeployment \| UpdateFrom PriorExecutionProvisionRef`; every desired kind-indexed `BoundExecutionUnit`; no caller terminating bound | exact prior steady execution projection for updates, complete topology, and all compute/storage/slot/device residuals | derive empty-capable planned epochs; exact-join desired/prior and live UID/process identities; derive ResourceQuota, identity admission, and the amoebius Haskell scheduler role whose pre-Binding CAS atomically debits every selected-node axis by Pod UID; bound/terminating/terminal-retained reservations persist per policy | render only new desired kind-correct controller, quota/admission, and `schedulerName` projections; live identity/resource/reservation changes invalidate or refuse |
 | Capacity scheduler + reservation ledger | one pods=1/default-scheduled bootstrap unit running the same amoebius binary's scheduler role; exact prior+desired child-indexed accepted template sets; bootstrap add-on cutover; managed-node taint/admission/Binding RBAC; singleton root-ledger API source and churn | static/foreign/resident baseline, fixed or attested elastic node bindings, API/etcd capacity, observed scheduler/add-on/managed-authority readiness, and root resourceVersion/CAS state | identity-aware fold of baseline+whole ledger+candidate; Reserved→BindingInFlight→Bound with ambiguous outcome retained/repaired; state-indexed Pod/absent-ledger recovery; per-domain shared-extent union, identity CSI, exclusive CUDA device, terminal/GC partitions; mint bootstrap readiness, observe default→custom add-on replacement joins, then install authority and mint `ManagedCapacityReady`; stale/orphan/mismatched/bypass states reject | one `ProvisionedCapacitySchedulerSystem` globally renders bootstrap Deployment/quota/config/RBAC/admission/taints/root schema in staged ownership; guarded templates render immutable identity/set/child-template digest and schedulerName; snapshot-bound full readiness/root/authority join `ValidatedLiveTarget` |
@@ -6821,7 +6985,8 @@ The fold is four total functions (checked at the post-bind `provision-seal` locu
   capacity, returning the leftover headroom or `Left Overcommit` with the offending axis and magnitudes.
   Exact fit returns `Right` with `Zero` on that axis.
 - **`podFits :: Demand -> Node -> Either PlacementError PodFitWitness`** — the per-pod placement primitive:
-  one pod's effective CPU/memory/ephemeral-storage requests against one node's *allocatable* capacity, its
+  one pod's effective CPU/memory/ephemeral-storage **reserved** demand — its required requests plus any
+  declared compute headroom — against one node's *allocatable* capacity, its
   one pod slot, unique driver-scoped CSI attachment demand, durable-volume locality, its accelerator
   family/device/VRAM requirement, **and** that node's affinity/taint
   eligibility
@@ -6841,9 +7006,14 @@ The fold is four total functions (checked at the post-bind `provision-seal` locu
   ([§4.1](#41-place-branches-static-proves-a-placement-dynamic-proves-a-growth-envelope)):
   a **fixed** node set yields a concrete `Placement` witness (bin-pack); an **elastic** node set yields a
   proof that the growth envelope holds. A successful result carries three compute proofs over the same
-  assignment: **reservation fit** (summed effective requests), **bounded CPU-limit fit** (summed effective CPU
+  assignment: **reservation fit** (summed effective reserved — required requests plus declared compute
+  headroom), **bounded CPU-limit fit** (summed effective CPU
   limits within the explicit overcommit policy), and **finite-ceiling/physical-peak fit** (summed effective
-  memory/ephemeral-storage limits, exact accelerator devices, VRAM/cache/durable caps). This is stronger than
+  memory/ephemeral-storage limits, exact accelerator devices, VRAM/cache/durable caps). Headroom widens the
+  first proof only; the second and third are stated over limits and are untouched by it, because
+  `reserved ≤ limits` holds by construction. That bound is also why reservation fit is now *implied* on memory
+  and ephemeral storage by the finite-ceiling proof and remains independently load-bearing on CPU alone, whose
+  limits are policy-bounded rather than allocatable-bounded. This is stronger than
   raw Kubernetes scheduling and is what makes “sufficient resources” mean more than “the pod left Pending.”
   ([cluster_topology_doctrine.md](./cluster_topology_doctrine.md) owns the `Topology`; this doc owns the
   placement/envelope arithmetic over it.)
@@ -6868,7 +7038,9 @@ The nesting is where the illegal states [§3.17](../illegal_state/illegal_state_
   ([platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope))
   and every durable volume declares a hard-capped size ([storage_lifecycle_doctrine.md §5](./storage_lifecycle_doctrine.md#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim)),
   the per-pod inputs are exact, not a guess. The placement consumes the effective pod demand derived from all
-  app/sidecar/init containers plus pod overhead; it does not re-sum manifest fields independently. A CUDA
+  app/sidecar/init containers plus pod overhead plus any declared compute headroom; it does not re-sum manifest
+  fields independently, and in particular does not add the pad itself — the demand it receives is already the
+  reserved total. A CUDA
   demand has no fit on a CPU-only node even when CPU/memory/storage happen to fit. This is the same soundness
   the cluster-lifecycle push-back relies on
   ([cluster_lifecycle_doctrine.md §6](./cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-root-inforcespec)).
@@ -7399,8 +7571,11 @@ topology's `NodeSupply` ([cluster_topology_doctrine.md §4](./cluster_topology_d
 - **Fixed supply** (`Kind` with `replicas`, `Rke2` `servers` + `Rke2AgentPool.Fixed`, any `Bounded`
   budget) → **witness bin-pack.** `place` computes a concrete pod→node assignment by first-fit-decreasing,
   honoring each node's allocatable `Capacity`, `podFits` eligibility (affinity/taints), anti-affinity, summed
-  request reservations, its policy-bounded summed CPU limits, and the finite-ceiling/physical-peak fit for
-  memory/ephemeral-storage/accelerator device and residency epochs/cache/storage.
+  reserved reservations (required requests plus declared compute headroom), its policy-bounded summed CPU
+  limits, and the finite-ceiling/physical-peak fit for
+  memory/ephemeral-storage/accelerator device and residency epochs/cache/storage. Because the pack is
+  first-fit-decreasing over the reserved demand, a declared pad genuinely reduces how many pods share a node —
+  which is the point of the `NeighbourIsolation` and `DefragmentationReserve` reasons.
   Success returns a `Placement` — a **witness** that a feasible schedule exists; failure returns
   `Left Unschedulable`. Schedulability is proven **by construction of the witness**, sound-not-complete
   ([§2](#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed)).
@@ -9445,7 +9620,10 @@ enactLiveTarget
   plus retained resident debits; its resourceVersion/CAS version and every observation fingerprint participate
   in the inventory token. `place` is rerun
   against `observed allocatable − surviving commitments`, not against the raw allocatable total: preserved
-  foreign/system pods contribute their effective CPU/memory/ephemeral requests, finite-policy CPU limits,
+  amoebius pods contribute their reserved total, request and pad both, since a surviving row that surrendered
+  its headroom on reconcile would let a second workload pack into space the first still holds. Preserved
+  foreign/system pods have no envelope and therefore no pad; they
+  contribute their effective CPU/memory/ephemeral requests, finite-policy CPU limits,
   memory bounds, ephemeral eviction ceilings, device claims, and bounded volumes. The physical fold separately
   routes their disk volumes/logs/writable layers and independently observed kubelet/runtime metadata components
   through `KubeletNodefs | CriRuntimeRoot` and the selected
