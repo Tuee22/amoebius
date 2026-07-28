@@ -95,7 +95,7 @@ Every `phase_NN_<slug>.md` follows this skeleton:
 ## Phase Summary
 <what this phase owns, declarative; the objective and scope>
 **Substrate:** <none | apple | linux-cpu | linux-cuda | windows> (§L)
-**Register:** <1 pure/golden · 2 boundary-with-fakes · 3 live> (§K)
+**Register:** <1 pure/golden · 2 boundary-with-fakes · 3 live · 1/2 for a two-register gate · — for Phase 0> (§K)
 **Gate:** <the concrete acceptance test that must pass before the next phase opens>
 
 ## Gate integrity            (optional; see below)
@@ -165,6 +165,15 @@ Adopt <doctrine section cited by name, §H>; <what this sprint delivers>.
 `Implementation` for a Planned sprint names the **target** module path (the intended layout from
 [`system_components.md`](system_components.md)), honestly marked as not-yet-built.
 
+**The four `###` sub-headings repeat once per sprint, so their anchors collide — and that is expected.**
+`Objective`, `Deliverables`, `Validation`, and `Remaining Work` appear in every sprint block, so GitHub mints
+`#objective`, `#objective-1`, `#objective-2`, … in document order. Those suffixed anchors are **positional and
+therefore unstable**: inserting a sprint renumbers every later one. Consequently **none of the four is ever a
+link target**. A reference to a sprint's content cites the sprint itself — the `## Sprint N.Y: <Name>` heading,
+whose anchor is unique and stable — and never one of its sub-headings. A documentation lint that checks for
+duplicate heading slugs **exempts these four names inside `phase_NN_*.md`**; a collision among them is
+conformant, not a defect.
+
 ## G. Documentation Requirements
 
 Every phase doc ends its body with an explicit doc-sync block so doctrine and plan never drift:
@@ -231,7 +240,7 @@ statement is design intent.
 
 **Validation happens in registers, and the ledger names the register(s) it reached.** A phase gate runs
 in **exactly one register** ([`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md),
-[`testing_doctrine.md` §2](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing)):
+[`testing_doctrine.md` §2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)):
 **Register 1** (pure/golden, in-process, no cluster), **Register 2** (boundary integration with fake tools, no
 cluster), and **Register 3** (live infrastructure) — with exactly three deliberate exceptions at the two ends of
 the count: **Phase 0** (the documentation-lint gate) reaches **no** register (it validates text and the link
@@ -249,7 +258,7 @@ Register-1/2 in-process ledger marks the Register-3 runtime layer UNVERIFIED and
 A live-band phase may additionally run its real daemon/reconciler code under `IOSim`/`IOSimPOR` against a
 modeled, fault-injectable environment (no cluster, deterministically replayable;
 [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md),
-[`testing_doctrine.md` §2](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing))
+[`testing_doctrine.md` §2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing))
 as an in-process check **before** its Register-3 gate. Because **no phase's acceptance gate keys to Register
 2.5** — the phase's single gate remains its Register-3 live proof — the one-gate-one-register rule above is
 unbroken; a `**Register:**` field is never `2.5`. The Register-2.5 run emits its own proven/tested/assumed

@@ -24,7 +24,7 @@ The obvious alternative — "keep the two artifacts in sync by discipline" — f
 copy-paste fails: two sources of truth diverge, and nothing forces them back together. The correspondence is
 the load-bearing claim, and it is precisely the claim left unverified.
 
-Amoebius forecloses the drift by removing the second source of truth. **The protocol is authored once, as a
+amoebius forecloses the drift by removing the second source of truth. **The protocol is authored once, as a
 reifiable Haskell value — the `Model` — and both the running decision function and the TLA+ specification are
 total functions of that one value.** This is the same move the rest of the system already makes: hostbootstrap's
 plan is the data (`chain :: cfg -> [Step]`, rendered to both a `--dry-run` preview and live execution), and a
@@ -214,7 +214,7 @@ Per the honesty discipline ([documentation_standards.md §6](../documentation_st
   truncates the behaviour graph at the bound and distorts `WF`/`SF` enabledness, so a continuously-enabled action
   can be cut off at the boundary and TLC report a *spurious* green liveness **within** the bound — a distortion
   the "not a general-scope proof" bullet below (which speaks only to what lies *beyond* the bound) does not
-  cover. Amoebius therefore **finitizes** every liveness run — bounding the state space through `CONSTANTS` and
+  cover. amoebius therefore **finitizes** every liveness run — bounding the state space through `CONSTANTS` and
   finite, saturating variable domains rather than a state `CONSTRAINT` — so `PROPERTY` checking runs
   **`CONSTRAINT`-free**; where a run instead retains a `CONSTRAINT`, TLC's constraint-truncation semantics is
   recorded as an explicit *assumed* premise, and which of the two a run uses is stated. A liveness green is

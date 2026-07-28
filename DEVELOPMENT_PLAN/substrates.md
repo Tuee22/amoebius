@@ -81,7 +81,7 @@ gates.
 | Host kind | macOS on Apple Silicon — the admin laptop / highest-level root cluster host |
 | Native arch | `arm64` (always; Intel-Mac is rejected outright, [`substrate_doctrine.md` §1](../documents/engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob)) |
 | GPU axis | Apple Metal — on-host, **not containerizable** (needs unified memory); the worker is built **headless on the host, no VM** ([`apple_metal_headless_builds.md`](../documents/engineering/apple_metal_headless_builds.md)) |
-| Virtualization | Lima (Ubuntu-24.04 Linux VM) — see §3. **No macOS build VM (no Tart)**: Apple-Metal builds are headless on-host |
+| Virtualization | Lima (Ubuntu-24.04 Linux VM) — see [§3](#3-virtualized-substrates-lima--wsl2). **No macOS build VM (no Tart)**: Apple-Metal builds are headless on-host |
 | LoadBalancer | MetalLB (bare-metal / kind / rke2 lane) |
 | What it validates | The Phase 41 gate — an Apple-Silicon **host compute daemon** runs a Metal ML workload as an in-cluster Pulsar/MinIO peer over host-only NodePorts ([`substrate_doctrine.md` §5 — host worker nodes](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)) |
 | Gate phase(s) | Phase 41 — the per-phase assignment is owned by [§4](#4-per-phase-substrate-map) |
@@ -120,7 +120,7 @@ gates.
 | Host kind | Windows host |
 | Native arch | `amd64` |
 | GPU axis | CUDA present ⇒ **on-host worker node** — CUDA does not run performantly inside WSL2 ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)) |
-| Virtualization | WSL2 (Ubuntu-24.04 Linux distro) for the Linux-host role — see §3 |
+| Virtualization | WSL2 (Ubuntu-24.04 Linux distro) for the Linux-host role — see [§3](#3-virtualized-substrates-lima--wsl2) |
 | LoadBalancer | MetalLB (when acting as a Linux cluster host) |
 | What it validates | No phase gate in 0–43 keys its single substrate to `windows`: Windows participates either as a Linux host (via WSL2) or as the Windows-CUDA host-worker case, which shares the Phase 41 host-compute doctrine whose gate substrate is `apple`. This round elevates the Windows-CUDA host worker to a **first-class** case alongside Apple-Metal — role parity, not evidence parity ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized), [`daemon_topology_doctrine.md` §4](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected)). The standalone `windows` gate is a later-phase concern (README later phases) |
 | Gate phase(s) | none in 0–43 (host-worker doctrine shared with Phase 41) |
@@ -147,7 +147,7 @@ gates.
 
 EKS is a first-class citizen on the **compute-engine axis**, not a member of the detected substrate catalog:
 it has no host to detect and no `LinuxHost` witness. It is the `Managed Eks` arm of the `ComputeEngine` union
-([`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md) §2).
+([`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md) [§2](../documents/engineering/cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)).
 
 | Field | Value |
 |-------|-------|
@@ -198,7 +198,7 @@ Lima VM on Apple presents as `linux-cpu` to everything above it.
 > pure post-bind `provision-seal`
 > ([`illegal_state_catalog.md` §3.17](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent)). A Lima/WSL2 VM is
 > also the **only `LinuxHost` witness** its non-Linux host can produce — which is why an rke2/kind cluster on
-> apple/windows must interpose one (I1, §3.14).
+> apple/windows must interpose one (I1, [§3.14](../documents/illegal_state/illegal_state_topology.md#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm)).
 
 > **No Tart / no macOS build VM.** The Apple-Metal host worker's Swift/Metal parts are **not** built in a VM.
 > They build headless, directly on the macOS host via a fixed `/usr/bin/clang`-built Metal bridge with runtime

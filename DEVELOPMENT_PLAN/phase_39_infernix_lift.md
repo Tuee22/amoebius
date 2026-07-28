@@ -90,15 +90,15 @@ validatable ahead of the live proof.
 **Gate:** an infernix CPU-inference workflow is **reproducible on linux-cpu**, measured against a
 **Phase-0-pinned external oracle** (§M). The **representative set is named concretely and committed before the
 implementation exists** (§M.1, §M.7): the single pinned model `catalog/tinyllama-1.1b-cpu@<sha256>` named in
-`infernix/dhall/engine_catalog.dhall`, the single fixed inference request `test/fixtures/phase_33/request.cbor`,
+`infernix/dhall/engine_catalog.dhall`, the single fixed inference request `test/fixtures/phase_39/request.cbor`,
 and the fixed request seed `0x0000000000000001` — together the "representative request". The gate has four
 independent parts:
 
 - **(a) Equivalence against the sibling oracle** (§M.3): the lifted library's output for the representative
-  request byte-matches the committed golden `test/fixtures/phase_33/sibling_golden.cbor`, which was **recorded
+  request byte-matches the committed golden `test/fixtures/phase_39/sibling_golden.cbor`, which was **recorded
   from the sibling `~/infernix` executing the same request and committed in Phase 0** — the reference side is
   authored from the sibling, never regenerated from the amoebius implementation. Additionally the sibling
-  infernix inference test corpus `test/fixtures/phase_33/sibling_corpus/` runs green against the lifted library
+  infernix inference test corpus `test/fixtures/phase_39/sibling_corpus/` runs green against the lifted library
   with only adapter-seam configuration changed (no infernix inference/orchestration source edited), foreclosing
   a from-scratch toy that satisfies only the seam shapes.
 - **(b) Determinism by independent recompute** (§M.6): the workflow is run **twice as two cache-cold
@@ -125,11 +125,11 @@ Each **negative asserts its specific reason** (§M.8), paired with a positive di
 dimension: the divergent-input case asserts the distinct `experimentHash` digest and distinct namespace prefix
 (not merely "output differs"); the no-URL-engine case asserts a **compile-fail at the absent `Url` engine
 constructor**. **At least one committed seeded mutant must turn the gate red** (§M.2), committed and re-run, not
-hand-picked once: the mutant `mutants/phase_33/wallclock_seed.hs` (effect swap — the pure decode reads
+hand-picked once: the mutant `mutants/phase_39/wallclock_seed.hs` (effect swap — the pure decode reads
 `getCurrentTime` in place of the derived SplitMix seed) must fail part (b); the mutant
-`mutants/phase_33/identity_hash.hs` (dropped effect/UNCHANGED — `deriveExperimentHash` drops the changed-input
+`mutants/phase_39/identity_hash.hs` (dropped effect/UNCHANGED — `deriveExperimentHash` drops the changed-input
 term from its fold) must fail
-part (c); and the mutant `mutants/phase_33/sweep_skips_pulsar.hs` (invariant-clause delete — the postflight
+part (c); and the mutant `mutants/phase_39/sweep_skips_pulsar.hs` (invariant-clause delete — the postflight
 three-layer inventory sweep drops the Pulsar topic/subscription class, so leaked topics go undetected and it
 reports leak-free vacuously) must fail the leak-free teardown assertion, paired with the positive full
 three-layer sweep over a genuinely clean teardown reporting green. The whole `InfernixReproSpec` /
@@ -275,7 +275,7 @@ inference CPU/memory/token-derived KV RAM,
 logical and physical ephemeral storage, image workspace, SPA CPU/memory/ephemeral, pod/IP and matched-CSI
 slots, runtime-metadata shape/component/role and grouped layout backings, cache and object-store space, and cold
 active-work/output overlap. The committed resource mutants
-`mutants/phase_33/drop_cpu_inference_envelope.dhall`, `drop_spa_envelope.dhall`,
+`mutants/phase_39/drop_cpu_inference_envelope.dhall`, `drop_spa_envelope.dhall`,
 `drop_client_buffers.dhall`, `drop_cold_overlap.dhall`, `drop_spa_rollout_epoch.dhall`, and
 `drop_host_harness_envelope.dhall` respectively remove those rows;
 `drop_registry_publication_envelope.dhall` removes the push/storage row and
@@ -330,7 +330,7 @@ names the section it adopts; individual sprints cite the same sections where the
   — *the `SecretRef` contract: a name, never a value* / *parent injects secrets into the child's Vault*:
   infernix's credentials (its JWT-auth material and any engine-registry pull secret) become a `SecretRef` name
   the parent injects into the child's Vault — no k8s-Secret, no hardcoded default in the `.dhall`.
-- [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) — *Register 3 (live)* and the per-run
+- [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) — *Register 3 (live)* and the per-run
   proven/tested/assumed ledger: the register this gate reaches, its spin-up → run → always-tear-down contract,
   and the ledger that marks cross-substrate equality UNVERIFIED, never green.
 
@@ -350,7 +350,7 @@ canonical-CBOR `manifests/<sha256>` under the `experimentHash` namespace and wri
 the prior store with **no infernix `.hs` source change**, proving reversibility. "infernix `.hs` source" is
 defined concretely as **every module present under `infernix/src/Infernix/` before this lift began, EXCEPT the
 newly added seam modules `Infernix.Adapter.*` and `Infernix.Inference.Deterministic`**; the frozen set is
-committed as the manifest `test/fixtures/phase_33/frozen_sources.txt` (Phase-0-pinned) and the reversibility
+committed as the manifest `test/fixtures/phase_39/frozen_sources.txt` (Phase-0-pinned) and the reversibility
 check asserts a **zero diff to every file named in it** across the legacy↔amoebius toggle — the seam modules
 alone may change.
 **Docs to update**: `documents/engineering/lift_and_compose_doctrine.md`,
@@ -379,7 +379,7 @@ behind a **reversible adapter seam** — the first of the one-subsystem-at-a-tim
 1. End-to-end stage-then-serve in "amoebius" mode: a half-downloaded model has no serveable reference; a completed
    one does, reachable only through the `.ready` sentinel.
 2. Reversibility: switching the seam to "legacy" and back changes no infernix `.hs` source — asserted as a zero
-   diff to every file in the committed `test/fixtures/phase_33/frozen_sources.txt` manifest (the pre-lift
+   diff to every file in the committed `test/fixtures/phase_39/frozen_sources.txt` manifest (the pre-lift
    `Infernix.*` modules minus the `Adapter.*`/`Inference.Deterministic` seams) — and leaves both stores functional.
 
 ### Remaining Work
@@ -505,12 +505,12 @@ without overclaiming cross-substrate equality.
    byte-identical output across **two independent invocations** (no store hit reused), with no wall-clock,
    worker-id, or `/dev/urandom` read inside the stage — the absence of ambient reads is asserted from an
    OS-boundary observer (an `strace`/syscall filter over the decode process), not a self-reported trace (§M.5).
-   The committed seeded mutant `mutants/phase_33/wallclock_seed.hs` (effect swap: the stage reads
+   The committed seeded mutant `mutants/phase_39/wallclock_seed.hs` (effect swap: the stage reads
    `getCurrentTime` in place of the `deriveSplitMixSeed` seed) **must turn this validation red** (§M.2).
 2. Any changed input (model, request seed, resolved `.dhall`) changes `experimentHash` and the store namespace;
-   the committed mutant `mutants/phase_33/identity_hash.hs` (`deriveExperimentHash` ignores the changed input)
+   the committed mutant `mutants/phase_39/identity_hash.hs` (`deriveExperimentHash` ignores the changed input)
    **must turn this validation red**. The reference `experimentHash` for the representative request is a
-   Phase-0-pinned hand-authored value in `test/fixtures/phase_33/expected_hashes.txt`, computed independently of
+   Phase-0-pinned hand-authored value in `test/fixtures/phase_39/expected_hashes.txt`, computed independently of
    the decode implementation (§M.3).
 
 ### Remaining Work
@@ -529,12 +529,12 @@ one-byte-short and alias controls) — target paths, not yet built.
 **Blocked by**: Sprint 39.4; Phase 26 gate (the live DSL deploy via the Deployment-`replicas=1` singleton that
 schedules the demo app and the workflow); Phase 38 gate (the resolved engine cache the inference runs against).
 **Independent Validation**: a `.dhall` workflow runs the infernix CPU inference for the representative request
-(the pinned `catalog/tinyllama-1.1b-cpu@<sha256>` model, `test/fixtures/phase_33/request.cbor`, seed
+(the pinned `catalog/tinyllama-1.1b-cpu@<sha256>` model, `test/fixtures/phase_39/request.cbor`, seed
 `0x0000000000000001`) twice on linux-cpu **as two cache-cold recomputes** — each distinct run id uses a
 run-isolated staging prefix with an initially absent output key and cannot read the other run's output during
 compute, and an OS-boundary observer (CNI/containerd log + store-client
 argv shim) confirms run 2 recomputed rather than served a store hit — and asserts the two independently produced
-outputs are byte-identical **and** byte-match the Phase-0 sibling golden `test/fixtures/phase_33/sibling_golden.cbor`
+outputs are byte-identical **and** byte-match the Phase-0 sibling golden `test/fixtures/phase_39/sibling_golden.cbor`
 recorded from `~/infernix`. It asserts a divergent `experimentHash` and a distinct store namespace for any
 changed input **and that the changed run actually executes, stores an output, and that output differs
 byte-for-byte from the baseline**. It deploys the demo SPA application-logic-only (its Deployment
@@ -546,8 +546,8 @@ delete plus an OS-boundary-verified (§M.5) read-only three-layer pre/post inven
 classes — ApplySet/`kind` k8s objects, run-prefixed MinIO objects under `<experimentHash>/<runId>`, Pulsar
 topics/subscriptions — coming back empty, with the durable content-addressed store bytes the sole permitted
 survivor by class), and emits a proven/tested/assumed
-ledger artifact. The committed seeded mutants `mutants/phase_33/wallclock_seed.hs`,
-`mutants/phase_33/identity_hash.hs`, and `mutants/phase_33/sweep_skips_pulsar.hs` each turn the gate red when
+ledger artifact. The committed seeded mutants `mutants/phase_39/wallclock_seed.hs`,
+`mutants/phase_39/identity_hash.hs`, and `mutants/phase_39/sweep_skips_pulsar.hs` each turn the gate red when
 swapped in (§M.2).
 **Docs to update**: `documents/engineering/app_vs_deployment_doctrine.md`,
 `documents/engineering/lift_and_compose_doctrine.md`, `documents/engineering/content_addressing_doctrine.md`,
@@ -577,16 +577,16 @@ lift-and-compose re-homing and the app-vs-deployment split on live linux-cpu.
   pod/IP/CSI slots, images, mapped files and physical backings
   before the first build or workload effect; no `linux-cpu` default is permitted to synthesize CPU or RAM.
 - The **Phase-0-pinned oracle corpus** (authored and committed before the implementation exists, §M.1):
-  `test/fixtures/phase_33/sibling_golden.cbor` (the representative-request output recorded from `~/infernix`),
-  `test/fixtures/phase_33/sibling_corpus/` (the sibling inference test corpus that must run green against the
-  lifted library with only seam-config changes), `test/fixtures/phase_33/request.cbor`,
-  `test/fixtures/phase_33/expected_hashes.txt` (hand-authored reference `experimentHash` values, independent of
-  the decode code), `test/fixtures/phase_33/frozen_sources.txt` (the pre-lift `Infernix.*` module manifest),
-  `test/fixtures/phase_33/resource_shape.json` (independent build/worker/SPA/cold-overlap witness), and the
-  one-short/dropped-envelope fixtures under `mutants/phase_33/`.
-- The **committed seeded mutants** `mutants/phase_33/wallclock_seed.hs` (effect swap → fails the determinism
-  check), `mutants/phase_33/identity_hash.hs` (dropped effect/UNCHANGED → fails the divergence check), and
-  `mutants/phase_33/sweep_skips_pulsar.hs` (invariant-clause delete → the postflight three-layer inventory sweep
+  `test/fixtures/phase_39/sibling_golden.cbor` (the representative-request output recorded from `~/infernix`),
+  `test/fixtures/phase_39/sibling_corpus/` (the sibling inference test corpus that must run green against the
+  lifted library with only seam-config changes), `test/fixtures/phase_39/request.cbor`,
+  `test/fixtures/phase_39/expected_hashes.txt` (hand-authored reference `experimentHash` values, independent of
+  the decode code), `test/fixtures/phase_39/frozen_sources.txt` (the pre-lift `Infernix.*` module manifest),
+  `test/fixtures/phase_39/resource_shape.json` (independent build/worker/SPA/cold-overlap witness), and the
+  one-short/dropped-envelope fixtures under `mutants/phase_39/`.
+- The **committed seeded mutants** `mutants/phase_39/wallclock_seed.hs` (effect swap → fails the determinism
+  check), `mutants/phase_39/identity_hash.hs` (dropped effect/UNCHANGED → fails the divergence check), and
+  `mutants/phase_39/sweep_skips_pulsar.hs` (invariant-clause delete → the postflight three-layer inventory sweep
   drops the Pulsar topic/subscription class and reports leak-free vacuously while topics leak → fails the
   leak-free teardown check), each committed and
   re-run so the gate demonstrably goes red on them (§M.2).
@@ -606,7 +606,7 @@ lift-and-compose re-homing and the app-vs-deployment split on live linux-cpu.
 1. Two **cache-cold** runs (distinct run-isolated prefixes with absent output keys, each with a distinct run id,
    and an OS-boundary observer confirming run 2 recomputed without reading run 1) with the same
    `experimentHash` on linux-cpu produce byte-identical infernix
-   output that also byte-matches the Phase-0 sibling golden `test/fixtures/phase_33/sibling_golden.cbor`; a
+   output that also byte-matches the Phase-0 sibling golden `test/fixtures/phase_39/sibling_golden.cbor`; a
    changed model, request seed, or resolved `.dhall` produces a different `experimentHash` and a distinct store
    namespace **and its changed run executes, stores an output, and that output differs byte-for-byte from the
    baseline** (divergence asserted on two compared outputs, not on the hash alone). The committed mutants
@@ -624,7 +624,7 @@ lift-and-compose re-homing and the app-vs-deployment split on live linux-cpu.
    changed fields), not a second from-scratch spin-up.** The three-layer sweep MUST positively emit each of its
    three class enumerations into the ledger, and any omitted class or any non-empty remainder outside the named
    durable content-addressed survivor is a hard gate failure. Assert the committed mutant
-   `mutants/phase_33/sweep_skips_pulsar.hs`, which drops the Pulsar topic/subscription class, turns this
+   `mutants/phase_39/sweep_skips_pulsar.hs`, which drops the Pulsar topic/subscription class, turns this
    validation **red** (a class-omitting sweep both fails the three-layer completeness contract and lets a leaked
    Pulsar topic go undetected), paired with the positive full three-layer sweep that enumerates all three classes
    and reports green on a genuinely clean teardown.
@@ -674,7 +674,7 @@ The whole sprint (📋 Planned).
 ## Related Documents
 - [README.md](README.md) — the live tracker; Phase 39 objective, gate, and substrate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (skeleton,
-  sprint format, the doctrine-citation rule, the three-register + honesty + one-substrate disciplines)
+  sprint format, the doctrine-citation rule, the register + honesty + one-substrate disciplines)
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (lift-and-compose, the demo
   web apps as application-logic-only, the non-baked jit-resolved engine, the honest reproducibility ceiling)
 - [system_components.md](system_components.md) — the target component inventory for the infernix module paths above

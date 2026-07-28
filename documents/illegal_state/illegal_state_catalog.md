@@ -79,7 +79,7 @@ Applied to the three correctness layers from the chaos/failover doctrine
 So the catalog's promise is exact: *a PVC that cannot bind a PV is unrepresentable in the spec* — meaning
 no such spec can be written and type-check. It is **not** the claim that *the running cluster's PVC
 is bound*; that is a reconcile-time fact whose verification is owned by
-[`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the testing doctrine. Amoebius **defers the
+[`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the testing doctrine. amoebius **defers the
 runtime-enforcement proof there on purpose**, and never reports it here. In the register model this is
 exactly the split: the spec-composition proof is a **Register 1/2** (pre-cluster, in-process) property, front-loaded
 to the pre-cluster gates, while the cluster-enforcement claim is **Register 3** (live-infrastructure integrity, deferred to the

@@ -244,12 +244,12 @@ duplicate that corpus — it partitions it along the storage seam.
   **accept ⟺ in-envelope** equivalence, not merely soundness.
 - [`illegal_state_catalog.md §4.6`](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
   — the capacity-accounting technique's **storage-checked** half (summed demand within capacity, storage
-  checked), covering the storage/retention catalog entries §3.11/§3.17/§3.19/§3.20/§3.25 at the honest layer
+  checked), covering the storage/retention catalog entries [§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)/[§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)/[§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)/[§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)/[§3.25](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) at the honest layer
   ([`§6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
   every storage **sum** is checked at `provision-seal` and never type-foreclosed, honoring the load-bearing
   limit of [`§2`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it).
-- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) §2 (**Register 1** — pure/golden,
-  in-process, no cluster) and §4 (the per-run proven/tested/assumed ledger): the register this gate reaches and
+- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) (**Register 1** — pure/golden,
+  in-process, no cluster) and [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) (the per-run proven/tested/assumed ledger): the register this gate reaches and
   the ledger it emits, with model↔runtime correspondence and runtime fidelity marked UNVERIFIED (owned by the
   live band — [Phase 19](phase_19_object_reconciler.md)/[Phase 21](phase_21_retained_storage.md)/
   [Phase 23](phase_23_platform_backbone.md)/[Phase 37](phase_37_provider_dynamic_nodes.md)).
@@ -457,7 +457,7 @@ individually** (§M.2), not merely one hand-picked strawman.
 `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
-Adopt [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) §2 (Register 1)
+Adopt [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) (Register 1)
 and the honesty limit of [`resource_capacity_doctrine.md §2`](../documents/engineering/resource_capacity_doctrine.md#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed):
 express the storage-geometry fold as QuickCheck properties. Because the storage `Σ ≤ backing` sum is decidable
 in **both** directions, assert the stronger **accept ⟺ in-envelope equivalence** (the fold accepts *exactly* the
@@ -544,7 +544,7 @@ isolated over-backing axis — **each negative asserting its specific expected t
 named cache backing, and `illegal_incluster_cache_bound_mismatch` → `Left (CacheBudgetNestingViolation …)`),
 **not merely "some
 `Left`", and each paired with a store-fits row differing only in the foreclosed dimension** (§M.8) — each
-assertion annotated with its catalog entry (§3.11/§3.17/§3.19/§3.20/§3.25) and its checked-rejection layer at
+assertion annotated with its catalog entry ([§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)/[§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)/[§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)/[§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)/[§3.25](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)) and its checked-rejection layer at
 the `provision-seal` locus; the run emits a Register-1 proven/tested/assumed ledger.
 **Docs to update**: `documents/illegal_state/illegal_state_catalog.md` (the storage §3.11/§3.17/§3.19/§3.20/§3.25
 checked-rejection / `provision-seal` entries → layer-2 Register-1),
@@ -559,26 +559,26 @@ while the positive store-fits rows fit feasibly — and emit the per-entry valid
 honest foreclosure layer of each.
 
 ### Deliverables
-- The fold-negative fixtures — `illegal_store_over_backing` (§3.19), whose case table includes logical committed
+- The fold-negative fixtures — `illegal_store_over_backing` ([§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)), whose case table includes logical committed
   bytes fitting while erasure/healing, finite-horizon failed-write orphans, filesystem overhead, backing
   minimum/quantum, uniform-claim rounding, a differing-backing ordinal short despite aggregate spare bytes
   elsewhere, registry upload/failed partials or filesystem→MinIO old+new copy workspace, one ZooKeeper member's
   transaction-log/snapshot recovery, one Patroni data/WAL/failover ordinal, schema old+new/temp/WAL overlap, or
   Vault Raft compaction/recovery/audit rotation exceeds a physical backing, and whose producer cases omit each of
-  the six closed object-store arms in turn; `illegal_hot_tier_over_bookie` (§3.20), whose case table includes
+  the six closed object-store arms in turn; `illegal_hot_tier_over_bookie` ([§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)), whose case table includes
   logical hot bytes fitting while write-quorum/recovery placement exceeds one bookie;
-  `illegal_topic_time_only_offload` (§3.20), a topic whose only retention is time-based and therefore has no
-  size-triggered durable ceiling; `illegal_cache_over_local_pool` (§3.17/§3.25), exact catalog residents plus
+  `illegal_topic_time_only_offload` ([§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)), a topic whose only retention is time-based and therefore has no
+  size-triggered durable ceiling; `illegal_cache_over_local_pool` ([§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)/[§3.25](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)), exact catalog residents plus
   bounded first-miss temporaries exceeding the named cache backing; `illegal_incluster_cache_bound_mismatch`
-  (§3.11/§3.17), a cache peak/budget/`emptyDir` nesting or double-charge violation — each returning its
+  ([§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)/[§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)), a cache peak/budget/`emptyDir` nesting or double-charge violation — each returning its
   **specific** tagged `Left` at the fold and paired with a store-fits row differing
   only in the foreclosed dimension, with the type-foreclosed neighbours noted as already foreclosed upstream
-  (Phase 4/6) and the base capacity/topology (§3.13–§3.18/§3.22) and execution/accelerator (§3.21/§3.27–§3.30)
+  (Phase 4/6) and the base capacity/topology ([§3.13](../documents/illegal_state/illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.18](../documents/illegal_state/illegal_state_storage.md#318-unbounded-storage-anywhere)/[§3.22](../documents/illegal_state/illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration)) and execution/accelerator ([§3.21](../documents/illegal_state/illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)/[§3.27](../documents/illegal_state/illegal_state_capacity.md#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement)–[§3.30](../documents/illegal_state/illegal_state_capacity.md#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool))
   negatives noted as owned by [Phase 7](phase_07_capacity_core_folds.md)/[Phase 9](phase_09_execution_accelerator_folds.md). This fold
   additionally *implements* the provider-root and control-plane-storage byte-fit — the under-provisioned
-  instance-store root (§3.17), the privately derived, rounded root-EBS request over its distinct
-  `nodeRootStorage` byte/volume-count ceiling (§3.17), and the control-plane etcd
-  max-WAL/preallocated-next/snapshot-save/serialized-defrag transition overrun (§3.19) — but their **committed
+  instance-store root ([§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)), the privately derived, rounded root-EBS request over its distinct
+  `nodeRootStorage` byte/volume-count ceiling ([§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)), and the control-plane etcd
+  max-WAL/preallocated-next/snapshot-save/serialized-defrag transition overrun ([§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)) — but their **committed
   gate negatives** (`illegal_provider_instance_store_root_underprovisioned` /
   `illegal_provider_node_root_ebs_over_quota` / `illegal_control_plane_storage_transition_overrun`) are owned by
   [Phase 9](phase_09_execution_accelerator_folds.md) per the §M.7 partition — fold mechanics here, gate oracle in
@@ -640,14 +640,14 @@ The whole sprint (📋 Planned).
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
   design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the no-unbounded-storage invariant
-- [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — §5/§6/§7: the
+- [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — [§5](../documents/engineering/resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)/[§6](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)/[§7](../documents/engineering/resource_capacity_doctrine.md#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total): the
   `StorageBudget`/`Growable` arithmetic and the two-ceiling Pulsar fold
 - [Storage Lifecycle Doctrine](../documents/engineering/storage_lifecycle_doctrine.md) — the backing read-side
   this fold reconciles with
-- [Pulsar Client Doctrine](../documents/engineering/pulsar_client_doctrine.md) — §6 the two-ceiling read-side
+- [Pulsar Client Doctrine](../documents/engineering/pulsar_client_doctrine.md) — [§6](../documents/engineering/pulsar_client_doctrine.md#6-the-declarative-topology-algebra) the two-ceiling read-side
 - [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — the storage entries and the
-  §4.6 storage-checked technique, with §2/§6 the load-bearing limit and honest layer split
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — §2 Register 1, §4 the per-run ledger
+  [§4.6](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) storage-checked technique, with [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)/[§6](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) the load-bearing limit and honest layer split
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 1, [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger
 - [phase_07](phase_07_capacity_core_folds.md) — the base `fits`/`carve`/`place` fold and the shared capacity
   types this geometry fold layers on
 - [phase_09](phase_09_execution_accelerator_folds.md) — the execution-epoch/accelerator folds and the composed

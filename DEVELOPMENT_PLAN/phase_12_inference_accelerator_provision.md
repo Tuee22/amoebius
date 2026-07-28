@@ -89,7 +89,7 @@ coexistence overcommit — returns its **specific** structured `Left`, each pair
 in the foreclosed dimension. The full apparatus (the concrete corpus, the Phase-0-pinned goldens, the five
 committed accelerator-provision seeded mutants that must go red, and the independent reference predicate) is
 named in [Gate integrity](#gate-integrity), to which this line delegates per
-[§M](development_plan_standards.md#gate-integrity-delegation). A **Register-1** in-process check that runs on no
+[§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub). A **Register-1** in-process check that runs on no
 substrate.
 
 ## Gate integrity
@@ -122,7 +122,7 @@ Validations above.
   - `illegal_engine_by_url` — an engine named by URL — **fails Gate 1** (`dhall type`) at an
     *unknown-constructor / no-such-alternative* type error on the `EngineRuntime` union (the union has no
     `Url`/`Download` arm), paired with `legal_inference_cuda` differing only in that the engine is a named
-    catalog identity (§3.25).
+    catalog identity ([§3.25](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)).
   - `illegal_engine_family_unavailable_on_lane` — a served model whose engine family is unavailable on the
     serving lane — returns its committed family-unavailable-on-lane `ProvisionError` at the `provision-seal`
     locus, paired with a positive whose family *is* available on that lane.
@@ -147,7 +147,7 @@ Validations above.
   The three accelerator net-fit negatives (`illegal_cuda_on_cpu_target`, `illegal_accelerator_count_shortage`,
   `illegal_accelerator_vram_shortage`) fail **after binding but before `renderAll`, with zero provisioned
   values**; each of the nine negatives is annotated in the validation-locus ledger with its catalog id
-  (§3.25 for the engine-by-url state) and its honest foreclosure layer (Gate 1 for `illegal_engine_by_url`; the
+  ([§3.25](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) for the engine-by-url state) and its honest foreclosure layer (Gate 1 for `illegal_engine_by_url`; the
   post-bind `provision-seal` locus for the rest).
 
 - **Committed accelerator-provision seeded-mutant battery (§M.2).** The gate turns **red** on each of the five
@@ -237,8 +237,8 @@ Validations above.
   — **the illegal-state-unrepresentable contract's two typed gates** (Gate 1 the Dhall typechecker, Gate 2 the
   in-process decoder): the `EngineRuntime` union is guarded at Gate 1 (an engine-by-URL has no syntax), and the
   family-on-lane / device / VRAM insufficiencies are the post-bind `provision-seal` layer beneath both gates.
-- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing)
-  §2 (**Register 1** — pure/golden, in-process, no cluster) and §4 (the per-run proven/tested/assumed ledger):
+- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
+  [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) (**Register 1** — pure/golden, in-process, no cluster) and [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) (the per-run proven/tested/assumed ledger):
   the register this gate reaches and the ledger it emits, with the live jit-resolve of any engine and the
   runtime-checked cross-lane weight-load residue marked UNVERIFIED, owned by the live band.
 
@@ -376,8 +376,8 @@ passes), `DEVELOPMENT_PLAN/substrates.md` (the Phase-12 `none` gate row).
 
 ### Objective
 Adopt [`service_capability_doctrine.md §8`](../documents/engineering/service_capability_doctrine.md#8-capabilities-and-the-illegal-state-contract)
-and [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing)
-§2/§4: assemble this seam's single Register-1 gate — the `InferenceEngine` positives bind and provision by
+and [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
+[§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)/[§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact): assemble this seam's single Register-1 gate — the `InferenceEngine` positives bind and provision by
 selecting the matching target offering while every URL-named engine has no syntax and every insufficient
 accelerator target returns its specific `ProvisionError` without constructing `ProvisionedSpec` — and emit the
 per-entry validation-locus ledger that names the honest foreclosure layer of each.
@@ -398,7 +398,7 @@ per-entry validation-locus ledger that names the honest foreclosure layer of eac
   individually required to turn the suite red: `mutant_drop_accelerator_work_item`,
   `mutant_accept_accelerator_domain_mismatch`, `mutant_select_favorable_accelerator_epoch`,
   `mutant_drop_accelerator_overlap_debit`, `mutant_skip_accelerator_shard_validation`.
-- A Register-1 validation-locus ledger mapping every entry to its catalog id (§3.25 for the engine-by-URL state)
+- A Register-1 validation-locus ledger mapping every entry to its catalog id ([§3.25](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) for the engine-by-URL state)
   and honest layer (Gate 1 for `illegal_engine_by_url`; the post-bind `provision-seal` locus for the rest),
   backed by Phase-6-style coverage-assertion machinery (the ledger goes **red** if any corpus entry, negative
   reason, or seeded mutant named above is absent), explicitly marking the runtime residue (the engine actually
@@ -451,16 +451,16 @@ The whole sprint (📋 Planned).
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
   design-proof acceptance token: *binding-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the accelerator/net-allocatable-VRAM invariant
-- [Service Capability Doctrine](../documents/engineering/service_capability_doctrine.md) — §4.1 the
-  substrate-selected `InferenceEngine`, §3/§4 the provider+shape binding, §8 the illegal-state instances
-- [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — §3.25 (engine by URL), with §2
+- [Service Capability Doctrine](../documents/engineering/service_capability_doctrine.md) — [§4.1](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored) the
+  substrate-selected `InferenceEngine`, [§3](../documents/engineering/service_capability_doctrine.md#3-one-canonical-provider-the-type-admits-alternates)/[§4](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding) the provider+shape binding, [§8](../documents/engineering/service_capability_doctrine.md#8-capabilities-and-the-illegal-state-contract) the illegal-state instances
+- [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — [§3.25](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) (engine by URL), with [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)
   the load-bearing limit
-- [Illegal State Techniques](../documents/illegal_state/illegal_state_techniques.md) — §4.7 compatibility/topology
+- [Illegal State Techniques](../documents/illegal_state/illegal_state_techniques.md) — [§4.7](../documents/illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) compatibility/topology
   relations by construction over a collection (the family×lane relation)
-- [Content Addressing Doctrine](../documents/engineering/content_addressing_doctrine.md) — §4.5 the ML-asset
+- [Content Addressing Doctrine](../documents/engineering/content_addressing_doctrine.md) — [§4.5](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the ML-asset
   lifecycle whose Tier-1 jit-resolved engine is the `InferenceEngine` provider
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — §5 the two typed gates a capability binding decodes through
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — §2 Register 1, §4 the per-run ledger
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) the two typed gates a capability binding decodes through
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 1, [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger
 - [phase_09](phase_09_execution_accelerator_folds.md) — the identity-complete accelerator-device / net-allocatable-VRAM
   / residency-coexistence epoch fold these owner demands feed
 - [phase_10](phase_10_capability_bind.md) — the closed nine-arm capability union (whose reserved `InferenceEngine`

@@ -145,12 +145,12 @@ the following named, committed artifacts so no self-authored harness or post-hoc
   committed unclassified fixture is then wrongly admitted for active-active wiring and the classification oracle
   must go red. (b) `project-identity` — the `project(subtree)` projection weakened toward identity so a child's
   delivered `ChildInForceSpec` carries a sibling branch (dropped-guard); the runtime subtree-inspection
-  assertion must go red. (c) `mut-28.1-drop-parallel-executor` — the capacity peak drops one of two
+  assertion must go red. (c) `mut-32.1-drop-parallel-executor` — the capacity peak drops one of two
   simultaneously runnable Pulumi executor Jobs (or admits parallel demand and serializes it afterward); a
   parent that fits one executor but not both is wrongly admitted, and the pre-effect provision oracle must go
   red. All mutants are committed under `test/inject/mutants/` and re-run every gate, not hand-run once.
 - **External-observer teardown check.** "Tears down leak-free" is scoped for Phase 32 (the flagged-credential +
-  postflight tag-sweep machinery of testing_doctrine §6–§7 is Phase 42) to: after teardown, an **OS-boundary
+  postflight tag-sweep machinery of testing_doctrine [§6](../documents/engineering/testing_doctrine.md#6-flagged-test-credentials)–[§7](../documents/engineering/testing_doctrine.md#7-the-elevated-harness-is-the-sole-automated-deleter-of-test-owned-durable-storage-leak-free-cycles) is Phase 42) to: after teardown, an **OS-boundary
   observer** — `pulumi stack ls` and kubeconfig-context enumeration, read outside the forest — reports zero
   surviving child stacks and zero surviving child clusters, while the retained backing stores the gate
   deliberately preserves are explicitly exempt (named in the fixture as the retained set).
@@ -168,7 +168,7 @@ the following named, committed artifacts so no self-authored harness or post-hoc
   — the `project(subtree)` handoff of amoebic spawning, enacted as `discover → diff → enact → re-observe`
   reconciles over a managed-resource registry (never a bespoke lifecycle state machine), so the leak-free child
   teardown of this phase's gate is one `reconcileAbsent` loop with "cannot observe" never collapsed to "absent."
-  The teardown-with-cleanup-vs-chaos distinction (§5) and the unsatisfiable-`.dhall` push-back (§6) belong to the
+  The teardown-with-cleanup-vs-chaos distinction ([§5](../documents/engineering/cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction)) and the unsatisfiable-`.dhall` push-back ([§6](../documents/engineering/cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-root-inforcespec)) belong to the
   gateway-migration drills of [Phase 33](phase_33_gateway_migration_drills.md).
 - [`pulumi_iac_doctrine.md §1`](../documents/engineering/pulumi_iac_doctrine.md#1-pulumi-runs-only-from-inside-an-existing-amoebius-cluster),
   [`§2`](../documents/engineering/pulumi_iac_doctrine.md#2-the-backend-every-byte-of-state-is-a-vault-enveloped-object-in-minio), and
@@ -187,15 +187,15 @@ the following named, committed artifacts so no self-authored harness or post-hoc
   — the confluent data plane: content-addressed write-once blobs (identical content ⇒ identical key ⇒ idempotent
   cross-cluster write) and the work-id-keyed Pulsar fold land in bucket (i) and cross freely, leaving only the
   gateway authority and any CAS "latest" pointer in bucket (ii) for the [Phase
-  29](phase_33_gateway_migration_drills.md) migration runtime.
+  33](phase_33_gateway_migration_drills.md) migration runtime.
 - [`chaos_failover_doctrine.md §16`](../documents/engineering/chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
   and [`§17`](../documents/engineering/chaos_failover_doctrine.md#17-the-boundary-and-its-classifier)
-  — the Second Axis (one cluster becomes a forest) and the invariant-confluence classifier (R1/§17) that sorts
+  — the Second Axis (one cluster becomes a forest) and the invariant-confluence classifier (R1/[§17](../documents/engineering/chaos_failover_doctrine.md#17-the-boundary-and-its-classifier)) that sorts
   every crossing mutable invariant into confluent (crosses freely) or non-confluent (held by bounded authority),
   the unclassified default = non-confluent — with the [proven/tested/assumed ledger
   (§12)](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed) kept
-  honest. The R7/R8/R9 boundary rules and the §19 cross-boundary ledger are consumed by [Phase
-  29](phase_33_gateway_migration_drills.md).
+  honest. The R7/R8/R9 boundary rules and the [§19](../documents/engineering/chaos_failover_doctrine.md#19-the-cross-boundary-ledger-and-conformance-rows) cross-boundary ledger are consumed by [Phase
+  33](phase_33_gateway_migration_drills.md).
 - [`testing_doctrine.md §3`](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down)
   (the test-as-`InForceSpec` spin-up → run → always-tear-down contract) and
   [`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
@@ -540,7 +540,7 @@ managed-resource registry entry so teardown is a reconcile, not a state machine.
    match the exact stack/revision object identities and extents. Injecting a failed checkpoint CAS retains the
    bounded partial/orphan object until the declared GC horizon and keeps it charged. A direct checkpoint PUT
    outside the gateway is denied.
-3. The committed `mut-28.1-drop-parallel-executor` mutant charges only one of the two simultaneously runnable
+3. The committed `mut-32.1-drop-parallel-executor` mutant charges only one of the two simultaneously runnable
    executor Jobs (or serializes after admitting the parallel declaration) and MUST go red against a parent
    fixture that fits either Job alone but not both. This proves applicative parallelism is represented in the
    resource peak, not merely exercised opportunistically after admission.
@@ -572,7 +572,7 @@ runtime); Phase 23 (MinIO); Phase 24 (Patroni Postgres).
 **Independent Validation**: two sibling children replicate a `command → event* → result` workflow over
 native-protocol Pulsar geo-replication, write-once content-addressed MinIO blobs, and Patroni Postgres; a
 duplicate cross-cluster write is shown idempotent against the committed content-addressed golden; every crossing
-mutable multi-record invariant is sorted by the §17 classifier into confluent (crosses freely) or non-confluent
+mutable multi-record invariant is sorted by the [§17](../documents/engineering/chaos_failover_doctrine.md#17-the-boundary-and-its-classifier) classifier into confluent (crosses freely) or non-confluent
 (held by bounded authority) against the committed independent classification table, an unclassified invariant
 defaulting to non-confluent; and the forest tears down leak-free by the OS-boundary observer.
 **Docs to update**: `documents/engineering/chaos_failover_doctrine.md`,

@@ -20,7 +20,7 @@ The obvious alternative — "commit the generated output but regenerate it caref
 because the discipline is unenforceable and the failure is silent: a stale committed manifest, a hand-tweaked
 `.tla`, or an out-of-date schema type-checks and reads as authoritative while no longer matching its source.
 
-Amoebius forecloses this by **not committing generated artifacts at all.** Each is emitted deterministically
+amoebius forecloses this by **not committing generated artifacts at all.** Each is emitted deterministically
 from its typed source by an `amoebius` subcommand, stamped as generated, and produced fresh at the moment it is
 needed (a build, a `--dry-run`, a model-check, a deploy). What this forecloses: a stale or hand-edited generated
 artifact, because there is no committed artifact to go stale — the source is the only thing under version

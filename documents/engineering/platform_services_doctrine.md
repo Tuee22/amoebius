@@ -200,7 +200,7 @@ independent version and lifecycle, and clean per-namespace teardown.
 - **The Percona operator is itself a platform component**, drawn from the shared inventory ([§12](#12-substrate-equivalence-as-a-structural-invariant)) so it
   installs identically on every substrate. A service needing SQL renders a `PerconaPGCluster` in its own
   namespace; the cluster-wide operator reconciles it. (This generalizes the prodbox
-  `helm_chart_platform_doctrine.md` §4 Patroni dependency contract, where Keycloak is the proven
+  `helm_chart_platform_doctrine.md` [§4](#4-minio--the-object-substrate) Patroni dependency contract, where Keycloak is the proven
   consumer — without restating its prodbox-specific naming.)
 - **HA always applies here too ([§2](#2-ha-always--including-replicas1)).** At its configured steady state a Patroni cluster runs multiple
   replicas; at `replicas=1` it is still a Patroni cluster, never a bare Pod. This doc deliberately fixes
@@ -476,7 +476,7 @@ flowchart TD
 
 "Same service set on every cluster" is **enforced structurally**, not maintained by parallel hand-edited
 installers. This generalizes the prodbox substrate-equivalence mechanism (prodbox CLAUDE.md "Substrate
-Equivalence" and `helm_chart_platform_doctrine.md` §3A) from two substrates to all of them. The three
+Equivalence" and `helm_chart_platform_doctrine.md` [§3](#3-the-registry--the-single-image-source)A) from two substrates to all of them. The three
 mechanisms, adapted:
 
 1. **One release/version value per platform-component image, shared across substrates.** A platform

@@ -163,8 +163,8 @@ can pass:
 - **Reference oracles are independent (§M.1/§M.3).** Expected step counts, the
   expected CAS-conflict count, CUDA device inventory, expected wholesale extended-resource allocation, and
   zero-effects negative result, plus the exact owner/cache/coordinator/SPA/build/failover resource witness
-  `test/fixtures/phase_34/resource_shape.json`, are hand-authored and committed in Phase 0 in
-  `test/fixtures/phase_34/` **before** the implementation exists; none is regenerated from the SUT's own encoder
+  `test/fixtures/phase_40/resource_shape.json`, are hand-authored and committed in Phase 0 in
+  `test/fixtures/phase_40/` **before** the implementation exists; none is regenerated from the SUT's own encoder
   or fold. The manifest SHA is not among these pre-implementation oracles: a SHA-256 over the canonical-CBOR
   manifest of GPU-computed floating-point tensors is not knowable a priori, so same-substrate bit-equality
   rests on the two-fresh-runs equality cross-check, the ≥ 200-step / ≥ 10M-param floors, and the OS-boundary
@@ -279,7 +279,7 @@ pod/IP and matched-CSI slot, cache/checkpoint/build storage, host trace-harness 
 Pulsar client/topic/backlog/offload, registry publication/proxy, device-plugin/driver host+Pod resources/rollout
 plus content-gateway/collector and failover/replacement overlap.
 Dropped-envelope
-mutants under `test/mutants/phase_34/resources/` name the cache owner, coordinator standby, SPA, build, and
+mutants under `test/mutants/phase_40/resources/` name the cache owner, coordinator standby, SPA, build, and
 dying-active/replacement rows; `drop_cuda_node_system.dhall` omits the driver/plugin witness,
 `drop_registry_publication_envelope.dhall` omits the image push/storage row,
 `drop_pulsar_topic_demand.dhall` omits the Feed/messaging row,
@@ -357,7 +357,7 @@ store effects.
   — *extensible surfaces: TensorBoard*: the mandatory `TensorBoard` monitoring surface is carried on the jitML
   `ExtensionSpec`, so an unmonitored jitML run is unrepresentable and `tfevents` land in the per-experiment
   `tb/` prefix on the Phase-29 store.
-- [`testing_doctrine.md` §2](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing),
+- [`testing_doctrine.md` §2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing),
   [`§3`](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down),
   [`§4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
   — Register 3 (live), the spin-up → run → always-tear-down contract, and the per-run ledger this gate emits.
@@ -602,7 +602,7 @@ ETag-CAS + `AdvancePredicate`, so single-writer is a **delegation, never an elec
    `cover`/`classify` obligations (§M.4) that force the **two-writer-overlap / CAS-conflict branch to fire in
    ≥ 20% of generated cases** and the **AdvancePredicate-absorption branch in ≥ 20%**; a generator that emits
    only single-writer non-conflicting interleavings fails the coverage floor. The reference decision the property
-   checks against is a **hand-authored committed truth table** in `test/fixtures/phase_34/single_writer.tbl`
+   checks against is a **hand-authored committed truth table** in `test/fixtures/phase_40/single_writer.tbl`
    (Phase 0), not the SUT's own decision fold (§M.3). The committed monotonicity-guard-negated `AdvancePredicate`
    mutant (§M.2) must turn this property red.
    No leadership election: an audit consisting of (a) a committed **dependency-graph ban** rejecting any import
@@ -618,7 +618,7 @@ ETag-CAS + `AdvancePredicate`, so single-writer is a **delegation, never an elec
    pre-kill and post-takeover checkpoint manifests, reconciled against the Feed offsets, must be a contiguous
    gap-free non-duplicated sequence — "the run completed and `latest` advanced monotonically" is **not** accepted
    as equivalent. The reconciliation is checked against the Phase-0 committed expected-step-sequence and
-   expected-CAS-conflict-count fixture in `test/fixtures/phase_34/` (§M.1/§M.3).
+   expected-CAS-conflict-count fixture in `test/fixtures/phase_40/` (§M.1/§M.3).
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -676,12 +676,12 @@ delegated trainer failover, and the application-logic-only demo — into the sin
 - **Phase-0-committed gate oracles and mutants** (authored before any implementation, §M.1/§M.2/§M.3): the
   workload corpus `test/dhall/phase_40_det_workloads.dhall`; the hand-authored
   expected-executed-step-count, expected-step-sequence, and expected-CAS-conflict-count fixtures under
-  `test/fixtures/phase_34/` (the manifest-SHA fixture is pinned only after the first green run, as a downstream
+  `test/fixtures/phase_40/` (the manifest-SHA fixture is pinned only after the first green run, as a downstream
   regression pin, not a pre-implementation oracle); the pinned CUDA inventory, expected owner extended-resource allocation, and
   CPU-only/count/VRAM zero-effects negatives, including raw-fits-but-net-allocatable-fails and
   raw/net-fit-but-current-free-fails; omitted-work-item, favorable-epoch, per-device-overlap-one-short,
   policy-domain-mismatch, and malformed-shard negatives; a mismatched link graph; the single-writer decision truth table
-  `test/fixtures/phase_34/single_writer.tbl`;
+  `test/fixtures/phase_40/single_writer.tbl`;
   and the seeded mutant set (manifest-encoder tensor-sort dropped; `AdvancePredicate` monotonicity-guard negated;
   CUDA-selector silent CPU fallback; accelerator-owner GPU-allocation dropped; omitted work item; favorable
   epoch substituted; co-resident device debit dropped) the gate re-runs and requires
@@ -790,8 +790,8 @@ The whole sprint (📋 Planned).
 - [Content Addressing & Determinism Doctrine](../documents/engineering/content_addressing_doctrine.md) — the
   three-tier checkpoint store, the linux-cuda-bound `experimentHash`, the jit-resolved engine, and the honest
   ceiling
-- [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — §4.3 the Feed-sourced
-  single-writer trainer delegated to Pulsar + CAS (never elected), §4.2 the wholesale per-node accelerator owner
+- [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — [§4.3](../documents/engineering/daemon_topology_doctrine.md#43-the-feed-sourced-continuous-trainer-single-writer-delegated) the Feed-sourced
+  single-writer trainer delegated to Pulsar + CAS (never elected), [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) the wholesale per-node accelerator owner
 - [Chaos / Failover Doctrine](../documents/engineering/chaos_failover_doctrine.md) — the proven/tested/assumed
   ledger and the deferred cross-cluster (Second Axis) boundary
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — Register 3 (live), the spin-up → run →

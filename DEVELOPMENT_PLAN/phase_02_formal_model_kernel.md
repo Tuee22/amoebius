@@ -39,8 +39,8 @@ The one concrete protocol amoebius proves itself — the cross-cluster gateway m
 **not** authored here; that is [Phase 3](phase_03_gateway_migration_model.md). This phase proves the *kernel*
 on a small, throwaway transition-system model (a bounded two-process mutual-exclusion or token model) so the
 machinery is trustworthy before a load-bearing model rides on it. Validation is entirely in-process
-([`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) §2 — the
-registers, and §3 — rendering never touches live infrastructure): the explorer is a `cabal test`, and TLC
+([`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) [§2](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) — the
+registers, and [§3](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure) — rendering never touches live infrastructure): the explorer is a `cabal test`, and TLC
 runs on the emitted spec through the version-stable JVM `tla2tools` toolchain. This is a **Register 1**
 (pure/golden, in-process, no cluster) design-proof phase.
 
@@ -374,7 +374,7 @@ operational form of "the two renderings mean the same thing."
   differential-test case count and per-constructor coverage percentages; (d) model-correspondence-to-Phase-3-code
   and runtime fidelity marked **UNVERIFIED**. Each row is **machine-derived from the corresponding recorded test
   outcome** (not a print statement), and a harness assertion fails the gate if the emitted ledger does not equal
-  the suite's recorded results — carrying the honest caveats of §6 (bounded scope; not a general-scope proof;
+  the suite's recorded results — carrying the honest caveats of [§6](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not) (bounded scope; not a general-scope proof;
   not a proof the model is the right model; liveness proven only under the assumed fairness).
 
 ### Validation

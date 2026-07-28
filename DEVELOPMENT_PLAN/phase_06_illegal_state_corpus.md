@@ -50,7 +50,7 @@ the representational SPA-composition corpus (Phase 16), and every `live-effect` 
 
 **Gate:** every negative fixture is rejected at its tagged locus — each Gate-1-class negative fails
 `dhall type` at authoring time with the error pinned to a **Phase-0-committed** `dhall type` error-locus golden
-naming the foreclosing union/field (§8 specific-reason), each Gate-2-class negative passes `dhall type` and
+naming the foreclosing union/field (§M.8 specific-reason), each Gate-2-class negative passes `dhall type` and
 decodes to a structured `Left DecodeError` whose tag equals a **Phase-0-committed** expected-`DecodeError`-tag
 golden, and each GADT-index negative fails to compile under the pinned `ghc -fno-code` expect-fail golden with a
 GHC **type** error (not a scope/parse error) pinned to a committed expected-error-locus golden — the suite is
@@ -59,7 +59,7 @@ red if any illegal fixture is admitted at or past its locus; QuickCheck is green
 and the per-entry validation-locus ledger (`Gate-1-editor` / `Gate-2-decoder` / `provision-seal` /
 `rendered-output-golden` / `live-effect`) is emitted with every catalog entry mapped to its truth-maker locus and a separate
 `owner_phase` / `case_family` disposition, with both **reconciled against the catalog-reconciled committed
-`locus_registry.tsv`** (the independent oracle of §3), red on any divergence — a **Register-1** in-process
+`locus_registry.tsv`** (the independent oracle of §M.3), red on any divergence — a **Register-1** in-process
 check that runs on no substrate. The committed gate-integrity apparatus (§M) that discharges the eight clauses
 — the representative set, oracle pins, and seeded mutants — is itemised in [Gate integrity](#gate-integrity).
 
@@ -68,7 +68,7 @@ check that runs on no substrate. The committed gate-integrity apparatus (§M) th
 This gate satisfies the eight §M clauses through the following committed apparatus.
 The existing fixture/error oracles are Phase-0-pinned; the owner/family catalog enrichment identified below
 must be hand-authored and committed at the start of Phase 6, before the corpus/ledger implementation that
-consumes it (§1 oracle-pinning):
+consumes it (§M.1 oracle-pinning):
 
 > **Planning-status note:** the catalog currently carries `**Validation-locus:**` tags only.
 > `**Delivery-owner:**` and `**Case-family:**` do not exist yet; adding them to every catalog entry, extending
@@ -108,20 +108,20 @@ this phase: it is Phase-0 documentation-lint check (g)
 ([`phase_00`](phase_00_documentation_suite.md)), which validates the enumeration is well-formed over text
 alone, before any fixture exists to join against.
 
-- **Oracle-pinning (§1) + specific-reason negatives (§8).** Each negative fixture ships a committed expected-failure
+- **Oracle-pinning (§M.1) + specific-reason negatives (§M.8).** Each negative fixture ships a committed expected-failure
   golden authored by hand, not regenerated from the implementation: `dhall/examples/goldens/<name>.typeerr`
   (the `dhall type` error, naming the offending union/field) for each `illegal_gate1_*`;
   `test/dsl/goldens/<name>.tag` (the expected `DecodeError` constructor tag) for each `illegal_decode_*`;
   `test/dsl/compilefail/<name>.expected` (the expected GHC type-error class + locus) for each compile-fail golden.
   The suite asserts the observed failure **equals** its golden, not merely that some failure occurred.
-- **Independent reference predicate (§3).** The validation-locus reference side is the catalog's committed
+- **Independent reference predicate (§M.3).** The validation-locus reference side is the catalog's committed
   per-entry `**Validation-locus:**`, `**Delivery-owner:**`, and `**Case-family:**` tags in
   `documents/illegal_state/illegal_state_*.md` once this phase adds the latter two, reconciled by the
   Phase-0 documentation lint (extended here) into
   `dhall/examples/locus_registry.tsv`. Those catalog tags are authored independently of
   `ValidationLocusLedger.hs`; the coverage assertion reads that registry, never the emitter's own
   classification or a hard-coded section-number range.
-- **Committed mutation quota (§2).** Four committed seeded mutants (from the §M operator set) MUST turn the gate
+- **Committed mutation quota (§M.2).** Four committed seeded mutants (from the §M operator set) MUST turn the gate
   red, re-run each gate run: (a) a **union-arm-addition** schema mutant admitting a product-named capability →
   `CorpusSpec` red; (b) a **dropped-resource-normalization guard** decoder mutant that admits a zero/incomplete
   resource declaration or discards one normalized resource field → the corresponding Gate-2 negative or
@@ -130,9 +130,9 @@ alone, before any fixture exists to join against.
   partialized-fold** mutant → each of the four QuickCheck properties red. Phase-7/10 fold mutants remain owned
   by those phases; Phase 6 cannot execute a fold that has not landed. The gate is itself red if any mutant
   survives.
-- **Generator coverage (§4).** Sprint 6.3's `checkCoverage` minima (below) force the nontrivial reject/boundary
+- **Generator coverage (§M.4).** Sprint 6.3's `checkCoverage` minima (below) force the nontrivial reject/boundary
   arms to fire.
-- **Concrete corpus (§7).** The representative set is enumerated explicitly in the Sprint 6.1/6.2 Deliverables
+- **Concrete corpus (§M.7).** The representative set is enumerated explicitly in the Sprint 6.1/6.2 Deliverables
   and the committed `locus_registry.tsv`, not left to "representative".
 
 ## Doctrine adopted
@@ -145,7 +145,7 @@ alone, before any fixture exists to join against.
 - [`illegal_state_techniques.md §5 — Coverage matrix`](../documents/illegal_state/illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)
   and [`§2 — the load-bearing limit`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it):
   the coverage matrix is the checklist the corpus must exhaust — one fixture per Register-1-settleable entry —
-  and §2's limit is honored verbatim: *a type-check proves the spec composes, not that the cluster enforces
+  and [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)'s limit is honored verbatim: *a type-check proves the spec composes, not that the cluster enforces
   it.* Entries whose truth-maker is the running cluster are ledgered `live-effect`, never claimed here.
 - [`dsl_doctrine.md §5 — the illegal-state-unrepresentable contract`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
   the **two typed gates** — Gate 1 (the Dhall typechecker) and Gate 2 (the in-process `Dhall.inputFile auto`
@@ -154,10 +154,10 @@ alone, before any fixture exists to join against.
 - [`resource_capacity_doctrine.md §3 — The types: Quantity, Capacity, Demand, Budget`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
   and [`§4 — The total fold: fits, carve, place, and the nesting`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting):
   the complete resource envelope and opaque post-bind checked boundary. This phase exhausts the resource
-  **shape/normalization** cases its predecessors own (including the missing-envelope §3.11 negative) and
+  **shape/normalization** cases its predecessors own (including the missing-envelope [§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext) negative) and
   derives every later capacity, storage, accelerator, VRAM, and missing-capability deferral from registry
   ownership tags; it never claims those Phase-7/10 folds have run early.
-- [`testing_doctrine.md §2 — three registers`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) — **Register 1**
+- [`testing_doctrine.md §2 — the registers`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) — **Register 1**
   (pure/golden, in-process, no cluster): the register this phase's gate reaches; and
   [`§4 — the per-run ledger`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) — the proven/tested/assumed ledger
   the battery emits, the validation-locus ledger being its per-catalog-entry specialization with model↔runtime
@@ -211,11 +211,11 @@ must pass `dhall type` and decode-reject — never billing a Gate-2-only foreclo
 - Gate-1 negatives (`illegal_gate1_*`, must fail `dhall type`) are **exactly** the rows enumerated by
   `locus_registry.tsv` with `validation_locus = Gate-1-editor` and
   `owner_phase ∈ { Phase-4, Phase-5, Phase-6 }`. Required members
-  include product-named capability (§3.12), insecure/backdoor ingress (§3.7), a workload missing its complete
-  `ResourceEnvelope` (§3.11; the Phase-4 `illegal_missing_resource_envelope` case), unbounded storage /
-  un-tiered topic (§3.18/§3.20), growth with no scaling policy (§3.21), even/zero-server rke2 control plane
-  (§3.24), the produce-side non-CBOR shape (§3.23), and a substrate/topology arm the union does not offer
-  (§3.14/§3.15). The registry, not this prose list, is the exact enumeration.
+  include product-named capability ([§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability)), insecure/backdoor ingress ([§3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)), a workload missing its complete
+  `ResourceEnvelope` ([§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext); the Phase-4 `illegal_missing_resource_envelope` case), unbounded storage /
+  un-tiered topic ([§3.18](../documents/illegal_state/illegal_state_storage.md#318-unbounded-storage-anywhere)/[§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)), growth with no scaling policy ([§3.21](../documents/illegal_state/illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)), even/zero-server rke2 control plane
+  ([§3.24](../documents/illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)), the produce-side non-CBOR shape ([§3.23](../documents/illegal_state/illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload)), and a substrate/topology arm the union does not offer
+  ([§3.14](../documents/illegal_state/illegal_state_topology.md#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm)/[§3.15](../documents/illegal_state/illegal_state_topology.md#315-a-multi-node-kind-cluster-not-on-a-single-linux-host)). The registry, not this prose list, is the exact enumeration.
 - Gate-2 negatives (`illegal_decode_*`, must pass `dhall type`, then decode-reject) are **exactly** registry
   rows with `validation_locus = Gate-2-decoder` whose
   `owner_phase ∈ { Phase-4, Phase-5, Phase-6 }`; these exercise the Phase-5
@@ -233,7 +233,7 @@ must pass `dhall type` and decode-reject — never billing a Gate-2-only foreclo
   that declares lawful headroom, so the pinned tag proves the pad rule fired rather than an unrelated shape
   error.
 - **Provisioning-deferred negatives are selected by tags, never section-number ranges.** A registry row with
-  `validation_locus = provision-seal`, an `owner_phase` of `Phase-7` or `Phase-10`, and a `case_family` of
+  `validation_locus = provision-seal`, an `owner_phase` of `Phase-7` or `Phase-11`, and a `case_family` of
   `topology`, `capacity`, `storage`, `cache`, `accelerator`, or `capability-provision` carries no rejecting
   fixture in Phase 6 and is ledgered with that owner. The generated selection must include every current
   aggregate and atomic fit case: engine/substrate incompatibility and host reuse; host/VM/cluster and
@@ -248,16 +248,16 @@ must pass `dhall type` and decode-reject — never billing a Gate-2-only foreclo
   allocatable VRAM; and provider-expanded resource demand. Phase 7 owns the pure folds and Phase 11 owns the end-to-end post-bind
   `ProvisionContext → Topology → BoundDeployment → Either ProvisionError ProvisionedSpec` boundary. Adding a new catalog row with
   those tags automatically adds it to the deferred set; no phase-doc range edit is required.
-- **Near-miss twinning (forecloses wrong-reason negatives, §8).** Each Gate-1 negative is a **single-construct
+- **Near-miss twinning (forecloses wrong-reason negatives, §M.8).** Each Gate-1 negative is a **single-construct
   mutation** of a named committed legal fixture (its `legal_*` twin, differing only in the one foreclosed
   dimension), and that twin MUST pass `dhall type`; the negative's `dhall type` error MUST equal the committed
   `<name>.typeerr` golden that names the foreclosing union/field, so a fixture that fails for an unrelated
   reason (typo, missing field, syntax error) does not pass. Each `illegal_decode_*` negative is likewise a
   single-field mutation of a legal twin that decodes, and asserts its committed expected `DecodeError` tag.
 - **Per-Register-1-locus fixtures (disambiguation).** A catalog entry carrying more than one Register-1 locus
-  (e.g. §3.16 = `Gate-1-editor` cardinality sub-part + `Gate-2-decoder` distinctness fold) owes **one fixture
+  (e.g. [§3.16](../documents/illegal_state/illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused) = `Gate-1-editor` cardinality sub-part + `Gate-2-decoder` distinctness fold) owes **one fixture
   row per Register-1 locus it carries**, each rejected at its own locus — not one row total. The ledger's
-  single "truth-maker locus" per entry is the earliest-sufficient among the loci it carries (§8 tie-break:
+  single "truth-maker locus" per entry is the earliest-sufficient among the loci it carries (§M.8 tie-break:
   `Gate-1-editor` < `Gate-2-decoder`), but delivery follows each row's owner: Phase 6 supplies only rows owned
   by Phases 4–6, while Phase-7/10-owned subcases remain visibly deferred to those phases.
 
@@ -299,8 +299,8 @@ Phase-4 honesty caveat routed here, since Dhall has no opaque types.
 
 ### Deliverables
 - Compile-fail goldens for the type-foreclosed entries the IR indices foreclose: a cross-tenant `Ref`
-  (§3.8/§3.10), a PVC with no matching PV (§3.2), an endpoint-kind interconversion (§3.7), and a route built
-  from no live service handle (§3.3) — each an expect-fail module that must not compile.
+  ([§3.8](../documents/illegal_state/illegal_state_security.md#38-cross-tenant-references-and-literal-secrets)/[§3.10](../documents/illegal_state/illegal_state_security.md#310-a-child-spec-that-reaches-beyond-its-own-subtree)), a PVC with no matching PV ([§3.2](../documents/illegal_state/illegal_state_storage.md#32-pvcs-that-dont-bind-pvs)), an endpoint-kind interconversion ([§3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)), and a route built
+  from no live service handle ([§3.3](../documents/illegal_state/illegal_state_security.md#33-misconfigured-gateway)) — each an expect-fail module that must not compile.
 - A pinned `ghc -fno-code` expect-fail harness reporting one aggregate green/red over the golden set, plus a
   positive control module that compiles. Each golden ships a committed `test/dsl/compilefail/<name>.expected`
   golden (expected GHC error class = type-error, plus locus) authored in Phase 0, and a one-token legal twin.
@@ -345,7 +345,7 @@ exhausted (the three `Rke2Servers` arms).
   generated input without partiality), and `prop_compositionPreservesWellFormedness` (composing two
   well-formed fragments yields a well-formed value).
 - A per-property label: TESTED (sampled) by default; PROVEN for the exhausted `Rke2Servers` finite domain.
-- **Declared coverage minima (forecloses vacuous generators, §4).** Each property runs under `checkCoverage`
+- **Declared coverage minima (forecloses vacuous generators, §M.4).** Each property runs under `checkCoverage`
   with explicit `cover` obligations forcing its nontrivial arms: `prop_smartCtorClosure` covers each
   smart-constructor family (≥ 15% each, ≥ 3 distinct families); `prop_decodeRoundTrip` covers non-empty
   multi-substrate and multi-service IR (≥ 20% multi-substrate, ≥ 20% ≥2-service); `prop_foldTotal` covers each
@@ -411,7 +411,7 @@ Phase 7 or 8; `rendered-output-golden` is owned by
   the catalog's per-entry `**Validation-locus:**` plus the Phase-6-added `**Delivery-owner:**` and
   `**Case-family:**` tags, with columns at minimum `entry`, `subcase`, `validation_locus`, `owner_phase`, and
   `case_family`. The
-  provisioning-deferred set is a query over those committed rows (`owner_phase ∈ {Phase-7, Phase-10}` plus the
+  provisioning-deferred set is a query over those committed rows (`owner_phase ∈ {Phase-7, Phase-11}` plus the
   provisioning case families), not a duplicated literal section-number list.
 - A coverage assertion that **reconciles the emitter's locus for every entry against the registry** and goes
   red on any locus/owner/family divergence, then requires every Phase-4/5/6-owned `Gate-1-editor` /
@@ -423,7 +423,7 @@ Phase 7 or 8; `rendered-output-golden` is owned by
 1. The ledger emits with every catalog entry mapped to exactly one locus, that map reconciled against the
    committed `locus_registry.tsv` (red on any emitter-vs-registry divergence); the coverage assertion is green —
    every Phase-4/5/6-owned Register-1 row carries a passing rejecting fixture and every deferred row names its
-   registry owner (`provision-seal` rows → Phase 7 or Phase 10,
+   registry owner (`provision-seal` rows → Phase 7 or Phase 11,
    `rendered-output-golden` → Phase 13, `live-effect` → live band); the suite is red if any entry/subcase is
    unmapped, misclassified relative to the registry, selected by a stale hard-coded range, or claimed settled
    before its owner phase.
@@ -459,14 +459,14 @@ The whole sprint (📋 Planned).
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
   design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the DSL vision
-- [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — the catalog index and its §2
-  load-bearing limit; the §5 coverage matrix this corpus exhausts and the §6 three foreclosure layers with the
+- [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — the catalog index and its [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)
+  load-bearing limit; the [§5](../documents/illegal_state/illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state) coverage matrix this corpus exhausts and the [§6](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) three foreclosure layers with the
   honest Gate-1-vs-Gate-2 split live in `illegal_state_techniques.md`
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — §5 the two typed gates exercised against the corpus
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — §2 Register 1, §4 the per-run ledger the
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) the two typed gates exercised against the corpus
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 1, [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger the
   validation-locus ledger specializes
-- [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — §2 the registers,
-  §5 the honesty limit (a green Register-1 corpus is not a live-effect claim)
+- [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — [§2](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) the registers,
+  [§5](../documents/engineering/conformance_harness_doctrine.md#5-honesty-what-the-harness-does-and-does-not-establish) the honesty limit (a green Register-1 corpus is not a live-effect claim)
 - [phase_04](phase_04_dhall_gate1_schema.md) — Gate 1, the Dhall schema + positive corpus this phase extends
 - [phase_05](phase_05_gadt_decoder_gate2.md) — Gate 2, the GADT-indexed IR + decoder this corpus rides atop
 - [phase_07](phase_07_capacity_core_folds.md) — the pure capacity/topology/storage fold negatives selected

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, documents/README.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: The mechanism slice of the illegal-state catalog — the seven reusable typing techniques that
@@ -31,7 +31,7 @@ below cite it.
 
 Everything here is **design intent**, not a tested amoebius result: the type discipline it describes (the spec
 composes; no illegal value is constructible) is a **Tier-1** (design-time / in-process) property targeted for
-in-process validation in the **pre-cluster gates (Phases 4–13)** (Dhall Gate 1 `dhall type` + the Haskell decoder Gate 2 + QuickCheck), while
+in-process validation in the **pre-cluster type/decode gates (Phases 4–13)** (Dhall Gate 1 `dhall type` + the Haskell decoder Gate 2 + QuickCheck), while
 its **runtime enforcement** remains **Phase 26** (Tier 2). Status and gates live only in
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
 
@@ -51,7 +51,10 @@ The catalog is foreclosed by seven reusable techniques operating across **two ty
 
 The seven techniques follow. Each leads with the principle, then the mechanism. Techniques [§4.6](#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) and [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) were
 added for the capacity / topology / bounded-storage block ([§3.13](./illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](./illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration)); [§4.6](#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) is the one technique that is
-**irreducibly decode-foreclosed** ([§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it), [§6](#6-three-layers-of-foreclosure-and-the-honesty-they-force)).
+**wholly** decode-foreclosed — no part of it reaches type-inhabitance. Several others are **split** across
+the two layers: [§4.1](#41-pvcpv-binding-by-construction) and [§4.4](#44-ownership-indices--single-owner-ssot-structurally) each have a type-level part and a decode-time part, and every
+entry names its own concrete stage in its `Validation-locus:` line rather than inheriting one from its
+technique ([§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it), [§6](#6-three-layers-of-foreclosure-and-the-honesty-they-force)).
 
 ### 4.1 PVC↔PV binding by construction
 
@@ -60,8 +63,13 @@ pair. *Mechanism:* a single `BoundVolume` smart constructor takes one private `P
 already derived from required usable bytes through presentation overhead and backing allocation
 minimum/quantum, and emits *both* the StatefulSet claim request and the exactly-matching `no-provisioner` PV.
 They share its backing-rounded `provisionedBytes`, presentation/access mode, and deterministic
-`<namespace>/<statefulset>/pv_<integer>` identity. There is no constructor for a bare PVC and
-none for a free-floating PV, so [§3.1](./illegal_state_storage.md#31-bad--illegal-durable-storage) and [§3.2](./illegal_state_storage.md#32-pvcs-that-dont-bind-pvs) have no inhabitants. The *binding* is the value. The retain,
+`<namespace>/<statefulset>/pv_<integer>` identity. The smart constructor exposes no way to build a bare PVC
+or a free-floating PV, so [§3.1](./illegal_state_storage.md#31-bad--illegal-durable-storage) and [§3.2](./illegal_state_storage.md#32-pvcs-that-dont-bind-pvs) are foreclosed — but at **different loci**, and
+neither claim is stronger than its entry's own `Validation-locus:` line. [§3.1](./illegal_state_storage.md#31-bad--illegal-durable-storage)'s no-arm/required-field
+shapes fail `dhall type` at authoring (`Gate-1-editor`), while [§3.2](./illegal_state_storage.md#32-pvcs-that-dont-bind-pvs)'s exactly-matching pairing bites at
+`Gate-2-decoder`: Dhall has no opaque types, so it cannot hide the raw claim and PV record constructors, and
+the pairing is held by the Haskell smart constructor rather than by the Dhall schema
+([§6](#6-three-layers-of-foreclosure-and-the-honesty-they-force)). The *binding* is the value. The retain,
 sizing, and deterministic-rebind rules are owned by
 [`storage_lifecycle_doctrine.md`](../engineering/storage_lifecycle_doctrine.md); this doc owns only the
 *pairing-by-construction* technique.
@@ -338,9 +346,14 @@ flowchart TD
 
 *Design intent. The two gate layers foreclose at decode; the opaque seal is the provision-seal locus; the runtime layer is observed, never asserted as a type proof.*
 
-1. **`type-foreclosed` — uninhabitable by type.** The illegal value has *no constructor* — the strongest layer. A cross-tenant
-   reference ([§3.8](./illegal_state_security.md#38-cross-tenant-references-and-literal-secrets)) and a bare PVC ([§3.2](./illegal_state_storage.md#32-pvcs-that-dont-bind-pvs)) are meant to live here. The "proof" is type-inhabitance, checked
-   by Dhall + GHC at the spec/code layer.
+1. **`type-foreclosed` — uninhabitable by type.** The illegal value has *no constructor* — the strongest layer.
+   A product-named capability ([§3.12](./illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability)) and an even/zero-server rke2 control plane
+   ([§3.24](./illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)) live here: closed unions with no illegal arm, foreclosed at `dhall type`. The "proof" is
+   type-inhabitance, checked by Dhall + GHC at the spec/code layer. **The phantom-tag and GADT techniques
+   ([§4.2](#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable), [§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)) reach this layer only in the Haskell IR, not in Dhall** — Dhall has no opaque
+   types, so a cross-tenant reference ([§3.8](./illegal_state_security.md#38-cross-tenant-references-and-literal-secrets)) and a bare PVC ([§3.2](./illegal_state_storage.md#32-pvcs-that-dont-bind-pvs)) are uninhabitable in the
+   decoded IR while their concrete rejection stage is `Gate-2-decoder`. Each entry's `Validation-locus:` line,
+   not this layer name, is what a fixture must fail against.
 2. **`decode-foreclosed` — rejected by a total pure construction check before effects.** This historical
    layer name covers constructible values rejected by a **total** smart constructor or fold: some checks run
    in the Gate-2 decoder, while whole-deployment/resource checks run only after bind/expand at the
@@ -358,7 +371,7 @@ flowchart TD
 terms: **Tier-1 corresponds to Registers 1–2** and **Tier-2 to Register 3** — one pre-cluster/runtime boundary
 under two names.) Layers 1–2 (`type-foreclosed` + `decode-foreclosed`) are the **Tier-1** design-time /
 in-process integrity band — the spec composes and the type discipline holds in the abstract — validated
-**in-process in the pre-cluster gates (Phases 4–13)** (Dhall Gate 1, Haskell decoder Gate 2, QuickCheck,
+**in-process in the pre-cluster type/decode gates (Phases 4–13)** (Dhall Gate 1, Haskell decoder Gate 2, QuickCheck,
 bind/expand, the opaque provision seal, and `renderAll` goldens). Layer 3
 (`runtime-checked`) is **Tier-2** runtime-enforcement integrity — that the running cluster enforces what the spec
 composed — and stays **deferred and UNVERIFIED** until its live real-resource phase (owned by
@@ -400,7 +413,7 @@ growing capacity, and the cloud honoring the quota — are always runtime-checke
 [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the testing doctrine, never asserted here.
 
 > **Honesty.** amoebius has built no phase yet. Every `type-foreclosed` and `decode-foreclosed` claim above is the *intended*
-> **Tier-1** (design-time / in-process) property of the type discipline — targeted for in-process validation in the **pre-cluster gates (Phases 4–13)**,
+> **Tier-1** (design-time / in-process) property of the type discipline — targeted for in-process validation in the **pre-cluster type/decode gates (Phases 4–13)**,
 > not a tested result; the **Tier-2** `runtime-checked` residue is explicitly deferred to its live phase. Where a technique
 > generalizes a behaviour proven in prodbox (single-owner SSoT, Keycloak-owns-ingress), that proof is
 > evidence from a sibling system, not proof in amoebius.
@@ -437,7 +450,7 @@ The five loci:
    residual teeth of the [§4.1](#41-pvcpv-binding-by-construction)–[§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
    `type-foreclosed` foreclosures actually land.
 3. **`provision-seal` — post-bind whole-deployment provisioning returns `Left`.** Gate 2 has already produced
-   decoded, unprovisioned declarations. Phase 10 expands the complete source set and `provision` runs every
+   decoded, unprovisioned declarations. Phase 10 expands the complete source set and Phase 11's `provision` runs every
    capacity, placement, storage/retention, provider-quota, accelerator-count, and net-VRAM fold against the
    exact target inventory. Failure returns `ProvisionError`; success alone constructs the opaque
    `ProvisionedSpec`. This is the concrete locus for the whole-deployment face of `decode-foreclosed`.
@@ -463,7 +476,7 @@ monitor field, the absent `Off`/`Public` arms), `Gate-2-decoder` (the coverage /
 `rendered-output-golden` (the derived rules/panels in the emitted objects), and `live-effect` (that the alert actually
 fires) — and the foreclosure *layer* of each part is stated separately in the entry. The loci also map loosely onto
 the two-tier band: `Gate-1-editor`, `Gate-2-decoder`, `provision-seal`, and `rendered-output-golden` are
-**Tier-1** design-time / in-process gates (validated in the **pre-cluster band, Phases 4–13**), while
+**Tier-1** design-time / in-process gates (validated in the **pre-cluster type/decode gates, Phases 4–13** — inside the plan's pre-cluster band, Phases 1–16), while
 `live-effect` is the **Tier-2** runtime-enforcement residue
 deferred to its live phase.
 

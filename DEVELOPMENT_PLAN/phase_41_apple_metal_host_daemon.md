@@ -125,7 +125,7 @@ and its concrete fixtures are pinned per the [Phase-0 oracle-pinning obligation]
 
 - **Input-dependent output oracle (§M.1/§M.3).** The artifact retrieved from MinIO by content address must be
   byte-equal to an independently pinned expected output computed **off-implementation** — the committed
-  Phase-0 CPU reference `test/golden/phase_35/metal_job_ref.py` (a plain NumPy recompute of the same kernel
+  Phase-0 CPU reference `test/golden/phase_41/metal_job_ref.py` (a plain NumPy recompute of the same kernel
   math, authored before the bridge exists, never derived from bridge output). Two committed jobs `job_A` and
   `job_B` (differing only in their input tensor) must land two **different** pinned outputs
   `blobs/<sha256(out_A)>` and `blobs/<sha256(out_B)>`; a constant, input-independent, or `job_A==job_B` worker
@@ -140,7 +140,7 @@ and its concrete fixtures are pinned per the [Phase-0 oracle-pinning obligation]
   exists anywhere in the repo, an echo worker has nothing to replay and must actually dispatch. The dispatch
   additionally observes a real `MTLDevice` artifact (the compiled `MTLLibrary`/pipeline-reflection handle) and
   may bind provenance by reading the `MTLBuffer` the GPU kernel wrote, not only the returned buffer.
-- **Committed seeded mutant (§M.2).** The committed mutant set `test/mutants/phase_35/` includes at minimum
+- **Committed seeded mutant (§M.2).** The committed mutant set `test/mutants/phase_41/` includes at minimum
   `const_output.patch` (worker writes a fixed constant regardless of job payload — an effect-swap operator),
   `echo_golden.patch` (worker returns the per-job **committed golden bytes** keyed by input identity without ever
   using the dispatch result — the effect-swap operator that survives the committed-`job_A`/`job_B` oracle but is
@@ -182,35 +182,34 @@ the following fixtures, goldens, and expected-error tags are authored and commit
 Phase-41 implementation exists** — and are the byte-authority the gate checks against (none is regenerated from
 the implementation):
 
-- `test/golden/phase_35/metal_job_ref.py` — the off-implementation CPU (NumPy) reference for the dispatched
-  kernel; the source of the expected output bytes.
-- `test/golden/phase_35/job_A.input`, `job_B.input` — the two committed job inputs, differing only in their
-  tensor payload.
-- `test/golden/phase_35/job_A.expected`, `job_B.expected` — the two pinned expected outputs (produced by the
-  CPU reference, not the bridge), whose sha256 the gate retrieves from MinIO.
-- `test/golden/phase_41/metal_job_ref.py` — the off-implementation NumPy recompute of the same kernel math,
-  invoked **at gate-run time** to derive the challenge job `job_C`'s expected output. Only this reference
+- `test/golden/phase_41/metal_job_ref.py` — the off-implementation CPU (NumPy) reference for the dispatched
+  kernel, used two ways: ahead of time it produces the pinned `job_A`/`job_B` expected bytes, and
+  **at gate-run time** it derives the challenge job `job_C`'s expected output. Only this reference
   **script** is Phase-0-committed; `job_C`'s input is nonce/seed-derived at gate-run time and its expected output
   is computed by this reference at gate-run time, so **no committed golden for `job_C` exists in the repo** for a
   worker to echo. The oracle stays independent of the code under test (§M.1/§M.3) — it is regenerated from this
   off-implementation reference, never from the bridge.
-- `test/golden/phase_35/resource_fold.json` — the independently authored physical-host inventory and exact
+- `test/golden/phase_41/job_A.input`, `job_B.input` — the two committed job inputs, differing only in their
+  tensor payload.
+- `test/golden/phase_41/job_A.expected`, `job_B.expected` — the two pinned expected outputs (produced by the
+  CPU reference above, not the bridge), whose sha256 the gate retrieves from MinIO.
+- `test/golden/phase_41/resource_fold.json` — the independently authored physical-host inventory and exact
   Lima-VM, Kubernetes-node, host-worker, Apple-unified-memory, cache, and durable/local-storage demands. For
   the VM it pins guest-system/unique-layout usable carves, `FilesystemPresentation`, backing minimum/quantum, the
   expected private `requiredUsableBytes`/40-GiB `provisionedBytes` result, and the single physical-disk
   high-water debit; it fixes the disjoint pool ownership and expected headroom witness before the provision
   fold exists.
-- `test/golden/phase_35/vm_disk_boundaries.csv` — independently computed minimum/quantum boundary pairs,
+- `test/golden/phase_41/vm_disk_boundaries.csv` — independently computed minimum/quantum boundary pairs,
   including an accepted exact-boundary operand, a one-byte-higher operand that rounds to the next quantum and
   exhausts its parent, and the expected one-byte-short-live-disk/fs-type failure reasons.
 - `test/dhall/phase_41_illegal/` — the four wild-exposure negatives (see Sprint 41.5), each a one-field
   mutation of the committed green host-comms spec, each carrying its validation-locus tag and its expected
   `dhall type` error string, registered in the Phase-6 illegal-state corpus.
-- `test/mutants/phase_35/const_output.patch`, `echo_golden.patch`, `lb_nodeport.patch`, `omit_metal_work_item.patch`,
+- `test/mutants/phase_41/const_output.patch`, `echo_golden.patch`, `lb_nodeport.patch`, `omit_metal_work_item.patch`,
   `favorable_metal_epoch.patch`, `drop_metal_overlap_debit.patch` — the committed seeded mutants the gate must
   turn red (`echo_golden.patch` replays the committed per-job golden bytes without using the dispatch result, and
   is caught only by the run-time challenge job `job_C`).
-- `test/mutants/phase_35/resources/` — one-short provider/compiler/worker/harness cases and dropped-envelope/
+- `test/mutants/phase_41/resources/` — one-short provider/compiler/worker/harness cases and dropped-envelope/
   premature-replacement mutants, paired with the complete `resource_fold.json` positive.
 
 ## Resource provision — the host worker and its transitions
@@ -287,7 +286,7 @@ CPU/memory,
 process slots, logs/writable/scratch/cache, client buffers, Pulsar topic/backlog/offload, output-object overlap,
 content-gateway/collector execution, and every surviving pod/IP/
 CSI/image/storage commitment. Dropped-envelope mutants that launch clang, the worker, or the host probe with
-no row live under `test/mutants/phase_35/resources/`; `early_worker_replacement.dhall` replaces before observed
+no row live under `test/mutants/phase_41/resources/`; `early_worker_replacement.dhall` replaces before observed
 release and `drop_pulsar_topic_demand.dhall` omits the work-topic row. Each must turn the gate red before any
 lasting effect. `drop_content_gateway_collector.dhall` and `direct_minio_backend_put.dhall` must likewise fail
 before any output mutation.
@@ -415,7 +414,7 @@ and [`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-f
    the VM; with it present, the same call is a verified no-op (idempotent).
 2. A unit test exercises the pure install plan for apple without invoking brew.
 3. Cross-check the live physical-host and VM/node inventory against
-   `test/golden/phase_35/resource_fold.json`; observed supply below any declared CPU, memory/unified-memory, or
+   `test/golden/phase_41/resource_fold.json`; observed supply below any declared CPU, memory/unified-memory, or
    storage value fails. Before creation, rederive the current fixture's
    `requiredUsableBytes` from the guest system plus unique kubelet-layout carves, apply its
    `FilesystemPresentation` overhead and backing minimum/quantum, and assert the private result is the pinned
@@ -519,7 +518,7 @@ The whole sprint (📋 Planned).
 **Status**: Planned
 **Implementation**: `src/Amoebius/HostWorker/MetalBridge.hs` (fixed ObjC/C bridge install + probe + runtime MSL dispatch), `src/Amoebius/HostWorker/AppleMetalBuild.hs` (target paths; not yet built)
 **Blocked by**: Sprint 41.1 (the apple substrate manager + brew lazy tool-ensure that resolves `/usr/bin/clang` and the OS Metal runtime by absolute path); Phase 38 gate (external prereq — the jit-build resolver + `CacheBudget`-bounded content-addressed cache the MSL source-metadata artifact lands in); Phase 38 gate (external prereq — the determinism kernel: fast-math-off, `experimentHash`)
-**Independent Validation**: the fixed Objective-C/C Metal bridge dylib is source-built on the host with `/usr/bin/clang` (absolute path, no env/`PATH`), `dlopen`'d, and verified by its probe symbol; generated MSL compiles at runtime via `MTLDevice.makeLibrary(source:options:)` and dispatches on the host GPU, and the dispatch surfaces a real `MTLDevice` artifact — the compiled `MTLLibrary` handle and its pipeline reflection — not merely a returned buffer; the dispatched kernel's output is byte-equal to the Phase-0-pinned off-implementation CPU reference (`test/golden/phase_35/job_A.expected`) for `job_A`'s input and byte-**different** and equal to `job_B.expected` for `job_B`'s input, so an input-independent or constant worker output is red, and byte-matches the **run-time-derived** expected value (off-implementation NumPy reference `test/golden/phase_41/metal_job_ref.py`, computed at gate-run time) for the **never-committed** challenge job `job_C`, so an echo-of-committed-golden worker is red; **no VM is ever started, no SwiftPM/`swift build` runs on a cache miss, and no login-keychain unlock is required**; the source-metadata cache artifact is content-addressed and yields bit-identical output when recomputed on a cache-bypassed second run in a distinct content-addressed namespace (an independent recompute, not a store hit).
+**Independent Validation**: the fixed Objective-C/C Metal bridge dylib is source-built on the host with `/usr/bin/clang` (absolute path, no env/`PATH`), `dlopen`'d, and verified by its probe symbol; generated MSL compiles at runtime via `MTLDevice.makeLibrary(source:options:)` and dispatches on the host GPU, and the dispatch surfaces a real `MTLDevice` artifact — the compiled `MTLLibrary` handle and its pipeline reflection — not merely a returned buffer; the dispatched kernel's output is byte-equal to the Phase-0-pinned off-implementation CPU reference (`test/golden/phase_41/job_A.expected`) for `job_A`'s input and byte-**different** and equal to `job_B.expected` for `job_B`'s input, so an input-independent or constant worker output is red, and byte-matches the **run-time-derived** expected value (off-implementation NumPy reference `test/golden/phase_41/metal_job_ref.py`, computed at gate-run time) for the **never-committed** challenge job `job_C`, so an echo-of-committed-golden worker is red; **no VM is ever started, no SwiftPM/`swift build` runs on a cache miss, and no login-keychain unlock is required**; the source-metadata cache artifact is content-addressed and yields bit-identical output when recomputed on a cache-bypassed second run in a distinct content-addressed namespace (an independent recompute, not a store hit).
 **Docs to update**: `documents/engineering/apple_metal_headless_builds.md`, `documents/engineering/substrate_doctrine.md`
 
 ### Objective
@@ -556,7 +555,7 @@ this sprint realizes it in amoebius for the first time.
 
 ### Validation
 1. Build the fixed bridge with `/usr/bin/clang`, `dlopen` it, and pass its probe; assert (from the
-   Sprint-35.3 exec trace, not a self-report) no `tart`/VM process was started and no `security`/keychain
+   Sprint-41.3 exec trace, not a self-report) no `tart`/VM process was started and no `security`/keychain
    unlock call was made.
    Independently overdraw clang CPU/RSS, intermediate scratch, and compiler-cache write headroom and make the
    scratch identity unknown. Each case starts zero clang processes and writes zero object/cache bytes. For a
@@ -564,7 +563,7 @@ this sprint realizes it in amoebius for the first time.
    deliberate overrun is throttled/terminated/`ENOSPC`, never spilled elsewhere.
 2. Compile generated MSL at runtime through the bridge and dispatch a kernel for both `job_A` and `job_B`;
    assert the returned buffer is byte-equal to the Phase-0-pinned CPU reference expected output for each job
-   (`test/golden/phase_35/job_A.expected`, `job_B.expected`), that the two outputs **differ** (so a constant
+   (`test/golden/phase_41/job_A.expected`, `job_B.expected`), that the two outputs **differ** (so a constant
    output fails), and that a real `MTLLibrary`/pipeline-reflection handle was obtained. Additionally dispatch the
    challenge job `job_C` whose input is generated **this run** (nonce/seed-derived, never committed) and assert the
    returned buffer byte-matches the expected output **computed at run time** by the off-implementation NumPy
@@ -573,7 +572,7 @@ this sprint realizes it in amoebius for the first time.
    under the fast-math-off determinism contract by recomputing `job_A` on a **cache-bypassed** run in a distinct
    content-addressed namespace and asserting the compute path (MSL compile + GPU dispatch) actually executed and
    produced a bit-identical result — a store hit does not satisfy this. The committed mutants
-   `test/mutants/phase_35/const_output.patch` (fixed constant) and `echo_golden.patch` (returns the committed
+   `test/mutants/phase_41/const_output.patch` (fixed constant) and `echo_golden.patch` (returns the committed
    per-job golden without using the dispatch result) must each turn this validation red.
    The OS-boundary memory/cache observer also confirms the worker stays within its declared runtime +
    Metal-unified-memory ceiling and the host cache stays inside its one carved backing; crossing either ceiling
@@ -696,19 +695,19 @@ transport crypto, close the carve-out so its boundaries cannot be drawn wrong, a
    one-field mutation of the committed green host-comms spec, differing only in the foreclosed field — fails
    `dhall type` with the pinned structured error naming its specific violated exclusion (asserted against the
    corpus-registered expected error string at its validation-locus tag), while the green spec type-checks; the
-   committed mutant `test/mutants/phase_35/lb_nodeport.patch` (which re-types the NodePort `LoadBalancer` in the
+   committed mutant `test/mutants/phase_41/lb_nodeport.patch` (which re-types the NodePort `LoadBalancer` in the
    *gate* spec) must turn this validation red.
 2. The gate `.dhall` runs the full Apple-Metal peer workflow: the worker consumes the job over native Pulsar
    (no WebSocket frames, no TLS handshake, only `127.0.0.1:<nodeport>`), and the output landed through the
    provisioned mutation gateway in MinIO,
    retrieved by its content address, is byte-equal to the Phase-0-pinned off-implementation expected output for
-   the dispatched job (`test/golden/phase_35/job_A.expected`) — with `job_B` yielding the distinct pinned
+   the dispatched job (`test/golden/phase_41/job_A.expected`) — with `job_B` yielding the distinct pinned
    `job_B.expected`, so a constant or input-independent artifact fails. The gate additionally dispatches the
    challenge job `job_C`, whose input is generated at gate-run time (nonce/seed-derived, never committed) and whose
    expected output is computed at run time by the off-implementation NumPy reference
    `test/golden/phase_41/metal_job_ref.py`; the content-addressed artifact retrieved from MinIO must byte-match
    that run-time-derived value, so an echo-of-committed-golden worker — which has no committed golden for `job_C`
-   to replay — fails, and the committed mutant `test/mutants/phase_35/echo_golden.patch` must turn this validation
+   to replay — fails, and the committed mutant `test/mutants/phase_41/echo_golden.patch` must turn this validation
    red. The gate then tears down leak-free per the three-part residue check.
 3. The live host, Lima VM, Kubernetes node, pods, host worker, private Metal epoch peak, cache, and storage inventory
    matches the Phase-0 resource-fold oracle: all CPU, memory/unified-memory, logical pod-ephemeral,

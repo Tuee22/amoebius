@@ -88,14 +88,14 @@ type K8sObjectIdentity =
   (ApiGroup, ApiVersion, Kind, Maybe NamespaceId, KubernetesObjectName)
 type KubernetesObjectId = K8sObjectIdentity -- compatibility alias, not a second identity
 
--- Phase 10 seals one unique source per Kubernetes object identity.
+-- Phase 11 seals one unique source per Kubernetes object identity.
 renderSourcePrivate :: ProvisionedRenderSource identity -> K8sObject
 
 -- Whole-deployment closure. KubernetesObjectId is (group/version/kind, namespace, name).
 renderAll :: ProvisionedSpec -> [K8sObject]
 ```
 
-Phase 10 constructs `ProvisionedRenderSourceSet` without depending on this Phase-13 object/Aeson model. Its
+Phase 11 constructs `ProvisionedRenderSourceSet` without depending on this Phase-13 object/Aeson model. Its
 private `renderSourcePrivate` maps one already-owned source to one object and cannot independently apply a
 list. Deployment-level `renderAll` owns the **complete set of typed Kubernetes objects** — `Namespace` /
 `Node` /
@@ -109,7 +109,7 @@ exactly as prodbox already serializes its supporting objects ([§1](#1-why-this-
 and no `values.yaml`; the *record* is the manifest.
 
 `renderAll` is not an unchecked list concatenation. It traverses the unique
-`K8sObjectIdentity → ProvisionedRenderSource K8sObjectIdentity` map already sealed by Phase 10. Each key equals
+`K8sObjectIdentity → ProvisionedRenderSource K8sObjectIdentity` map already sealed by Phase 11. Each key equals
 the source's embedded identity and has exactly one
 structural source owner; duplicate candidates or an omitted source-domain member fail
 `provisionRenderSources` before `ProvisionedSpec`, without depending on this later renderer. A deliberately
@@ -184,7 +184,7 @@ Three properties make this the right shape:
   kind cluster, no apiserver, no golden-YAML diffing of templated strings. This is the manifest-layer face
   of the project's pure-FP testing posture.
 - **Composable per the dependency graph.** `renderAll` maps every service/global render source in the
-  Phase-10-sealed unique source inventory. Ordering and connectivity are derived
+  Phase-11-sealed unique source inventory. Ordering and connectivity are derived
   from the declared dependency graph, not hand-authored
   ([§3](#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)). One spec value renders the
   whole cluster, and duplicate ownership cannot be hidden by list order.
@@ -758,7 +758,7 @@ three-replica Patroni — a difference of *object structure*, not merely of a `v
 This is precisely what a values-only Helm chart handles badly and a typed renderer handles cleanly. A single
 chart parameterized by a `replicas` value cannot, without templating contortions, emit a *different set and
 shape* of objects for "single-node" vs. "distributed"; a typed
-Phase 10's private `ProvisionedServiceObjectSource` constructors pattern-match the shape and enter the unique
+Phase 11's private `ProvisionedServiceObjectSource` constructors pattern-match the shape and enter the unique
 whole-deployment source map; Phase 13's `renderSourcePrivate` total-maps those sources before `renderAll`
 returns the deployment set. Each shape remains independently type-checked. The
 capability abstraction — capabilities named by role (`ObjectStore`, `SecretStore`, `MessageBus`, `Sql`,

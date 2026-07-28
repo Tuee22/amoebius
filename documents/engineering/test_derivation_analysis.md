@@ -60,7 +60,7 @@ Descriptive only. Each concept is owned by the document named; nothing here rest
 
 | Concept | Owner |
 |---|---|
-| The four registers (pure, boundary, deterministic simulation 2.5, live test-`.dhall` topology) | [testing_doctrine.md §2](./testing_doctrine.md#2-three-registers-of-amoebius-testing) |
+| The three phase-gate registers (1 pure, 2 boundary, 3 live test-`.dhall` topology) plus the Register-2.5 deterministic-simulation activity | [testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing) |
 | Spin up → run → always tear down; the leak-free cycle | [testing_doctrine.md §3](./testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down) |
 | The per-run proven/tested/assumed ledger and the UNVERIFIED rule | [testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) |
 | Extract → Model → Inject; the three-layer correctness argument | [chaos_failover_doctrine.md §5](./chaos_failover_doctrine.md#5-three-layers-and-the-blindness-that-binds-them) |
@@ -325,7 +325,7 @@ only — no owning model or phase*.
 
 ### 6.5 One reported defect that was not real
 
-An earlier reading reported two stale anchors in the illegal-state index (§3.27 and §3.30), on the grounds
+An earlier reading reported two stale anchors in the illegal-state index ([§3.27](../illegal_state/illegal_state_capacity.md#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement) and [§3.30](../illegal_state/illegal_state_capacity.md#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool)), on the grounds
 that both headings had been retitled without their inbound anchors being updated. **That report was a false
 positive.** The corpus uses explicit `<a id="old-slug">` tags to keep inbound links alive across a heading
 rename, and both entries — along with nine other retitled headings — carry one. A whole-repo check that
@@ -352,8 +352,8 @@ deliberate and is recorded here so it is not "fixed" away by a later reader.
 
 ## 8. What was adopted
 
-This analysis has been **adopted**. Its thesis is now normative doctrine, its six recommendations are
-placed, and all four defects are repaired. What follows records where each part landed, so a reader arriving
+This analysis has been **adopted**. Its thesis is now normative doctrine, **four of its six**
+recommendations are placed (the remaining two are recorded as open below), and all four defects are repaired. What follows records where each part landed, so a reader arriving
 at this document can find the owner rather than treat it as a live proposal.
 
 | This document's section | Landed in |

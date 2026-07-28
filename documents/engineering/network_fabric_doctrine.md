@@ -66,7 +66,7 @@ Harbor/Helm of networking: the duplicated-control-plane pattern amoebius rejects
 | Its own PKI / mTLS | The Vault forest CA + secrets model ([vault_pki_doctrine.md](./vault_pki_doctrine.md)) |
 | Its own node/peer inventory | The typed node inventory ([substrate_doctrine.md](./substrate_doctrine.md)) + the Dhall spec |
 
-Five duplicated control planes, five second state stores. Amoebius configures the
+Five duplicated control planes, five second state stores. amoebius configures the
 raw WireGuard *primitive* it owns end to end, and runs none of Netmaker's machinery. What this forecloses:
 raw-WireGuard-only gives up Netmaker's turnkey conveniences — automatic mesh management, NAT-traversal
 helpers, and an operator UI — each of which amoebius must instead supply through its own rendered-config
@@ -222,7 +222,7 @@ exists to provide have little surface to act on, and each is already covered:
 
 | Mesh feature | Why it is redundant / declined here |
 |---|---|
-| East-west pod-to-pod mTLS | East-west is authorized by NetworkPolicy (default-deny + derived-allow, [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), identity is Vault PKI, and the cross-cluster wires §5 *renders* — the attach (K1) and stretched control-plane (K2) spans — are WireGuard-encrypted ([§5](#5-the-security-boundary-generalizes-localhost--authenticated-fabric); the broker↔broker geo-replication wire is deferred, [§1](#1-why-this-doctrine-exists-the-inter-cluster-wire-is-an-open-gap)). The in-cluster network is already treated as trusted, and coordination is broker-mediated Pulsar + MinIO, not synchronous pod-to-pod HTTP — little east-west surface to encrypt. |
+| East-west pod-to-pod mTLS | East-west is authorized by NetworkPolicy (default-deny + derived-allow, [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), identity is Vault PKI, and the cross-cluster wires [§5](./platform_services_doctrine.md#5-vault--the-secrets-root-reference-only) *renders* — the attach (K1) and stretched control-plane (K2) spans — are WireGuard-encrypted ([§5](#5-the-security-boundary-generalizes-localhost--authenticated-fabric); the broker↔broker geo-replication wire is deferred, [§1](#1-why-this-doctrine-exists-the-inter-cluster-wire-is-an-open-gap)). The in-cluster network is already treated as trusted, and coordination is broker-mediated Pulsar + MinIO, not synchronous pod-to-pod HTTP — little east-west surface to encrypt. |
 | Retries / timeouts / circuit-breaking | The bus already gives at-least-once + dedup ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)) at the typed application layer, where amoebius wants it — not hidden in a sidecar. |
 | Golden metrics | Prometheus/Grafana is already a standard service ([platform_services_doctrine.md](./platform_services_doctrine.md)). |
 | Traffic-split (the *one* relevant feature, for gateway migration) | **Gateway-API `HTTPRoute` `backendRefs` carry weights natively**, on the Envoy edge amoebius already renders and Keycloak-fronts. A planned home→provider migration ([gateway_migration_doctrine.md](./gateway_migration_doctrine.md)) is a weight shift on the edge already in the stack — no mesh needed. |

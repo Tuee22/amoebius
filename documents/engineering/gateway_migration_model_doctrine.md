@@ -11,7 +11,7 @@
 
 ## 1. The one obligation
 
-Amoebius delegates almost every consensus problem to a system that already discharges it, and does not re-prove
+amoebius delegates almost every consensus problem to a system that already discharges it, and does not re-prove
 it ([chaos_failover_doctrine.md](./chaos_failover_doctrine.md)):
 
 - **Intra-cluster replicated state** — object storage, the message log, the SQL primary — is delegated to
@@ -65,7 +65,7 @@ superseded doc).
 
 The model asserts properties of **two kinds** — safety (nothing bad ever happens; checked on every reachable
 state) and liveness (something good eventually happens; a temporal `modelProperties` goal checked by TLC under a
-named fairness assumption `F`, per [formal_model_doctrine.md §2–§3](./formal_model_doctrine.md#2-the-model-is-data)).
+named fairness assumption `F`, per [formal_model_doctrine.md [§2](#2-the-two-branches-the-state-machine-this-model-checks)–[§3](#3-the-model)](./formal_model_doctrine.md#2-the-model-is-data)).
 The distinction is load-bearing here: the anti-split-brain guarantee is *both* "never two owners" (safety) *and*
 "eventually exactly one owner" (liveness) — a stalled state with **zero** owners satisfies the first and violates
 the second, so safety alone would not catch a failover that deadlocks.

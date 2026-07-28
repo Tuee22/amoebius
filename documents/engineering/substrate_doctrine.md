@@ -463,7 +463,7 @@ consumers read it, and each is a foreclosure that depends on there being exactly
   `currentFreeVram : Residual Bytes` (including `Zero`) is observed for live admission; the Apple
   offering carries no separate memory pool because its demand is charged to physical-host memory. The
   accelerator-memory shape is
-  [§8.2](#82-accelerator-memory-vram-unified-on-apple-discrete-on-cudawindows); the physical-host total behind
+  [§8.2](#82-accelerator-memory-vram-unified-on-apple-per-device-on-cudawindows); the physical-host total behind
   a host worker is [§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand).
   Kubernetes image bytes are not part of a pod's logical `ephemeral-storage` request, but they do consume the
   layout's physical filesystem. The platform-selected OCI index/manifest/config/compressed-layer objects are
@@ -535,7 +535,7 @@ consumers read it, and each is a foreclosure that depends on there being exactly
 This document owns the inventory *record*, the closed `NodeTaintKind` set, and the per-host `Capacity`
 *declaration* — including the **physical-host total and disjoint disk-pool partition** behind a host worker
 ([§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)),
-the unified-vs-discrete accelerator-device/**`vram`** shape ([§8.2](#82-accelerator-memory-vram-unified-on-apple-discrete-on-cudawindows)),
+the unified-vs-discrete accelerator-device/**`vram`** shape ([§8.2](#82-accelerator-memory-vram-unified-on-apple-per-device-on-cudawindows)),
 and the declared **`Site`** ([§8.3](#83-site-the-declared-network-locality-axis-cluster-nodes-and-host-worker-hosts));
 it does **not** own the capacity arithmetic ([resource_capacity_doctrine.md](./resource_capacity_doctrine.md)),
 the compute-engine relation ([cluster_topology_doctrine.md](./cluster_topology_doctrine.md)), or the
@@ -625,7 +625,7 @@ cross-checked-at-runtime** discipline as the rest of the `Capacity` above: the i
 `Site`, and a host declaring a `Site` its reachability contradicts (a remote host mis-declared local) surfaces
 at reconcile as the three-valued `discover = Unreachable → refuse`
 ([cluster_lifecycle_doctrine.md §9](./cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine))
-— so a declared-vs-real `Site` mismatch is runtime-checked residue, the ceiling every §8 declared fact lives
+— so a declared-vs-real `Site` mismatch is runtime-checked residue, the ceiling every [§8](#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints) declared fact lives
 at. Crucially this inventory carries a `Site` for **both** kinds of host it lists: **in-cluster cluster
 `Node`s** *and* the **host-worker physical hosts** ([§5](#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized),
 whose per-host `Capacity` is [§8.1](#81-the-physical-host-total-vs-the-vms-allocatable-the-host-worker-fold-operand)'s

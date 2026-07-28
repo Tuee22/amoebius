@@ -77,7 +77,7 @@ historical layer taxonomy, concretely evaluated at the post-bind `provision-seal
 uninhabitable-by-type proof.** Dhall (and the GADT-indexed Haskell it decodes into) has **no dependent
 arithmetic**: capacity is a *value*, not a type index, so neither "a feasible packing exists" nor "the sum fits"
 can be a statement about type inhabitance. Each is a **total smart constructor / fold** that inspects a
-constructible value and rejects it (`Left Overcommit` / `Left Unschedulable`) during Phase-10 provisioning,
+constructible value and rejects it (`Left Overcommit` / `Left Unschedulable`) during Phase-11 provisioning,
 after the complete source inventory is bound and before `ProvisionedSpec` or `renderAll` exists. Per the three
 foreclosure layers ([illegal_state_catalog.md §6](../illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
 this remains `decode-foreclosed`: a *spec-layer guarantee* (the spec never reaches the interpreter), but a
@@ -408,17 +408,25 @@ pure value; they are never a second source of truth.
   beside pod/runtime overhead, never inside the init-versus-app maximum:
 
   ```text
-  effectiveRequired := max(Σ app+sidecar requests, largest init request)
-                       + restartable-init accumulation
-                       + overhead
+  -- Restartable init containers (sidecars) run alongside BOTH later init stages and the app, so their
+  -- requests appear INSIDE both branches of the maximum and are never added outside it. Adding them
+  -- outside would double-count them against the app branch and omit them from the init branch.
+  appBranch  := Σ restartable-init requests + Σ app requests
+  initBranch := max over each ordinary init container k of
+                  ( request(k) + Σ requests of restartable-init containers started before k )
+  effectiveRequired := max(appBranch, initBranch) + overhead
   effectiveReserved := effectiveRequired + headroom.pad     -- provision only
                        subject to  effectiveReserved ≤ effectiveLimits
   ```
 
   Pod scope is what makes that insertion point unambiguous: a per-container pad would have to answer whether an
   init container's headroom participates in the maximum and whether a restartable-init sidecar's accumulates,
-  questions no existing addend answers. `effectiveReserved` is the value `place` folds and the value rendered
-  into `requests`; it is summed here, in `provision`, and never recomputed by the renderer.
+  questions no existing addend answers. `effectiveReserved` is the value `place` folds. Because Kubernetes
+  computes a pod's effective request from **per-container** `requests` by re-running the same maximum, the pod
+  -scoped pad is rendered by **distributing it across the app-branch containers** so the apiserver's recomputed
+  pod request equals `effectiveReserved`; `renderedRequestsEqualReserved` pins that equality on the rendered
+  object rather than assuming a pod-level `requests` field exists. The distribution is derived in `provision`
+  and never recomputed by the renderer.
 - **`Budget`** — a capacity an owner is allowed to consume against, fixed or quota-capped growable
   ([§5](#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm),
   [§6](#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)).
@@ -435,7 +443,9 @@ Residual u =
 -- Same scalar/resource shape as Capacity, but every scalar is Residual and
 -- allocated discrete identities have been removed.
 AvailableCapacity = Residualized Capacity
-Headroom         = AvailableCapacity
+-- NOTE: there is deliberately no `Headroom` synonym for AvailableCapacity. "Headroom" in this doctrine
+-- always means the DEMAND-side declared pad (`headroom : Optional ComputeHeadroomDemand`); remaining
+-- supply is always `AvailableCapacity`. One word never names both sides of the ledger.
 
 Resources =
   { requests : PodResourceVec
@@ -7053,7 +7063,7 @@ The nesting is where the illegal states [§3.17](../illegal_state/illegal_state_
   ([substrate_doctrine.md §8](./substrate_doctrine.md#8-the-node-inventory-the-single-owner-of-hosts-capacity-and-taints)),
   distinct from the Lima/WSL2 VM's kube-allocatable ([§8](#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime)).
   The three-way fit — the co-resident VM carve + the worker `Demand` ≤ physical-host allocatable, with the host
-  binary's own footprint already netted into system-reserved (substrate §8) — is a **post-bind
+  binary's own footprint already netted into system-reserved (substrate [§8](#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime)) — is a **post-bind
   `Left Overcommit` at the provision seal**, the host-tier analogue of the pod-tier aggregate overcommit
   ([illegal_state_catalog.md §3.17](../illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded));
   the raw demand remains representable, but no opaque deployable `ProvisionedSpec` can be constructed — a
@@ -7384,7 +7394,7 @@ ProvisionedKubernetesObjectKind =
   >
 
 CanonicalProvisionedKubernetesFields =
-  private Phase-10 object-source AST containing only fields copied from provisioned identities and witnesses
+  private Phase-11 object-source AST containing only fields copied from provisioned identities and witnesses
 
 RenderReconcileMode =
   < DeclarativeApply :
@@ -7544,12 +7554,12 @@ groups. Only the matching
 observed fingerprint plus fresh result can mint `ValidatedLiveTarget`; no prior
 `ProvisionedTenantPolicyPersistence` is an input.
 
-**`place` folds exactly one `Topology`.** `place :: Topology -> [Workload]` admits a **single** `Topology`, and
+**`place` folds exactly one `Topology`.** `place :: Topology -> [Workload] -> Either PlacementError Placement` takes a **single** `Topology`, and
 a `Topology` is one cluster ([cluster_topology_doctrine.md §4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction)),
 so a pod placement spanning two clusters' `Topology`s has **no constructor — type-foreclosed by arity**
-([§9.1](#91-the-cross-cluster-capacity-fold-is-a-type-foreclosed-non-goal-single-cluster-by-arity),
+([§9.1](#91-pod-placement-is-single-cluster-shared-physical-supply-is-allocated-at-the-forest-boundary),
 [illegal_state_catalog.md §3.31](../illegal_state/illegal_state_catalog.md)). When clusters share a physical
-host/account/backing, the parent must first carve disjoint `ClusterBudget`s from the §9.1
+host/account/backing, the parent must first carve disjoint `ClusterBudget`s from the [§9.1](#91-pod-placement-is-single-cluster-shared-physical-supply-is-allocated-at-the-forest-boundary)
 `SharedSupplyLedger`; that infrastructure allocation never lets a pod cross a cluster boundary. A
 **stretched cluster** — one whose nodes span
 two network-locality `Site`s across a WAN — is still **one** `Topology`; `place` runs **once** over it. The WAN
@@ -8247,7 +8257,8 @@ ScalingSignal =
 ScalingPolicy =
   { account          : CloudAccountId
   , engine           : ScalingEngineArm
-  , candidates       : NonEmptyMap CandidateClassId CandidateNodeClass
+  , candidates       : NonEmptyMap CandidateClassId ProviderNodeClass  -- `CandidateNodeClass` elsewhere is
+                                                                       -- an alias for this same record
   , candidateKeys    : CandidateNodeClassKeyEqualityWitness
   , signals          : NonEmpty ScalingSignal
   , priceCeiling     : Price
@@ -8397,8 +8408,8 @@ the *two-ceiling arithmetic*):
 
 For overcommit to be a pure checked rejection rather than only a runtime error, the capacity the fold checks
 against must be a **pure-model input** — a demand cannot be provisioned against a number learned only after
-effects. Amoebius therefore **declares** capacity in the spec/inventory model, completes bind/expansion, runs
-the fold at the Phase-10 `provision-seal`, and then **cross-checks** the declaration against reality at
+effects. amoebius therefore **declares** capacity in the spec/inventory model, completes bind/expansion, runs
+the fold at the Phase-11 `provision-seal`, and then **cross-checks** the declaration against reality at
 reconcile (runtime-checked). Gate-2 decode never constructs `ProvisionedSpec`.
 
 - **Declared in pure input; checked at the provision seal.** Each host/node advertises an **allocatable**
@@ -9709,7 +9720,7 @@ To keep SSoT boundaries crisp:
 ### 9.1 Pod placement is single-cluster; shared physical supply is allocated at the forest boundary
 
 `place` is **single-cluster by construction**, and cross-cluster *pod placement* is a deliberate non-goal. Its signature
-is `place :: Topology -> [Workload]`, and a `Topology` is exactly one cluster
+is `place :: Topology -> [Workload] -> Either PlacementError Placement`, taking exactly one `Topology`, and a `Topology` is exactly one cluster
 ([cluster_topology_doctrine.md §4](./cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction)),
 so a placement spanning two clusters' `Topology`s has **no constructor — type-foreclosed by arity**: the same
 closed-union / no-arm idiom that forecloses the worker pool as a fourth `ComputeEngine` arm
@@ -9725,7 +9736,14 @@ single-owner budget carve:
 allocateForestSupply
   :: ObservedSharedSupplySnapshot
   -> ClusterSupplyDemandSet
-  -> Either SharedSupplyOvercommit (Map ClusterId ClusterBudget)
+  -> Either ForestSupplyError (Map ClusterId ClusterBudget)
+
+-- Every refusal the carve can return, closed:
+ForestSupplyError =
+  < SharedSupplyOvercommit        -- a HostId/CloudAccountId/BackingId reused across cluster totals
+  | AcceleratorAlreadyAllocated   -- one physical accelerator assigned twice
+  | BackingAlias                  -- one backing/device copied at full size into two host records
+  >
 
 SharedSupplyLedger =
   { id       : SharedSupplyLedgerId
@@ -10161,7 +10179,7 @@ compacted topic and the jitML `tfevents` prefix fold through the two-ceiling Pul
 ([§7](#7-pulsar-has-two-ceilings-the-hot-tier-and-the-durable-total)) and the closed `StorageBudget`
 ([§5](#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm)) — no new budget type. And because
 in-cluster parent→child telemetry is foreclosed ([monitoring_doctrine.md](./monitoring_doctrine.md), the same
-cross-cluster arity as [§9.1](#91-the-cross-cluster-capacity-fold-is-a-type-foreclosed-non-goal-single-cluster-by-arity)),
+cross-cluster arity as [§9.1](#91-pod-placement-is-single-cluster-shared-physical-supply-is-allocated-at-the-forest-boundary)),
 there is **no** parent-rollup storage to budget — a vacuous parent-side `StorageBudget` would have no flow to
   account. The cost model is deliberately conservative and version-pinned: actual query latency remains
   runtime-checked, but descriptor cardinality cannot bypass the pure CPU/memory provision.

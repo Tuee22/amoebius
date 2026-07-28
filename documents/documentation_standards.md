@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, documents/README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, README.md, documents/README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for how documentation is written and maintained across amoebius.
@@ -135,7 +135,7 @@ is promoted into reader-facing prose it takes the anchor-link form.
 
 ## 6. Honesty (the proven/tested/assumed discipline)
 
-Amoebius doctrine inherits the chaos/failover doctrine's moral rule: **never report a tested, assumed, or
+amoebius doctrine inherits the chaos/failover doctrine's moral rule: **never report a tested, assumed, or
 merely argued result as proven.** Verification claims state the layer they actually reach; the rest is
 evidence, not proof, and the document must say so. See
 [`engineering/chaos_failover_doctrine.md`](./engineering/chaos_failover_doctrine.md) (Phase 0).
@@ -157,15 +157,15 @@ diagram adds one back-link to that file near its first diagram and does not rest
 
 ## 8. Tone and voice
 
-> **Purpose**: fix the register of doctrinal prose so tone is uniform and enforceable. §6 governs
-> whether a claim is *true*; §8 governs how any claim is *phrased*. Both are mandatory and
+> **Purpose**: fix the register of doctrinal prose so tone is uniform and enforceable. [§6](#6-honesty-the-proventestedassumed-discipline) governs
+> whether a claim is *true*; [§8](#8-tone-and-voice) governs how any claim is *phrased*. Both are mandatory and
 > independent.
 
 ### Register
 Doctrine prose is technical, declarative, and impersonal. The grammatical subject is amoebius, a
 named subsystem, or a named artifact:
 
-- **Amoebius forbids _X_.**
+- **amoebius forbids _X_.**
 - **The DSL carries only names, never values.**
 - **A valid `InForceSpec` cannot represent illegal cluster state.**
 
@@ -177,8 +177,8 @@ reasoning process; the argument is the surrounding sentences, not a rhetorical f
 | Person | Status | Rule |
 |--------|--------|------|
 | Third-person declarative | **Default** | amoebius / the subsystem / the artifact is the subject. Every normative statement. |
-| First-person plural (`we` / `our`) | **Forbidden in amoebius's own prose** | Recast with an impersonal subject (`Amoebius rejects Crossplane`; `The recorded operator decision is to drop Helm`). First-person survives **only inside a verbatim quotation** of the operator's recorded vision or decision — cited source material, not amoebius's narration (subject to §8's *Quoted vision text* rule below). |
-| Second-person (`you` / `your`) | **Forbidden** | Recast impersonally (`a PVC can bind to no PV`, not `you can write a PVC that…`). Genuine operator instructions use the **imperative mood** (`Run amoebius up`), which is not second-person address. |
+| First-person plural (`we` / `our`) | **Forbidden in amoebius's own prose** | Recast with an impersonal subject (`amoebius rejects Crossplane`; `The recorded operator decision is to drop Helm`). First-person survives **only inside a verbatim quotation** of the operator's recorded vision or decision — cited source material, not amoebius's narration (subject to [§8](#8-tone-and-voice)'s *Quoted vision text* rule below). |
+| Second-person (`you` / `your`) | **Forbidden in amoebius's own prose** | Recast impersonally (`a PVC can bind to no PV`, not `you can write a PVC that…`). Genuine operator instructions use the **imperative mood** (`Run amoebius up`), which is not second-person address. Second-person survives under the **same provenance exemption as first-person** — inside a verbatim quotation of external source material (e.g. an upstream project's own words: *"use at your own risk"*) — and under no other circumstance. |
 
 ### Banned constructs
 Each row is forbidden in doctrine prose. *Instead* is the required replacement.
@@ -193,6 +193,13 @@ Each row is forbidden in doctrine prose. *Instead* is the required replacement.
 | Emphatic filler (`the whole point` / `the whole reason` / `the whole identity`, `refuses that outright`, `bluntly`, `with a straight face`, decorative `exactly`) | Delete. A correctly stated rule needs no intensifier. |
 | First-person sentimentality (`amoebius's gift to its own engineers is focus`) | Delete, or restate as a structural property of the system. |
 
+### The product name
+
+The product name is **lowercase `amoebius`** everywhere, including sentence-initially and in headings —
+it is styled like `prodbox`, `infernix`, and `jitML`, which are also never capitalised. The only capitalised
+form is a document **title** (`# Amoebius Documentation Standards`), where title case governs. A sentence
+therefore reads *"amoebius forbids X"*, never *"Amoebius forbids X"*.
+
 ### Metaphor and slogan
 A metaphor, analogy, or slogan may appear **only** when both hold:
 
@@ -205,9 +212,9 @@ cross-reference target. Prefer no metaphor. Permitted form: state the rule preci
 useful, append the shorthand — *"(Shorthand: clusters are cattle; storage is not.)"*
 
 ### Relationship to §6 (Honesty)
-§6 and §8 are orthogonal and both mandatory. §6 governs truth-claims (proven / tested / assumed);
-§8 governs register. Where they meet — hedging language — §6 dictates *which* hedge word is
-required; §8 forbids *dramatizing* the hedge. Neither section licenses violating the other.
+[§6](#6-honesty-the-proventestedassumed-discipline) and [§8](#8-tone-and-voice) are orthogonal and both mandatory. [§6](#6-honesty-the-proventestedassumed-discipline) governs truth-claims (proven / tested / assumed);
+[§8](#8-tone-and-voice) governs register. Where they meet — hedging language — [§6](#6-honesty-the-proventestedassumed-discipline) dictates *which* hedge word is
+required; [§8](#8-tone-and-voice) forbids *dramatizing* the hedge. Neither section licenses violating the other.
 
 ### Quoted vision text
 A verbatim quotation is kept **only** when it is a load-bearing provenance citation — it establishes
@@ -233,23 +240,23 @@ A section that introduces or defends a design decision has four parts, in order:
 
 1. **The problem the choice prevents** — in precise technical terms: the concrete illegal state,
    desync, or class of defect, and the layer at which it would otherwise surface (author time /
-   type-check / decode / runtime). No dramatization (§8).
+   type-check / decode / runtime). No dramatization ([§8](#8-tone-and-voice)).
 2. **Why the obvious alternative fails** — name the tempting or industry-default approach and the
    specific property it cannot provide.
-3. **The chosen rule** — stated as a declarative invariant (§8).
-4. **What it forecloses** — the capability or freedom the rule gives up, and (per §6) any residual
+3. **The chosen rule** — stated as a declarative invariant ([§8](#8-tone-and-voice)).
+4. **What it forecloses** — the capability or freedom the rule gives up, and (per [§6](#6-honesty-the-proventestedassumed-discipline)) any residual
    tension stated honestly.
 
 **Exemplars** — these sections already follow the shape and are the models to copy:
 
-- [`engineering/manifest_generation_doctrine.md` §1](./engineering/manifest_generation_doctrine.md) —
+- [`engineering/manifest_generation_doctrine.md` §1](./engineering/manifest_generation_doctrine.md#1-why-this-doctrine-exists-types-render-manifests-helm-does-not) —
   no-Helm: string-templated YAML is unverified (problem) → typed render (rule) → what a chart could
   still express (foreclosed).
 - [`engineering/pulumi_iac_doctrine.md`](./engineering/pulumi_iac_doctrine.md) — keep-Pulumi /
   reject-Crossplane, with the checkpoint tension stated honestly.
-- [`engineering/pulsar_client_doctrine.md` §1](./engineering/pulsar_client_doctrine.md) —
+- [`engineering/pulsar_client_doctrine.md` §1](./engineering/pulsar_client_doctrine.md#1-one-client-one-wire-no-websockets) —
   no-WebSockets / CBOR-only.
-- [`engineering/apple_metal_headless_builds.md` §6](./engineering/apple_metal_headless_builds.md) —
+- [`engineering/apple_metal_headless_builds.md` §6](./engineering/apple_metal_headless_builds.md#6-why-tart-is-not-viable-the-no-vm-rationale) —
   no-Tart.
 
 ---

@@ -40,7 +40,7 @@ so it protects against node loss but not against the domain-scoped disaster a ba
 **The chosen rule.** A backup is a **deployment rule** — a closed `BackupPolicy` authored beside HA replicas
 and the PACELC surface ([`app_vs_deployment_doctrine.md`](./app_vs_deployment_doctrine.md)), never application
 logic — that names a **bounded** medium in a **distinct failure domain**, a **write regime**, and a **bounded
-retention**. Amoebius holds a **put-only** credential over that medium: retention and deletion are out of band
+retention**. amoebius holds a **put-only** credential over that medium: retention and deletion are out of band
 and amoebius never authenticates as an actor that can delete a backup. A completed backup is a verified,
 content-addressed `BackupArtifact`. Recovery **seeds a fresh coordinate** from such an artifact — it never
 overwrites live durable bytes — and a backup-seeded cluster may take the wild-ingress gateway only after its
@@ -73,7 +73,9 @@ survives, not what the app is ([`app_vs_deployment_doctrine.md` §1](./app_vs_de
 ```dhall
 -- WHERE backups land. A closed union; each arm names its own BOUNDED backing in a distinct failure domain.
 let BackupMedium =
-      < RemoteObjectStore : { backing : StorageBacking, domain : FailureDomain }  -- off-site S3/MinIO, distinct domain
+      -- The credential field lives on THIS arm and only this arm: an air-gapped medium reachable over the
+      -- network is uninhabitable because there is nowhere to put the credential (§3, §4).
+      < RemoteObjectStore : { backing : StorageBacking, domain : FailureDomain, credential : SecretRef }
       | AirGapMedia       : { library : AirGapLibrary, handling : Handling }       -- offline tape/optical/removable
       >
 
@@ -149,16 +151,33 @@ put-only record** — there is no field into which a `DeleteObject`, `ExpireObje
 `DeleteObjectVersion` action could be placed:
 
 ```haskell
--- The write capability's allowedActions is a closed record of exactly the put/write actions, in the shape of
+-- Both capabilities are indexed by the medium arm, so neither exists for AirGapMedia: the credential is a
+-- field of the RemoteObjectStore arm (§2), and there is no other place to read one from.
+-- allowedActions is a closed record of exactly the listed actions, in the shape of
 -- SoleHostBootstrapMutationCapability's two-Required-actions record. "amoebius deletes a backup" is
--- uninhabitable — there is no constructor for a delete action on this surface — not merely denied at runtime.
-data BackupWriteCapability = MkBackupWriteCapability
-  { account        :: CloudAccountId
-  , credential     :: SecretRef                 -- resolved from Vault by name, never inline
-  , allowedActions :: BackupPutOnlyActions      -- closed record: { putObject :: Required, … }; no delete field
-  , medium         :: BackupMediumRef
-  }
+-- uninhabitable — there is no constructor for a delete action on either surface — not merely denied at runtime.
+data BackupWriteCapability (arm :: MediumArm) where
+  MkBackupWriteCapability ::
+    { account        :: CloudAccountId
+    , allowedActions :: BackupPutOnlyActions    -- closed: { putObject :: Required, … }; no delete field
+    , medium         :: BackupMediumRef 'RemoteObjectStore   -- carries the SecretRef; never inline
+    } -> BackupWriteCapability 'RemoteObjectStore
+
+-- Restore and verification must READ backup bytes, so they need their own capability. A read credential does
+-- not weaken the never-delete boundary: that boundary constrains delete/expire/lifecycle actions, and this
+-- record has no field for one either.
+data BackupReadCapability (arm :: MediumArm) where
+  MkBackupReadCapability ::
+    { account        :: CloudAccountId
+    , allowedActions :: BackupGetOnlyActions    -- closed: { getObject :: Required, headObject :: Required }
+    , medium         :: BackupMediumRef 'RemoteObjectStore
+    } -> BackupReadCapability 'RemoteObjectStore
 ```
+
+The two capabilities are **separately held**: the writer that produces a generation never carries the read
+capability, and the restore/verify path ([§7](#7-recovery-restore-seeds-a-fresh-coordinate)) never carries the
+write one. Reading an air-gapped medium is not a credential at all — it is the witnessed physical handoff of
+[§3](#3-the-three-strategies).
 
 Three consequences:
 
@@ -195,8 +214,10 @@ medium's backing:
 ```
 
 - **Append-only history grows monotonically.** Under `AppendOnly`, generations cannot be deleted to reclaim
-  space, so the retained set is `cadence`-many generations across the retention window; a policy whose
-  window × cadence bytes exceed the medium's bounded quota is rejected at `provision-seal` unless it declares a
+  space, so the retained set holds **`⌈window / cadence⌉` generations** — the window divided by the interval
+  between them, never the two durations multiplied — and its size is that count times the per-generation
+  bytes. A policy whose `⌈window / cadence⌉ × generation-bytes` exceeds the medium's bounded quota (or, under
+  `KeepN`, whose `N × generation-bytes` does) is rejected at `provision-seal` unless it declares a
   `Growable` retention whose ceiling is itself a quota
   ([`resource_capacity_doctrine.md` §6](./resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm)).
   Backing up more data than the medium holds returns a `ProvisionError`, constructs no `ProvisionedSpec`, and
@@ -267,8 +288,10 @@ data RestorePhase = Requested | MediumOnline | Seeded | FreshnessProven
 -- Obtaining MediumOnline for a Manual air-gap medium requires a human-attested MediaLoaded token recorded
 -- through the admin channel; NO constructor mints it automatically. An AUTOMATIC restore from a Manual
 -- air-gap medium therefore has no inhabitant (§4.2 phantom Handling index + §4.3 phase gating).
-mediumOnlineAuto   :: (handling ~ 'Automatic) => AirGapMedia -> Restore 'MediumOnline
-mediumOnlineManual :: MediaLoadedWitness       -> AirGapMedia -> Restore 'MediumOnline
+-- The index must appear IN the type: `AirGapMedia handling`. A bare `AirGapMedia` with a
+-- `(handling ~ 'Automatic)` constraint would leave `handling` unbound and enforce nothing.
+mediumOnlineAuto   :: AirGapMedia 'Automatic -> Restore 'MediumOnline
+mediumOnlineManual :: MediaLoadedWitness -> AirGapMedia handling -> Restore 'MediumOnline
 ```
 
 - **A manual air-gap medium cannot be recovered automatically.** For `handling = Manual`, the only path to
@@ -290,7 +313,7 @@ mediumOnlineManual :: MediaLoadedWitness       -> AirGapMedia -> Restore 'Medium
 
 The recovery story the operator most needs is the down-primary case: a primary cluster is down and its
 secondary was never deployed, so the secondary's data plane must be **seeded from backups** before it can serve.
-Amoebius chooses **consistency over availability** here — it would rather stay down than promote a secondary
+amoebius chooses **consistency over availability** here — it would rather stay down than promote a secondary
 whose seeded state cannot prove its freshness. This extends three surfaces, each staying with its owner.
 
 **The deployment-rule (owned by [`consistency_pacelc_doctrine.md` §3.7](./consistency_pacelc_doctrine.md#37-the-cold-dr-seed-recovery-source)).** The

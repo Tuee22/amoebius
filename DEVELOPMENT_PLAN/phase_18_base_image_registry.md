@@ -123,7 +123,7 @@ not passed unless, in addition to the above:
   the Phase-0-committed **canonical standard-platform-services inventory** — the `DEVELOPMENT_PLAN/README.md`
   standard-platform-services list as ratified in
   [`platform_services_doctrine.md`](../documents/engineering/platform_services_doctrine.md), copied verbatim
-  into the committed fixture `test/fixtures/phase15/bake_inventory_expected.dhall` — and the bake-inventory
+  into the committed fixture `test/fixtures/phase18/bake_inventory_expected.dhall` — and the bake-inventory
   lint reconciles the image's contents against **that** committed table automatically, never against the
   implementer's own `BakeInventory` value.
 - **Per-arch execution, not presence (§M.5):** each baked service binary and each **linux-runnable** toolchain
@@ -147,7 +147,7 @@ not passed unless, in addition to the above:
   the entire standup-and-publish window — asserting **zero** TCP connections to the resolved endpoints of
   `docker.io`/`quay.io`/`ghcr.io` (the concrete set in [Gate integrity](#gate-integrity)); never a
   compliance trace the publisher emits about itself. The denial scope covers in-cluster registry standup,
-  publication, and pull; the **host-side `buildx` build legitimately reaches upstream** (§2/§9) and is
+  publication, and pull; the **host-side `buildx` build legitimately reaches upstream** ([§2](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)/[§9](../documents/engineering/image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves)) and is
   explicitly outside the denied boundary.
 - **Atomicity observed at the registry boundary (§M.3/§M.8):** the partial-arch failure is induced by a
   **fault-injecting proxy** in front of the registry that fails one arch's blob/manifest upload **mid-push**
@@ -174,54 +174,54 @@ their reference sides are defined independently of the code under test. This sec
 "representative set" (§M.7).
 
 **Pinned oracles (Phase-0-committed):**
-- `test/fixtures/phase15/bake_inventory_expected.dhall` — the canonical standard-platform-services inventory
+- `test/fixtures/phase18/bake_inventory_expected.dhall` — the canonical standard-platform-services inventory
   (a verbatim copy of the `DEVELOPMENT_PLAN/README.md` standard-platform-services list as ratified in
   [`platform_services_doctrine.md`](../documents/engineering/platform_services_doctrine.md)) with the per-arch
   pinned version each `<bin> --version` must match; authored independently of `BakeInventory` (§M.3). The
   pinned set covers the **linux-runnable** jit-build toolchain (`nvcc`/`g++`/pinned compilers + any linux
   cross-tooling) as well as the service binaries, and deliberately **omits** the Apple-Metal bridge — an
   apple-substrate Mach-O dylib pinned and probed at Phase 41, never a linux ELF here.
-- `test/fixtures/phase15/build_execution_envelope.dhall` — the per-stage host/engine-VM CPU, memory,
+- `test/fixtures/phase18/build_execution_envelope.dhall` — the per-stage host/engine-VM CPU, memory,
   intermediate/cache-write operands, scratch/build-cache backings, and architecture/stage-concurrency bounds
   plus the independently calculated transition peak and
   expected per-axis rejection tags. It is authored before `BuildExecutionEnvelope`/BuildKit admission code.
-- `test/fixtures/phase15/registry_storage_demand.dhall` — the independently authored
+- `test/fixtures/phase18/registry_storage_demand.dhall` — the independently authored
   `RegistryStoredArtifact` table (compressed layer blobs, configs, child manifests, and manifest-list object),
   observed-resident overlap, upload concurrency/model-derived workspace, failed-upload residue/GC horizon, exact-fit and
   one-byte-under expected verdicts, plus the expected digest-size-conflict tag. It is authored before the
   registry admission/publisher code and is reused unchanged by Phase 23's MinIO rehome.
-- `test/fixtures/phase15/bootstrap_registry_domain.dhall` — the independently authored registry/proxy
+- `test/fixtures/phase18/bootstrap_registry_domain.dhall` — the independently authored registry/proxy
   Kubernetes identity set, initialized-field ownership partition, canonical source/field digest, and expected
   one-time whole-deployment handoff verdicts (equal, one-field mismatch, stale snapshot, repeated transfer).
   It is authored before `ProvisionedBootstrapRegistry` or `BootstrapRegistryAction` exists.
-- `test/fixtures/phase15/public_registry_endpoints.txt` — the concrete public-registry endpoint set the
+- `test/fixtures/phase18/public_registry_endpoints.txt` — the concrete public-registry endpoint set the
   OS-boundary observer asserts zero connections to: `registry-1.docker.io`, `auth.docker.io`,
   `production.cloudflare.docker.com`, `quay.io`, `cdn.quay.io`, `ghcr.io`, `pkg-containers.githubusercontent.com`
   (and their resolved IP CIDRs at gate time).
-- `test/fixtures/phase15/expected_pull_failure.txt` — the negative-control canary's expected reason
+- `test/fixtures/phase18/expected_pull_failure.txt` — the negative-control canary's expected reason
   (`ErrImagePull`/`ImagePullBackOff`, connection-timeout to the public endpoint), paired with the positive
   in-cluster pull that must succeed (§M.8).
 
 **Committed seeded mutants (each MUST go red at the named gate, §M.2):**
-- `mutant/phase15/stub-arm64-binary` — a zero-byte binary at a baked path; red at Sprint 18.1 (execution +
+- `mutant/phase18/stub-arm64-binary` — a zero-byte binary at a baked path; red at Sprint 18.1 (execution +
   ELF check).
-- `mutant/phase15/wrong-arch-layer` — amd64 bytes placed in the arm64 layer; red at Sprint 18.1 (`e_machine`
+- `mutant/phase18/wrong-arch-layer` — amd64 bytes placed in the arm64 layer; red at Sprint 18.1 (`e_machine`
   check).
-- `mutant/phase15/gxx-version-skew` — the baked `g++` shimmed (path: `/usr/bin/g++`; operator:
+- `mutant/phase18/gxx-version-skew` — the baked `g++` shimmed (path: `/usr/bin/g++`; operator:
   `--version`-string patch-decrement) to report a version one patch below its Phase-0-pinned
   `bake_inventory_expected.dhall` entry; red at Sprint 18.1's per-arch `<bin> --version` match, paired with the
   positive that the pinned `g++ --version` matches on both arches (§M.2). This gives the linux-runnable
   toolchain set (`nvcc`/`g++`/pinned compilers) its version-match teeth; the Apple-Metal bridge is not a linux
   binary and is exercised only at Phase 41 (apple).
-- `mutant/phase15/drop-build-scratch-accounting` — omits intermediate-layer workspace from host build
+- `mutant/phase18/drop-build-scratch-accounting` — omits intermediate-layer workspace from host build
   admission; red at Sprint 18.1's zero-builder-process overdraw fixture.
-- `mutant/phase15/bootstrap-domain-expansion` — lets the bootstrap action initialize an object outside its
+- `mutant/phase18/bootstrap-domain-expansion` — lets the bootstrap action initialize an object outside its
   provisioned registry/proxy domain; red at Sprint 18.2's exact-domain/zero-write assertion.
-- `mutant/phase15/handoff-without-equality` — adopts bootstrap objects into the later whole deployment without
+- `mutant/phase18/handoff-without-equality` — adopts bootstrap objects into the later whole deployment without
   equal identity/source/owned-field digest readback; red at Sprint 18.2's ownership-handoff assertion.
-- `mutant/phase15/record-before-push` — records the tag as published before the manifest list lands; red at
+- `mutant/phase18/record-before-push` — records the tag as published before the manifest list lands; red at
   Sprint 18.3 (registry-API un-advertised assertion).
-- `mutant/phase15/noop-egress-policy` — a vanilla unenforced `kindnetd` `NetworkPolicy` substituted for the
+- `mutant/phase18/noop-egress-policy` — a vanilla unenforced `kindnetd` `NetworkPolicy` substituted for the
   enforcing firewall; red at Sprint 18.4 (negative-control canary must fail `ImagePull`).
 
 ## Doctrine adopted
@@ -257,7 +257,7 @@ their reference sides are defined independently of the code under test. This sec
 - [`content_addressing_doctrine.md` §4.5 — the ML asset lifecycle: one bounded content-addressed cache, resolved on first miss](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss):
   the reversal this phase upholds — engine payloads are named catalog identities resolved into a
   `CacheBudget`-bounded content-addressed cache, with no arbitrary-`Url` arm, never OCI-baked.
-- [`testing_doctrine.md` §2 — three registers of amoebius testing](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing):
+- [`testing_doctrine.md` §2 — the registers of amoebius testing](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing):
   this phase's gate reaches **Register 3** (live infrastructure) and emits a proven/tested/assumed ledger
   naming that register.
 
@@ -268,7 +268,7 @@ their reference sides are defined independently of the code under test. This sec
 **Status**: Planned
 **Implementation**: `docker/base/Dockerfile`, `src/Amoebius/Image/Build.hs`, `src/Amoebius/Image/BakeInventory.hs` (the per-arch asset map + version resolver, hostbootstrap-style) — target paths, not yet built.
 **Blocked by**: Phase 17 gate (external prereq — `pb bootstrap --distro=kind` brings up an empty single-node `kind` cluster on a linux-cpu host and provides the `pb` CLI); Phase 1's recorded GHC 9.12.4 / Cabal pin for the amoebius runtime layer.
-**Independent Validation**: `docker buildx imagetools inspect <tag>` lists both `linux/amd64` and `linux/arm64` under one manifest list; a bake-inventory lint asserts the image contains **every** service binary named in the Phase-0-committed canonical inventory `test/fixtures/phase15/bake_inventory_expected.dhall` (a verbatim copy of the `DEVELOPMENT_PLAN/README.md` standard-platform-services list as ratified in `platform_services_doctrine.md`, reconciled **automatically** against that committed table — never against the implementer's own `BakeInventory` value, §M.3) and the jit-build resolver + its **linux-runnable** toolchain (`nvcc`/`g++`/pinned compilers + any linux cross-tooling — the Apple-Metal bridge is **not** baked here; it is an apple-substrate Mach-O dylib built and probed at [Phase 41](phase_41_apple_metal_host_daemon.md), never a linux ELF in phases 0..18) and contains **no** ML engine payload (`llama.cpp`/`whisper.cpp`/ONNX/Audiveris absent). Presence alone is insufficient (§M.5): for **each** arch — natively for the host arch and under `binfmt`/QEMU for the non-native arch — every baked binary is executed by **absolute path** with `<bin> --version` matching the version pinned in `bake_inventory_expected.dhall`, and each arch's layer passes an ELF `e_machine` check confirming its binaries carry that arch's machine type (foreclosing zero-byte stubs and amd64 bytes copied into the arm64 layer). The committed seeded mutants `mutant/phase15/stub-arm64-binary` (a zero-byte binary at a baked path), `mutant/phase15/wrong-arch-layer` (amd64 bytes in the arm64 layer), and `mutant/phase15/gxx-version-skew` (the baked `/usr/bin/g++` shimmed to report a `--version` one patch below its pinned `bake_inventory_expected.dhall` entry) MUST turn this lint red (§M.2) — the last giving the per-arch `<bin> --version` match its teeth, paired with the positive that the pinned `g++ --version` matches on both arches.
+**Independent Validation**: `docker buildx imagetools inspect <tag>` lists both `linux/amd64` and `linux/arm64` under one manifest list; a bake-inventory lint asserts the image contains **every** service binary named in the Phase-0-committed canonical inventory `test/fixtures/phase18/bake_inventory_expected.dhall` (a verbatim copy of the `DEVELOPMENT_PLAN/README.md` standard-platform-services list as ratified in `platform_services_doctrine.md`, reconciled **automatically** against that committed table — never against the implementer's own `BakeInventory` value, §M.3) and the jit-build resolver + its **linux-runnable** toolchain (`nvcc`/`g++`/pinned compilers + any linux cross-tooling — the Apple-Metal bridge is **not** baked here; it is an apple-substrate Mach-O dylib built and probed at [Phase 41](phase_41_apple_metal_host_daemon.md), never a linux ELF in phases 0..18) and contains **no** ML engine payload (`llama.cpp`/`whisper.cpp`/ONNX/Audiveris absent). Presence alone is insufficient (§M.5): for **each** arch — natively for the host arch and under `binfmt`/QEMU for the non-native arch — every baked binary is executed by **absolute path** with `<bin> --version` matching the version pinned in `bake_inventory_expected.dhall`, and each arch's layer passes an ELF `e_machine` check confirming its binaries carry that arch's machine type (foreclosing zero-byte stubs and amd64 bytes copied into the arm64 layer). The committed seeded mutants `mutant/phase18/stub-arm64-binary` (a zero-byte binary at a baked path), `mutant/phase18/wrong-arch-layer` (amd64 bytes in the arm64 layer), and `mutant/phase18/gxx-version-skew` (the baked `/usr/bin/g++` shimmed to report a `--version` one patch below its pinned `bake_inventory_expected.dhall` entry) MUST turn this lint red (§M.2) — the last giving the per-arch `<bin> --version` match its teeth, paired with the positive that the pinned `g++ --version` matches on both arches.
 The same independent validation begins before `buildx`: a read-only host/engine-VM snapshot validates the
 declared `BuildExecutionEnvelope` — the closed stage graph's per-stage CPU/memory, intermediate scratch and
 cache-write operands, observed resident cache + derived concurrent write delta, and independent
@@ -311,11 +311,11 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
   provenance, not a second caller-authored aggregate and not an estimate reconstructed from unpacked layers.
 - The `BakeInventory` asset map (per-arch pinned versions) driving logic-free `ARG`/`RUN … install` blocks, and
   a bake-inventory lint proving the resolver/toolchain are present and every ML engine payload is **absent**.
-- The Phase-0-committed oracle `test/fixtures/phase15/bake_inventory_expected.dhall` (the canonical
+- The Phase-0-committed oracle `test/fixtures/phase18/bake_inventory_expected.dhall` (the canonical
   standard-platform-services set + pinned per-arch versions, independent of `BakeInventory`) and the committed
-  mutants `mutant/phase15/stub-arm64-binary`, `mutant/phase15/wrong-arch-layer`,
-  `mutant/phase15/gxx-version-skew` (the pinned-`g++`-version-skew that bites the per-arch `<bin> --version`
-  match), and `mutant/phase15/drop-build-scratch-accounting`.
+  mutants `mutant/phase18/stub-arm64-binary`, `mutant/phase18/wrong-arch-layer`,
+  `mutant/phase18/gxx-version-skew` (the pinned-`g++`-version-skew that bites the per-arch `<bin> --version`
+  match), and `mutant/phase18/drop-build-scratch-accounting`.
 
 ### Validation
 1. Independently occupy or shrink one of build CPU, memory, intermediate scratch, or cache backing; make
@@ -337,9 +337,9 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
    inventory.
 5. For each arch (host arch native; non-native under `binfmt`/QEMU), every baked binary runs by absolute path
    with `--version` matching the pinned version, and each arch layer passes the ELF `e_machine` check.
-6. The committed mutants `mutant/phase15/stub-arm64-binary`,
-   `mutant/phase15/wrong-arch-layer`, `mutant/phase15/gxx-version-skew` (the pinned-`g++`-version-skew that
-   makes Validation 5's `<bin> --version` match bite), and `mutant/phase15/drop-build-scratch-accounting` turn
+6. The committed mutants `mutant/phase18/stub-arm64-binary`,
+   `mutant/phase18/wrong-arch-layer`, `mutant/phase18/gxx-version-skew` (the pinned-`g++`-version-skew that
+   makes Validation 5's `<bin> --version` match bite), and `mutant/phase18/drop-build-scratch-accounting` turn
    the validation red (§M.2).
 
 ### Remaining Work
@@ -367,7 +367,7 @@ through the resource-provisioned, snapshot-bound `ProvisionedBootstrapRegistry` 
 cycle-break against bounded interim node-local blob storage. The action initializes only the exact
 registry/proxy object domain through Phase 13's package-private serializer; it is not a minimal
 whole-deployment spec and creates no public service-render boundary.
-§9's dissolution holds — the registry is a baked binary, so there is no pre-registry public-pull window.
+[§9](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)'s dissolution holds — the registry is a baked binary, so there is no pre-registry public-pull window.
 
 ### Deliverables
 - A registry-specific pure/live boundary:
@@ -440,7 +440,7 @@ The whole sprint (📋 Planned).
 **Status**: Planned
 **Implementation**: `src/Amoebius/Image/Publish.hs`, `src/Amoebius/Image/Ref.hs` (the single-`--push` publisher + the immutable, source/content-derived ref scheme) — target paths, not yet built.
 **Blocked by**: Sprint 18.2 (the running registry to push into), Sprint 18.1 (the manifest list to publish).
-**Independent Validation**: one `buildx … --push` lands the complete manifest list or errors; the publisher cannot begin without the unchanged-snapshot token carrying the private `ProvisionedRegistryStorageDemand`. A digest-size conflict, retained partial-upload residue, or a backing exactly one byte below its digest-deduplicated resident/new + workspace + failed-upload-GC peak returns the expected tagged rejection with **zero mutating registry requests and no tag publication**. The fitting partial (one-arch) push is induced by a **fault-injecting proxy** in front of the registry that fails one arch's blob/manifest upload **mid-push** (§M.3 — a registry-boundary fault, never an exception thrown inside amoebius's own publisher), and the tag is asserted **un-advertised at the registry HTTP API**: `GET /v2/<repo>/tags/list` omits the tag and the manifest-list `GET` returns **404** (§M.8 — the observable is the registry's state, not amoebius's own published-set record); the observed partial residue is charged in the next snapshot until GC is observed. A re-run against a fully-published tag is a **no-op**, defined as **zero mutating requests** (`PUT`/`POST`/`PATCH`) in the registry access log during the second run (§M.6 — not exit-0-twice, not a permitted rebuild-and-re-push); refs are immutable digest-pinned (never `:latest` as a deployment reference); the build uses an ephemeral `docker --config <dir>` with **no** environment variable and **no** `docker login`. The committed mutant `mutant/phase15/record-before-push` (records the tag as published before the manifest list lands) MUST turn the un-advertised assertion red (§M.2).
+**Independent Validation**: one `buildx … --push` lands the complete manifest list or errors; the publisher cannot begin without the unchanged-snapshot token carrying the private `ProvisionedRegistryStorageDemand`. A digest-size conflict, retained partial-upload residue, or a backing exactly one byte below its digest-deduplicated resident/new + workspace + failed-upload-GC peak returns the expected tagged rejection with **zero mutating registry requests and no tag publication**. The fitting partial (one-arch) push is induced by a **fault-injecting proxy** in front of the registry that fails one arch's blob/manifest upload **mid-push** (§M.3 — a registry-boundary fault, never an exception thrown inside amoebius's own publisher), and the tag is asserted **un-advertised at the registry HTTP API**: `GET /v2/<repo>/tags/list` omits the tag and the manifest-list `GET` returns **404** (§M.8 — the observable is the registry's state, not amoebius's own published-set record); the observed partial residue is charged in the next snapshot until GC is observed. A re-run against a fully-published tag is a **no-op**, defined as **zero mutating requests** (`PUT`/`POST`/`PATCH`) in the registry access log during the second run (§M.6 — not exit-0-twice, not a permitted rebuild-and-re-push); refs are immutable digest-pinned (never `:latest` as a deployment reference); the build uses an ephemeral `docker --config <dir>` with **no** environment variable and **no** `docker login`. The committed mutant `mutant/phase18/record-before-push` (records the tag as published before the manifest list lands) MUST turn the un-advertised assertion red (§M.2).
 **Docs to update**: `documents/engineering/image_build_doctrine.md`.
 
 ### Objective
@@ -466,7 +466,7 @@ not capacity admission.
   Vault `SecretRef` identity is flagged as the Phase-22+ transport-hardening target.
 - The exclusive registry mutation proxy (the backend has no direct mutating route), with a fault-injecting
   mode that fails one arch's blob/manifest upload mid-push, and the committed mutant
-  `mutant/phase15/record-before-push`, plus the registry access-log capture used for the zero-writes re-run
+  `mutant/phase18/record-before-push`, plus the registry access-log capture used for the zero-writes re-run
   assertion.
 
 ### Validation
@@ -482,7 +482,7 @@ not capacity admission.
 3. Re-run against a fully-published tag is a no-op, asserted as **zero `PUT`/`POST`/`PATCH` requests** in the
    registry access log during the second run; the ref is digest-pinned and never `:latest`.
 4. The build uses the ephemeral config directory with no environment variable and no `docker login`.
-5. The committed mutant `mutant/phase15/record-before-push` turns Validation 1 red (§M.2).
+5. The committed mutant `mutant/phase18/record-before-push` turns Validation 1 red (§M.2).
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -492,13 +492,13 @@ The whole sprint (📋 Planned).
 **Status**: Planned
 **Implementation**: `src/Amoebius/Image/Gate.hs` / a `pb` gate subcommand + `test/live/RegistryGate.hs` (the Register-3 gate harness) — target paths, not yet built.
 **Blocked by**: Sprint 18.3 (the atomically-published tag), Sprint 18.2 (the running registry).
-**Independent Validation**: the egress denial is realized as a **node-level host firewall / IP-CIDR blackhole** of the resolved public-registry endpoints (or an enforcing-CNI FQDN policy) — **not** a vanilla `kindnetd` `NetworkPolicy`, which `kindnetd` does not enforce and which cannot match FQDNs (§M ambiguity resolution). Its enforcement is proven by a **negative control** (§M.8): under the *same* policy, a canary pod referencing `docker.io/library/busybox` **FAILS `ImagePull`** with the committed expected reason (`ErrImagePull`/`ImagePullBackOff` from a connection-timeout to the public endpoint), paired with the positive that an in-cluster `distribution` pull of the same shape succeeds. Under that enforced denial the registry stands up and the base-image manifest list publishes and resolves with **zero** requests leaving for a public registry, asserted from the **OS-boundary observer** (§M.5) — node `containerd` logs + a packet capture spanning the entire standup-and-publish window, showing zero TCP connections to the resolved endpoints of the [Gate integrity](#gate-integrity) public-registry set; never a self-emitted compliance trace. The denial scope covers in-cluster standup/publication/pull; the **host-side `buildx` build is outside it** and legitimately reaches upstream (§2/§9). Both `linux/amd64` and `linux/arm64` resolve under the one digest-pinned tag; a re-run of the whole build → side-load → standup → publish flow is idempotent, defined as **zero mutating (`PUT`/`POST`/`PATCH`) requests** in the registry access log during the second run (§M.6 — not a permitted full rebuild-and-re-push). The committed mutant `mutant/phase15/noop-egress-policy` (a vanilla unenforced `NetworkPolicy` substituted for the enforcing firewall) MUST turn the negative-control assertion red (§M.2).
+**Independent Validation**: the egress denial is realized as a **node-level host firewall / IP-CIDR blackhole** of the resolved public-registry endpoints (or an enforcing-CNI FQDN policy) — **not** a vanilla `kindnetd` `NetworkPolicy`, which `kindnetd` does not enforce and which cannot match FQDNs (§M ambiguity resolution). Its enforcement is proven by a **negative control** (§M.8): under the *same* policy, a canary pod referencing `docker.io/library/busybox` **FAILS `ImagePull`** with the committed expected reason (`ErrImagePull`/`ImagePullBackOff` from a connection-timeout to the public endpoint), paired with the positive that an in-cluster `distribution` pull of the same shape succeeds. Under that enforced denial the registry stands up and the base-image manifest list publishes and resolves with **zero** requests leaving for a public registry, asserted from the **OS-boundary observer** (§M.5) — node `containerd` logs + a packet capture spanning the entire standup-and-publish window, showing zero TCP connections to the resolved endpoints of the [Gate integrity](#gate-integrity) public-registry set; never a self-emitted compliance trace. The denial scope covers in-cluster standup/publication/pull; the **host-side `buildx` build is outside it** and legitimately reaches upstream ([§2](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)/[§9](../documents/engineering/image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves)). Both `linux/amd64` and `linux/arm64` resolve under the one digest-pinned tag; a re-run of the whole build → side-load → standup → publish flow is idempotent, defined as **zero mutating (`PUT`/`POST`/`PATCH`) requests** in the registry access log during the second run (§M.6 — not a permitted full rebuild-and-re-push). The committed mutant `mutant/phase18/noop-egress-policy` (a vanilla unenforced `NetworkPolicy` substituted for the enforcing firewall) MUST turn the negative-control assertion red (§M.2).
 **Docs to update**: `documents/engineering/image_build_doctrine.md`, `documents/engineering/testing_doctrine.md`.
 
 ### Objective
 Adopt [`image_build_doctrine.md` §2](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)
 and [§4](../documents/engineering/image_build_doctrine.md#4-atomic-publication--a-partial-multi-arch-upload-is-a-failed-upload)
-under [`testing_doctrine.md` §2 — Register 3](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing):
+under [`testing_doctrine.md` §2 — Register 3](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing):
 run the whole flow on the live `kind` cluster and prove no public-registry pull and atomic multi-arch
 publication, then emit a Register-3 proven/tested/assumed ledger — the model↔runtime correspondence with the
 later reconciler-owned rendering (Phase 19) and the MinIO-backed blob store (Phase 23) marked UNVERIFIED here.
@@ -509,8 +509,8 @@ later reconciler-owned rendering (Phase 19) and the MinIO-backed blob store (Pha
   (node `containerd` logs + packet capture), and the registry access-log capture; driving the build →
   side-load → standup → publish flow and asserting the negative-control `ImagePull` failure, zero public pulls
   from the observer, both-arch resolution, and zero-writes idempotent re-run.
-- The committed oracle `test/fixtures/phase15/public_registry_endpoints.txt` (the concrete public-registry
-  endpoint set the observer checks against) and the committed mutant `mutant/phase15/noop-egress-policy`.
+- The committed oracle `test/fixtures/phase18/public_registry_endpoints.txt` (the concrete public-registry
+  endpoint set the observer checks against) and the committed mutant `mutant/phase18/noop-egress-policy`.
 - A Register-3 ledger naming the substrate (linux-cpu) and the register, attaching the OS-boundary observer
   evidence, with the interim-storage and reconciler-rehoming residue flagged UNVERIFIED, never green.
 
@@ -521,7 +521,7 @@ later reconciler-owned rendering (Phase 19) and the MinIO-backed blob store (Pha
    endpoint set.
 2. Both `linux/amd64` and `linux/arm64` resolve under the one digest-pinned tag; the whole flow re-runs as a
    no-op, asserted as **zero mutating requests** in the registry access log during the second run.
-3. The committed mutant `mutant/phase15/noop-egress-policy` (unenforced vanilla `NetworkPolicy`) turns
+3. The committed mutant `mutant/phase18/noop-egress-policy` (unenforced vanilla `NetworkPolicy`) turns
    Validation 1's negative-control assertion red (§M.2).
 
 ### Remaining Work
@@ -542,7 +542,7 @@ The whole sprint (📋 Planned).
   the resulting `ImageArtifact`'s node image-store fit.
 - `documents/engineering/platform_services_doctrine.md` — the §3 registry-as-single-image-source note flips from
   design intent to a delivered `distribution` standup, with the MinIO-backed S3 driver still a Phase-23 target.
-- `documents/engineering/testing_doctrine.md` — §2's three-register model records its first Register-3
+- `documents/engineering/testing_doctrine.md` — §2's register model records its first Register-3
   (live-infrastructure) gate reached on linux-cpu, with a proven/tested/assumed ledger naming that register.
 
 **Cross-references to add:**
@@ -557,11 +557,11 @@ The whole sprint (📋 Planned).
 - [substrates.md](substrates.md) — the substrate registry and per-phase substrate map
 - [system_components.md](system_components.md) — the target component inventory for the module paths above
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants
-- [Image Build & Registry](../documents/engineering/image_build_doctrine.md) — the baked-binary base container + `distribution` registry adopted here (§2, §3, §4, §5, §7, §8, §9)
-- [Content Addressing Doctrine](../documents/engineering/content_addressing_doctrine.md) — §4.5 the jit-resolved engine cache the base image does *not* bake
-- [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — §3 the registry as the single in-cluster image source
+- [Image Build & Registry](../documents/engineering/image_build_doctrine.md) — the baked-binary base container + `distribution` registry adopted here ([§2](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster), [§3](../documents/engineering/image_build_doctrine.md#3-buildx-multi-arch--amd64-and-arm64-one-manifest-list), [§4](../documents/engineering/image_build_doctrine.md#4-atomic-publication--a-partial-multi-arch-upload-is-a-failed-upload), [§5](../documents/engineering/image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest), [§7](../documents/engineering/image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain), [§8](../documents/engineering/image_build_doctrine.md#8-build-mechanics-under-the-no-env--no-path-contract), [§9](../documents/engineering/image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves))
+- [Content Addressing Doctrine](../documents/engineering/content_addressing_doctrine.md) — [§4.5](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the jit-resolved engine cache the base image does *not* bake
+- [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — [§3](../documents/engineering/platform_services_doctrine.md#3-the-registry--the-single-image-source) the registry as the single in-cluster image source
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — the per-distro registry plumbing and the lazy-tool-ensure contract the build obeys
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — §2 the three registers (Register 3 reached here)
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) the registers (Register 3 reached here)
 - [phase_17](phase_17_midwife_bootstrap_kind.md) — the `pb` midwife + empty `kind` cluster this phase publishes into
 - [phase_19](phase_19_object_reconciler.md) — the typed reconciler that adopts the equal-digest bootstrap
   objects into the first whole-deployment `ProvisionedSpec` through the one-time ownership handoff

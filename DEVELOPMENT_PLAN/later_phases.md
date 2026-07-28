@@ -56,7 +56,7 @@ already frames the diff as a *typed* value; this candidate extends that diff to 
 immutable-field changes so a change that would otherwise drop rows cannot be applied as a silent replace. The
 database half adds the migration ordering and idempotence on top of the per-consumer Postgres model. It is a
 later phase because it presupposes a working app-with-Postgres deployment from Phase 27 and the storage-safety
-guarantees from Phase 42 (durable bytes are not destroyed under normal credentials) — a schema migration must
+guarantees from Phase 36 (durable bytes are not destroyed under normal credentials) — a schema migration must
 move data *without* representing destruction.
 
 **Folded into the release lifecycle (forward pointer).** The migration half of this candidate is now positioned
@@ -317,8 +317,8 @@ air-gap medium, and a delete-a-backup attempt each perform zero effects.
 The **representation** half of backup is **not** a later phase — like the capacity / bounded-storage discipline
 below, it is folded into the pure band: the closed `BackupPolicy` / `BackupMedium` / `WriteRegime` /
 `BackupRetention` shapes and the `freshnessBound ≥ cadence` fold land in **Phase 4/5**, the no-overcommit sizing
-fold in **Phase 7/10**, the illegal-state corpus (`illegal_state_storage.md` §3.53–§3.68 /
-`illegal_state_multicluster.md` §3.69–§3.71) in **Phase 6**, and the `FreshnessWitness` /
+fold in **Phase 7/10**, the illegal-state corpus (`illegal_state_storage.md` [§3.53](../documents/illegal_state/illegal_state_storage.md#353-a-backup-larger-than-its-bounded-medium)–[§3.68](../documents/illegal_state/illegal_state_storage.md#368-two-conflicting-backup-policies-on-one-coordinate) /
+`illegal_state_multicluster.md` [§3.69](../documents/illegal_state/illegal_state_multicluster.md#369-a-cold-seeded-secondary-taking-the-gateway-without-proven-freshness)–[§3.71](../documents/illegal_state/illegal_state_multicluster.md#371-a-freshness-watermark-asserted-rather-than-derived-from-captured-content)) in **Phase 6**, and the `FreshnessWitness` /
 `NoTakeWithoutProvenFreshness` guard extending the one formal obligation in **Phase 3**
 ([`gateway_migration_model_doctrine.md`](../documents/engineering/gateway_migration_model_doctrine.md)). Only
 the **live** enactment is this candidate, and its runtime residues distribute to the phases that already own
@@ -344,12 +344,12 @@ the pure fold implementation and generated properties, **Phase 10** for full bin
 provision seal, and **Phase 13** for the closed `renderAll` consumer. None requires an external effect or a
 forward live-phase dependency ([development_plan_standards.md §E](development_plan_standards.md#e-one-canonical-phase-model) one-canonical-phase). Its **runtime**
 residues distribute to the phases that already own each substrate: the Pulsar two-ceiling offload to Phase
-19, the Lima `LinuxHost` witness + host/VM capacity cross-check to Phase 41, live kind topology to Phases
-14/28, and the `Managed EKS` arm + `ScalingPolicy` enaction + cloud quota to Phases 34/37. So there is **zero phase renumber**:
+23, the Lima `LinuxHost` witness + host/VM capacity cross-check to Phase 41, live kind topology to Phases
+17/32, and the `Managed EKS` arm + `ScalingPolicy` enaction + cloud quota to Phases 34/37. So there is **zero phase renumber**:
 the discipline is owned by two new doctrines
 ([`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md),
 [`cluster_topology_doctrine.md`](../documents/engineering/cluster_topology_doctrine.md)) and catalogued in
-[`illegal_state_catalog.md`](../documents/illegal_state/illegal_state_catalog.md) §3.13–§3.22 / §4.6 / §4.7,
+[`illegal_state_catalog.md`](../documents/illegal_state/illegal_state_catalog.md) [§3.13](../documents/illegal_state/illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.22](../documents/illegal_state/illegal_state_capacity.md#322-a-hand-authored-un-derived-toleration) / [§4.6](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) / [§4.7](../documents/illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection),
 delivered without inserting a phase. Named here only to close the question: do not re-open it as a candidate
 phase.
 
@@ -370,20 +370,20 @@ enforcement. Promoting that gate is required before an rke2 mutation continuatio
   at promotion
 - [phase_18_base_image_registry.md](phase_18_base_image_registry.md) — where the "one
   base container with everything" question is resolved (not deferred)
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — §8 the extension-DSL forward pointer
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§8](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl-forward-pointer-only) the extension-DSL forward pointer
 - [App vs Deployment Doctrine](../documents/engineering/app_vs_deployment_doctrine.md) — the application logic
   and deployment-rule split the native-client candidate preserves
 - [Lift and Compose Doctrine](../documents/engineering/lift_and_compose_doctrine.md) — the existing
   Haskell-contract-to-PureScript-SPA pattern the native-client family extends
 - [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — generated client
   bindings remain build artifacts, never a second committed contract truth
-- [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — §6 the typed
+- [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — [§6](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed) the typed
   reconcile state model the manifest-change correctness candidate extends
-- [Image Build Doctrine](../documents/engineering/image_build_doctrine.md) — §2 the baked-binary base
+- [Image Build Doctrine](../documents/engineering/image_build_doctrine.md) — [§2](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster) the baked-binary base
   container (Phase 18, resolved)
-- [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — §1 the substrate-is-a-fact model the
+- [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — [§1](../documents/engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob) the substrate-is-a-fact model the
   niche-substrate candidate probes
-- [Release Lifecycle Doctrine](../documents/engineering/release_lifecycle_doctrine.md) — §5 `RolloutPlan` /
+- [Release Lifecycle Doctrine](../documents/engineering/release_lifecycle_doctrine.md) — [§5](../documents/engineering/release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply) `RolloutPlan` /
   `RolloutPhase`, where this backlog candidate's DB schema-migration half is folded into Phase 30 as a
   readiness-gated phase (create-new→verified-migrate→retire-old)
 - [Network Fabric Doctrine](../documents/engineering/network_fabric_doctrine.md) — Phase 31 WireGuard and the

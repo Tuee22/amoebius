@@ -17,7 +17,7 @@ The corpus carries 65 Mermaid diagrams across roughly thirty documents, and ever
 
 Letting each document invent its own node styling fails the opposite way. When independent authors colour their own diagrams, the palettes diverge — one document's colour encodes an algebra role, another's a proof status, a third's a validation locus — and the same shape acquires conflicting meanings across documents, so a reader must re-learn the vocabulary per page. A cross-document scheme is therefore not optional polish; it is the only form in which a shared honesty axis is legible.
 
-Amoebius fixes one scheme on two orthogonal axes: **node shape encodes the functional-programming role, and node colour encodes the honesty / validation-locus band**. One glance reads both what a node is and how trustworthy its claim is. The scheme is subgraph-free and uses only solid, labelled edges, so it composes with the constraint [documentation_standards.md §7](../documentation_standards.md#7-diagrams) already imposes.
+amoebius fixes one scheme on two orthogonal axes: **node shape encodes the functional-programming role, and node colour encodes the honesty / validation-locus band**. One glance reads both what a node is and how trustworthy its claim is. The scheme is subgraph-free and uses only solid, labelled edges, so it composes with the constraint [documentation_standards.md §7](../documentation_standards.md#7-diagrams) already imposes.
 
 What the scheme forecloses: per-diagram palettes, colour as the sole carrier of any distinction (every role and the accumulate/short-circuit split survive greyscale via shape and edge), and the nested-subgraph and dotted-edge forms that render unreliably. A recursive product that genuinely needs nesting is drawn under the flat profile of [§8](#8-recursion-profiles); a nested form is a disclosed deviation, never a default.
 
@@ -59,7 +59,7 @@ Shape and colour are independent: a `Lift` probe is a parallelogram whose colour
 
 Every diagram reproduces this header verbatim as the first lines inside the block, so styling is uniform across documents. The fills are light pastels carrying explicit dark strokes and node text, legible on both light and dark canvases.
 
-```
+```text
   classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
   classDef provenPB fill:#dbeafe,stroke:#1e5fa8,color:#0b2f57,stroke-width:2px
   classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px

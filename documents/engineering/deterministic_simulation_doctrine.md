@@ -17,10 +17,12 @@
 ## 1. Why this doctrine exists
 
 The concurrency-and-failover method ([chaos_failover_doctrine.md §10](./chaos_failover_doctrine.md#10-simulate--the-pure-program-lifted-io-sim))
-adopts io-sim only for the *pure decision core* against hand-built peer stubs (Tier-1, Phase 3) and **defers**
-io-sim against the *built daemon* — leaving the daemon's real concurrent schedule, and every interaction with
-the real environment (apiserver admission, Pulsar redelivery/partition, DNS propagation, clock skew), to
-Register-3 live chaos. Register-3 chaos is the strongest *empirical* instrument but the weakest *logical* one:
+offers the io-sim lift as a **conditional** move — taken "where the in-process concurrency is intricate enough
+that Extract's purity boundary still leaves real schedule-dependent behaviour." The plan currently exercises
+it only for the *pure decision core* against hand-built peer stubs (Tier-1, Phase 3), which leaves the
+**built daemon's** real concurrent schedule, and every interaction with the real environment (apiserver
+admission, Pulsar redelivery/partition, DNS propagation, clock skew), to Register-3 live chaos. This doctrine
+makes the move **standing rather than conditional**, and points it at the built daemon. Register-3 chaos is the strongest *empirical* instrument but the weakest *logical* one:
 it is **sampled** and **late**, and a rare interleaving surfaces once in ten thousand runs, if ever
 ([chaos_failover_doctrine.md §3](./chaos_failover_doctrine.md#3-the-defect-class--one-shape-two-disguises)).
 
@@ -98,12 +100,12 @@ substrate behaviour.
 
 ## 4. Register 2.5 — where deterministic simulation sits
 
-The register *definitions* are owned by [testing_doctrine.md §2](./testing_doctrine.md#2-three-registers-of-amoebius-testing);
+The register *definitions* are owned by [testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing);
 this doctrine owns the **shape** of the deterministic-simulation register and how it extends the pre-cluster
 spine ([conformance_harness_doctrine.md §4](./conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run)).
 
 - **Registers 1, 2, and 3** — pure/golden, boundary-integration-with-fakes, and live-infrastructure — are
-  defined by [testing_doctrine.md §2](./testing_doctrine.md#2-three-registers-of-amoebius-testing); the
+  defined by [testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing); the
   pre-cluster spine they run on is [conformance_harness_doctrine.md §4](./conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run).
 - **Register 2.5 — deterministic simulation (this doctrine).** The real daemon/reconciler code under
   `IOSim`/`IOSimPOR` against the [§3](#3-the-simulated-environment-and-its-fault-model) modeled environment —
@@ -178,12 +180,12 @@ design intent, never a tested amoebius result.
 ## Cross-references
 
 - [Engineering Doctrine Index](./README.md)
-- [Chaos & Failover Doctrine](./chaos_failover_doctrine.md) — §10 the io-sim "Simulate" move this doctrine adopts and completes; the R1–R9 hazards the fault model targets
-- [Formal Model Doctrine](./formal_model_doctrine.md) — §8 trace validation, which first runs against the simulated daemon here
+- [Chaos & Failover Doctrine](./chaos_failover_doctrine.md) — [§10](./chaos_failover_doctrine.md#10-simulate--the-pure-program-lifted-io-sim) the io-sim "Simulate" move this doctrine adopts and completes; the R1–R9 hazards the fault model targets
+- [Formal Model Doctrine](./formal_model_doctrine.md) — [§8](./formal_model_doctrine.md#8-trace-validation-the-earlier-codemodel-bridge) trace validation, which first runs against the simulated daemon here
 - [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — the one model whose runtime fidelity DST bridges before Register 3
-- [Testing Doctrine](./testing_doctrine.md) — §2 owns the register definitions, including Register 2.5
+- [Testing Doctrine](./testing_doctrine.md) — [§2](./testing_doctrine.md#2-the-registers-of-amoebius-testing) owns the register definitions, including Register 2.5
 - [Conformance Harness Doctrine](./conformance_harness_doctrine.md) — the pre-cluster spine this register extends
 - [Content Addressing & Determinism Doctrine](./content_addressing_doctrine.md) — the shared determinism substrate (seeds + clock seams)
-- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — §6 the structured-concurrency daemon spine that lifts cleanly onto io-classes
+- [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§6](./daemon_topology_doctrine.md#6-the-shared-daemon-spine) the structured-concurrency daemon spine that lifts cleanly onto io-classes
 - [Documentation Standards](../documentation_standards.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

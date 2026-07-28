@@ -18,7 +18,7 @@ orchestration, engine-pool routing, and durable-context event-sourcing; `hostboo
 smart-constructor illegal-state types, and schema-reflected-from-Haskell. All four run today and are test-backed.
 
 Rewriting any of that from scratch would discard tested code and reintroduce its bugs, for no gain — the numerics
-and the orchestration are not where amoebius is novel. Amoebius is novel in **how these shapes are lifted and
+and the orchestration are not where amoebius is novel. amoebius is novel in **how these shapes are lifted and
 composed under one typed DSL**: the illegal-state-unrepresentable surface, the total composability, the single
 opinionated platform, the one formal obligation. So the rule is: **lift the proven shape, re-home it onto the
 amoebius seam, and reserve new implementation for the composition layer and the seams themselves.** What this
@@ -74,7 +74,7 @@ Register-1/2 validatable:
 
 Each of `infernix` and `jitML` ships a **PureScript** single-page demo app (built with `spago`), whose frontend
 **contract types are generated from the Haskell ADTs via `purescript-bridge`** and are exercised end to end
-under a browser driver. Amoebius lifts these shells and regenerates their contracts from the amoebius-composed
+under a browser driver. amoebius lifts these shells and regenerates their contracts from the amoebius-composed
 types; the generated PureScript contract is a build artifact, never committed
 ([generated_artifacts_doctrine.md](./generated_artifacts_doctrine.md)). A demo web app is **application logic
 that *uses* its extension, never itself an extension**

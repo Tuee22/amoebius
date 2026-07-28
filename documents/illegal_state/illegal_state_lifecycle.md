@@ -27,7 +27,7 @@ It owns nothing of the catalog's framing.
 - The **seven typing techniques**, the **coverage matrix**, the **three foreclosure layers**, and the new
   **validation-locus axis** (`Gate-1-editor` / `Gate-2-decoder` / `provision-seal` /
   `rendered-output-golden` / `live-effect`, orthogonal to the foreclosure layer; `provision-seal` is post-bind
-  Phase-10 provision returning a `ProvisionError` before any `ProvisionedSpec` exists) are owned by
+  Phase-11 provision returning a `ProvisionError` before any `ProvisionedSpec` exists) are owned by
   [`illegal_state_techniques.md`](./illegal_state_techniques.md) — referenced, not restated.
 - The *normative rule* behind each entry lives in that entry's owning doctrine (readiness/ordering, release
   lifecycle, monitoring, …). This doc names the owner and never restates its content.
@@ -191,7 +191,7 @@ component as the drill assumes). Per the validation-locus axis of
 ## Cross-references
 
 - [The Illegal-State Catalog](./illegal_state_catalog.md) — the catalog index and the load-bearing honesty
-  limit this slice inherits (§1 framing, §2 the honesty limit, §6 the three foreclosure layers)
+  limit this slice inherits ([§1](#1-scope) framing, [§2](#2-the-readiness-promotion--monitoring-illegal-states) the honesty limit, [§6](illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) the three foreclosure layers)
 - [Illegal States — Typing Techniques](./illegal_state_techniques.md) — the seven typing techniques, the
   coverage matrix, the foreclosure layers, and the **validation-locus axis** each entry above cites
 - [DSL Doctrine](../engineering/dsl_doctrine.md) — the contract this catalog enumerates (a valid `InForceSpec` cannot

@@ -118,12 +118,13 @@ this section records the migration-specific instance.
 
 ## 4. `Shrink` is create-new → verified-migrate → retire-old; backing reclaim is external and privileged
 
-The `Shrink` arm ([§3](#3-the-dsl-exposes-no-destructive-verb--the-closed-storagemutation-union)) realizes a smaller effective size without ever representing data destruction. The
-`.dhall` value the operator writes denotes the *target smaller size*; the reconciler provisions a new,
-correctly-sized retained coordinate, copies the live bytes, **verifies** the copy, and only then retires the
-old one. No `.dhall` value ever denotes "discard these bytes." This is the verified-shrink mechanism owned by
-[storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction),
-referenced here, not restated.
+The `Shrink` arm ([§3](#3-the-dsl-exposes-no-destructive-verb--the-closed-storagemutation-union)) realizes a
+smaller effective size without ever representing data destruction. The mechanism — create-new →
+verified-migrate → retire-old — is owned by
+[storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction)
+and is referenced here, not restated. What this document adds is the *representational* consequence: the
+`.dhall` value the operator writes denotes only the **target smaller size**, and no `.dhall` value anywhere
+denotes "discard these bytes."
 
 The typed diff must first become a resource-bearing transition. A volume/PV arm constructs
 `StorageMigrationIntent` from a raw `PriorProvisionRefSource` Volume arm, replacement logical demand, and

@@ -86,7 +86,7 @@ spins up, runs, tears down **leak-free**, and **re-runs idempotently under a dis
 namespace** (a cache-bypassing independent recompute of the `releaseHash`, not a store-hit), emitting a
 committed proven/tested/assumed ledger that names its register (3) and substrate (linux-cpu) and marks the
 runtime layer **tested, never proven** and the cross-cluster/canary layers **UNVERIFIED**. The gate is checked
-against the Phase-0-committed fixtures named in Sprints 26.1–26.4 and **MUST turn red** on the committed seeded
+against the Phase-0-committed fixtures named in Sprints 30.1–30.4 and **MUST turn red** on the committed seeded
 mutant `mutant/gate-admits-unverified` — a `PromotionGate` whose guard is weakened so a promotion that SHOULD
 be refused (`release_unverified` → `Prod`) is **admitted** — and on the additional mutants named per sprint.
 The representative set is exactly the `release_lifecycle.dhall` topology's **one trivial app with three
@@ -378,7 +378,7 @@ sprint does not build the ledger, only the environment→required-strength mappi
 Runtime/chaos layer **tested** — its highest achievable strength, since live injection samples the faults
 chosen and is never *proven*). A `Release` whose consumed evidence ledger records the
 Runtime/chaos layer **UNVERIFIED** — a Tier-1-only in-process ledger, or a skipped-but-applicable move —
-yields **no Runtime witness**, so there is **no `advance` value** to hand the Sprint-26.2 CAS: the promotion is
+yields **no Runtime witness**, so there is **no `advance` value** to hand the Sprint-30.2 CAS: the promotion is
 **refused** with the specific reason tag `PromotionRefused:RuntimeEvidenceMissing`, and the environment
 pointer HEAD is **unchanged in the store** (observed from the pointer history, not a gate self-report). A
 `Release` carrying a *tested* Runtime witness constructs an `advance` value that the CAS commits. The mapping
@@ -409,7 +409,7 @@ unrepresentable state.
   the ledger, only reads it.
 - The Tier-1-only fence: a purely in-process evidence ledger (Dhall typecheck + decoder + QuickCheck + TLA+/TLC,
   no live substrate) supplies **no Runtime `EvidenceWitness`**, so a `Prod` `PromotionGate` cannot be advanced
-  on it — "we validated the DSL in-process" can never mean "the cluster enforces it".
+  on it — an in-process validation of the DSL can never mean the cluster enforces it.
 - A refusal carries the **specific reason** (`PromotionRefused:RuntimeEvidenceMissing`), not a bare failure,
   and leaves the environment pointer HEAD untouched.
 - **Phase-0-pinned oracles (authored before the gate exists):** the committed environment→required-strength
@@ -458,7 +458,7 @@ The whole sprint (📋 Planned).
 `amoebius-release/src/Amoebius/Release/SchemaMigration.hs`,
 `amoebius-release/dhall/test/release_lifecycle.dhall` (the gate topology),
 `amoebius-release/test/live/ReleaseLifecycleSpec.hs` (target paths; not yet built)
-**Blocked by**: Sprints 26.1–26.3 (the ledger, the ETag-CAS pointer, and the `PromotionGate` the plan is
+**Blocked by**: Sprints 30.1–30.3 (the ledger, the ETag-CAS pointer, and the `PromotionGate` the plan is
 enacted after); Phase 26 gate (the in-cluster SSA/ApplySet reconciler and the `replicas=1` singleton the plan
 applies on); Phase 27 gate (the in-namespace Postgres the schema-migration phase targets); Phase 21 / Phase 17
 gates (the cluster-lifecycle teardown the InForceSpec drives) — external earlier-phase prerequisites.
@@ -561,7 +561,7 @@ values end-to-end.
 > schema-migration-as-a-phase shape is LIVE in the sibling jitML's pre/post-grant split — **sibling evidence,
 > not an amoebius result**. This gate exercises the **intra-cluster** ordered apply and the schema-migration
 > phase only; the **Gateway-API canary weight-shift** and **Pulsar consumer-group cutover** RolloutPhases of
-> §5, and the **cross-cluster/geo promotion** boundary, are adopted in doctrine but **not exercised here** —
+> [§5](../documents/engineering/release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply), and the **cross-cluster/geo promotion** boundary, are adopted in doctrine but **not exercised here** —
 > their proof rides a later phase and Phase 32, respectively. Pulumi cloud-IaC (tier a) and the host spot-fleet
 > reconciler
 > (tier b) are unrelated; only tier (c), the in-cluster SSA reconciler, enacts this plan.
@@ -603,7 +603,7 @@ The whole sprint (📋 Planned).
 ## Related Documents
 - [README.md](README.md) — the live tracker; Phase 30 objective, gate, and substrate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (skeleton,
-  sprint format, the doctrine-citation rule, the three-register + honesty + one-substrate disciplines, and the
+  sprint format, the doctrine-citation rule, the register + honesty + one-substrate disciplines, and the
   §M gate-integrity clauses)
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (no external CI/CD control
   plane; single-instance delegated to k8s/etcd; the content-addressed store)

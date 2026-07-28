@@ -105,7 +105,7 @@ seeded mutant** (§M.2) that MUST turn the gate red, committed and re-run.
 - [`vault_pki_doctrine.md §8`](../documents/engineering/vault_pki_doctrine.md#8-the-root-cluster-owns-the-pki-trust-anchor)
   — *the root cluster owns the PKI trust anchor*: exactly one self-signed root of trust, the Vault `pki/` root CA,
   with internal certs chaining to it; this phase builds **plane 1 (internal PKI) only** — public-edge TLS (Phase
-  21) and the cross-cluster intermediate-CA hierarchy (federation) are deferred and **live-proof-pending even in
+  25) and the cross-cluster intermediate-CA hierarchy (federation) are deferred and **live-proof-pending even in
   prodbox**.
 - [`vault_pki_doctrine.md §9`](../documents/engineering/vault_pki_doctrine.md#9-in-cluster-consumers-authenticate-to-vault-directly)
   and [`§3`](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value) —
@@ -381,7 +381,7 @@ re-adopt [`vault_pki_doctrine.md §2`](../documents/engineering/vault_pki_doctri
 prove the **fail-closed secrets-root invariant in simulation** — run the real init/unseal client against the
 modeled fault-injectable Vault under `IOSim`/`IOSimPOR` and assert that no adversarial fault schedule (sealed,
 unreachable, lease-expiry, restart) ever lets the daemon proceed while Vault is sealed or its freshness is
-unproven. This is a **Register-2.5** deterministic-simulation check, run in-process **before** the Sprint-18.3
+unproven. This is a **Register-2.5** deterministic-simulation check, run in-process **before** the Sprint-22.3
 Register-3 live gate — not a substitute for it.
 
 ### Deliverables
@@ -406,7 +406,7 @@ Register-3 live gate — not a substitute for it.
   its seed for debugging.
 - A **Register-2.5** proven/tested/assumed ledger (substrate `none`), stating the **honest limit** — the harness
   proves the *client's* fail-closed logic against a **modeled** Vault whose fidelity is **assumed**; that fidelity
-  assumption is discharged only by this phase's **Sprint-18.3 Register-3 live gate**, never by simulation.
+  assumption is discharged only by this phase's **Sprint-22.3 Register-3 live gate**, never by simulation.
 
 ### Validation
 1. Run the real init/unseal client under `IOSim`/`IOSimPOR` across **>=500 seeds per fault family** and assert the
@@ -416,7 +416,7 @@ Register-3 live gate — not a substitute for it.
 2. Force a counterexample (e.g. a modeled-Vault fault that would tempt a stale read) and assert it is
    **deterministically replayable** from its seed.
 3. Emit the Register-2.5 ledger (substrate `none`); assert it records modeled-Vault fidelity as **assumed** and
-   names the Sprint-18.3 Register-3 live gate as the discharge, never marking the live invariant green from
+   names the Sprint-22.3 Register-3 live gate as the discharge, never marking the live invariant green from
    simulation.
 
 ### Remaining Work

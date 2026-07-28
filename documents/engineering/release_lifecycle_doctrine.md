@@ -128,7 +128,7 @@ data Release = Release
 > content-addressed write protocol (a blob at a hash either is the bytes that hash to it, or the write is
 > rejected) — the enforcement actually holds at runtime, it is not a compile-time impossibility.
 
-### Sibling evidence
+### Sibling evidence — the `Release` ledger
 
 No sibling keeps a content-addressed *release* ledger; the closest evidence is that jitML and infernix already
 key ML *artifacts* by a `sha256(resolved-dhall ‖ substrate-fingerprint)` `experimentHash`
@@ -171,7 +171,7 @@ data Environment = Dev | Staging | Prod          -- closed union; no fourth, unn
 > lost-update / split-promotion race, not a type-level impossibility. The *closedness* of `Environment` (no
 > fourth environment) is **type-foreclosed** — an un-enumerated environment has no constructor.
 
-### Sibling evidence
+### Sibling evidence — the `Environment` promotion pointer
 
 The ETag-CAS pointer flip is demonstrated in the sibling content store for `trial` pointers (best/latest over ML
 manifests); the `environment` pointer **reuses that exact protocol** for a new pointee (`Release`). Sibling
@@ -239,7 +239,7 @@ advance :: Environment -> Release -> EvidenceWitness -> PointerCas
 > **Layer.** Promote-unverified→prod is **type-foreclosed** (uninhabitable — no `advance` term). The *strength
 > mapping* itself (which layer prod requires) is a policy value the gate enforces at construction time.
 
-### Sibling evidence
+### Sibling evidence — the `PromotionGate`
 
 infernix gates a servable artifact behind a `.ready` sentinel written **last** (`model_bootstrap.py`,
 `model_cache.py`) — the "no handle without its completion edge" pattern the `PromotionGate` mirrors at the
@@ -316,7 +316,7 @@ data ProvisionedRolloutWork       -- private constructors only
 > Kubernetes / Gateway-API mechanisms; *that amoebius wires them into this plan type* is specified here and
 > unproven until the phase lands.
 
-### Sibling evidence
+### Sibling evidence — the `RolloutPlan` apply
 
 jitML's `src/JitML/Cluster/Helm.hs` defines exactly this shape — a `HelmPhase`
 (`HarborPhase | PlatformPhase | FinalPhase`), a `releasePhase :: HelmPhase` field on each release, and a

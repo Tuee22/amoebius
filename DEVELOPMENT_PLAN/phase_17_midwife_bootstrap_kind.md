@@ -136,7 +136,7 @@ layout readback must catch it. A gate run in which any of M1–M6 stays green is
 
 ## Doctrine adopted
 
-- **Substrate doctrine §6 — the midwife contract (a Python `pb` CLI, not `bootstrap.sh`).** This phase
+- **Substrate doctrine [§6](../documents/engineering/substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off) — the midwife contract (a Python `pb` CLI, not `bootstrap.sh`).** This phase
   implements [`substrate_doctrine.md` §6 — the midwife contract: a Python CLI ensures a toolchain, builds the
   binary, hands off](../documents/engineering/substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off):
   the thin pre-binary driver that ensures the package-manager root, installs the pinned toolchain via `ghcup`,
@@ -144,18 +144,18 @@ layout readback must catch it. A gate run in which any of M1–M6 stays green is
   before any Haskell toolchain exists and because it is unified with the operator CLI — one `pb` with two modes,
   the second being the admin-REST client in
   [`bootstrap_sequence_doctrine.md` §5 — the admin control plane](../documents/engineering/bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api).
-- **Substrate doctrine §2 — detection as a pure classification over three reads.** This phase adopts
+- **Substrate doctrine [§2](../documents/engineering/substrate_doctrine.md#2-detection-a-pure-classification-over-three-reads) — detection as a pure classification over three reads.** This phase adopts
   [`substrate_doctrine.md` §2 — detection: a pure classification over three reads](../documents/engineering/substrate_doctrine.md#2-detection-a-pure-classification-over-three-reads):
   a total `classify` over three runtime reads (OS, normalized architecture, NVIDIA-GPU presence), with the two
   hard-failure rules encoded (Apple is always `arm64`; a present NVIDIA GPU promotes Linux to `linux-cuda`), and
   the only `IO` being the reads — the substrate is detected, never configured.
-- **Substrate doctrine §3 — the no-environment / no-`PATH` lazy tool-ensure contract.** This phase implements
+- **Substrate doctrine [§3](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) — the no-environment / no-`PATH` lazy tool-ensure contract.** This phase implements
   [`substrate_doctrine.md` §3 — the no-environment / no-`PATH` lazy tool-ensure contract](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract):
   probe → install-if-absent → resolve absolute path → invoke by full path; the closed `HostTool` enum, the
   unexported `AbsExe` constructor that makes a bare-name invocation unrepresentable, and — for this phase —
   ensuring `ghcup`/`cabal`/`kubectl`/`kind` but **not** Helm (amoebius renders and applies its own typed
   manifests and never shells out to Helm).
-- **Cluster lifecycle doctrine §1, §2, §9 — two cluster kinds and bring-up-as-reconcile.** This phase
+- **Cluster lifecycle doctrine [§1](../documents/engineering/cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape), [§2](../documents/engineering/cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap), [§9](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) — two cluster kinds and bring-up-as-reconcile.** This phase
   implements the self-managed half of
   [`cluster_lifecycle_doctrine.md` §1 — two cluster kinds, one lifecycle shape](../documents/engineering/cluster_lifecycle_doctrine.md#1-two-cluster-kinds-one-lifecycle-shape)
   (the host-binary-present `kind`/`rke2` cluster, in its root single-node form),
@@ -166,13 +166,13 @@ layout readback must catch it. A gate run in which any of M1–M6 stays green is
   machine](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)
   (`discover → diff → enact → re-observe`). The provider-managed half and post-bring-up init (Vault, the
   `.dhall` handoff) are later phases.
-- **DSL doctrine §3 — the orchestration surface: parameters, context, witness.** The in-binary `bootstrap`
+- **DSL doctrine [§3](../documents/engineering/dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness) — the orchestration surface: parameters, context, witness.** The in-binary `bootstrap`
   command the midwife hands off to carries a typed host context per
   [`dsl_doctrine.md` §3 — the orchestration surface: parameters, context, witness](../documents/engineering/dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness):
   parameters (substrate, distro, replicas), context (where the binary sits), and witnesses (locally-checkable
   runtime facts), adapted to the no-environment-variable invariant via file/socket-existence witnesses rather
   than `PATH`/env kinds. The pure Step/Chain kernel this rides on is already delivered pre-cluster.
-- **Resource-capacity doctrine §8 — declared in pure input, provisioned before render, cross-checked at
+- **Resource-capacity doctrine [§8](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime) — declared in pure input, provisioned before render, cross-checked at
   runtime.** This phase establishes the
   first live inventory required by
   [`resource_capacity_doctrine.md` §8](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime):

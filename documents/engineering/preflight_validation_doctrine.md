@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/README.md, documents/engineering/diagram_conventions.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, documents/engineering/README.md, documents/engineering/diagram_conventions.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the pure-functional validation algebra (`Check`) that is the mechanism of the `dhall update` admission gate, its credential/host/quota probe instances including the worst-case dynamic envelope, and the recursive-forest validate-before-effect proof tree that makes a partial acknowledgement across a parent/child/grandchild forest unrepresentable.
@@ -19,7 +19,7 @@ The Dhall gates foreclose only structurally-illegal specifications. Gate 1 (type
 
 An untyped, per-call validation layer fails the property amoebius requires. Ad-hoc checks scattered through the deploy path report the first failure and stop, cannot express which checks are independent (and therefore parallelisable) versus dependent, and admit a deploy that then fails halfway through `pulumi up` with resources half-created. The admission the deploy needs is a single composable structure whose success is a precondition of any mutation.
 
-Amoebius already owns the runtime admission gate this requires: `dhall update` "actively proves each named secret before admitting the upload, and rejects fail-fast otherwise", reaching real hosts and cloud APIs and rejecting an absent secret, an SSH key that cannot connect, a host short of its declared resources, or a cloud credential lacking permission or quota, before any reconcile ([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)). This document owns the *mechanism* of that gate — one pure-functional `Check` algebra ([§2](#2-the-check-algebra)), its probe instances ([§3](#3-the-check-instances-the-mechanism-of-the-dhall-update-gate)), and the recursive lift of the same algebra over the forest ([§4](#4-the-recursive-forest)) — and two extensions the gate's prose does not yet spell out: the worst-case dynamic envelope that validates a future-needed credential now, and the ack/nack proof tree.
+amoebius already owns the runtime admission gate this requires: `dhall update` "actively proves each named secret before admitting the upload, and rejects fail-fast otherwise", reaching real hosts and cloud APIs and rejecting an absent secret, an SSH key that cannot connect, a host short of its declared resources, or a cloud credential lacking permission or quota, before any reconcile ([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)). This document owns the *mechanism* of that gate — one pure-functional `Check` algebra ([§2](#2-the-check-algebra)), its probe instances ([§3](#3-the-check-instances-the-mechanism-of-the-dhall-update-gate)), and the recursive lift of the same algebra over the forest ([§4](#4-the-recursive-forest)) — and two extensions the gate's prose does not yet spell out: the worst-case dynamic envelope that validates a future-needed credential now, and the ack/nack proof tree.
 
 What the design forecloses, stated honestly ([§5](#5-the-guarantee-and-its-honest-limits)): a `Check` proof is stamped to observation time and cannot prove the running cluster complies. "A validated deploy cannot fail" is not achievable; the achievable and claimed property is that no enumerated, probe-observable precondition can fail at validation and that every subsequent self-management mutation is re-confirmed by the existing single-use snapshot token and fails closed on drift.
 
@@ -31,7 +31,7 @@ What the design forecloses, stated honestly ([§5](#5-the-guarantee-and-its-hone
 
 No single lawful type is both an error-accumulating `Applicative` and a short-circuiting `Monad`. For any type carrying lawful `Monad` and `Applicative` instances, the coherence law forces `mf <*> mx = mf >>= \f -> mx >>= \x -> pure (f x)`; the right-hand side makes `mx`'s contribution a function of `mf`'s result, so a failed `mf` short-circuits and `mx` is never inspected. An accumulating `<*>` must inspect `mx` even when `mf` failed, which the coherence law forbids. `Validation (NonEmpty e)` therefore has no lawful `Monad`, and `Either e` has a short-circuiting `Applicative`; the two behaviours cannot coexist in one lawful instance.
 
-Amoebius resolves this the way the deploy algebra already resolves it — independence is `Applicative`, dependency is `Monad`, and which one holds is the structure of the composition, not a runtime decision ([pulumi_iac_doctrine.md §7](./pulumi_iac_doctrine.md#7-applicative-parallelism-for-independent-deploys)). `Check` is a free GADT whose type-class instances take the lawful, short-circuiting reading, while accumulation lives in distinct constructors interpreted through `Validation`:
+amoebius resolves this the way the deploy algebra already resolves it — independence is `Applicative`, dependency is `Monad`, and which one holds is the structure of the composition, not a runtime decision ([pulumi_iac_doctrine.md §7](./pulumi_iac_doctrine.md#7-applicative-parallelism-for-independent-deploys)). `Check` is a free GADT whose type-class instances take the lawful, short-circuiting reading, while accumulation lives in distinct constructors interpreted through `Validation`:
 
 ```haskell
 data Check a where
@@ -58,7 +58,7 @@ One `Check` value carries both disciplines — the `Bind` fragment in the short-
 
 ### 2.3 The accumulation discipline
 
-The canonical `Applicative`/`Monad` instances short-circuit (`<*> = ap`). Error accumulation is reachable only through the named combinators `independently`, `allOfList`, and `both`. A site that must validate several inputs and report every failure uses those combinators; `traverse`, `mapM`, and `<*>` are forbidden there, because they re-enter the short-circuit instance and report only the first failure. An accumulating operand may close over a value already bound by an enclosing `Bind` but may not consume a sibling operand's output — consuming a sibling's output is a data dependency, which the type admits only through `Bind`.
+The canonical `Applicative`/`Monad` instances short-circuit (`<*> = ap`). Error accumulation is reachable only through the named combinators `independently`, `allOfList`, `both`, and — in its one double-failure case — `Select`, which is left-biased (the right branch is unobserved when the left succeeds) but keeps **both** reasons when both branches fail ([§2.4](#24-laws-and-the-mutant-corpus)). A site that must validate several inputs and report every failure uses those combinators; `traverse`, `mapM`, and `<*>` are forbidden there, because they re-enter the short-circuit instance and report only the first failure. An accumulating operand may close over a value already bound by an enclosing `Bind` but may not consume a sibling operand's output — consuming a sibling's output is a data dependency, which the type admits only through `Bind`.
 
 ### 2.4 Laws and the mutant corpus
 

@@ -247,7 +247,7 @@ every mutation surface.
   — **the apply/reconcile engine.** This phase realizes scoped SSA, kind-indexed and staged execution actions,
   authenticated dependency-gated deletion, the pure and simulated Job completion/cleanup state machine, live
   terminal retention, and readiness observed from live state. The amoebius scheduler-role CAS/Binding protocol
-  named by §5 is Phase 20; durable Job completion/cleanup first runs live in Phase 29; rollback and the release
+  named by [§5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) is Phase 20; durable Job completion/cleanup first runs live in Phase 29; rollback and the release
   ledger stay deferred.
 - [`manifest_generation_doctrine.md §6`](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)
   — **desired is the validated identity index of `renderAll(provisionedSpec)`, observed is live inventory, and
@@ -285,7 +285,7 @@ every mutation surface.
 - [`generated_artifacts_doctrine.md §3`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule)
   — the applied `[K8sObject]` set is emitted from the Haskell source of truth and **never committed**; what
   reaches the cluster is generated at apply time, not a checked-in manifest.
-- [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing)
+- [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
   — **Register 3** (live infrastructure): the register this phase's gate reaches; and
   [`§4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact),
   the per-run proven/tested/assumed ledger the live convergence emits (no skips, fail fast; the scratch namespace
@@ -701,21 +701,21 @@ The whole sprint (📋 Planned).
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the live-proof
   acceptance token: *converges and re-run is a no-op*, proven in Register 3)
 - [overview.md](overview.md) — target architecture and the no-Helm / no-release-store reconciler posture
-- [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — §5 the apply/reconcile
-  engine adopted here; §6 the reconcile state model; §2 the pure renderer consumed from Phase 13
-- [Readiness Ordering Doctrine](../documents/engineering/readiness_ordering_doctrine.md) — §6 the runtime enactor
+- [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — [§5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) the apply/reconcile
+  engine adopted here; [§6](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed) the reconcile state model; [§2](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) the pure renderer consumed from Phase 13
+- [Readiness Ordering Doctrine](../documents/engineering/readiness_ordering_doctrine.md) — [§6](../documents/engineering/readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps) the runtime enactor
   (observe, never sleep) the wait-for-ready realizes
-- [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — §8 the pre-mutation live
+- [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — [§8](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime) the pre-mutation live
   inventory cross-check
-- [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — §3 the Deployment-`replicas=1`
+- [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — [§3](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton) the Deployment-`replicas=1`
   singleton (delegated single-instance, no election) that will own this reconciler in Phase 26
-- [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — §3 the invariant that
+- [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — [§3](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure) the invariant that
   rendering never touches live infrastructure; apply is the first live step
 - [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — why the applied object
   set is generated and never committed
-- [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — §4 the
+- [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — [§4](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits) the
   Register-2.5 io-sim environment the reconciler is validated against in Sprint 19.5, before the Register-3 live gate
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — §2 Register 3 (live), §4 the per-run ledger
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 3 (live), [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger
 - [phase_13_render_manifest_goldens.md](phase_13_render_manifest_goldens.md) — the pure per-projection renderers and
   deployment-global `renderAll` owner-union goldens this phase enacts
 - [phase_14_chain_kernel_boundary.md](phase_14_chain_kernel_boundary.md) — the Register-2 fake-apply this phase

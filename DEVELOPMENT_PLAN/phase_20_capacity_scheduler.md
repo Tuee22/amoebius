@@ -230,7 +230,7 @@ planner — not regenerated from the scheduler's own output.
   a second implementation; this phase drives it from the **host binary** as a precursor, and the Deployment-
   `replicas=1` singleton that *owns* it (single-writer authority delegated to k8s/etcd through the mandatory
   `Lease`, no bespoke election) is stood up in Phase 26.
-- [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing)
+- [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
   — **Register 3** (live infrastructure): the register this phase's gate reaches; and
   [`§4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact),
   the per-run proven/tested/assumed ledger the live cutover/binding emits (no skips, fail fast; the scratch
@@ -638,15 +638,15 @@ The whole sprint (📋 Planned).
   apiserver the Register-2.5 scheduler sim (Sprint 20.5) drives the real modules on
 - [phase_15_deterministic_sim_substrate.md](phase_15_deterministic_sim_substrate.md) — the deterministic-
   simulation substrate the Register-2.5 scheduler battery runs in
-- [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — §5 the apply/
-  reconcile engine (scheduler CAS/Binding + bootstrap cutover slice); §6 the observed scheduler-ledger state
+- [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — [§5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) the apply/
+  reconcile engine (scheduler CAS/Binding + bootstrap cutover slice); [§6](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed) the observed scheduler-ledger state
   model
-- [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — §8 declared at decode,
+- [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — [§8](../documents/engineering/resource_capacity_doctrine.md#8-where-the-numbers-come-from-declared-in-pure-input-provisioned-before-render-cross-checked-at-runtime) declared at decode,
   cross-checked at runtime (the scheduler's pre-reservation re-fold)
-- [Readiness Ordering Doctrine](../documents/engineering/readiness_ordering_doctrine.md) — §6 the runtime
+- [Readiness Ordering Doctrine](../documents/engineering/readiness_ordering_doctrine.md) — [§6](../documents/engineering/readiness_ordering_doctrine.md#6-the-runtime-enactor-the-reconciler-observes-never-sleeps) the runtime
   enactor (observe, never sleep) the scheduler-readiness witnesses realize
-- [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — §3 the Deployment-
+- [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — [§3](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton) the Deployment-
   `replicas=1` singleton that will own this scheduling role in Phase 26
 - [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — the
   Register-2.5 io-sim environment the scheduler is validated against in Sprint 20.5, before the Register-3 gate
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — §2 Register 3 (live), §4 the per-run ledger
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 3 (live), [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger

@@ -204,7 +204,7 @@ the engine actually resolving into its bounded cache) deferred to the live band,
   cyclic or shadowing extension fixture fails Gate 2 at its committed locus (the closed v1 extension set
   `{infernix, jitML}`).
 - [`illegal_state_catalog.md §3`](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent)
-  (§3.12 — a product named in application logic) and
+  ([§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability) — a product named in application logic) and
   [`§3.25`](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)
   (an ML asset named by arbitrary URL) — the two states this phase forecloses at Gate 1, honoring the
   load-bearing limit ([`§2`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)):
@@ -213,8 +213,8 @@ the engine actually resolving into its bounded cache) deferred to the live band,
   — **the illegal-state-unrepresentable contract's two typed gates** (Gate 1 the Dhall typechecker, Gate 2 the
   in-process decoder): the capability union is guarded at Gate 1, the binding decodes through Gate 2 — this
   phase adds the capability-model instance of that contract, no live half.
-- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) §2
-  (**Register 1** — pure/golden, in-process, no cluster) and §4 (the per-run proven/tested/assumed ledger): the
+- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
+  (**Register 1** — pure/golden, in-process, no cluster) and [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) (the per-run proven/tested/assumed ledger): the
   register this gate reaches and the ledger it emits, with the live realization of any provider (and the
   jit-resolve of any engine) marked UNVERIFIED, owned by the live band.
 
@@ -378,7 +378,7 @@ stopping at the wholly unprovisioned `BoundDeployment`.
 
 ### Validation
 1. The same `CapabilityNeed`, bound under two shapes, produces two `BoundServiceSpec`s that are **structurally
-   different by the object-node-multiset oracle** (deep structural diff per §5, red on a scalar-only or
+   different by the object-node-multiset oracle** (deep structural diff per [§5](../documents/engineering/service_capability_doctrine.md#5-per-cluster-structural-shapes--beyond-values), red on a scalar-only or
    copied-shape-tag difference; each equal to its Phase-0-committed golden), while the **app-surface bytes**
    (beta-normalized app-surface slices from two distinct composed spec files) are identical; a binding to an
    unbuilt provider arm returns a structured `Left` tagged (Gate 2); a shape/provider authored on the app
@@ -424,8 +424,8 @@ gate passes), `DEVELOPMENT_PLAN/substrates.md` (the Phase-10 `none` gate row).
 ### Objective
 Adopt [`service_capability_doctrine.md §8`](../documents/engineering/service_capability_doctrine.md#8-capabilities-and-the-illegal-state-contract),
 [`capability_extension_doctrine.md §3`](../documents/engineering/capability_extension_doctrine.md#3-the-provide-and-require-contract),
-and [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing)
-§2/§4: assemble the phase's single Register-1 gate — every positive need binds to a checked `BoundServiceSpec`
+and [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
+[§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)/[§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact): assemble the phase's single Register-1 gate — every positive need binds to a checked `BoundServiceSpec`
 while every product- or URL-named or shape-in-app app has no syntax and every unbuilt/unbound/cyclic/shadowing
 binding returns its specific `DecodeError` — and emit the per-entry validation-locus ledger that names the
 honest foreclosure layer of each.
@@ -448,7 +448,7 @@ honest foreclosure layer of each.
   that the Registry arm crosses `ObjectStoreProducerIntent.Registry : RegistryStorageIntent` on the *bound* side
   (its derivation into `RegistryStorageDemand` is the provision seal's), and that the canonical
   `BoundExecutionSet` enumerates every kind-indexed unit — including controller-lowered units — exactly once.
-- The negative corpus — `illegal_product_in_app` (§3.12, Gate 1), `illegal_engine_by_url` (§3.25, Gate 1),
+- The negative corpus — `illegal_product_in_app` ([§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability), Gate 1), `illegal_engine_by_url` ([§3.25](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model), Gate 1),
   `illegal_shape_in_app` (shape/provider on the app surface, Gate 1), `illegal_unbuilt_provider` (Gate 2),
   `illegal_unbound_capability` (undecodable, Gate 2), `illegal_cyclic_extension` (a provide-and-require
   self-loop, Gate 2 at the `extRequires` locus), and `illegal_shadowing_extension` (an anti-shadow merge, Gate 2
@@ -529,18 +529,18 @@ The whole sprint (📋 Planned).
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
   design-proof acceptance token: *binding-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the capability-not-product invariant
-- [Service Capability Doctrine](../documents/engineering/service_capability_doctrine.md) — §1/§2 the capability
-  set, §3/§4/§5 the provider+shape binding, §4.1 the `InferenceEngine` union's no-URL shape, §8 the illegal-state
+- [Service Capability Doctrine](../documents/engineering/service_capability_doctrine.md) — [§1](../documents/engineering/service_capability_doctrine.md#1-why-capabilities-not-products)/[§2](../documents/engineering/service_capability_doctrine.md#2-the-capability-set) the capability
+  set, [§3](../documents/engineering/service_capability_doctrine.md#3-one-canonical-provider-the-type-admits-alternates)/[§4](../documents/illegal_state/illegal_state_techniques.md#4-the-typing-techniques)/[§5](../documents/illegal_state/illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state) the provider+shape binding, [§4.1](../documents/illegal_state/illegal_state_techniques.md#41-pvcpv-binding-by-construction) the `InferenceEngine` union's no-URL shape, [§8](../documents/engineering/service_capability_doctrine.md#8-capabilities-and-the-illegal-state-contract) the illegal-state
   instances
-- [Capability Extension Doctrine](../documents/engineering/capability_extension_doctrine.md) — §3 the
+- [Capability Extension Doctrine](../documents/engineering/capability_extension_doctrine.md) — [§3](../documents/engineering/capability_extension_doctrine.md#3-the-provide-and-require-contract) the
   provide/require `extRequires` contract whose acyclicity/no-shadow this gate's extension negatives exercise
-- [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — §3.12 (product in app logic),
-  §3.25 (engine by URL), with §2 the load-bearing limit
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — §5 the two typed gates a capability binding decodes
+- [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — [§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability) (product in app logic),
+  [§3.25](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) (engine by URL), with [§2](../documents/illegal_state/illegal_state_ml_asset.md#2-the-ml-asset--training-illegal-states) the load-bearing limit
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) the two typed gates a capability binding decodes
   through
-- [Content Addressing Doctrine](../documents/engineering/content_addressing_doctrine.md) — §4.5 the ML-asset
+- [Content Addressing Doctrine](../documents/engineering/content_addressing_doctrine.md) — [§4.5](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the ML-asset
   lifecycle whose Tier-1 named engine identity is the `InferenceEngine` provider
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — §2 Register 1, §4 the per-run ledger
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 1, [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger
 - [phase_05](phase_05_gadt_decoder_gate2.md) — Gate 2, the IR + decoder the bound specs project from
 - [phase_06](phase_06_illegal_state_corpus.md) — the illegal-state corpus + validation-locus ledger machinery
   this gate reuses

@@ -32,7 +32,7 @@ containment hierarchy cannot express one shared, single-owned resolver at all. A
 (`dlopen`, per-extension image) is the other default; it cannot be checked before it runs, so a missing
 requirement or a collision is a production failure, not a compile error.
 
-Amoebius wires extensions as **flat peers in one linked binary along a typed acyclic PROVIDE/REQUIRE capability
+amoebius wires extensions as **flat peers in one linked binary along a typed acyclic PROVIDE/REQUIRE capability
 graph.** Each `ExtensionSpec` declares `extCapabilities` (what it PROVIDES into the capability surface) and
 `extRequires` (what it CONSUMES from a peer extension or the core), and the closed extension set merges into one
 binary by a merge that is **total** (every required capability is provided), **acyclic** (no requirement cycle),
@@ -79,11 +79,11 @@ merged at compile/link time into one binary. This doctrine owns one addition to 
 capability declaration from **export-only** to **PROVIDE + REQUIRE**.
 
     ExtensionSpec :
-      { extDhall        : <a typed Dhall sub-catalog nested inside the InForceSpec>   -- dsl §4
-      , extChain        : cfg -> [Step]                                                -- dsl §4
+      { extDhall        : <a typed Dhall sub-catalog nested inside the InForceSpec>   -- dsl [§4](#4-the-two-capability-extensions-jit-build-and-coordination)
+      , extChain        : cfg -> [Step]                                                -- dsl [§4](#4-the-two-capability-extensions-jit-build-and-coordination)
       , extCapabilities : List Capability     -- PROVIDES: exported into the capability surface
       , extRequires     : List Capability     -- REQUIRES: consumed from a peer extension or the core (new)
-      , extMonitoring   : NonEmpty MonitoringSurface                                   -- dsl §4
+      , extMonitoring   : NonEmpty MonitoringSurface                                   -- dsl [§4](#4-the-two-capability-extensions-jit-build-and-coordination)
       }
 
 - **`extCapabilities` is PROVIDES.** An extension exports each listed capability into the capability surface
@@ -156,17 +156,27 @@ amoebius-built consensus plane.
 
 The graph is the union of every extension's `extRequires`. The v1 edge set:
 
+Both columns are `List Capability` ([§3](#3-the-provide-and-require-contract)), so a cell names capabilities
+only — never a workload. A workload extension that stands up no capability provides the empty list.
+
 | Extension | Kind | REQUIRES (`extRequires`) | PROVIDES (`extCapabilities`) |
 |---|---|---|---|
-| `jitML` | workload | `JitBuild`, `Coordination`, `InferenceEngine` | its training/serving workload |
-| `infernix` | workload | `JitBuild`, `InferenceEngine` | `InferenceEngine` workload |
+| `jitML` | workload | `JitBuild`, `Coordination`, `InferenceEngine` | — (empty; contributes a training/serving workload, not a capability) |
+| `infernix` | workload | `JitBuild` | `InferenceEngine` |
 | `jit-build` | capability | `ObjectStore`, `Registry` | `JitBuild` |
 | `coordination` | capability | `MessageBus` | `Coordination` |
 
-`InferenceEngine`, `ObjectStore`, `Registry`, and `MessageBus` are **core** capabilities
-([service_capability_doctrine.md §2](./service_capability_doctrine.md#2-the-capability-set),
-[§4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored));
-`JitBuild` and `Coordination` are **extension-provided** ([§3](#3-the-provide-and-require-contract)). Every edge points
+`infernix` **provides** `InferenceEngine` and therefore does not require it — an extension that both required
+and provided one capability would be the self-edge [§6](#6-the-merge-total-acyclic-anti-shadow)'s acyclicity
+check rejects.
+
+`ObjectStore`, `Registry`, and `MessageBus` are **core** capabilities
+([service_capability_doctrine.md §2](./service_capability_doctrine.md#2-the-capability-set)); `InferenceEngine`
+is the ninth arm of the closed union but **extension-provided** in provenance — the arm exists in the core
+surface, its provider comes from `infernix`
+([§4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored),
+[§3](#3-the-provide-and-require-contract)); `JitBuild` and `Coordination` are extension-provided by the two
+capability-extensions. Every edge points
 from a consumer toward a provider, and the whole set is a directed acyclic graph: workload extensions depend on
 capability-extensions, capability-extensions depend on the core, and nothing points back. There is no
 containment edge — a `jit-build` used *by* `jitML` is a peer `jitML` requires, never a member `jitML` owns, so

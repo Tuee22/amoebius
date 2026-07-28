@@ -241,7 +241,7 @@ cloud inventory.
   accelerator offering, unequal accelerator source/workload keys, a missing or extra coexistence-policy class,
   an invalid shard inventory, and a dropped co-resident accelerator debit; each must reject before any
   allocation and leave the external mutating-effects trace empty.
-- `test/mutants/phase_36/resources/` — the host generator/harness, active/standby/replacement, pod/IP/CSI and
+- `test/mutants/phase_42/resources/` — the host generator/harness, active/standby/replacement, pod/IP/CSI and
   transition-credit one-short/dropped-envelope variants paired with the same exact resource-shape oracle. It
   also contains one-unit/one-byte-short variants for every registry object/upload/proxy/backing axis, Pulumi
   executor/plugin/workspace/checkpoint/gateway axis, and migration old/new/workspace/provider/copy-Job axis,
@@ -427,7 +427,7 @@ gateway resources; and migration old/new/workspace/provider-overlap/copy-Job res
 dropped-envelope mutants omit the harness, standby, replacement, registry-publication, Pulumi-executor,
 Pulumi-checkpoint, migration-copy or migration-old+new+workspace row, and a premature-credit mutant launches
 run 2 while a run-1 survivor still exists; these are pinned under
-`test/mutants/phase_36/resources/` as `drop_harness_envelope.dhall`, `drop_standby_envelope.dhall`,
+`test/mutants/phase_42/resources/` as `drop_harness_envelope.dhall`, `drop_standby_envelope.dhall`,
 `drop_replacement_envelope.dhall`, `drop_pulsar_topic_demand.dhall`,
 `drop_registry_publication_envelope.dhall`, `drop_pulumi_executor_envelope.dhall`,
 `drop_pulumi_checkpoint_demand.dhall`, `drop_migration_copy_envelope.dhall`,
@@ -474,7 +474,7 @@ object-store, provider and backing mutation trace empty.
   Sprint 42.4 implements one-deleter/one-credential, flag-then-sweep, and the independent postflight-inventory
   hard failure — the single automated test exception delegated by
   [`storage_lifecycle_doctrine.md §7.1`](../documents/engineering/storage_lifecycle_doctrine.md#71-the-single-exception-the-elevated-test-harness)
-  (the single exception, the elevated test harness) to the no-normal-operation-deletion rule of that doc's §7.
+  (the single exception, the elevated test harness) to the no-normal-operation-deletion rule of that doc's [§7](../documents/engineering/storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation).
 - [`daemon_topology_doctrine.md §3.1`](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)
   and [`§5`](../documents/engineering/daemon_topology_doctrine.md#5-single-instance-and-coordination--delegated-not-elected)
   — *exactly one pod is a k8s/etcd property* / *single-instance and coordination, delegated not elected*: the
@@ -646,7 +646,7 @@ the emitted chaos schedule injects a *delegated* failover.
   attached on the deployment-rules surface (the app under test is unaware).
 
 ### Validation
-1. The emitted `.dhall` type-checks as a `TestTopology` and obeys the §3 teardown contract unconditionally.
+1. The emitted `.dhall` type-checks as a `TestTopology` and obeys the [§3](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down) teardown contract unconditionally.
 2. Property tests perturb each supply axis independently. Lowering CPU, memory, local ephemeral storage
    (thereby also reducing in-cluster cache headroom), presented durable backing, native-host-cache backing on a
    host-worker lane, pinned-model SplitRuntime kubelet-role nodefs headroom, CRI-role
@@ -846,7 +846,7 @@ criterion 7 against `test/golden/phase_42_failover_takeover.json`, not the opera
 before any allocation;
 it tears down with an empty inventory-diff sweep (Gate criterion 1), and emits a proven/tested/assumed
 ledger whose applicable-move set is **derived** from the topology's `ChaosSchedule`/`FaultTarget` projections
-and the chaos_failover_doctrine §11.1 `FaultKind`→invariant map (never declared by the emitter) and which
+and the chaos_failover_doctrine [§11.1](../documents/engineering/chaos_failover_doctrine.md#111-the-typed-fault-schedule-chaosschedule--faulttarget) `FaultKind`→invariant map (never declared by the emitter) and which
 matches, field-for-field, the externally hand-authored committed fixture `test/golden/phase_42_ledger.json`:
 it records the Runtime-layer move *tested on that substrate* and marks the fixture's declared-but-unfaulted
 invariant UNVERIFIED, never green; a missing prerequisite fails fast with a naming error rather than a silent
@@ -869,7 +869,7 @@ injects is delegated to Pulsar (Phase 29), never a bespoke amoebius election.
 - A `Ledger` emitter producing, per run, a record of which correctness layers were reached and at what strength
   (proven / tested / assumed / UNVERIFIED), as a first-class output beside pass/fail, whose applicable-move set
   is **derived** from the topology's `ChaosSchedule`/`FaultTarget` projections and the chaos_failover_doctrine
-  §11.1 `FaultKind`→invariant map — never a set the emitter declares for itself. The externally hand-authored
+  [§11.1](../documents/engineering/chaos_failover_doctrine.md#111-the-typed-fault-schedule-chaosschedule--faulttarget) `FaultKind`→invariant map — never a set the emitter declares for itself. The externally hand-authored
   expected ledger `test/golden/phase_42_ledger.json` (committed in Phase 0, authored independently of
   `Ledger.hs`) is the oracle the emitted ledger is matched against field-for-field.
 - A fail-fast prerequisite check: a missing substrate input, credential, or tool fails the run with a message
@@ -904,7 +904,7 @@ injects is delegated to Pulsar (Phase 29), never a bespoke amoebius election.
    identity-complete policy-derived CUDA/Metal owner epochs, and quota fields must pass the provision fold and
    match the pinned witness; any review edit that breaks resource feasibility fails before allocation even if
    the field is review-allowlisted.
-2. The run emits a ledger whose applicable-move set is derived (from `ChaosSchedule`/`FaultTarget` + §11.1
+2. The run emits a ledger whose applicable-move set is derived (from `ChaosSchedule`/`FaultTarget` + [§11.1](../documents/engineering/chaos_failover_doctrine.md#111-the-typed-fault-schedule-chaosschedule--faulttarget)
    `FaultKind`→invariant map, not emitter-declared) and matches `test/golden/phase_42_ledger.json`
    field-for-field; an applicable move the run omits is recorded UNVERIFIED, not green; the cardinal rule
    "never report tested or assumed as proven" holds. The committed seeded mutant
@@ -972,7 +972,7 @@ The whole sprint (📋 Planned).
 ## Related Documents
 - [README.md](README.md) — the live tracker; Phase 42 objective, gate, and substrate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (skeleton,
-  sprint format, the doctrine-citation rule, the three-register + honesty + one-substrate disciplines)
+  sprint format, the doctrine-citation rule, the register + honesty + one-substrate disciplines)
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (no bespoke election;
   single-instance delegated to k8s/etcd; the no-normal-operation-deletion storage rule)
 - [system_components.md](system_components.md) — the target component inventory for the `Amoebius/Test/*` modules

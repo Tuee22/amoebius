@@ -161,7 +161,7 @@ OS-boundary containerd/registry-log observer confirms zero public-registry pull 
   `(namespace, statefulset, ordinal)` to the expected `metadata.name`, `amoebius.io/pv-identity` label,
   `claimRef` `(namespace, PVC-name)`, logical demand, `requiredUsableBytes`, presentation/model,
   backing-minimum/quantum operands, and exact private-witness `provisionedBytes` rendered as PVC/PV capacity;
-  authored by hand, never by the renderer's naming or sizing helper (Sprints 17.2, 17.3).
+  authored by hand, never by the renderer's naming or sizing helper (Sprints 21.2, 21.3).
 - `test/live/fixtures/durable-backing-capacity.golden` — the observed named durable-backing ceilings and the
   accepted post-reconcile per-backing rounded-`provisionedBytes` debit map over existing/proposed stable
   identities, authored independently of the allocation fold; cache and node ephemeral pools are separately
@@ -353,8 +353,11 @@ volume, a one-ordinal StatefulSet
 metadata and `claimRef` match the Phase-0-pinned independent oracle table `test/live/fixtures/claimref_table.csv`
 (hand-authored from `(namespace, statefulset, ordinal)`, never derived from the renderer's own naming helper).
 Because the logical identity `<namespace>/<statefulset>/pv_<integer>` is not a legal `metadata.name` (`/` and
-`_` are forbidden), the scheme is realized as: `metadata.name` is the DNS-1123 encoding
-`<namespace>-<statefulset>-pv-<integer>`, and the verbatim logical identity is carried in the label
+`_` are forbidden), the scheme is realized as: `metadata.name` is the RFC-1123 **subdomain** encoding
+`<namespace>.<statefulset>.pv-<integer>` — the `.` separator is illegal inside either label-shaped component,
+so the encoding is injective and two distinct identities can never collide on one cluster-scoped name
+([`storage_lifecycle_doctrine.md` §4](../documents/engineering/storage_lifecycle_doctrine.md#4-deterministic-pv-naming-and-the-explicit-bind))
+— and the verbatim logical identity is carried in the label
 `amoebius.io/pv-identity`; the table pins **both**, and the assertion checks both against it. The `claimRef`
 names the exact `(namespace, PVC-name)`, and the PV capacity is **exactly equal** (`==`, not merely `>=`) to
 the PVC request and private `UniformClaimPlan.provisionedBytes` from the table; that raw rounded number may be
@@ -386,8 +389,8 @@ PVC creation path to exactly one shape.
 
 ### Deliverables
 - Deterministic PV generation from `(namespace, statefulset, ordinal)`: the logical identity
-  `<namespace>/<statefulset>/pv_<integer>` realized as the DNS-1123 `metadata.name`
-  `<namespace>-<statefulset>-pv-<integer>` with the verbatim identity carried in the `amoebius.io/pv-identity`
+  `<namespace>/<statefulset>/pv_<integer>` realized as the injective RFC-1123-subdomain `metadata.name`
+  `<namespace>.<statefulset>.pv-<integer>` with the verbatim identity carried in the `amoebius.io/pv-identity`
   label, explicit `claimRef` to the exact `(namespace, PVC-name)`, and node affinity to the host-path node for
   host-backed volumes (the trivial single-node case on this substrate).
 - An authorable `DeclaredVolumeDemand` per claim slot with logical bytes, geometry, backing, and explicit

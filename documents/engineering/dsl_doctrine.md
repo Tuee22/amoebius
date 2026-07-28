@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for what the amoebius Dhall DSL is — a typed orchestration surface
@@ -17,7 +17,7 @@
 Kubernetes admits specifications that cannot work: a PVC that binds to no PV, a Gateway that points at
 the wrong address, a NetworkPolicy that severs two services that must communicate, a NodePort that
 exposes an admin surface publicly — each is valid YAML, accepted by the apiserver, so the contradiction
-surfaces only at runtime. Amoebius inverts this: a **typed orchestration surface on which such
+surfaces only at runtime. amoebius inverts this: a **typed orchestration surface on which such
 specifications do not type-check**.
 
 This document owns four things about that surface:
@@ -48,7 +48,7 @@ Phase order and status live only in [../../DEVELOPMENT_PLAN/README.md](../../DEV
 
 The amoebius DSL is not a scripting language, and it does not contain the deployment logic. Templating
 puts the *how* in the config — loops, conditionals, string-built commands — placing untyped control flow
-in configuration that the type-checker cannot inspect. Amoebius excludes that, per the recorded operator
+in configuration that the type-checker cannot inspect. amoebius excludes that, per the recorded operator
 decision: *"in general we do not want to use env vars or bash logic, we want everything to be
 dhall"*. It gets there by a hard split between two languages:
 
@@ -58,7 +58,7 @@ dhall"*. It gets there by a hard split between two languages:
   `InForceSpec` describes the desired world; the local `amoebius.dhall` describes the authority and
   witnesses of this binary frame. Neither carries control flow that the binary executes, subprocess strings,
   or environment lookups. Each is read, type-checked, and decoded; neither ever "runs."
-- **Haskell is the logic.** The actual reconcile logic is a pure Haskell value. Amoebius adopts
+- **Haskell is the logic.** The actual reconcile logic is a pure Haskell value. amoebius adopts
   hostbootstrap's **chain/Step algebra**: a project's deploy is a pure function `chain :: cfg -> [Step]`
   (`/home/matthewnowak/hostbootstrap/core/hostbootstrap-core/src/HostBootstrap/Step.hs`,
   `.../Chain.hs`). Each `Step` is *"the pure renderable shape plus the effectful reconcile action"* —
@@ -102,7 +102,7 @@ flowchart TD
 
 ## 3. The orchestration surface: parameters, context, witness
 
-Amoebius has **two Dhall authority surfaces**, and their names are intentionally different:
+amoebius has **two Dhall authority surfaces**, and their names are intentionally different:
 
 - **`InForceSpec`** — the dynamic, scope-relative desired-state value. The operator authors Dhall locally
   and uploads it through the singleton's `dhall update` admin endpoint; after acceptance it is not a flat
@@ -136,7 +136,7 @@ The split keeps the surfaces honest:
   what makes the recursive descent of [§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) self-describing.
 - **Witness** — the `FrameConfig`'s locally-checkable runtime facts (`RuntimeWitness`, `Context.hs`):
   e.g. *a required file or unix socket exists*. A command is gated on its witnesses passing (`validateRuntimeContext`,
-  `commandAllowed`), so a binary refuses to act in a context it does not actually inhabit. Amoebius
+  `commandAllowed`), so a binary refuses to act in a context it does not actually inhabit. amoebius
   **adapts** this vocabulary to its no-environment-variables invariant: it relies on file/socket-existence
   witnesses, not on `PATH`/env-equality kinds — the substrate tool-discovery contract that replaces those
   is owned by [substrate_doctrine.md](./substrate_doctrine.md).
@@ -202,7 +202,7 @@ at decode time — so an unrestricted uploaded `InForceSpec` would make Gate-2 d
 no-`PATH` invariant ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic), owned by
 [substrate_doctrine.md](./substrate_doctrine.md)) and the no-arbitrary-URL invariant
 ([illegal_state_catalog.md §3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model)).
-Amoebius therefore **forbids** `env:` and remote (`http(s):`) imports in any authored or uploaded spec, and
+amoebius therefore **forbids** `env:` and remote (`http(s):`) imports in any authored or uploaded spec, and
 **resolves-and-freezes** every spec to a fully-local, semantic-integrity-hashed (Dhall `sha256:…`) expression
 at `dhall update` upload time, before decode. The effect-free/total claim of
 [§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) holds for this *resolved, frozen*
@@ -329,9 +329,14 @@ a later family would enter via Path 1 once its math is absorbed into a vendored 
 Because infernix and jitML nest as `ExtensionSpec`s, their `extDhall` carries two ML-asset types the surface
 must hold apart — and, per [§1](#1-why-this-doctrine-exists), *carries but does not define*:
 
-- **`EngineRuntime`** — a **closed** union of substrate-tagged, *baked* engine identities. It has **no
-  `Url`/`Download`/`Fetch` arm**: an engine is *selected by substrate*, never fetched, and exists the moment
-  the pod does (because the extension links as a library, not a build-time download).
+- **`EngineRuntime`** — a **closed** union of substrate-tagged **named catalog identities**. It has **no
+  `Url`/`Download`/`Fetch` arm**: an engine is *selected by substrate* and named, never fetched from an
+  operator-supplied address. The **identity** is fixed the moment the spec type-checks; the **payload** is not
+  baked into the image — it is jit-resolved on first miss into the `CacheBudget`-bounded per-node cache
+  ([`content_addressing_doctrine.md` §4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)),
+  which is the deliberate exception to the bake-every-third-party-binary rule
+  ([`image_build_doctrine.md`](./image_build_doctrine.md)). What this surface forecloses is the *arbitrary
+  address*, not the deferred materialization.
 - **`ModelArtifact`** — a by-name / content-address **reference** into the content store. Its `ArtifactRef`
   is obtainable **only once the `.ready` sentinel exists *and* the artifact carries a provenance witness** —
   a committed producing checkpoint or a pinned content-addressed import — so there is no constructor for an
@@ -601,7 +606,7 @@ it does not permit that shape to be redesigned.
 
 This is why [§5](#5-the-illegal-state-unrepresentable-contract)'s contract is even tractable. The set of legal worlds is small and opinionated, so the
 types that exclude the illegal ones are *writable*. A DSL that tried to express every possible Kubernetes
-topology could not also guarantee that every expressible topology is safe. Amoebius narrows the surface
+topology could not also guarantee that every expressible topology is safe. amoebius narrows the surface
 first — one service set, one ingress path, one storage model, HA always — and *then* makes the residue of
 illegal configurations unrepresentable. The narrowing and the unrepresentability are the same design
 decision viewed from two sides.
@@ -630,7 +635,7 @@ not the future Haskell extension language.
 
 ## 9. Toolchain note
 
-Amoebius decodes Dhall in-process under the permanent **GHC 9.12.4** project pin (DEVELOPMENT_PLAN
+amoebius decodes Dhall in-process under the permanent **GHC 9.12.4** project pin (DEVELOPMENT_PLAN
 "Toolchain"). Because of Hackage version skew, the `dhall` library's transitive dependencies require
 `allow-newer` to build on the pinned GHC — the precise toolchain pins and `allow-newer` set are owned by the
 dependency-management surface tracked in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md),

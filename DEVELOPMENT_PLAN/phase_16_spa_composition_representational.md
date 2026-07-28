@@ -45,7 +45,7 @@ pure decode and a locally-served browser run can settle.
 analogous to the Phase-14 boundary fake-tool harness. The inference/training substrate is structurally absent
 from the SPA surface — it is a deployment rule bound only at [Phase 43](phase_43_spa_live_deploy.md).
 
-**Register:** 1/2 — the single deliberate two-register gate: Register 1 (the composition property decodes) + Register 2 (the PureScript demo SPA against a faked backend), both in-process, no cluster (§K).
+**Register:** 1/2 — one of the two deliberate two-register gates (Phase 14 is the other, §K): Register 1 (the composition property decodes) + Register 2 (the PureScript demo SPA against a faked backend), both in-process, no cluster (§K).
 
 **Gate:** two in-process registers pass together over the **representative set pinned in [Gate integrity](#gate-integrity)** — **(Register 1)**
 each of the two committed positive app-spec fixtures (`spa_chatbot.dhall` composing infernix,
@@ -112,7 +112,7 @@ authored and committed in Phase 0, before `Amoebius.Spa.*` exists.
   and [`§7 — Expressing a capability in the DSL`](../documents/engineering/service_capability_doctrine.md#7-expressing-a-capability-in-the-dsl):
   the SPA's multi-service surface declares each dependency as a capability need drawn from the fixed no-product
   union — `ObjectStore` / `Sql` / `MessageBus` / `Identity` / `Edge` — never as a product literal.
-- [`lift_and_compose_doctrine.md`](../documents/engineering/lift_and_compose_doctrine.md#4-the-demo-web-apps-purescript-spas-contracts-generated-from-haskell) §4 (the demo web
+- [`lift_and_compose_doctrine.md`](../documents/engineering/lift_and_compose_doctrine.md#4-the-demo-web-apps-purescript-spas-contracts-generated-from-haskell) [§4](../documents/engineering/lift_and_compose_doctrine.md#4-the-demo-web-apps-purescript-spas-contracts-generated-from-haskell) (the demo web
   apps as PureScript SPAs whose contracts are generated from the Haskell ADTs via `purescript-bridge`) and
   [`§2 — What lifts (the reuse map)`](../documents/engineering/lift_and_compose_doctrine.md#2-what-lifts-the-reuse-map) /
   [`§3 — The friction envelope`](../documents/engineering/lift_and_compose_doctrine.md#3-the-friction-envelope-what-is-re-shaped-during-the-lift):
@@ -129,7 +129,7 @@ authored and committed in Phase 0, before `Amoebius.Spa.*` exists.
   pre-cluster spine — **Register 1** explicitly includes the representational SPA composition and **Register 2**
   explicitly includes the demo SPAs run locally against a faked backend, driven end to end; rendering the
   composition and its contract never touches live infrastructure.
-- [`testing_doctrine.md §2 — Three registers`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing):
+- [`testing_doctrine.md §2 — Three registers`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing):
   this phase's gate reaches Registers 1 and 2 and emits a per-run proven/tested/assumed ledger whose acceptance
   token reads *spec-composition proven* / *tested (local browser)*, never *runtime proven*, with the live
   deploy marked UNVERIFIED (owned by [Phase 43](phase_43_spa_live_deploy.md)).
@@ -262,8 +262,8 @@ generated types.
 `documents/engineering/lift_and_compose_doctrine.md`, `DEVELOPMENT_PLAN/system_components.md`
 
 ### Objective
-Adopt [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what) §2/§3 and
-[`lift_and_compose_doctrine.md`](../documents/engineering/lift_and_compose_doctrine.md#4-the-demo-web-apps-purescript-spas-contracts-generated-from-haskell) §4: regenerate the
+Adopt [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what) [§2](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what)/[§3](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule) and
+[`lift_and_compose_doctrine.md`](../documents/engineering/lift_and_compose_doctrine.md#4-the-demo-web-apps-purescript-spas-contracts-generated-from-haskell) [§4](../documents/engineering/lift_and_compose_doctrine.md#4-the-demo-web-apps-purescript-spas-contracts-generated-from-haskell): regenerate the
 lifted infernix/jitML demo SPAs' frontend contract types from the amoebius-composed Haskell ADTs via
 `purescript-bridge`, emitted fresh at build time and never committed, so the frontend contract cannot drift
 from the composed types.
@@ -304,7 +304,7 @@ the infernix chat shell (a chat turn) *and* the jitML RL-gaming shell (one RL-ga
 end" is fixed as: the SPA loads, issues a real request over the wire to the local faked backend, and renders the
 response the backend returned (not a hardcoded DOM update). The faked backend (reusing the Phase-14 fake-tool
 seam) **decodes every recorded request and encodes every response through the composed Haskell ADTs' own
-serialization instances — the same source the Sprint-13.3 contract generator consumes — and is red on any
+serialization instances — the same source the Sprint-16.3 contract generator consumes — and is red on any
 payload that does not conform** (this ties the browser wire traffic to the composed ADTs, foreclosing an SPA and
 fake that agree only with each other). Call recording is read from an **OS-boundary observer** (the faked
 backend's argv/HTTP-access log at the process boundary), never a self-emitted compliance trace from the SPA. The
@@ -317,8 +317,8 @@ deploy ([Phase 43](phase_43_spa_live_deploy.md)) as UNVERIFIED.
 `documents/engineering/testing_doctrine.md`, `DEVELOPMENT_PLAN/README.md`
 
 ### Objective
-Adopt [`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) §2/§3 (the
-Register-2 demo-SPA-local move) and [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing):
+Adopt [`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) [§2](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation)/[§3](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure) (the
+Register-2 demo-SPA-local move) and [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing):
 serve the lifted demo SPA locally against a faked backend, drive it end to end under a browser driver, and
 emit the composite proven/tested/assumed ledger for both halves of the gate — never a runtime claim.
 
@@ -381,7 +381,7 @@ The whole sprint (📋 Planned).
   `Spa.dhall` type)
 - [substrates.md](substrates.md) — substrate registry and per-phase map
 - [Application Logic vs Deployment Rules Doctrine](../documents/engineering/app_vs_deployment_doctrine.md) —
-  §8 shared-library use is application logic; §2 the application-logic surface
+  [§8](../documents/engineering/app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic) shared-library use is application logic; [§2](../documents/engineering/app_vs_deployment_doctrine.md#2-the-application-logic-surface--what-an-app-is) the application-logic surface
 - [Service Capability Doctrine](../documents/engineering/service_capability_doctrine.md) — the capability set
   the SPA composes, never products
 - [Lift and Compose Doctrine](../documents/engineering/lift_and_compose_doctrine.md) — the lifted PureScript
@@ -390,7 +390,7 @@ The whole sprint (📋 Planned).
   contract is generated, never committed
 - [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — Register 1 the
   representational composition; Register 2 the demo SPA run locally against a faked backend
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — §2 the three registers and the per-run ledger
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — §5 the two typed gates the composed SPA decodes through
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) the registers and the per-run ledger
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) the two typed gates the composed SPA decodes through
 - [phase_14](phase_14_chain_kernel_boundary.md) — the boundary fake-tool / faked-backend harness this phase reuses
 - [phase_43](phase_43_spa_live_deploy.md) — the live SPA deploy; its representational composition is proven here

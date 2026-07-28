@@ -44,14 +44,14 @@ editor or CI, with no amoebius binary ever run. The gate is bound by the concret
 nonzero exit on a negative is not sufficient.
 
 - **Representative set (explicit, §M.7).** The Gate-1-class negative corpus is EXACTLY these eight catalog
-  entries, one committed `dhall/examples/illegal_*.dhall` fixture each: product-named capability (§3.12),
-  insecure/backdoor ingress arm (§3.7), a workload missing its complete resource envelope (§3.11), unbounded
-  storage backing (§3.18), un-tiered / no-retention topic (§3.20), capacity-growth-without-scaling-policy
-  (§3.21), even/zero-server rke2 control plane (§3.24), and a substrate/topology arm the union does not offer
-  (§3.14/§3.15). The malformed-received-body subcase of the non-CBOR payload entry (§3.23) is a layer-2
+  entries, one committed `dhall/examples/illegal_*.dhall` fixture each: product-named capability ([§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability)),
+  insecure/backdoor ingress arm ([§3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)), a workload missing its complete resource envelope ([§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)), unbounded
+  storage backing ([§3.18](../documents/illegal_state/illegal_state_storage.md#318-unbounded-storage-anywhere)), un-tiered / no-retention topic ([§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)), capacity-growth-without-scaling-policy
+  ([§3.21](../documents/illegal_state/illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)), even/zero-server rke2 control plane ([§3.24](../documents/illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)), and a substrate/topology arm the union does not offer
+  ([§3.14](../documents/illegal_state/illegal_state_topology.md#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm)/[§3.15](../documents/illegal_state/illegal_state_topology.md#315-a-multi-node-kind-cluster-not-on-a-single-linux-host)). The malformed-received-body subcase of the non-CBOR payload entry ([§3.23](../documents/illegal_state/illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload)) is a layer-2
   decode foreclosure, recorded in the partial-foreclosure ledger as deferred to
   [Phase 5](phase_05_gadt_decoder_gate2.md)'s Gate 2; its separate produce-side no-constructor subcase is left
-  to Phase 6's exhaustive registry-driven corpus. Neither §3.23 subcase is counted toward this representative
+  to Phase 6's exhaustive registry-driven corpus. Neither [§3.23](../documents/illegal_state/illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload) subcase is counted toward this representative
   gate's green. This eight-entry set is the single canonical Gate-1-class membership and supersedes any
   shorter parenthetical elsewhere in this doc.
 - **Paired positive per negative (§M.8 / §M.3).** Each `illegal_*.dhall` is a MINIMAL one-construct mutation
@@ -64,7 +64,7 @@ nonzero exit on a negative is not sufficient.
   targeted union/arm/field/record; the harness is red if the observed `dhall type` stderr does not match its
   committed golden (a negative that fails for an unrelated typo/import/field error mismatches and goes red).
 - **Arm-inventory oracle, independent of the schema (§M.3).** A committed hand-authored catalog table
-  (`tests/oracle/gate1/arm_inventory.csv`, authored in Phase 0 from `illegal_state_catalog` §3.12/§3.24/§3.7,
+  (`tests/oracle/gate1/arm_inventory.csv`, authored in Phase 0 from `illegal_state_catalog` [§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability)/[§3.24](../documents/illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)/[§3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress),
   NOT derived from the schema modules) pins each union's exact arm set; the harness normalizes each shipped
   schema module and compares its arm inventory byte-exactly against this table, red on any extra (e.g. a
   `Custom : Text` / `Raw : Text` escape arm) or missing arm.
@@ -280,7 +280,7 @@ carries the acceptance token *spec-composition proven*, never *runtime proven*.
   illegal states and the typing techniques that foreclose each, adopted **at the honest foreclosure layer**.
   The layer-1 type-foreclosed entries — closed unions, required fields, no-arm — are discharged at Gate 1
   here; decoder-local checked rejections defer to Phase 5, whole-deployment resource/target checks defer to
-  Phase 11's `provision-seal`, and runtime-checked entries defer to the live band. The catalog's §2 limit is
+  Phase 11's `provision-seal`, and runtime-checked entries defer to the live band. The catalog's [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it) limit is
   honored verbatim: *a type-check proves the spec composes, not that the
   cluster enforces it.*
 - [`resource_capacity_doctrine.md §3`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget):
@@ -316,12 +316,17 @@ an authoring-time boundary that fires before any binary runs.
 
 ### Deliverables
 - A Dhall prelude and record/union types exposing only *smart constructors* — a vocabulary with no illegal
-  words: the 8-arm no-product `Capability` union (catalog §3.12); no-unbounded-arm `StorageBacking` /
-  `Growable` (catalog §3.18/§3.21); the odd-quorum `Rke2Servers = ⟨Single|Ha3|Ha5⟩` (catalog §3.24); the
+  words: the **9-arm** no-product `Capability` union (catalog [§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability)) — `ObjectStore`, `SecretStore`,
+  `MessageBus`, `Sql`, `Identity`, `Observability`, `Registry`, `Edge`, and `InferenceEngine`, the ninth arm
+  ([`service_capability_doctrine.md` §4.1](../documents/engineering/service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored));
+  eight of the nine are cluster-invariant, `InferenceEngine` is offered where an ML extension provides it, and
+  the arm-inventory oracle pins all nine so Phase 10 binds and Phase 12 provisions the same union;
+  no-unbounded-arm `StorageBacking` /
+  `Growable` (catalog [§3.18](../documents/illegal_state/illegal_state_storage.md#318-unbounded-storage-anywhere)/[§3.21](../documents/illegal_state/illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)); the odd-quorum `Rke2Servers = ⟨Single|Ha3|Ha5⟩` (catalog [§3.24](../documents/illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)); the
   explicit `Rke2AgentPool = ⟨Fixed|Autoscaled { floor, policy }⟩` and derived
   `NodeSupply = ⟨Fixed (NonEmpty Node)|Elastic { floor, candidates, quota }⟩`;
-  mandatory size-triggered `RetentionPolicy` (catalog §3.20); and a `Ingress`/route surface with **no**
-  insecure/backdoor arm (catalog §3.7) — each encoded as a closed union, a required field, or a no-arm shape.
+  mandatory size-triggered `RetentionPolicy` (catalog [§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)); and a `Ingress`/route surface with **no**
+  insecure/backdoor arm (catalog [§3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)) — each encoded as a closed union, a required field, or a no-arm shape.
 - The pure resource declarations of
   [`resource_capacity_doctrine.md §3`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget):
   unit-tagged quantity fields; `PodResourceVec = { cpu, memory, ephemeralStorage }`;
@@ -384,7 +389,7 @@ an authoring-time boundary that fires before any binary runs.
   Kubernetes resource maps, uniform claim-template PVC sizes, cache volumes, and accelerator extended
   resources are later rendered projections of these pure values, never authorable parallel fields.
 - An in-file **honesty caveat**: because Dhall has no opaque types, binding- and phantom-index foreclosures
-  (catalog §4.1–§4.3) are only *partially* Gate-1-foreclosed by smart-constructor convention and get real
+  (catalog [§4.1](../documents/illegal_state/illegal_state_techniques.md#41-pvcpv-binding-by-construction)–[§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)) are only *partially* Gate-1-foreclosed by smart-constructor convention and get real
   teeth at the Haskell GADT decoder in [Phase 5](phase_05_gadt_decoder_gate2.md) (Gate 2).
 - **Wired surfaces (forecloses detached-ornament stubs).** The three surface records carry the foreclosing
   types as REQUIRED fields, not as standalone unreferenced modules: `App` demands `caps : List Capability`
@@ -607,7 +612,7 @@ The whole sprint (📋 Planned).
 type` at authoring time for the pinned reason (its stderr matches the committed `<entry>.err` golden) while
 its reverted paired positive type-checks; the committed seeded mutant goes red; and the committed
 partial-foreclosure ledger maps each negative to its catalog entry and foreclosure layer (fully vs. residue
-owned by Phase 5's Gate 2), with the malformed-received-body §3.23 subcase recorded as deferred, not counted
+owned by Phase 5's Gate 2), with the malformed-received-body [§3.23](../documents/illegal_state/illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload) subcase recorded as deferred, not counted
 green.
 **Docs to update**: `documents/illegal_state/illegal_state_catalog.md` (per-entry Gate-1 foreclosure-layer
 annotation), `DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md` (backlink: the decode-foreclosed residue lands
@@ -623,15 +628,15 @@ at Gate 2.
 
 ### Deliverables
 - The eight canonical Gate-1 negatives named in the **Gate** representative set, one committed
-  `illegal_*.dhall` each, MUST fail `dhall type`: product-named capability (§3.12), insecure/backdoor ingress
-  arm (§3.7), a missing complete resource envelope on an execution unit (§3.11), unbounded storage backing
-  (§3.18), un-tiered / no-retention topic (§3.20), capacity-growth-without-scaling-policy (§3.21),
-  even/zero-server rke2 control plane (§3.24), and an un-offered substrate/topology arm (§3.14/§3.15). The
-  §3.11 fixture is `illegal_missing_resource_envelope.dhall`: it deletes only the required envelope field
+  `illegal_*.dhall` each, MUST fail `dhall type`: product-named capability ([§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability)), insecure/backdoor ingress
+  arm ([§3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)), a missing complete resource envelope on an execution unit ([§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)), unbounded storage backing
+  ([§3.18](../documents/illegal_state/illegal_state_storage.md#318-unbounded-storage-anywhere)), un-tiered / no-retention topic ([§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)), capacity-growth-without-scaling-policy ([§3.21](../documents/illegal_state/illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)),
+  even/zero-server rke2 control plane ([§3.24](../documents/illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)), and an un-offered substrate/topology arm ([§3.14](../documents/illegal_state/illegal_state_topology.md#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm)/[§3.15](../documents/illegal_state/illegal_state_topology.md#315-a-multi-node-kind-cluster-not-on-a-single-linux-host)). The
+  [§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext) fixture is `illegal_missing_resource_envelope.dhall`: it deletes only the required envelope field
   from a legal workload, and its pinned error names that missing field. Each is a MINIMAL one-construct mutation of its named `legal_*.dhall`
   paired positive, and each embeds its illegal construct inside a full positive-derived cluster/app spec —
   NOT a detached import of an ornamental type — so the illegal state is exercised in a wired surface.
-- The malformed-received-body subcase of the non-CBOR payload entry (§3.23) is explicitly NOT authored as a
+- The malformed-received-body subcase of the non-CBOR payload entry ([§3.23](../documents/illegal_state/illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload)) is explicitly NOT authored as a
   Gate-1 fixture: it is layer-2 decode-foreclosed and appears in the ledger as a deferred row owned by
   [Phase 5](phase_05_gadt_decoder_gate2.md)'s Gate 2. The separate produce-side no-constructor subcase is
   outside this representative set and lands in Phase 6's exhaustive registry-driven corpus.
@@ -684,7 +689,7 @@ The whole sprint (📋 Planned).
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
   design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the DSL vision
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — §2 the two languages, §5 the two typed gates and
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§2](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) the two languages, [§5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) the two typed gates and
   the illegal-state contract
 - [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — the catalog, the typing
   techniques, and the honest foreclosure-layer split

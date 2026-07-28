@@ -24,7 +24,7 @@ evidence the mechanism works, not a built amoebius result.
 ## Phase Summary
 
 This phase writes the *one* protocol amoebius proves about itself and checks it every way the design band
-allows, before a single real resource exists. Amoebius delegates almost every consensus problem to a system
+allows, before a single real resource exists. amoebius delegates almost every consensus problem to a system
 that already discharges it — intra-cluster replicated state to MinIO / Pulsar-BookKeeper / Percona-Patroni,
 and single-instance of the control-plane singleton to k8s/etcd (the singleton is a Deployment `replicas=1`
 with **no bespoke election**, [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton)).
@@ -66,7 +66,7 @@ fairness removed), and its scope-2 pairwise cutoff check (the decode-time struct
 *accepts ⟺ pairwise ∧ independent ∧ acyclic ∧ in-parameter-envelope* equivalence — the parameter-envelope
 conjunct co-equal with the graph-shape conjuncts (each edge's `Failover` data-loss budget ≤ the proven cap, its
 `dnsRecord` TTL within the modelled TTL regime, every `ColdSeedFromBackup` edge's `freshnessBound` within the
-modelled freshness regime, its clusters' offset/log domains within the model `CONSTANTS`), per doctrine §5 —
+modelled freshness regime, its clusters' offset/log domains within the model `CONSTANTS`), per doctrine [§5](../documents/engineering/gateway_migration_model_doctrine.md#5-one-and-done-plus-a-per-inforcespec-structural-fit) —
 holds under QuickCheck against an **independently-authored reference predicate** (§M.3) that shares no code with
 `StructuralFit.hs` and decides **both** axes, with committed `cover`/`checkCoverage` thresholds (§M.4) firing
 each graph violation class, each parameter-out-of-envelope class (over-budget / TTL-out-of-regime /
@@ -121,12 +121,12 @@ Register 1, in-process, substrate `none`.
   runs per-spec is a total decode-time structural-fit fold whose **graph** envelope (pairwise / independent /
   acyclic) **and co-equal parameter envelope** (data-loss budget ≤ proven cap, `dnsRecord` TTL in the modelled
   regime, `ColdSeedFromBackup` `freshnessBound` in the modelled freshness regime, offset/log domains within the
-  model `CONSTANTS`) together make scope 2 a genuine cutoff, with §6 (*modelling bounds and honesty*) supplying
+  model `CONSTANTS`) together make scope 2 a genuine cutoff, with [§6](../documents/engineering/gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty) (*modelling bounds and honesty*) supplying
   the one over-scope stress run.
 - [`formal_model_doctrine.md §4 — correspondence by construction`](../documents/engineering/formal_model_doctrine.md#4-correspondence-by-construction)
   and [`§6 — what a green model-check proves`](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not):
   because `interpret` and `emitTLA` render one value, there is no variable→module table to maintain; a green
-  TLC run is *proven-for-the-model at the bound*, generalized only by the stated §5 cutoff.
+  TLC run is *proven-for-the-model at the bound*, generalized only by the stated [§5](../documents/engineering/formal_model_doctrine.md#5-the-tlacfg-are-generated-never-committed) cutoff.
 - [`generated_artifacts_doctrine.md §3`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule) and
   [`conformance_harness_doctrine.md §2 — the registers`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation):
   the emitted `.tla`/`.cfg` are build artifacts, **never committed**, and every check here is Register 1,
@@ -406,7 +406,7 @@ total fold, never a per-`InForceSpec` TLC.
   can be the cause of the reject (§M.8); and a committed no-exception totality property forcing the fold to normal form over
   arbitrary (malformed/oversized) graphs (§M.4).
 - One over-scope (3-cluster, chained) TLC run that **models the shared resources in** with live contention
-  semantics (rate-limited zone-repoint, shared survivor / shared commit log), recorded as the §6 stress check,
+  semantics (rate-limited zone-repoint, shared survivor / shared commit log), recorded as the [§6](../documents/engineering/gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty) stress check,
   with its shared-resource interaction actions each non-dead and one committed seeded shared-resource mutant
   (shared survivor holding two active roles, or the rate-limited zone dropping a repoint) that the run catches
   red — proving the stress model can detect a cutoff violation, not merely fail to express one; the abstracted

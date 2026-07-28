@@ -32,7 +32,7 @@ transparent proxy, session portability) that has no home in a lifecycle document
 the design notes leaves the concept with no single canonical owner.
 
 **The chosen rule.** A gateway change is a value of the typed sum `GatewayMigration = <Planned | Failover>`.
-Amoebius owns one canonical taxonomy here; the two arms carry different, explicitly stated guarantees; and
+amoebius owns one canonical taxonomy here; the two arms carry different, explicitly stated guarantees; and
 the mechanics each arm invokes — the traffic weight-shift, the hub-role move, the DNS repoint, and the async
 proof — stay with their existing owners and are linked, never restated.
 
@@ -165,7 +165,7 @@ client is stranded. "A session that cannot rebind to the migrated gateway" is an
   that never migrates — the proxy target and the explicit-redirect fallback.
 - **The explicit 307 redirect** to the target's stable per-cluster address is a fallback only: a host change
   drops host-only cookies, so it preserves the session only for parent-domain-scoped cookies or portable
-  OIDC/JWT bearers. Amoebius's Keycloak-OIDC sessions are portable, so it works — but the transparent proxy
+  OIDC/JWT bearers. amoebius's Keycloak-OIDC sessions are portable, so it works — but the transparent proxy
   avoids the concern entirely and is preferred.
 - **Long-lived connections** (WebSocket/SSE) are forwarded by the old-gateway proxy, or sent a graceful close
   so the client reconnects and re-resolves; the in-cluster backend cutover uses `HTTPRoute` weights.
@@ -260,15 +260,15 @@ status.
 
 ## Cross-references
 
-- [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — teardown-with-cleanup (a `Planned` trigger; §5) and amoebic spawning / parent-owned forest relations (§3).
-- [Chaos & Failover Doctrine](./chaos_failover_doctrine.md) — the `Failover` branch's proof obligation: the Second Axis (§16–§19), the fail-closed freshness gate and data-loss budget, and the failover / reconciliation worked example (Appendix B).
-- [Network Fabric Doctrine](./network_fabric_doctrine.md) — the hub = gateway role and its move (§4); the Gateway-API `HTTPRoute` weight-shift traffic mechanic (§6).
+- [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — teardown-with-cleanup (a `Planned` trigger; [§5](./cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction)) and amoebic spawning / parent-owned forest relations ([§3](./cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)).
+- [Chaos & Failover Doctrine](./chaos_failover_doctrine.md) — the `Failover` branch's proof obligation: the Second Axis ([§16](./chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)–[§19](./chaos_failover_doctrine.md#19-the-cross-boundary-ledger-and-conformance-rows)), the fail-closed freshness gate and data-loss budget, and the failover / reconciliation worked example (Appendix B).
+- [Network Fabric Doctrine](./network_fabric_doctrine.md) — the hub = gateway role and its move ([§4](./network_fabric_doctrine.md#4-topology-the-hub-is-the-gateway-role-and-the-fabric-moves-with-it)); the Gateway-API `HTTPRoute` weight-shift traffic mechanic ([§6](./network_fabric_doctrine.md#6-the-service-mesh-verdict-no-linkerd-for-v1)).
 - [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — the `RolloutPhase` / `HTTPRoute` weight shift used for the backend cutover.
-- [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — the route53 DNS record this migration repoints (§5.1).
-- [Platform Services Doctrine](./platform_services_doctrine.md) — Keycloak owns all wild ingress; the single wild-ingress path (§9).
+- [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — the route53 DNS record this migration repoints ([§5.1](./pulumi_iac_doctrine.md#51-dns--route53)).
+- [Platform Services Doctrine](./platform_services_doctrine.md) — Keycloak owns all wild ingress; the single wild-ingress path ([§9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)).
 - [Single Logical Data Plane Doctrine](./single_logical_data_plane_doctrine.md) — a genuine second cluster reached by gateway migration, versus remote compute attached to one data plane.
 - [Consistency & PACELC Doctrine](./consistency_pacelc_doctrine.md) — the whole-stance PACELC posture and the unified deployment-rules surface (the R8 lag bound, R9 RTO budget, and per-app participation flag) that this taxonomy's budget and pairing feed into.
-- [Illegal-State Catalog](../illegal_state/illegal_state_catalog.md) — the "session that cannot rebind on migration" entry (§3.44) and the GADT-indexed-state-machine technique (§4.3).
+- [Illegal-State Catalog](../illegal_state/illegal_state_catalog.md) — the "session that cannot rebind on migration" entry ([§3.44](../illegal_state/illegal_state_multicluster.md#344-a-session-that-cannot-rebind-on-gateway-migration)) and the GADT-indexed-state-machine technique ([§4.3](../illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)).
 - [DSL Doctrine](./dsl_doctrine.md) — the typed `GatewayFailover` forest relation as a parent-minted, child-projected subtree field.
 - [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — the formal model of both the `Planned` and `Failover` branches (Phase 3).
 - [Development Plan → Phase 33](../../DEVELOPMENT_PLAN/README.md) — phase order, status, and the failover acceptance gate.

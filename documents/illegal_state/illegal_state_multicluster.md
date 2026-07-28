@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering cross-cluster capacity folds,
@@ -23,10 +23,10 @@ The surrounding framing is owned elsewhere and is **referenced, not restated** h
 - The **catalog index** (which entries exist, the ordering of the enumeration) and the **honesty limit** (a
   type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned by
   [`illegal_state_catalog.md`](./illegal_state_catalog.md).
-- The **seven typing techniques** (§4.1–§4.7 of the catalog), the **coverage matrix**, the **three-layer
+- The **seven typing techniques** ([§4.1](illegal_state_techniques.md#41-pvcpv-binding-by-construction)–[§4.7](illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) of the catalog), the **coverage matrix**, the **three-layer
   foreclosure** model (`type-foreclosed` / `decode-foreclosed` / `runtime-checked`), and the **validation-locus
   axis** (`Gate-1-editor` / `Gate-2-decoder` / `provision-seal` / `rendered-output-golden` / `live-effect`;
-  `provision-seal` is post-bind Phase-10 provision returning a `ProvisionError` before any `ProvisionedSpec`
+  `provision-seal` is post-bind Phase-11 provision returning a `ProvisionError` before any `ProvisionedSpec`
   exists) are owned by
   [`illegal_state_techniques.md`](./illegal_state_techniques.md).
 
@@ -44,7 +44,7 @@ deployment enforces it (the load-bearing limit owned by [`illegal_state_catalog.
 ### 3.31 A capacity or workload fold spanning two clusters
 
 Distributing one workload across clusters looks like "just fold capacity over both," but
-`place :: Topology -> [Workload]` admits exactly **one** `Topology`, and a `Topology` is one cluster
+`place :: Topology -> [Workload] -> Either PlacementError Placement` takes exactly **one** `Topology`, and a `Topology` is one cluster
 ([`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md) [§4](../engineering/cluster_topology_doctrine.md#4-topology-a-cluster-is-a-fold-over-its-nodes-and-cardinality-is-by-construction)). A multi-cluster / fleet capacity fold
 therefore has **no constructor** — the same type-foreclosed "no arm" idiom that forecloses the worker pool as a fourth
 `ComputeEngine`. Distributing across clusters is **geo-replication** (N independent clusters, each its own
@@ -63,8 +63,10 @@ the consistency boundary). **Technique:** [§4.7](./illegal_state_techniques.md#
 (the relation/collection is over one cluster's `NonEmpty Node`; a second `Topology` has no place in the fold's
 arity). **Layer:** type-foreclosed uninhabitable-by-arity; runtime-checked residue lives only in the deferred geo-replication
 enaction (Phase 32).
-**Validation-locus:** `Gate-1-editor` (the `place` arity admits exactly one `Topology` — the "no arm" fold shape
-has no way to name a second cluster, rejected at authoring by `dhall type`); `live-effect` (the only residue is
+**Validation-locus:** `Gate-2-decoder` (the arity is a property of the **Haskell** `place`, so a fold written
+over two `Topology`s is a compile-fail golden at the Gate-2 layer — **not** a `dhall type` failure: a root
+`InForceSpec` legitimately names many clusters, so nothing at the Dhall layer forbids naming a second one;
+what has no inhabitant is a single `place` call folding both); `live-effect` (the only residue is
 the deferred geo-replication enaction, Phase 32).
 
 ### 3.35 A stretched host worker with no declared networking capability
@@ -323,7 +325,7 @@ authorable field) + `live-effect` residue (that the derived watermark reflects r
 - [`illegal_state_catalog.md`](./illegal_state_catalog.md) — the authoritative catalog index and the honesty
   limit (a type-check proves the spec composes, not that the cluster enforces it); this document is one themed
   slice of that catalog.
-- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques (§4.1–§4.7), the
+- [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques ([§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)–[§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)), the
   coverage matrix, the three-layer foreclosure model, and the validation-locus axis referenced by every entry
   above.
 - [`dsl_doctrine.md`](../engineering/dsl_doctrine.md) — the DSL surface and the contract that a valid `InForceSpec` cannot

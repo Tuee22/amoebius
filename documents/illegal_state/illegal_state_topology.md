@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/substrates.md, documents/engineering/README.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering compute-engine/substrate
@@ -23,7 +23,7 @@ It owns nothing but the faithful reproduction of these entries. The catalog **in
 owned by [`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques**, the
 **coverage matrix**, the **three foreclosure layers**, and the **validation-locus axis** (the orthogonal
 axis — `Gate-1-editor` / `Gate-2-decoder` / `provision-seal` / `rendered-output-golden` / `live-effect` — added
-on each entry below; `provision-seal` is post-bind Phase-10 provision returning a `ProvisionError` before any
+on each entry below; `provision-seal` is post-bind Phase-11 provision returning a `ProvisionError` before any
 `ProvisionedSpec`) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice references
 them and does not restate them.
 
@@ -81,12 +81,12 @@ that one host, and a second host has no field to bind. **Owner:**
 
 A multi-node rke2 cluster needs one distinct Linux host per node; raw tooling permits asking for five nodes with
 three machines, or reusing one machine for two nodes. amoebius's `Rke2` arm carries
-`{ servers : Rke2Servers, agents : Fixed (List LinuxHost) | Autoscaled { floor, policy } }`: the server arm
+`{ servers : Rke2Servers, agents : < Fixed : List Rke2AgentNode | Autoscaled : { floor : List Rke2AgentNode, policy : Rke2AgentScalingPolicy } > }`: the server arm
 fixes the server count structurally (`Single`/`Ha3`/`Ha5`,
 [§3.24](#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)), and every fixed/floor agent
 binds one `LinuxHost`; future agents are represented by the policy's non-empty candidate classes and finite
 quota, not by fictitious host values. **Distinctness** ("no declared host reused") is the one part Dhall cannot
-express as a type (no Set-distinctness), so it degrades to the total post-bind provision fold that rejects a
+express as a type (no Set-distinctness), so it degrades to the total Gate-2 decode fold `mkRke2`, which rejects a
 duplicate `HostId` **over `servers ∪ agentFloor`** — a server host reused as an agent, or two declared agents on
 one machine, is caught alongside two servers on one machine. This **generalizes** the original "the node list
 *is* the host list" cardinality to the split fixed/elastic server-agent inventory (the quorum shape itself is
@@ -94,8 +94,8 @@ one machine, is caught alongside two servers on one machine. This **generalizes*
 [`cluster_topology_doctrine.md`](../engineering/cluster_topology_doctrine.md). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction) (`node == host`
 cardinality) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (distinctness fold over `servers ∪ agentFloor`). **Layer:** decode-foreclosed — assigned to its weaker
 distinctness floor; the cardinality sub-part is type-foreclosed.
-**Validation-locus:** `provision-seal` (the post-bind distinctness fold over `servers ∪ agentFloor` returns a
-`ProvisionError` before any `ProvisionedSpec` exists on a reused `HostId`) + `Gate-1-editor` (the fixed-node cardinality
+**Validation-locus:** `Gate-2-decoder` (the total decode fold `mkRke2` returns `Left` on a reused `HostId`
+over `servers ∪ agentFloor`, before any `ProvisionedSpec` exists) + `Gate-1-editor` (the fixed-node cardinality
 sub-part — one required `host` field per declared node; an elastic candidate is a capacity/substrate class, not
 a host).
 

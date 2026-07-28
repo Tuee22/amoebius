@@ -177,7 +177,7 @@ provision.
   — *delivery: at-least-once with broker-side dedup*: at-least-once made effectively-once by **broker-side**
   namespace deduplication on `(producer_name, sequence_id)`; intra-cluster consensus is delegated, not
   re-proven.
-- [`substrate_doctrine.md`](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) §3 — *the no-environment / no-`PATH` lazy tool-ensure contract*: the supernova fork's `protoc`/`proto-lens` codegen is discovered lazily by full path through the
+- [`substrate_doctrine.md`](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) [§3](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) — *the no-environment / no-`PATH` lazy tool-ensure contract*: the supernova fork's `protoc`/`proto-lens` codegen is discovered lazily by full path through the
   substrate package manager — no `PATH` lookup and no environment variable anywhere in the build or runtime
   path.
 
@@ -515,7 +515,7 @@ The whole sprint (📋 Planned).
 - [Native Pulsar Client Doctrine](../documents/engineering/pulsar_client_doctrine.md) — the adopted transport,
   capability, topology, CBOR-payload, and dedup doctrine
 - [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — the Register-2.5 io-sim environment the dedup fold's exactly-once is validated against in Sprint 28.5
-- [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — §3.23, the non-CBOR payload made
+- [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — [§3.23](../documents/illegal_state/illegal_state_capability_messaging.md#323-a-non-cbor-pulsar-payload), the non-CBOR payload made
   unrepresentable
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — the no-env/no-`PATH` lazy tool
   discovery the fork conforms to

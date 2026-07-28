@@ -331,7 +331,7 @@ not a flat "type-foreclosed":
 
 Phase order, status, and validation gates live only in
 [`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). The monitoring obligation types land in **Phase 4** and the
-`validateTopology` fold in **Phase 7**; rendered monitoring shapes and baked binaries land in **Phases 13 and 18**;
+`validateTopology` fold in **Phase 28**; rendered monitoring shapes and baked binaries land in **Phases 13 and 18**;
 the derived rules/panels and optional local Thanos companion in **Phase 24**; the `workflow-health` TableView
 projection in **Phase 26** and the orchestrator/worker SLO-status event in **Phase 29**; the extension surfaces in **Phase 39**
 (infernix) and **Phase 40** (jitML → TensorBoard); the peer-cluster posture and the forest foreclosure in

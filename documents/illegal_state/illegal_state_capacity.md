@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, documents/engineering/README.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering capacity folds, placement /
@@ -26,7 +26,7 @@ The material this slice deliberately does **not** restate lives with its owners:
   the **three-layer foreclosure** model (type-foreclosed / decode-foreclosed / runtime-checked, [§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)),
   and the **validation-locus axis** itself are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md).
   The five loci referenced below — `Gate-1-editor` (fails `dhall type` at authoring time), `Gate-2-decoder`
-  (the total decoder returns `Left`), `provision-seal` (post-bind Phase-10 provision returns a `ProvisionError`
+  (the total decoder returns `Left`), `provision-seal` (post-bind Phase-11 provision returns a `ProvisionError`
   before any `ProvisionedSpec` exists), `rendered-output-golden` (caught by a golden test on the *rendered*
   manifest), and `live-effect` (only at reconcile / runtime) — are defined there; this slice only names, per
   entry, where each illegal state is caught.
@@ -177,7 +177,7 @@ capability is another placement predicate: a deployment requiring CUDA has no pl
 eligible nodes/candidate classes offer no compatible CUDA device, even if its CPU/memory/storage totals fit.
 There is no silent CPU fallback; an allowed fallback must be explicit in the pure capability need.
 
-This is the resource-fit generalization of [§3.5](#35-undeployable-pods-taints-tolerations--affinity): §3.5
+This is the resource-fit generalization of [§3.5](#35-undeployable-pods-taints-tolerations--affinity): [§3.5](#35-undeployable-pods-taints-tolerations--affinity)
 asks whether *a node matching affinity + tolerating taints exists*; this entry adds *with enough CPU, memory,
 pod-ephemeral capacity, and required accelerator family/count, given everything else placed*. Ordinary
 workloads do not author GPU claims: the CUDA need binds to the node's wholesale accelerator owner
@@ -226,9 +226,11 @@ sub-budget because the Kubernetes device allocation is whole-device, not a VRAM 
 singleton kind), consumed by [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (which this round
 keeps accelerators separate from `PodResourceVec = { cpu, memory, ephemeralStorage }`). **Technique:** [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
 (a per-node ownership index — one owner per node's accelerators) + [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
-(the closed accelerator-owner worker-kind union — no fractional-claim arm). **Layer:** type-foreclosed — the typed per-node
-singleton gives the two-owner / fractional-claim state no inhabitant; runtime-checked residue — that the one owner
-actually holds the devices at runtime.
+(the closed accelerator-owner worker-kind union — no fractional-claim arm). **Layer:** split — the
+*fractional-claim* arm is **type-foreclosed** (the closed worker-kind union gives it no inhabitant), while
+*two owners on one node* is **decode-foreclosed**: it is a constructible pair rejected by the post-bind
+ownership fold with a `ProvisionError`, not an absence of inhabitants; runtime-checked residue — that the one
+owner actually holds the devices at runtime.
 **Validation-locus:** `Gate-1-editor` (the closed accelerator-owner worker-kind union has no ordinary-pod or
 fractional-claim arm) + `provision-seal` (the post-bind per-node ownership index returns a `ProvisionError`
 before any `ProvisionedSpec` exists on a second owner; success derives one whole-device allocation) +

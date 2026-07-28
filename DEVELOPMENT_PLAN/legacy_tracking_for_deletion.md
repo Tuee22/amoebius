@@ -99,7 +99,7 @@ phase's gate actually passes on its substrate and the superseding mechanism is t
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook (status vocabulary [§C](development_plan_standards.md#c-status-vocabulary), one-phase model [§E](development_plan_standards.md#e-one-canonical-phase-model), doctrine-citation [§H](development_plan_standards.md#h-the-doctrine-citation-rule-cite-by-name), honesty [§K](development_plan_standards.md#k-honesty-proven--tested--assumed)) this ledger obeys
 - [system_components.md](system_components.md) — the target amoebius modules that absorb or replace each slated artifact
 - [substrates.md](substrates.md) — the substrate registry the substrate-equivalence row ranges over
-- [phase_23_platform_backbone.md](phase_23_platform_backbone.md) — owns the no-Helm platform render, the baked operators, `distribution`, multi-arch, and the substrate-equivalence check
+- [phase_23_platform_backbone.md](phase_23_platform_backbone.md) — owns the no-Helm platform render, the baked operators, and the substrate-equivalence check (`distribution` and multi-arch are [phase_18_base_image_registry.md](phase_18_base_image_registry.md)'s)
 - [phase_28_pulsar_client.md](phase_28_pulsar_client.md) — owns the native `amoebius-pulsar` client that retires the WebSocket transports
 - [`manifest_generation_doctrine.md`](../documents/engineering/manifest_generation_doctrine.md) — no-Helm rendering + generated operators
 - [`image_build_doctrine.md`](../documents/engineering/image_build_doctrine.md) — baked binaries, `distribution`, multi-arch

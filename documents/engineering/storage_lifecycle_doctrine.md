@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_21_retained_storage.md, DEVELOPMENT_PLAN/phase_22_vault_pki.md, DEVELOPMENT_PLAN/phase_23_platform_backbone.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_25_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/phase_36_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_21_retained_storage.md, DEVELOPMENT_PLAN/phase_22_vault_pki.md, DEVELOPMENT_PLAN/phase_23_platform_backbone.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_25_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/phase_36_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define amoebius's durable-storage contract — the single `no-provisioner` retained PV model,
@@ -124,10 +124,25 @@ pins each PV to its claim *before the claim exists*.
 - **Naming convention**: every PV is named on the deterministic scheme whose **logical identity** is
   **`<namespace>/<statefulset>/pv_<integer>`**, where the integer is the StatefulSet ordinal the volume
   serves. That triple is the logical key, not the object's `metadata.name`: a PV `metadata.name` is an
-  RFC-1123 subdomain and admits neither `/` nor `_`, so the logical key is rendered to a legal slug of the
-  form **`<namespace>-<statefulset>-pv-<n>`**. The slug is a pure function of identity; it carries no node
-  id, no cluster id, no timestamp, and no allocation counter, so the *same* StatefulSet ordinal computes the
-  *same* PV name on every cluster and every rebuild.
+  RFC-1123 subdomain and admits neither `/` nor `_`, so the logical key is rendered to a legal
+  `metadata.name` of the form **`<namespace>.<statefulset>.pv-<n>`**. The rendering is a pure function of
+  identity; it carries no node id, no cluster id, no timestamp, and no allocation counter, so the *same*
+  StatefulSet ordinal computes the *same* PV name on every cluster and every rebuild.
+
+  **Why the separator is `.` and not `-`.** A PV is cluster-scoped, so the rendering must be **injective** —
+  two distinct logical keys may never collide on one name — or the `claimRef` pairing below and the
+  one-PVC/one-PV/one-backing identity of [§5](#5-sizes-are-explicit-hard-capped-and-one-volume-per-claim)
+  silently bind the wrong pair. Hyphen-joining does not give that: `namespace = a-b` with
+  `statefulset = c`, and `namespace = a` with `statefulset = b-c`, both render `a-b-c-pv-0`, because a
+  hyphen is legal *inside* each component. amoebius therefore joins on `.`, which is legal in an RFC-1123
+  **subdomain** (the PV name) and illegal in an RFC-1123 **label** — and both a namespace name and a
+  StatefulSet name are labels, the latter because Kubernetes derives each Pod's hostname from it. The
+  separator cannot occur inside a component, so the join is injective by construction rather than by
+  convention. *(The alternative — keep the hyphen and append a digest of the canonical triple — is also
+  injective but makes the name unreadable and unreconstructable by an operator; amoebius prefers the
+  separator.)* **What this forecloses:** a namespace or StatefulSet name containing a `.` would break the
+  scheme, so the label constraint above is load-bearing rather than incidental, and the name is no longer
+  assemblable by eye without knowing it.
 - **Explicit `claimRef`**. Each PV carries a `claimRef` naming the exact `(namespace, PVC-name)` it serves, so the
   pairing is fixed by amoebius rather than discovered by whichever unbound claim the scheduler happens to
   match first. A `volumeClaimTemplate` claim and its `claimRef`-pinned PV are two halves of one identity.
@@ -412,7 +427,7 @@ preserves the backing bytes after the claim is gone ([§2](#2-one-storage-class-
 the *same* claims over the *same* preserved bytes. What a teardown preserves is the **backing store** — the
 EBS volume or the host path — not necessarily the PV API object. A `Retain` PV left `Released` in a
 surviving cluster keeps the deleted claim's `claimRef.uid` and will not rebind a freshly created PVC; and a
-`kind delete cluster` destroys etcd and every PV object outright, leaving only the backing bytes. Amoebius
+`kind delete cluster` destroys etcd and every PV object outright, leaving only the backing bytes. amoebius
 therefore reconstructs the bind by **re-creating a fresh PV object** whose `claimRef` names
 `(namespace, PVC-name)` but carries **no `uid` and no `resourceVersion`** — the deterministic, `uid`-less
 pre-bind — pointing at the preserved bytes; a recreated PVC then binds to that fresh PV. Nothing is restored
@@ -496,7 +511,7 @@ normal circumstances." amoebius takes the strong reading: **forbid it.**
   normal-operation credentials can *create* EBS but not *delete* it, so "accidentally delete durable
   storage" is unauthorized at the cloud API, not merely discouraged. The exact create-vs-delete credential
   model (and whether Pulumi creates under one credential set and the harness destroys under another) is
-  resolved by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) §6 (four locked decisions: durable-class
+  resolved by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) [§6](./pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model) (four locked decisions: durable-class
   EBS carried outside the ephemeral cluster stack; normal-operation credentials create-but-not-delete; only
   the elevated in-memory test credential deletes test-flagged volumes; static CSI attaches the
   Pulumi-created ID without dynamic provisioning); this doc records only the requirement that the destroy

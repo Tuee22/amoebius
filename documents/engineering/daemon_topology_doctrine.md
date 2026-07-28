@@ -99,7 +99,7 @@ the other two:
   (kube-apiserver + the etcd quorum) versus which are pure workload nodes. This is the `Rke2Servers` closed
   union — `Single` / `Ha3` / `Ha5`, the only legal odd etcd quorums {1,3,5} — plus
   `Rke2AgentPool = Fixed [Rke2AgentNode] | Autoscaled { floor : [Rke2AgentNode], policy : ScalingPolicy }`, owned by
-  [cluster_topology_doctrine.md §2, §4](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm). An even- or zero-server (no-quorum /
+  [cluster_topology_doctrine.md [§2](#2-context--role-an-orthogonal-grid), [§4](#4-worker-daemons--n-unelected)](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm). An even- or zero-server (no-quorum /
   split-brain) control plane has no constructor: **type-foreclosed unrepresentable**.
 
 (Two further declared axes exist system-wide — environment dev/staging/prod, and the engine/model/kernel asset
@@ -181,7 +181,7 @@ behind “other control-plane bytes.”
 and etcd already guarantee the cluster converges to one running pod, restarting it elsewhere on node loss. A
 bespoke ranked-failover election over a signed commit log would **re-implement the consensus etcd already
 provides**, add a second coordination plane to prove correct, and deadlock at exactly the moment leadership is
-most needed (cold-start, and the disaster-recovery of the very services such an election would run on). Amoebius
+most needed (cold-start, and the disaster-recovery of the very services such an election would run on). amoebius
 therefore does not build one:
 
 - The steady state is **one pod**, kept so by the Deployment controller (etcd-backed). The singleton Deployment
@@ -295,7 +295,7 @@ Properties shared by all workers:
 - **Unelected and horizontally scaled.** Workers do not run a leadership election among themselves. They
   coordinate through the shared **coordination plane** — Pulsar + MinIO + the commit log ([§5](#5-single-instance-and-coordination--delegated-not-elected)) — whose
   intra-system consensus is *delegated* to those systems, not re-proved by amoebius
-  ([platform_services_doctrine.md §6, §8](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox)). A Pulsar topic-lifecycle
+  ([platform_services_doctrine.md [§6](#6-the-shared-daemon-spine), [§8](#8-planning-ownership)](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox)). A Pulsar topic-lifecycle
   coordinator that needs single-consumer semantics gets it from Pulsar's subscription model and the
   at-least-once + dedup discipline ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)), not from a
   bespoke amoebius election.
@@ -559,7 +559,7 @@ shape and links back for status.
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — [§0](./pulumi_iac_doctrine.md#0-decision-record-why-pulumi-stays--and-why-that-is-not-the-helm-decision) the checkpoint-free tag-discovery host reconciler (tier (b)) that enacts child rke2 rollout over SSH
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md)
-- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — Phase-10 provisioning runs the complete
+- [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — Phase-11 provisioning runs the complete
   post-bind capacity fold before `ProvisionedSpec`/`renderAll`; **consumes** the wholesale per-node accelerator
   ownership of [§4.2](#42-the-accelerator-owner-worker-wholesale-per-node-ownership-a-typed-per-node-singleton)
 - [Service Capability Doctrine](./service_capability_doctrine.md) — [§4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored) owns the substrate→`EngineRuntime` quotient whose pod-vs-host-subprocess consequence [§4.1](#41-the-engine-offering-vs-the-node-hardware-in-cluster-pod-or-host-subprocess) records

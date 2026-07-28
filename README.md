@@ -37,8 +37,9 @@ and reattaches retained backing
 - **How docs work:** [`documents/documentation_standards.md`](./documents/documentation_standards.md).
 - **How amoebius is tested:** [`documents/engineering/testing_doctrine.md`](./documents/engineering/testing_doctrine.md)
   — a test *is* an amoebius deployment: a spec composed with a chaos schedule, a typed expectation surface,
-  and a mandatory teardown. Validation runs in four named registers (1 pure/golden · 2 boundary-with-fakes ·
-  2.5 deterministic-simulation · 3 live), and every gate emits a committed proven/tested/assumed ledger that
+  and a mandatory teardown. Validation runs in three phase-gate registers (1 pure/golden · 2
+  boundary-with-fakes · 3 live), plus the Register-2.5 deterministic-simulation activity, which is never
+  itself a phase gate; every gate emits a committed proven/tested/assumed ledger that
   states which layer it reached and marks the rest UNVERIFIED.
 
 ## Toolchain

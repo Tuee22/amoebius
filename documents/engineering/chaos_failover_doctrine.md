@@ -73,7 +73,7 @@ The discipline against it has three moves — **Extract**, **Model**, **Inject**
 other two catch ([§5](#5-three-layers-and-the-blindness-that-binds-them)). The amoebius-specific narrowing
 ([§6](#6-the-concentration-principle--where-the-obligation-lives)): because the standard platform services run
 their own consensus, the obligation does not spread across every app — it **concentrates** onto the one boundary
-§6 identifies.
+[§6](#6-the-concentration-principle--where-the-obligation-lives) identifies.
 
 ---
 
@@ -1018,7 +1018,7 @@ Each first-axis rule ([§13](#13-the-supporting-rules--the-conditions-the-moves-
   **assumed** under real disaster. Every other rule's violation is transient and heals; R9's data-loss
   dimension is permanent, accepted, and never heals — which is why no other rule can host it. The
   declarative **push-back on an unsatisfiable root `InForceSpec`**, and the data-loss-budget thresholds, are
-  configured as deployment-rules ([cluster_lifecycle_doctrine.md §5, §6](./cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction));
+  configured as deployment-rules ([cluster_lifecycle_doctrine.md [§5](#5-three-layers-and-the-blindness-that-binds-them), [§6](#6-the-concentration-principle--where-the-obligation-lives)](./cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction));
   this doctrine owns the *proof obligation* that the declared budget actually holds.
 
 ---

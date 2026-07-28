@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_28_pulsar_client.md, documents/engineering/pulsar_client_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_28_pulsar_client.md, documents/engineering/pulsar_client_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering the states in which an application
@@ -23,7 +23,7 @@ type-check proves the specification composes, never that the running cluster enf
 [`illegal_state_catalog.md`](./illegal_state_catalog.md) — referenced here, not restated. The **seven typing
 techniques**, the **coverage matrix**, the **three foreclosure layers**, and the orthogonal
 **validation-locus axis** (`Gate-1-editor` / `Gate-2-decoder` / `provision-seal` /
-`rendered-output-golden` / `live-effect`; `provision-seal` is post-bind Phase-10 provision returning a
+`rendered-output-golden` / `live-effect`; `provision-seal` is post-bind Phase-11 provision returning a
 `ProvisionError` before any `ProvisionedSpec` exists) are owned by [`illegal_state_techniques.md`](./illegal_state_techniques.md) — likewise referenced, not
 restated. Each entry below names its owning doctrine, which remains the SSoT for the normative rule.
 
@@ -46,6 +46,7 @@ product arms, so "depend on `minio` directly" has no syntax: it fails Gate 1 (th
 any binary runs. **Owner:** [`service_capability_doctrine.md`](../engineering/service_capability_doctrine.md) (the
 capability abstraction; one canonical provider, the type admitting alternates). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
 (capabilities as a closed union — a product name is uninhabitable).
+**Layer:** type-foreclosed — a closed-union capability with no product arm; the illegal spec has no inhabitant.
 **Validation-locus:** `Gate-1-editor` — a closed-union capability with no product arms; "depend on `minio`
 directly" has no syntax and fails `dhall type` at authoring time, before any binary runs. No runtime
 residue: the illegal shape is unrepresentable, not merely rejected downstream.
@@ -65,8 +66,10 @@ different layer. **Owner:** [`pulsar_client_doctrine.md` §3.1](../engineering/p
 no non-CBOR payload handle) — **no new technique**. **Layer:** type-foreclosed uninhabitable on the *produce* side; the
 *consume* decode is a total fail-fast check — decode-foreclosed, exactly like the CRC32C frame check — never a
 runtime-checked claim that a received body is valid.
-**Validation-locus:** `Gate-1-editor` on the *produce* side (a closed codec — the non-CBOR payload has no
-constructor, so it fails the authoring-time gate) **+** `Gate-2-decoder` on the *consume* side (the total
+**Validation-locus:** `Gate-2-decoder` on the *produce* side — the closed codec is a **Haskell** surface
+(`Serialise` / `CborPayload` / `encodeCbor`), so the foreclosure is a compile-fail golden at the Gate-2
+Haskell layer, **not** a `dhall type` failure: `dhall type` never sees the produce API **+** `Gate-2-decoder`
+on the *consume* side (the total
 `Either DecodeError a` returns `Left` on a malformed body, exactly like the CRC32C frame check). Explicitly
 **not** a `live-effect` locus: there is no runtime-checked claim that a received body is valid — the decode
 either succeeds or fails fast.

@@ -96,7 +96,7 @@ enumerated in Sprint 29.3 and fails hard on any non-empty remainder outside its 
 retained-by-design set — and **re-runs idempotently under a
 distinct `experiment-hash` namespace** (a cache-bypassing independent recompute, not a content-addressed
 store-hit), emitting a per-run proven/tested/assumed ledger artifact. The gate is checked against the
-Phase-0-committed fixtures named in Sprints 25.1/25.3 and MUST turn red on the committed seeded mutants named
+Phase-0-committed fixtures named in Sprints 29.1/29.3 and MUST turn red on the committed seeded mutants named
 there (e.g. the insertion-order-leaking CBOR encoder and the ack-before-store-write worker); the representative
 service set is exactly the `round_trip_failover.dhall` topology's **one orchestrator + three workers** (one
 active, two name-ordered standbys) over the standing single-node Pulsar + MinIO.
@@ -202,7 +202,7 @@ them.
   three classes / two protocols; [`§2.2`](../documents/engineering/content_addressing_doctrine.md#22-why-this-shape-removes-the-races)
   why the shape removes the write/write and write/read hazards), keyed under the
   [`§3 experimentHash`](../documents/engineering/content_addressing_doctrine.md#3-experimenthash-identity-is-what-was-requested--where-it-ran)
-  namespace consumed here as an opaque pinned prefix. The same §2.1 capacity contract and
+  namespace consumed here as an opaque pinned prefix. The same [§2.1](../documents/engineering/content_addressing_doctrine.md#21-three-object-classes-two-write-protocols) capacity contract and
   [`resource_capacity_doctrine.md §5.1`](../documents/engineering/resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry)
   require committed residents + bounded in-flight writes + every failed-write orphan through the finite
   positive GC horizon to remain charged through MinIO's physical and uniform-claim witness.
@@ -233,7 +233,7 @@ them.
   subscription surface this phase consumes for standby takeover and the redelivery/dedup contract that keeps a
   retried produce or a redelivered consume idempotent.
 - [`deterministic_simulation_doctrine.md §4`](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits)
-  — *Register 2.5 — where deterministic simulation sits*: Sprint 29.4 runs the real Sprint-25.2/25.3 workflow
+  — *Register 2.5 — where deterministic simulation sits*: Sprint 29.4 runs the real Sprint-29.2/25.3 workflow
   runtime under `IOSimPOR` against the Phase-15 modeled environment as a Register-2.5 lower-register cross-check
   of the same leak-free-takeover / no-double-application properties the Register-3 live gate asserts.
 - [`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed)
@@ -365,7 +365,7 @@ store is a single one-object atomic pointer flip.
 > **Honesty.** Blob/manifest conflict-freedom and pointer lattice-convergence are *proven-in-types* arguments
 > (immutability + a commutative/associative/idempotent join) per
 > [`content_addressing_doctrine.md §6`](../documents/engineering/content_addressing_doctrine.md#6-the-honest-ceiling-types-make-the-bookkeeping-total-not-the-physics-deterministic);
-> the CAS protocol's runtime behaviour is validated here, but cross-cluster replication (§5 confluence) is not
+> the CAS protocol's runtime behaviour is validated here, but cross-cluster replication ([§5](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely) confluence) is not
 > exercised in this phase. This generalizes the sibling `jitML` checkpoint format — sibling evidence, not an
 > amoebius result.
 
@@ -394,7 +394,7 @@ that SHA and it matches byte-for-byte; a retried produce or a redelivered consum
 ### Objective
 Adopt [`daemon_topology_doctrine.md §4 — worker daemons, N, unelected`](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected)
 and [`content_addressing_doctrine.md §5 — confluence`](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely):
-wire the Phase-28 client, its topology algebra, and the Sprint-25.1 store into an orchestrator/worker runtime
+wire the Phase-28 client, its topology algebra, and the Sprint-29.1 store into an orchestrator/worker runtime
 whose command → artifact → event round-trip is idempotent by construction — the workers unelected, the
 artifact reference a content address.
 
@@ -404,7 +404,7 @@ artifact reference a content address.
 - Worker daemons that consume the command, write a content-addressed artifact to the store (Sprint 29.1), and
   produce an `event` carrying the manifest SHA — CBOR payloads throughout (Phase 28), a large artifact carried
   by its manifest SHA reference and never inline.
-- The orchestrator's fetch-by-manifest-SHA read path over the store, exercising §5 confluence: re-fetching the
+- The orchestrator's fetch-by-manifest-SHA read path over the store, exercising [§5](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely) confluence: re-fetching the
   same immutable manifest/blob is a no-op, which is exactly what the at-least-once contract needs.
 - The runtime is scheduled under the Deployment-`replicas=1` singleton (Phase 26); no orchestrator/worker role
   runs a bespoke election, and the singleton's single-instance stays a k8s/etcd property.
@@ -478,7 +478,7 @@ bespoke amoebius election — and assemble the phase gate.
   write and before it acks the `event`** (the same window Sprint 29.4 injects in simulation, restated for the
   live gate), so the load-bearing standby re-fetch + bounded failover overlap are actually exercised — not a kill
   against an idle, already-drained worker. Pulsar promotes the name-ordered standby, the Phase-28 at-least-once
-  contract redelivers the un-acked command, and §5 confluence makes the standby's re-fetch of the artifact by
+  contract redelivers the un-acked command, and [§5](../documents/engineering/content_addressing_doctrine.md#5-confluence-content-addressed-data-crosses-cluster-boundaries-safely) confluence makes the standby's re-fetch of the artifact by
   manifest SHA safe without a distributed lock. The window placement is asserted from broker/consumer state
   (the store object exists; the `event` message is still unacked) and recorded in the per-run ledger.
 - The **postflight sweep's explicit inventory contract**: the sweep MUST inventory, and the ledger MUST record,
@@ -553,7 +553,7 @@ The whole sprint (📋 Planned).
 **Status**: Planned
 **Implementation**: `amoebius-runtime/test/sim/WorkflowFailoverSimSpec.hs` (the `IOSimPOR` property harness),
 `amoebius-runtime/test/sim/WorkflowSimScenario.hs` (the injected kill/redelivery/partition schedule) — the
-*same* `Amoebius.Workflow.Runtime`/`Orchestrator`/`Worker` code from Sprints 25.2–25.3 run against the Phase-15
+*same* `Amoebius.Workflow.Runtime`/`Orchestrator`/`Worker` code from Sprints 29.2–29.3 run against the Phase-15
 modeled environment (`src/Amoebius/Sim/Env.hs` + `src/Amoebius/Sim/Fakes/*`), nothing forked or re-implemented
 (target paths; not yet built).
 **Blocked by**: Sprint 29.2 (the orchestrator/worker runtime the schedule drives) and Sprint 29.3 (the
@@ -576,14 +576,14 @@ document.
 
 ### Objective
 Adopt [`deterministic_simulation_doctrine.md §4 — Register 2.5 — where deterministic simulation sits`](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits) at
-**Register 2.5** on the **`none`** substrate: run the *real* Sprint-25.2/25.3 workflow runtime and its
+**Register 2.5** on the **`none`** substrate: run the *real* Sprint-29.2/25.3 workflow runtime and its
 Failover-takeover path — the daemon/workflow code written against `io-classes` — under `IOSimPOR` against the
 Phase 15 Sprint 15.2 modeled fault-injectable environment, and assert the same load-bearing properties the Sprint 29.3
 live gate asserts (leak-free standby takeover; no double-application), now **deterministically replayable** under
 adversarial schedules instead of a single live wall-clock trace.
 
 ### Deliverables
-- A `WorkflowFailoverSimSpec` that binds `Amoebius.Workflow.Runtime`/`Orchestrator`/`Worker` (Sprints 25.2–25.3)
+- A `WorkflowFailoverSimSpec` that binds `Amoebius.Workflow.Runtime`/`Orchestrator`/`Worker` (Sprints 29.2–29.3)
   to the Phase 15 Sprint 15.2 `Amoebius.Sim.Env` substrate through `io-classes` and drives it under `IOSimPOR` — the
   production code path, not a simulation-only re-implementation.
 - The injected fault schedule (`WorkflowSimScenario`): a `kill-worker-mid-workflow` inside the gate's critical
@@ -597,7 +597,7 @@ adversarial schedules instead of a single live wall-clock trace.
 - A **Register-2.5 ledger** artifact per run, recording the explored-schedule count and the leak-free /
   no-double-application properties discharged, feeding the same proven/tested/assumed ledger
   ([`chaos_failover_doctrine.md §12`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed))
-  as the Sprint-25.3 live gate.
+  as the Sprint-29.3 live gate.
 - **Committed seeded mutants the sim MUST turn red (authored before the harness exists):**
   `mutant/double-apply-on-redelivery` (operator: dropped dedup — the runtime applies the redelivered command a
   second time, so the pointer HEAD diverges on the fault-firing schedules) and
@@ -663,7 +663,7 @@ The whole sprint (📋 Planned).
 ## Related Documents
 - [README.md](README.md) — the live tracker; Phase 29 objective, gate, and substrate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (skeleton,
-  sprint format, the doctrine-citation rule, the three-register + honesty + one-substrate disciplines)
+  sprint format, the doctrine-citation rule, the register + honesty + one-substrate disciplines)
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (no bespoke election;
   single-instance delegated to k8s/etcd; the content-addressed store)
 - [system_components.md](system_components.md) — the target component inventory for the module paths above

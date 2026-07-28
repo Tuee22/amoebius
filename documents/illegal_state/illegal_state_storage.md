@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: documents/engineering/backup_recovery_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering durable storage, bounded backing, and
@@ -17,12 +17,12 @@ This document is a **themed slice** of the illegal-state catalog: the durable-st
 Pulsar-retention entries, faithfully reproduced with their original numbers and headings so inbound links
 stay stable. It is not self-contained framing — it owns only the deep treatment of its entries.
 
-- The **catalog index** (which states are illegal, the full §3.x list) and the **honesty limit** (a
+- The **catalog index** (which states are illegal, the full [§3](#3-the-backup--recovery-illegal-states).x list) and the **honesty limit** (a
   type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned by
   [`illegal_state_catalog.md`](./illegal_state_catalog.md) — referenced here, not restated.
 - The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three-layer foreclosure**
   ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus axis** (the orthogonal question of *where* each state is caught —
-  `Gate-1-editor`, `Gate-2-decoder`, `provision-seal` (post-bind Phase-10 provision returns a `ProvisionError`
+  `Gate-1-editor`, `Gate-2-decoder`, `provision-seal` (post-bind Phase-11 provision returns a `ProvisionError`
   before any `ProvisionedSpec` exists), `rendered-output-golden`, `live-effect`) are owned by
   [`illegal_state_techniques.md`](./illegal_state_techniques.md) — referenced here, not restated.
 
@@ -30,7 +30,7 @@ Everything below is **design intent** (per [`illegal_state_techniques.md` §6](.
 the catalog-owned honesty limit, instantiated for storage — a type-check proves the spec composes into
 something internally coherent; it does **not** prove the running
 cluster's PVC is bound, its disk is unfilled, or its bookies are healthy. Each entry names a **Layer** (the
-foreclosure layer, from [`illegal_state_techniques.md`](./illegal_state_techniques.md) §6) and a
+foreclosure layer, from [`illegal_state_techniques.md`](./illegal_state_techniques.md) [§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)) and a
 **Validation-locus** (the new orthogonal axis — where authoring/decoding/provisioning/rendering/runtime catches it).
 
 ---
@@ -45,6 +45,7 @@ data can quietly live on an ephemeral, auto-provisioned volume that vanishes wit
 path, the unsized claim, and the un-selected default storage class are simply not constructible.
 **Owner:** [`storage_lifecycle_doctrine.md`](../engineering/storage_lifecycle_doctrine.md). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (PVC↔PV binding by construction) + refined non-zero sizes.
+**Layer:** type-foreclosed — the dynamic-provisioner path, the unsized claim, and the un-selected default class have no constructor at the Dhall layer; runtime-checked residue — that the retained PV actually binds at reconcile.
 **Validation-locus:** `Gate-1-editor` (the dynamic-provisioner path, the unsized claim, and the un-selected
 default class are non-constructible — required-field / no-arm shapes that fail `dhall type` at authoring) +
 `live-effect` residue (that the retained PV actually binds at reconcile, owned by the runtime-enforcement proof).
@@ -56,6 +57,7 @@ objects that bind only if their sizes, access modes, and selectors happen to mat
 hangs in `Pending` forever. amoebius removes the independence: there is no way to declare a claim *without*
 its exactly-matching PV ([§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)). The mismatched pair has no inhabitant. **Owner:**
 [`storage_lifecycle_doctrine.md`](../engineering/storage_lifecycle_doctrine.md). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction).
+**Layer:** type-foreclosed at the Haskell IR — a bare PVC or free-floating PV has no constructor once decoded — with its concrete rejection stage at Gate 2, since Dhall has no opaque types; runtime-checked residue — that the PVC actually binds its PV.
 **Validation-locus:** `Gate-2-decoder` (the exactly-matching-PV pairing is a Haskell smart-constructor / GADT
 discipline whose teeth Dhall cannot hold — Dhall has no opaque types to hide the raw claim and PV record
 constructors ([`illegal_state_techniques.md` §6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), so the mismatched pair is a compile-fail
@@ -326,7 +328,7 @@ exactly one `BackupPolicy` owner under a total ownership-index fold; a double-cl
 
 ## Cross-references
 
-- [`illegal_state_catalog.md`](./illegal_state_catalog.md) — the authoritative catalog index (the full §3.x
+- [`illegal_state_catalog.md`](./illegal_state_catalog.md) — the authoritative catalog index (the full [§3](./illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent).x
   list) and the load-bearing honesty limit (a type-check proves the spec composes, not that the cluster
   enforces it); this document is the storage slice carved from it.
 - [`illegal_state_techniques.md`](./illegal_state_techniques.md) — the seven typing techniques ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the

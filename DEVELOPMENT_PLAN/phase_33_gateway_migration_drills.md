@@ -8,7 +8,7 @@
 > **Purpose**: Discharge the Register-3 residue of amoebius's one proof obligation — drive the built
 > `src/Amoebius/Multicluster/*` gateway-migration runtime through **both** a `Planned` coordinated handover
 > (RPO=0) and a `Failover` emergency takeover (bounded rebind) against the live [Phase
-> 28](phase_32_multicluster_spawn_georepl.md) forest, trace-validate it against the Phase-3 emitted spec, and
+> 32](phase_32_multicluster_spawn_georepl.md) forest, trace-validate it against the Phase-3 emitted spec, and
 > show that runtime *is* the Phase-3 design-model's decision core.
 
 ---
@@ -51,7 +51,7 @@ hold — never a hand-maintained variable→module table.
 This phase consumes earlier phases and does not re-implement them: Phase 32's geo-replicated forest and
 invariant-confluence classifier, Phase 3's `GatewayMigration` `Model` + `interpret` + decode-time
 structural-fit fold, Phase 25's Keycloak-owned wild ingress, Phase 31's WireGuard fabric (whose hub role the
-`Planned` handover repoints), and Phase 15's (Sprints 12.1/12.2) `io-classes` seams and modeled route53/Pulsar. A
+`Planned` handover repoints), and Phase 15's (Sprints 15.1/15.2) `io-classes` seams and modeled route53/Pulsar. A
 **stretched cluster is not geo-replication**: one etcd, one boundary owes no R9 budget and no Second-Axis
 obligation and is out of scope here.
 
@@ -63,8 +63,9 @@ exercised by killing a sibling on the same host — not a property a single root
 **Register:** 3 — live infrastructure: a real geo-replicated forest, a real DNS repoint, a real WireGuard
 hub-role move, and adversarial fault injection against the running forest.
 
-**Gate:** a `Planned` handover completes with **RPO=0** — proven not by a bare "loss = 0" but by the external
-write-journal oracle of [Gate integrity](#gate-integrity) below: the drill runs under a **non-idle** workload (the client journals every
+**Gate:** a `Planned` handover completes with **RPO=0** — demonstrated not by a bare "loss = 0" but by the
+external write-journal oracle of [Gate integrity](#gate-integrity) below (a Register-3 run yields *tested*,
+never *proven*, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed)): the drill runs under a **non-idle** workload (the client journals every
 source-acked write ID to a store *outside* the forest, and the harness asserts **≥ 8 acked-but-un-replicated
 write IDs exist at the quiesce instant**, i.e. observed replication lag > 0, before authority moves), and
 post-cutover every journaled ID is present on the new owner; killing the lead cluster mid-workflow (again with
@@ -79,9 +80,11 @@ committed seeded mutant** ([Gate integrity](#gate-integrity): the `verify-caught
 built decision core is that model's `interpret` (correspondence-by-construction, discharged as step-by-step
 trace-validation in Register 2.5 per Sprint 33.3, with the Register-3 drills adding only a
 modeled-action-coverage assertion that every modeled action fired ≥ 1 time across the drill set); the Register-3
-Inject drills assert the four named invariants (`UniqueGatewayOwner`, `SessionAlwaysRebindable`,
+Inject drills assert **all five** Phase-3 safety invariants (`UniqueGatewayOwner`, `SessionAlwaysRebindable`,
 `PlannedIsLossless`, `NoWriteAfterStaleFailover` — the safety half of the superseded `FailoverBounded`; the
-recovery-time half is carried separately as the *tested* RTO datapoint, not as a bounded-divergence invariant)
+recovery-time half is carried separately as the *tested* RTO datapoint, not as a bounded-divergence invariant —
+and `NoTakeWithoutProvenFreshness`, which the survivor-promotion drills already exercise through the
+fail-closed freshness gate and which is therefore asserted by name rather than left implicit)
 against the live forest; the forest tears down leak-free by the OS-boundary route53/`pulumi stack ls` observer
 (retained `no-provisioner` PVs exempt); and the run emits a **machine-derived** proven/tested/assumed ledger
 ([Gate integrity](#gate-integrity)) recording recovery time as *tested* (drilled), the data-loss bound as *assumed* (monitored, not proven),
@@ -108,7 +111,7 @@ following named, committed artifacts so no self-authored harness or post-hoc fix
   so it promotes without a proven watermark/fence (guard-negation); `NoWriteAfterStaleFailover` must go red. Both
   mutants are committed under `test/inject/mutants/` and re-run every gate, not hand-run once.
 - **External-observer teardown check.** "Tears down leak-free" is scoped for Phase 33 (the flagged-credential +
-  postflight tag-sweep machinery of testing_doctrine §6–§7 is Phase 42) to: after teardown, an **OS-boundary
+  postflight tag-sweep machinery of testing_doctrine [§6](../documents/engineering/testing_doctrine.md#6-flagged-test-credentials)–[§7](../documents/engineering/testing_doctrine.md#7-the-elevated-harness-is-the-sole-automated-deleter-of-test-owned-durable-storage-leak-free-cycles) is Phase 42) to: after teardown, an **OS-boundary
   observer** — the route53 API (`ListResourceRecordSets`) and `pulumi stack ls`, read outside the forest —
   reports zero surviving migration DNS records and zero surviving child stacks, while the retained
   `no-provisioner` PVs that Sprint 33.2 deliberately preserves are explicitly exempt (named in the fixture as the
@@ -189,7 +192,7 @@ RPO/RTO assertions would otherwise pass.
 - [`gateway_migration_doctrine.md §2`](../documents/engineering/gateway_migration_doctrine.md#2-the-planned-branch--a-coordinated-strong-consistency-handover)
   and [`§3`](../documents/engineering/gateway_migration_doctrine.md#3-the-failover-branch--an-availability-first-emergency-takeover)
   — the two arms of `GatewayMigration = <Planned | Failover>`: the coordinated strong-consistency handover
-  (RPO=0, argued-design-level) and the availability-first emergency takeover (RPO>0, bounded by the data-loss
+  (RPO=0, proven-for-the-model at scope 2) and the availability-first emergency takeover (RPO>0, bounded by the data-loss
   budget, reconciling to a single owner) — with the client-rebind protocol of
   [`§4`](../documents/engineering/gateway_migration_doctrine.md#4-client-rebind--a-live-session-must-always-find-the-gateway)
   and the typed, edge-observed state machine of
@@ -256,8 +259,11 @@ the watermark stays a typed `NotYetObserved`), so the runtime realizes the prove
 it.
 
 ### Deliverables
-- A `Planned` coordinated `quiesce → drain → verify-caught-up → cutover` (repoint the gateway DNS record, the
-  WireGuard hub role, and the apiserver VPN-IP, then unfreeze) whose `decommission(source-ingress)` edge is
+- A `Planned` coordinated `quiesce → drain → verify-caught-up → cutover` (repoint the gateway DNS record and
+  the WireGuard hub role, then unfreeze — **not** the apiserver-VPN-IP, which is a per-cluster stretched-cluster
+  construct owned by its own cluster and never repointed by a gateway migration,
+  [`gateway_migration_doctrine.md` §2](../documents/engineering/gateway_migration_doctrine.md#2-the-planned-branch--a-coordinated-strong-consistency-handover))
+  whose `decommission(source-ingress)` edge is
   reachable only from an observed `drain-monitor` edge, so no transition removes the last working endpoint.
 - A `Failover` fail-closed `PromotionGate`: the survivor promotes only on a proven commit watermark or a held
   fence, trading recovery time (R9 RTO) for zero divergence beyond the already-lost suffix; a route53 repoint via
@@ -344,7 +350,7 @@ route53 + geo-replicated Pulsar) and `test/sim/GatewayMigrationTrace.hs` (the tr
 transitions against the emitted `Next`), driving the real `src/Amoebius/Multicluster/*` forest code lifted onto
 the Phase-15 `io-classes` `Env` interface — target paths, not yet built.
 **Blocked by**: Sprint 33.1 (the built `Multicluster/*` forest code); Phase 32 (the geo-replicated forest);
-Phase 3 (the emitted TLA+ spec + `interpret`); Phase 15 (Sprints 12.1/12.2 — the `io-classes` seams + the modeled
+Phase 3 (the emitted TLA+ spec + `interpret`); Phase 15 (Sprints 15.1/15.2 — the `io-classes` seams + the modeled
 route53/Pulsar).
 **Independent Validation**: the real `Multicluster/*` forest code runs under `IOSimPOR` against the modeled
 route53 (short-TTL, **no compare-and-swap**, propagation delay) and modeled geo-replicated Pulsar with injected
@@ -428,10 +434,10 @@ and [`§19`](../documents/engineering/chaos_failover_doctrine.md#19-the-cross-bo
   emitting the machine-derived per-run ledger artifact. The gate topology `.dhall`, `test/inject/journal/` (the
   out-of-forest write-ID journal schema), and the committed ledger validator are **committed in Phase 0 before
   the runtime exists**; the runtime-dependent `test/inject/mutants/` seeded mutants (the `verify-caught-up`-stub
-  and `promote-before-fence` mutants that must go red) mutate the Sprint-29.1 implementation, so they are
+  and `promote-before-fence` mutants that must go red) mutate the Sprint-33.1 implementation, so they are
   **committed at the start of Phase 33, before that implementation is trusted** (the §M.1
   start-of-owning-phase form for oracles that depend on later code).
-- A machine-derived per-run proven/tested/assumed ledger that marks `Planned` RPO=0 **argued-design-level +
+- A machine-derived per-run proven/tested/assumed ledger that marks `Planned` RPO=0 **proven-for-the-model (Phase 3, scope 2) +
   drilled (tested)**, the `Failover` recovery time + reconciliation **tested (drilled)**, the data-loss /
   replication-lag bound **assumed (monitored, never proven)**, and the modeled safety/liveness
   **proven-for-the-model at scope 2** (Phase-3, a design-layer result) — and never reports an
@@ -440,8 +446,8 @@ and [`§19`](../documents/engineering/chaos_failover_doctrine.md#19-the-cross-bo
 ### Validation
 1. The built decision core resolves to the Phase-3 `interpret` — the correspondence-check mechanic is fixed as:
    the step-by-step trace-validation of Sprint 33.3 (Register 2.5) **plus** a Register-3 **modeled-action-coverage
-   assertion** that every modeled action fired ≥ 1 time across the drill set (no orphaned modeled action); live
-   trace-validation is the Sprint-29.3 obligation and is not re-run in Register 3. The Inject drills run against
+   assertion** that every modeled action fired ≥ 1 time across the drill set (no orphaned modeled action); step-by-step
+   trace-validation is the Sprint-33.3 obligation and is not re-run in Register 3. The Inject drills run against
    the live forest and pass, each asserting the four named safety invariants (`NoWriteAfterStaleFailover` is the
    safety half; the recovery-time half is the separate *tested* RTO datapoint). `phase_33_gateway_migration.dhall`
    reports **RPO=0 for `Planned` proven by the write-journal set-equality oracle ([Gate integrity](#gate-integrity)) under a workload with ≥ 8
@@ -465,7 +471,7 @@ The whole sprint (📋 Planned).
   *run against a live forest* for both branches, recording that correspondence held by construction (the built
   runtime is `interpret`) and that no variable→module table was needed; keep the abstracted premises assumed.
 - `documents/engineering/gateway_migration_doctrine.md` — backlink §2/§3/§4/§5 to the built
-  `src/Amoebius/Multicluster/*` runtime; confirm `Planned` RPO=0 stayed argued-design-level (now drilled) and
+  `src/Amoebius/Multicluster/*` runtime; confirm `Planned` RPO=0 stayed proven-for-the-model (Phase 3, scope 2; now drilled live) and
   `Failover` stayed bounded-by-budget.
 - `documents/engineering/chaos_failover_doctrine.md` — the §19 cross-boundary ledger and the §15/§19 conformance
   rows gain an amoebius-tested linux-cpu datapoint (recovery-time drilled, data-loss assumed), so the matrix

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering the engine/model asset
@@ -24,7 +24,7 @@ limit (a type-check proves the *spec composes*, not that the *running cluster en
 [`illegal_state_catalog.md`](./illegal_state_catalog.md). The **seven typing techniques** ([§4](./illegal_state_techniques.md#4-the-typing-techniques)), the **coverage
 matrix** ([§5](./illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state)), the **three-layer foreclosure** model ([§6](./illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)), and the **validation-locus
 axis** (the orthogonal `Gate-1-editor` / `Gate-2-decoder` / `provision-seal` / `rendered-output-golden` /
-`live-effect` axis added on top of the foreclosure layer; `provision-seal` means post-bind Phase-10 provision
+`live-effect` axis added on top of the foreclosure layer; `provision-seal` means post-bind Phase-11 provision
 returns a `ProvisionError` before any `ProvisionedSpec` exists) are owned by
 [`illegal_state_techniques.md`](./illegal_state_techniques.md). This slice **references** those — it does not
 restate them. Each entry below preserves its original number and heading verbatim (inbound links depend on the
@@ -104,7 +104,7 @@ storage fold ([`resource_capacity_doctrine.md`](../engineering/resource_capacity
 [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (closed `TrainBudget`/`Feed`
 unions with no unbounded arm) + [§4.6](./illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
 (the retention room-fit). **Layer:** type-foreclosed for the mandatory-cadence / bounded-retention union shape; **runtime-checked**
-residue — that the trainer actually checkpoints at cadence and retention actually holds (mirroring §3.21's
+residue — that the trainer actually checkpoints at cadence and retention actually holds (mirroring [§3.21](illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)'s
 runtime-checked tail).
 
 **Validation-locus:** `Gate-1-editor` (the closed `TrainBudget`/`Feed` unions with no unbounded arm, and the

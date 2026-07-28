@@ -102,7 +102,7 @@ per named `DecodeError` failure class** — `SchemaMismatch`, `OutOfDomainArm`, 
 `illegal_decode_*.dhall` fixture mapped in its committed header to a specific `illegal_state_catalog.md` entry
 and pinned to its expected tag; the suite is **red if any of the three tag arms has zero fixtures** (so a
 blanket catch-all tag cannot pass) and red if any negative fails its `dhall type` precondition. (b) The
-**minimal-pair compile-fail set** for each of §4.2/§4.3/§4.4 (see Sprint 5.2). (c) A **committed seeded mutant
+**minimal-pair compile-fail set** for each of [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (see Sprint 5.2). (c) A **committed seeded mutant
 set that must go red, committed and re-run** (not run once): the mutant `illegal_decode_schema.dhall`
 → legalized twin (a negative whose Gate-2-illegal index is corrected so it would decode) **must turn the suite
 red**, demonstrating the "any illegal fixture decodes ⇒ red" polarity is an executed check, not a restated
@@ -134,10 +134,10 @@ independent of the decoder's own output (§M clause 3).
   `Either`, never a throw), and the ADTs make illegal combinations un-spellable — *because the value cannot
   be constructed, it cannot be decoded, and because it cannot be decoded, it cannot be deployed.*
 - [`illegal_state_catalog.md §4`](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
-  — the typing techniques discharged at the decode boundary: **GADT-indexed state machines** (§4.3, only legal
-  transitions are typed), **capability & phantom tenant tags** (§4.2, cross-tenant references are
-  uninhabitable), and **ownership indices** (§4.4, single-owner SSoT structurally). This phase builds the IR
-  that carries those indices; the capacity-accounting and topology-relation folds (§4.6/§4.7) are deferred to
+  — the typing techniques discharged at the decode boundary: **GADT-indexed state machines** ([§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed), only legal
+  transitions are typed), **capability & phantom tenant tags** ([§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable), cross-tenant references are
+  uninhabitable), and **ownership indices** ([§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally), single-owner SSoT structurally). This phase builds the IR
+  that carries those indices; the capacity-accounting and topology-relation folds ([§4.6](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)/[§4.7](../documents/illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)) are deferred to
   Phase 7.
 - [`resource_capacity_doctrine.md §3/§4`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
   — the complete pure resource vocabulary and its checked-construction boundary. This phase carries and
@@ -148,9 +148,9 @@ independent of the decoder's own output (§M clause 3).
 - [`illegal_state_catalog.md §2`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)
   and [`illegal_state_techniques.md §6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)
   — the load-bearing limit and the three layers of foreclosure: layers 1–2 (type-/decode-foreclosed) are
-  Register-1 and honestly discharged here; layer 3 (runtime-checked) stays deferred. Honors §2 verbatim: *a
+  Register-1 and honestly discharged here; layer 3 (runtime-checked) stays deferred. Honors [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it) verbatim: *a
   type-check proves the spec composes, not that the cluster enforces it.*
-- [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) — **Register 1** (pure/golden,
+- [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) — **Register 1** (pure/golden,
   in-process, no cluster): the register this phase's gate reaches; and [`§4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)
   — the per-run proven/tested/assumed ledger the battery emits, marking model↔runtime correspondence
   UNVERIFIED.
@@ -198,9 +198,9 @@ declaration fields, and component ADTs),
 `src/Amoebius/Dsl/SmartConstructors.hs`, `src/Amoebius/Dsl/Ref.hs` (the phantom tenant `Ref tenant a` and
 ownership indices) — target paths, not yet built.
 **Blocked by**: Sprint 5.1.
-**Independent Validation**: the catalog's decode-foreclosed classes (§4.2/§4.3/§4.4) have no inhabitant,
-proven by **committed minimal-pair compile-fail fixtures** (not absence-by-omission). For each of §4.2 (phantom
-tenant), §4.3 (GADT transition index), and §4.4 (ownership index) the phase commits **two source fixtures
+**Independent Validation**: the catalog's decode-foreclosed classes ([§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)) have no inhabitant,
+proven by **committed minimal-pair compile-fail fixtures** (not absence-by-omission). For each of [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom
+tenant), [§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (GADT transition index), and [§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (ownership index) the phase commits **two source fixtures
 differing only in the one index** (tenant tag / state index / owner): the **legal twin must compile** *and*
 must be the exact constructor a **named Phase-4 positive fixture is committed to decode through** (the fixture
 header cites which `legal_*.dhall`), while the **illegal twin must fail `ghc -fno-code` with a type error whose
@@ -224,7 +224,7 @@ structural owner. These are the ADTs that make an illegal combination un-spellab
 
 ### Deliverables
 - `ClusterIR` and its component ADTs as GADT-indexed types + smart constructors exposing only a legal
-  vocabulary; the phantom tenant `Ref tenant a` and ownership indices catalogued at §4.2/§4.4.
+  vocabulary; the phantom tenant `Ref tenant a` and ownership indices catalogued at [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally).
 - Normalized resource declarations wired into the real IR, not ornamental side records: every execution-unit
   component carries stable id/revision plus one private controller-indexed body: Deployment/StatefulSet use
   `Once | Replicated`; DaemonSet embeds `PerNode`; Job uses completions/parallelism/backoff/
@@ -432,17 +432,17 @@ structural owner. These are the ADTs that make an illegal combination un-spellab
   process-template qualification, or SKU identity is a decoder-field-inventory failure. Phase 17 owns kind
   fit/enforcement; live multi-node rke2 admission/enforcement
   remains an explicitly unassigned Phase-N gate and no current live phase may claim it.
-- An in-file honesty note that binding/capacity/topology totals (§4.6/§4.7) are *not* foreclosed by these
+- An in-file honesty note that binding/capacity/topology totals ([§4.6](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)/[§4.7](../documents/illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)) are *not* foreclosed by these
   types — the decoded declarations are intentionally **unprovisioned**. Phase 7 owns the total feasibility
   folds and Phase 11 invokes them on the fully expanded `BoundDeployment`; only their private constructor
   produces `ProvisionedSpec`. `ClusterIR` and `BoundDeployment` are forbidden renderer inputs and a structural
   type-inventory check rejects any `Provisioned*` field in either.
-- The committed minimal-pair compile-fail fixtures: for each of §4.2/§4.3/§4.4, a legal twin (compiles; cited
+- The committed minimal-pair compile-fail fixtures: for each of [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally), a legal twin (compiles; cited
   to a named `legal_*.dhall` positive it decodes through) and an illegal twin (fails `ghc -fno-code` with a
   type error naming the same constructor/index), plus each pair's committed expected type-error locus.
 
 ### Validation
-1. For each of §4.2/§4.3/§4.4, the committed minimal pair holds at compile time: the legal twin compiles
+1. For each of [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.3](../documents/illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally), the committed minimal pair holds at compile time: the legal twin compiles
    **and** is the constructor a named Phase-4 positive fixture is committed to decode through, and the illegal
    twin fails `ghc -fno-code` with a type error naming that same constructor/index (matching the committed
    locus). The compile-time pair is Sprint 5.2's standalone check; the decode-through round-trip to the cited
@@ -590,7 +590,7 @@ exercised here → layer-2 Register-1), `documents/engineering/testing_doctrine.
 `DEVELOPMENT_PLAN/README.md` (flip the Phase-5 status when the gate passes).
 
 ### Objective
-Adopt [`testing_doctrine.md §2 — Register 1`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing): assemble the
+Adopt [`testing_doctrine.md §2 — Register 1`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing): assemble the
 in-process decode battery that exercises the fail-closed decoder over every positive fixture and confirms it
 returns a structured `Left` on each representative Gate-2 negative, emitting a Register-1 proven/tested/assumed ledger
 with model↔runtime correspondence marked UNVERIFIED (owned by Phase 26). The exhaustive per-catalog-entry
@@ -718,10 +718,10 @@ The whole sprint (📋 Planned).
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
   design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the DSL vision
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — §5 the two typed gates; Gate 2 is adopted here
-- [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — §4 the typing techniques the
-  IR carries; §2/§6 the load-bearing limit and the honest foreclosure-layer split
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — §2 Register 1, §4 the per-run ledger
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) the two typed gates; Gate 2 is adopted here
+- [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — [§4](../documents/illegal_state/illegal_state_catalog.md#4-planning-ownership) the typing techniques the
+  IR carries; [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)/[§6](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) the load-bearing limit and the honest foreclosure-layer split
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 1, [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger
 - [phase_04](phase_04_dhall_gate1_schema.md) — Gate 1, the Dhall schema this decoder mirrors
 - [phase_06](phase_06_illegal_state_corpus.md) — the exhaustive illegal-state corpus, properties, and
   validation-locus ledger built atop this decoder

@@ -38,7 +38,8 @@ jit-resolved on first miss into a `CacheBudget`-bounded content-addressed cache 
 URL-fetched. amoebius's one formal proof obligation is the **cross-cluster gateway migration**, both the
 `Planned` and `Failover` branches, modelled once as data. Generated artifacts (k8s manifests, the emitted
 `.tla`/`.cfg`, the reflected Dhall schema, the PureScript contracts) are emitted from a Haskell source of truth
-and never committed. Validation runs in three named registers; rendering a plan or `--dry-run` never requires
+and never committed. Validation runs in three phase-gate registers (1 pure/golden · 2 boundary-with-fakes ·
+3 live) plus the Register-2.5 deterministic-simulation activity; rendering a plan or `--dry-run` never requires
 live infrastructure. The suite's naming and header mechanics adapt conventions proven in the sibling
 **prodbox** project — that is sibling evidence, not an amoebius result.
 
@@ -53,7 +54,7 @@ first written down here and then adopted, phase by phase, by the pre-cluster and
 
 **Gate:** the documentation lint passes **two-sided** — it runs clean over every document in `documents/` and
 `DEVELOPMENT_PLAN/` (valid header metadata per the documentation standard; every anchored relative link resolves
-under the §4 slug rule; every `Referenced by` header reconciled from the true link graph in both directions;
+under the [§4](../documents/documentation_standards.md#4-cross-referencing) slug rule; every `Referenced by` header reconciled from the true link graph in both directions;
 **near-duplicate normative content** — measured by sentence-shingle overlap above a stated threshold between two
 governed docs, outside quoted/exempt blocks — absent, with semantic SSoT *ownership* documented as a hand review
 rather than a lint verdict; each README Phase-Overview status marker equal to its phase doc's `## Phase Status`
@@ -101,8 +102,8 @@ name.
   is versioned.
 - [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton) —
   *The control-plane singleton*: a Deployment `replicas=1`, stateless (no PVC), single-instance delegated to
-  k8s/etcd through the mandatory reconciler Lease (§3.1, no bespoke election), durable state the
-  Vault-enveloped MinIO bucket; §3.3 separately owns the same-binary capacity-scheduler role with no singleton
+  k8s/etcd through the mandatory reconciler Lease ([§3.1](../documents/illegal_state/illegal_state_storage.md#31-bad--illegal-durable-storage), no bespoke election), durable state the
+  Vault-enveloped MinIO bucket; [§3.3](../documents/illegal_state/illegal_state_security.md#33-misconfigured-gateway) separately owns the same-binary capacity-scheduler role with no singleton
   or secret authority.
 - [`content_addressing_doctrine.md §4.5`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) —
   *The ML-asset lifecycle*: each engine/model/kernel is a named catalog identity the shared `jit-build` resolver
@@ -195,7 +196,7 @@ The whole sprint (📋 Planned).
 `conformance_harness_doctrine.md` (target documentation files; not yet complete)
 **Blocked by**: Sprint 0.1
 **Independent Validation**: lint the DSL-core and method docs together — the illegal-state catalog links to the
-DSL contract rather than restating it; the three-register model and the generated-never-committed rule are each
+DSL contract rather than restating it; the register model and the generated-never-committed rule are each
 owned by exactly one doc and referenced elsewhere.
 **Docs to update**: the docs above and `documents/engineering/README.md`
 
@@ -221,7 +222,7 @@ doctrines (the three validation registers, the generated-never-committed rule, a
   `illegal_state_ml_asset.md`, `illegal_state_multicluster.md`, `illegal_state_lifecycle.md`) and the
   `illegal_state_techniques.md` coverage matrix that check (g) validates,
   `service_capability_doctrine.md`, `tenancy_doctrine.md`.
-- `conformance_harness_doctrine.md`: the three registers and the rendering-never-touches-live invariant.
+- `conformance_harness_doctrine.md`: the registers and the rendering-never-touches-live invariant.
 - `generated_artifacts_doctrine.md`: the emit-from-source, never-commit rule for manifests, the `.tla`/`.cfg`,
   the reflected Dhall schema, and the PureScript contracts.
 - `lift_and_compose_doctrine.md`: the reuse map and the PureScript demo SPAs.
@@ -296,7 +297,7 @@ bootstrap reference (not restate) the capability and Pulsar surfaces from Sprint
 
 Adopt [`daemon_topology_doctrine.md §3`](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton) —
 *The control-plane singleton* (Deployment `replicas=1`, mandatory Lease, no bespoke election, no PVC) — plus
-§3.3's separate same-binary capacity-scheduler role — and
+[§3.3](../documents/illegal_state/illegal_state_security.md#33-misconfigured-gateway)'s separate same-binary capacity-scheduler role — and
 [`content_addressing_doctrine.md §4.5`](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) —
 *The ML-asset lifecycle*: write the secrets/IaC and runtime/transport/determinism layers. The bootstrap doctrine
 records that the pre-binary **midwife is a Python `pb` CLI** (two modes: midwife and admin-REST client), not a
@@ -371,7 +372,7 @@ checker that *is* the Phase 0 gate.
   mechanically: (a) valid header metadata — decomposed per the documentation standard's five facets: a `Status`
 drawn from the enum with vague values banned, a `Supersedes` field, a `Referenced by` field, `Generated
 sections` keys that match the real in-body markers, and a one-sentence `Purpose` — each an independently
-seeded sub-check; (b) every anchored relative link resolves under the §4 slug rule,
+seeded sub-check; (b) every anchored relative link resolves under the [§4](../documents/documentation_standards.md#4-cross-referencing) slug rule,
 and **no bare `§N` section reference** appears outside a Markdown link label, heading, fenced/Mermaid block,
 `§M.N` clause-shorthand, or external-project reference — a section citation must be an anchor link, never bare
 `§N` prose (the lint flags any `§`-plus-digit occurring in prose that is not one of those forms);

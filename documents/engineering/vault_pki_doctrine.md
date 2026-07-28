@@ -226,7 +226,7 @@ and [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md); this 
 is itself a per-app name. Correspondingly, the bytes that credential pulls are **verified against a pinned
 expected content-address, failing closed before `.ready`** — the pin-and-verify import constructor (and its
 layers: pin *presence* type-foreclosed, pin *match* decode-foreclosed, "the pin names the intended model" runtime-checked/assumed)
-is owned by content_addressing §4.5; vault_pki owns only that the credential resolving the pull is a name,
+is owned by content_addressing [§4.5](../illegal_state/illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content); vault_pki owns only that the credential resolving the pull is a name,
 never a value.
 
 ---

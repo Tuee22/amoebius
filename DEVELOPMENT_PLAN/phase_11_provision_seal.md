@@ -94,7 +94,7 @@ the `provision-seal` locus — `illegal_post_bind_expansion_overcommit`, `illega
 `illegal_accelerator_vram_shortage`, and `illegal_cuda_on_cpu_target`. The gate turns **red** on ≥1 committed
 seeded mutant. The complete apparatus — inherited fixtures, committed mutants, and the independent reference
 predicates — is named in [`## Gate integrity`](#gate-integrity); the gate line above delegates to it by anchor
-per [`development_plan_standards.md` §M](development_plan_standards.md#gate-integrity-delegation).
+per [`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub).
 
 ## Gate integrity
 
@@ -244,8 +244,8 @@ each one-resource-or-one-byte-short minimally-differing pair rejects, exercising
   unique identity-keyed `ProvisionedRenderSourceSet` under the opaque `ProvisionedSpec` that Phase 13's
   `renderAll` privately maps; no service projection can invoke render on its own, and the seal's per-source
   field ownership and activation stage are what the later typed diff/enactor must honor.
-- [`testing_doctrine.md` §2](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing)
-  (**Register 1** — pure/golden, in-process, no cluster) and §4 (the per-run proven/tested/assumed ledger): the
+- [`testing_doctrine.md` §2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
+  (**Register 1** — pure/golden, in-process, no cluster) and [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) (the per-run proven/tested/assumed ledger): the
   register this gate reaches and the ledger it emits, with the live realization of any provider (and the
   jit-resolve of any engine) marked UNVERIFIED, owned by the live band.
 
@@ -533,7 +533,7 @@ committed seeded mutants.
 gate passes), `DEVELOPMENT_PLAN/substrates.md` (the Phase-11 `none` gate row).
 
 ### Objective
-Adopt [`testing_doctrine.md` §2/§4](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing)
+Adopt [`testing_doctrine.md` §2/§4](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
 and [`illegal_state_catalog.md §2 — the load-bearing limit`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it):
 assemble the sub-phase's single Register-1 gate — every positive need provisions to a checked opaque deployment
 while every insufficient target returns its specific `ProvisionError` at the `provision-seal` locus without
@@ -618,15 +618,15 @@ The whole sprint (📋 Planned).
   design-proof acceptance token: *binding-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the explicit-provision / opaque-`ProvisionedSpec`
   invariant
-- [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — §3/§4 the envelope and
-  the total fold, §9.2 monitoring cost folds, §10 planning ownership
-- [Service Capability Doctrine](../documents/engineering/service_capability_doctrine.md) — §4 the binding's
-  provisioning tail, §4.1 the seal-locus family/CUDA rejection
-- [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — §2 `renderAll` is
+- [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — [§3](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)/[§4](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting) the envelope and
+  the total fold, [§9.2](../documents/engineering/resource_capacity_doctrine.md#92-monitoring-cost-folds-through-the-standard-machinery-and-the-forest-has-no-parent-rollup-budget) monitoring cost folds, [§10](../documents/engineering/resource_capacity_doctrine.md#10-planning-ownership) planning ownership
+- [Service Capability Doctrine](../documents/engineering/service_capability_doctrine.md) — [§4](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding) the binding's
+  provisioning tail, [§4.1](../documents/illegal_state/illegal_state_techniques.md#41-pvcpv-binding-by-construction) the seal-locus family/CUDA rejection
+- [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — [§2](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) `renderAll` is
   the sole public pure function; this seal produces its unique input
-- [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — §2 the load-bearing limit at
+- [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it) the load-bearing limit at
   the provision-seal locus
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — §2 Register 1, §4 the per-run ledger
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 1, [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger
 - [phase_10](phase_10_capability_bind.md) — the capability union + total `bind` + shape oracle that produces
   the wholly-unprovisioned `BoundDeployment` this phase seals
 - [phase_09](phase_09_execution_accelerator_folds.md) — the execution-epoch / scheduler-reservation /

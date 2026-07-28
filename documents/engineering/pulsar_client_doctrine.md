@@ -576,7 +576,7 @@ infernix and jitML remain **ML extension libraries**; they stop shipping their o
 This document is normative client doctrine only. Delivery sequencing, completion status, and validation
 gates are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md): the native client,
 the topology algebra, and the round-trip gate land in **Phase 28**, and the infernix/jitML migration onto it
-is **Phases 39 (infernix) and 34 (jitML)**. This doc never maintains a competing status ledger.
+is **Phases 39 (infernix) and 40 (jitML)**. This doc never maintains a competing status ledger.
 
 ---
 

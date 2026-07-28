@@ -94,11 +94,11 @@ The gate is hardened as follows (§M) and passes only when every clause below ho
   fingerprint immediately before the first `ip`/`wg`/traffic-control/listener mutation; mismatch or overdraw
   discards the plan with zero such effects.
 - **Phase-0-pinned oracle (§M.1).** The positive fixture `dhall/examples/wireguard_fabric.dhall`, the committed
-  rendered-config golden `test/fixtures/phase27/expected-peer-config.golden` (key fields carried as `SecretRef`
+  rendered-config golden `test/fixtures/phase31/expected-peer-config.golden` (key fields carried as `SecretRef`
   names, *not* key material — with the AllowedIPs, per-peer VPN-IP, and hub `Endpoint` pinned), the expected
-  topology/resource expansion `test/fixtures/phase27/expected-fabric-demand.json`, the reachability matrix
-  `test/fixtures/phase27/reachability-expected.json`, and the negative corpus's expected
-  foreclosure-tag table `test/fixtures/phase27/negative-expected-tags.tsv` (hand-authored, independent of the
+  topology/resource expansion `test/fixtures/phase31/expected-fabric-demand.json`, the reachability matrix
+  `test/fixtures/phase31/reachability-expected.json`, and the negative corpus's expected
+  foreclosure-tag table `test/fixtures/phase31/negative-expected-tags.tsv` (hand-authored, independent of the
   renderer's own output — §M.3) are all **committed in Phase 0 before** `Fabric.hs`/`WgRender.hs`/`WgReconcile.hs`
   exist; none is regenerated from implementation output.
 - **External-observer reachability, not a self-report (§M.5).** The hub-attach claim is read from an observer at
@@ -114,9 +114,9 @@ The gate is hardened as follows (§M) and passes only when every clause below ho
   assumed. Every value must equal the provisioned per-node operands, and a stress pass must remain within the
   admitted high-water marks.
 - **Committed seeded mutants (§M.2).** The gate names **≥2 committed seeded mutants** that MUST turn it red: a
-  **missing/rotated peer key** mutant `test/fixtures/phase27/mutants/missing-peer-key.patch` (the spoke's
+  **missing/rotated peer key** mutant `test/fixtures/phase31/mutants/missing-peer-key.patch` (the spoke's
   `SecretRef` resolves to no live Vault-KV entry — reconcile cannot bring `wg0` up and the reachability probe
-  fails), and a **dropped-field** mutant `test/fixtures/phase27/mutants/hub-no-endpoint.patch` (the hub-role
+  fails), and a **dropped-field** mutant `test/fixtures/phase31/mutants/hub-no-endpoint.patch` (the hub-role
   peer config omits its `Endpoint`, so the spoke has no address to reach and the probe fails). Both are committed
   and re-run each gate. The same Phase-0 bundle pins `drop-resource-envelope.patch` and
   `early-listener-replacement.patch`; they must fail resource projection/readback even when reachability would
@@ -167,7 +167,7 @@ resources and compares them exactly with that projection. Independent one-unit-s
 CPU ceiling, memory reservation, memory ceiling, queue, writable/log/nodefs, host-process-slot, and harness
 capture-space fixtures return their tagged `Left` with zero fabric effects. A committed dropped-envelope
 mutant that starts the listener or probe without its resource row
-(`test/fixtures/phase27/mutants/drop-resource-envelope.patch`), and a replacement-overlap mutant that starts
+(`test/fixtures/phase31/mutants/drop-resource-envelope.patch`), and a replacement-overlap mutant that starts
 the new listener before the old PID is observed absent (`early-listener-replacement.patch`), must both turn
 the gate red.
 
@@ -217,7 +217,7 @@ holds the Curve25519 keypairs and the by-name reader the renderer uses).
 **Independent Validation**: a peer's Curve25519 keypair is minted into Vault-KV and the renderer resolves it by
 `SecretRef` name through the Phase-22 client; **no key material appears in any `.dhall`** — the schema field is a
 `SecretRef` name, and an attempt to inline a raw key literal is rejected at Gate 1/Gate 2 with the committed
-expected tag in `test/fixtures/phase27/negative-expected-tags.tsv`. The rotated/absent-key case (the KV entry a
+expected tag in `test/fixtures/phase31/negative-expected-tags.tsv`. The rotated/absent-key case (the KV entry a
 `SecretRef` names does not resolve) is observable: key resolution returns a specific-reason error, never a
 silent empty key.
 **Docs to update**: `documents/engineering/network_fabric_doctrine.md`,
@@ -258,7 +258,7 @@ pure total render lifted from the Phase-13 goldens); `src/Amoebius/Fabric/WgReco
 control-plane singleton whose reconcile loop this reconcile plugs into); Phase 13 (the pure `renderAll` manifest goldens
 discipline this render extends).
 **Independent Validation**: `render(wireguard_fabric.dhall)` produces per-peer config **byte-identical to the
-committed golden** `test/fixtures/phase27/expected-peer-config.golden` (key fields carried as `SecretRef`
+committed golden** `test/fixtures/phase31/expected-peer-config.golden` (key fields carried as `SecretRef`
 names, with per-peer VPN-IP, `AllowedIPs`, and the hub `Endpoint` pinned) — the golden is the Phase-0 oracle,
 authored before `WgRender.hs` exists, so it cannot be a regenerated tautology (§M.1). The reconcile is
 idempotent: a first pass brings `wg0` to the rendered peer set (observed via `wg show` read from the kernel, the
@@ -344,7 +344,7 @@ Linux network namespace on the linux-cpu host) from `dhall/examples/wireguard_fa
 renders + reconciles `wg0` on each, and the **spoke reaches the hub at the hub's VPN-IP** — asserted by an
 **external-observer** probe (an OS-level ICMP echo + TCP connect from the spoke netns to the hub VPN-IP, plus a
 `tcpdump` underlay capture confirming the traffic is WireGuard UDP, never cleartext — §M.5), matching
-`test/fixtures/phase27/reachability-expected.json`; effective peer state is read from `wg show` (the kernel),
+`test/fixtures/phase31/reachability-expected.json`; effective peer state is read from `wg show` (the kernel),
 never a singleton self-report. The gate also proves the exact topology-expanded fabric reserve was admitted
 against a fresh fingerprint before mutation and that its cgroup/rate/queue/log controls are effective by OS
 readback; one-byte and stale-snapshot negatives have zero fabric effects. Teardown tears down `wg0` on each
@@ -369,17 +369,17 @@ probe over the VPN IP, not a self-report.
 - The negative regression guard: the inline-key-literal (secrets-in-Dhall), overlapping-VPN-IP, and
   out-of-CIDR-`AllowedIPs` fixtures re-run against the same render entry point, each failing at Gate 1/Gate 2
   with its foreclosure tag equal to the Phase-0-committed hand-authored oracle
-  `test/fixtures/phase27/negative-expected-tags.tsv` (§M.3/§M.8), each paired with a positive differing only in
+  `test/fixtures/phase31/negative-expected-tags.tsv` (§M.3/§M.8), each paired with a positive differing only in
   the foreclosed dimension.
-- **Committed seeded mutants (§M.2):** `test/fixtures/phase27/mutants/missing-peer-key.patch` (the spoke's
+- **Committed seeded mutants (§M.2):** `test/fixtures/phase31/mutants/missing-peer-key.patch` (the spoke's
   `SecretRef` resolves to no live Vault-KV entry — `wg0` never comes up, the probe fails red) and
-  `test/fixtures/phase27/mutants/hub-no-endpoint.patch` (the hub-role config omits its `Endpoint` — the spoke
+  `test/fixtures/phase31/mutants/hub-no-endpoint.patch` (the hub-role config omits its `Endpoint` — the spoke
   has no hub address, the probe fails red) — both committed and re-run each gate, each asserted to turn the gate
   red.
 - The **Phase-0-pinned oracle bundle** committed before any implementation exists:
   `dhall/examples/wireguard_fabric.dhall`, `expected-peer-config.golden`,
   `expected-fabric-demand.json`, `reachability-expected.json`, and `negative-expected-tags.tsv` (under
-  `test/fixtures/phase27/`).
+  `test/fixtures/phase31/`).
 - The pre-effect negative bundle: CPU reservation/ceiling, memory reservation/ceiling, queue-state memory, and
   rotated nodefs demand each exceed the current residual by exactly one unit; an expansion omits one rendered
   peer; and a validated fingerprint changes before enactment. Each must return its committed specific reason

@@ -262,7 +262,7 @@ Ownership and honesty for the registry:
   `jitML/documents/engineering/determinism_contract.md`. `kernelKey` is consumed by Tier 3 in [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss).
 - `releaseHash` and the `environment` pointer are **defined here** (this table is their canonical registry), but
   their *lifecycle* — the immutable release ledger, the promotion CAS, the `PromotionGate` — is owned by
-  [`release_lifecycle_doctrine.md` §2/§3](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash). "Promote to prod" is an
+  [`release_lifecycle_doctrine.md` [§2](#2-the-three-tier-store-blobs--manifests--pointers)/[§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash). "Promote to prod" is an
   `environment`-pointer CAS onto a `Release`, exactly the ETag-CAS discipline of a `trial` pointer flip ([§2.2](#22-why-this-shape-removes-the-races)).
 - The **OCI image digest** is registry-owned, not computed by amoebius; it appears here only so `releaseHash`
   can pin it. Its format and build path are owned by [`image_build_doctrine.md`](./image_build_doctrine.md).
@@ -462,7 +462,7 @@ writable-layer and log headroom; "the final files fit but the build scratch or l
 admitted.
 The same capacity fold that bounds every other budget rejects an over-budget peak at the post-bind
 `provision-seal` before any effect
-([resource_capacity_doctrine.md §3–§4](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)).
+([resource_capacity_doctrine.md [§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)–[§4](#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed)](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)).
 
 For an in-cluster node, a typed per-node cache-owner pod owns the pool. Its pure resource envelope renders
 CPU/memory/`ephemeral-storage` requests+limits and a disk-backed `emptyDir.sizeLimit` derived from the
@@ -754,9 +754,9 @@ reaches:
 | Same-substrate same-toolchain checkpoint reproduction is byte-identical | **Tested in the sibling `jitML`**, not proven in amoebius | A runtime comparison on matching hardware |
 | Off-policy RL same-seed full-run bit-equality | **Not asserted**; only the first-N-step prefix (bounded run) / per-checkpoint-segment (Continuous) is tested | A runtime prefix comparison of two fresh runs |
 | Cross-substrate bit-equality (training or inference) | **Explicitly not asserted** | Nothing — out of contract by design |
-| An imported model's pin names the *intended* model (§4.5 arm b) | **Assumed** — pin *presence* is type-foreclosed, stage-time pin *match* is decode-foreclosed (fail-closed), but "the pin denotes the intended model" is out of type reach | Nothing typed — trust in the pin author (Fork A) |
-| A family-matched, substrate-specific-weight-layout model actually **loads** on the serving substrate (§3.1) | **Not asserted** | Runtime — the decode-foreclosed family relation passes; the weight-layout load is residue, like "the staged bytes actually load" |
-| S3 conditional PUT (`If-Match`) is honored by the MinIO endpoint, so the pointer CAS is linearizable (§2.1) | **Assumed** — a pinned version floor is a platform-service invariant and a stale-`If-Match` reconcile probe asserts `412` (fail-closed); that the deployed erasure-set store honors the precondition is out of type reach | Nothing typed — a pinned version + a runtime probe, not a proof (a store that ignores the header degrades to last-writer-wins) |
+| An imported model's pin names the *intended* model ([§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) arm b) | **Assumed** — pin *presence* is type-foreclosed, stage-time pin *match* is decode-foreclosed (fail-closed), but "the pin denotes the intended model" is out of type reach | Nothing typed — trust in the pin author (Fork A) |
+| A family-matched, substrate-specific-weight-layout model actually **loads** on the serving substrate ([§3.1](#31-producing-substrate-vs-serving-substrate-a-distinct-serving-run-fingerprint)) | **Not asserted** | Runtime — the decode-foreclosed family relation passes; the weight-layout load is residue, like "the staged bytes actually load" |
+| S3 conditional PUT (`If-Match`) is honored by the MinIO endpoint, so the pointer CAS is linearizable ([§2.1](#21-three-object-classes-two-write-protocols)) | **Assumed** — a pinned version floor is a platform-service invariant and a stale-`If-Match` reconcile probe asserts `412` (fail-closed); that the deployed erasure-set store honors the precondition is out of type reach | Nothing typed — a pinned version + a runtime probe, not a proof (a store that ignores the header degrades to last-writer-wins) |
 
 amoebius itself has built none of this; the proven-in-types rows are the design's *intended* totality, and the
 tested rows are evidence from sibling libraries that the design is realizable. Treat this document as a

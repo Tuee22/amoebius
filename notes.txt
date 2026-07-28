@@ -1,6 +1,12 @@
-- resource limits : DEVELOPMENT_PLAN/README.md says "containers always declare cpu/ram". that is true but we need a systmatic review of all resource provisions : cpu, memory, storage, vram. it's true these must be explicit at the pod level in k8s but they are derived from pure representations. it is impossible to represent a cluster deployment to a cluster which lacks the sufficient resources, eg a workload needing cuda cannot be deployed to a cluster without cuda. ephemeral pod storage for cache is also an explicitly declared resource. 
+- resource limits : DEVELOPMENT_PLAN/README.md says "containers always declare cpu/ram". that is true but we need a systmatic review of all resource provisions : cpu, memory, storage, vram. it's true these must be explicit at the pod level in k8s but they are derived from pure representations. it is impossible to represent a cluster deployment to a cluster which lacks the sufficient resources, eg a workload needing cuda cannot be deployed to a cluster without cuda. ephemeral pod storage for cache is also an explicitly declared resource.
+  DESIGNED. See documents/engineering/resource_capacity_doctrine.md — the complete provisioning model
+  (pod/host/build/engine/fabric/controller/gateway/executor envelopes; pod/CNI/CSI slots; logical pod ephemeral
+  plus layout-routed OCI/cache storage; accelerator count/profile/net-allocatable VRAM), and the rule that only
+  an opaque `ProvisionedSpec` reaches `renderAll`. The cuda-on-cpu case is illegal_state_capacity.md §3.30.
 
-- testing
+- testing : designed. See documents/engineering/testing_doctrine.md — a test *is* an amoebius deployment
+  (spec + chaos schedule + typed expectation surface + mandatory teardown), the three phase-gate registers plus
+  the Register-2.5 simulation activity, and the per-run proven/tested/assumed ledger. Generation is Phase 42.
 
 - backups : designed. See documents/engineering/backup_recovery_doctrine.md — the closed BackupPolicy
   deployment rule (remote / append-only-WORM / air-gapped manual-or-automatic media), the write-but-never-delete
@@ -10,4 +16,8 @@
   consistency over availability). Illegal states enumerated at illegal_state_storage.md §3.53-3.68 and
   illegal_state_multicluster.md §3.69-3.71; the freshness guard extends the Phase-3 formal model.
 
-- how do we ensure eg deploying on aws has a valid key, the resources are correct for the workflow, 
+- how do we ensure eg deploying on aws has a valid key, the resources are correct for the workflow,
+  DESIGNED. See documents/engineering/preflight_validation_doctrine.md — the pure-functional `Check` algebra
+  behind the `dhall update` admission gate: the AWS `DryRun` + STS join and the SSH reach + hardware-match
+  probes, the worst-case dynamic envelope that validates a future-needed credential now, and the recursive
+  `SubtreeValidated` proof tree. Adopted by Phase 26 (admission gate) and Phases 34/37 (provider probes).

@@ -362,7 +362,7 @@ in the pre-cluster band; here it becomes a live regression guard.
    tenant's bucket, topic, AND secret (three fixtures, not one of any kind)** — is rejected at Gate 1 or Gate 2,
    and the returned structured error **carries the committed reason tag `CrossTenantRef{enclosing=t1,
    foreign=t2}`** (or, on the static-phantom arm, the `dhall type` error locus), which the test asserts equal to
-   the value in the **Phase-0-committed hand-authored expected-tag table** (`test/fixtures/phase23/expected_tags.dhall`) —
+   the value in the **Phase-0-committed hand-authored expected-tag table** (`test/fixtures/phase27/expected_tags.dhall`) —
    the reference side authored independently of the fold, never read back from the fold's own output (§M.3, §M.8).
    **Each negative ships a minimal positive twin, byte-identical except the foreign tenant id corrected to the
    enclosing `t1`, that must decode successfully** — so a rejection is attributable to cross-tenancy alone and
@@ -437,7 +437,7 @@ final tenant, and exact-empty no-op without losing persistence or executor capac
   corresponding provider adapter plus a fresh fingerprint-matching `ValidatedLiveTarget` may enact one. The
   `Readback` modules validate action result and old-target cleanup before releasing any retained capacity.
 - The **derive-don't-author** enforcement: no DSL surface hand-authors a Vault policy, Pulsar ACL, or SQL grant —
-  precisely as none exists for a NetworkPolicy — so an un-derived provider grant has no syntax (catalog §3.45).
+  precisely as none exists for a NetworkPolicy — so an un-derived provider grant has no syntax (catalog [§3.45](../documents/illegal_state/illegal_state_security.md#345-a-cross-tenant-or-hand-authored-rbac-binding)).
 - The **honest limit** recorded ([`tenancy_doctrine.md §7`](../documents/engineering/tenancy_doctrine.md#7-two-isolation-layers-and-the-honest-limit)):
   this sprint does **not** prove the policy derivation is faithful; an over-grant is a runtime-checked
   residue, not a foreclosed one, and the default shared-service model's tenant isolation rests on per-tenant
@@ -504,7 +504,7 @@ guard, the pre-cluster no-foreign-tenant corpus is re-run so a spec naming a for
 fails before any binary acts.
 
 ### Deliverables
-- A positive gate `.dhall` (`tenant_app`) composing the platform spec + a tenant app (Sprints 23.1–23.3) that
+- A positive gate `.dhall` (`tenant_app`) composing the platform spec + a tenant app (Sprints 27.1–27.3) that
   the singleton reconciles to ready and then tears down leak-free, authored as a test-topology `.dhall` with a
   teardown obligation and a **full pre-run-vs-post-run provider-inventory diff** (asserting set equality across
   Kubernetes API, MinIO, Vault, Pulsar, Keycloak, and Postgres, independent of test-owned tagging) — never a
@@ -524,18 +524,18 @@ fails before any binary acts.
   A matching empty-desired/empty-observed fixture is a no-op and executes no provider call.
 - Negative gate fixtures — re-run as a live regression guard, **authored and committed in Phase 0 before the
   implementation** (§M.1) — `illegal_cross_tenant_ref` (three arms: a `RoleBinding` naming a `Ref t' ≠ t`
-  bucket, topic, and secret, catalog §4.2), `illegal_cross_tenant_user` (a `UserSpec` in two tenants), and
-  `illegal_handauthored_grant` (a hand-authored provider policy, catalog §3.45) — each asserted to fail at
+  bucket, topic, and secret, catalog [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)), `illegal_cross_tenant_user` (a `UserSpec` in two tenants), and
+  `illegal_handauthored_grant` (a hand-authored provider policy, catalog [§3.45](../documents/illegal_state/illegal_state_security.md#345-a-cross-tenant-or-hand-authored-rbac-binding)) — each asserted to fail at
   Gate 1 or Gate 2, annotated with its foreclosure layer, and each **carrying its committed expected reason
   tag**. Each negative ships its **minimal positive twin**, differing only in its foreclosed dimension (the
   foreign id corrected to `t1` for the two cross-tenant fixtures; the hand-authored grant replaced by its
   derived `deriveTenantPolicies` form for `illegal_handauthored_grant`), that must decode and deploy.
-- The **Phase-0-committed independent oracle** `test/fixtures/phase23/expected_tags.dhall` — a hand-authored
+- The **Phase-0-committed independent oracle** `test/fixtures/phase27/expected_tags.dhall` — a hand-authored
   table mapping each negative fixture to its expected reason tag (`CrossTenantRef{enclosing, foreign}`,
   `TwoTenantUser`, `HandAuthoredGrant`), authored independently of the `project`/unification fold, never
   regenerated from it (§M.3).
 - At least one **committed seeded mutant** (§M.2), drawn from the defined operator set: the guard-negation
-  mutant `mutants/phase23/fold_tenant_eq_inverted` of the tenant-unification fold (the `RoleBinding`
+  mutant `mutants/phase27/fold_tenant_eq_inverted` of the tenant-unification fold (the `RoleBinding`
   resource-tenant vs enclosing-tenant equality inverted, so a cross-tenant ref decodes clean), committed and
   re-run by the gate, which **must** turn the negative suite and the gate red.
 - A **Register-3** proven/tested/assumed ledger recording the live-realization result (namespace + bucket + Sql
@@ -558,7 +558,7 @@ fails before any binary acts.
 2. Every illegal `.dhall` fixture is rejected before any binary acts **carrying its committed expected reason
    tag** (`CrossTenantRef{enclosing=t1, foreign=t2}` for `illegal_cross_tenant_ref`, `TwoTenantUser` for
    `illegal_cross_tenant_user`, `HandAuthoredGrant` for `illegal_handauthored_grant`) matched against the
-   Phase-0 hand-authored expected-tag table `test/fixtures/phase23/expected_tags.dhall`, **each paired with its
+   Phase-0 hand-authored expected-tag table `test/fixtures/phase27/expected_tags.dhall`, **each paired with its
    minimal positive twin** differing only in its foreclosed dimension (the foreign id corrected to `t1` for the
    two cross-tenant fixtures; the hand-authored grant replaced by its derived form for
    `illegal_handauthored_grant`) that decodes and deploys — a rejection carrying
@@ -627,7 +627,7 @@ The whole sprint (📋 Planned).
 - [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — the six provider
   persistence targets and sealed administrative action boundary
 - [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — the phantom-tenant-tag mechanism
-  (§4.2) and the hand-authored-grant entry (§3.45) re-run as a live guard
+  ([§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)) and the hand-authored-grant entry ([§3.45](../documents/illegal_state/illegal_state_security.md#345-a-cross-tenant-or-hand-authored-rbac-binding)) re-run as a live guard
 - [Vault, PKI & Secret Injection](../documents/engineering/vault_pki_doctrine.md) — the `SecretRef` contract for
   tenant credentials and the derived per-tenant Vault policy
 - [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — the Deployment-`replicas=1`

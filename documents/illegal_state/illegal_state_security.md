@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_25_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_25_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering gateway/DNS/NetworkPolicy wiring,
@@ -38,7 +38,7 @@ correct manifests, whether the apiserver admits them, or whether the running clu
 Each entry keeps its **original catalog number and heading** (inbound links depend on the slug). The
 **Validation-locus** line added to each entry places it on the orthogonal validation-locus axis defined in
 [`illegal_state_techniques.md`](./illegal_state_techniques.md): `Gate-1-editor` (fails `dhall type` at
-authoring time), `Gate-2-decoder` (the total decoder returns `Left`), `provision-seal` (post-bind Phase-10
+authoring time), `Gate-2-decoder` (the total decoder returns `Left`), `provision-seal` (post-bind Phase-11
 provision returns a `ProvisionError` before any `ProvisionedSpec` exists), `rendered-output-golden` (caught by
 a golden test on the *rendered* manifest, not a live cluster), and `live-effect` (only observable at
 reconcile/runtime — the runtime-checked residue).
@@ -53,6 +53,7 @@ with no matching service, cannot be written. **Owner:**
 wild-ingress path). **Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (GADT-indexed: a route is constructed *from* a live service handle)
 + [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content) totality (the cert/host name is a function of the declared identity, not a free string).
 
+**Layer:** type-foreclosed at the Haskell IR — a route to a non-existent backend has no constructor; runtime-checked residue — that the live gateway actually routes.
 **Validation-locus:** `Gate-2-decoder` (a route is constructed only *from* a live service handle, and the
 cert/host name is a total function of the declared identity — a route to a non-existent backend or a listener
 with no matching service has no inhabitant) + `rendered-output-golden` (the emitted Gateway/HTTPRoute
@@ -69,6 +70,7 @@ representation. **Owner:** [`pulumi_iac_doctrine.md`](../engineering/pulumi_iac_
 [`platform_services_doctrine.md` §9](../engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path). **Technique:** [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content) (content-address
 totality, applied to the name→address map).
 
+**Layer:** type-foreclosed at the Haskell IR — a name binds only to an allocated address, so an unowned target has no constructor; runtime-checked residue — that DNS actually resolves to it.
 **Validation-locus:** `Gate-2-decoder` (the DNS binding is a total function of a service handle — there is no
 free string in which to type an unowned target IP) + `rendered-output-golden` (the emitted DNS record targets
 the allocated LB address) + `live-effect` residue (the realized LoadBalancer address is what is actually bound
@@ -86,6 +88,7 @@ human never writes the policy. **Owner:**
 graph is the single owner of connectivity) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (a consumer handle only exists once the dependency edge
 does).
 
+**Layer:** type-foreclosed at the Haskell IR — NetworkPolicies are derived from the declared dependency graph and never hand-authored, so a severing policy has no constructor; runtime-checked residue — that the live CNI actually admits the traffic.
 **Validation-locus:** `rendered-output-golden` (the derived NetworkPolicy is checked in the emitted objects —
 a declared dependency is never a connection the policy blocks) + `Gate-2-decoder` (the consumer handle exists
 only once the dependency edge does; the ownership fold over the dependency graph) + `live-effect` residue
@@ -105,6 +108,7 @@ host-local peer into a wild endpoint, and none that exposes a workload to the wi
 (capability: only the edge holds the "expose-to-wild" capability) + [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (endpoint kinds are distinct
 indices that do not interconvert).
 
+**Layer:** type-foreclosed at the Haskell IR — only the Keycloak edge holds the expose-to-wild capability and endpoint kinds do not interconvert; runtime-checked residue — that the running cluster in fact exposes no unauthenticated path.
 **Validation-locus:** `rendered-output-golden` (the no-backdoor-ingress golden on the emitted objects — no
 wild NodePort or Keycloak-skipping Ingress in the rendered manifest) + `Gate-2-decoder` (only the edge holds
 the expose-to-wild capability, and endpoint kinds are distinct non-interconverting indices — a self-published
@@ -123,6 +127,7 @@ under *this* tenant's tag; a cross-tenant reference has no inhabitant. **Owner:*
 [`vault_pki_doctrine.md`](../engineering/vault_pki_doctrine.md) (the `SecretRef`-by-name contract, parent→child
 injection, the trust tree). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom tenant tags + capabilities).
 
+**Layer:** type-foreclosed at the Haskell IR — phantom tenant tags admit no re-tagging function and a literal secret value has no constructor; runtime-checked residue — that the parent actually injects the referenced material.
 **Validation-locus:** `Gate-2-decoder` (phantom tenant tags — a literal secret value and a cross-tenant
 reference have no inhabitant; a `SecretRef` is only ever a name under *this* tenant's tag, and no function
 re-tags across tenants) + `live-effect` residue (that the parent actually injects the referenced material into
@@ -141,6 +146,7 @@ materialized to a cluster-legible store is therefore not something a workload's 
 (an envelope/handle, not a plaintext value) — note this row's *enforcement* is partly runtime (per the [§2](./illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)
 limit); the type only removes any plaintext-spec input.
 
+**Layer:** type-foreclosed at the Haskell IR — a workload's typed inputs can name only an envelope or handle; runtime-checked residue — that the bytes at rest are in fact enveloped.
 **Validation-locus:** `Gate-2-decoder` (a workload's typed inputs can only name an envelope/handle, never a
 plaintext-spec value — the plaintext-at-rest input has no inhabitant) + `live-effect` residue (that the
 control-plane singleton decrypts the Vault-Transit MinIO envelope in-process and never writes plaintext to a
@@ -158,6 +164,7 @@ by per-child Transit keys (a child cannot even *decrypt* a sibling's subtree). *
 [`vault_pki_doctrine.md` §6](../engineering/vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes) (per-child keys). **Technique:** [§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable) (phantom
 tenant/subtree tags) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (ownership indices).
 
+**Layer:** type-foreclosed at the Haskell IR — a `ChildInForceSpec` has no field in which a sibling or ancestor-only branch can appear; runtime-checked residue — that the running child reaches no further.
 **Validation-locus:** `Gate-2-decoder` (phantom subtree tags + ownership indices — a `ChildInForceSpec` has no
 field in which a sibling or ancestor-only branch can appear) + `live-effect` residue (per-child Transit keys —
 a child cannot even *decrypt* a sibling's subtree at runtime, the cryptographic reinforcement beyond the type
@@ -191,6 +198,7 @@ rule) + [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctr
 provision boundary). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (required-field-by-construction — a record without the field has no inhabitant).
 
+**Layer:** split — the missing-envelope and un-hardened-`securityContext` shapes are type-foreclosed (required fields, closed arms), while the capacity half is decode-foreclosed at the provision seal; runtime-checked residue — that the kubelet actually enforces the rendered limits.
 **Validation-locus:** `Gate-1-editor` (a workload record missing its mandatory resource envelope fails
 `dhall type` at authoring) + `provision-seal` (the post-bind resource/capability fold must construct the opaque
 whole-deployment `ProvisionedSpec`, returning a `ProvisionError` before that seal when the selected target
@@ -319,24 +327,24 @@ transition high-water; the policies refuse a live cross-tenant read).
   represent illegal state") these entries instantiate.
 - Owning doctrines cited by the entries in this slice:
   - [`platform_services_doctrine.md`](../engineering/platform_services_doctrine.md) — the LoadBalancer + single wild-ingress
-    path, derived NetworkPolicy, and the complete resource-envelope rule (§3.3, §3.4, §3.6, §3.7, §3.11).
+    path, derived NetworkPolicy, and the complete resource-envelope rule ([§3.3](#33-misconfigured-gateway), [§3.4](#34-dns-that-binds-to-the-wrong-ip), [§3.6](#36-blocking-networkpolicy-services-cant-reach-each-other), [§3.7](#37-accidental-insecure--backdoor-ingress), [§3.11](#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)).
   - [`pulumi_iac_doctrine.md`](../engineering/pulumi_iac_doctrine.md) — route53 + zerossl, and the Vault-enveloped backend
-    (§3.4, §3.9).
+    ([§3.4](#34-dns-that-binds-to-the-wrong-ip), [§3.9](#39-a-plaintext-spec-at-rest)).
   - [`host_cluster_comms_doctrine.md`](../engineering/host_cluster_comms_doctrine.md) — the host-local-peer carve-out and
-    the channel taxonomy (§3.7, §3.40).
+    the channel taxonomy ([§3.7](#37-accidental-insecure--backdoor-ingress), [§3.40](#340-a-secure-gateway-reach-collapsing-into-wild-ingress)).
   - [`vault_pki_doctrine.md`](../engineering/vault_pki_doctrine.md) — the `SecretRef`-by-name contract, parent→child
     injection, per-child keys, the fail-closed unsealed-Vault precondition, and the per-tenant policy envelope
-    (§3.8, §3.9, §3.10, §3.42, §3.45).
+    ([§3.8](#38-cross-tenant-references-and-literal-secrets), [§3.9](#39-a-plaintext-spec-at-rest), [§3.10](#310-a-child-spec-that-reaches-beyond-its-own-subtree), [§3.42](#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness), [§3.45](#345-a-cross-tenant-or-hand-authored-rbac-binding)).
   - [`tenancy_doctrine.md`](../engineering/tenancy_doctrine.md) — RBAC is derived, never authored; the typed tenant→role
-    graph as the single owner of every derived grant (§3.45).
+    graph as the single owner of every derived grant ([§3.45](#345-a-cross-tenant-or-hand-authored-rbac-binding)).
   - [`cluster_lifecycle_doctrine.md`](../engineering/cluster_lifecycle_doctrine.md) — the `project(subtree)` handoff
-    (§3.10).
+    ([§3.10](#310-a-child-spec-that-reaches-beyond-its-own-subtree)).
   - [`manifest_generation_doctrine.md`](../engineering/manifest_generation_doctrine.md) — best-practice-by-construction, the
-    unconstructible unsafe manifest (§3.11).
+    unconstructible unsafe manifest ([§3.11](#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)).
   - [`network_fabric_doctrine.md`](../engineering/network_fabric_doctrine.md) — the endpoint indices, including
-    `SecureGatewayReach` (§3.40).
+    `SecureGatewayReach` ([§3.40](#340-a-secure-gateway-reach-collapsing-into-wild-ingress)).
   - [`bootstrap_sequence_doctrine.md`](../engineering/bootstrap_sequence_doctrine.md) — the admin control plane and the
-    singleton REST API (§3.42).
+    singleton REST API ([§3.42](#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness)).
   - [`daemon_topology_doctrine.md`](../engineering/daemon_topology_doctrine.md) and
     [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) — the runtime-checked residue that the
-    singleton holds sole admin authority (§3.42).
+    singleton holds sole admin authority ([§3.42](#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness)).

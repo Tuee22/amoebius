@@ -178,7 +178,7 @@ compiling-but-inert ADT.
 
 ### Deliverables
 - The modeled Pulsar/MinIO/apiserver/route53/Vault/clock under `IOSim s`, each with the typed fault model named in
-  the simulation doctrine §3.
+  the simulation doctrine [§3](../documents/engineering/deterministic_simulation_doctrine.md#3-the-simulated-environment-and-its-fault-model).
 - The committed **per-fake fault-contract corpus** (the six named substrate assertions above), each paired with a
   knob-disabled positive per §M-8, wired into `sim-spec`.
 
@@ -275,12 +275,12 @@ The whole sprint (📋 Planned).
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (§K: a
   `**Register:**` field is never `2.5`; 2.5 names the *activity*, not the gate register)
 - [overview.md](overview.md) — target architecture and the pre-cluster conformance vision
-- [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — §2 the
-  io-classes environment abstraction, §3 the simulated environment and its fault model, §4 where Register 2.5
-  sits, §5 what DST establishes and the assumed-fidelity premise
-- [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — §2 the registers for
+- [Deterministic Simulation Doctrine](../documents/engineering/deterministic_simulation_doctrine.md) — [§2](../documents/engineering/deterministic_simulation_doctrine.md#2-the-io-classes-environment-abstraction--build-it-pure-lift-it-whole) the
+  io-classes environment abstraction, [§3](../documents/engineering/deterministic_simulation_doctrine.md#3-the-simulated-environment-and-its-fault-model) the simulated environment and its fault model, [§4](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits) where Register 2.5
+  sits, [§5](../documents/engineering/deterministic_simulation_doctrine.md#5-what-dst-establishes-and-the-one-premise-it-buys) what DST establishes and the assumed-fidelity premise
+- [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — [§2](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) the registers for
   pre-cluster validation (the Register-2.5 entry this substrate serves)
-- [Chaos/Failover Doctrine](../documents/engineering/chaos_failover_doctrine.md) — §10 simulate: the pure program
+- [Chaos/Failover Doctrine](../documents/engineering/chaos_failover_doctrine.md) — [§10](../documents/engineering/chaos_failover_doctrine.md#10-simulate--the-pure-program-lifted-io-sim) simulate: the pure program
   lifted (io-sim), the ladder the two interpreters realize
 - [phase_14](phase_14_chain_kernel_boundary.md) — the `chain`/`Step` kernel + `--dry-run` plan the toy reconcile
   loop consumes

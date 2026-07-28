@@ -112,35 +112,38 @@ observed absent before the authenticated child singleton acquires the same Lease
 child runs **no host worker daemon** and advertises **no host substrate** (the `Managed Eks` arm carries no
 `LinuxHost` witness). Re-running the bring-up against the converged child is a **no-op**, defined observably as
 **zero mutating cloud-API/K8s-API calls** on run 2 in an OS-boundary audit trail — not exit 0 and not the
-reconciler's self-reported empty diff. The committed seeded mutant `mut-30.2-public-pull` (a manifest pinned to a
+reconciler's self-reported empty diff. The committed seeded mutant `mut-35.1-public-pull` (a manifest pinned to a
 public-registry image) MUST go **red** on the OS-boundary image-pull observer. The complete apparatus — inherited
 representative set, committed oracles, the committed mutant, and the independent reference predicates — is named
 in [`## Gate integrity`](#gate-integrity); the gate line above delegates to it by anchor per
-[`development_plan_standards.md` §M](development_plan_standards.md#gate-integrity-delegation).
+[`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub).
 
 ## Gate integrity
 
 
-> **Shared provider corpus (by design).** The `test/dhall/phase_30_provider_provision.dhall` topology and the `mut-30.*` mutant family are the one committed corpus deliberately shared across the four provider sub-phases (Phases 34–37; see [Phase 34](phase_34_provider_deploy_checkpoint.md)) — this sub-phase gates its own slice, not accidental double-ownership.
-This section carries this sub-phase's **slice** of the source Phase-30 provider gate apparatus, partitioned along
+> **Provider corpus split (by design).** `test/dhall/phase_35_provider_provision.dhall` and the
+> `mut-35.*` mutant family are this sub-phase's own Phase-0 corpus. The four provider sub-phases
+> (Phases 34–37; see [Phase 34](phase_34_provider_deploy_checkpoint.md)) share one provider topology
+> *shape* while each commits and gates its own slice — not accidental double-ownership.
+This section carries this sub-phase's **slice** of the provider gate apparatus, partitioned along
 the hostless-child / convergence / Lease-handoff seam (per
 [`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).
 The deploy/checkpoint apparatus (`test/goldens/checkpoint_envelope.json`, `test/goldens/engine_execve.txt`, the
-`test/negatives/host_shell_pulumi_up.sh` no-in-cluster-singleton negative, and the `mut-30.1-static-key` /
-`mut-30.1-leak-path` / `mut-30.1-drop-parallel-executor` mutants) stays in
+`test/negatives/host_shell_pulumi_up.sh` no-in-cluster-singleton negative, and the `mut-34.1-static-key` /
+`mut-34.1-leak-path` / `mut-34.1-drop-parallel-executor` mutants) stays in
 [Phase 34](phase_34_provider_deploy_checkpoint.md); the per-PV EBS / credential apparatus
-(`test/goldens/ebs_credential_matrix.txt`, `test/fixtures/phase30/ebs_csi_bake_expected.dhall`, and the
-`mut-30.3-allow-delete` / `mut-30.3-enable-dynamic-provisioner` / `mut-30.3-credit-old-before-observed-delete` /
-`mut-30.3-drop-copy-executor` mutants) stays in [Phase 36](phase_36_provider_ebs_credential.md); the dynamic-node
-/ quota / teardown-sweep apparatus (`test/dhall/phase_30_provider_over_quota.dhall`, the expected two-instance
-identity map and tag-sweep oracle, and the `mut-30.4-*` / `mut-30.5-skip-sweep` mutants) stays in
+(`test/goldens/ebs_credential_matrix.txt`, `test/fixtures/phase36/ebs_csi_bake_expected.dhall`, and the
+`mut-36.1-allow-delete` / `mut-36.1-enable-dynamic-provisioner` / `mut-36.1-credit-old-before-observed-delete` /
+`mut-36.1-drop-copy-executor` mutants) stays in [Phase 36](phase_36_provider_ebs_credential.md); the dynamic-node
+/ quota / teardown-sweep apparatus (`test/dhall/phase_37_provider_over_quota.dhall`, the expected two-instance
+identity map and tag-sweep oracle, and the `mut-37.1-*` / `mut-37.2-skip-sweep` mutants) stays in
 [Phase 37](phase_37_provider_dynamic_nodes.md). This phase inherits only the convergence/handoff slice below.
 
 **Oracle-pinning (§M.1).** Every fixture, expected foreclosure/error tag, and reference table this gate checks
 against is authored and **committed in Phase 0**, before `Amoebius.Cluster.ProviderBringUp` and the provider-child
 singleton wiring exist — no oracle is regenerated from the implementation's own output:
 
-- **Representative set (§M.7)** — the committed topology `test/dhall/phase_30_provider_provision.dhall`, restricted
+- **Representative set (§M.7)** — the committed topology `test/dhall/phase_35_provider_provision.dhall`, restricted
   to its **provider-child bring-up + standard-service-convergence slice**: one `Managed Eks` control plane, one
   base managed node group (size 1, deployed by Phase 34), the child `amoebius-capacity-scheduler` (`pods=1`), the
   stateless in-cluster singleton, and the complete standard HA service set. The dynamic-node, per-PV-EBS, and
@@ -164,7 +167,7 @@ singleton wiring exist — no oracle is regenerated from the implementation's ow
 the one that breaks the bake-only supply chain on the convergence seam — committed and re-run (not run once); the
 gate MUST turn it red:
 
-- `mut-30.2-public-pull` — a platform manifest pinned to a public-registry image instead of the in-cluster
+- `mut-35.1-public-pull` — a platform manifest pinned to a public-registry image instead of the in-cluster
   registry / preloaded CRI digest (effect swap on the image source). It MUST go **red** on the OS-boundary
   image-pull observer (the CNI/containerd pull log / egress network trace), which records a pull from a host
   outside the in-cluster registry — a red the reconciler's self-reported "converged" status could never surface,
@@ -180,7 +183,7 @@ the bring-up/convergence code**, never by reusing its own status report:
 2. the **no-Helm / no-public-pull** predicate reads an **OS-boundary observer** (an argv-recording shim on the
    convergence path plus a CNI/containerd image-pull log or egress network trace, §M.5), asserts **zero** `helm`
    invocations and **zero** image pulls from any host outside the in-cluster registry against
-   `test/goldens/convergence_argv.txt`, and is the predicate `mut-30.2-public-pull` turns red;
+   `test/goldens/convergence_argv.txt`, and is the predicate `mut-35.1-public-pull` turns red;
 3. the **Lease-handoff authority** predicate reads an **independent** Kubernetes Lease/audit observer (not the
    handoff code's self-report) and asserts the ordered sequence in `test/goldens/lease_handoff_sequence.txt` with
    **zero parent mutations after release** and **zero child mutations before acquire**; the race fixtures
@@ -195,7 +198,7 @@ the bring-up/convergence code**, never by reusing its own status report:
    exit 0, not a self-reported empty diff.
 
 **Concrete corpus (§M.7).** The representative set is named explicitly above (the bring-up/convergence slice of
-`test/dhall/phase_30_provider_provision.dhall` plus the explicit committed service set). The bootstrap-ordering
+`test/dhall/phase_35_provider_provision.dhall` plus the explicit committed service set). The bootstrap-ordering
 negatives are enumerated and each asserts its specific rejected outcome (§M.8): a guarded test Pod before
 `ManagedCapacityReady`, an omitted add-on, an old UID still present, a replacement without a reservation join, and
 a second default-scheduler exception. **Scope boundary (no forward dependency).** This gate reaches convergence,
@@ -229,7 +232,7 @@ own deploy lifecycle, and the leak-free sweep witness is recorded **deferred to 
   — *the single distribution rule: bake the binaries, pull only in-cluster*: the scheduler bootstrap references
   the exact OCI digest Phase 34 preloaded into the base node's CRI store, and every standard platform service is
   a baked binary under typed manifests, so convergence needs neither the not-yet-ready child registry nor a public
-  pull — the exact contract `mut-30.2-public-pull` is committed to violate.
+  pull — the exact contract `mut-35.1-public-pull` is committed to violate.
 - [`platform_services_doctrine.md §1`](../documents/engineering/platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster)
   and [`§12`](../documents/engineering/platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant)
   — *every cluster is the same cluster* / *substrate equivalence as a structural invariant*: a provider child
@@ -425,7 +428,7 @@ a structural invariant proven live on the provider target.
    observer** (an argv-recording shim on the convergence path plus a CNI/containerd image-pull log or an egress
    network trace, §M.5), never a compliance trace the daemon emits about itself: the observer records **zero**
    `helm` invocations and **zero** image pulls from any host outside the in-cluster registry, checked against
-   `test/goldens/convergence_argv.txt`. The committed mutant `mut-30.2-public-pull` (a manifest pinned to a
+   `test/goldens/convergence_argv.txt`. The committed mutant `mut-35.1-public-pull` (a manifest pinned to a
    public-registry image) MUST go **red** on the image-pull observer.
 
 ### Remaining Work
@@ -434,7 +437,7 @@ The whole sprint (📋 Planned).
 ## Sprint 35.4: The provider-child bring-up gate 📋
 
 **Status**: Planned
-**Implementation**: `test/dhall/phase_30_provider_provision.dhall` (the committed gate topology, exercised here on
+**Implementation**: `test/dhall/phase_35_provider_provision.dhall` (the committed gate topology, exercised here on
 its provider-child bring-up + standard-service-convergence slice), `test/provider/ProviderChildBringUpGate.hs`
 (the end-to-end Register-3 gate harness + per-run proven/tested/assumed ledger, with the independent Lease/audit,
 image-pull, and no-op OS-boundary observers) (target paths; not yet built)
@@ -444,7 +447,7 @@ image-pull, and no-op OS-boundary observers) (target paths; not yet built)
 `ManagedCapacityReady`, releases the parent bootstrap Lease holder and observes it absent before the authenticated
 child singleton acquires the same Lease and reports `/readyz`, converges the complete standard HA service set
 exact-matching the committed oracle, runs no host daemon and advertises no host substrate, and re-runs the
-bring-up as a no-op (zero mutating cloud/K8s calls in the OS-boundary audit trail). `mut-30.2-public-pull` goes
+bring-up as a no-op (zero mutating cloud/K8s calls in the OS-boundary audit trail). `mut-35.1-public-pull` goes
 red on the image-pull observer. The run emits a proven/tested/assumed ledger; the base provider stack is torn down
 through Phase 34's deploy lifecycle, and the leak-free tag-sweep witness is recorded **deferred to Phase 37**.
 **Docs to update**: `documents/engineering/cluster_lifecycle_doctrine.md` (§1/§2/§3),
@@ -457,12 +460,12 @@ Adopt [`cluster_lifecycle_doctrine.md §1 — Two cluster kinds, one lifecycle s
 and [`chaos_failover_doctrine.md §12 — proven, tested, assumed`](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed):
 assemble the sub-phase's single Register-3 gate — a hostless provider child brought to full standard-HA
 convergence through the two-stage capacity bootstrap and the parent→child Lease handoff, with a no-op re-run and
-a red `mut-30.2-public-pull` — and emit the per-run proven/tested/assumed ledger that marks the deferred
+a red `mut-35.1-public-pull` — and emit the per-run proven/tested/assumed ledger that marks the deferred
 leak-free-sweep layer UNVERIFIED here.
 
 ### Deliverables
 - The gate over the committed representative set (§M.7): the provider-child bring-up + standard-service-convergence
-  slice of `test/dhall/phase_30_provider_provision.dhall`, driven end-to-end — bootstrap scheduler readiness,
+  slice of `test/dhall/phase_35_provider_provision.dhall`, driven end-to-end — bootstrap scheduler readiness,
   complete add-on cutover, full managed authority, parent→child Lease handoff, complete standard-HA convergence,
   hostless topology, and the no-op re-run.
 - The five independent reference predicates wired to OS-boundary observers: the standard-service-set exact-match,
@@ -475,7 +478,7 @@ leak-free-sweep layer UNVERIFIED here.
   green.
 
 ### Validation
-1. Run the gate end-to-end over `test/dhall/phase_30_provider_provision.dhall` (bring-up/convergence slice): the
+1. Run the gate end-to-end over `test/dhall/phase_35_provider_provision.dhall` (bring-up/convergence slice): the
    child's scheduler reaches `BootstrapCapacitySchedulerReady`, every bootstrap add-on old UID is released and its
    replacement reservation-joined, full managed authority is read back, and the parent bootstrap Lease holder
    releases and is observed absent before the authenticated child singleton acquires. Only then does the
@@ -485,7 +488,7 @@ leak-free-sweep layer UNVERIFIED here.
 2. Re-run the bring-up against the converged child and assert a no-op, defined observably as **zero mutating
    cloud-API/K8s-API calls** on run 2 in the OS-boundary audit trail (§M.5/§M.6) — not exit 0 and not the
    reconciler's self-reported empty diff.
-3. Assert `mut-30.2-public-pull` goes **red** on the OS-boundary image-pull observer (a pull from a host outside
+3. Assert `mut-35.1-public-pull` goes **red** on the OS-boundary image-pull observer (a pull from a host outside
    the in-cluster registry), and the bootstrap-ordering negatives (guarded test Pod before `ManagedCapacityReady`,
    omitted add-on, old UID still present, replacement without reservation join, second default-scheduler
    exception) each reject at their specific outcome.
@@ -549,7 +552,7 @@ The whole sprint (📋 Planned).
 - [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — every cluster is the same
   cluster / substrate equivalence: the complete standard HA service set converged on a provider child
 - [Image Build Doctrine](../documents/engineering/image_build_doctrine.md) — bake the binaries, pull only
-  in-cluster: the preloaded scheduler digest and baked platform services `mut-30.2-public-pull` is committed to
+  in-cluster: the preloaded scheduler digest and baked platform services `mut-35.1-public-pull` is committed to
   violate
 - [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — the hostless-provider-child
   topology arm (no `LinuxHost` witness) observed at runtime

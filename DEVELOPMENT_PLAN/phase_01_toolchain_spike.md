@@ -31,9 +31,9 @@ historically lags new GHC releases — it pulls `template-haskell`, `aeson`, `me
 so `allow-newer` alone may be insufficient and a source patch or fork may be required. This phase stands up a
 throwaway probe package that depends on all of them, resolves them against one shared `index-state`, and either
 builds clean or records the precise `allow-newer`/patch/fork set. The TLA+/TLC side is a JVM toolchain, not a
-GHC-pin risk: a **pinned `tla2tools.jar` version and a JRE floor are recorded in the tracker's Toolchain
-section** and located by the Phase-2/3 harness, so the Phase-2/3 TLC path has a named, version-pinned
-acquisition path even though its buildability is not gated by this GHC probe.
+GHC-pin risk: the **`tla2tools.jar` release is pinned in Phase 2 and a JRE floor is recorded in the
+tracker's Toolchain section**, and both are located by the Phase-2/3 harness, so the Phase-2/3 TLC path has a
+named acquisition path even though its buildability is not gated by this GHC probe.
 
 The whole check is a pure Register-1 in-process battery, analogous to the Phase-0 documentation lint: it
 touches no live infrastructure and produces no durable amoebius *module* — the probe package is deleted once
@@ -108,8 +108,8 @@ terminal-state positive it breaks — §M.2).
 ## Doctrine adopted
 
 - [`conformance_harness_doctrine.md §2 — the registers`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation)
-  and its §3 load-bearing invariant that **rendering never touches live infrastructure**: this phase is a pure
-  Register-1 check ([three-register definitions](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing)),
+  and its [§3](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure) load-bearing invariant that **rendering never touches live infrastructure**: this phase is a pure
+  Register-1 check ([register definitions](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)),
   building and running in-process with no cluster, no credentials, and no broker.
 - [`dsl_doctrine.md §9 — Toolchain note`](../documents/engineering/dsl_doctrine.md#9-toolchain-note), read
   with [§5's Gate 2](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
@@ -180,7 +180,7 @@ recorded with the verbatim failing output and one failing transcript per remedia
 ### Objective
 Adopt [`dsl_doctrine.md §9 — Toolchain note`](../documents/engineering/dsl_doctrine.md#9-toolchain-note) with
 its [§5 Gate 2](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract): prove
-the in-process `dhall` decoder — the structural Gate-2 leg that must precede Phase-10 bind/provision — is
+the in-process `dhall` decoder — the structural Gate-2 leg that must precede Phase-10/11 bind/provision — is
 buildable on the pin before Phase 5 promises an executable decoder. `dhall` historically lags new GHC releases, so
 `allow-newer` alone may be insufficient and a source patch or fork may be required.
 

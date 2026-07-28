@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_36_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_36_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md
 **Generated sections**: none
 
 > **Purpose**: Make a provider child's worker-node set declarative and reactive — grown and shrunk by a typed
@@ -129,21 +129,24 @@ minimally `mut-37.1-ignore-signal`, `mut-37.1-apply-over-quota`, `mut-37.2-skip-
 `mut-37-untagged-orphan`** (which leaves an *untagged* provider-spawned orphan a tag-only sweep would miss). The
 complete apparatus — inherited fixtures, committed mutants, and the independent reference predicates — is named
 in [`## Gate integrity`](#gate-integrity); the gate line above delegates to it by anchor per
-[`development_plan_standards.md` §M](development_plan_standards.md#gate-integrity-delegation).
+[`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub).
 
 ## Gate integrity
 
 
-> **Shared provider corpus (by design).** The `test/dhall/phase_30_provider_provision.dhall` topology and the `mut-30.*` mutant family are the one committed corpus deliberately shared across the four provider sub-phases (Phases 34–37; see [Phase 34](phase_34_provider_deploy_checkpoint.md)) — this sub-phase gates its own slice, not accidental double-ownership.
-This section carries this sub-phase's **slice** of the source Phase-30 provider gate apparatus, partitioned
+> **Provider corpus split (by design).** `test/dhall/phase_37_provider_provision.dhall` and the
+> `mut-37.*` mutant family are this sub-phase's own Phase-0 corpus. The four provider sub-phases
+> (Phases 34–37; see [Phase 34](phase_34_provider_deploy_checkpoint.md)) share one provider topology
+> *shape* while each commits and gates its own slice — not accidental double-ownership.
+This section carries this sub-phase's **slice** of the provider gate apparatus, partitioned
 along the dynamic-node + leak-free-teardown seam (per
 [`development_plan_standards.md` §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).
 The deploy/checkpoint/execve apparatus (`test/goldens/checkpoint_envelope.json`, `test/goldens/engine_execve.txt`,
-`test/negatives/host_shell_pulumi_up.sh`, and the `mut-34.*-static-key` / `mut-34.*-leak-path` /
-`drop-parallel-executor` mutants) stays in [Phase 34](phase_34_provider_deploy_checkpoint.md); the bootstrap
+`test/negatives/host_shell_pulumi_up.sh`, and the `mut-34.1-static-key` / `mut-34.1-leak-path` /
+`mut-34.1-drop-parallel-executor` mutants) stays in [Phase 34](phase_34_provider_deploy_checkpoint.md); the bootstrap
 scheduler / add-on cutover / Lease-handoff apparatus (the `public-pull` and hostless-`LinuxHost`-foreclosure
 tags) stays in [Phase 35](phase_35_provider_child_bringup.md); the per-PV-EBS credential apparatus
-(`test/goldens/ebs_credential_matrix.txt`, `test/fixtures/phase30/ebs_csi_bake_expected.dhall`, and the
+(`test/goldens/ebs_credential_matrix.txt`, `test/fixtures/phase36/ebs_csi_bake_expected.dhall`, and the
 `allow-delete` / `enable-dynamic-provisioner` / `credit-old-before-observed-delete` / `drop-copy-executor`
 mutants) stays in [Phase 36](phase_36_provider_ebs_credential.md). This phase inherits only the reactive-node
 and teardown slice below; the **composed** gate (Sprint 37.2) additionally re-runs the named sibling mutants and
@@ -192,7 +195,7 @@ implementation's own output, and it is authored independently of the code under 
 after teardown, an **independent read-only cloud-API sweep** — direct AWS `Describe*` queries under a distinct
 read-only audit credential, explicitly **NOT** the emptied Pulumi checkpoint and **NOT** the managed-resource
 registry's own `discover` (both of which the teardown itself just drove, and neither of which can see
-provider-spawned out-of-registry orphans) — returns **zero** ephemeral-class resources. The source Phase-30
+provider-spawned out-of-registry orphans) — returns **zero** ephemeral-class resources. The pre-split provider
 sweep scoped enumeration to the run's unique test tag `amoebius:test-run=<run-id>` alone; a **tag-only** sweep
 cannot see resources the cloud/EKS control plane or in-cluster controllers spawn **without** that tag. This phase
 therefore **keys the enumeration additionally on the run's VPC id and the `eks:cluster-name` /

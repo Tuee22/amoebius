@@ -661,7 +661,7 @@ The whole sprint (📋 Planned).
 ## Related Documents
 - [README.md](README.md) — the live tracker; Phase 43 objective, gate, and substrate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the skeleton,
-  the sprint format, the doctrine-citation rule, and the three-register + honesty + one-substrate disciplines)
+  the sprint format, the doctrine-citation rule, and the register + honesty + one-substrate disciplines)
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (no bespoke election;
   single-instance delegated to k8s/etcd; the two DSL surfaces; jit-resolved engines)
 - [system_components.md](system_components.md) — the target component inventory for the module paths above
@@ -669,11 +669,11 @@ The whole sprint (📋 Planned).
   SPA as application logic; ML-workflow composition as shared-library use; the inference substrate as a deployment rule
 - [Service Capability Doctrine](../documents/engineering/service_capability_doctrine.md) — the capabilities the SPA
   composes (never products), the Edge-behind-Identity door, and the jit-resolved InferenceEngine capability
-- [Content Addressing & Determinism Doctrine](../documents/engineering/content_addressing_doctrine.md) — §4.5 the
+- [Content Addressing & Determinism Doctrine](../documents/engineering/content_addressing_doctrine.md) — [§4.5](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the
   ML engine jit-resolved into a bounded content-addressed cache, never baked or URL-fetched
 - [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — the HA-always charts and
   the single wild-ingress path the SPA edge rides
-- [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — §3.1 exactly one pod is a
+- [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — [§3.1](../documents/engineering/daemon_topology_doctrine.md#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election) exactly one pod is a
   k8s/etcd property, not an amoebius election
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — Register 3 (live), the spin-up → run →
   always-tear-down contract, and the per-run ledger

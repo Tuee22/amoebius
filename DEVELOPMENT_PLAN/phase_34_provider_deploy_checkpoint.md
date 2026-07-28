@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_32_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_33_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_36_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_32_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_33_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_36_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Stand up a provider-managed EKS control plane plus a base managed node group by a `pulumi up`
@@ -117,28 +117,33 @@ the engine pod's filesystem (OS-boundary filesystem observer records zero plaint
 attempted with a **sealed Vault refuses before any cloud-side create**; the `pulumi` subprocess is spawned by
 absolute path with **no** `PULUMI_*`/`AWS_*`/`PULUMI_CONFIG_PASSPHRASE`/`PATH` in its environment (OS-boundary
 `execve` observer checked against the committed expected-argv/env table); and the committed seeded mutants
-`mut-30.1-static-key` and `mut-30.1-leak-path` go **red**. The per-run stack is torn down for cost hygiene, but
+`mut-34.1-static-key` and `mut-34.1-leak-path` go **red**. The per-run stack is torn down for cost hygiene, but
 the independent leak-free tag-sweep proof is [phase_37_provider_dynamic_nodes.md](phase_37_provider_dynamic_nodes.md)'s
 gate, deferred and never depended on here. The gate delegates its committed-fixture / mutant / oracle apparatus
-to [`## Gate integrity`](#gate-integrity) ([development_plan_standards.md §M](development_plan_standards.md#gate-integrity-delegation)).
+to [`## Gate integrity`](#gate-integrity) ([development_plan_standards.md §M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).
 Each run emits a proven/tested/assumed ledger artifact.
 
 ## Gate integrity
 
 
-> **Shared provider corpus (by design).** Phases 34–37 (the provider split) deliberately share one Phase-0-committed corpus — `test/dhall/phase_30_provider_provision.dhall` and the `mut-30.*` mutant family — each provider sub-phase gating the slice for its own sprint (34 → `mut-30.1`; 35 → `mut-30.2`; 36 → `mut-30.3`; 37 → `mut-30.4`/`mut-30.5`). This is an intentional shared corpus across the four provider sub-phases, not accidental double-ownership.
-This sub-phase inherits the **deploy / checkpoint / engine-boundary slice** of Phase 30's committed gate corpus.
+> **Provider corpus split (by design).** Phases 34–37 (the provider split) share one provider **topology
+> shape**, but each sub-phase commits its own Phase-0 corpus and gates only its own slice: the topology
+> fixture is `test/dhall/phase_NN_provider_provision.dhall` and the mutant family is `mut-NN.*`, per
+> sub-phase (34 → `mut-34.1`; 35 → `mut-35.1`; 36 → `mut-36.1`; 37 → `mut-37.1`/`mut-37.2`). A sub-phase
+> cites a sibling's mutant by that sibling's own name. No two sub-phases own one fixture — the split is
+> deliberate, not accidental double-ownership.
+This sub-phase owns the **deploy / checkpoint / engine-boundary slice** of the provider gate corpus.
 The other slices belong to the sibling sub-phases and are **not** duplicated here: the
-teardown-sweep and dynamic-node slice (`mut-30.5-skip-sweep`, `mut-30.4-ignore-signal`,
-`mut-30.4-apply-over-quota`, the expected-sweep oracle, and the two-instance identity map) is
+teardown-sweep and dynamic-node slice (`mut-37.2-skip-sweep`, `mut-37.1-ignore-signal`,
+`mut-37.1-apply-over-quota`, the expected-sweep oracle, and the two-instance identity map) is
 [phase_37_provider_dynamic_nodes.md](phase_37_provider_dynamic_nodes.md)'s; the per-PV durable EBS +
 create-vs-delete slice (the `ec2:DeleteVolume` expected-denied-call tag, the `protect`/`Retain` state, the
-static-CSI `volumeHandle` bind, `mut-30.3-*`) is [phase_36_provider_ebs_credential.md](phase_36_provider_ebs_credential.md)'s;
-and the scheduler-cutover slice (`mut-30.2-public-pull`, the `LinuxHost`-absence foreclosure tag) is
+static-CSI `volumeHandle` bind, `mut-36.1-*`) is [phase_36_provider_ebs_credential.md](phase_36_provider_ebs_credential.md)'s;
+and the scheduler-cutover slice (`mut-35.1-public-pull`, the `LinuxHost`-absence foreclosure tag) is
 [phase_35_provider_child_bringup.md](phase_35_provider_child_bringup.md)'s. Partitioned to this seam:
 
 **Representative set (§M.7).** The deploy slice of the committed topology
-`test/dhall/phase_30_provider_provision.dhall`: one `Managed Eks` control plane and one base managed node group
+`test/dhall/phase_34_provider_provision.dhall`: one `Managed Eks` control plane and one base managed node group
 (size 1) from the named CPU-only base `ProviderNodeClass`, whose exact allocatable CPU plus finite overcommit
 policy, memory, `podSlots`/`cniSlots`/`attachableVolumes`, `EphemeralRootEbs` root backing under a `Unified`
 kubelet filesystem layout, `ProviderUsableDiskCarveTemplate` system reserve and layout carves, OCI
@@ -162,13 +167,13 @@ independently of the code under test:
 
 **Committed seeded mutants (§M.2) — the gate re-runs them and requires red:**
 
-- `mut-30.1-static-key` — an envelope keyed by a pod-local static key with the seal-status precheck still
+- `mut-34.1-static-key` — an envelope keyed by a pod-local static key with the seal-status precheck still
   present. It MUST go red on the cryptographic-dependence assertions (decrypts only via Vault Transit; zero
   plaintext-data-key bytes on disk) **while still passing the behavioral seal-gate**, proving the gate tests
   cryptographic dependence, not merely seal-status.
-- `mut-30.1-leak-path` — an engine that exports `PATH` into the child process. It MUST go red on the OS-boundary
+- `mut-34.1-leak-path` — an engine that exports `PATH` into the child process. It MUST go red on the OS-boundary
   `execve` env assertion.
-- `mut-30.1-drop-parallel-executor` — omits one live Job from the executor peak, or admits parallel demand then
+- `mut-34.1-drop-parallel-executor` — omits one live Job from the executor peak, or admits parallel demand then
   silently serializes it. It MUST go red on the `BoundedParallel 2` executor fixture.
 
 **Independent reference predicates (§M.3/§M.5).** Every "how the binary behaved" assertion reads from an
@@ -197,7 +202,7 @@ audit.
   provider-cluster entry as a Pulumi deploy that obeys the one rule (engine under the singleton, no env vars, no
   `PATH`, logical checkpoint as a Vault-enveloped MinIO object set), holds the checkpoint as a lifetime-classed
   budgeted object set behind an exclusive mutation gateway, and enacts the deploy through the reconciler rather
-  than a bespoke state machine. (The EBS create-vs-delete credential arm of §6 is realized in
+  than a bespoke state machine. (The EBS create-vs-delete credential arm of [§6](../documents/engineering/pulumi_iac_doctrine.md#6-the-ebs-create-vs-delete-credential-model) is realized in
   [phase_36_provider_ebs_credential.md](phase_36_provider_ebs_credential.md), not here.)
 - [`cluster_lifecycle_doctrine.md §3`](../documents/engineering/cluster_lifecycle_doctrine.md#3-amoebic-spawning--the-recursive-forest)
   — *amoebic spawning — the recursive forest*: provider-cluster spawn is the *cloud-keyed* sibling of Phase 32's
@@ -382,7 +387,7 @@ discovered lazily by full path, with no `PULUMI_*`/`AWS_*`/`PATH` side-channel e
    (b) an **OS-boundary filesystem observer** (an `inotify`/`fanotify` or `strace` watch on the pod filesystem,
    NOT a self-emitted compliance log, §M.5) records **zero** plaintext-data-key bytes written to disk across a
    full deploy; (c) a deploy with a sealed Vault refuses *before* any cloud-side create, and the committed
-   seeded mutant `mut-30.1-static-key` (an envelope keyed by a pod-local static key with the seal-status
+   seeded mutant `mut-34.1-static-key` (an envelope keyed by a pod-local static key with the seal-status
    precheck still present) MUST go **red** on assertion (a) and (b) while passing the behavioral seal-gate —
    proving the gate tests cryptographic dependence, not just seal-status (§M.2).
 3. Process-environment assertion read from an **OS-boundary observer** (an `execve` argv/env-recording shim or
@@ -390,7 +395,7 @@ discovered lazily by full path, with no `PULUMI_*`/`AWS_*`/`PATH` side-channel e
    with an empty/whitelisted environment (no `PULUMI_*`/`AWS_*`/`PULUMI_CONFIG_PASSPHRASE`/`PATH`) and the
    `pulumi`/plugin paths are absolute, checked against the committed Phase-0 expected-argv/expected-env table
    `test/goldens/engine_execve.txt` authored independently of the engine (§M.1/§M.3). The committed mutant
-   `mut-30.1-leak-path` (an engine that exports `PATH` into the child) MUST go red here.
+   `mut-34.1-leak-path` (an engine that exports `PATH` into the child) MUST go red here.
 4. Paired one-short fixtures reduce only parent executor or checkpoint-gateway CPU, memory, pod-ephemeral,
    plugin-cache, workspace, or checkpoint `StorageBudget` by one unit. Each returns its specific provision error
    before a Job, checkpoint PUT, or AWS mutation. In the fitting case, Kubernetes API readback of the executor
@@ -400,7 +405,7 @@ discovered lazily by full path, with no `PULUMI_*`/`AWS_*`/`PATH` side-channel e
    checkpoint CAS stays charged until its finite GC horizon, and a direct mutating S3 request outside the gateway
    is denied.
 5. A `BoundedParallel 2` fixture with two independent deploy units fits either executor alone but not both and
-   must reject before effects. The committed `mut-30.1-drop-parallel-executor` mutant, which omits one live Job
+   must reject before effects. The committed `mut-34.1-drop-parallel-executor` mutant, which omits one live Job
    from the peak or admits parallel demand then silently serializes it, MUST go red. Separately, lower only
    kubelet/CNI pod residual or the `CSINode` `ebs.csi.aws.com` attach limit below the declared SKU policy; the
    lesser live value refuses workload admission even while CPU, memory, and regional EBS count remain ample.
@@ -410,7 +415,7 @@ discovered lazily by full path, with no `PULUMI_*`/`AWS_*`/`PATH` side-channel e
 > evidence, not an amoebius result*. This sprint re-realizes the shape under the amoebius
 > Deployment-`replicas=1` singleton and the per-child envelope for the first time. The per-run stack is torn
 > down for cost hygiene; the *independent, leak-free* teardown proof (the OS-boundary cloud-API tag sweep and
-> `mut-30.5-skip-sweep`) is [phase_37_provider_dynamic_nodes.md](phase_37_provider_dynamic_nodes.md)'s gate,
+> `mut-37.2-skip-sweep`) is [phase_37_provider_dynamic_nodes.md](phase_37_provider_dynamic_nodes.md)'s gate,
 > deferred and never depended on here.
 
 ### Remaining Work

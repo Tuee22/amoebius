@@ -28,7 +28,7 @@ pure test contacts infrastructure. The sibling projects already prove
 this at scale — prodbox validates ~940 behaviours in a pure, no-process suite plus byte-for-byte dry-run
 goldens, with a single thin IO seam.
 
-Amoebius adopts that as a rule: **build so that decode → bind/expand → `planInfrastructure` → either
+amoebius adopts that as a rule: **build so that decode → bind/expand → `planInfrastructure` → either
 golden-lock the non-renderable infrastructure batch or supply its authenticated materialization fixture →
 provision → `renderAll` → plan → dry-run is exercised in-process and golden-locked before any
 live-infrastructure work, for every feature.** What this forecloses is
@@ -36,7 +36,7 @@ a design whose correctness is unknown until a cluster is stood up; the cluster i
 genuinely requires it (that pods schedule, that the LB comes up, that a partition heals).
 
 The register *definitions* — Pure, Boundary-integration, Test-`.dhall`-topology — are owned by
-[testing_doctrine.md §2](./testing_doctrine.md#2-three-registers-of-amoebius-testing). This document owns the
+[testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing). This document owns the
 **pre-cluster spine**: how Registers 1 and 2 are composed into a conformance harness, and the invariant that
 keeps them honest.
 
@@ -44,9 +44,12 @@ keeps them honest.
 
 ## 2. The registers, as amoebius uses them for pre-cluster validation
 
-Naming the three registers (definitions owned by [testing_doctrine.md §2](./testing_doctrine.md#2-three-registers-of-amoebius-testing)):
+Naming the registers (definitions owned by [testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing)):
 
-- **Register 1 — pure / golden (no cluster, no processes).** DSL decode and every illegal-state foreclosure the
+- **Register 1 — pure / golden (no cluster, no live infrastructure).** A **pinned, hermetic, deterministic
+  checker over committed source is Register 1 even though it is a separate process** — TLC through the pinned
+  `tla2tools.jar` is the case in point. What distinguishes Register 2 is not process count but a **fake tool
+  standing in for infrastructure**; TLC fakes nothing. DSL decode and every illegal-state foreclosure the
   decoder enforces; whole-deployment `renderAll` and the correctness of the emitted objects (a hardened `securityContext`, a route
   from a live service handle, a derived NetworkPolicy — golden-tested on the *rendered* output); the `[Step]`
   plan and its `--dry-run`; the capability→provider→shape binder; the capacity/topology folds; the formal
@@ -62,7 +65,7 @@ Naming the three registers (definitions owned by [testing_doctrine.md §2](./tes
   crash, deterministically replayable. This exercises the daemon's real *schedule* under faults, which Registers
   1 and 2 structurally cannot reach; owned by
   [deterministic_simulation_doctrine.md](./deterministic_simulation_doctrine.md) (register definition in
-  [testing_doctrine.md §2](./testing_doctrine.md#2-three-registers-of-amoebius-testing)).
+  [testing_doctrine.md §2](./testing_doctrine.md#2-the-registers-of-amoebius-testing)).
 - **Register 3 — live infrastructure only.** The residue that cannot be settled by inspecting source or by
   simulation: the apiserver admitting and the scheduler placing pods, the LoadBalancer coming up, etcd forming
   quorum, a VM interposing, a broker offloading, geo-replication lag, DNS propagation, chaos/partition healing —
@@ -178,7 +181,7 @@ Every statement here is design intent, never a tested amoebius result.
 ## Cross-references
 
 - [Engineering Doctrine Index](./README.md)
-- [Testing Doctrine](./testing_doctrine.md) — owns the three-register definitions ([§2](./testing_doctrine.md#2-three-registers-of-amoebius-testing))
+- [Testing Doctrine](./testing_doctrine.md) — owns the register definitions ([§2](./testing_doctrine.md#2-the-registers-of-amoebius-testing))
 - [Generated Artifacts Doctrine](./generated_artifacts_doctrine.md) — why the render is pure and its output uncommitted
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — `renderAll` and the reconcile/apply seam
 - [Formal Model Doctrine](./formal_model_doctrine.md) — the in-process `Model` explorer that mirrors TLC

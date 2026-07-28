@@ -5,7 +5,7 @@
 **Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
-> **Purpose**: Stand up the pure, total `renderAll :: ProvisionedSpec -> [K8sObject]`, mapping Phase 10's
+> **Purpose**: Stand up the pure, total `renderAll :: ProvisionedSpec -> [K8sObject]`, mapping Phase 11's
 > unique identity-keyed private render sources to typed objects, and lock its emitted deployment object
 > set byte-for-byte with rendered-output goldens — proving the by-construction manifest-safety invariants on
 > the emitted objects in-process, before any cluster exists.
@@ -31,7 +31,7 @@ This phase delivers the pure manifest renderer: the typed `K8sObject` model, the
 `renderAll :: ProvisionedSpec -> [K8sObject]` that emits the complete whole-deployment Kubernetes object set from Haskell
 ADTs serialized via Aeson — no Helm, no text template, no `values.yaml` — and the rendered-output golden
 battery that locks that output and proves its by-construction safety. `renderAll` performs no I/O, reaches no
-apiserver, and is total over the opaque, capacity/capability-checked `ProvisionedSpec` the Phase-10
+apiserver, and is total over the opaque, capacity/capability-checked `ProvisionedSpec` the Phase-11
 bind/provision boundary produces. Phase 11 has already sealed a
 `Map K8sObjectIdentity (ProvisionedRenderSource K8sObjectIdentity)`; `KubernetesObjectId` is only a
 compatibility alias for `K8sObjectIdentity`, not a second identity type. Duplicate
@@ -83,7 +83,7 @@ analogous to the Phase-5 decode battery and the Phase-4 `dhall type` corpus.
 **Register:** 1 — pure/golden, in-process, no cluster (§K).
 
 **Gate:** `cabal test render-golden` is green against Phase-0-pinned oracles — the pure, total
-`renderAll :: ProvisionedSpec -> [K8sObject]` emits, **for the concrete corpus** (the full Phase-10 provisioned output set:
+`renderAll :: ProvisionedSpec -> [K8sObject]` emits, **for the concrete corpus** (the full Phase-11 provisioned output set:
 every capability arm × both deployment shapes {`SingleNode`, `Distributed`}, enumerated explicitly in Sprint 13.3's
 Deliverables and jointly covering every renderable `K8sObject` sum variant at least once), an object set the
 **byte-for-byte** goldens pin exactly, and the three rendered-output-golden illegal-state properties hold
@@ -151,7 +151,7 @@ proven/tested/assumed ledger, marking runtime enforcement UNVERIFIED (owned by t
   cluster-free `renderAll :: ProvisionedSpec -> [K8sObject]` whose output is a value amoebius inspects before any
   object reaches a cluster; the record *is* the manifest, serialized via Aeson, with no intermediate template
   and no `values.yaml`. **Only the pure-render half is adopted here**; the apply/reconcile engine of that
-  doctrine's §5 is the live-band [Phase 19](phase_19_object_reconciler.md) residue.
+  doctrine's [§5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) is the live-band [Phase 19](phase_19_object_reconciler.md) residue.
 - [`manifest_generation_doctrine.md §3`](../documents/engineering/manifest_generation_doctrine.md#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)
   — **best practice by construction: an unsafe manifest is not constructible.** The renderer emits a hardened
   `securityContext` on every pod, least-privilege per-workload RBAC, default-deny-plus-derived-allow
@@ -161,7 +161,7 @@ proven/tested/assumed ledger, marking runtime enforcement UNVERIFIED (owned by t
   Vault coordinate
   and never bytes — a manifest lacking any of these is not a value `renderAll` can return.
 - [`conformance_harness_doctrine.md §3`](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure)
-  — **the load-bearing invariant: rendering never touches live infrastructure**, and its §4 decode →
+  — **the load-bearing invariant: rendering never touches live infrastructure**, and its [§4](../documents/engineering/conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run) decode →
   bind/expand → plan/resolve infrastructure → provision → `renderAll` → plan → dry-run spine (this phase locks the **`renderAll`** step). `renderAll` is a pure function of
   committed source that completes in-process with no apiserver, no credentials, no Vault; the byte-for-byte
   golden is a fixture of the renderer, and the rendered-output-golden validation locus catches a large share
@@ -189,8 +189,8 @@ proven/tested/assumed ledger, marking runtime enforcement UNVERIFIED (owned by t
   — generated artifacts are emitted from a Haskell source of truth and **never committed**: the rendered
   `[K8sObject]` set is never a checked-in deployment artifact; the byte-for-byte golden is a *test fixture*
   that pins the renderer, not a committed manifest.
-- [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) — **Register 1** (pure/golden,
-  in-process, no cluster): the register this phase's gate reaches; and §4 — the per-run
+- [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) — **Register 1** (pure/golden,
+  in-process, no cluster): the register this phase's gate reaches; and [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) — the per-run
   proven/tested/assumed ledger the battery emits, marking runtime-enforcement correspondence UNVERIFIED
   (owned by the live band).
 
@@ -206,7 +206,7 @@ proven/tested/assumed ledger, marking runtime enforcement UNVERIFIED (owned by t
 `ResourceQuota` / `LimitRange` / validating- and mutating-webhook configurations /
 `ClusterIssuer` / `Certificate` / Secret-reference), `src/Amoebius/Manifest/Types.hs` — target paths, not yet
 built.
-**Blocked by**: Phase 10 gate (the capability→provider→shape binder and final provision fold that construct the
+**Blocked by**: Phase 11 gate (the provision seal that constructs the
 opaque whole-deployment `ProvisionedSpec` and sealed render-source set this model renders from); Phase 5 (the GADT-indexed IR from which its unchecked
 input is projected).
 **Independent Validation**: the object model compiles under the pinned GHC 9.12.4; a hand-built object
@@ -388,7 +388,7 @@ test-side allow-edge oracle `test/manifest/DepGraphOracle.hs` (a hand-authored r
 from the declared dependency graph, not a call into `renderAll`), and the **concrete corpus** — the full Phase-10
 binder output set: every capability arm × both deployment shapes {`SingleNode`, `Distributed`}, jointly
 covering every renderable `K8sObject` sum variant at least once — target paths, not yet built.
-**Blocked by**: Sprint 13.2; Phase 10 gate (the whole-deployment `ProvisionedSpec` corpus the goldens render from).
+**Blocked by**: Sprint 13.2; Phase 11 gate (the whole-deployment `ProvisionedSpec` corpus the goldens render from).
 **Independent Validation**: `cabal test render-golden` is green — the emitted `[K8sObject]` matches its
 Phase-0-committed byte-for-byte golden under the canonical encoding and every rendered-output-golden
 illegal-state property holds non-vacuously; the suite goes **red** if the renderer's output drifts by a single
@@ -407,7 +407,7 @@ when the gate passes).
 
 ### Objective
 Adopt [`conformance_harness_doctrine.md §3`](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure)
-and its §4 spine's **`renderAll`** step: assemble the in-process battery that pins `renderAll`'s output byte-for-byte
+and its [§4](../documents/engineering/conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run) spine's **`renderAll`** step: assemble the in-process battery that pins `renderAll`'s output byte-for-byte
 and proves the three rendered-output-golden illegal states — the unsafe-workload
 ([`§3.11`](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)),
 backdoor-ingress ([`§3.7`](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)),
@@ -528,17 +528,17 @@ The whole sprint (📋 Planned).
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
   design-proof acceptance token: *rendered-output proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the pure-render / no-Helm posture
-- [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — §2 the pure
-  renderer adopted here; §3 best-practice-by-construction; §5 the SSA reconciler deferred to the live band
+- [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — [§2](../documents/engineering/manifest_generation_doctrine.md#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) the pure
+  renderer adopted here; [§3](../documents/engineering/manifest_generation_doctrine.md#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible) best-practice-by-construction; [§5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) the SSA reconciler deferred to the live band
 - [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — the `renderAll` step
   of the pre-cluster spine and the invariant that rendering never touches live infrastructure
-- [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — §3.6/§3.7/§3.11 the three
-  rendered-output-golden states; §6 the honest foreclosure-layer split
-- [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — §9 the derived
-  NetworkPolicy rule, §10 the complete resource-envelope rule this phase renders by construction
+- [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — [§3.6](../documents/illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other)/[§3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)/[§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext) the three
+  rendered-output-golden states; [§6](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) the honest foreclosure-layer split
+- [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — [§9](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path) the derived
+  NetworkPolicy rule, [§10](../documents/engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope) the complete resource-envelope rule this phase renders by construction
 - [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — why the `renderAll`
   output is generated and never committed
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — §2 Register 1, §4 the per-run ledger
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 1, [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger
 - [phase_10](phase_10_capability_bind.md) — the capability→provider→shape binder and provision fold producing
   the opaque whole-deployment `ProvisionedSpec` and its sealed identity-keyed render-source set
 - [phase_14](phase_14_chain_kernel_boundary.md) — the `chain`/`[Step]` `--dry-run` plan render deferred from here

@@ -196,7 +196,7 @@ data Deprovision = Deprovision { releaseCompute :: ComputeSet }  -- NO deleteSto
 
 - **Elastic growth stays capacity-checked.** When the price trigger fires and the `Growable` policy adds
   nodes, the `place` fold re-runs against the enlarged topology capacity
-  ([resource_capacity_doctrine.md §4, §6](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)), so "the pool grew but the job
+  ([resource_capacity_doctrine.md [§4](#4-the-elastic-worker-pool-the-attach-topology), [§6](#6-boundaries-this-doc-owns-vs-defers)](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)), so "the pool grew but the job
   still does not fit" is caught at the same decode-foreclosed check. "Job too big for the hardware" is never
   representable, elastic or not.
 - **The wire is owned elsewhere.** *How* a remote node reaches the home Pulsar/MinIO — the WireGuard fabric,

@@ -235,7 +235,7 @@ pinned at the start of Phase 14 before the executor — the §M.1 named exceptio
   `--dry-run` preview is a golden fixture of the renderer, not a committed runtime artifact — and the
   applied-manifest bytes the fakes capture in Part B are byte-for-byte the same rendered value as the `--dry-run`
   preview (both consume the one rendered source); regeneration is deterministic and reproducible.
-- [`testing_doctrine.md §2 — three registers of amoebius testing`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing)
+- [`testing_doctrine.md §2 — the registers of amoebius testing`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
   (Register 1 for Part A; **Register 2, boundary integration with fakes** for Part B — adopting its cardinal
   mocking posture verbatim: *pure code never touches a mock; all mocking happens at the subprocess or interpreter
   boundary*, so the fakes live in a dedicated boundary suite and the planning/rendering code stays pure) and
@@ -481,7 +481,7 @@ this document.
 
 ### Objective
 Adopt [`conformance_harness_doctrine.md §2`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation)
-and [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing):
+and [`testing_doctrine.md §2`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing):
 stand up the **single thin IO seam** through which every external tool invocation flows, so the boundary suite
 can substitute fakes at exactly one substitutable point while the planning/rendering code stays pure — the
 prodbox single-IO-seam shape as *sibling evidence, not an amoebius result*.
@@ -568,7 +568,7 @@ merely assertion logic.
 `documents/engineering/testing_doctrine.md`, `documents/engineering/conformance_harness_doctrine.md`.
 
 ### Objective
-Adopt [`testing_doctrine.md §2 — Register 2`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing),
+Adopt [`testing_doctrine.md §2 — Register 2`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing),
 [`conformance_harness_doctrine.md §4`](../documents/engineering/conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run)
 (the fake-apply step),
 [`§5`](../documents/engineering/conformance_harness_doctrine.md#5-honesty-what-the-harness-does-and-does-not-establish)
@@ -645,15 +645,15 @@ The whole sprint (📋 Planned).
 - [substrates.md](substrates.md) — substrate registry and per-phase map
 - [system_components.md](system_components.md) — target component inventory (the kernel modules, the exec seam,
   and the `chain-spec`/`boundary-spec` suites)
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — §2 the chain/Step algebra and *"the plan is the data"*
-- [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — §2 the registers for
-  pre-cluster validation (Registers 1 and 2), §3 rendering never touches live infrastructure, §4 the
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§2](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) the chain/Step algebra and *"the plan is the data"*
+- [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — [§2](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) the registers for
+  pre-cluster validation (Registers 1 and 2), [§3](../documents/engineering/conformance_harness_doctrine.md#3-the-load-bearing-invariant-rendering-never-touches-live-infrastructure) rendering never touches live infrastructure, [§4](../documents/engineering/conformance_harness_doctrine.md#4-the-spine-decode--bindexpand--planresolve-infrastructure--provision--renderall--plan--dry-run) the
   decode→bind/expand→`planInfrastructure`→(infrastructure-plan golden | authenticated-materialization
-  fixture→provision→`renderAll`)→plan→dry-run→fake-apply spine, §5 the honesty limit
+  fixture→provision→`renderAll`)→plan→dry-run→fake-apply spine, [§5](../documents/engineering/conformance_harness_doctrine.md#5-honesty-what-the-harness-does-and-does-not-establish) the honesty limit
 - [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — the rendered plan is
   emitted from source and never committed, and the applied bytes equal the `--dry-run` bytes
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — §2 the three registers (Register 1 for Part A,
-  Register 2 for Part B), §4 the per-run proven/tested/assumed ledger
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) the registers (Register 1 for Part A,
+  Register 2 for Part B), [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run proven/tested/assumed ledger
 - [phase_11](phase_11_provision_seal.md) — the whole-deployment provision seal that constructs the opaque
   `ProvisionedSpec` the plan config carries
 - [phase_13](phase_13_render_manifest_goldens.md) — the pure `renderAll` output from which a step selects its

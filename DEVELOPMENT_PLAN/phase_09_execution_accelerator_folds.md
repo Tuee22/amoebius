@@ -290,17 +290,17 @@ only its seam's slice.
   only for `place`; completeness is deliberately not claimed.
 - [`illegal_state_catalog.md §4.6`](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)
   — the capacity-accounting placement-witness technique this phase discharges along its seam, covering the
-  execution/runtime-metadata/provider-root entries §3.11/§3.17/§3.19 and the accelerator entries §3.27–§3.30 at
+  execution/runtime-metadata/provider-root entries [§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)/[§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)/[§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar) and the accelerator entries [§3.27](../documents/illegal_state/illegal_state_capacity.md#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement)–[§3.30](../documents/illegal_state/illegal_state_capacity.md#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool) at
   the honest layer
   ([`§6`](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force)):
   every capacity/accelerator **sum** is checked at `provision-seal` and never type-foreclosed, honoring the
   load-bearing limit of
   [`§2`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it).
-  (The §4.7 compatibility/topology technique and the §3.13–§3.16 topology entries are discharged by
-  [phase_07_capacity_core_folds.md](phase_07_capacity_core_folds.md); the durable/object/Pulsar §3.19–§3.21
+  (The [§4.7](../documents/illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection) compatibility/topology technique and the [§3.13](../documents/illegal_state/illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.16](../documents/illegal_state/illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused) topology entries are discharged by
+  [phase_07_capacity_core_folds.md](phase_07_capacity_core_folds.md); the durable/object/Pulsar [§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)–[§3.21](../documents/illegal_state/illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)
   storage-geometry entries by [phase_08_storage_geometry_folds.md](phase_08_storage_geometry_folds.md).)
-- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) §2
-  (**Register 1** — pure/golden, in-process, no cluster) and §4 (the per-run proven/tested/assumed ledger): the
+- [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
+  (**Register 1** — pure/golden, in-process, no cluster) and [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) (the per-run proven/tested/assumed ledger): the
   register this gate reaches and the ledger it emits, with model↔runtime correspondence and runtime fidelity
   marked UNVERIFIED (owned by the live band).
 
@@ -674,7 +674,7 @@ provider-root properties hold over generated inputs, each meeting its committed 
 `DEVELOPMENT_PLAN/system_components.md`.
 
 ### Objective
-Adopt [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-three-registers-of-amoebius-testing) §2 (Register 1) and the honesty
+Adopt [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) (Register 1) and the honesty
 limit of [`resource_capacity_doctrine.md §2`](../documents/engineering/resource_capacity_doctrine.md#2-the-load-bearing-honesty-limit-a-capacity-sum-is-a-decode-foreclosed-check-never-type-foreclosed):
 express the composed full-resource-vector `place` witness as QuickCheck properties. For the checks that are
 decidable in **both** directions on this seam — runtime-metadata role grouping, execution-epoch source-unit
@@ -783,7 +783,7 @@ negative asserting its specific expected tag** (e.g. `illegal_filesystem_layout_
 `illegal_control_plane_storage_transition_overrun` → `Left EngineStorageOvercommit`, and the accelerator
 negatives their specific committed accelerator tag), **not merely "some `Left`", and each paired with a positive
 differing only in the foreclosed dimension** (§M.8) — each assertion annotated with its catalog entry
-(§3.11/§3.17–§3.19/§3.27–§3.30) and its checked-rejection layer at the `provision-seal` locus; the run emits a
+([§3.11](../documents/illegal_state/illegal_state_security.md#311-an-unsafe-workload-no-resource-limits-no-hardened-securitycontext)/[§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)–[§3.19](../documents/illegal_state/illegal_state_storage.md#319-an-application-consuming-more-storage-than-its-backing-minio-and-pulsar)/[§3.27](../documents/illegal_state/illegal_state_capacity.md#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement)–[§3.30](../documents/illegal_state/illegal_state_capacity.md#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool)) and its checked-rejection layer at the `provision-seal` locus; the run emits a
 Register-1 proven/tested/assumed ledger.
 **Docs to update**: `documents/illegal_state/illegal_state_catalog.md` (the resource/capability
 §3.11/§3.17–§3.19/§3.27–§3.30 checked-rejection / `provision-seal` entries → layer-2 Register-1),
@@ -798,20 +798,20 @@ across every axis and reject each execution/accelerator/provider-root/runtime-me
 axis — and emit the per-entry validation-locus ledger that names the honest foreclosure layer of each.
 
 ### Deliverables
-- The fold-negative fixtures on this seam — `illegal_hard_ceiling_overcommit` (§3.17), whose case table
+- The fold-negative fixtures on this seam — `illegal_hard_ceiling_overcommit` ([§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)), whose case table
   separately makes only a controller webhook, object-write/query/registry gateway, Pulumi executor,
   storage/registry/schema migration executor, or ZooKeeper/Patroni child one CPU/memory/ephemeral unit or pod
   slot short, and separately makes a kind-indexed desired replica, DaemonSet-selected slot, surge instance,
   exact prior old/removed revision, or live terminating instance one unit short; other variants copy the new
   envelope into a deliberately larger/different old source, invent a predecessor under `FirstDeployment`,
   resolve the wrong/latest generation, omit the empty recreate step, or admit a replacement while an observed
-  terminator holds the last provisioned unit; `illegal_node_local_storage_over_backing` (§3.17/§3.18, logical
+  terminator holds the last provisioned unit; `illegal_node_local_storage_over_backing` ([§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)/[§3.18](../documents/illegal_state/illegal_state_storage.md#318-unbounded-storage-anywhere), logical
   pod ephemeral fits but the layout-routed union of OCI content, snapshots, writable layers, concurrent
   pull/import workspace, and model-derived per-Pod kubelet/CRI runtime metadata exceeds a physical backing; its
   case table drops the largest simultaneous metadata row, removes/changes the pinned model, drops/swaps a
   component role, mismatches planned/observed domains, overlaps or leaks qualified Pod/image ownership,
   double-debits an alias group, and makes either SplitRuntime nodefs or imagefs/containerfs exactly one byte
-  short); `illegal_disk_backing_alias_double_spend` (§3.17, duplicate backing/carve identity exposes one
+  short); `illegal_disk_backing_alias_double_spend` ([§3.17](../documents/illegal_state/illegal_state_capacity.md#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded), duplicate backing/carve identity exposes one
   physical byte pool twice; its case table covers same-host duplicate-carve, cross-host duplicate-backing, the
   `PhysicalDiskPartition` VM-usable-for-raw substitution, an underived presented usable carve, an omitted
   `systemReserve`, and a child debit repeated through an alias); `illegal_filesystem_layout_alias` (a split arm
@@ -828,18 +828,18 @@ axis — and emit the per-entry validation-locus ledger that names the honest fo
   `illegal_control_plane_storage_transition_overrun` (steady backend fits but the pinned
   max-WAL/preallocated-next, snapshot-save temporary, or serialized defrag old+new transition exceeds its system
   carve) → `Left EngineStorageOvercommit`; `illegal_cuda_on_cpu_target` + `illegal_accelerator_count_shortage`
-  (§3.27/§3.28); `illegal_accelerator_vram_fragmentation` (§3.30 — aggregate residency bytes fit but one
+  ([§3.27](../documents/illegal_state/illegal_state_capacity.md#327-a-deployment-that-fits-in-aggregate-but-has-no-resource-capable-placement)/[§3.28](../documents/illegal_state/illegal_state_capacity.md#328-two-accelerator-owners-on-one-node-or-a-fractional-accelerator-claim)); `illegal_accelerator_vram_fragmentation` ([§3.30](../documents/illegal_state/illegal_state_capacity.md#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool) — aggregate residency bytes fit but one
   `Unsharded` residency fits no device, a `ReplicatedPerDevice` residency is not chargeable on every owner
   device, or an explicit shard/per-device epoch assignment does not fit);
-  `illegal_accelerator_vram_reserve_boundary` (§3.30 — the demand fits raw `memory.total` but exceeds
+  `illegal_accelerator_vram_reserve_boundary` ([§3.30](../documents/illegal_state/illegal_state_capacity.md#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool) — the demand fits raw `memory.total` but exceeds
   `allocatableVram` after the mandatory driver/runtime reserve); `illegal_apple_metal_profile_mismatch` (host
   Metal demand has no compatible offering); and `illegal_shared_accelerator_double_owner` (two cluster budgets
   claim one physical device id) — each asserted to return its **specific** tagged `Left` at the fold and paired
   with a positive differing only in the foreclosed dimension, with the type-foreclosed neighbours
-  (§3.14/§3.15/§3.18/§3.21/§3.24) noted as already foreclosed upstream and the base-fold/storage-geometry
+  ([§3.14](../documents/illegal_state/illegal_state_topology.md#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm)/[§3.15](../documents/illegal_state/illegal_state_topology.md#315-a-multi-node-kind-cluster-not-on-a-single-linux-host)/[§3.18](../documents/illegal_state/illegal_state_storage.md#318-unbounded-storage-anywhere)/[§3.21](../documents/illegal_state/illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)/[§3.24](../documents/illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)) noted as already foreclosed upstream and the base-fold/storage-geometry
   neighbours cross-referenced to [phase_07_capacity_core_folds.md](phase_07_capacity_core_folds.md) and
   [phase_08_storage_geometry_folds.md](phase_08_storage_geometry_folds.md).
-- The composed positive fixtures `legal_multisubstrate_cluster` (the §3.13 heterogeneous carve-out, exercising
+- The composed positive fixtures `legal_multisubstrate_cluster` (the [§3.13](../documents/illegal_state/illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class) heterogeneous carve-out, exercising
   distinguishable `Unified` and `SplitRuntime` routing plus a presentation-adjusted VM/instance-store fit; its
   case table includes exact-fit physical-raw and nested-VM-usable parent equations, including
   `systemReserve raw parent debit + Σ unique VM provisionedBytes + Σ unique other raw parent debits ==
@@ -913,11 +913,11 @@ The whole sprint (📋 Planned).
   design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the capacity/execution/accelerator invariants
 - [Resource Capacity Doctrine](../documents/engineering/resource_capacity_doctrine.md) — the `fits`/`carve`/`place`
-  fold, the §4.1 static/elastic branch, and the §2 sound-not-complete honesty limit
+  fold, the [§4.1](../documents/illegal_state/illegal_state_techniques.md#41-pvcpv-binding-by-construction) static/elastic branch, and the [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it) sound-not-complete honesty limit
 - [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — the execution/accelerator/
-  provider-root entries and the §4.6 capacity-accounting technique, with §2/§6 the load-bearing limit and honest
+  provider-root entries and the [§4.6](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked) capacity-accounting technique, with [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)/[§6](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) the load-bearing limit and honest
   layer split
-- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — §2 Register 1, §4 the per-run ledger
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 1, [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger
 - [phase_05](phase_05_gadt_decoder_gate2.md) — Gate 2, the IR + decoder these folds decode into
 - [phase_06](phase_06_illegal_state_corpus.md) — the illegal-state corpus, properties, and validation-locus
   ledger this phase extends
