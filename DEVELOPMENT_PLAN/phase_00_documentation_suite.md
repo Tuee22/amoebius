@@ -67,7 +67,7 @@ technique-matrix row)
 suite is not a gate; the committed corpus is what proves the lint can fail. **The corpus is this gate's
 independent oracle (§M.3):** the `tools/doc_lint_corpus/` fixtures are hand-authored — one seeded negative per
 check and sub-check, committed in [`Sprint 0.5`](#sprint-05-verification-formal-model-doctrine--the-documentation-lint-gate-)
-*before* `tools/doc_lint.sh` exists, so the party writing the lint is not the sole author of
+*before* `tools/doc_lint.py` exists, so the party writing the lint is not the sole author of
 what "clean" means; a lint that cannot turn its own committed negatives red is not admitted, exactly as it
 requires of every other phase's gate.
 
@@ -331,9 +331,14 @@ The whole sprint (📋 Planned).
 **Implementation**: `documents/engineering/chaos_failover_doctrine.md`, `testing_doctrine.md`,
 `test_derivation_analysis.md` (the analysis record behind the derivation boundary),
 `formal_model_doctrine.md`, `gateway_migration_model_doctrine.md`, `tla_modelling_assumptions.md` (deprecated
-stub), `tools/doc_lint.sh`, `tools/doc_lint_corpus/` (the committed seeded-negative fixtures), and
-`tools/ledger_lint` (target standalone scripts; not yet built — they must not depend on the amoebius binary,
-which first appears in the pre-cluster implementation band, Phase 2+)
+stub), `tools/doc_lint.py`, `tools/doc_lint_verify.py` (the two-sided gate runner),
+`tools/doc_lint_corpus/` (the committed seeded-negative fixtures, with `_positive/` the conforming tree each
+one mutates and `_build.py` the authored mutation list), and
+`tools/ledger_lint.py` (target standalone scripts; not yet built — they must not depend on the amoebius binary,
+which first appears in the pre-cluster implementation band, Phase 2+. Both are **Python**, matching the
+pre-binary `pb` midwife ([README.md](README.md#toolchain)) and the recorded decision against bash logic
+([`dsl_doctrine.md §2`](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)); a
+shell script is not admitted)
 **Blocked by**: Sprint 0.1, Sprint 0.2, Sprint 0.3, Sprint 0.4
 **Independent Validation**: run the lint **two-sided** — clean over the whole `documents/` + `DEVELOPMENT_PLAN/`
 tree, **and** non-zero on every fixture in the committed `tools/doc_lint_corpus/` (a bad header (a); a
@@ -367,7 +372,7 @@ checker that *is* the Phase 0 gate.
   `gateway_migration_model_doctrine.md` (the one obligation, both `Planned` and `Failover` branches, reduced by
   a decode-time structural-fit fold).
 - `tla_modelling_assumptions.md`: a `Deprecated` redirect stub pointing at the two docs above.
-- `tools/doc_lint.sh`: a pure text/link checker (no amoebius-binary dependency), run **two-sided** — it must
+- `tools/doc_lint.py`: a pure text/link checker (no amoebius-binary dependency), run **two-sided** — it must
   pass clean on the suite **and** fail on every fixture in the committed `tools/doc_lint_corpus/`. It checks,
   mechanically: (a) valid header metadata — decomposed per the documentation standard's five facets: a `Status`
 drawn from the enum with vague values banned, a `Supersedes` field, a `Referenced by` field, `Generated
@@ -414,7 +419,7 @@ and **no bare `§N` section reference** appears outside a Markdown link label, h
   the failing check), not the fixture's filename or identity, so a stub that keys on fixture identity
   (`if path in known_corpus: exit 1`) cannot pass both sides. The
   malformed-ledger negative is **not** in this corpus; it lives in `ledger_lint`'s own corpus below.
-- `tools/ledger_lint`: a schema checker for the proven/tested/assumed ledger
+- `tools/ledger_lint.py`: a schema checker for the proven/tested/assumed ledger
   ([`testing_doctrine.md §4`](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)) —
   the `{phase, gate_command, register, substrate, date, layers, coverage, ledger_hash}` shape, `register`/`substrate`
   equal to the tracker row, every out-of-register correctness layer a mandatory UNVERIFIED `layers` row, and

@@ -306,6 +306,12 @@ ordered by substrate; phases **44+** are the backlog.
 | 43 | Live SPA deploy | linux-cpu | 3 | the full app/rollout, surviving platform/workflow/cache, cold-tenant rematerialization, object/topic/database, image, slot, and API/etcd transition provisions before apply; the composed inference path round-trips behind Keycloak/Envoy | 📋 Planned | [phase_43](phase_43_spa_live_deploy.md) |
 | 44+ | Later phases | varies | — | each high-numbered in-scope phase gets its own gate when reached (schema migrations, extension DSL/JIT, native apps, additional cloud/GPU/NPU families, throughput-oriented MoE distillation, niche substrates, proof hardening, live backup) | 📋 Planned | [later_phases](later_phases.md) |
 
+**Phase 0 gate command:** `python3 tools/doc_lint_verify.py`. It runs
+[`tools/doc_lint.py`](../tools/doc_lint.py) two-sided — over the governed tree, and over every seeded
+negative in `tools/doc_lint_corpus/`, each of which must go red naming the check its defect trips. The
+fixture side passes; the tree side is red, so Phase 0 stays 🔄 Active and the reported violations are the
+remaining Phase-0 work.
+
 The detailed objective, sprint breakdown, doctrine adoptions, and gate for each phase live in that phase's
 own document (linked above); this tracker holds only the one-line gate and status. The standing rules a
 reader needs are in [development_plan_standards.md](development_plan_standards.md); the architecture and

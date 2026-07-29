@@ -94,8 +94,8 @@ Every `phase_NN_<slug>.md` follows this skeleton:
 
 ## Phase Summary
 <what this phase owns, declarative; the objective and scope>
-**Substrate:** <none | apple | linux-cpu | linux-cuda | windows> (§L)
-**Register:** <1 pure/golden · 2 boundary-with-fakes · 3 live · 1/2 for a two-register gate · — for Phase 0> (§K)
+**Substrate:** <none | apple | linux-cpu | linux-cuda | windows> ([§L](#l-one-substrate-discipline))
+**Register:** <1 pure/golden · 2 boundary-with-fakes · 3 live · 1/2 for a two-register gate · — for Phase 0> ([§K](#k-honesty-proven--tested--assumed))
 **Gate:** <the concrete acceptance test that must pass before the next phase opens>
 
 ## Gate integrity            (optional; see below)
