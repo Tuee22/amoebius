@@ -186,7 +186,19 @@ Cross-tenant isolation holds at two layers, and the strength of each is stated p
 
 **The honest limit.** The type layer proves *the spec names no foreign tenant*; it does **not** prove *the
 `deriveTenantPolicies` result of [§5](#5-rbac-is-derived-never-authored) is faithful* — a derivation bug could
-over-grant. That residue is **runtime-checked**, not foreclosed. In the default shared-service model, tenants
+over-grant. That residue is **runtime-checked**, not foreclosed.
+
+**Code is not co-resident across tenants.** Because an app is linked into the `Runtime` variant that serves
+it rather than shipped as its own image
+([app_vs_deployment_doctrine.md §2](./app_vs_deployment_doctrine.md#2-the-application-logic-surface--what-an-app-is),
+[image_build_doctrine.md §5](./image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)),
+a variant links exactly the apps it serves — so one tenant's compiled logic is absent from another tenant's
+pod image, and it is a per-variant build failure rather than a fleet-wide one if it fails to merge. That is
+*stronger* than the shared-image alternative, not weaker; it is stated here because linking apps into one
+binary invites the opposite assumption. It changes nothing below: isolation between tenants still rests on
+policy within shared services, not on code separation.
+
+In the default shared-service model, tenants
 share one Vault, one broker set, one MinIO, and one Kubernetes control plane, so isolation rests on per-tenant
 *policy within shared services*: a broker/MinIO/Vault/Kubernetes privilege-escalation bug crosses tenants there.
 The **hardening dial** is to promote a

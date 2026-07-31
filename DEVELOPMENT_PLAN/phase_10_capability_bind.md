@@ -210,7 +210,7 @@ the engine actually resolving into its bounded cache) deferred to the live band,
   load-bearing limit ([`§2`](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)):
   a type-check proves the *binding composes*, not that the *running provider* came up.
 - [`dsl_doctrine.md §5`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
-  — **the illegal-state-unrepresentable contract's two typed gates** (Gate 1 the Dhall typechecker, Gate 2 the
+  — **the illegal-state-unrepresentable contract's typed spec gates** (Gate 1 the Dhall typechecker, Gate 2 the
   in-process decoder): the capability union is guarded at Gate 1, the binding decodes through Gate 2 — this
   phase adds the capability-model instance of that contract, no live half.
 - [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
@@ -536,7 +536,7 @@ The whole sprint (📋 Planned).
   provide/require `extRequires` contract whose acyclicity/no-shadow this gate's extension negatives exercise
 - [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — [§3.12](../documents/illegal_state/illegal_state_capability_messaging.md#312-an-app-that-names-a-product-instead-of-a-capability) (product in app logic),
   [§3.25](../documents/illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) (engine by URL), with [§2](../documents/illegal_state/illegal_state_ml_asset.md#2-the-ml-asset--training-illegal-states) the load-bearing limit
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) the two typed gates a capability binding decodes
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) the typed spec gates a capability binding decodes
   through
 - [Content Addressing Doctrine](../documents/engineering/content_addressing_doctrine.md) — [§4.5](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the ML-asset
   lifecycle whose Tier-1 named engine identity is the `InferenceEngine` provider

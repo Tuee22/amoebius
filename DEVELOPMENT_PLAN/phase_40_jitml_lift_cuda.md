@@ -210,8 +210,11 @@ objects plus upload/failed-write extents and retention, not a scalar disk estima
 routes through the Phase-29 sole content-mutation gateway and collector/verification Job; their complete Pod
 envelopes, admission concurrency, upload/failure workspace and pod/IP/CSI/image/API-object demands remain in
 the failover/checkpoint peak. The PureScript contract,
-frontend and app image consume a complete finite `BuildExecutionEnvelope` before the resulting image can be
-selected for the demo SPA. The resulting OCI index/manifests/config/layers, upload workspace/retained partials
+frontend bundle and the demo app's `Runtime` variant consume a complete finite `BuildExecutionEnvelope`
+before the resulting image can be selected for the demo SPA — the bundle entering that variant as a
+`BakeStep.CopyGeneratedAsset`
+([`lift_and_compose_doctrine.md` §4](../documents/engineering/lift_and_compose_doctrine.md#4-the-demo-web-apps-purescript-spas-contracts-generated-from-haskell)),
+never as an image of the app's own. The resulting OCI index/manifests/config/layers, upload workspace/retained partials
 and finite mutation policy form a separate structured registry storage/publication demand; the standing
 registry mutation-proxy Pod retains its full envelope and is the sole push path. Build scratch, registry
 backing and CUDA-node image content/snapshots are never collapsed into one byte scalar.

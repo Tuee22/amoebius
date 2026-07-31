@@ -152,7 +152,7 @@ the opaque checked whole deployment crosses public
 check over a small pre-binding skeleton from missing resources introduced by the provider shape.
 
 ```dhall
--- Illustrative only; the real grammar and the two typed gates are owned by dsl_doctrine.md.
+-- Illustrative only; the real grammar and the typed spec gates are owned by dsl_doctrine.md.
 
 -- APPLICATION LOGIC names a capability need (no product, no shape), including its bounded storage shape:
 let ObjectStoreBucketNeed =
@@ -230,7 +230,12 @@ with the resolver's build inputs and the base image owned by
 [image_build_doctrine.md §7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain).
 The unions are closed **here** because every arm is a **named catalog identity**: adding an engine family is a new
 `InferenceBinding.family` arm plus a resolver recipe, never something an app `.dhall` can author, and the families in the
-table above map to the inference modalities the platform serves. The deployment `.dhall` **selects** an
+table above map to the inference modalities the platform serves. The same move is made for container images
+by `ImageIdentity`
+([image_build_doctrine.md §5](./image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)) —
+a closed union of named identities with no free-digest or `Url` arm, so "run a foreign image" fails Gate 1
+exactly as "fetch an engine by URL" does. Where the pattern recurs, the rule recurs with it: a closed union
+of named catalog identities is amoebius's standard answer to an operator-supplied address. The deployment `.dhall` **selects** an
 arm through the target offering projected from the *detected* substrate (the substrate is DETECTED,
 [substrate_doctrine.md](./substrate_doctrine.md));
 it has no syntax with which to *author* an arbitrary download or build. This is the [§1](#1-why-capabilities-not-products) object-storage lesson taken to
@@ -550,7 +555,7 @@ surface, never asserted here.
 | The build pipeline, registry image refs, the baked base container, the Temurin JVM toolchain | [image_build_doctrine.md](./image_build_doctrine.md) |
 | Secrets-by-name, `SecretRef`, Vault k8s auth, the PKI anchor | [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | The app-logic-vs-deployment-rules classification | [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md) |
-| The DSL grammar, total composability, the two typed gates | [dsl_doctrine.md](./dsl_doctrine.md) |
+| The DSL grammar, total composability, the typed spec gates | [dsl_doctrine.md](./dsl_doctrine.md) |
 | Which capability invariants are type-enforced (made unrepresentable) | [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) |
 | The substrate catalog and the substrate-driven LoadBalancer choice beneath Edge | [substrate_doctrine.md](./substrate_doctrine.md) |
 
@@ -585,7 +590,7 @@ status.
 - [Engineering Doctrine Index](./README.md)
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — the application-logic-vs-deployment-rules split this model rides on
 - [Platform Services Doctrine](./platform_services_doctrine.md) — the concrete provider set, the derived-connectivity rule ([§9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)), and the single wild-ingress path
-- [DSL Doctrine](./dsl_doctrine.md) — the typed Dhall surface, total composability, and the two typed gates a capability binding decodes through
+- [DSL Doctrine](./dsl_doctrine.md) — the typed Dhall surface, total composability, and the typed spec gates a capability binding decodes through
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — rendering a chosen shape into typed manifests and the idempotent typed reconciler (no Helm)
 - [Image Build Doctrine](./image_build_doctrine.md) — the build pipeline, the `distribution` registry refs, the base container ([§7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain) bakes the jit-build resolver + toolchain that materializes every `EngineRuntime` arm), and the Temurin JVM toolchain
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — the ML-asset lifecycle ([§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)) whose Tier-1 jit-resolved engine is the `InferenceEngine` provider; `ModelArtifact`/`.ready` and the JIT kernel

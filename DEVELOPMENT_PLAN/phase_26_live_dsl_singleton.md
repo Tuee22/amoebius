@@ -29,7 +29,7 @@ authorizes overlapping writers.
 ## Phase Summary
 
 This phase makes the DSL **run live**. Its design half is already discharged in the pre-cluster band
-(Registers 1–2, substrate `none`): the two typed gates — Gate 1, the Dhall typechecker (Phase 4), and Gate 2,
+(Registers 1–2, substrate `none`): the typed spec gates — Gate 1, the Dhall typechecker (Phase 4), and Gate 2,
 the in-process `Dhall.inputFile auto` decoder (Phase 5) — the illegal-state corpus and its per-entry
 validation-locus ledger (Phase 6), the capacity/topology folds (Phase 7), the capability→provider→shape
 binder (Phase 10) and opaque provision seal (Phase 11), the pure `renderAll` goldens (Phase 13), and the
@@ -390,7 +390,7 @@ the harness is asserted back at Ready so the shared Phase-23/24 stack is left as
 
 ### Objective
 Adopt [`dsl_doctrine.md §5`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
-at the runtime layer: the two typed gates guard the **live** deploy, but decoded IR is never reconciled
+at the runtime layer: the typed spec gates guard the **live** deploy, but decoded IR is never reconciled
 directly. The singleton must bind/expand it, derive the conditional infrastructure result, authenticate the
 already-materialized target (or receipt-bound enacted result), construct `ProvisionContext`, and successfully
 `provision` the exact target into an opaque
@@ -679,7 +679,7 @@ The whole sprint (📋 Planned).
 - [system_components.md](system_components.md) — the target component inventory for the module paths above
 - [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md) — the control-plane singleton
   as a Deployment `replicas=1`, single-instance delegated to k8s/etcd, and the shared daemon spine
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — the two typed gates and the illegal-state contract
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — the typed spec gates and the illegal-state contract
   guarding the live deploy path
 - [Bootstrap Sequence Doctrine](../documents/engineering/bootstrap_sequence_doctrine.md) — the [§5](../documents/engineering/bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api) admin control
   plane (CLI ↔ singleton REST) delivered by Sprint 26.4, and the [§4](../documents/engineering/bootstrap_sequence_doctrine.md#4-the-host-daemon--singleton-handoff) handoff point at which it is exposed

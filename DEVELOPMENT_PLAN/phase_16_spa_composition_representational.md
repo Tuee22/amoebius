@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/tenancy_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/tenancy_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Prove — in-process, before any cluster exists — that a multi-service app spec composes with an
@@ -65,6 +65,13 @@ ill-composing generator mutant (M-comp) must make `prop_spaCompositionDecodes` f
 delete mutant (M-neg) must let `illegal_spa_compose_minio.dhall` decode and turn the negative suite red. All goldens, positive/negative fixtures, expected-error tags, and mutants are
 authored and committed in Phase 0 before the implementation exists; a golden regenerated from the generator is
 not a test.
+
+**Gate 3 applies here first.** These are the first two apps, so they are the first source admitted by the
+Phase-14 AST checker ([phase_14_chain_kernel_boundary.md](phase_14_chain_kernel_boundary.md), Sprints 14.8–14.9).
+Each fixture's `ExtensionSpec 'App` source must yield `Accepted`, and a committed negative — the same app with
+one unsanctioned reach added — must yield `Rejected` at its pinned reason and span. This is what makes "an app
+has no image of its own" safe rather than merely tidy: linking replaces an OCI boundary with a checked one, so
+the check has to be exercised at the moment apps first exist.
 
 ## Gate integrity
 
@@ -134,7 +141,7 @@ authored and committed in Phase 0, before `Amoebius.Spa.*` exists.
   token reads *spec-composition proven* / *tested (local browser)*, never *runtime proven*, with the live
   deploy marked UNVERIFIED (owned by [Phase 43](phase_43_spa_live_deploy.md)).
 - [`dsl_doctrine.md §5 — the illegal-state-unrepresentable contract`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
-  the two typed gates — Gate 1 (Dhall typechecker) + Gate 2 (in-process `Dhall.inputFile auto` decoder) — that
+  the typed spec gates — Gate 1 (Dhall typechecker) + Gate 2 (in-process `Dhall.inputFile auto` decoder) — that
   the composed SPA value passes; `prop_spaCompositionDecodes` establishes that composition preserves
   well-formedness so *if it composes, it decodes*.
 
@@ -391,6 +398,6 @@ The whole sprint (📋 Planned).
 - [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — Register 1 the
   representational composition; Register 2 the demo SPA run locally against a faked backend
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) the registers and the per-run ledger
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) the two typed gates the composed SPA decodes through
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) the typed spec gates the composed SPA decodes through
 - [phase_14](phase_14_chain_kernel_boundary.md) — the boundary fake-tool / faked-backend harness this phase reuses
 - [phase_43](phase_43_spa_live_deploy.md) — the live SPA deploy; its representational composition is proven here

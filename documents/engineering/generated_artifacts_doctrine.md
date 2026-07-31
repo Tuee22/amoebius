@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_18_base_image_registry.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the rule that every artifact amoebius can *render from a typed source* — Kubernetes manifests, the TLA+ `.tla`/`.cfg`, the Dhall schema, the PureScript frontend contracts — is a **build artifact emitted at build/check time and never committed to the repository**; the only committed truth is the Haskell (or authored-Dhall) source it is rendered from.
@@ -39,9 +39,19 @@ Each generated artifact names its typed source of truth and the pure renderer th
 | The Dhall schema (types the DSL is authored against) | the Haskell DSL ADTs | schema reflected from the types (the hostbootstrap `reflectedSchema` / prodbox `SchemaDhall` pattern) | [dsl_doctrine.md](./dsl_doctrine.md) |
 | PureScript frontend contract types | the Haskell app/workflow ADTs | `purescript-bridge` contract generation | [lift_and_compose_doctrine.md](./lift_and_compose_doctrine.md) |
 | The reconcile plan / `--dry-run` preview | the `chain :: cfg -> [Step]` value whose amoebius config contains the whole opaque `ProvisionedSpec` | `renderChainPlan` | [manifest_generation_doctrine.md](./manifest_generation_doctrine.md) |
+| The image build recipe (`Dockerfile`, per identity) | the typed bake catalog — each stage's `NonEmpty BakeStep` in its `BuildExecutionEnvelope` | `renderDockerfile :: BuildExecutionEnvelope -> Dockerfile` (pure, total) | [image_build_doctrine.md](./image_build_doctrine.md) |
 
 The common shape: a **pure, total function** from a committed typed value to text-or-objects. Because the
 renderer is pure, the artifact is a deterministic function of the source, and regenerating is free.
+
+**Why the `Dockerfile` belongs on this list.** The argument is the one
+[manifest_generation_doctrine.md §1](./manifest_generation_doctrine.md#1-why-this-doctrine-exists-types-render-manifests-helm-does-not)
+already makes against Helm, one layer down. A Go-templated chart is text that becomes YAML only after string
+interpolation, so nothing inspects the result until the apiserver does; an `ARG`/`RUN` Dockerfile is text
+that becomes a *filesystem* only after interpolation, so nothing inspects the result until the image runs.
+amoebius refused the first and cannot consistently accept the second. With each stage's content a
+`NonEmpty BakeStep` ([image_build_doctrine.md §6](./image_build_doctrine.md#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)),
+the recipe becomes a projection of typed data and the committed artifact is the catalog, not the template.
 
 ---
 

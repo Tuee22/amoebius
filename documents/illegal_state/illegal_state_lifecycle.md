@@ -2,13 +2,15 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_18_base_image_registry.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering the lifecycle band — the readiness
-> race (condition, never duration), unverified environment promotion, unmonitored workflows/extensions, and a
-> chaos fault targeting an undeclared component — with the honest limit that a type-check proves the
-> *spec composes*, not that the *running cluster enforces it*.
+> race (condition, never duration), unverified environment promotion, unmonitored workflows/extensions, a
+> chaos fault targeting an undeclared component, and the build/link band (a foreign image, an unnamed
+> container process, an unmodeled build stage, a worker naming an unlinked extension, and extension source
+> reaching outside the sanctioned API) — with the honest limit that a type-check proves the *spec composes*,
+> not that the *running cluster enforces it*.
 
 ---
 
@@ -18,14 +20,20 @@ This document is a **themed slice** of the illegal-state catalog: the lifecycle 
 duration-gated / hand-ordered bring-up race ([§3.41](#341-a-duration-gated--hand-ordered-bring-up-sequence-a-readiness-race)),
 the unverified environment promotion ([§3.26](#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence)),
 the unmonitored workflow or extension ([§3.43](#343-an-unmonitored-workflow-or-extension-or-an-unauthenticated-monitoring-surface)),
-and a chaos fault targeting a component the spec never declared ([§3.46](#346-a-chaos-fault-targeting-a-component-the-spec-never-declared)).
+and a chaos fault targeting a component the spec never declared ([§3.46](#346-a-chaos-fault-targeting-a-component-the-spec-never-declared)) —
+plus the **build/link band**, where the same discipline reaches the artifact an app ships as rather than the
+spec it is described by: a foreign container image ([§3.74](#374-a-container-image-amoebius-did-not-generate)),
+an unnamed container process ([§3.75](#375-a-container-whose-process-is-unnamed)), an unmodeled build stage
+([§3.76](#376-a-build-stage-whose-content-is-unmodeled)), a worker naming an extension its binary does not
+link ([§3.77](#377-a-worker-naming-an-extension-its-own-binary-does-not-link)), and extension source reaching
+outside the sanctioned API ([§3.78](#378-extension-source-that-reaches-outside-the-sanctioned-api)).
 It owns nothing of the catalog's framing.
 
 - The **catalog index** and the **load-bearing honesty limit** (a type-check proves the spec composes, not
   that the cluster enforces it) are owned by
   [`illegal_state_catalog.md`](./illegal_state_catalog.md) — referenced, not restated.
 - The **seven typing techniques**, the **coverage matrix**, the **three foreclosure layers**, and the new
-  **validation-locus axis** (`Gate-1-editor` / `Gate-2-decoder` / `provision-seal` /
+  **validation-locus axis** (`Gate-1-editor` / `Gate-2-decoder` / `Gate-3-astcheck` / `provision-seal` /
   `rendered-output-golden` / `live-effect`, orthogonal to the foreclosure layer; `provision-seal` is post-bind
   Phase-11 provision returning a `ProvisionError` before any `ProvisionedSpec` exists) are owned by
   [`illegal_state_techniques.md`](./illegal_state_techniques.md) — referenced, not restated.
@@ -185,6 +193,121 @@ resolving the `FaultTarget` against the declared component set returns `Left` on
 Haskell-IR "no inhabitant" teeth land there — plus `live-effect` (that the injected fault perturbs the live
 component as the drill assumes). Per the validation-locus axis of
 [`illegal_state_techniques.md`](./illegal_state_techniques.md), orthogonal to the foreclosure layer above.
+
+### 3.74 A container image amoebius did not generate
+
+Every other byte the cluster runs is accounted for — a baked binary, a linked library, a content-addressed
+asset — but an image reference was, until now, a free digest. `ImageArtifact` constrained *bytes*
+exhaustively (manifest-list digest, per-platform child and config digests, per-layer blob digests) and
+*identity* not at all, so any digest inhabited it and an app could name a container amoebius neither built
+nor inspected. Making `identity : ImageIdentity` a required field closes it: the union's three arms are
+named catalog identities — the host-pulled `KindNode` image, the multi-arch `Base` image, and a `Runtime`
+variant keyed by the extension set linked into it — with **no `Foreign`, free-digest, or `Url` arm**. An app
+therefore has no image to name; its container is the `Runtime` arm whose `linked` set contains it. This is
+the same closure `EngineRuntime` already carries against an operator-supplied engine address, applied one
+layer out. **Owner:** [`image_build_doctrine.md` §5](../engineering/image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)
+(the closed identity) + [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the
+`ImageArtifact` field). **Technique:** [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)
+(a relation over a closed named catalog) + [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
+(identity as a required field, not an optional annotation). **Layer:** `type-foreclosed` — a foreign image
+reference has no constructor, with a `rendered-output-golden` residue that the *deployed* image is the one
+named (the containerd inspection the live SPA gate already runs).
+
+**Validation-locus:** `Gate-1-editor` — the union is closed in the Dhall schema, so naming a foreign image
+fails `dhall type` before any binary runs, exactly as an engine named by URL does.
+
+### 3.75 A container whose process is unnamed
+
+A `ContainerEnvelope` named an image, a lifecycle, and a complete resource envelope — and never said what
+the container *executes*. No `command`, no `args`, no `entrypoint` field existed anywhere in the type layer,
+so the running process was whatever the image's `ENTRYPOINT` happened to be: a fact about bytes, invisible
+to every fold that reasons about the deployment. A required `process : ContainerProcess` closes it, and the
+union has exactly two arms because exactly two things legitimately run in an amoebius pod — the linked
+binary in a closed `InClusterRole`, or a binary some `BakeStep` installed, named by `BakedBinaryId`. Two
+relations make the pairing coherent rather than merely present: an `AmoebiusRole` container must run an
+image whose identity is the `Runtime` arm, and a `BakedService`'s binary must be installed by a `BakeStep`
+in that identity's own build content — so a container cannot name an executable no stage put in its image.
+**Owner:** [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the field and
+the relations) + [`daemon_topology_doctrine.md` §2](../engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid)
+(the closed role union). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
+(required field) + [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)
+(process↔image and binary↔bake-content relations over the enclosing build). **Layer:** `type-foreclosed` for
+the field's presence and the union's closedness; the two cross-references are `Gate-2-decoder` folds.
+
+**Validation-locus:** `Gate-1-editor` — a `ContainerEnvelope` missing `process`, or naming a role outside
+the closed union, does not type-check; the image↔process and binary↔content relations are cross-field and so
+land at the decoder, per the validation-locus axis of
+[`illegal_state_techniques.md`](./illegal_state_techniques.md).
+
+### 3.76 A build stage whose content is unmodeled
+
+`BuildStageDemand` typed a build stage's *resources* totally — CPU reservation and ceiling, memory
+reservation and ceiling, peak intermediate bytes, peak cache-write bytes, and its `dependsOn` edges — and
+its *content* not at all. What a stage installed lived in a hand-authored `ARG`/`RUN` Dockerfile: text that
+becomes a filesystem only after string interpolation, with nothing checking the result until the image runs.
+That is precisely the defect amoebius refuses one layer up, where a Go-templated chart becomes YAML only
+after interpolation and no type inspects the result
+([`manifest_generation_doctrine.md` §1](../engineering/manifest_generation_doctrine.md#1-why-this-doctrine-exists-types-render-manifests-helm-does-not)).
+A required `content : NonEmpty BakeStep` closes it, and the union's arms are the doctrine's own preference
+ladder — `AptPackage`, `OfficialTarball`, `SourceBuild` — plus the two intra-build moves, with **no
+`RunShell : Text` arm and no `Url` arm**. The Dockerfile stops being committed source and becomes a
+generated projection of that data. **Owner:**
+[`image_build_doctrine.md` §6](../engineering/image_build_doctrine.md#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)
+(the typed content) + [`generated_artifacts_doctrine.md`](../engineering/generated_artifacts_doctrine.md)
+(the renderer). **Technique:** [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
+(a `NonEmpty` required field) + [§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content)
+(a pinned identity per step rather than a fetched address). **Layer:** `type-foreclosed` — an interpolated
+shell fragment has no constructor — with a `rendered-output-golden` residue pinning the emitted Dockerfile.
+
+**Validation-locus:** `Gate-1-editor` — the absent `RunShell`/`Url` arms are a Dhall-schema closure, so an
+authored shell fragment fails `dhall type` with no binary involved.
+
+### 3.77 A worker naming an extension its own binary does not link
+
+Making apps linked extensions creates a pairing that did not previously exist: a worker Pod names the
+`WorkerKind` it runs, that kind names the `ExtensionId` whose library handles its work, and the Pod's image
+links some particular set of extensions. Nothing forced those two to agree, so a Web-service host could be
+scheduled for an app whose code its own binary does not carry — a "handler not found" discovered when the
+first request arrives. The membership relation closes it: a `WorkerKind`'s `ExtensionId` must be a member of
+its container's `ImageIdentity.Runtime.linked` set. Because variants are per-app rather than one image
+carrying every app ([§3.74](#374-a-container-image-amoebius-did-not-generate)), this is a real constraint
+rather than a tautology. **Owner:**
+[`daemon_topology_doctrine.md` §4](../engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected)
+(the dispatch wire and the relation). **Technique:**
+[§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)
+(a relation over the enclosing linked set) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
+(one owning variant per app). **Layer:** `decode-foreclosed` — the relation is cross-field, so it is a total
+decoder fold rather than a Dhall type index — with a `runtime-checked` residue that the linked handler
+actually serves.
+
+**Validation-locus:** `Gate-2-decoder` — Dhall carries no dependent types, so "this id is in that set" is
+resolved by the total decoder, which returns `Left` when it is not.
+
+### 3.78 Extension source that reaches outside the sanctioned API
+
+Gates 1 and 2 prove things about a *value*; neither constrains the Haskell linked beside it. An
+`ExtensionSpec`'s `extChain` carries a `stepRun :: cfg -> IO ()`, and `IO ()` is a type, not a bound — so
+extension source could open a socket, shell out, `unsafeCoerce`, or read a file, in the same process as the
+role holding cluster-wide secret authority. While the linked set was closed at two vendored ML libraries
+this was covered by review, and review is not a mechanism; with the `App` tier open it is not covered at
+all. Gate 3 closes it: a custom AST checker admits source against a closed `SanctionedApi`, rejecting an
+unsanctioned import, raw `IO`, an FFI call, an `unsafe*` operation, Template Haskell, or an orphan instance
+with a located diagnostic. Its `Accepted` arm carries an opaque, constructor-private
+`CheckedExtensionSource` that only the checker produces and only the linker consumes, so "link unchecked
+source" has no more syntax than "render an unprovisioned spec". **Owner:**
+[`dsl_doctrine.md` §5](../engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) (the
+gate) + [`dsl_doctrine.md` §8](../engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits)
+(the constrained surface). **Technique:**
+[§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
+(an opaque checked value as the only linkable state) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
+(one producer of that value). **Layer:** `type-foreclosed` at the link boundary — unchecked source has no
+linkable representation — with the honest limit that the checker bounds what code may *reach*, never what it
+computes: that checked source terminates, respects its budgets, or serves correctly is `runtime-checked`
+residue claimed by no gate.
+
+**Validation-locus:** `Gate-3-astcheck` — a new locus on the same axis as Gate-1/Gate-2, fired at build
+time over extension source before link, per the validation-locus axis of
+[`illegal_state_techniques.md`](./illegal_state_techniques.md).
 
 ---
 

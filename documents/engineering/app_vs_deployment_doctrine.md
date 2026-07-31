@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_39_infernix_lift.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_39_infernix_lift.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md
 **Generated sections**: none
 
 > **Purpose**: Define the hard separation between an app's **application logic** (what it *is* to a user)
@@ -46,9 +46,20 @@ cross-cutting invariant "Application logic and deployment rules are separate DSL
 ## 2. The application-logic surface — what an app *is*
 
 **Everything on this surface survives a move.** An app torn off its cluster and stood up somewhere else — on a
-different substrate, at a different scale — carries these things *with* it because they *are* the app. An amoebius app is exactly two artifacts: one or
-more container images that build for both `amd64` and `arm64`, and an **app-spec `.dhall`**. The image-build pipeline is owned by [image_build_doctrine.md](./image_build_doctrine.md);
-this surface owns the spec.
+different substrate, at a different scale — carries these things *with* it because they *are* the app. An
+amoebius app is exactly two artifacts: **Haskell contributing one `ExtensionSpec 'App`**, admitted by Gate 3
+and linked into the multi-arch amoebius runtime image
+([dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract),
+[capability_extension_doctrine.md §2](./capability_extension_doctrine.md#2-three-extension-kinds-workload-capability-and-app)),
+and an **app-spec `.dhall`**. **An app has no image of its own; there is no third artifact.** Its container
+is the `Runtime` variant whose linked set contains that app, so "ship a container amoebius did not build"
+has no syntax rather than being discouraged. The image-build pipeline and the closed image identity are
+owned by [image_build_doctrine.md](./image_build_doctrine.md); this surface owns the spec.
+
+Note what this does *not* claim. Linking does not move an app's behaviour into Dhall — behaviour stays in
+Haskell, exactly as infernix's does
+([dsl_doctrine.md §2](./dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)).
+What it buys is that the behaviour is checked before it links and has nowhere else to live.
 
 The app-spec surface declares:
 
@@ -287,9 +298,12 @@ merged at **compile/link time into the single binary** — there is no per-exten
 That the app *contributes* an `ExtensionSpec` is application logic (it travels with the app); the
 *placement* of the linked workload stays a deployment rule ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)). The `ExtensionSpec` grammar and its
 nested-Dhall composition are owned by [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability) — this is specified DSL design
-intent, not a built mechanism. An app unwilling to be linked is **not** an extension — it runs as an
-ordinary app-spec `.dhall` workload; the one path for a non-vendored third party is the later-phase Haskell
-extension DSL + AST checker below.
+intent, not a built mechanism. **Every app is linked**: the ordinary-app-spec-workload escape that once
+absorbed an app unwilling to be linked is withdrawn along with the per-app image
+([§2](#2-the-application-logic-surface--what-an-app-is)), so what used to be the third party's *only* path —
+the constrained Haskell surface and its AST checker — is now the path every app takes
+([dsl_doctrine.md §8](./dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits)).
+The cost is real and is stated rather than finessed: logic that is not Haskell has no v1 path.
 
 Treating shared-library use as app logic is what lets jitML and infernix be *unified libraries under the
 DSL* rather than separate products (DEVELOPMENT_PLAN: "the constituent projects are not separate products").

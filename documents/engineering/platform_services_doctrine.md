@@ -447,7 +447,7 @@ into a foreclosed illegal state at
   ([§3](#3-the-registry--the-single-image-source), [§4](#4-minio--the-object-substrate)), so MinIO must be serving before the registry is ready. MinIO runs from
   the preloaded base image on retained PVs, so this is a plain ordering edge, not a pull cycle.
 - **The registry before later app-image pulls** — once MinIO backs it, the registry must be serving before
-  amoebius publishes or pulls amoebius-built app/workload images ([§3](#3-the-registry--the-single-image-source)). Platform services do not
+  amoebius publishes or pulls the amoebius-built `Runtime` variants an app runs ([§3](#3-the-registry--the-single-image-source)). Platform services do not
   wait on the registry: they run from the preloaded base image ([image_build_doctrine.md §9](./image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves)).
 - **The Percona operator before any Postgres consumer** — a `PerconaPGCluster` has nothing to reconcile it
   otherwise ([§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin)).

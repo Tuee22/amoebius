@@ -20,7 +20,7 @@ gateway-migration model) and runs on **no substrate** (`none`) — it stands up 
 
 ## Phase Summary
 
-This phase delivers the first of the DSL's two typed gates as an in-process, authoring-time proof. It stands
+This phase delivers the first of the DSL's typed spec gates as an in-process, authoring-time proof. It stands
 up the Dhall prelude and the typed record/union surfaces — the cluster spec, the app spec, and the
 deployment-rules surface — as *data that carries parameters, not logic*, and exposes them only through a
 **smart-constructor vocabulary**: a lexicon with no illegal words, in which a whole class of illegal cluster
@@ -296,7 +296,7 @@ carries the acceptance token *spec-composition proven*, never *runtime proven*.
 ## Sprint 4.1: Dhall prelude + typed surfaces + smart constructors 📋
 
 **Status**: Planned
-**Implementation**: `dhall/amoebius/{prelude,Cluster,App,Deployment,Capability,Topology,Capacity,Resources,Storage,Retention}.dhall`
+**Implementation**: `dhall/amoebius/{prelude,Cluster,App,Deployment,Capability,Topology,Capacity,Resources,Storage,Retention,Image}.dhall`
 (typed surfaces + smart constructors) — target paths, not yet built.
 **Blocked by**: Phase 3 gate. External prerequisite: the `dhall` CLI only — this sprint needs **no** Haskell
 skeleton (that arrives with the Gate-2 decoder in Phase 5).
@@ -327,6 +327,16 @@ an authoring-time boundary that fires before any binary runs.
   `NodeSupply = ⟨Fixed (NonEmpty Node)|Elastic { floor, candidates, quota }⟩`;
   mandatory size-triggered `RetentionPolicy` (catalog [§3.20](../documents/illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)); and a `Ingress`/route surface with **no**
   insecure/backdoor arm (catalog [§3.7](../documents/illegal_state/illegal_state_security.md#37-accidental-insecure--backdoor-ingress)) — each encoded as a closed union, a required field, or a no-arm shape.
+- The **build/image closures** of `dhall/amoebius/Image.dhall`, the same shape applied to the artifact an app
+  ships as rather than the spec it is described by: the three-arm `ImageIdentity`
+  (`KindNode | Base | Runtime { linked }`) with **no foreign, free-digest, or `Url` arm** (catalog
+  [§3.74](../documents/illegal_state/illegal_state_lifecycle.md#374-a-container-image-amoebius-did-not-generate)); the
+  `BakeStep` content union with **no `RunShell : Text` arm** (catalog
+  [§3.76](../documents/illegal_state/illegal_state_lifecycle.md#376-a-build-stage-whose-content-is-unmodeled)); and the
+  required `ContainerProcess` naming what a container executes (catalog
+  [§3.75](../documents/illegal_state/illegal_state_lifecycle.md#375-a-container-whose-process-is-unnamed)). Their
+  negatives — a spec naming a foreign image, an authored shell fragment, a container with no `process` — must
+  each fail `dhall type` at the committed expected error.
 - The pure resource declarations of
   [`resource_capacity_doctrine.md §3`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget):
   unit-tagged quantity fields; `PodResourceVec = { cpu, memory, ephemeralStorage }`;
@@ -689,7 +699,7 @@ The whole sprint (📋 Planned).
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
   design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the DSL vision
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§2](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) the two languages, [§5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) the two typed gates and
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§2](../documents/engineering/dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) the two languages, [§5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) the typed spec gates and
   the illegal-state contract
 - [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — the catalog, the typing
   techniques, and the honest foreclosure-layer split

@@ -234,7 +234,7 @@ Validations above.
   matching offering, then run the Phase-9 accelerator-residency/coexistence fold, then hand only the checked
   result to the render phase. A device/VRAM check over a pre-bind skeleton is insufficient.
 - [`dsl_doctrine.md §5`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
-  — **the illegal-state-unrepresentable contract's two typed gates** (Gate 1 the Dhall typechecker, Gate 2 the
+  — **the illegal-state-unrepresentable contract's typed spec gates** (Gate 1 the Dhall typechecker, Gate 2 the
   in-process decoder): the `EngineRuntime` union is guarded at Gate 1 (an engine-by-URL has no syntax), and the
   family-on-lane / device / VRAM insufficiencies are the post-bind `provision-seal` layer beneath both gates.
 - [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)
@@ -459,7 +459,7 @@ The whole sprint (📋 Planned).
   relations by construction over a collection (the family×lane relation)
 - [Content Addressing Doctrine](../documents/engineering/content_addressing_doctrine.md) — [§4.5](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the ML-asset
   lifecycle whose Tier-1 jit-resolved engine is the `InferenceEngine` provider
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) the two typed gates a capability binding decodes through
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) the typed spec gates a capability binding decodes through
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 1, [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger
 - [phase_09](phase_09_execution_accelerator_folds.md) — the identity-complete accelerator-device / net-allocatable-VRAM
   / residency-coexistence epoch fold these owner demands feed

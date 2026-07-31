@@ -39,7 +39,7 @@ Each row is a shape lifted largely intact; the change is the *seam* it plugs int
 | Shape lifted | Source (proven, runs today) | amoebius seam it re-homes onto |
 |---|---|---|
 | `chain`/`Step` algebra, host-lift, binary-context/witness | `hostbootstrap` `Step.hs`/`Chain.hs`/`Lift.hs`/`Context.hs` (prodbox vendors it) | the kernel; extended with a GADT-indexed IR |
-| Dhall decode + smart-constructor illegal-state types + schema-reflected-from-Haskell | `prodbox` `Settings`, `Cluster/Topology.hs`, `SchemaDhall.hs`; `hostbootstrap` `Dhall/Gen.hs` | the two typed gates + the full illegal-state catalog |
+| Dhall decode + smart-constructor illegal-state types + schema-reflected-from-Haskell | `prodbox` `Settings`, `Cluster/Topology.hs`, `SchemaDhall.hs`; `hostbootstrap` `Dhall/Gen.hs` | the typed spec gates + the full illegal-state catalog |
 | Pure manifest render + byte-for-byte dry-run goldens | `prodbox` `CLI/Charts.hs`, `Lib/ChartPlatform.hs`, `EksImageMirror.hs` | deployment-global `renderAll :: ProvisionedSpec -> [K8sObject]`, after the amoebius post-bind resource/capability seal ([manifest_generation_doctrine.md](./manifest_generation_doctrine.md)) |
 | Numerical core / autodiff / JIT codegen / RL-SL-AlphaZero / tuning | `jitML` `Numerics/*`, `Codegen/*`, `RL/*`, `SL/*`, `Tune/*` | an extension's `extChain`; hardware is a deployment rule |
 | Determinism kernel (SplitMix) + content-addressed CBOR checkpoint store | `jitML` `Engines/Rng.hs`, `Checkpoint/*` | `Kernel/{Rng,ContentAddress,ExperimentHash}` ([content_addressing_doctrine.md](./content_addressing_doctrine.md)) |
@@ -77,9 +77,30 @@ Each of `infernix` and `jitML` ships a **PureScript** single-page demo app (buil
 under a browser driver. amoebius lifts these shells and regenerates their contracts from the amoebius-composed
 types; the generated PureScript contract is a build artifact, never committed
 ([generated_artifacts_doctrine.md](./generated_artifacts_doctrine.md)). A demo web app is **application logic
-that *uses* its extension, never itself an extension**
-([app_vs_deployment_doctrine.md §8](./app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic)),
-and the two demo apps are the SPA-composition fixtures.
+that *uses* its extension**
+([app_vs_deployment_doctrine.md §8](./app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic))
+while itself contributing an `ExtensionSpec 'App`
+([capability_extension_doctrine.md §2](./capability_extension_doctrine.md#2-three-extension-kinds-workload-capability-and-app)) —
+*using* an extension and *being* one are different relations, and a demo app does both. The two demo apps are
+the SPA-composition fixtures.
+
+**Where the compiled bundle lives.** `spago` emits JavaScript, HTML, and CSS — bytes that are neither Haskell
+nor Dhall, so they cannot be linked and they are the one part of an app that linking does not place. They are
+**baked**: the bundle is a `BakeStep.CopyGeneratedAsset` in the app's own `Runtime` variant
+([image_build_doctrine.md §6](./image_build_doctrine.md#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)),
+produced by the same `spago` build whose contract types `purescript-bridge` emits, and served by the pod's
+Web-service host worker
+([daemon_topology_doctrine.md §4](./daemon_topology_doctrine.md#4-worker-daemons--n-unelected)).
+
+Baking is the right answer here and the content-addressed cache is the wrong one, for three reasons that are
+each decisive on their own. The cache's asset catalog is closed and **not authorable by an app**, so a
+per-app bundle identity would be a platform code change per app — reproducing at the asset layer exactly the
+closed-set problem the `App` tier exists to dissolve. Its hash/pointer registry declares itself the
+authoritative set of hash classes, so a bundle class is an amendment to a document that is closed over
+precisely this. And its serve gate admits two provenance witnesses — a committed producing checkpoint or a
+pinned external import — and a locally built bundle is neither
+([content_addressing_doctrine.md](./content_addressing_doctrine.md)). Baking needs none of those changes: the
+bundle is bytes amoebius built, entering an image amoebius builds, by the mechanism every other byte uses.
 
 ---
 

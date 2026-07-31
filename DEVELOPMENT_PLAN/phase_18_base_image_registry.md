@@ -266,7 +266,7 @@ their reference sides are defined independently of the code under test. This sec
 ## Sprint 18.1: Multi-arch base image bake — services + jit-build resolver/toolchain, not engine payloads 📋
 
 **Status**: Planned
-**Implementation**: `docker/base/Dockerfile`, `src/Amoebius/Image/Build.hs`, `src/Amoebius/Image/BakeInventory.hs` (the per-arch asset map + version resolver, hostbootstrap-style) — target paths, not yet built.
+**Implementation**: `dhall/amoebius/BakeCatalog.dhall` (the **typed source of truth** — each stage's `NonEmpty BakeStep` with its per-arch pinned versions), `src/Amoebius/Image/BakeInventory.hs` (decoding that catalog into the `BuildExecutionEnvelope`), `src/Amoebius/Image/RenderDockerfile.hs` (`renderDockerfile :: BuildExecutionEnvelope -> Dockerfile`, pure and total), `src/Amoebius/Image/Build.hs` — target paths, not yet built. **`docker/base/Dockerfile` is no longer committed**: it is a generated artifact emitted from the catalog and stamped generated-by, per [`generated_artifacts_doctrine.md` §2](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what).
 **Blocked by**: Phase 17 gate (external prereq — `pb bootstrap --distro=kind` brings up an empty single-node `kind` cluster on a linux-cpu host and provides the `pb` CLI); Phase 1's recorded GHC 9.12.4 / Cabal pin for the amoebius runtime layer.
 **Independent Validation**: `docker buildx imagetools inspect <tag>` lists both `linux/amd64` and `linux/arm64` under one manifest list; a bake-inventory lint asserts the image contains **every** service binary named in the Phase-0-committed canonical inventory `test/fixtures/phase18/bake_inventory_expected.dhall` (a verbatim copy of the `DEVELOPMENT_PLAN/README.md` standard-platform-services list as ratified in `platform_services_doctrine.md`, reconciled **automatically** against that committed table — never against the implementer's own `BakeInventory` value, §M.3) and the jit-build resolver + its **linux-runnable** toolchain (`nvcc`/`g++`/pinned compilers + any linux cross-tooling — the Apple-Metal bridge is **not** baked here; it is an apple-substrate Mach-O dylib built and probed at [Phase 41](phase_41_apple_metal_host_daemon.md), never a linux ELF in phases 0..18) and contains **no** ML engine payload (`llama.cpp`/`whisper.cpp`/ONNX/Audiveris absent). Presence alone is insufficient (§M.5): for **each** arch — natively for the host arch and under `binfmt`/QEMU for the non-native arch — every baked binary is executed by **absolute path** with `<bin> --version` matching the version pinned in `bake_inventory_expected.dhall`, and each arch's layer passes an ELF `e_machine` check confirming its binaries carry that arch's machine type (foreclosing zero-byte stubs and amd64 bytes copied into the arm64 layer). The committed seeded mutants `mutant/phase18/stub-arm64-binary` (a zero-byte binary at a baked path), `mutant/phase18/wrong-arch-layer` (amd64 bytes in the arm64 layer), and `mutant/phase18/gxx-version-skew` (the baked `/usr/bin/g++` shimmed to report a `--version` one patch below its pinned `bake_inventory_expected.dhall` entry) MUST turn this lint red (§M.2) — the last giving the per-arch `<bin> --version` match its teeth, paired with the positive that the pinned `g++ --version` matches on both arches.
 The same independent validation begins before `buildx`: a read-only host/engine-VM snapshot validates the
@@ -309,13 +309,30 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
   compressed layer blob, config, child manifest, and index/manifest-list object is keyed by its registry digest,
   kind-tagged, and carries exact stored bytes. It is a distinct registry-storage projection from the same pure
   provenance, not a second caller-authored aggregate and not an estimate reconstructed from unpacked layers.
-- The `BakeInventory` asset map (per-arch pinned versions) driving logic-free `ARG`/`RUN … install` blocks, and
-  a bake-inventory lint proving the resolver/toolchain are present and every ML engine payload is **absent**.
+- The **typed bake catalog** `dhall/amoebius/BakeCatalog.dhall`: every stage's `content : NonEmpty BakeStep`
+  with its per-arch pinned versions, decoded by `BakeInventory` into the `BuildExecutionEnvelope`. The union is
+  closed with **no `RunShell : Text` arm and no `Url` arm**
+  ([`image_build_doctrine.md` §6](../documents/engineering/image_build_doctrine.md#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)),
+  so an interpolated shell fragment or an operator-supplied download address is unrepresentable rather than
+  discouraged — closing [`illegal_state_lifecycle.md` §3.76](../documents/illegal_state/illegal_state_lifecycle.md#376-a-build-stage-whose-content-is-unmodeled).
+- `renderDockerfile`, emitting the previously hand-authored `ARG`/`RUN … install` blocks from that catalog, plus
+  a **byte-for-byte golden** pinning the emitted Dockerfile as a fixture of the *renderer's* behaviour. The
+  Dockerfile is not committed as source; the catalog is.
+- A bake-inventory lint proving the resolver/toolchain are present and every ML engine payload is **absent**.
 - The Phase-0-committed oracle `test/fixtures/phase18/bake_inventory_expected.dhall` (the canonical
-  standard-platform-services set + pinned per-arch versions, independent of `BakeInventory`) and the committed
+  standard-platform-services set + pinned per-arch versions) and the committed
   mutants `mutant/phase18/stub-arm64-binary`, `mutant/phase18/wrong-arch-layer`,
   `mutant/phase18/gxx-version-skew` (the pinned-`g++`-version-skew that bites the per-arch `<bin> --version`
-  match), and `mutant/phase18/drop-build-scratch-accounting`.
+  match), `mutant/phase18/drop-build-scratch-accounting`, and
+  `mutant/phase18/dockerfile-handedit` (an edit to the *generated* Dockerfile that the catalog does not
+  license) — which MUST turn the emitted-Dockerfile golden red.
+
+  **The oracle stays independent after the promotion.** `BakeInventory` becomes a decode of the committed
+  catalog rather than a hand-maintained Haskell asset map, so the §M.3 obligation — reconcile the image
+  against the Phase-0 table, **never** against the implementer's own value — now requires that
+  `bake_inventory_expected.dhall` remain a *separately authored* copy of the ratified
+  standard-platform-services list, not an import of `BakeCatalog.dhall`. An oracle that imports the source it
+  checks is not a test.
 
 ### Validation
 1. Independently occupy or shrink one of build CPU, memory, intermediate scratch, or cache backing; make

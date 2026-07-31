@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/phase_28_pulsar_client.md, DEVELOPMENT_PLAN/phase_29_content_store_workflow.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/phase_28_pulsar_client.md, DEVELOPMENT_PLAN/phase_29_content_store_workflow.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the one amoebius binary's three runtime contexts (CLI / sudo
@@ -39,9 +39,12 @@ The *constituent behaviours* of the binary map onto the role taxonomy below: **p
 single-node control-plane behaviour ([§3](#3-the-control-plane-singleton)), **infernix** + **jitML** are the ML worker roles ([§4](#4-worker-daemons--n-unelected)),
 and **hostbootstrap** is the bootstrap + DSL-`chain` core that the host daemon drives. The application
 logic a web-service worker hosts is a **demo web app** — the single-page apps shipped with `infernix` and
-`jitML` — an app-spec that USES those extensions rather than a library linked into the binary
-([README](../../README.md); [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md)). The named behaviours are
-libraries inside one binary, not separate products.
+`jitML` — an app-spec that USES those extensions, and it is itself linked into the binary as an `App`
+extension ([capability_extension_doctrine.md §2](./capability_extension_doctrine.md#2-three-extension-kinds-workload-capability-and-app);
+[README](../../README.md); [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md)). *Using* an extension and
+*being* one are different relations, and an app does both: it consumes infernix as a shared library while
+contributing its own `ExtensionSpec 'App`. The named behaviours are libraries inside one binary, not
+separate products.
 
 This document owns *which contexts exist and what each is for*. **How** the host daemon communicates — the
 distro-mTLS path to `kube-apiserver`, and the host-only NodePort peering with no mTLS — is owned by
@@ -63,6 +66,22 @@ pod" is not a role, and "the control-plane singleton" is not a context.
 | **CLI context**         | — (a CLI run is not a daemon) | — | — |
 | **Sudo host daemon**    | Pre-cluster bootstrap *acts on behalf of* the future singleton, then hands off | Bootstrap installs the first provisioned scheduler Pod/config but does not run the live role | Supervises host-level workers (e.g. Apple-Metal and Windows-CUDA inference, [§4](#4-worker-daemons--n-unelected)) |
 | **In-cluster pod**      | **Exactly one writer** — Deployment `replicas=1` plus mandatory Lease ([§3](#3-the-control-plane-singleton)) | Independently provisioned same-binary Deployment; sealed placement/root-ledger CAS/Binding only ([§3.3](#33-the-capacity-scheduler-a-separate-role-in-the-same-binary)) | **N**, unelected ([§4](#4-worker-daemons--n-unelected)) |
+
+The role axis is a closed union, and it is the value a pod's container names as its process:
+
+```text
+InClusterRole =
+  < ControlPlaneSingleton          -- exactly one writer; mandatory Lease (§3)
+  | CapacityScheduler              -- sealed placement / root-ledger CAS / Binding only (§3.3)
+  | Worker : WorkerKind            -- N, unelected (§4)
+  >
+```
+
+There is no fourth arm and no free-text role: a pod that names a role amoebius does not implement has no
+constructor. `InClusterRole` is what
+[resource_capacity_doctrine.md](./resource_capacity_doctrine.md)'s `ContainerProcess` names when a container
+runs the amoebius binary, which is how "what this container executes" becomes typed rather than inherited
+from an image's entrypoint.
 
 Three facts fall out of the grid:
 
@@ -289,6 +308,42 @@ each kind. The canonical worker kinds:
 | **Pulsar topic-lifecycle coordinator** | Drives an app's declared topic lifecycles (create / retention / teardown) | the DSL + [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) |
 | **ML batch coordinator** | Schedules and tracks batch ML workflows | **infernix** / **jitML** |
 | **Inference engine** | Serves model inference — **in-cluster on linux-CUDA; host-level on Apple-Metal and Windows-CUDA** | **infernix** / **jitML** |
+
+The "Constituent library" column above is not prose decoration — it is a typed field, and it is how a
+worker reaches the code it runs:
+
+```text
+WorkerKind =
+  < WebServiceHost            : { serves    : ExtensionId }   -- an App extension
+  | TopicLifecycleCoordinator : { serves    : ExtensionId }
+  | MlBatchCoordinator        : { extension : ExtensionId }   -- infernix | jitML
+  | InferenceEngine           : { extension : ExtensionId }
+  | AcceleratorOwner          : { extension : ExtensionId }   -- §4.2, per-node singleton
+  | ContinuousTrainer         : { extension : ExtensionId }   -- §4.3, Feed-sourced
+  >
+```
+
+**The dispatch wire, stated once because nothing else stated it.** A worker Pod's minted `FrameConfig`
+([dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness)) names its
+`InClusterRole`; the `Worker` arm names a `WorkerKind`; the kind names the `ExtensionId` whose linked
+library handles its work. Serving behaviour therefore reaches the binary through the **role**, never through
+`extChain` — `extChain :: cfg -> [Step]` is the deploy-time reconcile algebra
+([§2](#2-context--role-an-orthogonal-grid) of
+[dsl_doctrine.md](./dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)),
+and it carries no request, route, or handler concept. This was previously left implicit for infernix and
+jitML; it is written here because the `App` extension kind
+([capability_extension_doctrine.md §2](./capability_extension_doctrine.md#2-three-extension-kinds-workload-capability-and-app))
+makes every app depend on it.
+
+**The named extension must be linked into the pod's own image.** A `WorkerKind`'s `ExtensionId` is required
+to be a member of its container's `ImageIdentity.Runtime.linked` set
+([image_build_doctrine.md §5](./image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)).
+A worker naming an extension its own binary does not carry is therefore a decode-time rejection, not a
+runtime "handler not found" — the same relation-over-a-collection technique the catalog uses elsewhere
+([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)).
+
+> **Layer.** The union's closedness and the linked-membership relation are **decode-foreclosed** (Gate 2).
+> That a linked handler actually serves correctly is runtime residue, claimed by no gate here.
 
 Properties shared by all workers:
 

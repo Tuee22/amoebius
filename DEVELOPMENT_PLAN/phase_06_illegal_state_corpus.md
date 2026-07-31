@@ -23,7 +23,7 @@ not an amoebius result**.
 
 ## Phase Summary
 
-This phase turns the two typed gates stood up in Phases 4 and 5 into an *exhaustive*, honestly-classified
+This phase turns the typed spec gates stood up in Phases 4 and 5 into an *exhaustive*, honestly-classified
 proof. Phase 4 proved Gate 1 rejects a representative Gate-1-class negative set; Phase 5 proved the total
 decoder rejects a representative Gate-2-class negative set. This phase assembles the **whole** illegal-state
 corpus — one negative fixture per catalog entry that Register 1 can settle — and requires each to be rejected
@@ -56,8 +56,8 @@ golden, and each GADT-index negative fails to compile under the pinned `ghc -fno
 GHC **type** error (not a scope/parse error) pinned to a committed expected-error-locus golden — the suite is
 red if any illegal fixture is admitted at or past its locus; QuickCheck is green under `checkCoverage`
 (closure / round-trip / fold-totality / composition-preservation) with the coverage minima of Sprint 6.3 met;
-and the per-entry validation-locus ledger (`Gate-1-editor` / `Gate-2-decoder` / `provision-seal` /
-`rendered-output-golden` / `live-effect`) is emitted with every catalog entry mapped to its truth-maker locus and a separate
+and the per-entry validation-locus ledger (`Gate-1-editor` / `Gate-2-decoder` / `Gate-3-astcheck` /
+`provision-seal` / `rendered-output-golden` / `live-effect`) is emitted with every catalog entry mapped to its truth-maker locus and a separate
 `owner_phase` / `case_family` disposition, with both **reconciled against the catalog-reconciled committed
 `locus_registry.tsv`** (the independent oracle of §M.3), red on any divergence — a **Register-1** in-process
 check that runs on no substrate. The committed gate-integrity apparatus (§M) that discharges the eight clauses
@@ -148,7 +148,7 @@ alone, before any fixture exists to join against.
   and [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)'s limit is honored verbatim: *a type-check proves the spec composes, not that the cluster enforces
   it.* Entries whose truth-maker is the running cluster are ledgered `live-effect`, never claimed here.
 - [`dsl_doctrine.md §5 — the illegal-state-unrepresentable contract`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract):
-  the **two typed gates** — Gate 1 (the Dhall typechecker) and Gate 2 (the in-process `Dhall.inputFile auto`
+  the **typed spec gates** — Gate 1 (the Dhall typechecker) and Gate 2 (the in-process `Dhall.inputFile auto`
   decoder). This phase exercises both against the exhaustive negative corpus and pins the type-foreclosed
   residue with the compile-fail golden that gives the GADT indices their teeth.
 - [`resource_capacity_doctrine.md §3 — The types: Quantity, Capacity, Demand, Budget`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)
@@ -462,7 +462,7 @@ The whole sprint (📋 Planned).
 - [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — the catalog index and its [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)
   load-bearing limit; the [§5](../documents/illegal_state/illegal_state_techniques.md#5-coverage-matrix--which-technique-forecloses-which-illegal-state) coverage matrix this corpus exhausts and the [§6](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) three foreclosure layers with the
   honest Gate-1-vs-Gate-2 split live in `illegal_state_techniques.md`
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) the two typed gates exercised against the corpus
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) the typed spec gates exercised against the corpus
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 1, [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger the
   validation-locus ledger specializes
 - [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — [§2](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) the registers,

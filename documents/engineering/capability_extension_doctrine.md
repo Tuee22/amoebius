@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, documents/engineering/README.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/monitoring_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the amoebius capability-extension graph — how a linked
@@ -48,7 +48,7 @@ up is runtime residue, not a decode-time claim.
 
 ---
 
-## 2. Two extension kinds: workload and capability
+## 2. Three extension kinds: workload, capability, and app
 
 Every extension is **linked, not loaded** — Path 1 of the extension taxonomy, merged into the one binary at
 compile/link time, owned by [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability). Within that one linked
@@ -58,11 +58,39 @@ set, amoebius distinguishes two kinds, and both are flat peers:
 |---|---|---|
 | **Workload extension** | `infernix`, `jitML` | A vendored ML library that presents a workload (LLM inference; training + JIT codegen). This is the closed v1 set. |
 | **Capability extension** | `jit-build`, `coordination` | A single-owner horizontal concern, factored out so its install/build/cache and coordinator logic is authored **once** and consumed by many workloads. |
+| **App extension** | open | One amoebius app's logic. Admitted by Gate 3 ([dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)), linked into the `Runtime` variant that serves it, and **strictly weaker than the two kinds above** — see below. |
 
 The **vendored workload set is closed at `{infernix, jitML}`** and this doctrine does not expand it — that
-closure is owned by [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability). What this doctrine *adds* is the
-**capability-extension tier** and the graph edges that wire the two kinds together. The full linked set is
-therefore the two workload extensions plus the two capability-extensions, all peers, all merged by [§6](#6-the-merge-total-acyclic-anti-shadow).
+closure is owned by [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability). The closure is on the
+**`Workload` kind**, not on the linked set: the linked set already grew once when the capability-extension
+tier was added, and it grows again per app. What this doctrine *adds* is the **capability-extension tier**,
+the **App tier**, and the graph edges that wire the kinds together.
+
+**The `App` kind is a strictly weaker leaf, and each absence is load-bearing.** An `ExtensionSpec 'App`
+carries its app's nested `.dhall`, its deploy-time `extChain`, and its monitoring — and **not**
+`extCapabilities`, **not** `extRequires`, and **not** an author-supplied id:
+
+- **No `extCapabilities`.** An app PROVIDES nothing into the capability surface. This preserves the
+  [§3](#3-the-provide-and-require-contract) property exactly as written: an extension-provided capability is
+  still reachable *only* through a peer's `extRequires` at link time, never authored by an app spec as a free
+  service, so the closed core vocabulary
+  ([service_capability_doctrine.md §2](./service_capability_doctrine.md#2-the-capability-set)) does not
+  acquire a "some other service" arm by the back door.
+- **No `extRequires`.** An app declares its needs on the app-spec surface, against the core capability arms,
+  exactly as before. A node with no out-edges cannot sit on a cycle, so [§6](#6-the-merge-total-acyclic-anti-shadow)'s
+  acyclicity and totality checks are **vacuous for apps by construction** rather than merely passing.
+- **No author-supplied id.** See [§6](#6-the-merge-total-acyclic-anti-shadow): an app's ids are derived, so
+  two apps cannot collide.
+
+Because an app's monitoring surface is drawn from the same closed union
+([monitoring_doctrine.md](./monitoring_doctrine.md)) and `extMonitoring` is `NonEmpty`, every app owes at
+least one `Slo` — observability becomes a condition of being an app rather than a thing an app may omit.
+
+The full linked set of any one binary is therefore the vendored workload extensions it needs, the
+capability-extensions those require, and **exactly the apps that binary serves** — all peers, all merged by
+[§6](#6-the-merge-total-acyclic-anti-shadow). That last clause is what keeps the merge small: the set is
+per-`Runtime`-variant ([image_build_doctrine.md §5](./image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)),
+not one global set containing every app in the fleet.
 
 A capability-extension is a **packaging choice, not a mandate**: `jit-build` and `coordination` could equally be
 core capabilities. The doctrine models them as capability-extensions because that makes **single-ownership** and
@@ -203,6 +231,23 @@ constructors. This doctrine extends that merge with the **provide/require graph*
   [readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md): a decode-foreclosed rejection of a cyclic
   or self-referential requirement, not a runtime detection.
 - **Anti-shadow.** No two extensions share an id or a constructor ([dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability)).
+  With the `App` tier open ([§2](#2-three-extension-kinds-workload-capability-and-app)), a flat global namespace
+  would make one author's collision deny a binary to everyone, so both halves are **qualified**:
+  - **Ids are derived, never authored.** An app authors only a *local* id; the merge derives the global one
+    through a total function that is injective in both arguments,
+    `globalId : AppName -> LocalId -> ExtensionId`. Because an app's name is already unique per cluster
+    ([app_vs_deployment_doctrine.md §2](./app_vs_deployment_doctrine.md#2-the-application-logic-surface--what-an-app-is)),
+    injectivity makes a duplicate id between two apps **unconstructible** rather than rejected. This is the
+    content-address totality technique — make the name a computed function of what it names
+    ([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)).
+  - **`extDhall` sub-catalogs are qualified by `ExtensionId`.** Derived ids alone would not close constructor
+    collision: two apps whose nested catalogs each declare a constructor of the same name still shadow. Each
+    sub-catalog is therefore namespaced under its own extension, and anti-shadow quantifies over *qualified*
+    constructors. The unqualified global check is retained where it is genuinely required — capability names,
+    which `extRequires` must resolve across the peer graph.
+
+  What survives globally is small and reviewable: the `Workload` and `Capability` kinds, whose membership is
+  closed and vendored. What scales with the fleet is qualified and cannot collide.
 
 The three checks together make "extensions building on each other" a **typed acyclic graph, not a hierarchy.**
 Extensions do not have extensions; a `jit-build` nested inside `jitML` — unreachable by `infernix`, and a DRY

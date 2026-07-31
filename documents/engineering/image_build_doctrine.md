@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_18_base_image_registry.md, DEVELOPMENT_PLAN/phase_23_platform_backbone.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_36_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_18_base_image_registry.md, DEVELOPMENT_PLAN/phase_23_platform_backbone.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_36_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/apple_metal_headless_builds.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define how amoebius bakes third-party service binaries into one multi-arch base container and
@@ -65,7 +65,8 @@ rate limits, and a warm cluster is air-gapped by construction.
   in-cluster pull. This reverses prodbox's mirror-into-registry model (`local_registry_pipeline.md` [§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)).
 - **The in-cluster registry is `distribution`, not Harbor.** The registry every workload pulls from is the
   single-binary `distribution` (`registry:2`) OCI registry — itself a baked binary ([§7](#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)) — which **replaces
-  Harbor**. It serves amoebius-built images (the runtime image, app/workload images); it is *not* a
+  Harbor**. It serves amoebius-built images — the base image and every `Runtime` variant
+  ([§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)); it is *not* a
   pull-through mirror of public registries, because once binaries are baked there is nothing to mirror.
   *Which* provider backs the Registry capability is owned by
   [service_capability_doctrine.md](./service_capability_doctrine.md); this doc owns the build/publish side.
@@ -176,6 +177,26 @@ directly contradicts fungibility.
 **Recommended default: immutable, content-derived image references — `:latest` is forbidden for
 amoebius-owned images in cluster specs.**
 
+- **The image set itself is closed, and identity is separate from version.** *Which image this is* is a
+  named catalog identity; *which build of it* is the tag+digest the rest of this section governs.
+
+  ```text
+  ImageIdentity =
+    < KindNode                                  -- host-pulled, pre-cluster, outside the in-cluster boundary
+    | Base                                      -- the multi-arch third-party-binary base image (§7)
+    | Runtime : { linked : Set ExtensionId }    -- the GHC binary plus exactly this linked extension set
+    >   -- closed: no Foreign arm, no free digest, no Url; not authorable by an app .dhall
+  ```
+
+  An app therefore has no image of its own to name: its container is the `Runtime` arm whose `linked` set
+  contains that app's extension, so "run this foreign image" has no syntax and fails Gate 1 before any
+  binary runs. This is the same closure move
+  [service_capability_doctrine.md §4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored)
+  already makes for `EngineRuntime`, applied to images; the general rule that such unions close *because
+  every arm is a named catalog identity* is owned there and is not restated here. `KindNode` is a distinct
+  arm rather than an omission: the kind node-container image is pulled by the host docker before any cluster
+  exists, so it sits outside the [§2](#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)
+  no-public-pull boundary and must be nameable without being amoebius-built.
 - **Each build is published under an immutable tag and is consumed by digest.** A workload spec pins an
   image by its immutable identity (tag + digest), so "what runs" is a fixed, reproducible value — never
   "whatever `:latest` happens to be." prodbox's precedent derives a deterministic tag from machine identity
@@ -218,10 +239,19 @@ build, on-host MSL compilation, not the container image.)
   `BuildExecutionEnvelope`:
 
   ```text
+  BakeStep =
+    < AptPackage         : { name : Text, pinnedVersion : Text }
+    | OfficialTarball    : { identity : CatalogId, sha256 : Text }
+    | SourceBuild        : { identity : CatalogId, recipe : BuildRecipe }
+    | InstallBinary      : { from : BuildStageId, path : AbsPath, mode : FileMode }
+    | CopyGeneratedAsset : { producer : GeneratedArtifactId }
+    >   -- closed: there is no RunShell : Text arm, and no Url arm
+
   BuildStageDemand =
     { id                    : BuildStageId
     , platform              : OsArch
     , dependsOn             : List BuildStageId
+    , content               : NonEmpty BakeStep
     , runtime :
         { cpuReservation    : Quantity Cpu
         , cpuCeiling        : Quantity Cpu
@@ -243,7 +273,15 @@ build, on-host MSL compilation, not the container image.)
     }
   ```
 
-  The stage graph is non-empty, closed over `dependsOn`, and acyclic. Binding enumerates every dependency-
+  The stage graph is non-empty, closed over `dependsOn`, and acyclic. **Each stage's `content` is a
+  non-empty list of typed `BakeStep`s, and those steps are the only way bytes enter an image.** The union's
+  arms are exactly the [§7](#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)
+  preference ladder — `AptPackage`, then `OfficialTarball`, then `SourceBuild` — plus the two intra-build
+  moves (`InstallBinary` from an earlier stage, `CopyGeneratedAsset` from a
+  [generated_artifacts_doctrine.md](./generated_artifacts_doctrine.md) renderer). There is **no
+  `RunShell : Text` arm and no `Url` arm**: an interpolated shell fragment and an operator-supplied download
+  address are both unrepresentable, so the interior of an image is typed data rather than a template that
+  becomes a filesystem only when it runs. Binding enumerates every dependency-
   valid simultaneous stage set admitted by the separate architecture and stage concurrency policies, derives
   the maximum runtime, intermediate-layer workspace, and cache-write delta, and proves it fits the host/
   engine-VM CPU, memory, scratch, and cache carves. The cache obligation is `observed residents + derived
@@ -286,8 +324,12 @@ in-pod builder reproduces the host's multi-arch coverage (especially Apple-Silic
 ## 7. What amoebius bakes vs builds — the base container is the supply chain
 
 An open design question asked whether to put *"one big amoebius container with everything in it including
-3rd party services … into basecontainer."* The operator has now **adopted** exactly that: amoebius's images
-fall into two classes, and the third-party services are **baked**, not mirrored.
+3rd party services … into basecontainer."* The operator has now **adopted** exactly that: the third-party
+services are **baked**, not mirrored. The two classes this section governs — the base image and the runtime
+image — are the two amoebius-built arms of the closed
+[§5](#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)
+`ImageIdentity`; there is no third, app-supplied class, because an app's container is a `Runtime` variant
+rather than an image of its own.
 
 - **The amoebius base image carries every third-party service binary.** Vault, MinIO, Pulsar, Keycloak,
   Prometheus/Grafana, **TensorBoard** (the jitML monitoring surface, baked like Grafana and never fetched at
@@ -305,12 +347,26 @@ fall into two classes, and the third-party services are **baked**, not mirrored.
      keycloak-config-cli, Pulsar+ZooKeeper+BookKeeper) — which are a tarball + a per-arch JRE, not source
      builds. Envoy's data plane is taken as an **official binary** (its from-source path is Bazel, which
      amoebius does not adopt). Go/Rust/C/Node/Python toolchains are already present in the base image.
-- **The amoebius runtime image it builds.** The amoebius Haskell binary ships as its own runtime image
-  (GHC 9.12.4). Its **in-cluster pod role** is selected as control-plane singleton, dedicated
-  `amoebius-capacity` scheduler, or worker — adapting prodbox's union-image pattern
+- **The amoebius runtime image it builds — one recipe, a family of variants.** The amoebius Haskell binary
+  ships as its own runtime image (GHC 9.12.4). Its **in-cluster pod role** is selected as control-plane
+  singleton, dedicated `amoebius-capacity` scheduler, or worker — adapting prodbox's union-image pattern
   (`local_registry_pipeline.md` [§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1)). The CLI and sudo host daemon are contexts of the same executable outside that pod-role list; a CLI is not a
   pod-level runtime role. infernix and jitML are linked in as extension
-  libraries, not separate images.
+  libraries, not separate images — and so is every app, through the `App` extension kind owned by
+  [capability_extension_doctrine.md §2](./capability_extension_doctrine.md#2-three-extension-kinds-workload-capability-and-app).
+
+  Each `Runtime` arm is indexed by its `linked` extension set, so the *recipe* is one and the *variants* are
+  many: the control-plane variant links no app, and each app's variant links exactly that app. Two
+  consequences are load-bearing and neither is available from a single all-apps image. First, a control-plane
+  variant that links no app **cannot be perturbed by an app change** — an app's relink mints a new digest for
+  its own variant only, so the singleton's `strategy: Recreate` pod
+  ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton))
+  is untouched. Second, the link-time merge obligations of
+  [capability_extension_doctrine.md §6](./capability_extension_doctrine.md#6-the-merge-total-acyclic-anti-shadow)
+  are discharged **per variant** over a small set, not globally over every app at once, so one app's merge
+  failure cannot deny a binary to another app. Variants share their common layers by digest, so the fleet
+  cost is the delta rather than a whole image per app
+  ([resource_capacity_doctrine.md](./resource_capacity_doctrine.md)).
 - **The infernix/jitML engine runtimes are jit-resolved, not baked.** What the base image *does* bake for the
   ML layer is the **jit-build resolver and its build toolchain** — the Linux source-build inputs (`nvcc`,
   `g++`, the pinned compilers) the resolver needs to build an engine from source on a cache miss. The
@@ -423,7 +479,7 @@ is a separate ordinary migration, not this bootstrap cycle. This doc records the
   run from it with no public pull. The cluster-bring-up readiness edge
   ("the in-cluster registry up before later app-image pulls") is owned by
   [platform_services_doctrine.md §11](./platform_services_doctrine.md#11-bring-up-and-dependency-ordering).
-- **amoebius-built app/workload images publish *after* the registry is healthy.** [§3](#3-buildx-multi-arch--amd64-and-arm64-one-manifest-list)–[§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1) publication of the
+- **amoebius-built `Runtime` variants publish *after* the registry is healthy.** [§3](#3-buildx-multi-arch--amd64-and-arm64-one-manifest-list)–[§6](#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1) publication of the
   amoebius runtime and app images runs once the registry is serving. Readiness gating (probes, capability
   checks before any image write) follows the prodbox readiness contract (`local_registry_pipeline.md` §2.1)
   and is a cluster-lifecycle/platform concern, not owned here.

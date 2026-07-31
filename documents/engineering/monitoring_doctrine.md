@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Make monitoring a mandatory, non-vacuous property of a workflow and of an extension — so an
@@ -94,10 +94,14 @@ backlog quota ([pulsar_client_doctrine.md §6.1](./pulsar_client_doctrine.md#61-
 
 ### 2.3 Per-extension surfaces — `ExtensionSpec.extMonitoring`
 
-An extension declares the monitoring surfaces it stands up. The v1 extension set is closed at
-`{infernix, jitML}` and linked, not loaded ([dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability)), so the surfaces it may
-declare are a **closed** union with no open "other service" arm — the same closure the capability union
-carries ([service_capability_doctrine.md](./service_capability_doctrine.md)):
+An extension declares the monitoring surfaces it stands up. Every extension is linked, not loaded
+([dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability)), and the surfaces it may declare are a
+**closed** union with no open "other service" arm — the same closure the capability union carries
+([service_capability_doctrine.md](./service_capability_doctrine.md)). The closure rests on the **platform**
+kinds, whose membership is vendored and closed
+([capability_extension_doctrine.md §2](./capability_extension_doctrine.md#2-three-extension-kinds-workload-capability-and-app)):
+`TensorBoard` exists because jitML does. The open `App` tier does not widen it — an app draws from the same
+fixed arms, and since `extMonitoring` is `NonEmpty`, an app that declares no monitoring has no inhabitant:
 
 ```text
 ExtensionSpec = { extDhall, extChain, extCapabilities, extMonitoring : NonEmpty MonitoringSurface }

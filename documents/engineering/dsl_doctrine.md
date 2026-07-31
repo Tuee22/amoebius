@@ -27,9 +27,9 @@ This document owns four things about that surface:
 2. **Total composability** — how one `InForceSpec` is built by nesting Dhall fragments (app-in-cluster,
    extension-in-app, child-cluster-in-parent, test-topology-in-Dhall).
 3. **Secrets-by-name** — the DSL holds only a *name* for each secret, never a value.
-4. **The illegal-state-unrepresentable contract** — the layered principle, the two typed gates for
-   structural legality, and the conditional post-bind infrastructure/materialization/provision seal for
-   value- and inventory-dependent legality.
+4. **The illegal-state-unrepresentable contract** — the layered principle, the three typed gates (two for
+   the spec's structural legality, one for the extension source linked beside it), and the conditional
+   post-bind infrastructure/materialization/provision seal for value- and inventory-dependent legality.
 
 It does **not** own: the *catalog* of specific illegal states and the typing techniques that defeat each
 one ([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)); the application-logic-vs-deployment-rules
@@ -311,18 +311,27 @@ The `ExtensionSpec` seam is **Path 1**, and it is deliberately *not* open to the
 - **v1 — Path 1 (linked).** The closed set `{infernix, jitML}` is *vendored*: each links into
   the one binary through its `ExtensionSpec`. This is the only extension mechanism v1 ships.
 - **v2 — Path 2 (the Haskell extension DSL).** A non-vendored third party enters *only* through the future
-  **Haskell-as-DSL + custom AST checker + native JIT** — the forward pointer of [§8](#8-the-haskell-extension-dsl-forward-pointer-only), scheduled as a
+  **Haskell-as-DSL + custom AST checker + native JIT** — the forward pointer of [§8](#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits), scheduled as a
   later-phases candidate
-  ([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md#candidate-phase-haskell-extension-dsl--custom-ast-checker--native-jit)).
+  ([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md#candidate-phase-the-amoebius-native-jit-jitml-absorbed)).
   Path 2 is later-phases design intent, not built.
 
-And the boundary that keeps the seam honest: **an arbitrary container app is NOT an extension.** A party
-unwilling to be linked gets no `ExtensionSpec`; it runs as an ordinary app-spec `.dhall` workload —
-*"v1 can be an orchestrator for arbitrary containers"* — which is application logic, not extension
-([app_vs_deployment_doctrine.md §8](./app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic)).
-Extension = linked-and-vendored; container app = composed-and-orchestrated; the two are different axes. A
-future ML family is **deferred**: this pass provisions the seam but names no member beyond the closed set —
-a later family would enter via Path 1 once its math is absorbed into a vendored library, or via Path 2.
+And the boundary that keeps the seam honest: **there is no arbitrary container app.** The earlier form of
+this clause read *"an arbitrary container app is NOT an extension"* and routed the unwilling party to an
+ordinary app-spec `.dhall` workload, on the strength of the vision's *"v1 can be an orchestrator for
+arbitrary containers"*. That fallback is withdrawn. An app has no image of its own
+([app_vs_deployment_doctrine.md §2](./app_vs_deployment_doctrine.md#2-the-application-logic-surface--what-an-app-is)),
+so being composed-and-orchestrated is no longer an alternative to being linked — it is what linking
+produces. The two axes collapse into one, and the honesty this clause used to buy is now bought by Gate 3
+([§5](#5-the-illegal-state-unrepresentable-contract)) instead of by vendoring: what admits an extension is a
+check on its source, not who wrote it.
+
+Two consequences follow. **Willingness to be linked is now a precondition of being an app at all**, not a
+choice between two supported shapes — a party unwilling to be linked, or whose logic is not Haskell, has no
+v1 path, and that cost is stated plainly here rather than hidden behind a fallback that no longer exists.
+And a **future ML family** still enters as it did: via Path 1 once its math is absorbed into a vendored
+library, or via the constrained surface of [§8](#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits) —
+the difference being that both now pass the same checker.
 
 ### The ML-asset types an extension `.dhall` carries: `EngineRuntime` vs `ModelArtifact`
 
@@ -401,10 +410,12 @@ an operator can hold onto:
 > provider/host readback constructs `ProvisionContext`; only
 > `provision` can then construct the opaque `ProvisionedSpec` accepted by deployment-level `renderAll`.**
 
-That guarantee is bought by **two typed gates plus one conditional post-bind
-plan/materialize/provision seal**. Raw decoded or bound values authorize no effect; the only pre-spec effect
-authority is the validated initial-infrastructure plan and its single-use plan/action tokens, and it cannot
-render. This section owns the *principle* and the *mechanism*; the **inventory** of specific illegal states
+That guarantee is bought by **three typed gates plus one conditional post-bind
+plan/materialize/provision seal**. Gates 1 and 2 gate the *spec*; Gate 3 gates the *extension source* the
+spec's `extChain` resolves to ([§4](#4-total-composability)), because a spec whose types are impeccable still
+runs whatever code was linked beside it. Raw decoded or bound values authorize no effect; the only pre-spec
+effect authority is the validated initial-infrastructure plan and its single-use plan/action tokens, and it
+cannot render. This section owns the *principle* and the *mechanism*; the **inventory** of specific illegal states
 (PVC↔PV binding, gateway misconfig, DNS
 binding the wrong address, certs, taints/tolerations/affinity, NetworkPolicy partitions, backdoor ingress,
 resource overcommit, compute-engine/substrate incompatibility, illegal cluster topology, unbounded storage,
@@ -439,6 +450,57 @@ things happen here:
   failures.** Sum types and type indices give closed illegal shapes no inhabitant; total smart constructors
   can reject constructible values. Gate 2 produces only decoded, unprovisioned declarations. It does not
   decide whole-deployment placement, storage peaks, live target compatibility, or inventory sufficiency.
+
+### Gate 3 — the extension AST checker
+
+Gates 1 and 2 prove things about a *value*. Neither says anything about the Haskell linked beside it: an
+`ExtensionSpec`'s `extChain` carries a `stepRun :: cfg -> IO ()`, and `IO ()` is a type, not a bound. Before
+apps entered the linked set that gap was covered by *vendoring* — the set was closed at two reviewed ML
+libraries ([§4](#4-total-composability)) — and review is not a mechanism. Gate 3 replaces the review with a
+check.
+
+**Extension source is admitted by a custom AST checker against a closed sanctioned API.** The checker runs at
+build time, before link, over the module set an `ExtensionSpec` contributes:
+
+```text
+SanctionedApi = -- the closed set of amoebius library entry points extension source may reference
+  { modules   : NonEmptySet ModuleName
+  , effects   : NonEmptySet SanctionedEffect   -- no unrestricted IO constructor
+  }
+
+AstViolationReason =
+  < UnsanctionedImport : ModuleName
+  | RawIO                                      -- IO not routed through a SanctionedEffect
+  | ForeignCall                                -- FFI
+  | UnsafeOperation   : Text                   -- unsafePerformIO, unsafeCoerce, …
+  | TemplateHaskell
+  | OrphanInstance    : Text
+  >
+
+AstViolation = { modulePath : AbsPath, srcSpan : SrcSpan, reason : AstViolationReason }
+
+ExtensionSourceVerdict =
+  < Rejected : NonEmpty AstViolation
+  | Accepted : CheckedExtensionSource          -- opaque; constructors are not exported
+  >
+```
+
+**`CheckedExtensionSource` is the seal, and it is the same seal `ProvisionedSpec` already is.** Its
+constructor is private, the checker is its only producer, and the linker accepts nothing else — so "link
+unchecked source" has no more syntax than "render an unprovisioned spec"
+([§5](#5-the-illegal-state-unrepresentable-contract)'s post-gate seal, below). The symmetry is the argument
+for putting this here rather than in a build script: a lint that a build can skip is not a gate.
+
+A rejection names its module, source span, and reason, so a diagnostic is a located fact rather than a
+refusal. And because the sanctioned surface is *closed*, widening it is a deliberate amendment to this
+document — the same discipline that keeps `EngineRuntime` and `ImageIdentity` closed
+([service_capability_doctrine.md](./service_capability_doctrine.md),
+[image_build_doctrine.md](./image_build_doctrine.md)) rather than something an extension author can grant
+themselves.
+
+> **Layer.** Gate 3 is **link-time foreclosed**: unchecked source has no linkable representation. That
+> checked source *behaves* — terminates, respects its budgets, serves correctly — is **runtime residue** and
+> is claimed by no gate. The checker bounds what code may *reach*, never what it computes.
 
 ### Post-gate seal — bind/expand, conditionally materialize infrastructure, provision
 
@@ -613,23 +675,33 @@ decision viewed from two sides.
 
 ---
 
-## 8. The Haskell extension DSL (forward pointer only)
+## 8. The Haskell extension DSL — the constrained surface Gate 3 admits
 
-There is a second, later language in the vision: *"orchestration DSL lives in .dhall, extension DSL is
-Haskell that is (a) validated by a custom AST checker, and (b) has access to all amoebius libraries + jit
-features"*. It is explicitly **v2** — *"jit stuff is probably amoebius v2;
-v1 can be an orchestrator for arbitrary containers."*
+The vision names a second language: *"orchestration DSL lives in .dhall, extension DSL is Haskell that is
+(a) validated by a custom AST checker, and (b) has access to all amoebius libraries + jit features"*. It was
+scoped **v2** on the strength of one clause — *"v1 can be an orchestrator for arbitrary containers"* — and
+that clause no longer holds: an app has no image of its own
+([app_vs_deployment_doctrine.md §2](./app_vs_deployment_doctrine.md#2-the-application-logic-surface--what-an-app-is)),
+so the arbitrary-container fallback that made the checker deferrable is gone. The **checker half** of the
+vision's second language is therefore v1, and it is [§5](#5-the-illegal-state-unrepresentable-contract)'s
+Gate 3. What remains v2 is the **native JIT** and the absorption of jitML into it — a new capability, not a
+discipline ([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md)).
 
-This doc is the SSoT for the **orchestration** DSL (the Dhall surface). The **extension** DSL — the
-Haskell-as-DSL plus its custom AST checker and native JIT — is a scheduled **later phase**, not specified
-here. In [§4](#4-total-composability)'s extension taxonomy this is **Path 2** — the *only* path by which a non-vendored third party
-extends amoebius (Path 1, the closed linked set `{infernix, jitML}`, is vendored) — scheduled
-as a later-phases candidate
-([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md#candidate-phase-haskell-extension-dsl--custom-ast-checker--native-jit)).
-See also the "Later phases" entry in
-[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). It is named here only so the
-boundary is explicit: when this document says "the DSL," it means the typed Dhall orchestration surface,
-not the future Haskell extension language.
+This doc stays the SSoT for both halves of the two-language split
+([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)): Dhall carries the params,
+Haskell carries the logic, and Gate 3 bounds what that Haskell may reach. Concretely:
+
+- **The constrained surface is the `SanctionedApi` of [§5](#5-the-illegal-state-unrepresentable-contract).**
+  Extension source may name the sanctioned modules and route effects through sanctioned constructors; raw
+  `IO`, FFI, `unsafe*`, Template Haskell, and orphan instances are rejected with a located diagnostic.
+- **Both extension paths run through it.** Path 1 (vendored: `{infernix, jitML}`) and the `App` kind
+  ([capability_extension_doctrine.md §2](./capability_extension_doctrine.md#2-three-extension-kinds-workload-capability-and-app))
+  are admitted by the same checker. Vendoring is no longer load-bearing for *safety* — it now scopes only
+  which workload libraries amoebius ships.
+- **The boundary this section used to draw still stands, with one word changed.** When this document says
+  "the DSL," it means the typed Dhall orchestration surface, not the Haskell extension surface. Linking an
+  app does not move its behaviour into Dhall and this doctrine never claims it does — what it buys is that
+  the behaviour is *checked before it links*, and that there is no third artifact to smuggle it in.
 
 ---
 
@@ -656,7 +728,7 @@ does not serve as a message-payload format).
 
 This document is normative DSL doctrine only. Delivery sequencing, completion status, validation gates, and
 remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md). The
-orchestration Dhall DSL's **in-process contract validation** — the two typed gates of
+orchestration Dhall DSL's **in-process contract validation** — the three typed gates of
 [§5](#5-the-illegal-state-unrepresentable-contract), followed by bind/expand, conditional infrastructure
 planning/materialization fixtures, and the opaque provision seal (Tier 1: Dhall typecheck + decoder +
 QuickCheck + whole-deployment plan/provision + `renderAll` goldens) — is **front-loaded to Phases 4–13**,
@@ -694,6 +766,6 @@ links back for status.
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — the capacity/budget/scaling types the surface carries
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the compute-engine/topology types the surface carries
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — [§3.1](./pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor) runtime message payloads are CBOR, not Dhall
-- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — later-phases candidate Haskell extension DSL ([§4](#4-total-composability)/[§8](#8-the-haskell-extension-dsl-forward-pointer-only) Path 2 for third parties)
+- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — later-phases candidate Haskell extension DSL ([§4](#4-total-composability)/[§8](#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits) Path 2 for third parties)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

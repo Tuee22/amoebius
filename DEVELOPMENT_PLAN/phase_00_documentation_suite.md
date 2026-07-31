@@ -81,7 +81,7 @@ name.
   *Required header metadata* block, with the SSoT-first philosophy and the bidirectional cross-referencing rule:
   the three mechanics the gate's lint checks.
 - [`dsl_doctrine.md §5`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) —
-  *The illegal-state-unrepresentable contract*: the two typed gates (the Dhall typechecker and the Haskell typed
+  *The illegal-state-unrepresentable contract*: the typed spec gates (the Dhall typechecker and the Haskell typed
   decoder) that make illegal cluster state fail to type-check.
 - [`conformance_harness_doctrine.md §2`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) —
   *The registers*: the three named validation registers (Register 1 pure/golden, Register 2 boundary-with-fakes,
@@ -210,7 +210,7 @@ Adopt [`dsl_doctrine.md §5`](../documents/engineering/dsl_doctrine.md#5-the-ill
 *The rule*,
 [`lift_and_compose_doctrine.md §1`](../documents/engineering/lift_and_compose_doctrine.md#1-why-this-doctrine-exists),
 and [`tenancy_doctrine.md §1`](../documents/engineering/tenancy_doctrine.md#1-why-this-doctrine-exists): write the
-DSL core (the orchestration surface, the two typed gates, the app-logic/deployment split, the illegal-state
+DSL core (the orchestration surface, the typed spec gates, the app-logic/deployment split, the illegal-state
 catalog with honest foreclosure layers, the capability binder, the tenant axis) and the cross-cutting method
 doctrines (the three validation registers, the generated-never-committed rule, and lift-and-compose).
 

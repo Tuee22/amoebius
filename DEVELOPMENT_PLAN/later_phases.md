@@ -72,27 +72,31 @@ immutable-field replace is a precondition the `RolloutPlan`'s phases depend on. 
 intent: jitML's `Bootstrap.hs` schema-grant pre/post-migration phase is *sibling evidence* that the phased shape
 runs in a sibling, not an amoebius result.
 
-## Candidate phase: Haskell extension DSL + custom AST checker + native JIT
+## Candidate phase: The amoebius-native JIT (jitML absorbed)
 
 **Status**: 📋 Planned (provisional Phase 45)
 **Provisional substrate**: linux-cuda (the JIT path exercises the GPU compute substrate)
-**Scope** (one line): the second, *extension* language of the vision — Haskell-as-DSL validated by a custom
-AST checker, with full access to the amoebius libraries and a native JIT, into which jitML is absorbed as
-amoebius's own JIT.
-**Provisional gate**: an extension written in the constrained Haskell surface passes the custom AST checker,
-is rejected with a precise diagnostic when it reaches outside the sanctioned API, and a representative ML
-extension runs through the amoebius-native JIT (replacing jitML) producing the bit-deterministic result its
-determinism contract requires.
+**Scope** (one line): the *native JIT* half of the vision's second language — an amoebius-owned JIT into
+which jitML is absorbed, consumed through the constrained extension surface that Gate 3 already admits.
+**Provisional gate**: a representative ML extension runs through the amoebius-native JIT (replacing jitML)
+producing the bit-deterministic result its determinism contract requires.
 
-This is the explicitly **v2** language. The grand vision draws the line — *"orchestration DSL lives in
-.dhall, extension DSL is Haskell that is (a) validated by a custom AST checker, and (b) has access to all
-amoebius libraries + jit features"*, and *"jit stuff is probably amoebius v2; v1 can be an orchestrator for
-arbitrary containers"*. The DSL doctrine is the SSoT for
-the *orchestration* Dhall surface and forwards the extension language to this later phase by name:
-[`dsl_doctrine.md` §8 — The Haskell extension DSL (forward pointer only)](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl-forward-pointer-only).
-This candidate is where that forward pointer is redeemed — the custom AST checker, the library-access surface,
-and the JIT that subsumes jitML — and it is correctly a later phase because the README treats v1 as a complete
-orchestrator for arbitrary containers without it.
+**This candidate was split; its checker half is now v1.** It formerly read "Haskell extension DSL + custom
+AST checker + native JIT" and was deferred on the grand vision's clause *"jit stuff is probably amoebius v2;
+v1 can be an orchestrator for arbitrary containers."* That clause no longer holds: an app has no image of its
+own ([`app_vs_deployment_doctrine.md` §2](../documents/engineering/app_vs_deployment_doctrine.md#2-the-application-logic-surface--what-an-app-is)),
+so the arbitrary-container fallback that made the checker deferrable is gone and every app is now linked
+Haskell. The **constrained surface and its custom AST checker** are therefore **Gate 3**, specified in
+[`dsl_doctrine.md` §5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
+and [§8](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits),
+and delivered by [Phase 14](phase_14_chain_kernel_boundary.md) with
+[Phase 16](phase_16_spa_composition_representational.md) as its first consumer — folded into the phases that
+already own those surfaces, with **zero renumber**, per
+[`development_plan_standards.md` §N](development_plan_standards.md#n-reopening-and-amending-a-phase).
+
+What remains here is the **JIT** — a new capability rather than a discipline, and still correctly a later
+phase: nothing in v1 requires amoebius to own its own JIT, because jitML supplies one as a vendored workload
+extension.
 
 ## Candidate phase: Native desktop + mobile application surfaces
 
@@ -370,7 +374,7 @@ enforcement. Promoting that gate is required before an rke2 mutation continuatio
   at promotion
 - [phase_18_base_image_registry.md](phase_18_base_image_registry.md) — where the "one
   base container with everything" question is resolved (not deferred)
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§8](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl-forward-pointer-only) the extension-DSL forward pointer
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§8](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits) the extension-DSL forward pointer
 - [App vs Deployment Doctrine](../documents/engineering/app_vs_deployment_doctrine.md) — the application logic
   and deployment-rule split the native-client candidate preserves
 - [Lift and Compose Doctrine](../documents/engineering/lift_and_compose_doctrine.md) — the existing

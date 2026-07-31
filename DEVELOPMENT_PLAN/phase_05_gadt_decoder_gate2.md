@@ -23,7 +23,7 @@ evidence, not an amoebius result**.
 
 ## Phase Summary
 
-This phase builds the second of the DSL's two typed gates. Gate 1 (Phase 4) rejects what is not even
+This phase builds the second of the DSL's typed spec gates. Gate 1 (Phase 4) rejects what is not even
 well-typed Dhall; Gate 2 rejects what is well-typed Dhall but is not a legal amoebius world. It delivers the
 GADT-indexed Haskell intermediate representation the Dhall surface decodes *into* — sum types, smart
 constructors, phantom tenant references, and ownership indices designed so that an illegal combination has no
@@ -225,6 +225,12 @@ structural owner. These are the ADTs that make an illegal combination un-spellab
 ### Deliverables
 - `ClusterIR` and its component ADTs as GADT-indexed types + smart constructors exposing only a legal
   vocabulary; the phantom tenant `Ref tenant a` and ownership indices catalogued at [§4.2](../documents/illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)/[§4.4](../documents/illegal_state/illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally).
+- The two **image/process cross-field relations** Dhall cannot express, decoded here because they range over
+  the enclosing value rather than one field: an `AmoebiusRole` container must run an image whose identity is
+  the `Runtime` arm and, when its role is `Worker`, the kind's `ExtensionId` must be a member of that arm's
+  `linked` set (catalog [§3.77](../documents/illegal_state/illegal_state_lifecycle.md#377-a-worker-naming-an-extension-its-own-binary-does-not-link));
+  a `BakedService`'s `BakedBinaryId` must be installed by some `BakeStep` in that identity's own build
+  content. Each returns a structured `Left` with its own tag; neither is a runtime probe.
 - Normalized resource declarations wired into the real IR, not ornamental side records: every execution-unit
   component carries stable id/revision plus one private controller-indexed body: Deployment/StatefulSet use
   `Once | Replicated`; DaemonSet embeds `PerNode`; Job uses completions/parallelism/backoff/
@@ -718,7 +724,7 @@ The whole sprint (📋 Planned).
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (the
   design-proof acceptance token: *spec-composition proven*, never *runtime proven*)
 - [overview.md](overview.md) — target architecture and the DSL vision
-- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) the two typed gates; Gate 2 is adopted here
+- [DSL Doctrine](../documents/engineering/dsl_doctrine.md) — [§5](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) the typed spec gates; Gate 2 is adopted here
 - [Illegal State Catalog](../documents/illegal_state/illegal_state_catalog.md) — [§4](../documents/illegal_state/illegal_state_catalog.md#4-planning-ownership) the typing techniques the
   IR carries; [§2](../documents/illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)/[§6](../documents/illegal_state/illegal_state_techniques.md#6-three-layers-of-foreclosure-and-the-honesty-they-force) the load-bearing limit and the honest foreclosure-layer split
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) Register 1, [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) the per-run ledger

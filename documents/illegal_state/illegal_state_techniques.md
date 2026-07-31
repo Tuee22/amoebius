@@ -309,6 +309,11 @@ Forecloses [§3.13](./illegal_state_topology.md#313-a-compute-engine-incompatibl
 | 3.71 A freshness watermark asserted rather than derived from captured content | 4.5 content-address totality (watermark is a total function of content) | [backup_recovery](../engineering/backup_recovery_doctrine.md), [content_addressing §4.5](../engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) |
 | 3.72 A compute headroom pad that reserves past its own limit | 4.1 binding-by-construction (`requests + pad ≤ limits` decode fold; the all-`Zero` pad has no constructor) | [resource_capacity](../engineering/resource_capacity_doctrine.md), [platform_services §10](../engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope) |
 | 3.73 A padded reservation that overcommits allocatable | 4.6 capacity-accounting total fold over reserved (requests + pad) rather than requests alone | [resource_capacity](../engineering/resource_capacity_doctrine.md), [substrate](../engineering/substrate_doctrine.md) |
+| 3.74 A container image amoebius did not generate | 4.7 relation over a closed named catalog (`ImageIdentity`, no free-digest/`Url` arm) + 4.1 identity as a required field | [image_build §5](../engineering/image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest), [resource_capacity](../engineering/resource_capacity_doctrine.md) |
+| 3.75 A container whose process is unnamed | 4.1 required `ContainerProcess` field + 4.7 process↔image and binary↔bake-content relations | [resource_capacity](../engineering/resource_capacity_doctrine.md), [daemon_topology §2](../engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid) |
+| 3.76 A build stage whose content is unmodeled | 4.1 `NonEmpty BakeStep` required field (no `RunShell : Text` arm) + 4.5 pinned per-step identity rather than a fetched address | [image_build §6](../engineering/image_build_doctrine.md#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1), [generated_artifacts](../engineering/generated_artifacts_doctrine.md) |
+| 3.77 A worker naming an extension its own binary does not link | 4.7 membership relation over the variant's `linked` set + 4.4 one owning variant per app | [daemon_topology §4](../engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected), [image_build §5](../engineering/image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest) |
+| 3.78 Extension source that reaches outside the sanctioned API | 4.3 opaque `CheckedExtensionSource` as the only linkable state + 4.4 one producer of that value | [dsl §5](../engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract), [dsl §8](../engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits) |
 
 ---
 
@@ -431,7 +436,7 @@ residue** — the physical fact the spec-layer check structurally cannot settle.
 [`illegal_state_catalog.md`](./illegal_state_catalog.md) carries a **`Validation-locus:`** line naming its loci,
 derived from — but not identical to — its `Layer:` tag.
 
-The five loci:
+The six loci:
 
 1. **`Gate-1-editor` — fails `dhall type` at authoring time.** The illegal spec is rejected by the Dhall
    type-checker *in the editor*, before any binary runs. This is where the **closed-union / no-arm**, **required-field**,
@@ -449,12 +454,18 @@ The five loci:
    It is the decoder-time face of `decode-foreclosed`, and — because Dhall exposes constructors — also where the
    residual teeth of the [§4.1](#41-pvcpv-binding-by-construction)–[§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
    `type-foreclosed` foreclosures actually land.
-3. **`provision-seal` — post-bind whole-deployment provisioning returns `Left`.** Gate 2 has already produced
+3. **`Gate-3-astcheck` — the extension AST checker returns `Rejected`.** The first two loci judge a *value*;
+   this one judges the *source linked beside it*, at build time and before link
+   ([§3.78](./illegal_state_lifecycle.md#378-extension-source-that-reaches-outside-the-sanctioned-api) states
+   the rejected reaches and the seal). It is the **link-time face of `type-foreclosed`**: unchecked source
+   has no linkable representation, so nothing downstream can consume it. Owned by
+   [`dsl_doctrine.md` §5](../engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract).
+4. **`provision-seal` — post-bind whole-deployment provisioning returns `Left`.** Gate 2 has already produced
    decoded, unprovisioned declarations. Phase 10 expands the complete source set and Phase 11's `provision` runs every
    capacity, placement, storage/retention, provider-quota, accelerator-count, and net-VRAM fold against the
    exact target inventory. Failure returns `ProvisionError`; success alone constructs the opaque
    `ProvisionedSpec`. This is the concrete locus for the whole-deployment face of `decode-foreclosed`.
-4. **`rendered-output-golden` — caught by a golden test on the rendered manifest, not a cluster.** Some invariants are
+5. **`rendered-output-golden` — caught by a golden test on the rendered manifest, not a cluster.** Some invariants are
    properties of the **emitted objects**, observable after
    decode→bind/expand→plan/resolve-infrastructure→provision→renderAll but before any apply: that every generated
    workload carries the **hardened securityContext and exact checked resource projection**
@@ -464,7 +475,7 @@ The five loci:
    ingress** ([§3.7](./illegal_state_security.md#37-accidental-insecure--backdoor-ingress)). These are verified by a **golden test over the rendered
    manifest** — the "the generator only ever produces safe objects" claim, checked against the output artifact, never
    against a running cluster.
-5. **`live-effect` — observable only at reconcile/runtime.** The `runtime-checked` residue: whether the LB comes up,
+6. **`live-effect` — observable only at reconcile/runtime.** The `runtime-checked` residue: whether the LB comes up,
    the pod schedules, etcd forms and holds quorum, the Lima/WSL2 VM interposes, the autoscaler grows, the broker
    offloads to S3, the `drain-complete` edge is truthfully observed. **Not** in this catalog's promise; owned by
    [`chaos_failover_doctrine.md`](../engineering/chaos_failover_doctrine.md) and the testing doctrine.
@@ -475,7 +486,7 @@ monitor field, the absent `Off`/`Public` arms), `Gate-2-decoder` (the coverage /
 `provision-seal` (whole-deployment resource feasibility),
 `rendered-output-golden` (the derived rules/panels in the emitted objects), and `live-effect` (that the alert actually
 fires) — and the foreclosure *layer* of each part is stated separately in the entry. The loci also map loosely onto
-the two-tier band: `Gate-1-editor`, `Gate-2-decoder`, `provision-seal`, and `rendered-output-golden` are
+the two-tier band: `Gate-1-editor`, `Gate-2-decoder`, `Gate-3-astcheck`, `provision-seal`, and `rendered-output-golden` are
 **Tier-1** design-time / in-process gates (validated in the **pre-cluster type/decode gates, Phases 4–13** — inside the plan's pre-cluster band, Phases 1–16), while
 `live-effect` is the **Tier-2** runtime-enforcement residue
 deferred to its live phase.

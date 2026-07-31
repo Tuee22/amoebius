@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Seed the pure chain/Step reconcile kernel and its `--dry-run` plan render — `chain :: cfg ->
@@ -607,6 +607,85 @@ is owned by [phase_26_live_dsl_singleton.md](phase_26_live_dsl_singleton.md) and
    (Part A) it constitutes the two-part Phase-14 gate.
 2. Demonstrated negative controls (§M.2): each committed seeded mutant — mB1 (argv), mB2 (byte), mB3
    (`PATH`-resolution) — is re-run and turns `boundary-spec` red. A green run against any mutant fails the gate.
+
+### Remaining Work
+The whole sprint (📋 Planned).
+
+## Sprint 14.8: The sanctioned-API surface — what extension source may reach 📋
+
+**Status**: Planned
+**Implementation**: `src/Amoebius/Dsl/SanctionedApi.hs`, `dhall/amoebius/SanctionedApi.dhall`, and the
+Phase-0-committed oracle `test/fixtures/phase14/sanctioned_api_expected.dhall` (the hand-authored module and
+effect allowlist, authored **independently** of `SanctionedApi.hs` per §M.3) — target paths, not yet built.
+**Blocked by**: Sprint 14.1 (the `Step` algebra whose `stepRun` is the effect this surface bounds).
+**Independent Validation**: the committed allowlist and the implementation's `SanctionedApi` value agree
+exactly, reconciled automatically against the Phase-0 fixture and never against the implementer's own value;
+every entry names a module that exists in the pinned dependency closure; the surface contains **no** arm
+admitting raw `IO`, and a grep for `unsafePerformIO`/`unsafeCoerce`/`foreign import` over the allowlisted
+surface returns nothing.
+**Docs to update**: `documents/engineering/dsl_doctrine.md`
+
+### Objective
+Adopt [`dsl_doctrine.md` §5 — Gate 3](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)
+and [§8](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits):
+fix the closed set of amoebius library entry points and effect constructors extension source may reference,
+so that widening it is a reviewed amendment rather than something an extension author grants themselves.
+
+### Deliverables
+- A `SanctionedApi` value: the `NonEmptySet ModuleName` an extension may import and the
+  `NonEmptySet SanctionedEffect` through which it may perform effects. There is no unrestricted-`IO`
+  constructor; every effect an extension can reach is a named arm.
+- The Phase-0-committed independent allowlist oracle and its reconciliation check.
+
+### Validation
+1. The implementation surface equals the committed oracle; a module absent from the oracle but present in the
+   implementation (and the converse) fails.
+2. No sanctioned effect arm exposes raw `IO`, FFI, or an `unsafe*` operation.
+
+### Remaining Work
+The whole sprint (📋 Planned).
+
+## Sprint 14.9: Gate 3 — the extension AST checker and the link seal 📋
+
+**Status**: Planned
+**Implementation**: `src/Amoebius/Dsl/AstCheck.hs` (the checker and the opaque `CheckedExtensionSource`),
+`test/dsl/AstCheckSpec.hs`; the Phase-0-committed corpus `test/fixtures/phase14/astcheck/` — a positive
+extension source set plus **one negative per `AstViolationReason` arm** (`UnsanctionedImport`, `RawIO`,
+`ForeignCall`, `UnsafeOperation`, `TemplateHaskell`, `OrphanInstance`), each paired with a positive differing
+only in that dimension, and each with its expected `modulePath`/`srcSpan`/`reason` recorded in
+`astcheck_negatives.expected` — target paths, not yet built.
+**Blocked by**: Sprint 14.8.
+**Independent Validation**: every positive fixture yields `Accepted`; **every** negative fixture yields
+`Rejected` at the **exact tagged reason and source span recorded for it in the Phase-0 table**, not merely a
+non-zero exit; the linker accepts only a `CheckedExtensionSource` and its constructor is not exported, proven
+by a **compile-fail golden** — a test module attempting to construct one directly must fail to compile, the
+same way the `ProvisionedSpec` seal is proven at Phase 11. The committed seeded mutants
+`mutant/phase14/astcheck-allow-rawio` (delete the `RawIO` rejection) and
+`mutant/phase14/astcheck-export-ctor` (export the `CheckedExtensionSource` constructor) MUST each turn the
+suite red — the first via the `RawIO` negative, the second via the compile-fail golden (§M.2).
+**Docs to update**: `documents/engineering/dsl_doctrine.md`,
+`documents/illegal_state/illegal_state_lifecycle.md`, `DEVELOPMENT_PLAN/system_components.md`
+
+### Objective
+Deliver Gate 3: admit extension source against the Sprint-14.8 surface, and make unchecked source
+**unlinkable** rather than merely discouraged — closing
+[`illegal_state_lifecycle.md` §3.78](../documents/illegal_state/illegal_state_lifecycle.md#378-extension-source-that-reaches-outside-the-sanctioned-api).
+
+### Deliverables
+- The checker: `ExtensionSourceVerdict`, returning `Rejected` with a `NonEmpty AstViolation` carrying module
+  path, source span, and reason, or `Accepted` with an opaque `CheckedExtensionSource`.
+- The link seal: `CheckedExtensionSource`'s constructor is private and the checker is its only producer, so
+  the link step has no way to consume unchecked source.
+- A `--why` diagnostic rendering a rejection as located facts rather than a bare refusal.
+
+### Validation
+1. Positives accept; each negative rejects at its Phase-0-pinned reason **and** span.
+2. The compile-fail golden proves the seal: constructing `CheckedExtensionSource` outside the checker does not
+   compile.
+3. Both seeded mutants turn the suite red.
+4. The run emits a proven/tested/assumed ledger recording Gate 3 as **link-time foreclosed** and recording
+   explicitly that *behaviour* of checked source — termination, budget adherence, correct serving — is
+   **UNVERIFIED**; the checker bounds what code may reach, never what it computes.
 
 ### Remaining Work
 The whole sprint (📋 Planned).

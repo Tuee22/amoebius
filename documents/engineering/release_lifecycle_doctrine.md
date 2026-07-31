@@ -87,11 +87,18 @@ The unit of delivery is one immutable value:
 data Release = Release
   { releaseHash        :: ReleaseHash        -- sha256(resolved-deployment-dhall ‖ image-digests ‖ substrate-fp)
   , deploymentDhallRef :: ContentAddress     -- the resolved deployment .dhall, by content
-  , imageDigests       :: [OciImageDigest]   -- the exact images this generation runs
+  , imageDigests       :: [(ImageIdentity, OciImageDigest)]  -- the exact images, each by closed identity
   , substrateFp        :: SubstrateFingerprint
   }
 ```
 
+- **Each pinned digest names which image it is.** `imageDigests` pairs every digest with its closed
+  `ImageIdentity` ([image_build_doctrine.md §5](./image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)),
+  so a generation records not merely *which bytes* it ran but *which image those bytes are* — the base image,
+  or the `Runtime` variant linking a named app set. Nothing about the promotion model changes: an app's
+  relink moves only its own variant's digest, and the `Environment` pointer still advances a whole
+  generation at a time ([§3](#3-environment-and-the-etag-cas-promotion-pointer)), exactly as it did when the
+  list was untyped digests.
 - **`releaseHash` is a distinct hash class, never shared.** It is registered in the canonical hash/pointer
   master table alongside `experimentHash`, `kernelKey`, and the OCI image digest
   ([content_addressing_doctrine.md §2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)),

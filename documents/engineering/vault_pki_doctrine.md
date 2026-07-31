@@ -125,7 +125,7 @@ in  SecretRef
 | `Prompt` | Allowed (CLI only) | One-off elevated operator material (e.g. the cloud-admin credential that mints a least-privilege identity); supplied at the prompt, used, and discarded — never written to disk. |
 | `TestPlaintext` | **Rejected** | Accepted only by the test harness, only from a flagged test-secrets file. |
 
-The contract is enforced by the same **two typed gates** that guard every `InForceSpec`
+The contract is enforced by the same **typed spec gates** that guard every `InForceSpec`
 ([dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)): Gate 1 (the
 Dhall typechecker) admits only a well-typed `SecretRef`, and Gate 2 (the in-process Haskell decoder
 under GHC 9.12.4) runs a validator that **rejects any literal secret value and any `TestPlaintext` arm
