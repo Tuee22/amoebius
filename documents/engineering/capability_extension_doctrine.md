@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/monitoring_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, documents/engineering/README.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/monitoring_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the amoebius capability-extension graph — how a linked
@@ -52,23 +52,27 @@ up is runtime residue, not a decode-time claim.
 
 Every extension is **linked, not loaded** — Path 1 of the extension taxonomy, merged into the one binary at
 compile/link time, owned by [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability). Within that one linked
-set, amoebius distinguishes two kinds, and both are flat peers:
+set, amoebius distinguishes three kinds, and all are flat peers:
 
 | Kind | Members (v1) | What it is |
 |---|---|---|
 | **Workload extension** | `infernix`, `jitML` | A vendored ML library that presents a workload (LLM inference; training + JIT codegen). This is the closed v1 set. |
 | **Capability extension** | `jit-build`, `coordination` | A single-owner horizontal concern, factored out so its install/build/cache and coordinator logic is authored **once** and consumed by many workloads. |
-| **App extension** | open | One amoebius app's logic. Admitted by Gate 3 ([dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract)), linked into the `Runtime` variant that serves it, and **strictly weaker than the two kinds above** — see below. |
+| **App extension** | open, optional | A trusted server-side data/workflow/effect adapter needed by one app when the linked catalog has no handler for a required UI port. It is Gate-3-admitted and **strictly weaker than the two kinds above**; it is not the app's `UiSource` or client runtime. |
 
 The **vendored workload set is closed at `{infernix, jitML}`** and this doctrine does not expand it — that
 closure is owned by [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability). The closure is on the
 **`Workload` kind**, not on the linked set: the linked set already grew once when the capability-extension
-tier was added, and it grows again per app. What this doctrine *adds* is the **capability-extension tier**,
-the **App tier**, and the graph edges that wire the kinds together.
+tier was added, and it may grow for an app that requires a trusted adapter. A low-code app whose ports all bind
+to existing handlers does not expand the linked set. What this doctrine adds is the **capability-extension
+tier**, the optional **App-adapter tier**, and the graph edges that wire the kinds together.
 
-**The `App` kind is a strictly weaker leaf, and each absence is load-bearing.** An `ExtensionSpec 'App`
-carries its app's nested `.dhall`, its deploy-time `extChain`, and its monitoring — and **not**
-`extCapabilities`, **not** `extRequires`, and **not** an author-supplied id:
+**The `App` kind is a strictly weaker optional leaf, and each absence is load-bearing.** An
+`ExtensionSpec 'App` carries trusted server configuration, its deploy-time `extChain`, typed UI-port handlers,
+and its monitoring. The app's bounded view/state/event program remains `UiSource` and is checked through the
+separate module graph
+([low_code_ui_runtime_doctrine.md §6](./low_code_ui_runtime_doctrine.md#6-modules-and-total-composition)). The
+adapter carries **no** `extCapabilities`, **no** `extRequires`, and **no** author-supplied global id:
 
 - **No `extCapabilities`.** An app PROVIDES nothing into the capability surface. This preserves the
   [§3](#3-the-provide-and-require-contract) property exactly as written: an extension-provided capability is
@@ -76,20 +80,22 @@ carries its app's nested `.dhall`, its deploy-time `extChain`, and its monitorin
   service, so the closed core vocabulary
   ([service_capability_doctrine.md §2](./service_capability_doctrine.md#2-the-capability-set)) does not
   acquire a "some other service" arm by the back door.
-- **No `extRequires`.** An app declares its needs on the app-spec surface, against the core capability arms,
+- **No `extRequires`.** An app declares its needs and UI-port requirements on the app-spec surface, against the core capability arms,
   exactly as before. A node with no out-edges cannot sit on a cycle, so [§6](#6-the-merge-total-acyclic-anti-shadow)'s
   acyclicity and totality checks are **vacuous for apps by construction** rather than merely passing.
 - **No author-supplied id.** See [§6](#6-the-merge-total-acyclic-anti-shadow): an app's ids are derived, so
   two apps cannot collide.
 
-Because an app's monitoring surface is drawn from the same closed union
-([monitoring_doctrine.md](./monitoring_doctrine.md)) and `extMonitoring` is `NonEmpty`, every app owes at
-least one `Slo` — observability becomes a condition of being an app rather than a thing an app may omit.
+Because an app adapter's monitoring surface is drawn from the same closed union
+([monitoring_doctrine.md](./monitoring_doctrine.md)) and `extMonitoring` is `NonEmpty`, every linked adapter owes
+at least one `Slo`. Monitoring for the generic UI-server responsibility and each workflow remains mandatory even
+when no app adapter exists; the UI consumes that authenticated projection rather than supplying monitoring code.
 
 The full linked set of any one binary is therefore the vendored workload extensions it needs, the
-capability-extensions those require, and **exactly the apps that binary serves** — all peers, all merged by
-[§6](#6-the-merge-total-acyclic-anti-shadow). That last clause is what keeps the merge small: the set is
-per-`Runtime`-variant ([image_build_doctrine.md §5](./image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)),
+capability-extensions those require, and exactly the optional app adapters selected by its bound port set — all
+peers, all merged by [§6](#6-the-merge-total-acyclic-anti-shadow). A declarative app does not itself enter this
+set. The set remains per-`Runtime`-variant
+([image_build_doctrine.md §5](./image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)),
 not one global set containing every app in the fleet.
 
 A capability-extension is a **packaging choice, not a mandate**: `jit-build` and `coordination` could equally be
@@ -111,6 +117,7 @@ capability declaration from **export-only** to **PROVIDE + REQUIRE**.
       , extChain        : cfg -> [Step]                                                -- dsl [§4](#4-the-two-capability-extensions-jit-build-and-coordination)
       , extCapabilities : List Capability     -- PROVIDES: exported into the capability surface
       , extRequires     : List Capability     -- REQUIRES: consumed from a peer extension or the core (new)
+      , extUiHandlers   : List TrustedUiHandler -- server handlers offered to typed UI-port binding
       , extMonitoring   : NonEmpty MonitoringSurface                                   -- dsl [§4](#4-the-two-capability-extensions-jit-build-and-coordination)
       }
 
@@ -122,6 +129,11 @@ capability declaration from **export-only** to **PROVIDE + REQUIRE**.
 - **`extRequires` is REQUIRES.** An extension names the capabilities it consumes from another linked extension or
   from the core. This is the edge set of the graph: `extRequires` is *what makes an extension depend on a peer*,
   and it is exactly what [§6](#6-the-merge-total-acyclic-anti-shadow)'s merge checks for totality and acyclicity.
+- **`extUiHandlers` is a trusted server catalog, not a browser plugin surface.** Each entry contributes a
+  semantic operation, public input/output/error contracts, scope/effect witnesses, and a Haskell handler to the
+  exact-one UI-port binder. It contributes no PureScript or JavaScript and cannot be named as a provider
+  endpoint. The UI binding contract is owned by
+  [low_code_ui_runtime_doctrine.md §8](./low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations).
 
 A PROVIDE lands in the capability surface as an **extension-provided capability**, a provenance distinct from the
 fixed core set. The core capability set application logic may name — `ObjectStore`, `MessageBus`, `Sql`,
@@ -231,9 +243,10 @@ constructors. This doctrine extends that merge with the **provide/require graph*
   [readiness_ordering_doctrine.md](./readiness_ordering_doctrine.md): a decode-foreclosed rejection of a cyclic
   or self-referential requirement, not a runtime detection.
 - **Anti-shadow.** No two extensions share an id or a constructor ([dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability)).
-  With the `App` tier open ([§2](#2-three-extension-kinds-workload-capability-and-app)), a flat global namespace
-  would make one author's collision deny a binary to everyone, so both halves are **qualified**:
-  - **Ids are derived, never authored.** An app authors only a *local* id; the merge derives the global one
+  With the optional `App` adapter tier open ([§2](#2-three-extension-kinds-workload-capability-and-app)), a flat
+  global namespace would make one adapter author's collision deny a binary to everyone, so both halves are
+  **qualified**:
+  - **Ids are derived, never authored.** An app adapter authors only a *local* id; the merge derives the global one
     through a total function that is injective in both arguments,
     `globalId : AppName -> LocalId -> ExtensionId`. Because an app's name is already unique per cluster
     ([app_vs_deployment_doctrine.md §2](./app_vs_deployment_doctrine.md#2-the-application-logic-surface--what-an-app-is)),
@@ -241,13 +254,15 @@ constructors. This doctrine extends that merge with the **provide/require graph*
     content-address totality technique — make the name a computed function of what it names
     ([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)).
   - **`extDhall` sub-catalogs are qualified by `ExtensionId`.** Derived ids alone would not close constructor
-    collision: two apps whose nested catalogs each declare a constructor of the same name still shadow. Each
+    collision: two adapters whose nested catalogs each declare a constructor of the same name still shadow. Each
     sub-catalog is therefore namespaced under its own extension, and anti-shadow quantifies over *qualified*
     constructors. The unqualified global check is retained where it is genuinely required — capability names,
     which `extRequires` must resolve across the peer graph.
 
   What survives globally is small and reviewable: the `Workload` and `Capability` kinds, whose membership is
-  closed and vendored. What scales with the fleet is qualified and cannot collide.
+  closed and vendored. Optional adapter identities are qualified and cannot collide. `UiSource` module,
+  component, route, and port identities do not enter this namespace; their separate qualified anti-shadow merge
+  is owned by [low_code_ui_runtime_doctrine.md §6](./low_code_ui_runtime_doctrine.md#6-modules-and-total-composition).
 
 The three checks together make "extensions building on each other" a **typed acyclic graph, not a hierarchy.**
 Extensions do not have extensions; a `jit-build` nested inside `jitML` — unreachable by `infernix`, and a DRY
@@ -304,6 +319,7 @@ for `coordination`). This doc states the target shape and links back for status.
 ## Cross-references
 
 - [Engineering Doctrine Index](./README.md)
+- [Low-Code UI Runtime Doctrine](./low_code_ui_runtime_doctrine.md) — [§6](./low_code_ui_runtime_doctrine.md#6-modules-and-total-composition) keeps declarative UI modules out of the linked-extension set; [§8](./low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations) binds required ports to trusted Haskell handlers
 - [DSL Doctrine](./dsl_doctrine.md) — [§4](./dsl_doctrine.md#4-total-composability) the `ExtensionSpec` seam (linked-not-loaded), the anti-shadow `ProjectSpec` merge, and the closed vendored workload set `{infernix, jitML}` this graph extends
 - [Service Capability Doctrine](./service_capability_doctrine.md) — the capability surface a PROVIDE lands in ([§2](./service_capability_doctrine.md#2-the-capability-set)) and the `InferenceEngine` capability ([§4.1](./service_capability_doctrine.md#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored)) both workloads require
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the shared resolver + `CacheBudget`-bounded cache the `jit-build` capability-extension provides

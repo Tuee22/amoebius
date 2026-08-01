@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_39_infernix_lift.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md
 **Generated sections**: none
 
 > **Purpose**: Define the hard separation between an app's **application logic** (what it *is* to a user)
@@ -23,7 +23,7 @@ Concretely, amoebius splits the Dhall DSL into two **orthogonal surfaces**:
 
 | Surface | Answers | Written by | Example values |
 |---------|---------|------------|----------------|
-| **Application logic** (the app spec) | *What is this app?* | the app author, once | UI / LB services, Keycloak auth rules, durable-storage needs, Pulsar topics, shared-library use |
+| **Application logic** (the app spec) | *What is this app?* | the app author, once | bounded `UiSource` modules/routes/ports, auth-policy references, durable-data needs, workflows, shared-library use |
 | **Deployment rules** | *How, where, how robustly does it run?* | the operator, per deployment | HA replica counts, geo-replication topology, gateway failover, chaos-test injection, inference substrate |
 
 These are not two halves of one file that happen to be near each other — they are **separable inputs**. The
@@ -34,10 +34,10 @@ Dhall record/union types, total composability, and the illegal-state-unrepresent
 which surface, and why the line must never be crossed (DEVELOPMENT_PLAN
 cross-cutting invariant "Application logic and deployment rules are separate DSL surfaces").
 
-> **Honesty.** This split is *specified* doctrine for Phase 4 (the DSL type families) — with its in-process
-> design validation front-loaded to the pre-cluster gates (Phases 4–9) — and *demonstrated* live by the infernix demo web app in Phase 39
-> and the jitML demo web app in Phase 40 (composed as an SPA in Phase 43); none of these phases has been built.
-> Read every prescriptive statement here as design intent, never as a tested amoebius result. Status and gates live only in
+> **Honesty.** This split and the low-code UI/runtime boundary are specified design intent. The generic
+> `UiSource` checker, client interpreter, UI server, and infernix/jitML artifact interaction are not thereby
+> claimed as built or tested. Read every prescriptive statement here as design intent, never as a tested
+> amoebius result. Status and gates live only in
 > [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
@@ -46,29 +46,39 @@ cross-cutting invariant "Application logic and deployment rules are separate DSL
 ## 2. The application-logic surface — what an app *is*
 
 **Everything on this surface survives a move.** An app torn off its cluster and stood up somewhere else — on a
-different substrate, at a different scale — carries these things *with* it because they *are* the app. An
-amoebius app is exactly two artifacts: **Haskell contributing one `ExtensionSpec 'App`**, admitted by Gate 3
-and linked into the multi-arch amoebius runtime image
-([dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract),
-[capability_extension_doctrine.md §2](./capability_extension_doctrine.md#2-three-extension-kinds-workload-capability-and-app)),
-and an **app-spec `.dhall`**. **An app has no image of its own; there is no third artifact.** Its container
-is the `Runtime` variant whose linked set contains that app, so "ship a container amoebius did not build"
-has no syntax rather than being discouraged. The image-build pipeline and the closed image identity are
-owned by [image_build_doctrine.md](./image_build_doctrine.md); this surface owns the spec.
+different substrate, at a different scale — carries these things *with* it because they *are* the app. Its
+mandatory authored source is an **app-spec `.dhall`** containing or importing a bounded `UiSource`, semantic
+service/workflow requirements, and typed port bindings. That source checks to one `BoundUiProgram`, from which
+the generic PureScript client plan and amoebius UI-server plan derive
+([low_code_ui_runtime_doctrine.md §3](./low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans)).
 
-Note what this does *not* claim. Linking does not move an app's behaviour into Dhall — behaviour stays in
-Haskell, exactly as infernix's does
-([dsl_doctrine.md §2](./dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)).
-What it buys is that the behaviour is checked before it links and has nowhere else to live.
+An app may also select a trusted linked Haskell adapter when a declared data, workflow, or artifact port needs
+server semantics absent from the existing catalog. The adapter is admitted by Gate 3; it is not the UI and is
+not mandatory for an app whose ports bind entirely to existing handlers. The bounded view, state, and transition
+logic remains `UiSource` data, while effect implementations remain trusted Haskell. Generated client/server
+plans and per-app content manifests are release artifacts, not additional authored sources; the one generic
+client bundle changes only with its runtime ABI/component catalog.
+
+**An app has no image of its own.** The generic client and UI-server responsibility run from the applicable
+amoebius `Runtime` image, whose linked set contains only the trusted workload/effect adapters that its bound
+ports require. "Ship a container amoebius did not build" still has no syntax. The image-build pipeline and the
+closed image identity are owned by [image_build_doctrine.md](./image_build_doctrine.md); this surface owns the
+application/deployment classification.
 
 The app-spec surface declares:
 
-- **UI and user lifecycles** — what surfaces the app exposes and what a user can do with them.
+- **UI and user lifecycles** — the bounded `UiSource` modules, state, routes, forms, typed effects, workflow
+  views, and artifact interactions that define the user experience. Their checked representation and runtime
+  boundary are owned by
+  [low_code_ui_runtime_doctrine.md §4](./low_code_ui_runtime_doctrine.md#4-the-authored-dhall-surface).
 - **LB services** — *which* of the app's services are reachable from the edge. (Whether they are reachable
   is never the app's call: all wild ingress is owned by Keycloak via the LB + Gateway API — see
   [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path). The app declares *what to publish*;
   it cannot publish a backdoor.)
-- **Keycloak-backed auth rules** — the OIDC identity and authorization rules that gate the app's surfaces.
+- **Authentication and authorization requirements** — mandatory semantic `AuthPolicyRef` values on routes and
+  effects. Keycloak/Envoy and server policy are derived/bound projections; the app cannot author provider policy
+  or treat client visibility as authority
+  ([low_code_ui_runtime_doctrine.md §9](./low_code_ui_runtime_doctrine.md#9-routes-identity-authorization-and-the-edge)).
 - **Durable-storage needs** — the MinIO buckets it keeps (named `<app>/<bucket>`), any `no-provisioner`
   block storage it provisions, and any Postgres database it requests in its own namespace. The app declares
   *what data it keeps*; the retained-PV mechanics, sizing, and deterministic rebind that make that data
@@ -84,8 +94,8 @@ The app-spec surface declares:
   surfaces are visible*; there is no arm for "unmonitored" and none for "public." The obligation types, the
   derived dashboards, and the no-`Public`-arm rule are owned by
   [monitoring_doctrine.md](./monitoring_doctrine.md).
-- **Use of shared libraries** — that the app builds on infernix, jitML, or (later) a Haskell extension
-  module is part of what the app *is* (see [§8](#8-shared-library-use-is-application-logic)).
+- **Use of shared libraries** — that the app consumes infernix, jitML, or a trusted Haskell adapter through
+  typed ports is part of what the app *is* (see [§8](#8-shared-library-use-is-application-logic)).
 
 Two structural facts pin app identity to the cluster: an app's **name is unique per
 cluster**, and the app gets **its own namespace with that same name**. Secrets appear here **by name only** —
@@ -107,9 +117,11 @@ identical app; they just see it survive more, scale wider, or run on different h
 
 The deployment-rules surface declares:
 
-- **HA replica counts.** How many of each component run. The app spec never names a number; the chart is
-  **HA even at `replicas=1`** ([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1)), so the
-  replica value is a pure deployment dial that rides an unchanged chart. Where the replica value physically
+- **HA replica counts.** How many of each component run. The app spec never names a number; the deployable
+  shape remains horizontally scalable at `replicas=1`, but one UI-server replica is not redundant and is not
+  described as highly available
+  ([low_code_ui_runtime_doctrine.md §14](./low_code_ui_runtime_doctrine.md#14-runtime-role-deployment-and-high-availability)).
+  The replica value is a pure deployment dial that rides an unchanged shape. Where the value physically
   lives in the DSL (a cluster-scoped `cluster.dhall` value seeded at `bootstrap` vs a per-app deployment
   block) is a [dsl_doctrine.md](./dsl_doctrine.md) concern; this doc owns only the rule that it is **never**
   app logic.
@@ -193,13 +205,13 @@ Three concrete properties, each a direct consequence of keeping the line clean:
 - **Write once.** An app is authored a single time, deployment-agnostic. There is no "dev version" and
   "prod version" of the app spec; there is one app spec and many deployment-rules layers. This kills the
   whole *works-on-my-laptop, breaks-in-prod* class of bug at the source — the laptop deployment and the
-  production deployment run the **same app bytes on the same HA charts**
+  production deployment run the **same app bytes on the same derived deployment shapes**
   ([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1)); only the deployment dials differ.
 - **Orthogonal evolution.** Operators tune replicas, add a failover region, or schedule chaos without ever
   opening the app's source — and app authors ship features without ever reasoning about topology. The two
   teams change different files.
 - **Composability.** Because the surfaces are separable inputs, the *same* app composes with *any* valid
-  deployment-rules layer (total composability). The proof case is [§6](#6-the-proof-case-a-demo-web-app-as-application-logic-only) and the
+  deployment-rules layer (total composability). The proof case is [§6](#6-the-proof-case-a-low-code-workflow-ui-as-application-logic-only) and the
   extreme case is [§9](#9-composition-one-cluster--n-geo-replicated-clusters-zero-app-change).
 
 The most fundamental consequence is that the split makes a whole category of mistakes **unrepresentable**: the app surface
@@ -211,40 +223,36 @@ the *reason* it is worth enforcing.
 
 ---
 
-## 6. The proof case: a demo web app as application-logic-only
+## 6. The proof case: a low-code workflow UI as application-logic-only
 
-The canonical demonstration of this doctrine is a **demo web app** — the demo single-page web app each ML
-extension ships (one with infernix, one with jitML) to illustrate its ML workflow and render its results.
-Per [§8](#8-shared-library-use-is-application-logic), a demo web app is application logic that *uses* the
-infernix/jitML inference extension; it is **not** itself an extension. It is the cleanest case because it
-exercises every surface at once — a UI, user/render logic, durable data, auth rules, and a dependency on an
-ML inference extension — with nothing about scale, placement, or robustness anywhere in sight.
+The canonical demonstration is a low-code application that presents an infernix or jitML workflow and lifts its
+ready artifact into an interactive UX. The sibling demo SPAs supply UX evidence and migration fixtures; their
+handwritten component trees and client effects are not the amoebius application model. The amoebius app authors
+bounded `UiSource` modules, binds typed workflow/artifact ports, and lets the generic runtime render and dispatch
+them. Trusted Haskell adapters preserve the sibling workflow semantics
+([low_code_ui_runtime_doctrine.md §12](./low_code_ui_runtime_doctrine.md#12-workflows-and-artifact-lifting-into-the-ux)).
 
-Written the amoebius way, a demo web app is authored **once, as application logic only** — the UI, the user
-and render lifecycles, the durable data, the auth rules, and its *use* of the infernix/jitML inference
-extension. Everything about *how robustly and where it runs* is a separate, orthogonal deployment-rules
-surface: a *single* `InForceSpec` deployment-rules layer configures, **with zero extra effort from the
-application itself**:
+That application is authored once as application logic: its UI program, user lifecycle, durable-data
+requirements, authorization-policy references, and use of infernix/jitML. Everything about robustness and
+placement is a separate deployment-rules surface:
 
 - the k8s cluster distro (kind / rke2 / provider),
-- the HA replica count (a `replicas=n` dial on an unchanged HA chart
-  ([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1))),
+- the UI-server and backend replica counts, with redundancy only when the admitted count exceeds one,
 - chaos-test injection, geo-replication topology, and gateway failover — the app never knows it is scaled,
   replicated, failed over, or tested, and
 - the model-inference substrate (Apple Metal on the host, CUDA on the cluster, or linux-cpu).
 
-The same app bytes therefore run at one replica on a single kind cluster or geo-replicated across N clusters
-with failover, served on whatever inference substrate the deployment picks — and the demo web app's own spec
-never names a replica count, a region, a chaos schedule, or a substrate, because the app surface has no field
+The same checked application therefore runs at one replica on a single kind cluster or geo-replicated across N
+clusters with failover, served on whatever inference substrate the deployment picks — and its `UiSource` never
+names a replica count, a region, a chaos schedule, or a substrate, because the app surface has no field
 for them ([§2](#2-the-application-logic-surface--what-an-app-is)). The inference itself is an infernix/jitML
 workflow ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)), not a bespoke
 engine welded into the app.
 
-> **Honesty.** This is Phase-0 design intent, not a proven amoebius result. The application-logic-only
-> demonstration lands **live** with the infernix demo web app in **Phase 39** and the jitML demo web app in
-> **Phase 40**, and the two are composed as a live SPA in **Phase 43**; the surfaces' in-process design
-> validation is front-loaded to the **pre-cluster gates (Phases 4–9)** (see [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)).
-> None of these phases has been built.
+> **Honesty.** This is design intent, not a proven amoebius result. Representational, browser, live workflow,
+> tenant-isolation, and HA evidence must pass the gates recorded in
+> [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md); this classification supplies none of
+> that evidence itself.
 
 ---
 
@@ -282,28 +290,26 @@ dependency is app logic, the placement is a deployment rule.
 
 ## 8. Shared-library use is application logic
 
-Which libraries an app builds on — infernix, jitML, and (a later phase) Haskell extension modules validated
-by a custom AST checker — is part of what the app *is*, and therefore lives
+Which libraries and typed server adapters an app consumes — infernix, jitML, and later Haskell extension
+modules validated by a custom AST checker — is part of what the app *is*, and therefore lives
 on the application-logic surface. The clean way to hold this with [§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule):
 
-- The library **call graph** — *that* the app invokes infernix, *which* workflows it composes — is
-  application logic; it would travel with the app to any cluster.
+- The typed **port/workflow graph** — *that* the app invokes infernix and *which* workflows/artifacts it
+  composes — is application logic; it travels with the `UiSource` to any cluster.
 - The **placement** of the workload that executes that call graph — host vs cluster, Metal vs CUDA vs CPU,
   at what replica count — is a deployment rule.
 
-The typed shape of that dependency is the **`ExtensionSpec`** contract. Each in-tree extension in the v1
+The trusted Haskell shape behind that dependency is the **`ExtensionSpec`** contract. Each in-tree extension in the v1
 closed set — **{infernix, jitML}** — plugs in by contributing one `ExtensionSpec` — a typed Dhall sub-catalog **nested inside the
 `InForceSpec`** ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)), whose full record shape is owned by [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability). These specs are
 merged at **compile/link time into the single binary** — there is no per-extension image and no `dlopen`.
-That the app *contributes* an `ExtensionSpec` is application logic (it travels with the app); the
-*placement* of the linked workload stays a deployment rule ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)). The `ExtensionSpec` grammar and its
-nested-Dhall composition are owned by [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability) — this is specified DSL design
-intent, not a built mechanism. **Every app is linked**: the ordinary-app-spec-workload escape that once
-absorbed an app unwilling to be linked is withdrawn along with the per-app image
-([§2](#2-the-application-logic-surface--what-an-app-is)), so what used to be the third party's *only* path —
-the constrained Haskell surface and its AST checker — is now the path every app takes
+The application's requirement for that linked workload is application logic; the workload's placement remains
+a deployment rule ([§7](#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule)). A pure
+low-code app whose ports bind to the trusted catalog contributes no Haskell and is not an extension. Only a new
+server-side effect or workflow semantic needs an optional `ExtensionSpec 'App` adapter admitted by the
+constrained Haskell checker
 ([dsl_doctrine.md §8](./dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits)).
-The cost is real and is stated rather than finessed: logic that is not Haskell has no v1 path.
+There remains no path for arbitrary browser code or an arbitrary application container.
 
 Treating shared-library use as app logic is what lets jitML and infernix be *unified libraries under the
 DSL* rather than separate products (DEVELOPMENT_PLAN: "the constituent projects are not separate products").
@@ -323,7 +329,7 @@ Diagram vocabulary: [diagram_conventions.md](./diagram_conventions.md).
 
 ```mermaid
 flowchart TD
-  app["App spec dhall written once: UI, LB services, auth rules, durable storage, Pulsar topics, shared libraries"]:::intent -->|joined with| r1["Deployment rules A: single cluster, replicas=1"]:::intent
+  app["App spec Dhall written once: UiSource, typed ports, auth refs, durable data, workflows"]:::intent -->|joined with| r1["Deployment rules A: single cluster, replicas=1"]:::intent
   app -->|same bytes, joined with| r2["Deployment rules B: N clusters, geo-replicated, gateway failover"]:::intent
   r1 -->|renders| d1["Deployment: one cluster, one region"]:::runtime
   r2 -->|renders| d2["Deployment: N geo-replicated clusters, route53 failover"]:::runtime
@@ -343,7 +349,7 @@ Cashing out "zero app change":
 - The app spec is **byte-identical** across the single-cluster and N-cluster deployments; the diff is
   entirely in the deployment-rules layer.
 
-> **Honesty.** Geo-replication is **Phase 32**; cross-cluster gateway failover is **Phase 33**; neither is
+> **Honesty.** Geo-replication is **Phase 42**; cross-cluster gateway failover is **Phase 43**; neither is
 > started. Synchronous
 > intra-cluster HA is delegated to the systems that do their own consensus (MinIO / Pulsar / Postgres /
 > Patroni); the **asynchronous** cross-cluster boundary — what happens if a cluster dies mid-geo-sync and amoebius
@@ -353,36 +359,37 @@ Cashing out "zero app change":
 
 ---
 
-## 10. Application-author testing is a deliberate v1 exclusion
+<a id="10-application-author-testing-is-a-deliberate-v1-exclusion"></a>
+## 10. Application-authored expectations are application logic
 
-The split this document draws has a consequence worth stating rather than leaving implicit: because a chaos
-schedule is a deployment-rules value
-([§3](#3-the-deployment-rules-surface--how-the-same-app-runs)) and the deployment-rules surface is written by
-the operator, **an application author has no surface on which to write a test of their own application.**
+An application author may declare typed expectations and driven interactions alongside `UiSource`. They
+state what a route, event, state transition, port invocation, or visible outcome must uphold; they do not
+choose where the application runs or which infrastructure fails. These values are application logic because
+the same expectation must remain true when the byte-identical application is joined to different deployment
+rules.
 
-For v1 this is correct rather than incomplete. The extension set is closed at `{infernix, jitML}`, both
-lifted as libraries rather than authored as third-party applications, so no third-party application author
-exists for the surface to serve. An exclusion that follows from a closed set is not a gap.
+The checker derives the complete enumeration of reachable event constructors, routes, ports, transitions,
+and scoped actions from `CheckedUiProgram`. That enumeration is generated at gate time and never committed.
+The expected observation and the interaction that produces it are independently authored and committed;
+generating either from the program under test would create a self-agreeing oracle. An enumerated surface with
+no authored expectation remains explicitly UNVERIFIED. This is the derivation boundary owned by
+[testing_doctrine.md §9 — generated enumeration, authored expectation](./testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation)
+and applied to UI verification by
+[low_code_ui_runtime_doctrine.md §17 — verification obligations](./low_code_ui_runtime_doctrine.md#17-verification-obligations).
 
-Leaving it unstated is the hazard. An unrecorded exclusion is indistinguishable from an oversight, and the
-natural way to "fix" an oversight here is to give the application surface a testing affordance — which means
-moving a chaos, HA, or failover concern onto application logic. That is precisely the leak the concentration
-principle uses as its diagnostic: a proof obligation appearing outside the one cross-cluster boundary
-indicates a modelling error, usually a deployment-rules concern that has migrated into app logic
+The boundary is strict. Application source has no constructor for a chaos schedule, replica count, placement,
+rollout policy, topology, failover target, or fault injection. Those remain operator-authored deployment
+rules under [§3](#3-the-deployment-rules-surface--how-the-same-app-runs). Application expectations may be
+composed with an operator-selected topology and fault schedule, but cannot author or weaken either. This keeps
+the concentration principle intact: distribution behavior is still exercised and discharged at its platform
+boundary rather than duplicated inside each application
 ([chaos_failover_doctrine.md §6](./chaos_failover_doctrine.md#6-the-concentration-principle--where-the-obligation-lives)).
-The exclusion is therefore load-bearing: it is what keeps the app surface free of the distribution behaviour
-the concentration principle concentrates at the platform layer, to be discharged there once. Nothing in that
-arrangement is a proven amoebius result today — no phase delivering it has started
-([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
-A later application-author surface, if one is warranted, requires an application-level **expectation**
-surface that composes with deployment rules but cannot author them — the author states what their
-application must uphold; the operator states which faults are injected and where it runs. The expectation
-type that would carry it is owned by
-[chaos_failover_doctrine.md §11.2](./chaos_failover_doctrine.md#112-the-typed-expectation-surface-expectation),
-and the derivation boundary it would sit on by
-[testing_doctrine.md §9](./testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation). No
-phase schedules it; it is named here so the v1 exclusion is a recorded decision rather than an absence.
+The schema, binder, plan compiler, browser interpreter, UI-server boundary, and local-composition work is
+scheduled in the planned UI phases listed by the
+[Development Plan](../../DEVELOPMENT_PLAN/README.md); no implementation or runtime evidence is claimed until
+their gates run
+([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
 
 ---
 
@@ -412,11 +419,9 @@ mechanics it points at:
 
 This document is normative classification doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md):
-the two DSL surfaces land with the type families in **Phase 4** (their in-process design validation
-front-loaded to the **pre-cluster gates (Phases 4–9)**), the application-logic-only demonstration lands with the infernix demo web app
-in **Phase 39** and the jitML demo web app in **Phase 40** (composed as an SPA in **Phase 43**), and the
-zero-app-change geo-replication case is **Phase 32**. This doc never maintains a competing status
-ledger; it states the target shape and links back for status.
+the tracker sequences the general DSL, generic low-code UI checker/runtime, trusted infernix/jitML adapters,
+live artifact interaction, and zero-app-change geo-replication. This document never maintains a competing
+status ledger; it states the target classification and links back for status.
 
 ---
 
@@ -424,6 +429,7 @@ ledger; it states the target shape and links back for status.
 
 - [Engineering Doctrine Index](./README.md)
 - [DSL Doctrine](./dsl_doctrine.md)
+- [Low-Code UI Runtime Doctrine](./low_code_ui_runtime_doctrine.md) — [§2](./low_code_ui_runtime_doctrine.md#2-scope-and-single-source-ownership) owns the UI language/runtime boundary; [§14](./low_code_ui_runtime_doctrine.md#14-runtime-role-deployment-and-high-availability) keeps UI-server HA on the deployment surface
 - [Platform Services Doctrine](./platform_services_doctrine.md)
 - [Chaos / Failover Doctrine](./chaos_failover_doctrine.md)
 - [Testing Doctrine](./testing_doctrine.md)

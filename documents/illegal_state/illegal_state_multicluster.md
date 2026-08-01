@@ -49,7 +49,7 @@ Distributing one workload across clusters looks like "just fold capacity over bo
 therefore has **no constructor** — the same type-foreclosed "no arm" idiom that forecloses the worker pool as a fourth
 `ComputeEngine`. Distributing across clusters is **geo-replication** (N independent clusters, each its own
 `place`, related only by async Pulsar replication — outside the single-cluster `place` fold and enacted by
-Phase 32); it is **not** the stateless
+Phase 42); it is **not** the stateless
 attach pool, which is single-cluster and already **inside** `place`'s elastic branch
 ([`single_logical_data_plane_doctrine.md`](../engineering/single_logical_data_plane_doctrine.md) [§4](../engineering/single_logical_data_plane_doctrine.md#4-the-elastic-worker-pool-the-attach-topology) re-runs the same `place`
 fold on the enlarged topology) — modeling the attach pool as cross-cluster machinery is the category error [§5](../engineering/single_logical_data_plane_doctrine.md#5-the-category-error-this-doctrine-forecloses) of
@@ -62,12 +62,12 @@ single-cluster-by-arity non-goal in its own subsection), cross-referencing
 the consistency boundary). **Technique:** [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)
 (the relation/collection is over one cluster's `NonEmpty Node`; a second `Topology` has no place in the fold's
 arity). **Layer:** type-foreclosed uninhabitable-by-arity; runtime-checked residue lives only in the deferred geo-replication
-enaction (Phase 32).
+enaction (Phase 42).
 **Validation-locus:** `Gate-2-decoder` (the arity is a property of the **Haskell** `place`, so a fold written
 over two `Topology`s is a compile-fail golden at the Gate-2 layer — **not** a `dhall type` failure: a root
 `InForceSpec` legitimately names many clusters, so nothing at the Dhall layer forbids naming a second one;
 what has no inhabitant is a single `place` call folding both); `live-effect` (the only residue is
-the deferred geo-replication enaction, Phase 32).
+the deferred geo-replication enaction, Phase 42).
 
 ### 3.35 A stretched host worker with no declared networking capability
 

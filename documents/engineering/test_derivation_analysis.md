@@ -21,9 +21,9 @@ from the doctrine that resulted. Every claim here is design intent, never a prov
 
 ## 1. Why this analysis exists
 
-Three questions about amoebius testing had no answer in the corpus as it stood, and one had an answer that
-was correct but unstated. Each is stated below in the form it was found; [§8](#8-what-was-adopted) records
-the resolution.
+Four questions about amoebius testing had no adequate answer in the corpus as it stood. Each is stated below
+in the form it was found; [§8](#8-what-was-adopted) records the resolution, including the correction of the
+initial app-author exclusion diagnosis.
 
 **A test topology cannot state what it expects.** The test-topology contract
 ([testing_doctrine.md §3](./testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down))
@@ -42,12 +42,12 @@ constrains a fault to resolve only against a declared component, which is a *res
 not an *enumeration* of what authorship must cover. The illegal-state catalog is numbered and every
 negative fixture carries a pinned tag, but no check joins the two.
 
-**Testing by an application author is absent, and correctly so.** Chaos schedules live on the
-deployment-rules surface
+**Testing by an application author is absent.** Chaos schedules correctly live on the deployment-rules
+surface
 ([app_vs_deployment_doctrine.md §3](./app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)),
-which the app/deployment split assigns to the operator. An application author therefore has no surface on
-which to write a test. For v1 this is sound — the extension set is closed and no third-party author exists —
-but the corpus does not say so, and an unstated exclusion is indistinguishable from an oversight.
+but the analysis initially drew the boundary too broadly and treated all application-authored testing as a
+deployment concern. The low-code UI decision exposed the distinction: an author may state application
+expectations and interactions without choosing replicas, topology, fault injection, or failover.
 
 The fourth question — whether integration and browser tests should be generated from the spec or maintained
 by hand — is answered in [§3](#3-generate-the-enumeration-author-the-expectation--adopted).
@@ -163,19 +163,19 @@ phase explicitly warns against.
 **Defect.** Playwright coverage is specified as prose naming one interaction per phase. Nothing relates the
 set of driven interactions to the set of workflow states the contract admits.
 
-**Why generating the interactions fails.** The generated PureScript contract and the SPA consuming it derive
-from one source; a browser test generated from that source asserts self-agreement. The coupling that
-generation *can* establish is already established, by the committed field-rename mutant that must turn the
-run red.
+**Why generating the interactions fails.** The `ClientPlan`, server dispatch table, and generic PureScript
+interpreter contract derive from one checked program; a browser test generated from that same program asserts
+self-agreement. Generation can enumerate obligations, but it cannot author an independent expected outcome.
 
-**The rule.** Enumerate from the composed workflow ADT every constructor carrying a UI affordance. Each
-enumerated constructor is bound to an authored interaction or emits an UNVERIFIED row. Interactions and
+**The rule.** Enumerate every reachable event/effect/route and every composed workflow constructor carrying a
+UI affordance from the checked `UiSource` and bound port registry. Each enumerated item is bound to an authored
+interaction and independently authored expected observation, or emits an UNVERIFIED row. Interactions and
 their assertions remain authored.
 
-**Honest limit.** The `purescript-bridge` boundary carries types only — no routes, methods, or
-request/response pairing — so enumeration reaches constructors, not endpoints. Endpoint-level obligation
-generation would require an API description the corpus does not currently specify, and is not recommended
-here.
+**Honest limit.** The checked UI program can enumerate routes, ports, and public contracts, but cannot derive
+the current identity provider's truth, provider-side authorization result, or intended domain outcome without
+becoming its own oracle. Browser and server gates therefore pair that enumeration with hand-authored access
+matrices, fresh challenge values, and observations outside the UI runtime.
 
 **What it forecloses.** A browser suite whose coverage is asserted in prose rather than computed.
 
@@ -196,18 +196,20 @@ bound is finite and declared, per the bound-everything rule.
 **What it forecloses.** An unbounded or wall-clock-relative chaos schedule, which is not replayable and
 therefore not admissible as Register-2.5 evidence.
 
-### 4.5 Recording app-author testing as a deliberate v1 exclusion
+<a id="45-recording-app-author-testing-as-a-deliberate-v1-exclusion"></a>
+### 4.5 Application-authored expectations without deployment control
 
-**Defect.** The absence of an application-author testing surface is structural and correct, and is
-unrecorded. An unstated exclusion reads as an oversight and invites a later contributor to close it by
-leaking a deployment-rules concern into application logic — the modelling error the concentration principle
-names as a diagnostic.
+**Defect — corrected.** The initial analysis called the absence of an application-author testing surface a
+sound v1 exclusion. That conflated two different authorities: stating what application behavior must hold is
+application logic; selecting replicas, topology, injected faults, or failover remains deployment logic.
 
-**The rule.** State the exclusion, its basis (the extension set is closed for v1, so no third-party
-application author exists), and what a later surface would require: an application-level expectation surface
-that composes with, but cannot author, deployment rules.
+**The rule.** Permit typed, authored expectations and driven interactions alongside application source. Join
+them to the generated enumeration of reachable UI events, routes, transitions, ports, and scoped actions.
+Allow deployment rules to supply the execution topology and fault schedule, but give application source no
+constructor with which to author or weaken either.
 
-**What it forecloses.** Nothing in v1. It removes the ambiguity, not a capability.
+**What it forecloses.** A missing application oracle on one side and application-controlled chaos or HA on
+the other.
 
 ### 4.6 Consolidating the mutation-operator vocabulary
 
@@ -272,9 +274,9 @@ strength no applicable move can emit, so no `Release` could ever advance to `Pro
 **Resolved:** the testing doctrine is authoritative.
 [release_lifecycle_doctrine.md §4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable)
 now requires *tested* and states why that is the layer's highest achievable strength rather than a concession, so the
-wording cannot drift back. `DEVELOPMENT_PLAN/phase_30_release_lifecycle.md` propagated the same claim in
+wording cannot drift back. `DEVELOPMENT_PLAN/phase_39_release_lifecycle.md` propagated the same claim in
 four places; a first pass corrected only one (`:194`), and an audit found the other three surviving in the
-Sprint 30.3 validation, deliverable, and the committed `evidence_strength.txt` oracle it produces. All four
+Sprint 39.3 validation, deliverable, and the committed `evidence_strength.txt` oracle it produces. All four
 now read *tested*. The lesson is recorded in the verification discipline: an absence-check whose pattern
 could not span a newline reported the defect closed when three instances remained.
 
@@ -352,8 +354,8 @@ deliberate and is recorded here so it is not "fixed" away by a later reader.
 
 ## 8. What was adopted
 
-This analysis has been **adopted**. Its thesis is now normative doctrine, **four of its six**
-recommendations are placed (the remaining two are recorded as open below), and all four defects are repaired. What follows records where each part landed, so a reader arriving
+This analysis has been **adopted**. Its thesis is now normative doctrine, **five of its six**
+recommendations are placed (the remaining one is recorded as open below), and all four defects are repaired. What follows records where each part landed, so a reader arriving
 at this document can find the owner rather than treat it as a live proposal.
 
 | This document's section | Landed in |
@@ -361,16 +363,15 @@ at this document can find the owner rather than treat it as a live proposal.
 | [§3](#3-generate-the-enumeration-author-the-expectation--adopted) the derivation boundary and the coverage obligation | [testing_doctrine.md §9](./testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation) |
 | [§4.1](#41-a-typed-expectation-surface-on-the-test-topology) the typed expectation surface | [chaos_failover_doctrine.md §11.2](./chaos_failover_doctrine.md#112-the-typed-expectation-surface-expectation) |
 | [§4.4](#44-a-bounded-schedule-type-for-fault-injection) the bounded fault schedule | [chaos_failover_doctrine.md §11.2](./chaos_failover_doctrine.md#112-the-typed-expectation-surface-expectation) (`FaultSchedule`) |
-| [§4.5](#45-recording-app-author-testing-as-a-deliberate-v1-exclusion) the v1 exclusion | [app_vs_deployment_doctrine.md §10](./app_vs_deployment_doctrine.md#10-application-author-testing-is-a-deliberate-v1-exclusion) |
+| [§4.5](#45-application-authored-expectations-without-deployment-control) application-authored expectations without deployment control | [app_vs_deployment_doctrine.md §10](./app_vs_deployment_doctrine.md#10-application-authored-expectations-are-application-logic) |
+| [§4.3](#43-browser-testing-enumerate-the-surface-author-the-interaction) browser-surface enumeration with authored interactions | [testing_doctrine.md §9](./testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation) and [low_code_ui_runtime_doctrine.md §17](./low_code_ui_runtime_doctrine.md#17-verification-obligations) |
 | [§4.2](#42-an-illegal-state-catalog--fixture-coverage-check) catalog integrity (catalog-side half) | Phase 0, as a documentation-lint check |
 | [§4.2](#42-an-illegal-state-catalog--fixture-coverage-check) the fixture-coverage join | Phase 6, as a consumer of `locus_registry.tsv` |
 | [§6](#6-defects-found-in-the-current-corpus) the four defects | repaired in their owning documents; see each subsection |
 
-Two recommendations are **not** adopted and are recorded as open:
-[§4.3](#43-browser-testing-enumerate-the-surface-author-the-interaction) (enumerating driven interactions
-from the contract) has no owning phase, and
+One recommendation is **not** adopted and is recorded as open:
 [§4.6](#46-consolidating-the-mutation-operator-vocabulary) (one mutation-operator catalog) remains
-re-enumerated per phase. Neither blocks anything; both are noted so their absence is a recorded decision.
+re-enumerated per phase. It does not block anything; its absence remains a recorded decision.
 
 Because this document is now referenced by the doctrine it fed, the one-sided-link exception its earlier
 revision claimed no longer applies, and its `Referenced by` field is reconciled from the true link graph like

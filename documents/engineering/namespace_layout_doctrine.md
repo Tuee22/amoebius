@@ -126,7 +126,8 @@ land in their consumers' namespaces, so `amoebius-postgres` never becomes a cros
 ## 4. One namespace per app — per-app tenancy (referenced)
 
 Every app occupies its **own** namespace. That namespace holds the app's workloads, its per-app durable-storage
-requests, and any `PerconaPGCluster` it consumes ([§3](#3-the-postgres-namespace-holds-the-operator-not-per-consumer-databases)). The per-app namespace and the `<app>/<bucket>`
+requests, any `PerconaPGCluster` it consumes ([§3](#3-the-postgres-namespace-holds-the-operator-not-per-consumer-databases)),
+and the generic `UiServer app` and `UiProjectionWorker app` responsibilities when the app declares a UI. The per-app namespace and the `<app>/<bucket>`
 resource binding are owned by
 [service_capability_doctrine.md §4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding),
 and the tenant axis that scopes many tenants across shared platform services — the `TenantId` bundle of a
@@ -136,6 +137,19 @@ partition follows the *same* derived-not-authored rule as the platform partition
 from the app's identity, never written as a free field, so an app can no more name `amoebius-vault` than it can
 name another app's namespace or another tenant's resource
 ([tenancy_doctrine.md §7](./tenancy_doctrine.md#7-two-isolation-layers-and-the-honest-limit)).
+
+The namespace is an application blast-radius boundary, **not** the complete tenant or subject authority
+boundary. A multi-tenant program normally shares the same generic UI-server and projector Deployments across
+its tenants; each request, projection key, handle, provider operation, and audit record remains indexed by the
+server-derived `Principal`, `TenantId`, and `Owner`. Creating one namespace per tenant would not make a missing
+owner predicate safe, and sharing an app namespace does not authorize cross-tenant access. The owner-scoped
+runtime contract is owned by
+[low_code_ui_runtime_doctrine.md §9](./low_code_ui_runtime_doctrine.md#9-routes-identity-authorization-and-the-edge).
+
+Neither worker receives an author-supplied namespace. Both are derived from `AppId`; their plans are immutable
+release inputs and their ServiceAccounts receive only the exact server-side capability edges produced by
+binding. The browser has no ServiceAccount, provider credential, cross-namespace route, or direct service
+endpoint.
 
 ---
 
@@ -148,6 +162,12 @@ workload that declares no dependency on a capability cannot reach that capabilit
 partition is one-per-capability, the derived policies operate along clean namespace boundaries, and the layout
 **adds no new ingress** — cross-namespace reachability is still exactly the derived dependency edges, nothing
 more.
+
+For a UI app, the public allow path is exactly `edge → identity → UiServer app`. The derived server-side
+edges then follow its bound port and projection demands. There is no `browser → MinIO/Postgres/Pulsar/Vault/
+inference` edge, no broad `UiServer → platform` wildcard, and no policy derived merely because a component is
+visually present. Live validation must probe those forbidden direct paths from outside the subject under test;
+a rendered policy claiming to be default-deny is not enforcement evidence.
 
 The connectivity-derivation rule itself is owned by
 [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)
@@ -192,6 +212,7 @@ until the exact bootstrap holder/resourceVersion is read back.
 | The concrete provider set and how each is deployed (HA-always, bring-up ordering) | [platform_services_doctrine.md](./platform_services_doctrine.md) |
 | The capability set and the capability → provider → shape binding | [service_capability_doctrine.md](./service_capability_doctrine.md) |
 | Per-app tenancy, `<app>/<bucket>`, and the `TenantId` tenant axis | [service_capability_doctrine.md §4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding), [tenancy_doctrine.md](./tenancy_doctrine.md) |
+| Generic UI-server/projector behavior, owner-scoped plans, and browser/server trust boundary | [low_code_ui_runtime_doctrine.md](./low_code_ui_runtime_doctrine.md) |
 | Derived east-west NetworkPolicy (default-deny + dependency-graph allow) and its unrepresentability | [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path), [illegal_state_catalog.md §3.6](../illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other) |
 | One-Patroni-cluster-per-consumer and the Percona operator | [platform_services_doctrine.md §8](./platform_services_doctrine.md#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin) |
 | The stateless control-plane singleton, its k8s/etcd-delegated single-instance, and its MinIO-bucket state | [daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton), [storage_lifecycle_doctrine.md §7.2](./storage_lifecycle_doctrine.md#72-amoebius-own-control-plane-state-is-the-minio-bucket-not-a-pvc) |
@@ -228,5 +249,6 @@ result.
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — the blocking/over-open NetworkPolicy made unrepresentable ([§3.6](../illegal_state/illegal_state_security.md#36-blocking-networkpolicy-services-cant-reach-each-other))
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — rendering `Namespace` objects from typed Haskell
 - [Monitoring Doctrine](./monitoring_doctrine.md) — the observability surfaces that reside in `amoebius-observability`
+- [Low-Code UI Runtime Doctrine](./low_code_ui_runtime_doctrine.md) — generic per-app UI workers and the tenant/subject authority boundary that a namespace does not replace
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

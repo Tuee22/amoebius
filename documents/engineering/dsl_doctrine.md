@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for what the amoebius Dhall DSL is — a typed orchestration surface
@@ -64,6 +64,12 @@ dhall"*. It gets there by a hard split between two languages:
   `.../Chain.hs`). Each `Step` is *"the pure renderable shape plus the effectful reconcile action"* —
   a label, the frame it runs in, a `StepKind`, and a `stepRun :: HostConfig -> IO ()` action
   (`Step.hs`). The chain is the system; the Dhall only supplies the `cfg`.
+
+The UI surface is the bounded refinement of this rule. A normalized `UiSource` is a finite declarative program
+**description as data**: it contains no executable callback or effect implementation. Gate 2 checks that value
+into `CheckedUiProgram`; Haskell binds its effects and owns server semantics; the generic PureScript runtime
+interprets the sealed client projection. The complete boundary is owned by
+[low_code_ui_runtime_doctrine.md §3](./low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans).
 
 That split is load-bearing in three ways:
 
@@ -227,12 +233,12 @@ Total composability runs along four concrete axes, each owned in detail by a sib
   under the DSL, not separate products (DEVELOPMENT_PLAN), so an inference workload is a nested typed
   fragment, not a bolt-on. The precise seam by which such a library registers — the typed **`ExtensionSpec`**,
   merged at link time into the one binary — is spelled out below; this axis's closed v1 set is
-  `{infernix, jitML}`. Each of infernix and jitML additionally ships a **demo web app** — a single-page web
-  app that drives its ML workflow and renders its results. Per
-  [app_vs_deployment_doctrine.md §8](./app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic),
-  a demo web app is *application logic that uses* its extension — **not** itself an extension (an arbitrary
-  container app is never an extension) — so it composes as an ordinary app-spec fragment, and these two demo
-  web apps are the **SPA-composition fixtures** (SPA composition itself is front-loaded to Phase 16, below).
+  `{infernix, jitML}`. Their workflow and artifact adapters remain trusted linked Haskell. An application
+  presents those workflows through bounded `UiSource` modules and typed port requirements, composed by the
+  total module graph owned by
+  [low_code_ui_runtime_doctrine.md §6](./low_code_ui_runtime_doctrine.md#6-modules-and-total-composition).
+  The siblings' handwritten demo shells are UX evidence and migration fixtures, not amoebius's application
+  architecture.
 - **Child-cluster-in-parent.** The name *amoebius* is the recursion: a cluster spawns children, which
   spawn their own. A child receives only its own scoped `InForceSpec` — *"including
   their childrens'"* but nothing about siblings — and the whole tree is rolled out from the root. The
@@ -245,11 +251,11 @@ runs a workflow, and tears down resources — the same composition, with a teard
 obligation. The testing surface is owned by the testing doctrine; it is named here only as proof that even
 *testing* is expressed in the one composable DSL rather than a parallel harness language.
 
-**SPA composition, front-loaded to Phase 16.** Composing a multi-service app together with an ML-workflow
-**demo web app** (the infernix/jitML fixtures above) as **typed Dhall fragments** — a single-page-app
-composition over this same extension seam — has its *representational / type-level* validity front-loaded to
-**Phase 16**, where it is proven at the Tier-1 design/spec layer (the same authoring-time gates of
-[§5](#5-the-illegal-state-unrepresentable-contract)); only the **live SPA deploy** stays in **Phase 43**.
+**Low-code UI composition.** A multi-service app composes its normalized `UiSource` modules with typed
+infernix/jitML workflow and artifact ports before any client or server plan exists. The UI-specific Gate 1,
+Gate 2, bind, projection, and runtime boundaries are owned by
+[low_code_ui_runtime_doctrine.md §16](./low_code_ui_runtime_doctrine.md#16-admission-stages-and-illegal-state-foreclosure).
+The development plan owns when representational and live validation occur.
 
 ```mermaid
 flowchart TD
@@ -273,6 +279,7 @@ plugs into the surface:
       { extDhall        : <a typed Dhall sub-catalog nested inside the InForceSpec>
       , extChain        : cfg -> [Step]
       , extCapabilities : List Capability
+      , extUiHandlers   : List TrustedUiHandler
       , extMonitoring   : NonEmpty MonitoringSurface
       }
 
@@ -283,7 +290,10 @@ Four parts, each already load-bearing above: `extDhall` is a nested typed Dhall 
 composition); `extChain :: cfg -> [Step]` is the extension's slice of the chain/Step algebra ([§2](#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic) — an
 extension carries *no* logic the DSL does not already carry as `[Step]`); `extCapabilities` are the
 capability declarations it exports into the capability surface
-([service_capability_doctrine.md](./service_capability_doctrine.md)); and `extMonitoring` is the **mandatory,
+([service_capability_doctrine.md](./service_capability_doctrine.md)); `extUiHandlers` is the closed trusted
+Haskell handler catalog against which low-code UI ports bind
+([low_code_ui_runtime_doctrine.md §8](./low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations));
+and `extMonitoring` is the **mandatory,
 non-optional** `NonEmpty` list of monitoring surfaces the extension stands up — a closed union of the generic
 `Slo` (Prometheus/Grafana) and jitML's `TensorBoard` (backed by MinIO), with no open "other service" arm, so
 an extension that declares no monitoring has no inhabitant
@@ -316,22 +326,17 @@ The `ExtensionSpec` seam is **Path 1**, and it is deliberately *not* open to the
   ([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md#candidate-phase-the-amoebius-native-jit-jitml-absorbed)).
   Path 2 is later-phases design intent, not built.
 
-And the boundary that keeps the seam honest: **there is no arbitrary container app.** The earlier form of
-this clause read *"an arbitrary container app is NOT an extension"* and routed the unwilling party to an
-ordinary app-spec `.dhall` workload, on the strength of the vision's *"v1 can be an orchestrator for
-arbitrary containers"*. That fallback is withdrawn. An app has no image of its own
-([app_vs_deployment_doctrine.md §2](./app_vs_deployment_doctrine.md#2-the-application-logic-surface--what-an-app-is)),
-so being composed-and-orchestrated is no longer an alternative to being linked — it is what linking
-produces. The two axes collapse into one, and the honesty this clause used to buy is now bought by Gate 3
-([§5](#5-the-illegal-state-unrepresentable-contract)) instead of by vendoring: what admits an extension is a
-check on its source, not who wrote it.
+The boundary remains closed: **there is no arbitrary application container and no arbitrary browser-code
+extension**. An application can be composed without linking app-specific code by supplying bounded `UiSource`
+and binding its ports to the existing trusted handler catalog
+([app_vs_deployment_doctrine.md §2](./app_vs_deployment_doctrine.md#2-the-application-logic-surface--what-an-app-is)).
+If it requires a new server effect or workflow semantic, that implementation enters only as a Gate-3-admitted
+Haskell adapter. Gate 3 admits linked implementation; the UI-specific Gate 2 admits declarative interaction
+data. Neither route admits an unreviewed image, dynamic plugin, raw browser callback, or provider endpoint.
 
-Two consequences follow. **Willingness to be linked is now a precondition of being an app at all**, not a
-choice between two supported shapes — a party unwilling to be linked, or whose logic is not Haskell, has no
-v1 path, and that cost is stated plainly here rather than hidden behind a fallback that no longer exists.
-And a **future ML family** still enters as it did: via Path 1 once its math is absorbed into a vendored
-library, or via the constrained surface of [§8](#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits) —
-the difference being that both now pass the same checker.
+A future ML family still enters via Path 1 once its math is absorbed into a vendored library, or via the
+constrained surface of [§8](#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits). A new low-code
+application does not become a new ML extension merely by consuming its typed workflow or artifact ports.
 
 ### The ML-asset types an extension `.dhall` carries: `EngineRuntime` vs `ModelArtifact`
 
@@ -455,9 +460,9 @@ things happen here:
 
 Gates 1 and 2 prove things about a *value*. Neither says anything about the Haskell linked beside it: an
 `ExtensionSpec`'s `extChain` carries a `stepRun :: cfg -> IO ()`, and `IO ()` is a type, not a bound. Before
-apps entered the linked set that gap was covered by *vendoring* — the set was closed at two reviewed ML
-libraries ([§4](#4-total-composability)) — and review is not a mechanism. Gate 3 replaces the review with a
-check.
+trusted app-specific workflow or effect adapters were admitted, that gap was covered by *vendoring* — the set
+was closed at two reviewed ML libraries ([§4](#4-total-composability)) — and review is not a mechanism. Gate 3
+replaces the review with a check.
 
 **Extension source is admitted by a custom AST checker against a closed sanctioned API.** The checker runs at
 build time, before link, over the module set an `ExtensionSpec` contributes:
@@ -583,7 +588,7 @@ boundary and its goldens. These contract/golden checks are pure or in-process an
 enaction and provider/host readback of an `InfrastructureRequired` plan are exercised only by the later live
 infrastructure phases; they are not silently claimed by the Phase-10 type gate. What also stays deferred is the
 **Tier-2 runtime-enforcement residue** — that the *running* cluster enforces what the sealed spec composes —
-owned by **Phase 26**. A green typecheck or decode alone proves neither target feasibility nor live
+owned by **Phase 33**. A green typecheck or decode alone proves neither target feasibility nor live
 enforcement.
 
 ### Recursion: a child's spec is a typed subtree projection
@@ -623,7 +628,7 @@ its building phase, not yet built.
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), a typing argument is evidence, not a
 > tested or proven result: the pure contract is front-loaded to the pre-cluster gates, Phases 4–13 (Tier 1), while
 > runtime enforcement — that the running cluster enforces what the spec composed — stays the Tier-2 residue
-> deferred to Phase 26.
+> deferred to Phase 33.
 
 ---
 
@@ -694,14 +699,17 @@ Haskell carries the logic, and Gate 3 bounds what that Haskell may reach. Concre
 - **The constrained surface is the `SanctionedApi` of [§5](#5-the-illegal-state-unrepresentable-contract).**
   Extension source may name the sanctioned modules and route effects through sanctioned constructors; raw
   `IO`, FFI, `unsafe*`, Template Haskell, and orphan instances are rejected with a located diagnostic.
-- **Both extension paths run through it.** Path 1 (vendored: `{infernix, jitML}`) and the `App` kind
+- **Both extension paths run through it.** Path 1 (vendored: `{infernix, jitML}`) and an optional trusted
+  `App` adapter
   ([capability_extension_doctrine.md §2](./capability_extension_doctrine.md#2-three-extension-kinds-workload-capability-and-app))
-  are admitted by the same checker. Vendoring is no longer load-bearing for *safety* — it now scopes only
-  which workload libraries amoebius ships.
-- **The boundary this section used to draw still stands, with one word changed.** When this document says
-  "the DSL," it means the typed Dhall orchestration surface, not the Haskell extension surface. Linking an
-  app does not move its behaviour into Dhall and this doctrine never claims it does — what it buys is that
-  the behaviour is *checked before it links*, and that there is no third artifact to smuggle it in.
+  are admitted by the same checker. Generic `UiSource` view, state, and transition logic does not enter Gate 3;
+  it enters the UI-specific Gate 2. Vendoring is no longer load-bearing for Haskell-adapter safety — it scopes
+  only which workload libraries amoebius ships.
+- **The boundary remains explicit.** The Dhall UI program describes bounded interaction semantics; linked
+  Haskell implements trusted workflow, data, and effect adapters. A low-code app need not contribute Haskell.
+  Any new effect semantics outside the linked catalog require a Gate-3-admitted adapter and cannot be smuggled
+  into `UiSource` as browser code or a raw network operation
+  ([low_code_ui_runtime_doctrine.md §19](./low_code_ui_runtime_doctrine.md#19-extension-rule-and-permanently-absent-escape-hatches)).
 
 ---
 
@@ -735,7 +743,7 @@ QuickCheck + whole-deployment plan/provision + `renderAll` goldens) — is **fro
 while live enaction/readback of a required initial-infrastructure batch belongs to the later live
 infrastructure phase that owns that substrate. The DSL's
 **runtime-enforcement** half (the live deploy + singleton reconcile that makes the running cluster
-enforce what the spec composed, Tier 2) lands in **Phase 26**, atop the Phase 14 `dsl-step`/`chain` kernel
+enforce what the spec composed, Tier 2) lands in **Phase 33**, atop the Phase 14 `dsl-step`/`chain` kernel
 seeded from hostbootstrap. This doc never maintains a competing status ledger; it states the target shape and
 links back for status.
 
@@ -744,7 +752,7 @@ links back for status.
 > system*, not proof in amoebius — which has built neither the front-loaded pre-cluster (Phases 4–13)
 > in-process validation of this contract (Tier 1: Dhall typecheck + decoder + QuickCheck + conditional
 > infrastructure-plan/materialization fixtures + provision seal + `renderAll` goldens) nor the later live
-> infrastructure enaction/readback and Phase 26 runtime enforcement (Tier 2)
+> infrastructure enaction/readback and Phase 33 runtime enforcement (Tier 2)
 > that makes the running cluster enforce what the spec composed. Read every prescriptive statement here
 > as the contract amoebius intends to satisfy, never as a tested amoebius result
 > ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)).
@@ -754,6 +762,7 @@ links back for status.
 ## Cross-references
 
 - [Engineering Doctrine Index](./README.md)
+- [Low-Code UI Runtime Doctrine](./low_code_ui_runtime_doctrine.md) — [§3](./low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans) the UI-specific Dhall-data refinement and [§16](./low_code_ui_runtime_doctrine.md#16-admission-stages-and-illegal-state-foreclosure) its checked gates
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — [§8](./app_vs_deployment_doctrine.md#8-shared-library-use-is-application-logic) an arbitrary container app is application logic, not an extension
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model) an ML asset fetched/built at pod startup, and an unready/unlanded model, are unrepresentable
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — [§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the three-tier ML-asset lifecycle (`EngineRuntime` baked, `ModelArtifact` `.ready`-gated)

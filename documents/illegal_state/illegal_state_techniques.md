@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_topology.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/README.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/diagram_conventions.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_topology.md
 **Generated sections**: none
 
 > **Purpose**: The mechanism slice of the illegal-state catalog — the seven reusable typing techniques that
@@ -32,7 +32,7 @@ below cite it.
 Everything here is **design intent**, not a tested amoebius result: the type discipline it describes (the spec
 composes; no illegal value is constructible) is a **Tier-1** (design-time / in-process) property targeted for
 in-process validation in the **pre-cluster type/decode gates (Phases 4–13)** (Dhall Gate 1 `dhall type` + the Haskell decoder Gate 2 + QuickCheck), while
-its **runtime enforcement** remains **Phase 26** (Tier 2). Status and gates live only in
+its **runtime enforcement** remains **Phase 33** (Tier 2). Status and gates live only in
 [`../../DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -86,6 +86,16 @@ no function `Ref t1 a -> Ref t2 a`**. A child spec is decoded under its own tena
 of the locked rules "secrets are names only / parents inject into child Vault" and "Keycloak owns all wild
 ingress."
 
+The same mechanism applies inside the low-code UI runtime. `RequestContext tenant subject` and
+`Handle (tenant, audience) kind` retain tenant, subject, and audience indices even in the single-tenant arm; the
+single-tenant case supplies one fixed tenant witness rather than erasing the index. Browser input and model
+output carry an untrusted integrity tag, while provider handles and authority-bearing actions require
+server-only capabilities. There is no general re-tag, `unlabel`, or `declassify` function. An explicitly
+declared, policy-owned release/grant edge is the only constructor that may change an audience, so the
+subject/IDOR, scope-flow, browser/provider, and model-to-authority states
+([§3.80](./illegal_state_security.md#380-a-subject-resolving-or-mutating-another-subjects-resource-without-a-grant)–[§3.82](./illegal_state_capability_messaging.md#382-a-browser-effect-or-provider-call-escaping-the-server-mediated-capability-boundary),
+[§3.84](./illegal_state_ml_asset.md#384-a-model-output-used-as-an-authority-bearing-command-or-identity)) do not depend on a convention to preserve scope.
+
 ### 4.3 GADT-indexed state machines — only legal transitions are typed
 
 *Principle:* a thing that moves through phases (a volume that is `Unbound` then `Bound`; an endpoint that is
@@ -101,6 +111,16 @@ distinct endpoint index with **no** constructor into `WildIngress` ([§3.40](./i
 and a stretched node's `Reach` sum is kind-indexed so a host worker has no constructor into the control-plane
 witness ([§3.38](./illegal_state_multicluster.md#338-a-host-worker-granted-a-control-plane-witness-or-treated-as-a-member)).
 
+The UI action pipeline uses the same phase-index discipline: browser/model values begin as `Proposed`, an
+action-specific total decoder may produce `Validated`, current policy and request-context witnesses may produce
+`Authorized`, and only `Authorized` can be executed. No transition accepts a hidden-control visibility flag,
+a browser-provided tenant/subject, or a model-selected capability as an authorization witness. A sealed UI plan
+is indexed by the complete source generation that produced it; it cannot be re-tagged to a newer generation
+([§3.79](./illegal_state_security.md#379-a-ui-action-whose-server-authorization-does-not-match-its-declaration),
+[§3.83](./illegal_state_security.md#383-a-ui-plan-executed-after-an-authority-bearing-source-changed),
+[§3.84](./illegal_state_ml_asset.md#384-a-model-output-used-as-an-authority-bearing-command-or-identity)). Dynamic equality with the current generation
+is still a checked request-admission fact, not a static proof.
+
 ### 4.4 Ownership indices — single-owner SSoT, structurally
 
 *Principle:* every resource has **exactly one** owner; "two owners" and "no owner" should both be impossible,
@@ -113,6 +133,15 @@ fold is a **total decode-time check** that rejects a duplicate or missing owner.
 the [§6](#6-three-layers-of-foreclosure-and-the-honesty-they-force) honesty layer — amoebius does not pretend a decode-time check is a type-inhabitance proof.) This is the
 amoebius generalization of the prodbox single-owner SSoT discipline, lifted into the type/decode layer.
 
+For the low-code runtime, one closed port registry in `BoundUiProgram` owns the `PortId`, public contracts,
+bound handler, effect class, `AuthPolicyRef`, scope requirement, and audit metadata from which `ClientPlan` and
+`UiServerPlan` are derived. A total exact-key fold rejects missing, extra, duplicate, or differently scoped
+projections; control visibility is not a second authorization owner. The same ownership fold resolves an opaque
+browser identifier only under the authenticated tenant/subject or an explicit grant, never by globally looking
+up the identifier and checking ownership afterward
+([§3.79](./illegal_state_security.md#379-a-ui-action-whose-server-authorization-does-not-match-its-declaration),
+[§3.80](./illegal_state_security.md#380-a-subject-resolving-or-mutating-another-subjects-resource-without-a-grant)).
+
 ### 4.5 Content-address totality — names are total functions of content
 
 *Principle:* a name that doesn't correspond to a real thing is the root of dangling pointers, wrong-IP DNS,
@@ -124,6 +153,15 @@ the wrong/unowned IP" cannot be expressed. The content-addressed MinIO store (po
 and the `experimentHash` identity are owned by
 [`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md); this doc owns only the *totality
 technique* — names are derived, never asserted.
+
+A sealed UI plan applies the same totality rule to freshness. `ProgramDigest`, public-contract digests, runtime
+ABIs, and application-release identity are computed from the complete normalized program and binding identities,
+never authored. Dynamic authority is bound separately to server-observed policy, session, scope, grant, and
+handle epochs. The execution freshness identity is that complete derived tuple; exact source-key equality rejects
+an omitted or substituted static input before the plans can be sealed, and request admission rejects an old
+dynamic epoch. This forecloses a plan that merely *claims* freshness while preserving the honest limit that
+currentness at request arrival is a runtime check
+([§3.83](./illegal_state_security.md#383-a-ui-plan-executed-after-an-authority-bearing-source-changed)).
 
 ### 4.6 Capacity accounting — placement witness (compute) and summed demand within capacity (storage), checked
 
@@ -230,6 +268,12 @@ are the closed-union no-arm idiom, and a `Site`-indexed `Rke2Servers (s)` forcin
 [§3.31](./illegal_state_multicluster.md#331-a-capacity-or-workload-fold-spanning-two-clusters) cross-cluster fold that has no constructor.
 Forecloses [§3.13](./illegal_state_topology.md#313-a-compute-engine-incompatible-with-its-substrates-managed-providers-first-class)–[§3.16](./illegal_state_topology.md#316-a-multi-node-rke2-cluster-with-fewer-linux-hosts-than-nodes-or-a-host-reused), [§3.24](./illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain), and the model↔engine relation of [§3.25](./illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model).
 
+The relation-over-a-collection form also covers a UI information-flow graph. Every source and sink carries a
+tenant/audience confidentiality label and an integrity requirement; a total edge fold admits only compatible
+flows, propagates the most restrictive confidentiality and least trusted integrity across transforms, and
+requires a named policy-owned release edge for any audience widening. It reports every incompatible path rather
+than trusting the renderer that emitted the graph ([§3.81](./illegal_state_security.md#381-a-ui-value-flowing-to-an-incompatible-tenant-subject-or-audience-scope)).
+
 ---
 
 ## 5. Coverage matrix — which technique forecloses which illegal state
@@ -312,8 +356,14 @@ Forecloses [§3.13](./illegal_state_topology.md#313-a-compute-engine-incompatibl
 | 3.74 A container image amoebius did not generate | 4.7 relation over a closed named catalog (`ImageIdentity`, no free-digest/`Url` arm) + 4.1 identity as a required field | [image_build §5](../engineering/image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest), [resource_capacity](../engineering/resource_capacity_doctrine.md) |
 | 3.75 A container whose process is unnamed | 4.1 required `ContainerProcess` field + 4.7 process↔image and binary↔bake-content relations | [resource_capacity](../engineering/resource_capacity_doctrine.md), [daemon_topology §2](../engineering/daemon_topology_doctrine.md#2-context--role-an-orthogonal-grid) |
 | 3.76 A build stage whose content is unmodeled | 4.1 `NonEmpty BakeStep` required field (no `RunShell : Text` arm) + 4.5 pinned per-step identity rather than a fetched address | [image_build §6](../engineering/image_build_doctrine.md#6-host-build-vs-in-pod-build--development_plan-decision-recommended-default-host-builder-for-v1), [generated_artifacts](../engineering/generated_artifacts_doctrine.md) |
-| 3.77 A worker naming an extension its own binary does not link | 4.7 membership relation over the variant's `linked` set + 4.4 one owning variant per app | [daemon_topology §4](../engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected), [image_build §5](../engineering/image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest) |
+| 3.77 A worker naming an extension its own binary does not link | 4.7 membership relation over the variant's `linkedAdapters` set + 4.4 one owning image identity per worker | [daemon_topology §4](../engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected), [image_build §5](../engineering/image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest) |
 | 3.78 Extension source that reaches outside the sanctioned API | 4.3 opaque `CheckedExtensionSource` as the only linkable state + 4.4 one producer of that value | [dsl §5](../engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract), [dsl §8](../engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits) |
+| 3.79 UI action whose server authorization differs from its declaration | 4.4 single action-registry owner/exact-key parity + 4.3 authorized-action transition + 4.2 server-held scoped capability | [low-code UI §8](../engineering/low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations), [§9](../engineering/low_code_ui_runtime_doctrine.md#9-routes-identity-authorization-and-the-edge) |
+| 3.80 Subject resolves/mutates another subject's resource without a grant | 4.2 tenant/subject/audience-indexed handle + 4.4 ownership/grant fold | [low-code UI §10.2](../engineering/low_code_ui_runtime_doctrine.md#102-multi-tenant-mode), [§11](../engineering/low_code_ui_runtime_doctrine.md#11-data-forms-and-storage) |
+| 3.81 UI value flows to an incompatible tenant/subject/audience scope | 4.2 flow-label indices + 4.7 total transitive source→sink relation | [low-code UI §10.3](../engineering/low_code_ui_runtime_doctrine.md#103-information-flow-labels) |
+| 3.82 Browser/provider escape around the UI server | 4.2 server-only provider capabilities + 4.3 sealed-port dispatch | [low-code UI §13](../engineering/low_code_ui_runtime_doctrine.md#13-generic-purescript-client-and-amoebius-ui-server), [§19](../engineering/low_code_ui_runtime_doctrine.md#19-extension-rule-and-permanently-absent-escape-hatches) |
+| 3.83 Stale authority-bearing UI plan | 4.5 complete derived freshness identity + 4.3 current-generation transition + 4.4 exact source ownership | [low-code UI §15](../engineering/low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) |
+| 3.84 Model output used as authority | 4.2 untrusted-integrity/audience tags + 4.3 proposed→validated→authorized transition + 4.7 model-source→authority-sink relation | [low-code UI §12](../engineering/low_code_ui_runtime_doctrine.md#12-workflows-and-artifact-lifting-into-the-ux), [§10.3](../engineering/low_code_ui_runtime_doctrine.md#103-information-flow-labels) |
 
 ---
 
@@ -487,7 +537,7 @@ monitor field, the absent `Off`/`Public` arms), `Gate-2-decoder` (the coverage /
 `rendered-output-golden` (the derived rules/panels in the emitted objects), and `live-effect` (that the alert actually
 fires) — and the foreclosure *layer* of each part is stated separately in the entry. The loci also map loosely onto
 the two-tier band: `Gate-1-editor`, `Gate-2-decoder`, `Gate-3-astcheck`, `provision-seal`, and `rendered-output-golden` are
-**Tier-1** design-time / in-process gates (validated in the **pre-cluster type/decode gates, Phases 4–13** — inside the plan's pre-cluster band, Phases 1–16), while
+**Tier-1** design-time / in-process gates (validated in the **pre-cluster type/decode gates, Phases 4–13** — inside the plan's pre-cluster band, Phases 1–23), while
 `live-effect` is the **Tier-2** runtime-enforcement residue
 deferred to its live phase.
 
@@ -522,9 +572,11 @@ about the running cluster ([§2](./illegal_state_catalog.md#2-the-load-bearing-l
 - [Cluster Topology Doctrine](../engineering/cluster_topology_doctrine.md) — the [§4.7](#47-compatibility--topology-relations-by-construction-over-a-collection) compute-engine / topology relation
 - [Content Addressing Doctrine](../engineering/content_addressing_doctrine.md) — pointers→manifests→blobs totality ([§4.5](#45-content-address-totality--names-are-total-functions-of-content)), the `EngineRuntime` / `ModelArtifact` tiers
 - [Service Capability Doctrine](../engineering/service_capability_doctrine.md) — the capability abstraction and the engine as a substrate-selected capability
+- [Low-Code UI Runtime](../engineering/low_code_ui_runtime_doctrine.md) — the scoped action, information-flow,
+  browser/server, freshness, and model-interaction mechanisms used by [§3.79](./illegal_state_security.md#379-a-ui-action-whose-server-authorization-does-not-match-its-declaration)–[§3.84](./illegal_state_ml_asset.md#384-a-model-output-used-as-an-authority-bearing-command-or-identity)
 - [Release Lifecycle Doctrine](../engineering/release_lifecycle_doctrine.md) — the evidence-gated `PromotionGate` handle ([§4.3](#43-gadt-indexed-state-machines--only-legal-transitions-are-typed))
 - [Pulumi IaC Doctrine](../engineering/pulumi_iac_doctrine.md) — route53 / zerossl name→address binding ([§4.5](#45-content-address-totality--names-are-total-functions-of-content))
 - [Chaos / Failover Doctrine](../engineering/chaos_failover_doctrine.md) — the `runtime-checked` / `live-effect` residue (the honest limit)
 - [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) — proven/tested/assumed honesty discipline
-- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — status, gates, and the Tier-1 (Phases 4–13) / Tier-2 (Phase 26) tier split
+- [Development Plan](../../DEVELOPMENT_PLAN/README.md) — status, gates, and the Tier-1 (Phases 4–13) / Tier-2 (Phase 33) tier split
 - [Engineering Doctrine Index](../engineering/README.md)

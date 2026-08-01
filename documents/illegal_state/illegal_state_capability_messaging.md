@@ -2,21 +2,23 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_28_pulsar_client.md, documents/engineering/pulsar_client_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, documents/engineering/pulsar_client_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering the states in which an application
 > names a concrete product instead of a portable capability, and in which a Pulsar message carries a
-> non-CBOR body — with the honest limit that a type-check proves the *spec composes*, not that the *running
-> cluster enforces it*.
+> non-CBOR body, or a low-code browser escapes its server-mediated capability boundary — with the honest limit
+> that a type-check proves the *spec composes*, not that the *running cluster enforces it*.
 
 ---
 
 ## 1. Scope
 
-This document is a **themed slice** of the illegal-state catalog: the two entries in which an app welds
-itself to a product name rather than a capability abstraction ([§3.12](#312-an-app-that-names-a-product-instead-of-a-capability)),
-and in which a producer puts a non-CBOR body on a Pulsar topic ([§3.23](#323-a-non-cbor-pulsar-payload)).
+This document is a **themed slice** of the illegal-state catalog: an app welding itself to a product name rather
+than a capability abstraction ([§3.12](#312-an-app-that-names-a-product-instead-of-a-capability)), a producer
+putting a non-CBOR body on a Pulsar topic ([§3.23](#323-a-non-cbor-pulsar-payload)), and a browser bypassing the
+UI server to reach code or a provider outside the closed effect algebra
+([§3.82](#382-a-browser-effect-or-provider-call-escaping-the-server-mediated-capability-boundary)).
 
 The **catalog index** (the enumerated list of every illegal state) and the **honesty limit** (that a
 type-check proves the specification composes, never that the running cluster enforces it) are owned by
@@ -74,6 +76,49 @@ on the *consume* side (the total
 **not** a `live-effect` locus: there is no runtime-checked claim that a received body is valid — the decode
 either succeeds or fails fast.
 
+### 3.82 A browser effect or provider call escaping the server-mediated capability boundary
+
+Arbitrary JavaScript, raw HTML, a fetch URL, a provider SDK, or a serialized provider handle turns an
+otherwise typed SPA into a second authority surface. It can skip current server authorization, leak a
+credential, address MinIO/Pulsar/SQL/Vault/inference directly, or reinterpret untrusted text as executable
+markup. The low-code client surface is therefore closed: it has no `RawHtml`, `RawJavaScript`, `RawUrl`,
+`CustomFetch`, provider-coordinate, raw-codec, or persistent-browser-storage arm. Plain text is escaped; trusted
+components have bounded typed properties/events and no ambient network authority. A `ClientPlan` contains only
+public values, safe instructions, and opaque `PortId`/handle values that cannot be converted into credentials or
+provider addresses. Every effect crosses one same-origin transport to the amoebius UI server, whose sealed port
+table supplies the bound provider capability and current request-context/auth witnesses. Provider handles are
+server-only and intentionally have no client-plan encoder. A named external link carries only an id in Dhall,
+exact-joins a linked fixed-HTTPS catalog, is covered by `ProgramDigest`, and projects as navigation-only; it
+cannot be reused as fetch, media, form, or effect transport. **Owner:**
+[`low_code_ui_runtime_doctrine.md` §13](../engineering/low_code_ui_runtime_doctrine.md#13-generic-purescript-client-and-amoebius-ui-server)
+(the browser/server split), with the permanently absent escape arms owned by
+[`low_code_ui_runtime_doctrine.md` §19](../engineering/low_code_ui_runtime_doctrine.md#19-extension-rule-and-permanently-absent-escape-hatches).
+**Technique:**
+[§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
+(only the server holds provider capabilities; handles keep their scope and side) +
+[§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (`PortId`
+can transition to an effect only through sealed server dispatch, never browser-side provider invocation).
+
+**Layer:** `type-foreclosed` for raw-code/network/provider arms and for serializing a server-only capability;
+`decode-foreclosed` for a checked component or plan that contains an incompatible side/scope; `runtime-checked`
+residue — that the generated bundle, CSP, edge, NetworkPolicy, and browser actually expose no other path.
+**Validation-locus:** `Gate-1-editor` (forbidden arms have no Dhall constructor) + `Gate-2-decoder` (only the
+closed instruction/component/port sets can produce a checked program) + `provision-seal` (every effect must bind
+to one server handler/capability and no provider coordinate may enter `ClientPlan`) +
+`rendered-output-golden` (the bundle contract, CSP, routes, and NetworkPolicy expose only the same-origin UI
+server path) + `live-effect` residue (browser traffic and provider authentication confirm the boundary).
+
+**Independent oracle and mutants.** A built-artifact scanner independent of plan generation rejects executable
+inline content, forbidden browser APIs/imports, provider hostnames, provider protocols, secret material, and
+client encodings of server handles. A browser network harness records every request while exercising every port
+and requires the declared immutable-asset origins plus the same-origin UI-server transport only; a separate
+user-initiated named-link case may navigate only to its exact catalog destination with fixed referrer/opener
+policy and no appended data. Mutants add
+each absent raw arm, serialize a provider capability, inject a provider URL or credential into hydration data,
+reuse a catalog link as fetch, add direct network access to a trusted component, and place untrusted text in an
+HTML sink; compile/check, artifact scan, CSP, or the network oracle must turn red before the provider accepts an
+effect.
+
 ---
 
 ## Cross-references
@@ -91,3 +136,6 @@ either succeeds or fails fast.
   the CBOR-only payload rule ([§3.23](#323-a-non-cbor-pulsar-payload)).
 - [`content_addressing_doctrine.md`](../engineering/content_addressing_doctrine.md) — owner of the canonical-CBOR
   discipline the Pulsar payload rule reuses ([§3.23](#323-a-non-cbor-pulsar-payload)).
+- [`low_code_ui_runtime_doctrine.md`](../engineering/low_code_ui_runtime_doctrine.md) — owner of the closed
+  client instruction/component algebra and server-mediated provider-capability boundary
+  ([§3.82](#382-a-browser-effect-or-provider-call-escaping-the-server-mediated-capability-boundary)).

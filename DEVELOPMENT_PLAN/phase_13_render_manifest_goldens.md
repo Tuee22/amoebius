@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Stand up the pure, total `renderAll :: ProvisionedSpec -> [K8sObject]`, mapping Phase 11's
@@ -23,7 +23,7 @@ and pins byte-for-byte dry-run goldens over a pure, no-process suite), that is *
 amoebius result**. This phase deliberately builds **only the pure `renderAll` half** of the manifest doctrine;
 the action-driven reconciler that consumes it on a live cluster — driven by the control-plane singleton under
 its mandatory Kubernetes Lease — is deferred to the live band
-([Phase 19](phase_19_object_reconciler.md)).
+([Phase 26](phase_26_object_reconciler.md)).
 
 ## Phase Summary
 
@@ -45,9 +45,9 @@ the generic apply projection and remain exclusively mutable through their typed 
 reset either live state machine.
 Each source also retains its closed `RenderActivation` (`Immediate | BootstrapSchedulerStage |
 AfterBootstrapAddonCutover | AfterManagedCapacityReady`). `renderAll` lists the complete desired object set
-and never hides later-stage objects; Phase 19's typed diff/enactor filters actions by that sealed activation,
+and never hides later-stage objects; Phase 26's typed diff/enactor filters actions by that sealed activation,
 so managed-node taint/admission cannot be generically applied during the initial scheduler bootstrap.
-The same serializer module is available only inside the amoebius package for Phase 18's
+The same serializer module is available only inside the amoebius package for Phase 25's
 `BootstrapRegistryAction`: it can serialize the already provisioned registry/proxy source subset, but that
 typed cycle-break exposes neither `renderSourcePrivate` nor a per-service render function to callers. The
 public manifest facade exports `renderAll` only.
@@ -73,7 +73,7 @@ drift), and it asserts the **rendered-output-golden illegal states** directly on
 unsafe manifest is not a value `renderAll` can return, so a golden test over the output proves the property with
 no cluster. What is *not* here: snapshot-bound typed actions (including scoped SSA, staged delete/resume,
 host actions, scheduler-ledger CAS, and Job completion/cleanup), wait-for-ready, drift-heal, and live
-convergence — all deferred to [Phase 19](phase_19_object_reconciler.md); and
+convergence — all deferred to [Phase 26](phase_26_object_reconciler.md); and
 the `chain`/`[Step]` `--dry-run` plan render, which is [Phase 14](phase_14_chain_kernel_boundary.md). This phase
 locks the **`renderAll`** step of the pre-cluster spine.
 
@@ -151,7 +151,7 @@ proven/tested/assumed ledger, marking runtime enforcement UNVERIFIED (owned by t
   cluster-free `renderAll :: ProvisionedSpec -> [K8sObject]` whose output is a value amoebius inspects before any
   object reaches a cluster; the record *is* the manifest, serialized via Aeson, with no intermediate template
   and no `values.yaml`. **Only the pure-render half is adopted here**; the apply/reconcile engine of that
-  doctrine's [§5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) is the live-band [Phase 19](phase_19_object_reconciler.md) residue.
+  doctrine's [§5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions) is the live-band [Phase 26](phase_26_object_reconciler.md) residue.
 - [`manifest_generation_doctrine.md §3`](../documents/engineering/manifest_generation_doctrine.md#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)
   — **best practice by construction: an unsafe manifest is not constructible.** The renderer emits a hardened
   `securityContext` on every pod, least-privilege per-workload RBAC, default-deny-plus-derived-allow
@@ -257,7 +257,7 @@ deployment shapes {`SingleNode`, `Distributed`}, and every renderable `K8sObject
 minimum frequency — so the property demonstrably exercises the whole spec surface, not one happy-path shape.
 An export-list check proves the public manifest facade exposes `renderAll` but not
 `renderSourcePrivate` or any service-valued renderer; the internal serializer remains reachable only by the
-whole-deployment implementation and the typed Phase-18 bootstrap-registry action.
+whole-deployment implementation and the typed Phase-25 bootstrap-registry action.
 **Docs to update**: `documents/engineering/manifest_generation_doctrine.md` (backlink §3 to the Phase-13 pure
 renderer; keep the typed-action reconciler as the live-band residue), `documents/engineering/platform_services_doctrine.md`
 (the rendering enactment of the §9/§10 rules), `DEVELOPMENT_PLAN/system_components.md`.
@@ -318,12 +318,12 @@ request, with the closed root-filesystem arm projected exactly; access-/persiste
   cannot call a renderer. `renderAll` is the sole public manifest function.
 - A closed `RenderReconcileMode` projection that includes only immutable schema/initial fields for the
   scheduler root ledger and mandatory Lease. Ledger rows/CAS versions and Lease holder/renewal fields have no
-  generic-SSA source path and are owned only by the corresponding typed actions in Phase 19.
+  generic-SSA source path and are owned only by the corresponding typed actions in Phase 26.
 - Exact preservation of each source's `RenderActivation`; the golden covers all four arms. The renderer emits
   the complete desired set irrespective of stage, while a companion partition oracle proves the later action
   planner can select only the identities active at a given readiness witness.
 - An in-file honesty note: this is the render half only — the SSA/ApplySet apply, prune, wait-for-ready, and
-  release ledger are the live-band [Phase 19](phase_19_object_reconciler.md) reconciler, run by the
+  release ledger are the live-band [Phase 26](phase_26_object_reconciler.md) reconciler, run by the
   Deployment-`replicas=1` singleton under its mandatory Lease (no bespoke election).
 
 ### Validation
@@ -503,7 +503,7 @@ The whole sprint (📋 Planned).
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/manifest_generation_doctrine.md` — backlink §2/§3 to the Phase-13 pure renderer and
   rendered-output goldens; keep §5's snapshot-bound typed action reconciler explicitly as the live-band
-  [Phase 19](phase_19_object_reconciler.md) residue, run by the Deployment-`replicas=1` singleton under its
+  [Phase 26](phase_26_object_reconciler.md) residue, run by the Deployment-`replicas=1` singleton under its
   mandatory Lease.
 - `documents/engineering/conformance_harness_doctrine.md` — record the rendered-output-golden validation
   locus this phase realizes as the **`renderAll`** step of the pre-cluster spine, in Register 1.
@@ -542,5 +542,5 @@ The whole sprint (📋 Planned).
 - [phase_10](phase_10_capability_bind.md) — the capability→provider→shape binder and provision fold producing
   the opaque whole-deployment `ProvisionedSpec` and its sealed identity-keyed render-source set
 - [phase_14](phase_14_chain_kernel_boundary.md) — the `chain`/`[Step]` `--dry-run` plan render deferred from here
-- [phase_19](phase_19_object_reconciler.md) — the live action-driven reconciler that consumes
+- [phase_26](phase_26_object_reconciler.md) — the live action-driven reconciler that consumes
   `renderAll`'s desired object set

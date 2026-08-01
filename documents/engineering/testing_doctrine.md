@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_18_base_image_registry.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_21_retained_storage.md, DEVELOPMENT_PLAN/phase_23_platform_backbone.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_29_content_store_workflow.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/phase_32_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_33_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_36_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_39_infernix_lift.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define amoebius testing as a self-tearing-down `InForceSpec` topology — spin up resources, run a
@@ -53,7 +53,7 @@ Three consequences fall straight out of "a test is a spec":
   contract of [§3](#3-the-test-topology-contract-spin-up--run--always-tear-down).
 
 > **Honesty.** Test-as-an-`InForceSpec`-topology, `suggest-test`, flagged credentials, and the elevated
-> storage-deleting harness are **Phase 42** in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
+> storage-deleting harness are **Phase 54** in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)
 > and are **not started**. This document generalizes patterns *proven in the sibling prodbox project*
 > (`prodbox/documents/engineering/unit_testing_policy.md`,
 > `prodbox/documents/engineering/integration_fixture_doctrine.md`) into amoebius *design intent*. Per
@@ -154,7 +154,7 @@ flowchart TD
   classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
   classDef refuse   fill:#f8d6d6,stroke:#b23636,color:#5c1414,stroke-width:2px
 ```
-*Design intent (Phase 42, not started): the spin-up → run → always-tear-down contract, with a fail-closed leak sink; the live allocation, teardown, and independent inventory-diff residue is runtime-checked, not proven here.*
+*Design intent (Phase 54, not started): the spin-up → run → always-tear-down contract, with a fail-closed leak sink; the live allocation, teardown, and independent inventory-diff residue is runtime-checked, not proven here.*
 
 The "no explicit list of tests" principle is what makes this a *contract* rather
 than a checklist: amoebius does not maintain an enumerated test catalog that each could forget the teardown
@@ -214,7 +214,7 @@ machine-visible by emitting a ledger.
   and the required-evidence-strength-per-environment mapping are **owned by**
   [release_lifecycle_doctrine.md §4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable); this doc owns only the ledger the gate
   reads. *(Design intent: the release lifecycle is Phase-0 reference doctrine and this ledger harness is
-  Phase 42 / not started — read as a specification to be validated, never a proven amoebius result.)*
+  Phase 54 / not started — read as a specification to be validated, never a proven amoebius result.)*
 - **A Tier-1-only in-process ledger is structurally insufficient to advance a production `PromotionGate`.**
   The front-loaded pre-cluster formal-validation track
   ([../../DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md](../../DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md))
@@ -403,7 +403,7 @@ exception to this doc). This doc owns the **exception mechanism**:
 
 > **Honesty.** The flag-and-elevated-sweep mechanism above is a *design resolution* of an explicitly open
 > question in the vision, not a built or tested amoebius capability. Treat
-> the leak-free guarantee as a specification to be validated, never as a proven result. Delivery (Phase 42)
+> the leak-free guarantee as a specification to be validated, never as a proven result. Delivery (Phase 54)
 > is tracked in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
 
 ---
@@ -535,11 +535,80 @@ To keep the SSoT boundaries crisp:
 This document is normative testing doctrine only. Delivery sequencing, completion status, validation gates,
 and remaining work — the test-topology DSL, `suggest-test`, flagged credentials, the elevated
 storage-deleting harness, and the per-run ledger artifact — are owned by
-[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (Phase 42; with the cross-cluster
-failover proof artifacts in Phase 33). This doc never maintains a competing status ledger; it states the
+[../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (Phase 54; with the cross-cluster
+failover proof artifacts in Phase 43). This doc never maintains a competing status ledger; it states the
 target shape and links back for status. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline),
 no statement here is a proven amoebius result: the model generalizes patterns proven in prodbox into
 amoebius design intent.
+
+---
+
+## 12. Spoof-resistant evidence: a gate observes an unforgeable fresh effect
+
+A gate can report success while observing only values supplied by the system under test. A self-reported
+compliance trace, a caller-supplied identity header, a golden regenerated from current output, or a canned
+response matching a fixed fixture can therefore make an absent or bypassed behaviour appear present. The
+result is not independent evidence.
+
+Treating a signed self-report as sufficient does not solve the problem. A signature authenticates the emitter;
+it does not establish that the emitter performed the claimed effect, used the claimed authority, or observed the
+claimed provider state.
+
+amoebius gates use a **fresh-challenge witness envelope**:
+
+```text
+GateChallenge =
+  { runNonce
+  , fixtureDigest
+  , subjectBinaryDigest
+  , observerIdentity
+  , issuedAfterSubjectStart
+  }
+
+ObservedEvidence =
+  { challenge
+  , rawObservationDigest
+  , observerTimestamp
+  , authorityIdentity
+  }
+```
+
+The harness, never the subject, generates `runNonce` after the subject starts and injects nonce-bearing canaries
+through the public boundary being tested. The independent observer must recover the same nonce from the actual
+effect or provider state. A fixed response recorded before challenge issuance cannot satisfy the gate.
+
+The evidence rules are:
+
+1. **Observer independence.** Pure gates compare against a separately authored predicate, model, table, or
+   golden that does not call the implementation under test. Boundary and live gates read raw evidence from an
+   observer outside the subject process: an argv-recording shim, browser network trace, kernel/audit trace,
+   Kubernetes API readback, provider API, broker/store readback, or another named authority boundary.
+2. **Freshness binding.** Every effectful gate carries a fresh harness-generated nonce or unpredictable canary
+   through the requested operation and recovers it from the external observation. The ledger records the
+   challenge and raw-observation digests. Cached output is admitted only when cache reuse is the property under
+   test; determinism gates force an independently observed recomputation.
+3. **Authority authenticity.** Authentication and isolation gates obtain real, least-privilege credentials
+   from the authority under test. Raw subject, tenant, role, or gateway headers supplied by the harness are
+   hostile inputs, never authentication evidence. The gate includes a paired own-scope success and
+   foreign-scope denial under distinct credentials.
+4. **Two-sided path testing.** A positive reaches the sanctioned path. Its paired negative differs only in the
+   authority, scope, route, or lifecycle witness under test and proves zero forbidden effect through external
+   readback. Security-sensitive live gates also probe direct Service/Pod/provider paths so success through the
+   intended edge cannot hide a bypass.
+5. **Fail-closed observation.** An unavailable, incomplete, unauthenticated, or challenge-mismatched observer is
+   a gate failure. No fallback accepts a subject-emitted compliance event or a stale ledger row.
+6. **Independent evidence custody.** The party or generator that writes the implementation cannot be the sole
+   author of the oracle or observer adapter. Phase 0 pins the fixture, challenge shape, expected locus, mutant,
+   and evidence parser before the implementation phase opens.
+
+Every applicable gate names its observer, fresh challenge, authority source, paired negative, committed mutant,
+and independent oracle in its `## Gate integrity` section. A pure gate marks fresh challenge and authority
+credentials not applicable and names the independent reference predicate instead; it does not fabricate an
+effectful observer.
+
+This contract prevents spoofing of gate evidence at the modeled boundary. It does not prove that the kernel,
+identity provider, provider API, observer, or hardware is uncompromised. Those trust assumptions remain named in
+the proven/tested/assumed ledger.
 
 ---
 

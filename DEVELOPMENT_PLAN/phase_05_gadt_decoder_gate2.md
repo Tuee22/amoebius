@@ -53,7 +53,7 @@ The pure decode code carries no `error`/`undefined`/partial head (checked non-pa
 `Dhall.inputFile auto` alone throws (`DhallErrors`, IO exceptions) rather than returning `Left`, the
 exception-catch wrapper catches those and maps them to a structured `Left DecodeError` (fail-closed) so no
 throw escapes into a half-applied effect. What is *not* here: the chain
-/ reconcile / singleton runtime (Phase 26), the pure capacity/topology fold implementation and properties
+/ reconcile / singleton runtime (Phase 33), the pure capacity/topology fold implementation and properties
 (Phase 7) consumed by the conditional infrastructure-planning/post-materialization provision seal (Phase 11),
 the capability→provider binder (Phase 10), and
 the exhaustive illegal-state corpus with its per-entry validation-locus
@@ -408,7 +408,7 @@ structural owner. These are the ADTs that make an illegal combination un-spellab
   `Serial | BoundedParallel PositiveNatural` architecture and stage concurrency policies. The decoder proves
   dependency references are closed and the graph acyclic; Phase 7 derives maxima over every legal concurrent
   set. All quantities and references survive in their refined domains; there is no optional, editable-
-  aggregate, or descriptor-independent builder-resource bypass. Phase 18 owns snapshot-bound live admission,
+  aggregate, or descriptor-independent builder-resource bypass. Phase 25 owns snapshot-bound live admission,
   not decoding.
 - Every normalized `KindEngineDemand` retains non-empty ordinal-indexed node-container runtime, full
   `NodeCapacity`, and in-node `KindControlPlane | KindWorker` reserve plus a distinct host-only
@@ -435,7 +435,7 @@ structural owner. These are the ADTs that make an illegal combination un-spellab
   or optional/defaulted applicable history requirement returns a structured decode error. Each autoscaled
   rke2 candidate retains the template-local agent reserve/system-carve reference and declared raw per-instance
   host CPU/memory/disk supply, distinct from the managed-provider SKU/no-reserve arm. Missing raw host supply,
-  process-template qualification, or SKU identity is a decoder-field-inventory failure. Phase 17 owns kind
+  process-template qualification, or SKU identity is a decoder-field-inventory failure. Phase 24 owns kind
   fit/enforcement; live multi-node rke2 admission/enforcement
   remains an explicitly unassigned Phase-N gate and no current live phase may claim it.
 - An in-file honesty note that binding/capacity/topology totals ([§4.6](../documents/illegal_state/illegal_state_techniques.md#46-capacity-accounting--placement-witness-compute-and-summed-demand-within-capacity-storage-checked)/[§4.7](../documents/illegal_state/illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)) are *not* foreclosed by these
@@ -599,7 +599,7 @@ exercised here → layer-2 Register-1), `documents/engineering/testing_doctrine.
 Adopt [`testing_doctrine.md §2 — Register 1`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing): assemble the
 in-process decode battery that exercises the fail-closed decoder over every positive fixture and confirms it
 returns a structured `Left` on each representative Gate-2 negative, emitting a Register-1 proven/tested/assumed ledger
-with model↔runtime correspondence marked UNVERIFIED (owned by Phase 26). The exhaustive per-catalog-entry
+with model↔runtime correspondence marked UNVERIFIED (owned by Phase 33). The exhaustive per-catalog-entry
 corpus, the QuickCheck closure/round-trip/fold-totality properties, and the per-entry validation-locus ledger
 are the front-loaded next phase ([Phase 6](phase_06_illegal_state_corpus.md)); the capacity/topology fold
 negatives are [Phase 7](phase_07_capacity_core_folds.md), and provider-expanded/capability feasibility is
@@ -705,7 +705,7 @@ The whole sprint (📋 Planned).
 
 **Engineering docs to update (when the gate runs, flip the honest layer, never before):**
 - `documents/engineering/dsl_doctrine.md` — backlink §5's Gate 2 to the in-process Phase-5 decoder; keep the
-  runtime-enforcement half as Tier-2 residue owned by Phase 26.
+  runtime-enforcement half as Tier-2 residue owned by Phase 33.
 - `documents/illegal_state/illegal_state_catalog.md` — annotate each entry the IR type-/decode-forecloses here
   with its realized foreclosure layer (layers 1–2 → Register-1); keep runtime-checked entries (layer 3)
   deferred, and keep capacity/topology/provider-feasibility entries deferred to the Phase-7 fold and Phase-11
@@ -734,4 +734,4 @@ The whole sprint (📋 Planned).
 - [phase_07](phase_07_capacity_core_folds.md) — the pure capacity/topology fold implementation and
   properties deferred from here; Phase 11 invokes them after bind/expansion while deriving the conditional
   infrastructure plan and again at the post-materialization provision seal
-- [phase_26](phase_26_live_dsl_singleton.md) — the Tier-2 runtime-enforcement half of the DSL
+- [phase_33](phase_33_live_dsl_singleton.md) — the Tier-2 runtime-enforcement half of the DSL

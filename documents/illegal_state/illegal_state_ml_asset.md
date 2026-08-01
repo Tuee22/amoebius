@@ -2,12 +2,13 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering the engine/model asset
-> lifecycle (jit-build cache), continuous-training cadence, feed merge order, and cross-app model grants —
-> the ML-asset states a valid `InForceSpec` cannot represent.
+> lifecycle (jit-build cache), continuous-training cadence, feed merge order, cross-app model grants, and the
+> boundary between model output and authority-bearing UI actions — the ML-asset states a valid `InForceSpec`
+> cannot represent.
 
 ---
 
@@ -17,7 +18,8 @@ This document is a **themed slice** of the illegal-state catalog: it carries the
 ML-asset and training illegal states ([§3.25](#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model),
 [§3.32](#332-a-continuous-training-run-with-no-checkpoint-cadence-or-a-feed-with-no-bounded-retention),
 [§3.33](#333-a-multi-partition-training-feed-with-no-defined-merge-order),
-[§3.34](#334-an-app-serving-or-continuing-another-apps-model-without-a-grant)) and nothing else.
+[§3.34](#334-an-app-serving-or-continuing-another-apps-model-without-a-grant),
+[§3.84](#384-a-model-output-used-as-an-authority-bearing-command-or-identity)) and nothing else.
 
 It is **not** the index of the catalog. The full catalog index, the SSoT split, and the load-bearing honesty
 limit (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned by
@@ -156,6 +158,47 @@ total decode-time rejection; runtime-checked residue — that the running serve 
 cross-app model reference absent a grant a total decode-time `Left`) + `live-effect` (the residue: the running
 serve path honoring the per-app namespace).
 
+### 3.84 A model output used as an authority-bearing command or identity
+
+Readiness and provenance establish which model produced an output; they do not make that output trustworthy or
+authorized. A model can hallucinate an action id, tenant, subject, resource identifier, permission, grant, policy,
+SQL predicate, provider coordinate, or workflow transition. If a model-interaction component can deserialize
+such text directly into authority, prompt injection becomes an authorization bypass. Every inference result
+therefore enters the UI as scope-labelled, untrusted `Proposed output`. It may be displayed through an escaped
+public projection or supplied as ordinary input to a named action-specific total validator. It cannot construct
+or select a `PortId`, `ScopeWitness`, opaque handle, `GrantHandle`, `AuthPolicyRef`, tenant/subject identity, or
+provider capability. Only server-supplied context and current policy may transition a validated proposal to an
+authorized effect; any policy-required confirmation is a separate authenticated event, never a model assertion.
+The output inherits the input/artifact audience and cannot widen it merely because a model transformed the
+content. **Owner:**
+[`low_code_ui_runtime_doctrine.md` §12](../engineering/low_code_ui_runtime_doctrine.md#12-workflows-and-artifact-lifting-into-the-ux)
+(the `ReadyArtifactHandle`→typed `InvokeArtifact` interaction chain), with server reauthorization owned by
+[`low_code_ui_runtime_doctrine.md` §13](../engineering/low_code_ui_runtime_doctrine.md#13-generic-purescript-client-and-amoebius-ui-server).
+**Technique:**
+[§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
+(untrusted-integrity and audience tags; capabilities remain server-issued) +
+[§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
+(`Proposed`→`Validated`→`Authorized`, with no model-output→authority edge) +
+[§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)
+(the information-flow relation over model sources and authority-bearing sinks).
+
+**Layer:** `type-foreclosed` for constructing an opaque authority value from a public model-output type;
+`decode-foreclosed` for a UI dataflow that connects untrusted model output to an authority sink without the
+named validator and policy-owned action edges; `runtime-checked` residue — that the model adapter returns the
+declared public contract and the server reauthorizes every resulting request. **Validation-locus:**
+`Gate-1-editor` (public model-output values have no capability/identity constructors) + `Gate-2-decoder` (the
+typed flow graph rejects model-output→authority paths) + `provision-seal` (the artifact handle, model contract,
+validator, port handler, policy, audience, and current capability binding must resolve together) +
+`live-effect` residue (adversarial model text cannot cause an unauthorized effect).
+
+**Independent oracle and mutants.** A dataflow oracle maintained independently from the UI compiler enumerates
+every authority-bearing sink and proves that each model-source path crosses the expected deterministic validator
+and server-policy edge. Black-box prompts attempt to emit a privileged `PortId`, another tenant/subject, a
+foreign resource handle, a grant, and a destructive workflow instruction; provider/audit state, not displayed
+text, is the effect oracle. Seeded mutants dispatch a model-selected action id, copy a predicted tenant into
+request context, decode text as an opaque handle/capability, omit the current policy check, auto-confirm a
+protected action, or drop the inherited audience label; every mutant must fail before authority is exercised.
+
 ---
 
 ## Cross-references
@@ -180,3 +223,6 @@ serve path honoring the per-app namespace).
   [§3.33](#333-a-multi-partition-training-feed-with-no-defined-merge-order)).
 - [`vault_pki_doctrine.md`](../engineering/vault_pki_doctrine.md) — the per-app upstream-pull credential
   ([§3.34](#334-an-app-serving-or-continuing-another-apps-model-without-a-grant)).
+- [`low_code_ui_runtime_doctrine.md`](../engineering/low_code_ui_runtime_doctrine.md) — the
+  `ReadyArtifactHandle`→typed interaction chain, information-flow label contract, and server-side
+  reauthorization boundary ([§3.84](#384-a-model-output-used-as-an-authority-bearing-command-or-identity)).

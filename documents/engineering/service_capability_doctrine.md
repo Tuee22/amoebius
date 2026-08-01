@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_topology_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the abstraction by which amoebius application logic names abstract
@@ -68,6 +68,27 @@ These eight are the Phase-0 core vocabulary an app spec has for "a service I dep
 added for ML serving as Phase-N design intent ([§4.1](#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored)); it is one more *specific* closed-union capability — not
 the generic "some other service" escape hatch this rule forbids, and its provider still has no product arm and
 no URL arm.
+
+### 2.1 A service need is not a user permission
+
+`Capability` describes infrastructure required by an application. It does not authorize a principal to read,
+write, invoke, subscribe, administer, or share a resource. Treating possession of `ObjectStore` or `Sql` as
+user authority would turn the UI server into a confused deputy: every authenticated caller could exercise the
+whole app-level provider credential.
+
+amoebius therefore keeps two closed axes:
+
+```text
+ServiceNeed = Capability
+Permission tenant subject operation resource = opaque authorization witness
+```
+
+Application and low-code UI ports declare semantic operations. Binding derives their transitive
+`ServiceNeed`s and joins their mandatory authorization policies to the tenant/subject/resource graph; only the
+runtime authorization boundary can mint a `Permission` witness for the current request. Dhall can request a
+capability and reference a policy, but it cannot construct a permission, provider credential, tenant context,
+or resource handle. The UI-specific port and request-context contract is owned by
+[low_code_ui_runtime_doctrine.md §8](./low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations).
 
 ---
 
@@ -499,6 +520,10 @@ deployable `ProvisionedSpec` — are owned by [dsl_doctrine.md](./dsl_doctrine.m
   topic lifecycles against `MessageBus`, OIDC auth rules against `Identity`, published services against `Edge`.
   These are the same app-surface declarations catalogued by
   [app_vs_deployment_doctrine.md §2](./app_vs_deployment_doctrine.md#2-the-application-logic-surface--what-an-app-is), now read as capability resources.
+- **UI logic declares typed operation ports, not provider operations.** A port's semantic handler derives the
+  capability needs, least-authority permission check, provider policy, and east-west edges from one bound
+  source. A UI source cannot name a provider, HTTP endpoint, topic, SQL fragment, object coordinate, or
+  credential ([low_code_ui_runtime_doctrine.md §8](./low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations)).
 - **Deployment rules declare the binding.** Provider (default canonical) + shape ([§4](#4-capability--provider--shape-the-binding), [§5](#5-per-cluster-structural-shapes--beyond-values)). The same app
   composes with a single-node binding or a distributed one with zero app-spec change.
 - **Secrets and identity tie to Vault by name, never by value.** A provider that needs a credential — a `Sql`
@@ -578,7 +603,7 @@ surface, never asserted here.
 This document is normative capability-model doctrine only. Delivery sequencing, completion status, validation
 gates, and remaining work are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md),
 never restated here. For orientation only (the plan is authoritative): the **manifest generation + typed
-reconciler that render and apply a chosen shape** land with platform services in **Phase 19**, and the
+reconciler that render and apply a chosen shape** land with platform services in **Phase 26**, and the
 **capability abstraction itself — capability needs, the alternate-admitting provider binding, and per-cluster
 shapes** — lands with the DSL type families in **Phase 10**. This doc states the target shape and links back for
 status.
@@ -601,7 +626,7 @@ status.
 - [Documentation Standards](../documentation_standards.md)
 
 > **Honesty.** Everything in this doctrine is Phase 0 design intent, specified before implementation:
-> manifest generation and the typed reconciler are Phase 19, and the capability abstraction is Phase 10. It is
+> manifest generation and the typed reconciler are Phase 26, and the capability abstraction is Phase 10. It is
 > generalized from evidence in the sibling **prodbox** project (typed-Haskell→Aeson→`kubectl apply` rendering,
 > a chart-platform planner) but **not yet built or proven in amoebius**, and prodbox itself names products and
 > enforces the very substrate-equivalence lint this doctrine reverses. Per

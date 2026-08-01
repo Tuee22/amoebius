@@ -2,13 +2,14 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_25_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_storage.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering gateway/DNS/NetworkPolicy wiring,
 > backdoor ingress, cross-tenant references and literal secrets, plaintext-at-rest, unsafe workloads, the
-> secure-gateway reach, admin mutations, and derived RBAC bindings — the states amoebius makes unrepresentable
-> so that ingress, secrets, and the admin surface cannot be misconfigured into a leak.
+> secure-gateway reach, admin mutations, derived RBAC bindings, and the low-code UI authorization, ownership,
+> information-flow, and plan-freshness boundary — the states amoebius makes unrepresentable so that ingress,
+> secrets, data access, and authority-bearing UI actions cannot be misconfigured into a leak.
 
 ---
 
@@ -314,6 +315,168 @@ graph, with no grant crossing a tenant tag) + `live-effect` residue (provider-st
 normalized content digests, one coalesced target/base witness, store-global MinIO components, and the sealed
 transition high-water; the policies refuse a live cross-tenant read).
 
+### 3.79 A UI action whose server authorization does not match its declaration
+
+A hidden or disabled control is presentation, never authorization. If the SPA can name a raw endpoint, if an
+action has no policy, or if its client-visible permission differs from the server handler's enforced permission,
+an attacker can call the endpoint directly and bypass the UX. The low-code surface therefore has no
+`RawHttp`, handler-only, policy-optional, or visibility-as-auth arm. One closed port registry inside the
+`BoundUiProgram` owns each `PortId`, typed public contracts, bound server handler, effect class, non-optional
+`AuthPolicyRef`, scope requirement, and audit metadata; `ClientPlan`, `UiServerPlan`, and edge projections are
+derived from that value. Only the public `ClientPlan` and allowlisted client assets have browser routes; the
+private server-plan manifest and its dispatch/policy bytes do not. Construction of an authorized invocation requires both the authenticated trusted
+request context and the matching current policy witness. A total exact-key fold rejects missing, extra,
+duplicate, handler-mismatched, or policy-mismatched projections, and the default for an absent policy is refusal
+rather than allow. **Owner:**
+[`low_code_ui_runtime_doctrine.md` §8](../engineering/low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations)
+(the single action registry and exact-key fold) +
+[`low_code_ui_runtime_doctrine.md` §9](../engineering/low_code_ui_runtime_doctrine.md#9-routes-identity-authorization-and-the-edge)
+(independent server authorization and the edge).
+**Technique:**
+[§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (one port-registry
+owner plus exact-key parity) +
+[§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
+(`Validated` becomes `Authorized` only through current request-context and policy witnesses) +
+[§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
+(the authority to execute is a server-held, tenant/subject-scoped capability).
+
+**Layer:** `type-foreclosed` for raw/optional-policy action shapes and for executing anything other than an
+authorized invocation; `decode-foreclosed` at the post-bind seal for the cross-projection exact-key fold;
+`runtime-checked` residue — that the running gateway and UI server enforce the sealed policy on every request.
+**Validation-locus:** `Gate-1-editor` (a raw endpoint or route/port without its non-optional `AuthPolicyRef` has
+no Dhall arm) + `Gate-2-decoder` (the referenced policy and public contracts resolve and type-check locally) +
+`provision-seal` (the normalized `PortId`, public contracts, handler, effect class, `AuthPolicyRef`, and scope
+tuples must match across the expanded gateway, server-dispatch, authorization, and audit projections before any
+plan is sealed) +
+`rendered-output-golden` (the emitted public routes terminate at the authenticated UI server, match the exact
+public-asset allowlist, and carry neither a handler-only bypass nor a private server-plan path) + `live-effect`
+residue (a direct unauthorized request and private-manifest fetch are denied).
+
+**Independent oracle and mutants.** A checker separate from the UI-plan compiler extracts normalized action
+tuples from the authored registry and independently extracts enforced tuples from the sealed server policy and
+rendered routes, then requires exact set equality. Seeded mutants delete one policy, add a handler-only route,
+swap two equal-cardinality permissions, duplicate an action id, mark a control hidden while leaving its handler
+unguarded, change a handler id without changing the policy, and serve the private server-plan manifest as a
+client asset; each must fail before effects or private disclosure. Black-box direct action and manifest
+requests are the live oracle, not a click-visibility test.
+
+### 3.80 A subject resolving or mutating another subject's resource without a grant
+
+Checking only that a resource identifier exists creates an insecure direct-object-reference path: two subjects
+inside one tenant can see one another's rows, or a subject can submit another tenant's identifier. Every request
+is decoded under `RequestContext tenant subject`, and a browser identifier resolves only to a private
+`Handle scope kind` through a server resolver that simultaneously applies tenant, subject/audience, and
+explicit-grant predicates. Provider operations accept that scoped handle, never a globally resolved
+`ResourceId`; a handler has no API that performs “lookup by id, authorize later.” Tenant-wide, role-shared, and
+subject-owned resources remain representable through a closed `Audience` and a policy-derived `Grant` witness.
+The single-tenant architecture retains the tenant index and supplies one fixed witness, so switching deployment
+mode cannot erase the isolation proof needed by the multi-tenant arm. Derived SQL row policies, object prefixes,
+topic namespaces, workflow references, and cache keys preserve the same scope as defense in depth.
+**Owner:**
+[`low_code_ui_runtime_doctrine.md` §10.2](../engineering/low_code_ui_runtime_doctrine.md#102-multi-tenant-mode)
+(scope epochs and grants) +
+[`low_code_ui_runtime_doctrine.md` §11](../engineering/low_code_ui_runtime_doctrine.md#11-data-forms-and-storage)
+(server-injected tenant/subject constraints). **Technique:**
+[§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
+(`RequestContext`/`Handle` phantom scope, with no re-tag function) +
+[§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (one ownership/grant
+fold resolves every reference).
+
+**Layer:** `type-foreclosed` in the Haskell server IR for a provider operation over an unscoped/global id;
+`decode-foreclosed` for a declared data binding whose owner/audience has no matching grant; `runtime-checked`
+residue — that the database, object store, message bus, caches, and live handler enforce the derived predicates.
+**Validation-locus:** `Gate-2-decoder` (the public data/form algebra cannot construct a trusted scope, owner,
+grant, or opaque handle, and its declared scope kinds must agree) + `provision-seal` (ownership/grant resolution
+must succeed, and each bound data operation and provider policy must share the exact tenant, audience, resource,
+and action source) + `rendered-output-golden` (derived row policies/prefixes/namespaces carry the scoped
+predicates) + `live-effect` residue (cross-subject and cross-tenant probes return refusal without revealing
+existence).
+
+**Independent oracle and mutants.** Compile-fail fixtures attempt to pass a raw `ResourceId` to a handler or
+provider operation. A separately implemented two-tenant/two-subject oracle creates equal-shaped resources,
+then swaps identifiers across subjects in one tenant and across tenants while exercising read, update, delete,
+workflow resume, object download, topic subscription, and cache lookup. Mutants drop only the subject predicate,
+drop only the tenant predicate, trust a browser-supplied tenant, key a cache by resource id alone, or retain a
+grant after revocation; every cross-scope result must be indistinguishable from an unavailable resource and no
+mutation may occur.
+
+### 3.81 A UI value flowing to an incompatible tenant, subject, or audience scope
+
+A page may read a correctly authorized value and still leak it through a broader response, log, topic, model
+prompt, cache, export, or downstream workflow. Every data source and sink therefore carries a
+`FlowLabel tenant audience integrity`; transforms preserve or restrict confidentiality and propagate the least
+trusted integrity of their inputs. A sink consumes `Labeled label a` only with a `CanFlowTo label sink` witness.
+There is no general label erasure or declassification operation. Audience widening is possible only through a
+closed, named release/grant action whose own authorization, purpose, audit class, and target audience are
+policy-derived. Browser input and model output begin untrusted and cannot flow into an authority-bearing sink
+until an action-specific validator produces the required integrity witness. A total graph fold checks indirect
+paths as well as adjacent edges, so a formatter, join, workflow step, cache, or observability projection cannot
+silently discard the label. **Owner:**
+[`low_code_ui_runtime_doctrine.md` §10.3](../engineering/low_code_ui_runtime_doctrine.md#103-information-flow-labels).
+**Technique:**
+[§4.2](./illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)
+(phantom tenant/audience and integrity tags, with no general re-tag) +
+[§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)
+(a total compatibility relation over the complete source→sink graph).
+
+**Layer:** `type-foreclosed` where a typed sink requires a compatible flow witness; `decode-foreclosed` where
+the complete graph's dynamic labels and release edges are checked; `runtime-checked` residue — that provider
+policies and the running renderer preserve the sealed scopes. **Validation-locus:** `Gate-2-decoder` (the total
+information-flow fold returns every incompatible direct or transitive path) + `provision-seal` (late-bound data,
+workflow, model, messaging, storage, cache, and observability sinks must all be included before the flow graph is
+sealed) + `rendered-output-golden` (responses and provider policies contain no wider projection) + `live-effect`
+residue (cross-audience probes and telemetry inspection reveal no protected value).
+
+**Independent oracle and mutants.** An independent graph checker computes transitive reachability from authored
+sources to rendered/provider sinks and applies the label relation without consuming the compiler's flow
+witnesses. Mutants re-tag tenant A as tenant B, widen `Subject` to `Tenant`, route a private field through a
+formatter into a public response, log a labelled secret, key a cache without its audience, publish to a broader
+topic, and feed untrusted model/browser text into an authority sink; each must identify the complete offending
+path before effects.
+
+### 3.83 A UI plan executed after an authority-bearing source changed
+
+A compiled SPA plan becomes unsafe when authorization policy, tenant-role membership, handler schema, workflow
+contract, resource generation, or referenced model provenance changes while an old browser bundle or server
+cache continues to execute it. The paired `ClientPlan`/`UiServerPlan` projections of a sealed `BoundUiProgram`
+have a constructor-private identity computed from the complete authority-bearing source set: UI program, action
+registry, policy graph, tenant-role graph, schemas, workflow/data contracts, resolved trusted external-link
+subset, and model-artifact provenance.
+Exact source-key equality rejects an omitted input; the generation/digest is derived rather than authored, and
+no function re-tags an old sealed plan as current.
+Each release atomically names the content identities of both the public client plan and serializable private
+server-plan manifest. A missing half or A-client/B-server mix has no admitted pair identity and is refused
+before handler lookup; release publication cannot make either half current independently.
+The browser may send a public action id and observed plan version, but never a serialized capability or trusted
+plan. The server resolves the action in its current sealed plan and checks the current policy/membership epoch
+immediately before effects; a mismatch is a fail-closed reload/conflict response. **Owner:**
+[`low_code_ui_runtime_doctrine.md` §15](../engineering/low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts)
+(plan and contract compatibility), with request-time epoch validation owned by
+[`low_code_ui_runtime_doctrine.md` §13](../engineering/low_code_ui_runtime_doctrine.md#13-generic-purescript-client-and-amoebius-ui-server).
+**Technique:**
+[§4.5](./illegal_state_techniques.md#45-content-address-totality--names-are-total-functions-of-content) (plan
+identity is a total function of the complete source set) +
+[§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed) (only a
+current-generation authorized action crosses the effect edge) +
+[§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally) (exact source/key
+ownership).
+
+**Layer:** `type-foreclosed` for re-tagging a sealed plan across generations; `decode-foreclosed` at plan sealing
+for incomplete or mismatched sources; currentness at request arrival is necessarily `runtime-checked`, because a
+type cannot prove that external policy or membership has not changed. **Validation-locus:** `provision-seal`
+(complete-source digest and exact-key equality must hold before a plan exists) + `rendered-output-golden` (the
+bundle and server projection carry the same non-authoritative plan identifier) + `live-effect` (the server
+compares against current authority immediately before execution and refuses an old plan/action without side
+effects).
+
+**Independent oracle and mutants.** The replay oracle seals plan P under authority snapshot A, independently
+changes exactly one source to snapshot B, and retries P's action against B; it observes provider state as well as
+the HTTP refusal to verify zero observed effects. Mutants omit each source class from the digest in turn, compare only the
+UI-program digest, reuse an authorization decision across a membership epoch, accept an action removed from the
+current registry, publish only one plan half, swap equal-shaped client/server generations, or trust the
+browser's claimed generation. Every stale or mixed replay must fail closed; a cosmetic-only change outside the
+declared source set remains executable, preventing an oracle that merely rejects all old bundles.
+
 ---
 
 ## Cross-references
@@ -337,6 +500,12 @@ transition high-water; the policies refuse a live cross-tenant read).
     ([§3.8](#38-cross-tenant-references-and-literal-secrets), [§3.9](#39-a-plaintext-spec-at-rest), [§3.10](#310-a-child-spec-that-reaches-beyond-its-own-subtree), [§3.42](#342-an-admin-mutation-without-a-root-token-capability--an-unsealed-vault-witness), [§3.45](#345-a-cross-tenant-or-hand-authored-rbac-binding)).
   - [`tenancy_doctrine.md`](../engineering/tenancy_doctrine.md) — RBAC is derived, never authored; the typed tenant→role
     graph as the single owner of every derived grant ([§3.45](#345-a-cross-tenant-or-hand-authored-rbac-binding)).
+  - [`low_code_ui_runtime_doctrine.md`](../engineering/low_code_ui_runtime_doctrine.md) — the single action
+    registry, server-side authorization, subject/tenant scope, information-flow labels, and freshness-bound
+    client/server plans ([§3.79](#379-a-ui-action-whose-server-authorization-does-not-match-its-declaration),
+    [§3.80](#380-a-subject-resolving-or-mutating-another-subjects-resource-without-a-grant),
+    [§3.81](#381-a-ui-value-flowing-to-an-incompatible-tenant-subject-or-audience-scope),
+    [§3.83](#383-a-ui-plan-executed-after-an-authority-bearing-source-changed)).
   - [`cluster_lifecycle_doctrine.md`](../engineering/cluster_lifecycle_doctrine.md) — the `project(subtree)` handoff
     ([§3.10](#310-a-child-spec-that-reaches-beyond-its-own-subtree)).
   - [`manifest_generation_doctrine.md`](../engineering/manifest_generation_doctrine.md) — best-practice-by-construction, the

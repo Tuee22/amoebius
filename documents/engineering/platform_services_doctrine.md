@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_18_base_image_registry.md, DEVELOPMENT_PLAN/phase_22_vault_pki.md, DEVELOPMENT_PLAN/phase_23_platform_backbone.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_25_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define the fixed set of standard services every amoebius cluster runs (the concrete providers
@@ -69,12 +69,25 @@ Concretely (DEVELOPMENT_PLAN cross-cutting invariants):
 - **HA chart even at `replicas=1`.** A single-replica deployment is still the HA chart with one replica —
   never a hand-special-cased single-pod variant. Postgres at one node is still a Patroni-via-Percona
   cluster ([§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin)), not a bare `postgres` Pod.
+- **HA-capable shape is not an HA claim.** `replicas=1` has no replica redundancy and must never be reported as
+  highly available. The invariant in this section is byte/topology parity across environments; an HA outcome
+  additionally requires admitted redundant members in independent failure domains and a live failure test
+  observed from outside the service. This distinction applies to every platform provider and to the generic
+  UI-server/projector workers.
+- **A multi-zone claim requires a whole-zone fault.** Killing one Pod or node demonstrates only member/node
+  tolerance even when replicas are spread across zones. The initial UI HA gate must have a provider observer
+  confirm that every predeclared serving member and endpoint in one selected zone is unavailable while the
+  cookie-empty OIDC login/current-membership check, read/mutation/workflow/subscription, and cross-tenant-denial
+  matrix continue through the remaining zones. Pre-fault sessions alone do not establish identity-service
+  availability.
 - **No degenerate single-node path.** prodbox historically simulated HA by deploying *multiple kind
-  clusters*; amoebius replaces that with one HA stack whose replica count is declarative. A demo web app's
-  "mock 3-replica" pattern collapses to a `replicas=n` value.
+  clusters*; amoebius replaces that with one HA stack whose replica count is declarative. A sibling demo
+  client's "mock 3-replica" pattern becomes a deployment-rules `replicas=n` value outside the checked UI
+  program.
 
 > **Honesty.** The HA-always model is *specified* here and inherited from prodbox where parts of it are
-> proven; in amoebius it is design intent delivered across Phase 18 and Phases 22–25, not a tested amoebius result. Status and gates live
+> proven; in amoebius it is design intent delivered across Phases 25–32 and the UI availability gate in Phase
+> 58, not a tested amoebius result. Status and gates live
 > only in [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (per
 > [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline) and
 > [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)).
@@ -226,7 +239,7 @@ independent version and lifecycle, and clean per-namespace teardown.
 - **Canonical consumers.** Keycloak is the proven prodbox consumer; other standard services that need a
   relational database each get their own Patroni cluster + pgAdmin. (The registry does **not** —
   `distribution` needs no database, [§3](#3-the-registry--the-single-image-source) — which is one fewer Patroni consumer than prodbox's Harbor.) The
-  authoritative list of which standard services take a database is a Phase 24 delivery detail tracked in
+  authoritative list of which standard services take a database is a Phase 31 delivery detail tracked in
   [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), not frozen here.
 - **Storage is not owned here.** Retained PVs, the `<namespace>/<statefulset>/pv_<integer>` naming, sizing,
   and deterministic rebind are owned by [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md).
@@ -260,10 +273,10 @@ The canonical demand shapes are owned by
 the tenant-qualification, empty/diff planner, executor coalescing, target-change retention, MinIO physical fold,
 and sealed provider enactors are owned by [tenancy_doctrine.md §5](./tenancy_doctrine.md#5-rbac-is-derived-never-authored).
 
-Phase 27 owns provider administrative apply/readback for all six arms; its Pulsar adapter applies and observes
-tenant/namespace/ACL policy but does not use an application client. Phase 28, after the native `amoebius-pulsar`
+Phase 34 owns provider administrative apply/readback for all six arms; its Pulsar adapter applies and observes
+tenant/namespace/ACL policy but does not use an application client. Phase 35, after the native `amoebius-pulsar`
 client exists, owns the authenticated produce/consume round-trip gate. Administrative policy convergence in
-Phase 27 must not be reported as proof of the Phase-28 data path.
+Phase 34 must not be reported as proof of the Phase-35 data path.
 
 ---
 
@@ -281,6 +294,21 @@ the only sanctioned ingress shape, and the DSL makes the alternatives unrepresen
   [substrate_doctrine.md](./substrate_doctrine.md); everything above it is substrate-identical.
 - **Envoy + Gateway API** terminate TLS and route. TLS certificate provisioning (zerossl) and DNS
   (route53) integration are owned by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) and the DSL.
+
+### The UI server is the application reference monitor
+
+Successful edge authentication is necessary but not sufficient authorization. Envoy strips caller-supplied
+identity, tenant, role, and subject headers before inserting authenticated metadata. The low-code UI server then
+validates the issuer/audience/session binding, constructs the opaque current tenant/subject context, and
+reauthorizes every typed port invocation. A hidden client control, a forwarded header, or possession of an
+opaque action identifier confers no authority.
+
+Browser traffic is same-origin to the UI server. The browser has no direct route or credential for SQL, MinIO,
+Pulsar, Vault, Keycloak administration, workflow workers, or an inference engine. The derived NetworkPolicy
+admits Gateway→UI-server ingress and only the UI-server/projector capability edges present in the sealed server
+plan. Direct Service/Pod probes remain mandatory negatives in the live gate; edge success cannot mask a
+backdoor. The complete client/server contract is owned by
+[low_code_ui_runtime_doctrine.md §13](./low_code_ui_runtime_doctrine.md#13-generic-purescript-client-and-amoebius-ui-server).
 
 ### The sole exception: host-origin, localhost-only traffic
 
@@ -301,7 +329,7 @@ flowchart TD
   wild[Wild traffic: WAN / LAN / localhost browser] -->|TLS| lb[LoadBalancer: MetalLB or cloud LB]
   lb -->|Gateway API listener| envoy[Envoy Gateway data plane]
   envoy -->|OIDC and JWT enforcement| kc[Keycloak identity]
-  kc -->|authenticated route| app[App and platform admin surfaces]
+  kc -->|authenticated route| app[UI server and platform admin surfaces]
   host[Host amoebius binary and host compute daemons] -->|distro mTLS| api[kube-apiserver]
   host -->|host-only NodePort, no mTLS, localhost only| peers[In-cluster MinIO and Pulsar peers]
 ```
@@ -440,14 +468,16 @@ into a foreclosed illegal state at
   `amoebius-capacity` and waits for old UID absence/release plus replacement reservation joins. Only then are
   the managed-node taint, identity admission, and exclusive Binding RBAC installed and independently read back
   as `ManagedCapacityReady`. No platform-service controller is applied from the general plan before that full
-  witness exists. The finite pre-SSA Phase-18 registry/proxy units are bootstrap inputs, not an exception for
+  witness exists. The finite pre-SSA Phase-25 registry/proxy units are bootstrap inputs, not an exception for
   new workloads: they must be included in the cutover domain and become custom-scheduled before this witness.
 - **LoadBalancer before the Envoy/Gateway edge** — the Gateway needs an LB address to publish a listener.
 - **MinIO before the registry** — the `distribution` registry stores its blobs via MinIO's S3 API
   ([§3](#3-the-registry--the-single-image-source), [§4](#4-minio--the-object-substrate)), so MinIO must be serving before the registry is ready. MinIO runs from
   the preloaded base image on retained PVs, so this is a plain ordering edge, not a pull cycle.
-- **The registry before later app-image pulls** — once MinIO backs it, the registry must be serving before
-  amoebius publishes or pulls the amoebius-built `Runtime` variants an app runs ([§3](#3-the-registry--the-single-image-source)). Platform services do not
+- **The registry before later runtime-image pulls** — once MinIO backs it, the registry must be serving before
+  amoebius publishes or pulls the generic `Runtime` and trusted-adapter variants
+  ([§3](#3-the-registry--the-single-image-source)). Checked UI programs follow the immutable content/release
+  path rather than minting per-app images. Platform services do not
   wait on the registry: they run from the preloaded base image ([image_build_doctrine.md §9](./image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves)).
 - **The Percona operator before any Postgres consumer** — a `PerconaPGCluster` has nothing to reconcile it
   otherwise ([§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin)).
@@ -464,7 +494,7 @@ flowchart TD
   scheduler --> vault[Vault initialized and unsealed]
   lb -->|provides listener address| edge[Envoy and Gateway API]
   minio -->|registry stores its blobs via MinIO S3| reg[Registry up and responsive]
-  reg -->|amoebius-built app and workload image pulls resolve here| apppulls[Later app-image pulls]
+  reg -->|amoebius runtime and trusted-adapter image pulls resolve here| apppulls[Later runtime-image pulls]
   operator -->|reconciles| pg[Per-service Patroni clusters]
   vault -->|secrets resolve, else fail closed| secretdeps[Secret-dependent workloads]
   edge -->|authenticated by| keycloak[Keycloak admits wild traffic]
@@ -504,7 +534,7 @@ host tooling that brings these services up is discovered lazily through the subs
 invoked by full path — there is no `PATH`-based discovery anywhere in the bring-up sequence.
 
 > **Honesty.** Where this section generalizes a behaviour proven in prodbox, that proof is *evidence from a
-> sibling system*, not proof in amoebius — which has not yet built the Phase-18 / Phases-22–25 service set. Read every prescriptive
+> sibling system*, not proof in amoebius — which has not yet built the Phase-25 / Phases-29–32 service set. Read every prescriptive
 > statement here as design intent, never as a tested amoebius result.
 
 ---
@@ -514,7 +544,7 @@ invoked by full path — there is no `PATH`-based discovery anywhere in the brin
 This document is normative platform-services doctrine only. Delivery sequencing, completion status,
 validation gates, and remaining work are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) (the full service set lands across
-**Phase 18 and Phases 22–25**).
+**Phase 25 and Phases 29–32**).
 This doc never maintains a competing status ledger; it states the target shape and links back for status.
 
 ---
@@ -530,7 +560,7 @@ This doc never maintains a competing status ledger; it states the target shape a
 - [Host ↔ Cluster Comms Doctrine](./host_cluster_comms_doctrine.md)
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md)
 - [Tenancy Doctrine](./tenancy_doctrine.md) — the provider-indexed whole-deployment policy transaction and the
-  Phase-27 administrative-policy / Phase-28 Pulsar data-path boundary
+  Phase-34 administrative-policy / Phase-35 Pulsar data-path boundary
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md)
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md)
 - [Substrate Doctrine](./substrate_doctrine.md)

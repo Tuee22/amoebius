@@ -26,7 +26,8 @@ illegal-state-unrepresentable contract; service capabilities and the capability�
 manifest generation and the SSA reconciler; the standard platform services; storage lifecycle; substrate,
 cluster-topology, and resource-capacity models; Vault/PKI and Pulumi-from-inside; the daemon-topology grid;
 host↔cluster comms; the native Pulsar client; content-addressing and determinism; tenancy; the verification
-layer; and the cross-cutting method doctrines. It also authors the plan spine — the rulebook, the live
+layer; the bounded low-code UI language and generic browser/server runtime; and the cross-cutting method
+doctrines. It also authors the plan spine — the rulebook, the live
 tracker, and the target architecture/inventory/substrate documents — so every later phase cites doctrine by
 name when it schedules adoption work.
 
@@ -47,6 +48,10 @@ This phase runs in **no validation register (Register —)**: no code executes a
 exercised; the gate is a pure text-and-link lint. The cross-cutting invariants the whole plan upholds are
 first written down here and then adopted, phase by phase, by the pre-cluster and live bands that follow.
 
+**Session scope:** Complete the one documentation/link-graph re-baseline and run
+`python3 tools/doc_lint_verify.py`; split before continuing if the work introduces implementation code, a new
+runtime surface, or an acceptance command other than the two-sided documentation gate.
+
 **Substrate:** none (§L) — the gate is a pure documentation lint over text and the link graph; it touches no
 `apple`, `linux-cpu`, `linux-cuda`, or `windows` host and stands up no resources.
 
@@ -59,7 +64,9 @@ under the [§4](../documents/documentation_standards.md#4-cross-referencing) slu
 governed docs, outside quoted/exempt blocks — absent, with semantic SSoT *ownership* documented as a hand review
 rather than a lint verdict; each README Phase-Overview status marker equal to its phase doc's `## Phase Status`
 marker; every phase **Gate** naming its committed fixtures, at least one committed mutant, and an
-independent oracle per [`development_plan_standards.md §M`](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub);
+independent oracle per [`development_plan_standards.md §M`](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub),
+plus an applicable fresh challenge, outside observer, authority-paired scope negative, zero-forbidden-effect
+observation, and bypass probe for every effect/security gate;
 and **illegal-state catalog integrity** — every entry carrying a `**Validation-locus:**`, entry numbering
 contiguous with no gaps or duplicates, every index bullet's anchor resolving, and every entry carrying a
 technique-matrix row)
@@ -83,6 +90,9 @@ name.
 - [`dsl_doctrine.md §5`](../documents/engineering/dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract) —
   *The illegal-state-unrepresentable contract*: the typed spec gates (the Dhall typechecker and the Haskell typed
   decoder) that make illegal cluster state fail to type-check.
+- [`low_code_ui_runtime_doctrine.md §3`](../documents/engineering/low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans) —
+  *One checked value, two runtime plans*: bounded `UiSource` is checked and bound once, then projected into a
+  public client plan and private server plan with no raw-code or provider escape.
 - [`conformance_harness_doctrine.md §2`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) —
   *The registers*: the three named validation registers (Register 1 pure/golden, Register 2 boundary-with-fakes,
   Register 3 live) — and
@@ -111,7 +121,8 @@ name.
   URL-fetched.
 - [`lift_and_compose_doctrine.md §1`](../documents/engineering/lift_and_compose_doctrine.md#1-why-this-doctrine-exists) —
   *Why this doctrine exists*: amoebius lifts and re-homes the proven primitives of prodbox/hostbootstrap/
-  infernix/jitML rather than reimplementing them, and each ML library ships a PureScript demo SPA.
+  infernix/jitML rather than reimplementing them; their handwritten PureScript demo clients are migration
+  evidence whose interaction requirements are recast as bounded `UiSource`, not amoebius application code.
 - [`tenancy_doctrine.md §1`](../documents/engineering/tenancy_doctrine.md#1-why-this-doctrine-exists) —
   *Why this doctrine exists*: the first-class `TenantId` orthogonal to the cluster axis, so a valid `InForceSpec`
   cannot name a foreign tenant's resource.
@@ -124,6 +135,9 @@ name.
   [`§9`](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation),
   *Derivation: generated enumeration, authored expectation*: the enumeration/expectation split and the coverage
   obligation whose catalog-side half this phase's lint check (g) enforces.
+- [`testing_doctrine.md §12`](../documents/engineering/testing_doctrine.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect) —
+  *Spoof-resistant evidence*: effectful gates prove a post-start challenge through an authenticated observer
+  outside the system under test.
 - [`illegal_state_catalog.md`](../documents/illegal_state/illegal_state_catalog.md) — the *illegal-state catalog*
   index and its themed sub-catalogs: the numbered entry set, each carrying a `**Validation-locus:**`, that
   check (g) validates as a well-formed enumeration before any fixture exists to join against.
@@ -145,11 +159,11 @@ name.
 **Implementation**: `documents/documentation_standards.md`, `DEVELOPMENT_PLAN/development_plan_standards.md`,
 `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/overview.md`, `DEVELOPMENT_PLAN/system_components.md`,
 `DEVELOPMENT_PLAN/substrates.md`, `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`,
-`DEVELOPMENT_PLAN/later_phases.md`, and the `phase_00`…`phase_43` phase docs (target documentation files; not
+`DEVELOPMENT_PLAN/later_phases.md`, and the `phase_00`…`phase_58` phase docs (target documentation files; not
 yet complete)
 **Blocked by**: none
 **Independent Validation**: lint the spine files in isolation — each carries a valid header block, the status
-vocabulary and per-phase/per-sprint skeletons are defined, the 44-phase overview table is internally
+vocabulary and per-phase/per-sprint skeletons are defined, the 59-phase overview table is internally
 consistent, and every intra-plan link resolves.
 **Docs to update**: the spine files above and `documents/engineering/README.md`
 
@@ -159,7 +173,7 @@ Adopt [`documentation_standards.md §3`](../documents/documentation_standards.md
 *Required header metadata* — with the SSoT-first philosophy and bidirectional cross-referencing: establish the
 header/link mechanics and the plan-suite structure every other document and phase obeys. The naming and header
 conventions adapt the sibling prodbox project's documentation discipline (sibling evidence, then specialized for
-amoebius's snake_case rule), and the tracker is rebuilt for the 38 single-gate phases.
+amoebius's snake_case rule), and the tracker is rebuilt for 59 contiguous single-gate phases.
 
 ### Deliverables
 
@@ -168,7 +182,7 @@ amoebius's snake_case rule), and the tracker is rebuilt for the 38 single-gate p
 - The plan rulebook (`development_plan_standards.md`): the §A–§M disciplines (header, snake_case layout, status
   vocabulary, per-phase skeleton, one-phase model, sprint block format, Documentation Requirements,
   doctrine-citation rule, generated markers, cross-ref path rules, honesty, one-substrate, gate integrity).
-- The live tracker (`README.md`): the Document Index, the 44-phase Overview table with its one-line gates and
+- The live tracker (`README.md`): the Document Index, the 59-phase Overview table with its one-line gates and
   substrate/register columns, the status vocabulary, the phase discipline, and the cross-cutting invariants.
 - `overview.md`, `system_components.md`, `substrates.md`, `legacy_tracking_for_deletion.md`, `later_phases.md`,
   and the per-phase docs' spine.
@@ -193,7 +207,7 @@ The whole sprint (📋 Planned).
 `illegal_state_capability_messaging.md`, `illegal_state_ml_asset.md`, `illegal_state_multicluster.md`,
 `illegal_state_lifecycle.md`) and the `illegal_state_techniques.md` coverage matrix, `service_capability_doctrine.md`,
 `tenancy_doctrine.md`, `lift_and_compose_doctrine.md`, `generated_artifacts_doctrine.md`,
-`conformance_harness_doctrine.md` (target documentation files; not yet complete)
+`conformance_harness_doctrine.md`, `low_code_ui_runtime_doctrine.md` (target documentation files; not yet complete)
 **Blocked by**: Sprint 0.1
 **Independent Validation**: lint the DSL-core and method docs together — the illegal-state catalog links to the
 DSL contract rather than restating it; the register model and the generated-never-committed rule are each
@@ -221,11 +235,11 @@ doctrines (the three validation registers, the generated-never-committed rule, a
   `illegal_state_capacity.md`, `illegal_state_security.md`, `illegal_state_capability_messaging.md`,
   `illegal_state_ml_asset.md`, `illegal_state_multicluster.md`, `illegal_state_lifecycle.md`) and the
   `illegal_state_techniques.md` coverage matrix that check (g) validates,
-  `service_capability_doctrine.md`, `tenancy_doctrine.md`.
+  `service_capability_doctrine.md`, `tenancy_doctrine.md`, `low_code_ui_runtime_doctrine.md`.
 - `conformance_harness_doctrine.md`: the registers and the rendering-never-touches-live invariant.
 - `generated_artifacts_doctrine.md`: the emit-from-source, never-commit rule for manifests, the `.tla`/`.cfg`,
   the reflected Dhall schema, and the PureScript contracts.
-- `lift_and_compose_doctrine.md`: the reuse map and the PureScript demo SPAs.
+- `lift_and_compose_doctrine.md`: the reuse map and migration of sibling demo flows into bounded UI modules.
 
 ### Validation
 
@@ -334,6 +348,9 @@ The whole sprint (📋 Planned).
 stub), `tools/doc_lint.py`, `tools/doc_lint_verify.py` (the two-sided gate runner),
 `tools/doc_lint_corpus/` (the committed seeded-negative fixtures, with `_positive/` the conforming tree each
 one mutates and `_build.py` the authored mutation list), and
+`test/golden/phase_{16..23,36,38,40,50,52,55..58}_*` plus the correspondingly named
+`test/mutants/phase_{16..23,36,38,40,50,52,55..58}_*` (independently authored UI gate oracles and seeded
+mutants pinned before their implementations), and
 `tools/ledger_lint.py` (target standalone scripts; not yet built — they must not depend on the amoebius binary,
 which first appears in the pre-cluster implementation band, Phase 2+. Both are **Python**, matching the
 pre-binary `pb` midwife ([README.md](README.md#toolchain)) and the recorded decision against bash logic
@@ -372,6 +389,9 @@ checker that *is* the Phase 0 gate.
   `gateway_migration_model_doctrine.md` (the one obligation, both `Planned` and `Failover` branches, reduced by
   a decode-time structural-fit fold).
 - `tla_modelling_assumptions.md`: a `Deprecated` redirect stub pointing at the two docs above.
+- The UI-gate oracle set named by Phases 16–23, 36, 38, 40, 50, 52, and 55–58: independently authored
+  constructor/access/owner/event/timeline/placement tables and each named mutant, plus a manifest mapping every
+  file to its owning gate and expected reject locus. No implementation-generated output may author this set.
 - `tools/doc_lint.py`: a pure text/link checker (no amoebius-binary dependency), run **two-sided** — it must
   pass clean on the suite **and** fail on every fixture in the committed `tools/doc_lint_corpus/`. It checks,
   mechanically: (a) valid header metadata — decomposed per the documentation standard's five facets: a `Status`
@@ -386,7 +406,10 @@ and **no bare `§N` section reference** appears outside a Markdown link label, h
   docs outside quoted/exempt blocks (semantic SSoT *ownership* is a documented hand review, not a lint verdict);
   (e) **status-consistency** — each README Phase-Overview marker equals that phase doc's `## Phase Status`
   marker; (f) **gate-integrity** ([`development_plan_standards.md §M`](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)) —
-  every phase Gate names its committed fixtures/goldens, ≥1 committed mutant, and an independent oracle —
+  every phase Gate names its committed fixtures/goldens, ≥1 committed mutant, and an independent oracle;
+  an effectful gate also names a post-start fresh challenge and outside observer, and a security gate names
+  authority-minted credentials, an own/foreign-scope pair, a zero-forbidden-effect observation, and bypass
+  probes —
   **following one anchor hop** from the `**Gate:**` line into the phase's `## Gate integrity` section where the
   gate delegates to it (§M Gate → Gate-integrity delegation), so a gate whose apparatus lives one hop away is not flagged —
   and a
@@ -442,6 +465,8 @@ and **no bare `§N` section reference** appears outside a Markdown link label, h
    malformed-ledger negatives.
 3. The formal-model docs unambiguously separate what a green model-check proves (the protocol, in the abstract)
    from the model↔code correspondence and runtime fidelity discharged in the later implementation phases.
+4. Every new UI phase's named oracle and mutant path exists in the Phase-0 manifest before its implementation
+   path exists, and every effect/security gate declares all applicable spoof-resistant evidence fields.
 
 ### Remaining Work
 

@@ -71,7 +71,7 @@ object-store/observability/migration/scheduler-reservation demand derivation and
 target-offering→lane quotient, and the accelerator residency/coexistence provision
 ([Phase 12](phase_12_inference_accelerator_provision.md)); the pure
 `renderAll :: ProvisionedSpec -> [K8sObject]` ([Phase 13](phase_13_render_manifest_goldens.md)); and the live
-jit-resolve of an engine into its `CacheBudget`-bounded cache ([Phase 38](phase_38_determinism_jitcache.md)).
+jit-resolve of an engine into its `CacheBudget`-bounded cache ([Phase 48](phase_48_determinism_jitcache.md)).
 
 **Substrate:** none — no host, no cluster, no provider; the gate is an in-process `cabal test` bind + property +
 corpus battery, analogous to the Phase-5 decode battery.
@@ -510,7 +510,7 @@ The whole sprint (📋 Planned).
   engine resolved) deferred.
 - `documents/engineering/content_addressing_doctrine.md` — reconcile §4.5's Tier-1 engine as the
   `InferenceEngine` provider whose named identity this binder decodes; keep the jit-resolve into the bounded
-  cache as the live-band residue ([Phase 38](phase_38_determinism_jitcache.md)).
+  cache as the live-band residue ([Phase 48](phase_48_determinism_jitcache.md)).
 - `documents/engineering/app_vs_deployment_doctrine.md` — the app-surface capability resources vs the
   deployment-rules shape/provider surface; `documents/engineering/dsl_doctrine.md` — the capability-model
   instance of the two-gate contract.
@@ -553,5 +553,5 @@ The whole sprint (📋 Planned).
   relation and the accelerator residency/coexistence provision layered on this phase's capability union
 - [phase_13](phase_13_render_manifest_goldens.md) — the pure deployment-global
   `renderAll :: ProvisionedSpec -> [K8sObject]` downstream of the provision seal
-- [phase_38](phase_38_determinism_jitcache.md) — the live jit-build engine resolver + `CacheBudget` cache that
+- [phase_48](phase_48_determinism_jitcache.md) — the live jit-build engine resolver + `CacheBudget` cache that
   materializes the named `EngineRuntime` identity this phase only decodes

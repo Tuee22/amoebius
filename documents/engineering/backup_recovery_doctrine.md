@@ -47,7 +47,7 @@ overwrites live durable bytes — and a backup-seeded cluster may take the wild-
 data freshness is proven, choosing consistency over availability
 ([§8](#8-the-gateway-dovetail-seed-from-backup-under-consistency-over-availability)).
 
-**What it forecloses.** Amoebius gives up the ability to *reclaim* backup storage on its own initiative: it
+**What it forecloses.** amoebius gives up the ability to *reclaim* backup storage on its own initiative: it
 cannot delete, expire, or lifecycle a backup, so an operator who wants space reclaimed performs an out-of-band,
 audited action or relies on the medium's own object-lock/retention policy. It also gives up
 availability-first recovery for the cold-seed posture: a secondary whose seeded state cannot prove freshness

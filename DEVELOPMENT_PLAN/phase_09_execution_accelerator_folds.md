@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Build the kind-indexed execution-epoch expansion, the scheduler-reservation algebra, the
@@ -95,13 +95,13 @@ binder ([phase_10_capability_bind.md](phase_10_capability_bind.md)) and the whol
 `InferenceEngine` capability + accelerator coexistence provision
 ([phase_12_inference_accelerator_provision.md](phase_12_inference_accelerator_provision.md)); and the live
 residue — the same-binary scheduler role's Reserved→BindingInFlight→Bound around real Kubernetes Binding
-([phase_20_capacity_scheduler.md](phase_20_capacity_scheduler.md)), the snapshot-bound live preflight and
-action/token/CAS plumbing ([phase_19_object_reconciler.md](phase_19_object_reconciler.md)), retained-carve
-allocation ([phase_21_retained_storage.md](phase_21_retained_storage.md)), provider-capacity creation
-([phase_34_provider_deploy_checkpoint.md](phase_34_provider_deploy_checkpoint.md),
-[phase_37_provider_dynamic_nodes.md](phase_37_provider_dynamic_nodes.md)), and live CUDA/Metal enaction
-([phase_40_jitml_lift_cuda.md](phase_40_jitml_lift_cuda.md),
-[phase_41_apple_metal_host_daemon.md](phase_41_apple_metal_host_daemon.md)). Phase 9 owns the pure
+([phase_27_capacity_scheduler.md](phase_27_capacity_scheduler.md)), the snapshot-bound live preflight and
+action/token/CAS plumbing ([phase_26_object_reconciler.md](phase_26_object_reconciler.md)), retained-carve
+allocation ([phase_28_retained_storage.md](phase_28_retained_storage.md)), provider-capacity creation
+([phase_44_provider_deploy_checkpoint.md](phase_44_provider_deploy_checkpoint.md),
+[phase_47_provider_dynamic_nodes.md](phase_47_provider_dynamic_nodes.md)), and live CUDA/Metal enaction
+([phase_51_jitml_lift_cuda.md](phase_51_jitml_lift_cuda.md),
+[phase_53_apple_metal_host_daemon.md](phase_53_apple_metal_host_daemon.md)). Phase 9 owns the pure
 representation and fold only; it cannot validate or enact a live transition.
 
 **Substrate:** none — no host, no cluster; the gate is an in-process `cabal test` fold + QuickCheck battery,
@@ -394,7 +394,7 @@ numbers only — the pure expansion fold Phase 11's `provision` seal later invok
   admission, and the exact scheduler-reservation projection. A ledger row whose Pod has disappeared selects the
   exact full or retained `LedgerOnlyAbsentRecovery` debit until state-specific release/cleanup CAS; changed
   observed/root/config/capacity state invalidates the token. The live same-binary role (implemented in
-  [phase_20_capacity_scheduler.md](phase_20_capacity_scheduler.md)) performs Reserved→BindingInFlight→Bound
+  [phase_27_capacity_scheduler.md](phase_27_capacity_scheduler.md)) performs Reserved→BindingInFlight→Bound
   around Kubernetes Binding, keeping unknown outcomes charged; Ordinary/CUDA/Job release partitions credit only
   separately observed axes, and physical artifacts stay in the root resident baseline until deletion/GC.
 - A private `ControllerChildEnvelope` remains the descriptor/source-expansion explanation: its children lower to
@@ -882,7 +882,7 @@ The whole sprint (📋 Planned).
 - `documents/engineering/daemon_topology_doctrine.md` — reconcile §3's control-plane singleton reservation /
   five-kind control-plane-state producer read-side with the as-built scheduler-reservation and
   `EtcdLogicalDemand` folds; keep the live scheduler role residue deferred to
-  [phase_20_capacity_scheduler.md](phase_20_capacity_scheduler.md).
+  [phase_27_capacity_scheduler.md](phase_27_capacity_scheduler.md).
 - `documents/engineering/monitoring_doctrine.md` — reconcile the `MonitoringWorkBudget` compute read-side with
   the as-built fold; it remains the single owner of its number.
 - `documents/engineering/substrate_doctrine.md` — reconcile the §8 node inventory / kubelet layout / accelerator
@@ -931,5 +931,5 @@ The whole sprint (📋 Planned).
   these folds post-bind
 - [phase_12_inference_accelerator_provision.md](phase_12_inference_accelerator_provision.md) — the
   `InferenceEngine` capability + accelerator residency/coexistence provision built atop the accelerator fold
-- [phase_20_capacity_scheduler.md](phase_20_capacity_scheduler.md) — the live same-binary scheduler role that
+- [phase_27_capacity_scheduler.md](phase_27_capacity_scheduler.md) — the live same-binary scheduler role that
   enacts Reserved→BindingInFlight→Bound around Kubernetes Binding

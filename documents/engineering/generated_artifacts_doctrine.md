@@ -2,10 +2,10 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_18_base_image_registry.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
-> **Purpose**: Single source of truth for the rule that every artifact amoebius can *render from a typed source* — Kubernetes manifests, the TLA+ `.tla`/`.cfg`, the Dhall schema, the PureScript frontend contracts — is a **build artifact emitted at build/check time and never committed to the repository**; the only committed truth is the Haskell (or authored-Dhall) source it is rendered from.
+> **Purpose**: Single source of truth for the rule that every artifact amoebius can *render from a typed source* — Kubernetes manifests, TLA+ files, Dhall schemas, checked UI plans/content manifests, PureScript catalog codecs, and the generic client bundle — is a **build artifact emitted at build/check time and never committed to the repository**; only authored Dhall and runtime/generator source are committed.
 
 ---
 
@@ -30,19 +30,26 @@ control, and every consumer renders from it.
 
 ## 2. What is generated (and from what)
 
-Each generated artifact names its typed source of truth and the pure renderer that emits it:
+Each generated artifact names its typed source of truth and the deterministic renderer/compiler that emits it:
 
 | Generated artifact | Source of truth (committed) | Renderer | Owning doctrine |
 |---|---|---|---|
 | Kubernetes objects (Deployment/Service/RBAC/NetworkPolicy/HTTPRoute/…) | the opaque post-bind, capacity/capability-checked whole-deployment `ProvisionedSpec` derived from `InForceSpec` + target inventory | `renderAll :: ProvisionedSpec -> [K8sObject]` (pure, total; private service/global projections merge by object identity) | [manifest_generation_doctrine.md](./manifest_generation_doctrine.md) |
 | TLA+ `.tla` + `.cfg` | the reifiable Haskell `Model` | `emitTLA :: Model -> (Tla, Cfg)` | [formal_model_doctrine.md](./formal_model_doctrine.md) |
 | The Dhall schema (types the DSL is authored against) | the Haskell DSL ADTs | schema reflected from the types (the hostbootstrap `reflectedSchema` / prodbox `SchemaDhall` pattern) | [dsl_doctrine.md](./dsl_doctrine.md) |
-| PureScript frontend contract types | the Haskell app/workflow ADTs | `purescript-bridge` contract generation | [lift_and_compose_doctrine.md](./lift_and_compose_doctrine.md) |
+| Paired `ClientPlan`/serializable `UiServerPlan` manifests, resolved external-link subset, per-app public-contract/content manifest, route manifest, and sealed dispatch projection | authored `UiSource` plus the reified Haskell public contracts, bound handlers, policies, scopes, capability graph, and trusted external-link catalog | UI Gate 1/Gate 2/bind followed by the client/server/content projections from one private `BoundUiProgram` | [low_code_ui_runtime_doctrine.md §3](./low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans) |
+| PureScript public catalog types/codecs and the one immutable generic client bundle per runtime ABI/catalog | committed generic PureScript interpreter/component catalog plus reified public catalog contracts | deterministic catalog generation plus the pinned PureScript build | [low_code_ui_runtime_doctrine.md §15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) |
 | The reconcile plan / `--dry-run` preview | the `chain :: cfg -> [Step]` value whose amoebius config contains the whole opaque `ProvisionedSpec` | `renderChainPlan` | [manifest_generation_doctrine.md](./manifest_generation_doctrine.md) |
 | The image build recipe (`Dockerfile`, per identity) | the typed bake catalog — each stage's `NonEmpty BakeStep` in its `BuildExecutionEnvelope` | `renderDockerfile :: BuildExecutionEnvelope -> Dockerfile` (pure, total) | [image_build_doctrine.md](./image_build_doctrine.md) |
 
-The common shape: a **pure, total function** from a committed typed value to text-or-objects. Because the
-renderer is pure, the artifact is a deterministic function of the source, and regenerating is free.
+The common shape is a deterministic projection or pinned compilation from committed typed source. Pure
+renderers remain pure and total; a compiler-backed artifact additionally records the exact compiler/runtime ABI
+and component-catalog inputs. The same normalized source, linked binary, catalog, contracts, and pinned toolchain
+must emit byte-identical output.
+
+The paired UI artifacts have asymmetric visibility. `ClientPlan` is an allowlisted browser artifact;
+`UiServerPlan` is readable only by the UI-server service identity and has no client-asset route. A content
+address names bytes but does not make those bytes public or grant authority to fetch them.
 
 **Why the `Dockerfile` belongs on this list.** The argument is the one
 [manifest_generation_doctrine.md §1](./manifest_generation_doctrine.md#1-why-this-doctrine-exists-types-render-manifests-helm-does-not)
@@ -57,9 +64,11 @@ the recipe becomes a projection of typed data and the committed artifact is the 
 
 ## 3. The rule
 
-- **No generated artifact lives in the repository.** No `spec/tla/*.tla`, no rendered manifest YAML, no
-  reflected `*.dhall` schema, no generated `*.purs` contract is committed. The repository holds the Haskell
-  source, the authored Dhall (see [§5](#5-authored-vs-generated-the-committed-source)), and this doctrine.
+- **No generated artifact lives in the repository.** No `spec/tla/*.tla`, rendered manifest YAML, reflected
+  `*.dhall` schema, checked `ClientPlan`/`UiServerPlan`, per-app content manifest, generated `*.purs` catalog
+  codec, or compiled generic client bundle is committed. The repository holds Haskell and generic PureScript
+  source, authored Dhall (see
+  [§5](#5-authored-vs-generated-the-committed-source)), and this doctrine.
 - **Each artifact is emitted by an `amoebius` subcommand** and stamped with a generated-by header ("do not edit
   by hand; edit the source and re-emit"). The Dhall-generation pattern already proven in the siblings stamps
   its output `-- GENERATED … Do not edit by hand`.
@@ -97,15 +106,18 @@ the recipe becomes a projection of typed data and the committed artifact is the 
 
 The rule is about *rendered* artifacts, not all non-Haskell files. The committed source of truth includes:
 
-- **Authored Dhall** — an operator's `InForceSpec`, the DSL fixture corpus (`legal_*` / `illegal_*`), and any
-  hand-written example. These are *inputs* an operator writes, not renderings of a Haskell value, so they are
-  source and are committed. (The Dhall *schema* an `InForceSpec` is type-checked against is generated; the
-  `InForceSpec` itself is authored.)
-- **Haskell source** — the DSL types, the `renderAll`/`emitTLA`/`chain` functions, the `Model` values.
+- **Authored Dhall** — an operator's `InForceSpec`, an application's bounded `UiSource`, the DSL fixture corpus
+  (`legal_*` / `illegal_*`), and hand-written examples. These are inputs rather than renderings and are
+  committed. Their reflected Dhall schemas and checked plans are generated.
+- **Haskell source** — the DSL and UI checked-IR types, trusted workflow/data/artifact adapters, binders,
+  `renderAll`/`emitTLA`/`chain` functions, and `Model` values.
+- **PureScript source** — the one generic client interpreter and audited trusted component catalog. Generated
+  catalog types/codecs and its compiled generic bundle are not source. An app contributes a checked
+  plan/content manifest, not PureScript source or an app-specific bundle.
 - **Documentation** — this doctrine suite.
 
-The line: if a human authors it, it is committed source; if a pure function renders it from committed source, it
-is a generated artifact and is not committed.
+The line: a human-authored typed input or runtime/generator implementation is committed source; an artifact
+projected or compiled deterministically from that source is generated and is not committed.
 
 ---
 
@@ -126,7 +138,8 @@ result.
 - [Formal Model Doctrine](./formal_model_doctrine.md) — the `.tla`/`.cfg` case
 - [Manifest Generation Doctrine](./manifest_generation_doctrine.md) — the k8s-object and `--dry-run` cases
 - [DSL Doctrine](./dsl_doctrine.md) — the reflected Dhall schema vs the authored `InForceSpec`
-- [Lift and Compose Doctrine](./lift_and_compose_doctrine.md) — the PureScript contract case
+- [Low-Code UI Runtime Doctrine](./low_code_ui_runtime_doctrine.md) — [§15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) owns the complete UI generated-artifact set
+- [Lift and Compose Doctrine](./lift_and_compose_doctrine.md) — sibling UI contracts and flows are inputs to the generic checked runtime, not committed demo-shell output
 - [Conformance Harness Doctrine](./conformance_harness_doctrine.md) — golden rendering tests, no committed artifact
 - [Documentation Standards](../documentation_standards.md)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)

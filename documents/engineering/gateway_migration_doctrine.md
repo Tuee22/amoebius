@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_33_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for how amoebius moves the wild-ingress gateway between clusters — the typed `GatewayMigration = <Planned | Failover>` taxonomy, the planned strong-consistency handover, the unplanned survivor-wins failover, and the client-rebind protocol that keeps a live session bindable throughout.
@@ -88,13 +88,15 @@ proper begins only from a target that already holds the source's state.
    per-cluster (stretched-cluster) construct owned by that cluster, never a shared address repointed here.
 
 **Guarantee — RPO=0.** No committed write is lost — the `PlannedIsLossless` model invariant, proven-for-the-model
-at scope 2 (the runtime fidelity of the caught-up verification stays assumed until Phase 33;
+at scope 2 (the runtime fidelity of the caught-up verification stays assumed until Phase 43;
 [§6](#6-honesty-and-layer-markers)) — because writes were frozen and the replica was verified
 caught-up before authority moved. This is a coordinated cross-cluster switchover (Patroni-style), **not** an
 asynchronous [Second-Axis](./chaos_failover_doctrine.md#16-the-second-axis--when-one-cluster-becomes-a-forest)
-event: it presents no async divergence to reconcile. Logged-in sessions persist — Keycloak's session
-Postgres is drained to the same snapshot before cutover, and OIDC/JWT bearer tokens are stateless under the
-shared realm keys, so a session stays valid across the handover.
+event: it presents no async divergence to reconcile. Browser-session continuity comes from keeping the active
+origin unchanged while its protected host-only cookie is checked against caught-up/shared server-side session
+state after cutover; the Keycloak/session stores are part of the verified snapshot. Portable bearer semantics
+may apply to separately admitted non-browser clients, but browser-exposed OIDC/JWT credentials are not an SPA
+premise.
 
 **The illegal state this forecloses — a committed transaction lost during a planned migration.** The
 quiesce + verify-caught-up gate makes "authority moved to a target that had not received a committed write"
@@ -164,16 +166,19 @@ client is stranded. "A session that cannot rebind to the migrated gateway" is an
   shortened retroactively, so it must already be low. Each cluster also holds a **stable per-cluster address**
   that never migrates — the proxy target and the explicit-redirect fallback.
 - **The explicit 307 redirect** to the target's stable per-cluster address is a fallback only: a host change
-  drops host-only cookies, so it preserves the session only for parent-domain-scoped cookies or portable
-  OIDC/JWT bearers. amoebius's Keycloak-OIDC sessions are portable, so it works — but the transparent proxy
-  avoids the concern entirely and is preferred.
+  drops the protected host-only UI-session cookie. amoebius does not expose an OIDC bearer or refresh token to
+  browser state and does not broaden the cookie to a parent domain merely to make this redirect seamless.
+  The fallback may therefore require reauthentication before any effect; the transparent proxy/stable origin
+  is the session-preserving path and is preferred.
 - **Long-lived connections** (WebSocket/SSE) are forwarded by the old-gateway proxy, or sent a graceful close
   so the client reconnects and re-resolves; the in-cluster backend cutover uses `HTTPRoute` weights.
 
 **On the `Failover` path** the active is down, so no old-gateway proxy exists. Clients cached to the dead
-address get connection errors, retry, re-resolve within the low TTL, and rebind to the survivor. Rebind is
-still reached — the survivor holds the last-replicated session state and OIDC/JWT is portable — but it is
-**not seamless**: brief client errors, and post-fork sessions re-authenticate.
+address get connection errors, retry, re-resolve the **same active hostname** within the low TTL, and rebind to
+the survivor. The host-only protected cookie remains scoped to that stable hostname, while the survivor checks
+it against replicated/server-shared session state and current membership/policy. Rebind is still reached, but
+it is **not seamless**: brief client errors are expected, post-fork or unreplicated sessions reauthenticate,
+and no browser-held bearer portability is assumed.
 
 ---
 
@@ -213,10 +218,10 @@ source it admits is owned by [`backup_recovery_doctrine.md` §8](./backup_recove
 
 ## 6. Honesty and layer markers
 
-The forest/geo-replication substrate is **Phase 32**; everything in this document's gateway-migration/DNS
-failover runtime and acceptance is **design intent for Phase 33**. Nothing here is built or verified today. Phase order, status, and
+The forest/geo-replication substrate is **Phase 42**; everything in this document's gateway-migration/DNS
+failover runtime and acceptance is **design intent for Phase 43**. Nothing here is built or verified today. Phase order, status, and
 the acceptance gate are owned by
-[DEVELOPMENT_PLAN/README.md → Phase 33](../../DEVELOPMENT_PLAN/README.md); this document never restates phase
+[DEVELOPMENT_PLAN/README.md → Phase 43](../../DEVELOPMENT_PLAN/README.md); this document never restates phase
 status.
 
 - The `Planned` branch's **RPO=0** is the model invariant **`PlannedIsLossless`** — cutover is reachable only
@@ -225,15 +230,15 @@ status.
   [§6](./gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty)), not merely argued. What stays
   **assumed** is the *runtime physics* the model abstracts — that the caught-up verification and the
   MinIO/Pulsar/Patroni lossless delegation actually hold live — a **runtime-observed** caught-up edge, not a
-  constructive type-level impossibility, confirmed only by the Register-3 chaos injection of Phase 33. Per the
+  constructive type-level impossibility, confirmed only by the Register-3 chaos injection of Phase 43. Per the
   honesty rule ([documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)),
-  the model property is *proven-for-the-model* and the runtime fidelity is *assumed until Phase 33*.
+  the model property is *proven-for-the-model* and the runtime fidelity is *assumed until Phase 43*.
 - **Both** branches are the subject of amoebius's one proof obligation, owned by
   [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md) and set in the concentration
   principle of [chaos_failover_doctrine.md](./chaos_failover_doctrine.md): the `Failover` async correctness via
   `NoWriteAfterStaleFailover` (safety) and `MergeConverges` (liveness), and the `Planned` handover via
   `PlannedIsLossless` — one reifiable `Model`, simulated (io-sim) and proven (TLC) at design time, with
-  model↔code correspondence **by construction** (no deferred correspondence table). What remains for Phase 33
+  model↔code correspondence **by construction** (no deferred correspondence table). What remains for Phase 43
   is Register-3 chaos injection against the running forest — confirming the abstracted physics hold — never a
   paper correspondence.
 - The typed `GatewayFailover { active : ClusterId, standby : ClusterId, dnsRecord, hubRole }` forest relation
@@ -271,5 +276,5 @@ status.
 - [Illegal-State Catalog](../illegal_state/illegal_state_catalog.md) — the "session that cannot rebind on migration" entry ([§3.44](../illegal_state/illegal_state_multicluster.md#344-a-session-that-cannot-rebind-on-gateway-migration)) and the GADT-indexed-state-machine technique ([§4.3](../illegal_state/illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)).
 - [DSL Doctrine](./dsl_doctrine.md) — the typed `GatewayFailover` forest relation as a parent-minted, child-projected subtree field.
 - [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — the formal model of both the `Planned` and `Failover` branches (Phase 3).
-- [Development Plan → Phase 33](../../DEVELOPMENT_PLAN/README.md) — phase order, status, and the failover acceptance gate.
+- [Development Plan → Phase 43](../../DEVELOPMENT_PLAN/README.md) — phase order, status, and the failover acceptance gate.
 - [Documentation Standards](../documentation_standards.md) — header, SSoT, and the proven/tested/assumed honesty rule.

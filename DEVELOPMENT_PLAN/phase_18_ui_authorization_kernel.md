@@ -1,0 +1,140 @@
+# Phase 18: UI authorization kernel
+
+**Status**: Authoritative source
+**Supersedes**: N/A
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/system_components.md
+**Generated sections**: none
+
+> **Purpose**: Build the pure action-registry and current-authority transition that keeps client presentation,
+> server dispatch, policy, scope, audit, and plan freshness in exact agreement.
+
+---
+
+## Phase Status
+
+📋 Planned. This phase proves the closed authorization relation in process; it makes no claim that a live edge,
+identity provider, or UI-server deployment enforces the relation.
+
+## Phase Summary
+
+This phase implements one seam: checked action declarations form a sealed authorization registry, the
+independently checkable `CanRead`/`CanInvoke` relation, and the only `RequestContext` + current-policy transition
+that can construct `AuthorizedAction`. Client visibility is an advisory projection of that relation, never its
+input. A cached decision cannot cross a policy, membership, grant, or scope epoch before the pure effect
+interpreter records an effect.
+
+**Session scope:** one pure authorization/action-registry algebra and reference test interpreter; acceptance
+command `cabal test ui-authorization-spec`; split on any HTTP server, browser runtime, live credential, second
+register, or substrate requirement.
+**Dependency:** Phase 17 — scope-indexed request contexts, handles, audiences, and flow witnesses.
+**Substrate:** none — the gate runs hermetically with credential variables scrubbed and network unavailable.
+**Register:** 1 — pure/golden.
+**Gate:** `cabal test ui-authorization-spec` passes the Phase-0-pinned action/access matrices,
+current-authority replay cases, coverage floors, and both seeded mutants in
+[Gate integrity](#gate-integrity). The next phase opens only from that gate ledger; live enforcement remains
+UNVERIFIED until its owning Register-3 phases.
+
+## Gate integrity
+
+Phase 0 commits every expected decision and projection before `Amoebius.Ui.Security.Authorization` exists. The oracle
+side is hand-authored and cannot import the action binder, policy evaluator, plan-digest fold, or projection
+functions under test.
+
+- **Representative set:** `ReadData`, `MutateData`, `StartWorkflow`, `ObserveWorkflow`, and `EndSession` ports,
+  with tenant-wide, role-shared, subject-owned, and grant-mediated policies. Each allow has a same-action denial
+  differing only in subject, tenant, role, grant, or authority epoch.
+- **Pinned oracles:** `test/fixtures/ui_authorization/action_registry.tsv` owns the exact normalized action
+  tuples; `authorization_matrix.tsv` owns `CanRead`/`CanInvoke` allow/deny decisions, including explicit
+  hidden-but-invocable and default-deny rows; `stale_decision_cases.tsv` owns policy/membership/grant/scope
+  epoch outcomes; and `decode_errors.tsv` pins failures.
+- **Independent checks:** a small reference evaluator reads the matrix's explicit predicates and authority
+  version. A separate set comparison reads serialized sealed projections; neither reuses the production
+  evaluator or registry extractor.
+- **Specific negatives:** missing/extra/duplicate action, equal-cardinality permission swap, absent policy,
+  foreign scope, revoked grant, and stale membership/policy/scope epoch each assert a distinct committed
+  `AuthorizationError`.
+- **Generator coverage:** QuickCheck classifies every mismatch class and requires at least 5% denial coverage
+  for absent policy, wrong scope, wrong permission, and stale epoch, plus positive coverage for every effect arm.
+- **Effect discipline:** the pure reference interpreter records an effect only after `AuthorizedAction` exists;
+  every denial and stale replay has an empty trace. Fresh external challenges and real credentials are not
+  applicable in Register 1 and are deliberately deferred to Phases 36 and 56.
+- **Seeded mutants:** `default_allow` changes absent-policy refusal to allow, and
+  `visibility_is_authorization` substitutes the client visibility projection for current server policy. Both
+  are committed from the adopted authorization brief and must turn the matrix red.
+
+Passing proves correspondence for the checked corpus and properties. It does not prove Keycloak identity truth,
+HTTP routing, handler implementation correctness, or provider-side isolation.
+
+## Doctrine adopted
+
+- [`low_code_ui_runtime_doctrine.md` §3 — one checked value, two runtime plans](../documents/engineering/low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans): both projections come from one private bound value.
+- [`low_code_ui_runtime_doctrine.md` §8 — effects are typed ports](../documents/engineering/low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations): the action registry is the sole effect owner.
+- [`low_code_ui_runtime_doctrine.md` §9 — routes, identity, authorization, and the edge](../documents/engineering/low_code_ui_runtime_doctrine.md#9-routes-identity-authorization-and-the-edge): presentation never grants authority.
+- [`illegal_state_catalog.md` §3.79](../documents/illegal_state/illegal_state_security.md#379-a-ui-action-whose-server-authorization-does-not-match-its-declaration): default-deny and visibility-independence mutants are mandatory.
+
+## Sprints
+
+## Sprint 18.1: Sealed action registry and authorized-action transition 📋
+
+**Status**: Planned
+**Implementation**: `src/Amoebius/Ui/Security/Authorization.hs`, `test/ui/AuthorizationSpec.hs`, and
+`test/ui/AuthorizationReference.hs` (target authored sources; not yet built)
+**Blocked by**: Phase 17
+**Independent Validation**: `cabal test ui-authorization-spec` compares production results with Phase-0 pins
+and the separate reference evaluator, verifies empty denied traces, and requires each named mutant to fail.
+**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
+`documents/illegal_state/illegal_state_security.md`, `documents/engineering/testing_doctrine.md`
+
+### Objective
+
+Adopt the low-code runtime's single action-registry ownership and state-indexed authorization transition so no
+effect can be represented by a raw action id, client visibility decision, absent policy, mismatched projection,
+or stale authority snapshot.
+
+### Deliverables
+
+- Private `BoundActionRegistry`, current `AuthoritySnapshot`, and `AuthorizedAction` types with total bind,
+  projection-parity, policy-evaluation, and freshness checks returning stable structured errors.
+- A total `CanRead`/`CanInvoke` decision that requires current subject, scope, policy, membership, and grant
+  epochs and cannot be reconstructed from visibility state.
+- A tiny pure effect interpreter whose input requires `AuthorizedAction`, used only to establish zero trace on
+  denial and not as the independent decision oracle.
+- Matrix/golden readers, property coverage, stale replay corpus, mutant configurations, and a Register-1 ledger.
+
+### Validation
+
+1. Run `cabal test ui-authorization-spec`; exact registry/projection sets and every allow/deny row match their
+   independent pins, including paired own/foreign scope and active/revoked grant cases.
+2. Evaluate under authority A, change one policy/membership/grant/scope epoch to B, and try to reuse A's
+   decision; the pinned cases require recomputation or precise denial and an empty pure effect trace.
+3. Run `default_allow` and `visibility_is_authorization`; the default-deny and hidden-but-invocable rows must
+   turn red respectively.
+4. Verify network and credential access are impossible in the gate process and the ledger marks runtime policy
+   and provider enforcement UNVERIFIED.
+
+### Remaining Work
+
+The whole sprint (📋 Planned).
+
+## Documentation Requirements
+
+**Engineering docs to update (when the gate runs, flip the honest layer, never before):**
+
+- `documents/engineering/low_code_ui_runtime_doctrine.md` — record pure action-registry and authorization
+  evidence without claiming live enforcement.
+- `documents/illegal_state/illegal_state_security.md` — attach §3.79 Gate-2 fixture and mutant evidence.
+- `documents/engineering/testing_doctrine.md` — register the independent authorization-matrix and stale-replay
+  oracle pattern.
+
+**Cross-references to add:**
+
+- `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/substrates.md`, and
+  `DEVELOPMENT_PLAN/system_components.md` — index the phase, gate, `none` substrate, and module ownership.
+- Later UI server/boundary phases — consume `AuthorizedAction`; do not reproduce the policy evaluator.
+
+## Related Documents
+
+- [Phase 17](phase_17_scoped_identity_kernel.md) — the required scoped identity and flow kernel.
+- [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — action ownership, server authorization, and freshness contract.
+- [Testing Doctrine](../documents/engineering/testing_doctrine.md) — independent authored expectations and evidence registers.
+- [Illegal-State Security Slice](../documents/illegal_state/illegal_state_security.md) — authorization parity and visibility-bypass failures.

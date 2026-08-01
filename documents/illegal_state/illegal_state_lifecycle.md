@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_18_base_image_registry.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/illegal_state/README.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: The themed slice of the illegal-state catalog covering the lifecycle band — the readiness
@@ -202,8 +202,9 @@ exhaustively (manifest-list digest, per-platform child and config digests, per-l
 *identity* not at all, so any digest inhabited it and an app could name a container amoebius neither built
 nor inspected. Making `identity : ImageIdentity` a required field closes it: the union's three arms are
 named catalog identities — the host-pulled `KindNode` image, the multi-arch `Base` image, and a `Runtime`
-variant keyed by the extension set linked into it — with **no `Foreign`, free-digest, or `Url` arm**. An app
-therefore has no image to name; its container is the `Runtime` arm whose `linked` set contains it. This is
+variant keyed by the reviewed trusted-adapter set linked into it — with **no `Foreign`, free-digest, or `Url`
+arm**. An app therefore has no image to name; its checked UI program is immutable release data interpreted by
+that generic runtime. Only a new trusted Haskell adapter can mint another runtime variant. This is
 the same closure `EngineRuntime` already carries against an operator-supplied engine address, applied one
 layer out. **Owner:** [`image_build_doctrine.md` §5](../engineering/image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)
 (the closed identity) + [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the
@@ -211,7 +212,7 @@ layer out. **Owner:** [`image_build_doctrine.md` §5](../engineering/image_build
 (a relation over a closed named catalog) + [§4.1](./illegal_state_techniques.md#41-pvcpv-binding-by-construction)
 (identity as a required field, not an optional annotation). **Layer:** `type-foreclosed` — a foreign image
 reference has no constructor, with a `rendered-output-golden` residue that the *deployed* image is the one
-named (the containerd inspection the live SPA gate already runs).
+named (and a live containerd inspection independently confirms the pulled digest).
 
 **Validation-locus:** `Gate-1-editor` — the union is closed in the Dhall schema, so naming a foreign image
 fails `dhall type` before any binary runs, exactly as an engine named by URL does.
@@ -264,19 +265,20 @@ authored shell fragment fails `dhall type` with no binary involved.
 
 ### 3.77 A worker naming an extension its own binary does not link
 
-Making apps linked extensions creates a pairing that did not previously exist: a worker Pod names the
+A trusted linked extension creates a pairing that did not previously exist: a worker Pod names the
 `WorkerKind` it runs, that kind names the `ExtensionId` whose library handles its work, and the Pod's image
 links some particular set of extensions. Nothing forced those two to agree, so a Web-service host could be
 scheduled for an app whose code its own binary does not carry — a "handler not found" discovered when the
 first request arrives. The membership relation closes it: a `WorkerKind`'s `ExtensionId` must be a member of
-its container's `ImageIdentity.Runtime.linked` set. Because variants are per-app rather than one image
-carrying every app ([§3.74](#374-a-container-image-amoebius-did-not-generate)), this is a real constraint
-rather than a tautology. **Owner:**
+its container's `ImageIdentity.Runtime.linkedAdapters` set. Runtime variants declare their exact reviewed
+adapter set rather than assuming every image carries every adapter; ordinary UI programs are immutable
+release data and do not create image variants ([§3.74](#374-a-container-image-amoebius-did-not-generate)).
+The membership check is therefore a real constraint rather than a tautology. **Owner:**
 [`daemon_topology_doctrine.md` §4](../engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected)
 (the dispatch wire and the relation). **Technique:**
 [§4.7](./illegal_state_techniques.md#47-compatibility--topology-relations-by-construction-over-a-collection)
 (a relation over the enclosing linked set) + [§4.4](./illegal_state_techniques.md#44-ownership-indices--single-owner-ssot-structurally)
-(one owning variant per app). **Layer:** `decode-foreclosed` — the relation is cross-field, so it is a total
+(one owning image identity per worker). **Layer:** `decode-foreclosed` — the relation is cross-field, so it is a total
 decoder fold rather than a Dhall type index — with a `runtime-checked` residue that the linked handler
 actually serves.
 

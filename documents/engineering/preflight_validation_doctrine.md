@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, documents/engineering/README.md, documents/engineering/diagram_conventions.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, documents/engineering/README.md, documents/engineering/diagram_conventions.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the pure-functional validation algebra (`Check`) that is the mechanism of the `dhall update` admission gate, its credential/host/quota probe instances including the worst-case dynamic envelope, and the recursive-forest validate-before-effect proof tree that makes a partial acknowledgement across a parent/child/grandchild forest unrepresentable.

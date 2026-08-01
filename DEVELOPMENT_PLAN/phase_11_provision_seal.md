@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Take the fully expanded `BoundDeployment` produced by [Phase 10](phase_10_capability_bind.md),
@@ -72,8 +72,8 @@ coexistence provision corpus ([Phase 12](phase_12_inference_accelerator_provisio
 ([Phase 7](phase_07_capacity_core_folds.md), [Phase 8](phase_08_storage_geometry_folds.md),
 [Phase 9](phase_09_execution_accelerator_folds.md)); the pure `renderAll :: ProvisionedSpec -> [K8sObject]` that
 consumes the sealed set ([Phase 13](phase_13_render_manifest_goldens.md)); the live `amoebius-capacity`
-scheduler runtime ([Phase 20](phase_20_capacity_scheduler.md)); and the live realization of any provider or the
-actual jit-resolve of an engine ([Phase 38](phase_38_determinism_jitcache.md), the live band).
+scheduler runtime ([Phase 27](phase_27_capacity_scheduler.md)); and the live realization of any provider or the
+actual jit-resolve of an engine ([Phase 48](phase_48_determinism_jitcache.md), the live band).
 
 **Substrate:** none — no host, no cluster, no provider; the gate is an in-process `cabal test` over
 `planInfrastructure` + `provision` + `provisionRenderSources`, analogous to the Phase-9 fold battery it invokes.
@@ -293,7 +293,7 @@ already materialized or returns exactly one non-renderable plan owning the close
   (`ObservedInfrastructureMaterialization`) construct `ProvisionContext`; a `NoInfrastructureRequired` result
   supplies the already-materialized arm directly. Replay, missing readback, or promised identities reject.
 - An in-file honesty note: `planInfrastructure` produces a *plan value*, not a live provider action; the live
-  validation/CAS-enaction of any batch is the live band ([Phase 34](phase_34_provider_deploy_checkpoint.md)).
+  validation/CAS-enaction of any batch is the live band ([Phase 44](phase_44_provider_deploy_checkpoint.md)).
 
 ### Validation
 1. The pre-existing fixture yields `NoInfrastructureRequired`; the creation fixture returns exactly one
@@ -418,7 +418,7 @@ and an impossible target has no deployable value.
   materialized/provisioned results occur only inside `provision` and its opaque output, so direct multiplicity
   fields never weaken the wholly-unprovisioned `BoundDeployment` boundary.
 - An in-file honesty note: `provision` produces a value, not a live provider; the same pure identity/revision
-  epoch algebra is later reused by live admission ([Phase 20](phase_20_capacity_scheduler.md)), which performs
+  epoch algebra is later reused by live admission ([Phase 27](phase_27_capacity_scheduler.md)), which performs
   the real read this phase does not.
 
 ### Validation
@@ -640,7 +640,7 @@ The whole sprint (📋 Planned).
 - [phase_13](phase_13_render_manifest_goldens.md) — the pure deployment-global
   `renderAll :: ProvisionedSpec -> [K8sObject]` that consumes the identity-keyed render-source set this phase
   seals
-- [phase_20](phase_20_capacity_scheduler.md) — the live `amoebius-capacity` scheduler that reuses this seal's
+- [phase_27](phase_27_capacity_scheduler.md) — the live `amoebius-capacity` scheduler that reuses this seal's
   pure identity/revision epoch algebra
-- [phase_38](phase_38_determinism_jitcache.md) — the live jit-build engine resolver + `CacheBudget` cache that
+- [phase_48](phase_48_determinism_jitcache.md) — the live jit-build engine resolver + `CacheBudget` cache that
   materializes the named `EngineRuntime` identity this seal only decodes

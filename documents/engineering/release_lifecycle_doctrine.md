@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for delivery as **typed composition on primitives amoebius already
@@ -69,6 +69,7 @@ and how they chain. Every primitive they compose is owned elsewhere:
 | `create-new → verified-migrate → retire-old` for the schema-migration phase | [storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction) |
 | Gateway-API `HTTPRoute` `backendRefs` weights the canary shifts | [network_fabric_doctrine.md](./network_fabric_doctrine.md) |
 | The control-plane singleton that runs the promote/rollout half | [daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) |
+| The bounded UI language, plan envelope, browser/server ABI, and compatibility witness | [low_code_ui_runtime_doctrine.md §15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) |
 
 > **Honesty.** This whole doctrine is **Phase-0 reference-only design intent**. None of the four values is
 > built in amoebius. Where a sibling exhibits the shape — jitML's phased rollout, jitML's pre/post-grant
@@ -88,6 +89,8 @@ data Release = Release
   { releaseHash        :: ReleaseHash        -- sha256(resolved-deployment-dhall ‖ image-digests ‖ substrate-fp)
   , deploymentDhallRef :: ContentAddress     -- the resolved deployment .dhall, by content
   , imageDigests       :: [(ImageIdentity, OciImageDigest)]  -- the exact images, each by closed identity
+  , uiPrograms         :: [(AppId, UiProgramRelease)]
+      -- exact ProgramDigest/catalog/contracts/client+server ABI; part of resolved deployment identity
   , substrateFp        :: SubstrateFingerprint
   }
 ```
@@ -99,6 +102,14 @@ data Release = Release
   relink moves only its own variant's digest, and the `Environment` pointer still advances a whole
   generation at a time ([§3](#3-environment-and-the-etag-cas-promotion-pointer)), exactly as it did when the
   list was untyped digests.
+- **A UI program is a pinned release input, not mutable configuration.** Each `UiProgramRelease` records the
+  exact `ProgramDigest`, component catalog, public-contract digests, `ClientRuntimeAbi`, `UiServerAbi`, and
+  compatibility witnesses admitted for that app, plus the content identities of its paired `ClientPlan` and
+  serializable `UiServerPlan` manifest. The release pointer names both or neither, and the pair identity is
+  covered by `releaseHash`; neither half can be replaced, omitted, or mixed with another generation while
+  retaining the same release identity. The generic client/server image may remain byte-identical while a program changes,
+  but that change still mints a distinct `Release`. The authoritative field set and digest coverage are owned
+  by [low_code_ui_runtime_doctrine.md §15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts).
 - **`releaseHash` is a distinct hash class, never shared.** It is registered in the canonical hash/pointer
   master table alongside `experimentHash`, `kernelKey`, and the OCI image digest
   ([content_addressing_doctrine.md §2.3](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)),
@@ -161,8 +172,8 @@ data Environment = Dev | Staging | Prod          -- closed union; no fourth, unn
   where the `environment` pointer kind is registered as owned by this doctrine). Once the pointer moves, the
   in-cluster SSA reconciler ([§5](#5-rolloutplan--rolloutphase-the-readiness-gated-apply)) converges `render(release)` for that environment. The CAS is the atomic,
   race-free commit; the reconcile is the enactment.
-- **App bytes are byte-identical across environments.** Dev, staging, and prod run the **same image digests**
-  and the **same application logic** — an app is
+- **App release inputs are byte-identical across environments.** Dev, staging, and prod run the **same image
+  digests**, checked UI program digests, contracts, and application logic — an app is
   [written once](./app_vs_deployment_doctrine.md#1-two-surfaces-one-app-written-once). Everything that
   differs between environments lives on the **deployment-rules surface**
   ([app_vs_deployment_doctrine.md §3](./app_vs_deployment_doctrine.md#3-the-deployment-rules-surface--how-the-same-app-runs)):
@@ -290,7 +301,7 @@ data ProvisionedRolloutWork       -- private constructors only
   overlap—before a DDL statement. The migrate phase uses only the private `ProvisionedSchemaMigration`,
   migrates and **verifies** the copy, and only a later phase retires the old — with the
   retire step inheriting the durable-data-deletion prohibition. This is the delivery home of the schema-migration
-  half of **Phase 30** (release lifecycle); the remaining manifest-change-correctness hardening stays in
+  half of **Phase 39** (release lifecycle); the remaining manifest-change-correctness hardening stays in
   [DEVELOPMENT_PLAN/later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md). The schema-migration engine is a
   `RolloutPhase`, and the manifest-change-correctness half hardens the typed diff of
   [manifest_generation_doctrine.md §6](./manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed).
@@ -305,6 +316,12 @@ data ProvisionedRolloutWork       -- private constructors only
   readiness/health. **Pulsar-consuming workloads cut over by consumer-group / subscription** instead of by
   traffic weight — the new generation subscribes, drains, and the old subscription is retired
   ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)).
+- **A UI rollout moves a coherent client/server/program generation.** Gateway weight never sends a client
+  plan to a server that has not admitted its exact program and contract identities. Old and new generations
+  may overlap only under an explicit compatibility witness; otherwise an old client receives
+  `ReloadRequired` and no effect executes. Projection consumers must reach the release's recorded watermark
+  before traffic shifts, and reconnect cursors remain owner-scoped across rollout and rollback. Browser asset
+  success alone is not readiness evidence.
 - **Rollback is re-apply or CAS-back.** A failed convergence has two equivalent recoveries, both already in
   the primitive set: **re-apply the prior generation's object set** via the same SSA-declare-and-prune path
   ([manifest_generation_doctrine.md §5](./manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)),
@@ -318,7 +335,7 @@ data ProvisionedRolloutWork       -- private constructors only
 > so a `RolloutPhase` applies **rendered objects**, never a `helm install`. The pattern is borrowed; the Helm
 > is dropped.
 
-> **Layer / honesty.** The `RolloutPlan` is **Phase-30 design intent** enacted by the Phase-19 SSA reconciler,
+> **Layer / honesty.** The `RolloutPlan` is **Phase-39 design intent** enacted by the Phase-26 SSA reconciler,
 > which is itself unbuilt. Ordering, readiness-gating, canary weights, and rollback are real, documented
 > Kubernetes / Gateway-API mechanisms; *that amoebius wires them into this plan type* is specified here and
 > unproven until the phase lands.
@@ -331,7 +348,7 @@ jitML's `src/JitML/Cluster/Helm.hs` defines exactly this shape — a `HelmPhase`
 demonstrated in a sibling** (but bound to Helm, which amoebius drops). jitML's `src/JitML/Bootstrap.hs` splits its
 rollout in two around the Postgres schema grant (`livePreGrantSubprocessesForPort → postgresSchemaGrantIO →
 livePostGrantSubprocessesForPort`), which is **the schema-migration-as-a-phase shape, LIVE in a sibling** and
-the concrete evidence behind the Phase-30 rollout shape. By contrast, hostbootstrap's only delivery gate
+the concrete evidence behind the Phase-39 rollout shape. By contrast, hostbootstrap's only delivery gate
 is the build-time `check-code`, with no rollout-phase or promotion concept at all. All sibling evidence, not
 amoebius results.
 
@@ -354,14 +371,15 @@ elsewhere:
 | Pulsar subscription / consumer-group cutover mechanics | [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) |
 | The build half of the pipeline (multi-arch images, the `distribution` registry) | [image_build_doctrine.md](./image_build_doctrine.md) |
 | The sudo host daemon and the in-cluster singleton that enact the two halves | [daemon_topology_doctrine.md](./daemon_topology_doctrine.md) |
+| The UI program digest, client/server plan envelope, stale-plan behavior, and UI compatibility witness | [low_code_ui_runtime_doctrine.md §15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) |
 | The catalogued unrepresentability of an unverified promotion | [illegal_state_catalog.md §3.26](../illegal_state/illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) |
 
 **Planning ownership.** This document is normative release-lifecycle doctrine only. Delivery sequencing,
 completion status, and validation gates are owned by
 [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md), never restated here. For orientation
 only (the plan is authoritative): the environment/promotion values compose with the SSA reconciler landing in
-**Phase 19** and the test-topology / evidence-ledger work in **Phase 42**; the DB-schema-migration
-`RolloutPhase` lands in **Phase 30**, while the remaining manifest-change-correctness hardening and the generic
+**Phase 26** and the test-topology / evidence-ledger work in **Phase 54**; the DB-schema-migration
+`RolloutPhase` lands in **Phase 39**, while the remaining manifest-change-correctness hardening and the generic
 third-party extension mechanism remain in [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md). This doc states the target shape and links back for status.
 
 ---
@@ -381,14 +399,15 @@ third-party extension mechanism remain in [Later Phases](../../DEVELOPMENT_PLAN/
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — [§3.26](../illegal_state/illegal_state_lifecycle.md#326-an-unverified-environment-promotion-promote--prod-without-the-required-evidence) promote-unverified→prod is type-foreclosed unrepresentable
 - [Image Build Doctrine](./image_build_doctrine.md) — the build half (multi-arch images, the `distribution` registry)
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — [§3](./daemon_topology_doctrine.md#3-the-control-plane-singleton) the control-plane singleton that runs promote/rollout; the host daemon that builds
+- [Low-Code UI Runtime Doctrine](./low_code_ui_runtime_doctrine.md) — [§15](./low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts) pins a coherent UI program and client/server ABI into each release
 - [Pulumi IaC Doctrine](./pulumi_iac_doctrine.md) — reconciler tiers (a) cloud-IaC and (b) the tag-discovery host reconciler, distinct from tier (c)
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
-- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — the remaining manifest-change-correctness hardening after Phase 30 homes the schema-migration rollout
+- [Later Phases](../../DEVELOPMENT_PLAN/later_phases.md) — the remaining manifest-change-correctness hardening after Phase 39 homes the schema-migration rollout
 - [Documentation Standards](../documentation_standards.md)
 
 > **Honesty.** Everything here is Phase-0 **reference-only design intent**. The `Release` ledger, the
 > `Environment` promotion pointer, the `PromotionGate`, and the `RolloutPlan`/`RolloutPhase` are **unbuilt in
-> amoebius** and compose primitives that are themselves Phase-19-and-later. The shapes are **generalized from
+> amoebius** and compose primitives that are themselves Phase-26-and-later. The shapes are **generalized from
 > siblings** — jitML's phased readiness-gated rollout and its pre/post-grant schema phase, infernix's
 > `.ready`-gated artifact, the content store's ETag-CAS `trial` pointer — each of which is **sibling evidence,
 > not proof in amoebius**. Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline), read every

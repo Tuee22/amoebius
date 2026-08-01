@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_36_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Build the pure logical→physical storage-geometry fold — the closed `StorageBudget`/`Growable`
@@ -89,9 +89,9 @@ API-object/churn diff whose derived MVCC total this phase's control-plane physic
 declared input (owned by [Phase 9](phase_09_execution_accelerator_folds.md)); the capability → provider → shape
 binder and the whole-deployment provision seal that re-exercises these folds
 ([Phase 10](phase_10_capability_bind.md)/[Phase 11](phase_11_provision_seal.md)); and any live snapshot
-validation or mutation of a scaling transition — [Phase 19](phase_19_object_reconciler.md) owns the generic
-snapshot-bound action/token/CAS plumbing, [Phase 21](phase_21_retained_storage.md) enacts the retained-carve
-arms, and [Phase 37](phase_37_provider_dynamic_nodes.md) enacts the `CreateProviderCapacity` arm.
+validation or mutation of a scaling transition — [Phase 26](phase_26_object_reconciler.md) owns the generic
+snapshot-bound action/token/CAS plumbing, [Phase 28](phase_28_retained_storage.md) enacts the retained-carve
+arms, and [Phase 47](phase_47_provider_dynamic_nodes.md) enacts the `CreateProviderCapacity` arm.
 
 **Substrate:** none — no host, no cluster, no backing; the gate is an in-process `cabal test` storage-geometry
 fold + QuickCheck battery, analogous to the Phase 5 decode battery and the Phase 6 property suite.
@@ -251,8 +251,8 @@ duplicate that corpus — it partitions it along the storage seam.
 - [`testing_doctrine.md`](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) (**Register 1** — pure/golden,
   in-process, no cluster) and [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact) (the per-run proven/tested/assumed ledger): the register this gate reaches and
   the ledger it emits, with model↔runtime correspondence and runtime fidelity marked UNVERIFIED (owned by the
-  live band — [Phase 19](phase_19_object_reconciler.md)/[Phase 21](phase_21_retained_storage.md)/
-  [Phase 23](phase_23_platform_backbone.md)/[Phase 37](phase_37_provider_dynamic_nodes.md)).
+  live band — [Phase 26](phase_26_object_reconciler.md)/[Phase 28](phase_28_retained_storage.md)/
+  [Phase 30](phase_30_platform_backbone.md)/[Phase 47](phase_47_provider_dynamic_nodes.md)).
 
 ## Sprints
 
@@ -421,10 +421,10 @@ observed snapshot — never a live mutation, and never a check that requires a l
   ShrinkByVerifiedMigration`, with current allocation, residual/quota, and old+new migration high-water
   witnessed on every non-`NoChange` arm.
 - An in-file honesty note: Phase 8 has no mutation capability; the generic live action is validated by
-  [Phase 19 (the object reconciler)](phase_19_object_reconciler.md), the retained
+  [Phase 26 (the object reconciler)](phase_26_object_reconciler.md), the retained
   `AllocateWithinRetainedCarve`/`ShrinkByVerifiedMigration` arms are enacted by
-  [Phase 21 (retained storage)](phase_21_retained_storage.md), and `CreateProviderCapacity` by
-  [Phase 37 (provider dynamic nodes)](phase_37_provider_dynamic_nodes.md).
+  [Phase 28 (retained storage)](phase_28_retained_storage.md), and `CreateProviderCapacity` by
+  [Phase 47 (provider dynamic nodes)](phase_47_provider_dynamic_nodes.md).
 
 ### Validation
 1. Each generated envelope+snapshot pair resolves to exactly one arm; the arm's witness (retained carve,

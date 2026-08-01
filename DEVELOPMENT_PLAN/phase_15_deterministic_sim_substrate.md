@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/deterministic_simulation_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Build the `io-classes` environment substrate and the modeled, fault-injectable
@@ -139,7 +139,7 @@ test (`m = IOSim s`) from one source, generalizing the Phase-14 single IO seam.
 ### Deliverables
 - `src/Amoebius/Sim/Env.hs`: the typed `Env m` effect interface (publish/consume, put/get-blob, apply-object,
   write-DNS, vault-op, now/delay), polymorphic over an `io-classes` monad `m`, reusing the `MonadTime`/`MonadTimer`
-  clock and the seed seams the determinism kernel ([phase_38](phase_38_determinism_jitcache.md)) also uses — one
+  clock and the seed seams the determinism kernel ([phase_48](phase_48_determinism_jitcache.md)) also uses — one
   determinism substrate, two uses.
 - `src/Amoebius/Sim/Interp/{Real,Sim}.hs`: the two interpreters (real clients under `IO`; the `IOSim s` model).
 - The `sim-spec` test-suite stanza and a toy reconcile loop exercising the interface under both interpreters.
@@ -286,5 +286,5 @@ The whole sprint (📋 Planned).
   loop consumes
 - [phase_14](phase_14_chain_kernel_boundary.md) — the boundary fake-tool harness whose single IO seam Sprint
   12.1 generalizes into the typed `Env m` effect interface
-- [phase_38](phase_38_determinism_jitcache.md) — the determinism kernel that shares the seed / `MonadTime` seams
+- [phase_48](phase_48_determinism_jitcache.md) — the determinism kernel that shares the seed / `MonadTime` seams
   (one determinism substrate, two uses)

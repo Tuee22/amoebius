@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_33_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: Author amoebius's one formal proof obligation — the cross-cluster gateway migration, both the
@@ -460,7 +460,7 @@ The whole sprint (📋 Planned).
   `test/formal/*` TLC + io-sim harnesses, and `src/Amoebius/Multicluster/StructuralFit.hs` as one
   `GatewayMigration` `Model` row; retire any stale separate `CrossClusterFailover`/`SingletonElection` spec
   rows (there is one obligation, both branches, and no election model).
-- `DEVELOPMENT_PLAN/phase_32_multicluster_spawn_georepl.md` — backlink: this design-model is the artifact
+- `DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md` — backlink: this design-model is the artifact
   whose Register-3 correspondence against the built `Multicluster/*` forest is discharged there, never here.
 
 ## Related Documents

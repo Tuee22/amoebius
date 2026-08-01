@@ -474,4 +474,4 @@ The whole sprint (📋 Planned).
 - [phase_10](phase_10_capability_bind.md) — the post-bind provisioning/capability negatives selected from the
   registry as deferred from here
 - [phase_13](phase_13_render_manifest_goldens.md) — the `rendered-output-golden` locus this ledger points at
-- [phase_26](phase_26_live_dsl_singleton.md) — the live band where the `live-effect` locus is discharged
+- [phase_33](phase_33_live_dsl_singleton.md) — the live band where the `live-effect` locus is discharged

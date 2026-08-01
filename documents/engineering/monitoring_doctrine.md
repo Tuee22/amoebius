@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_31_platform_services_2.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Make monitoring a mandatory, non-vacuous property of a workflow and of an extension — so an
@@ -114,7 +114,9 @@ MonitoringSurface =
 `extMonitoring` is `NonEmpty` and mandatory, so an extension's `extDhall` cannot be constructed without at
 least one declared surface — jitML's is a `TensorBoard` surface backed by MinIO
 ([§5](#5-extensible-surfaces-tensorboard)), so an unmonitored jitML run has no inhabitant. infernix and
-jitML (and every app, including the demo web apps) declare at least the generic `Slo` surface.
+jitML declare at least the generic `Slo` surface. A low-code app need not contribute an `App` extension at
+all; its workflow and generic UI-server/projector monitoring surfaces are derived from the checked bound
+program and therefore remain mandatory without pretending the UI source is linked code.
 
 ---
 
@@ -163,7 +165,11 @@ eventually-consistent, never live truth.
 Every renderable monitoring surface carries a mandatory access scope with no unauthenticated arm:
 
 ```text
-AccessScope = < AdminGlobal | UserScoped : { rule : AuthRule } >   -- no Public / Unauthenticated arm
+AccessScope =
+  < AdminGlobal
+  | SubjectScoped : { tenant : TenantRef, owner : SubjectRef, policy : AuthPolicyRef }
+  | TenantRoleScoped : { tenant : TenantRef, role : RoleRef, policy : AuthPolicyRef }
+  >   -- no Public / Unauthenticated arm
 ```
 
 **The problem.** A monitoring surface that publishes without authentication, or a per-user view that leaks
@@ -183,18 +189,20 @@ inhabitant — reinforcing the existing rule that only the Keycloak edge holds `
   Keycloak, Vault, Postgres). This is the admin-dashboard answer; the admin identity itself is owned by
   [vault_pki_doctrine.md](./vault_pki_doctrine.md) and the bootstrap admin plane
   ([bootstrap_sequence_doctrine.md](./bootstrap_sequence_doctrine.md)).
-- **`UserScoped { rule }`** — a Keycloak-managed user sees only a subset (a TensorBoard showing one user's own
-  experiments). amoebius models **that a scope is declared and non-public**; the per-user object filtering
-  itself is a Keycloak-backed `AuthRule` — application logic, the same altitude as the recorded
-  "a login requires MFA for the admin role" example ([app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md)) — evaluated by the
-  Envoy ext-authz path against the token's `sub` claim ([service_capability_doctrine.md](./service_capability_doctrine.md)).
+- **`SubjectScoped`** — a verified subject sees only projections whose mandatory owner index equals the
+  request context's `(TenantRef, SubjectRef)`. The subject and tenant are minted from authenticated membership,
+  never supplied by a dashboard parameter. Storage, projection, cache, artifact, and workflow references carry
+  the same owner index.
+- **`TenantRoleScoped`** — a tenant role sees a deliberate tenant-shared projection. The policy is a closed,
+  derived reference into the tenant→role graph, not an author-written claim expression or filter.
 
-**What it forecloses.** The type does **not** introduce a per-user ownership grain: ownership stops at
-app/namespace and tenant/cluster-subtree ([content_addressing_doctrine.md](./content_addressing_doctrine.md),
-[illegal_state_catalog.md §4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable)). A `UserScoped` surface that leaks another user's data is therefore a
-Keycloak-auth-rule bug, runtime-checked ([§8](#8-the-three-foreclosure-layers)), not type-foreclosed. Extending the phantom-tenant-tag
-machinery to a user index — so a cross-user leak is uninhabitable — is a later hardening, recorded here as an
-open question, not built.
+**What it forecloses.** The type introduces the subject/owner grain required by
+[low_code_ui_runtime_doctrine.md §10](./low_code_ui_runtime_doctrine.md#10-single-tenant-and-multi-tenant-applications).
+There is no `Ref tenant owner a -> Ref tenant otherOwner a` coercion and no optional owner predicate. A
+cross-user monitoring reference is type- or decode-foreclosed in the checked graph; faithful enforcement by
+Keycloak, the UI server, the projection worker, and the provider remains runtime-checked
+([§8](#8-the-three-foreclosure-layers)). Admin-global access remains a distinct operator authority and cannot
+be obtained by widening a subject-scoped application policy.
 
 ---
 
@@ -215,7 +223,7 @@ the `TensorBoard` surface reads over MinIO's S3 API — MinIO is the S3-shaped `
 budget ([§7](#7-fit-within-resource-limits)); their retention/GC follows the deferral to the sibling jitML
 checkpoint-format doctrine ([content_addressing_doctrine.md](./content_addressing_doctrine.md)).
 
-**Per-user is an access filter, not a pod per user.** A per-user jitML TensorBoard is a `UserScoped` view over
+**Per-subject is an access filter, not a pod per subject.** A per-subject jitML TensorBoard is a `SubjectScoped` view over
 the **one shared** TensorBoard instance ([§4](#4-access-one-admin-delegated-per-user-scope-no-public-arm)),
 filtered by the `sub` claim — not a TensorBoard pod per user, which would multiply `Demand`
 ([§7](#7-fit-within-resource-limits)).
@@ -320,7 +328,7 @@ not a flat "type-foreclosed":
   type-foreclosed), feasibility (`MonitoringInfeasible`), and the `routes[].workflow`-vs-`name` reconciliation
   (`UnroutedMonitor`).
 - **runtime-checked** — that the SLO is actually met, the alert actually fires, the named `/metrics` series
-  actually exists, and a `UserScoped` surface actually filters correctly. These are the "a type cannot prove a
+  actually exists, and a `SubjectScoped` surface actually filters correctly. These are the "a type cannot prove a
   port is responsive" residues ([illegal_state_catalog.md §2](../illegal_state/illegal_state_catalog.md#2-the-load-bearing-limit-a-type-check-proves-the-spec-composes-not-that-the-cluster-enforces-it)), owned by
   [chaos_failover_doctrine.md](./chaos_failover_doctrine.md) and the review tier, never claimed stronger.
 
@@ -335,11 +343,11 @@ not a flat "type-foreclosed":
 
 Phase order, status, and validation gates live only in
 [`DEVELOPMENT_PLAN/README.md`](../../DEVELOPMENT_PLAN/README.md). The monitoring obligation types land in **Phase 4** and the
-`validateTopology` fold in **Phase 28**; rendered monitoring shapes and baked binaries land in **Phases 13 and 18**;
-the derived rules/panels and optional local Thanos companion in **Phase 24**; the `workflow-health` TableView
-projection in **Phase 26** and the orchestrator/worker SLO-status event in **Phase 29**; the extension surfaces in **Phase 39**
-(infernix) and **Phase 40** (jitML → TensorBoard); the peer-cluster posture and the forest foreclosure in
-**Phase 32**; and the decode-rejection tests in **Phase 42**. This doc never maintains a competing status
+`validateTopology` fold in **Phase 35**; rendered monitoring shapes and baked binaries land in **Phases 13 and 25**;
+the derived rules/panels and optional local Thanos companion in **Phase 31**; the `workflow-health` TableView
+projection in **Phase 33** and the orchestrator/worker SLO-status event in **Phase 37**; the extension surfaces in **Phase 49**
+(infernix) and **Phase 51** (jitML → TensorBoard); the peer-cluster posture and the forest foreclosure in
+**Phase 42**; and the decode-rejection tests in **Phase 54**. This doc never maintains a competing status
 ledger; it states the target shape and links back for status, per
 [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 

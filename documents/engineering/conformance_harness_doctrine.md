@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/test_derivation_analysis.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/formal_model_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/test_derivation_analysis.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the discipline that lets amoebius validate the overwhelming majority
@@ -54,11 +54,13 @@ Naming the registers (definitions owned by [testing_doctrine.md §2](./testing_d
   from a live service handle, a derived NetworkPolicy — golden-tested on the *rendered* output); the `[Step]`
   plan and its `--dry-run`; the capability→provider→shape binder; the capacity/topology folds; the formal
   `Model` explorer + the emitted `.tla` checked by TLC ([formal_model_doctrine.md](./formal_model_doctrine.md));
-  the representational SPA composition.
+  the bounded `UiSource` algebra, scoped identity/authorization checks, binding, and deterministic
+  `ClientPlan`/`UiServerPlan` compilation.
 - **Register 2 — boundary integration with fakes (no cluster).** The real amoebius binary run with fake
   `helm`/`kubectl`/`docker`/`pulumi` (or a fake interpreter over the `[Step]`/effect data) that record their
-  argv and applied bytes, asserting the exact commands and manifests — plus the demo SPAs run locally against a
-  faked backend, driven end to end.
+  argv and applied bytes, asserting the exact commands and manifests — plus the generic PureScript UI
+  interpreter and UI-server responsibility run locally against fake identity/workflow/storage boundaries,
+  driven end to end with fresh challenges and OS-boundary HTTP transcripts.
 - **Register 2.5 — deterministic simulation (no cluster).** The *real* daemon/reconciler code, lifted onto
   `io-classes`, run under `IOSim`/`IOSimPOR` against a modeled, fault-injectable environment (fake
   Pulsar/MinIO/apiserver/route53/Vault/clock) — concurrent schedules and injected partition/reorder/redelivery/
@@ -152,13 +154,13 @@ substrates behave as modeled), not first exposure.
 Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the-proventestedassumed-discipline)
 and [chaos_failover_doctrine.md](./chaos_failover_doctrine.md):
 
-- A green harness proves the spec **decodes, fully expands, produces the exact infrastructure plan or validates
+- A green harness establishes that the spec **decodes, fully expands, produces the exact infrastructure plan or validates
   its materialization fixture, provisions, renders coherently, and produces an
   exact plan** — the
   spec-composition and rendered-output layers.
-- It proves **nothing** about whether the physical effects converge (Register 3). A green harness is quoted as
+- It establishes **nothing** about whether the physical effects converge (Register 3). A green harness is quoted as
   "decodes + provisions + renders coherently + plan is exact," never as "the cluster is correct."
-- A green **Register 2.5** run proves the *real code upholds its invariants under the modeled schedules and
+- A green **Register 2.5** run tests that the *real code upholds its invariants under the modeled schedules and
   faults* — a genuinely stronger claim than the fake-tool boundary — but says **nothing** about whether the real
   Pulsar/apiserver/route53 behave as modeled; that fidelity is an assumed premise, discharged by a narrow
   Register-3 conformance check ([deterministic_simulation_doctrine.md §5](./deterministic_simulation_doctrine.md#5-what-dst-establishes-and-the-one-premise-it-buys)).

@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/phase_28_pulsar_client.md, DEVELOPMENT_PLAN/phase_29_content_store_workflow.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/testing_doctrine.md, documents/engineering/tla_modelling_assumptions.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for the one amoebius binary's three runtime contexts (CLI / sudo
@@ -37,14 +37,12 @@ policy"). This is structural, not stylistic:
 
 The *constituent behaviours* of the binary map onto the role taxonomy below: **prodbox** is the root
 single-node control-plane behaviour ([§3](#3-the-control-plane-singleton)), **infernix** + **jitML** are the ML worker roles ([§4](#4-worker-daemons--n-unelected)),
-and **hostbootstrap** is the bootstrap + DSL-`chain` core that the host daemon drives. The application
-logic a web-service worker hosts is a **demo web app** — the single-page apps shipped with `infernix` and
-`jitML` — an app-spec that USES those extensions, and it is itself linked into the binary as an `App`
-extension ([capability_extension_doctrine.md §2](./capability_extension_doctrine.md#2-three-extension-kinds-workload-capability-and-app);
-[README](../../README.md); [DEVELOPMENT_PLAN](../../DEVELOPMENT_PLAN/README.md)). *Using* an extension and
-*being* one are different relations, and an app does both: it consumes infernix as a shared library while
-contributing its own `ExtensionSpec 'App`. The named behaviours are libraries inside one binary, not
-separate products.
+and **hostbootstrap** is the bootstrap + DSL-`chain` core that the host daemon drives. Low-code application
+UI is not linked application-specific browser or server code. The same executable carries the generic
+PureScript assets and Haskell UI-server interpreter specified by
+[Low-Code UI Runtime](./low_code_ui_runtime_doctrine.md); a provisioned `UiServerPlan` selects their checked
+behaviour. infernix and jitML remain linked trusted workflow and component adapters behind typed ports. The
+named behaviours are libraries inside one binary, not separate products.
 
 This document owns *which contexts exist and what each is for*. **How** the host daemon communicates — the
 distro-mTLS path to `kube-apiserver`, and the host-only NodePort peering with no mTLS — is owned by
@@ -304,7 +302,8 @@ each kind. The canonical worker kinds:
 
 | Worker kind | What it does | Constituent library |
 |-------------|--------------|---------------------|
-| **Web-service host** | Hosts an amoebius app's services behind the cluster edge | a demo web app (application logic) |
+| **UI runtime server** | Serves a checked low-code program and mediates every browser effect behind the authenticated edge | generic UI runtime + bound server plan |
+| **UI projection worker** | Folds workflow/data events into bounded owner-scoped UI projections | generic UI runtime + native Pulsar client |
 | **Pulsar topic-lifecycle coordinator** | Drives an app's declared topic lifecycles (create / retention / teardown) | the DSL + [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) |
 | **ML batch coordinator** | Schedules and tracks batch ML workflows | **infernix** / **jitML** |
 | **Inference engine** | Serves model inference — **in-cluster on linux-CUDA; host-level on Apple-Metal and Windows-CUDA** | **infernix** / **jitML** |
@@ -314,7 +313,8 @@ worker reaches the code it runs:
 
 ```text
 WorkerKind =
-  < WebServiceHost            : { serves    : ExtensionId }   -- an App extension
+  < UiRuntimeServer           : { serves    : AppId, program : ProgramDigest }
+  | UiProjectionWorker        : { serves    : AppId, program : ProgramDigest }
   | TopicLifecycleCoordinator : { serves    : ExtensionId }
   | MlBatchCoordinator        : { extension : ExtensionId }   -- infernix | jitML
   | InferenceEngine           : { extension : ExtensionId }
@@ -325,25 +325,32 @@ WorkerKind =
 
 **The dispatch wire, stated once because nothing else stated it.** A worker Pod's minted `FrameConfig`
 ([dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness)) names its
-`InClusterRole`; the `Worker` arm names a `WorkerKind`; the kind names the `ExtensionId` whose linked
-library handles its work. Serving behaviour therefore reaches the binary through the **role**, never through
+`InClusterRole`; the `Worker` arm names a `WorkerKind`. Extension-bearing kinds name the `ExtensionId` whose
+linked library handles their work. UI kinds instead name an `AppId` plus the immutable `ProgramDigest` of a
+provisioned `UiServerPlan`; they do not require application-specific Haskell linkage. Serving behaviour
+therefore reaches the binary through the **role**, never through
 `extChain` — `extChain :: cfg -> [Step]` is the deploy-time reconcile algebra
 ([§2](#2-context--role-an-orthogonal-grid) of
 [dsl_doctrine.md](./dsl_doctrine.md#2-two-languages-one-system-dhall-carries-params-haskell-carries-logic)),
-and it carries no request, route, or handler concept. This was previously left implicit for infernix and
-jitML; it is written here because the `App` extension kind
-([capability_extension_doctrine.md §2](./capability_extension_doctrine.md#2-three-extension-kinds-workload-capability-and-app))
-makes every app depend on it.
+and it carries no request, route, or handler concept. The UI request/handler relation is the sealed port table
+owned by [low_code_ui_runtime_doctrine.md §8](./low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations).
 
-**The named extension must be linked into the pod's own image.** A `WorkerKind`'s `ExtensionId` is required
-to be a member of its container's `ImageIdentity.Runtime.linked` set
+**A named extension must be linked into the pod's own image; a named UI program must be provisioned for that
+release.** An extension-bearing `WorkerKind`'s `ExtensionId` is required
+to be a member of its container's `ImageIdentity.Runtime.linkedAdapters` set
 ([image_build_doctrine.md §5](./image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest)).
 A worker naming an extension its own binary does not carry is therefore a decode-time rejection, not a
-runtime "handler not found" — the same relation-over-a-collection technique the catalog uses elsewhere
-([illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)).
+runtime "handler not found." A UI worker's `ProgramDigest` must instead be a member of the release's sealed UI
+program set and must pass the client/server ABI relation. Before readiness, every handler identity referenced
+by its serializable `UiServerPlan` must resolve exactly once to an ABI-compatible handler linked into the
+generic binary. Other linked handlers are legal but unreachable when absent from that plan's sealed dispatch
+table; an arbitrary, stale, or unresolved plan has no ready worker state. Both use the
+relation-over-a-collection technique catalogued by
+[Illegal State Techniques](../illegal_state/illegal_state_techniques.md).
 
 > **Layer.** The union's closedness and the linked-membership relation are **decode-foreclosed** (Gate 2).
-> That a linked handler actually serves correctly is runtime residue, claimed by no gate here.
+> Plan/registry hydration is a fail-closed readiness check; that a linked handler actually serves correctly is
+> runtime residue, claimed by no gate here.
 
 Properties shared by all workers:
 
@@ -354,11 +361,20 @@ Properties shared by all workers:
   coordinator that needs single-consumer semantics gets it from Pulsar's subscription model and the
   at-least-once + dedup discipline ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)), not from a
   bespoke amoebius election.
-- **HA like everything else.** A worker Deployment runs the HA chart at a configurable replica count, even
-  at `replicas=1` ([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1)). Every worker
+- **One topology across replica counts; redundancy requires multiple failure domains.** A worker Deployment
+  runs the same HA-capable chart at every configurable replica count, including `replicas=1`
+  ([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1)). One
+  replica has restart semantics but no replica redundancy; an HA claim additionally requires an admitted
+  replica/failure-domain placement and a live fault gate. Every worker
   container declares explicit CPU, memory, and pod-ephemeral requests/limits plus any bounded volume,
   durable, or accelerator provision it consumes
   ([platform_services_doctrine.md §10](./platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope)).
+- **UI workers are least-authority workers.** A UI runtime or projection worker receives no control-plane
+  Lease, Kubernetes mutation authority, provider-admin credential, root Vault capability, arbitrary outbound
+  destination, or caller-selected tenant. Its service account, Vault role, NetworkPolicy, plan set, and
+  capability handles are derived from the bound UI program. The browser never connects directly to Pulsar,
+  MinIO, SQL, Vault, or an inference engine
+  ([low_code_ui_runtime_doctrine.md §13](./low_code_ui_runtime_doctrine.md#13-generic-purescript-client-and-amoebius-ui-server)).
 - **Host-level workers are subprocesses, not pods.** When hardware forbids containerization — **Apple-Metal
   unified-memory inference and native Windows-CUDA inference** (CUDA does not run performantly under WSL2,
   [substrate_doctrine.md](./substrate_doctrine.md)) — the worker runs as a
@@ -495,7 +511,7 @@ The control-plane singleton's "exactly one pod" and the accelerator owner's "one
 placement properties**, backed by etcd, not amoebius protocols ([§3.1](#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election), [§4.2](#42-the-accelerator-owner-worker-wholesale-per-node-ownership-a-typed-per-node-singleton)):
 a `Deployment replicas=1` for the singleton, a DaemonSet-like node-affinity for the accelerator owner, and a
 k8s `Lease` (the etcd-backed client-go leader-election object) wherever strict at-most-one-writer must survive a
-rolling update or partition. **Amoebius builds no ranked-failover rule, no signed-commit-log election, and no
+rolling update or partition. **amoebius builds no ranked-failover rule, no signed-commit-log election, and no
 warm-standby candidate population.** Re-deriving consensus that etcd already provides would add a second
 coordination plane to prove correct and would deadlock at cold-start and disaster-recovery; the design declines
 to duplicate etcd.

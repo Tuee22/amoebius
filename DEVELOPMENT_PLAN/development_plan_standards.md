@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_18_base_image_registry.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_21_retained_storage.md, DEVELOPMENT_PLAN/phase_22_vault_pki.md, DEVELOPMENT_PLAN/phase_23_platform_backbone.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_25_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/phase_28_pulsar_client.md, DEVELOPMENT_PLAN/phase_29_content_store_workflow.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/phase_31_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_32_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_33_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_36_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_39_infernix_lift.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_41_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_51_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/documentation_standards.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: The rulebook for the amoebius `DEVELOPMENT_PLAN/` suite — the canonical file layout, the
@@ -54,7 +54,7 @@ ALL-CAPS exception is `README.md`). The canonical set:
 | `system_components.md` | Target component inventory: surface → owning doctrine → planned module path. |
 | `substrates.md` | Substrate registry + per-phase substrate map; sole home of generated tables. |
 | `legacy_tracking_for_deletion.md` | The migration-removal ledger (what the convergence retires, and when). |
-| `phase_NN_<slug>.md` | One document per phase, zero-padded `NN` for sort order (`phase_00_documentation_suite.md` … `phase_43_spa_live_deploy.md`). |
+| `phase_NN_<slug>.md` | One document per phase, zero-padded `NN` for sort order (`phase_00_documentation_suite.md` … `phase_58_ui_ha_multizone.md`). |
 | `later_phases.md` | The in-scope, high-numbered phases not yet given their own document. |
 
 This deviates from prodbox's hyphenated names (`phase-3-gateway-dns.md`) on purpose: amoebius's
@@ -94,8 +94,9 @@ Every `phase_NN_<slug>.md` follows this skeleton:
 
 ## Phase Summary
 <what this phase owns, declarative; the objective and scope>
+**Session scope:** <one primary implementation seam, one acceptance command, and the explicit split trigger>
 **Substrate:** <none | apple | linux-cpu | linux-cuda | windows> ([§L](#l-one-substrate-discipline))
-**Register:** <1 pure/golden · 2 boundary-with-fakes · 3 live · 1/2 for a two-register gate · — for Phase 0> ([§K](#k-honesty-proven--tested--assumed))
+**Register:** <1 pure/golden · 2 boundary-with-fakes · 3 live · 1/2 only for Phase 14 · — for Phase 0> ([§K](#k-honesty-proven--tested--assumed))
 **Gate:** <the concrete acceptance test that must pass before the next phase opens>
 
 ## Gate integrity            (optional; see below)
@@ -113,7 +114,9 @@ Every `phase_NN_<slug>.md` follows this skeleton:
 
 `Phase Summary` is declarative present tense ("this phase stands up …"), not a promise log. The **Gate** is a
 single, checkable acceptance condition — ideally an `InForceSpec` topology that spins resources up, runs a
-workflow, and tears them down.
+workflow, and tears them down. **Session scope** is the enforceable phase-size declaration owned by
+[§O](#o-single-session-phase-scope); omitting it or naming more than one independently releasable seam makes the
+phase incomplete.
 
 **Two optional sections have fixed slots and fixed names**, both in the gate-detail block between
 `## Phase Summary` and `## Doctrine adopted`, in this order. A phase whose gate-integrity apparatus (the
@@ -131,6 +134,10 @@ fits inline and provisions nothing worth itemising needs neither.
 
 - **Contiguous numbering, no gaps.** Phases are `0..N`. A new phase is appended or inserted with a full
   renumber, never given a fractional id.
+- **A full renumber carries an audit map.** A pre-implementation re-baseline may reorder or split planned phases
+  only when the same change records every old phase as `old id/path → new id/path(s)`, updates every inbound
+  link and dependency, and leaves no stale old-number reference. Once any affected phase is ✅ Done, the
+  no-renumber rule of [§N](#n-reopening-and-amending-a-phase) applies.
 - **A sprint belongs to exactly one phase.** No sprint is duplicated across phases.
 - **No forward dependencies.** A sprint's `Blocked by` names only an earlier-or-same-phase sprint or an
   external prerequisite — **never** a later phase (that would violate the strict numeric order in
@@ -242,14 +249,13 @@ statement is design intent.
 in **exactly one register** ([`conformance_harness_doctrine.md`](../documents/engineering/conformance_harness_doctrine.md),
 [`testing_doctrine.md` §2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing)):
 **Register 1** (pure/golden, in-process, no cluster), **Register 2** (boundary integration with fake tools, no
-cluster), and **Register 3** (live infrastructure) — with exactly three deliberate exceptions at the two ends of
-the count: **Phase 0** (the documentation-lint gate) reaches **no** register (it validates text and the link
-graph, not amoebius behaviour), and two gates each span **two** registers — **Phase 14** (the chain/Step kernel
-+ `--dry-run` + boundary fake-tool harness) across Register 1 (the in-process `chain`/`Step` corpus) *and*
-Register 2 (the boundary fake-tool harness), and **Phase 16** (the representational SPA phase) across Register 1
-(the composition property decodes) *and* Register 2 (the PureScript demo SPA against a faked backend), both
-in-process, no cluster. The pre-cluster band (phases 1–16, substrate `none`) discharges
-Registers 1–2; the live band (phases 17–43) is Register 3. **Rendering a plan / `--dry-run` must never require
+cluster), and **Register 3** (live infrastructure) — with exactly two deliberate exceptions: **Phase 0** (the
+documentation-lint gate) reaches **no** register because it validates text and the link graph, not amoebius
+behaviour; and **Phase 14** (the chain/Step kernel + `--dry-run` + boundary fake-tool harness) spans Register 1
+(the in-process `chain`/`Step` corpus) and Register 2 (the boundary fake-tool harness). Every bounded-UI phase
+has one register: pure schema/check/bind/compiler work in Phases 16–20 and boundary browser/server/composition
+work in Phases 21–23 are deliberately separate. The pre-cluster band (phases 1–23, substrate `none`) discharges
+Registers 1–2; the live band (phases 24–58) is Register 3. **Rendering a plan / `--dry-run` must never require
 live infrastructure.** The per-phase proven/tested/assumed ledger names the register(s) its gate reached; a
 Register-1/2 in-process ledger marks the Register-3 runtime layer UNVERIFIED and can never advance a production
 `PromotionGate`.
@@ -266,7 +272,7 @@ ledger (its result is *tested against a modeled environment*, with the environme
 substrate recorded **assumed**), which does not by itself advance a `PromotionGate`.
 
 A **design-proof / in-process phase** — one whose substrate is `none` ([§L](#l-one-substrate-discipline)) and whose gate is an in-process
-type/model check rather than a live-substrate run, e.g. the pre-cluster band, [phases 1–16](README.md) —
+type/model check rather than a live-substrate run, e.g. the pre-cluster band, [phases 1–23](README.md) —
 emits a ledger whose acceptance token reads **"spec-composition proven"** / **"proven for the model"**, never
 **"runtime proven"**: a green Dhall typecheck, Haskell decoder, or TLC run establishes that the spec composes
 and the protocol is sound in the abstract, not that any cluster enforces it. Front-loading such a design
@@ -306,10 +312,10 @@ split until each gate is single-substrate.
 **Two named forms satisfy the one-substrate rule without naming a fixed catalog member on the parent gate**, and
 both keep the discipline checkable rather than bending it:
 
-- **Deferred-to-generation** (Phase 42, `per generated test`). A gate that *emits* a test `.dhall` names the
+- **Deferred-to-generation** (Phase 54, `per generated test`). A gate that *emits* a test `.dhall` names the
   **rule** that each generated test is substrate-locked to exactly one substrate, chosen at generation time — the
   single-substrate property holds per generated artifact, not as a fixed member on the emitting gate.
-- **Parent-drives-provider** (Phase 34, `linux-cpu → provider`). The gate runs on one hardware substrate (the
+- **Parent-drives-provider** (Phases 44–47 and 58, `linux-cpu → provider`). The gate runs on one hardware substrate (the
   `linux-cpu` parent) and *targets* a provider it does not itself run — EKS is a **declared managed engine, not a
   detected substrate** ([`substrates.md` §2](substrates.md#2-substrate-inventory)). The single substrate the gate
   keys to is the parent's; the provider is a compute-engine axis, never a fifth substrate.
@@ -359,12 +365,32 @@ happy-path, or self-fulfilling fixture can pass is not a gate. Every phase **Gat
    error, `DecodeError` tag, or compile-fail locus — and is paired with a positive that differs only in the
    foreclosed dimension. A negative that merely "fails" can fail for an unrelated reason (a typo, a missing
    field) while the illegal state it targets stays representable.
+9. **Fresh-challenge binding.** Every effectful boundary or live gate uses a harness-generated unpredictable
+   nonce or canary issued after the subject starts, carries it through the public operation, and recovers it
+   from the independent observation. Fixed output, stale state, or a pre-recorded response cannot satisfy the
+   gate. Pure gates name a separately authored reference predicate and mark an effectful challenge not
+   applicable.
+10. **Authenticated observer provenance.** The gate names the observer outside the system under test and the
+    raw evidence it reads. An unavailable, unauthenticated, incomplete, or challenge-mismatched observer fails
+    closed; a self-reported compliance trace is never a fallback.
+11. **Authority-paired security checks.** An authentication, authorization, tenancy, or ownership gate uses
+    real least-privilege credentials minted by the authority under test. It pairs an own-scope success with a
+    foreign-scope denial that differs only in authority or scope, and externally observes zero forbidden
+    effect. Caller-authored identity or tenant headers are hostile inputs, not evidence.
+12. **Bypass-path negatives.** A gate claiming a single edge, broker, store, workflow, or provider path probes
+    the alternate direct paths as well as the intended path. Success through the sanctioned route cannot hide
+    an independently reachable bypass.
 
 These clauses are what a phase's **Gate** and each sprint's **Validation** are checked against. The Phase-0
 documentation lint verifies that every gate line names its committed fixtures, its mutant(s), and its
 independent oracle; the honesty ledger ([§K](#k-honesty-proven--tested--assumed)) records the result.
 **The party that writes the implementation must not be the sole author of the oracle it
 is checked against** — Phase 0 pins the oracle first.
+
+Clauses 9–12 are the plan projection of
+[`testing_doctrine.md` §12 — spoof-resistant evidence](../documents/engineering/testing_doctrine.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect).
+Each applicable phase records the challenge, observer, authority source, paired negative, and raw-observation
+digest in its gate apparatus and evidence ledger.
 
 <a id="gate-integrity-delegation"></a>
 **Gate → Gate-integrity delegation.** A `**Gate:**` line may discharge these clauses inline **or** delegate them to the
@@ -403,15 +429,49 @@ changing a phase after it is gated is a recorded act, not a silent Markdown edit
 - **The amendment log is the `## Phase Status` block.** Every reopen or scope amendment appends a dated entry
   there; the block is the phase's audit trail, and no amendment is made without one.
 
-- **What reopening never does.** It never renumbers ([§E](#e-one-canonical-phase-model)) and never mints a
-  fractional id. Adding cross-cutting discipline to existing phases with **zero renumber** — the pattern
-  recorded in [`later_phases.md`](later_phases.md) where a discipline is folded into the phases that already
-  own its surfaces — remains the default; reopening is for changing a phase's *own* gate or scope, not for
-  inserting work between phases.
+- **What reopening never does after implementation evidence exists.** It never renumbers a completed phase
+  and never mints a fractional id. Adding cross-cutting discipline to existing phases with **zero renumber** —
+  the pattern recorded in [`later_phases.md`](later_phases.md) where a discipline is folded into the phases
+  that already own its surfaces — remains the default. The only renumbering exception is the fully mapped
+  pre-implementation re-baseline of [§E](#e-one-canonical-phase-model), before any affected gate has evidence.
 
 Pre-implementation, this section is dormant: with every phase 📋 Planned bar the 🔄 Active Phase 0 and none
 ✅ Done, no gate evidence exists to strike. It is written now, while it costs nothing, so the first phase to
 complete has a documented reverse move rather than an ad-hoc one.
+
+---
+
+## O. Single-session phase scope
+
+A phase is an implementation session, not a milestone container. A phase that requires several independently
+reviewable implementations makes failure localization ambiguous and leaves the next phase blocked on an
+unbounded work packet.
+
+The tempting alternative is to retain a broad phase and divide it into many sprints. That preserves a short
+tracker but not a short gate: the phase cannot complete until every independent seam lands, and its acceptance
+command can pass while hiding which seam supplied the observed behaviour.
+
+amoebius applies the following phase-size contract:
+
+1. A phase owns **one primary implementation seam**: one algebra, one interpreter, one boundary adapter, one
+   live deployment transition, or one fault/isolation claim.
+2. A phase has **one acceptance command in one register on at most one substrate**. Pure semantics and a
+   boundary fake, or functional deployment and HA failover, are separate phases.
+3. The phase may include supporting fixtures, tests, docs, and mechanical wiring required to validate that
+   seam. It may not absorb another artifact that has its own useful independent gate.
+4. The planned work must be completable in one uninterrupted engineering session. The `Session scope` field
+   names the seam and a concrete split trigger, such as a second public algebra, second runtime process,
+   second register, second substrate, or second independently meaningful acceptance claim.
+5. One sprint is the default. More than one sprint is permitted only when each later sprint is test/docs
+   support for the same seam and none has an independently useful completion state. A phase with two
+   implementation sprints is split.
+6. A phase that discovers its split trigger during implementation stops without widening its gate; the plan is
+   amended into contiguous successor phases before work resumes.
+
+The contract forecloses milestone-sized phases and multi-register acceptance batteries. It does not impose a
+source-line estimate: generated fixtures, exhaustive negative corpora, and doctrinal explanation can be large
+while the implementation seam remains singular. The README tracker and every phase's `Session scope` field are
+the auditable sizing record.
 
 ---
 

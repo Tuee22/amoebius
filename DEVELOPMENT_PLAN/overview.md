@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_16_spa_composition_representational.md, DEVELOPMENT_PLAN/phase_17_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_18_base_image_registry.md, DEVELOPMENT_PLAN/phase_19_object_reconciler.md, DEVELOPMENT_PLAN/phase_20_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_21_retained_storage.md, DEVELOPMENT_PLAN/phase_22_vault_pki.md, DEVELOPMENT_PLAN/phase_23_platform_backbone.md, DEVELOPMENT_PLAN/phase_24_platform_services_2.md, DEVELOPMENT_PLAN/phase_25_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_26_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_27_app_tenancy.md, DEVELOPMENT_PLAN/phase_28_pulsar_client.md, DEVELOPMENT_PLAN/phase_29_content_store_workflow.md, DEVELOPMENT_PLAN/phase_30_release_lifecycle.md, DEVELOPMENT_PLAN/phase_31_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_32_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_33_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_34_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_35_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_36_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_37_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_39_infernix_lift.md, DEVELOPMENT_PLAN/phase_40_jitml_lift_cuda.md, DEVELOPMENT_PLAN/phase_41_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_42_test_topology_dsl.md, DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md, DEVELOPMENT_PLAN/system_components.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/development_plan_standards.md, DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_04_dhall_gate1_schema.md, DEVELOPMENT_PLAN/phase_05_gadt_decoder_gate2.md, DEVELOPMENT_PLAN/phase_06_illegal_state_corpus.md, DEVELOPMENT_PLAN/phase_07_capacity_core_folds.md, DEVELOPMENT_PLAN/phase_08_storage_geometry_folds.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_12_inference_accelerator_provision.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_14_chain_kernel_boundary.md, DEVELOPMENT_PLAN/phase_15_deterministic_sim_substrate.md, DEVELOPMENT_PLAN/phase_24_midwife_bootstrap_kind.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_26_object_reconciler.md, DEVELOPMENT_PLAN/phase_27_capacity_scheduler.md, DEVELOPMENT_PLAN/phase_28_retained_storage.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_35_pulsar_client.md, DEVELOPMENT_PLAN/phase_37_content_store_workflow.md, DEVELOPMENT_PLAN/phase_39_release_lifecycle.md, DEVELOPMENT_PLAN/phase_41_network_fabric_wireguard.md, DEVELOPMENT_PLAN/phase_42_multicluster_spawn_georepl.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/phase_44_provider_deploy_checkpoint.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_46_provider_ebs_credential.md, DEVELOPMENT_PLAN/phase_47_provider_dynamic_nodes.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md, DEVELOPMENT_PLAN/phase_53_apple_metal_host_daemon.md, DEVELOPMENT_PLAN/phase_54_test_topology_dsl.md, DEVELOPMENT_PLAN/system_components.md
 **Generated sections**: none
 
 > **Purpose**: The target-architecture / vision / current-baseline narrative — the "why and what" companion
@@ -34,16 +34,20 @@ amoebius is a single Haskell binary that runs in three contexts from the same bu
    its cluster and its secrets, whose single-writer authority is enforced by a mandatory Kubernetes `Lease`,
    plus separately provisioned in-cluster worker and capacity-scheduler roles from the same executable.
 
-There is no second binary, no sidecar fleet, no shell glue: context is a runtime fact, and *role* (control
+There is no second executable artifact, no sidecar fleet, no shell glue: context is a runtime fact, and *role* (control
 plane vs. worker) is orthogonal to context. This is the doctrine of
 [`daemon_topology_doctrine.md` §1 — One binary, three contexts](../documents/engineering/daemon_topology_doctrine.md#1-one-binary-three-contexts).
-The cluster authority is one Deployment-`replicas=1` pod, reconciled with the HA-always rule, per
+The cluster authority is one Deployment-`replicas=1` pod, reconciled with the common HA-capable topology rule
+(one replica has restart semantics, not replica redundancy), per
 [`daemon_topology_doctrine.md` §3 — The control-plane singleton](../documents/engineering/daemon_topology_doctrine.md#3-the-control-plane-singleton):
 "one desired pod" is a Deployment property, while the mandatory k8s/etcd `Lease` supplies at-most-one-writer
 authority across termination/replacement overlap; this is **not** an amoebius election. The pod is stateless —
 no PVC; its durable state is the Vault-enveloped MinIO bucket. A distinct `amoebius-capacity` scheduler
 Deployment runs the same Haskell binary in its scheduler role, consumes only its named Pending Pods, performs
 the sealed placement/root-ledger CAS/Binding protocol, and holds no singleton or secret authority.
+The low-code UI server is another closed **worker responsibility** of that executable, paired with a generic
+PureScript browser interpreter and an owner-scoped projection worker; it is not another privileged binary or
+application-specific server build.
 
 ```mermaid
 flowchart TD
@@ -51,6 +55,7 @@ flowchart TD
   src --> host[Sudo host daemon: substrate detect, lazy tool-ensure, host workers]
   src --> pod[In-cluster singleton: Deployment replicas 1, single-instance from k8s and etcd]
   src --> sched[In-cluster capacity scheduler: same binary, dedicated role]
+  src --> ui[In-cluster UI server and projection workers: same binary, least authority]
   host --> kube[kube-apiserver via distro mTLS, localhost only]
   pod --> recon[Typed reconciler: observe, bind/provision, renderAll, enact typed actions]
   sched --> bind[Sealed placement, aggregate CAS ledger, Kubernetes Binding]
@@ -72,12 +77,12 @@ substrate from a single `.dhall` with zero application change:
 | **infernix** + **jitML** | ML extension libraries | shared inference/training libraries whose hardware substrate is a *deployment rule*, not app code — [`app_vs_deployment_doctrine.md` §7 — infernix is a shared library; the inference substrate is a deployment rule](../documents/engineering/app_vs_deployment_doctrine.md#7-infernix-is-a-shared-library-the-inference-substrate-is-a-deployment-rule); jitML is the seed of the forward-looking Haskell extension DSL noted in [`dsl_doctrine.md` §8](../documents/engineering/dsl_doctrine.md#8-the-haskell-extension-dsl--the-constrained-surface-gate-3-admits) |
 | **hostbootstrap** | bootstrap + DSL-`chain` core | the Python `pb` **midwife** CLI (ensure toolchain, build binary, hand off) plus the `dsl-step`/`chain` kernel — [`substrate_doctrine.md` §6 — The midwife contract](../documents/engineering/substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off) |
 
-Each of **infernix** and **jitML** additionally ships a **demo single-page web app** in its sibling repo that
-illustrates its ML workflow and renders its results. Those demo web apps are amoebius's
-**application-logic-only demonstrator** — the proof case that an app is written once as logic while HA replica
-count, substrate, and inference binding are an orthogonal deployment-rules surface — and the SPA-composition
-shakedown fixtures. A demo web app *uses* an extension but is not itself one — see
-[`app_vs_deployment_doctrine.md` §6 — The proof case: a demo web app as application-logic-only](../documents/engineering/app_vs_deployment_doctrine.md#6-the-proof-case-a-demo-web-app-as-application-logic-only).
+Each of **infernix** and **jitML** additionally ships a handwritten demo single-page app in its sibling repo.
+Those clients are evidence and migration fixtures, not the amoebius application model: their interaction flows
+are re-expressed as bounded `UiSource`, bound to trusted Haskell workflow/artifact ports, and interpreted by the
+generic client/server runtime. The program contains no arbitrary browser code, provider address, credential,
+authorization decision, tenant claim, or deployment knob — see
+[`app_vs_deployment_doctrine.md` §6 — The proof case: a low-code workflow UI as application-logic-only](../documents/engineering/app_vs_deployment_doctrine.md#6-the-proof-case-a-low-code-workflow-ui-as-application-logic-only).
 
 The unifying surface is the Dhall DSL: Dhall carries parameters, Haskell carries logic, and an app names
 *capabilities* (ObjectStore, Sql, MessageBus, …) rather than products — see
@@ -88,8 +93,9 @@ and [`service_capability_doctrine.md` §2 — The capability set](../documents/e
 peers to track: amoebius lifts each sibling's *role* onto its own seams and reimplements nothing
 ([`lift_and_compose_doctrine.md`](../documents/engineering/lift_and_compose_doctrine.md)), while what stops being
 carried forward is the [`legacy_tracking_for_deletion.md`](legacy_tracking_for_deletion.md) ledger. infernix and
-jitML join as the **closed `ExtensionSpec` set** linked onto the amoebius base — never a migration through
-hostbootstrap first — with their engines jit-resolved into a bounded content-addressed cache rather than baked
+jitML join as the closed **workload-extension set** linked into trusted runtime variants — never a migration
+through hostbootstrap first — with their engines jit-resolved into a bounded content-addressed cache rather than baked.
+Low-code applications remain checked release data; only an optional reviewed server adapter joins the linked set
 ([`capability_extension_doctrine.md`](../documents/engineering/capability_extension_doctrine.md),
 [`content_addressing_doctrine.md` §4.5](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)).
 
@@ -108,8 +114,10 @@ owned by exactly one doctrine SSoT; the overview only names and links them.
 | **Dynamic provisioning is amoebius-owned and typed** — capacity grows only through a quota-capped `ScalingPolicy` (capacity-based + instance price-shopping), never a bare "unbounded." | [`resource_capacity_doctrine.md`](../documents/engineering/resource_capacity_doctrine.md); [`cluster_lifecycle_doctrine.md` §8](../documents/engineering/cluster_lifecycle_doctrine.md#8-dynamic-node-provisioning) |
 | **Pulsar payloads are exclusively CBOR** (canonical where content-addressed) — a typed codec; a non-CBOR application body (JSON/base64/protobuf/raw) is unrepresentable; protocol framing stays protobuf. | [`pulsar_client_doctrine.md` §3.1](../documents/engineering/pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor); catalog [`§3.23`](../documents/illegal_state/illegal_state_catalog.md#3-the-catalog--states-a-valid-spec-cannot-represent) |
 | **Application logic and deployment rules are separate DSL surfaces** — write the app once; HA, chaos, geo-replication, and failover are an orthogonal layer. | [`app_vs_deployment_doctrine.md` §1 — Two surfaces, one app written once](../documents/engineering/app_vs_deployment_doctrine.md#1-two-surfaces-one-app-written-once) |
+| **A low-code UI is bounded checked data, never arbitrary browser/server code.** One `BoundUiProgram` projects into a public `ClientPlan` and private `UiServerPlan`; every effect binds to a typed server port, current authorization, mandatory tenant/owner scope, and an abstract capability. | [`low_code_ui_runtime_doctrine.md` §3 — One checked value, two runtime plans](../documents/engineering/low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans) and [§§8–9](../documents/engineering/low_code_ui_runtime_doctrine.md#8-effects-are-typed-ports-not-network-operations) |
+| **A browser is never an authority source.** The UI server derives identity/scope from the authenticated edge, reauthorizes every action, issues only opaque scoped handles, and exposes no direct SQL/MinIO/Pulsar/Vault/inference path or credential. | [`low_code_ui_runtime_doctrine.md` §9 — routes, identity, authorization, and the edge](../documents/engineering/low_code_ui_runtime_doctrine.md#9-routes-identity-authorization-and-the-edge) |
 | **Secrets never live in Dhall — only names.** Parents inject secrets directly into a child's Vault. | [`dsl_doctrine.md` §6 — Secrets are names, never values](../documents/engineering/dsl_doctrine.md#6-secrets-are-names-never-values); [`vault_pki_doctrine.md` §3 — The SecretRef contract: a name, never a value](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value) |
-| **Standard platform services on every cluster, HA always** — the chart is HA even at `replicas=1`. | [`platform_services_doctrine.md` §2 — HA always, including `replicas=1`](../documents/engineering/platform_services_doctrine.md#2-ha-always--including-replicas1) |
+| **One HA-capable topology across replica counts; one replica is not HA.** Topology parity prevents a dev/prod fork, while an HA claim requires redundant admitted failure domains and an externally observed live fault. | [`platform_services_doctrine.md` §2 — HA always, including `replicas=1`](../documents/engineering/platform_services_doctrine.md#2-ha-always--including-replicas1) |
 | **Only `no-provisioner` retained PVs** (`<ns>/<sts>/pv_<n>`, sized, host/EBS-bound); cluster infrastructure is replaceable rather than TTL-bound, while durable backing has an independent lifetime. | [`cluster_lifecycle_doctrine.md` §4](../documents/engineering/cluster_lifecycle_doctrine.md#4-the-root-inforcespec-is-the-persistent-contract) and [`§7`](../documents/engineering/cluster_lifecycle_doctrine.md#7-ephemeral-spin-updown-with-deterministic-rebind); [`storage_lifecycle_doctrine.md` §1](../documents/engineering/storage_lifecycle_doctrine.md#1-cluster-and-storage-have-independent-lifetimes) and [`§2`](../documents/engineering/storage_lifecycle_doctrine.md#2-one-storage-class-and-it-provisions-nothing) |
 | **Every execution unit declares its complete resource envelope.** Every rendered container, controller child, webhook/gateway, build/Pulumi/copy/schema/ACME Job, host worker, and static engine process has explicit CPU/memory and relevant storage/rollout bounds; pod cache/scratch/mapped files are nested in ephemeral or memory accounting, while durable/native-cache/accelerator provisions remain separately owned. | [`platform_services_doctrine.md` §10](../documents/engineering/platform_services_doctrine.md#10-every-execution-unit-declares-its-complete-resource-envelope); [`resource_capacity_doctrine.md` §3](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget) |
 | **Keycloak owns all wild ingress** via the LB + Gateway API; the sole exception is host-origin, localhost-only traffic. | [`platform_services_doctrine.md` §9 — The LoadBalancer and the single wild-ingress path](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path); the host-only carve-out in [`host_cluster_comms_doctrine.md` §1](../documents/engineering/host_cluster_comms_doctrine.md#1-the-host-origin-surface-two-channels-both-localhost-only) |
@@ -118,6 +126,7 @@ owned by exactly one doctrine SSoT; the overview only names and links them.
 | **Generated artifacts are never committed** — manifests, the emitted `.tla`/`.cfg`, the reflected Dhall schema, and PureScript contracts are rendered from Haskell source and not committed. | [`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md) |
 | **The one formal obligation is the cross-cluster gateway migration** (both `Planned` and `Failover` branches), modelled as data, **safety + liveness-under-fairness** proven (TLC) and simulated (io-sim) once; its runtime fidelity is bridged by deterministic simulation + trace validation before live; intra-cluster consensus is delegated, not re-proven. | [`gateway_migration_model_doctrine.md`](../documents/engineering/gateway_migration_model_doctrine.md); [`formal_model_doctrine.md`](../documents/engineering/formal_model_doctrine.md); [`deterministic_simulation_doctrine.md`](../documents/engineering/deterministic_simulation_doctrine.md) |
 | **A test generates the enumeration, authors the expectation** — the spec generates the *enumeration* of surfaces requiring coverage; the operator authors the *expectations* asserted against them; an uncovered surface emits an UNVERIFIED `coverage` ledger row, never a silent pass. | [`testing_doctrine.md` §9 — Derivation: generated enumeration, authored expectation](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation); [`chaos_failover_doctrine.md` §11.2](../documents/engineering/chaos_failover_doctrine.md#112-the-typed-expectation-surface-expectation) |
+| **An effectful gate cannot pass on a replay or self-report.** A post-start challenge must appear in an authenticated observation outside the subject; security gates pair authority-minted own-scope success with foreign-scope denial, zero forbidden effect, and direct-bypass probes. | [`testing_doctrine.md` §12 — spoof-resistant evidence](../documents/engineering/testing_doctrine.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect) |
 | **Backups are write-only for amoebius; deletion/retention is out of band** — a backup names a bounded medium in a distinct failure domain, is written under a put-only credential (no delete/expire/lifecycle action is representable), is append-only/WORM where declared, and its restore **seeds a fresh coordinate, never overwrites** live bytes; a `ColdSeedFromBackup` down-primary secondary takes the gateway only after proven freshness — consistency over availability. | [`backup_recovery_doctrine.md`](../documents/engineering/backup_recovery_doctrine.md); [`storage_lifecycle_doctrine.md` §7](../documents/engineering/storage_lifecycle_doctrine.md#7-deleting-durable-data-is-forbidden-under-normal-operation); [`consistency_pacelc_doctrine.md` §3.7](../documents/engineering/consistency_pacelc_doctrine.md#37-the-cold-dr-seed-recovery-source) |
 
 The standard service set behind these capabilities — Registry (`distribution`) · MinIO · Vault · Pulsar ·
@@ -162,37 +171,52 @@ runtime fidelity UNVERIFIED until that phase discharges them
 - **Phase 13 — Pure `renderAll` + rendered-output goldens** (`none`) → [phase_13](phase_13_render_manifest_goldens.md).
 - **Phase 14 — chain/Step kernel + `--dry-run` + boundary fake-tool harness** (`none`) → [phase_14](phase_14_chain_kernel_boundary.md).
 - **Phase 15 — Deterministic-simulation substrate** (`none`) → [phase_15](phase_15_deterministic_sim_substrate.md).
-- **Phase 16 — SPA composition (representational) + demo-SPA local** (`none`) → [phase_16](phase_16_spa_composition_representational.md).
+- **Phase 16 — Bounded UI-program schema** (`none`) → [phase_16](phase_16_ui_program_schema.md).
+- **Phase 17 — Scoped identity kernel** (`none`) → [phase_17](phase_17_scoped_identity_kernel.md).
+- **Phase 18 — UI authorization kernel** (`none`) → [phase_18](phase_18_ui_authorization_kernel.md).
+- **Phase 19 — UI effect binding** (`none`) → [phase_19](phase_19_ui_effect_binding.md).
+- **Phase 20 — UI plan compiler** (`none`) → [phase_20](phase_20_ui_plan_compiler.md).
+- **Phase 21 — Generic browser interpreter** (`none`) → [phase_21](phase_21_ui_browser_interpreter.md).
+- **Phase 22 — UI-server boundary** (`none`) → [phase_22](phase_22_ui_server_boundary.md).
+- **Phase 23 — Local UI composition** (`none`) → [phase_23](phase_23_ui_local_composition.md).
 
 *Live band (Register 3), substrate-ordered:*
-- **Phase 17 — Python midwife + substrate detect + single kind cluster** (`linux-cpu`) → [phase_17](phase_17_midwife_bootstrap_kind.md).
-- **Phase 18 — Multi-arch base image + jit-build resolver + distribution registry** (`linux-cpu`) → [phase_18](phase_18_base_image_registry.md).
-- **Phase 19 — Typed renderer + object reconciler** (`linux-cpu`) → [phase_19](phase_19_object_reconciler.md).
-- **Phase 20 — amoebius-capacity scheduler + bootstrap cutover** (`linux-cpu`) → [phase_20](phase_20_capacity_scheduler.md).
-- **Phase 21 — No-provisioner retained storage + lossless rebind** (`linux-cpu`) → [phase_21](phase_21_retained_storage.md).
-- **Phase 22 — Root Vault + PKI + built-in Haskell Vault client** (`linux-cpu`) → [phase_22](phase_22_vault_pki.md).
-- **Phase 23 — Platform backbone (MetalLB + MinIO + Pulsar HA)** (`linux-cpu`) → [phase_23](phase_23_platform_backbone.md).
-- **Phase 24 — Platform services-2 (Percona/Patroni + pgAdmin + observability + readiness-DAG)** (`linux-cpu`) → [phase_24](phase_24_platform_services_2.md).
-- **Phase 25 — Keycloak-owned ingress** (`linux-cpu`) → [phase_25](phase_25_keycloak_ingress.md).
-- **Phase 26 — Live DSL deploy via the replicas=1 singleton** (`linux-cpu`) → [phase_26](phase_26_live_dsl_singleton.md).
-- **Phase 27 — App tenancy + `TenantSpec`** (`linux-cpu`) → [phase_27](phase_27_app_tenancy.md).
-- **Phase 28 — Native Pulsar client (CBOR)** (`linux-cpu`) → [phase_28](phase_28_pulsar_client.md).
-- **Phase 29 — Content store + workflow runtime (Pulsar-Failover single-writer)** (`linux-cpu`) → [phase_29](phase_29_content_store_workflow.md).
-- **Phase 30 — Release lifecycle** (`linux-cpu`) → [phase_30](phase_30_release_lifecycle.md).
-- **Phase 31 — WireGuard network fabric** (`linux-cpu`) → [phase_31](phase_31_network_fabric_wireguard.md).
-- **Phase 32 — Multi-cluster spawn + geo-replication** (`linux-cpu`) → [phase_32](phase_32_multicluster_spawn_georepl.md).
-- **Phase 33 — Gateway-migration drills + model-correspondence** (`linux-cpu`) → [phase_33](phase_33_gateway_migration_drills.md).
-- **Phase 34 — Provider Pulumi deploy-from-inside + enveloped checkpoint** (`linux-cpu → provider`) → [phase_34](phase_34_provider_deploy_checkpoint.md).
-- **Phase 35 — Hostless provider child + convergence + Lease handoff** (`linux-cpu → provider`) → [phase_35](phase_35_provider_child_bringup.md).
-- **Phase 36 — Per-PV EBS decoupling + create-vs-delete credential** (`linux-cpu → provider`) → [phase_36](phase_36_provider_ebs_credential.md).
-- **Phase 37 — Dynamic node provisioning by signal + leak-free provider gate** (`linux-cpu → provider`) → [phase_37](phase_37_provider_dynamic_nodes.md).
-- **Phase 38 — Determinism kernel + jit-build CacheBudget cache** (`linux-cpu`) → [phase_38](phase_38_determinism_jitcache.md).
-- **Phase 39 — infernix lift + CPU inference reproducibility** (`linux-cpu`) → [phase_39](phase_39_infernix_lift.md).
-- **Phase 40 — jitML lift + checkpoints + coordinator + CUDA** (`linux-cuda`) → [phase_40](phase_40_jitml_lift_cuda.md).
-- **Phase 41 — Apple-Metal host compute daemon** (`apple`) → [phase_41](phase_41_apple_metal_host_daemon.md).
-- **Phase 42 — Test-topology DSL + suggest-test + elevated harness** (`per generated test`) → [phase_42](phase_42_test_topology_dsl.md).
-- **Phase 43 — Live SPA deploy** (`linux-cpu`) → [phase_43](phase_43_spa_live_deploy.md).
-- **Phases 44+ — Later phases** (`varies`) → [later_phases.md](later_phases.md).
+- **Phase 24 — Python midwife + substrate detect + single kind cluster** (`linux-cpu`) → [phase_24](phase_24_midwife_bootstrap_kind.md).
+- **Phase 25 — Multi-arch base image + jit-build resolver + distribution registry** (`linux-cpu`) → [phase_25](phase_25_base_image_registry.md).
+- **Phase 26 — Typed renderer + object reconciler** (`linux-cpu`) → [phase_26](phase_26_object_reconciler.md).
+- **Phase 27 — amoebius-capacity scheduler + bootstrap cutover** (`linux-cpu`) → [phase_27](phase_27_capacity_scheduler.md).
+- **Phase 28 — No-provisioner retained storage + lossless rebind** (`linux-cpu`) → [phase_28](phase_28_retained_storage.md).
+- **Phase 29 — Root Vault + PKI + built-in Haskell Vault client** (`linux-cpu`) → [phase_29](phase_29_vault_pki.md).
+- **Phase 30 — Platform backbone (MetalLB + MinIO + Pulsar HA)** (`linux-cpu`) → [phase_30](phase_30_platform_backbone.md).
+- **Phase 31 — Platform services-2 (Percona/Patroni + pgAdmin + observability + readiness-DAG)** (`linux-cpu`) → [phase_31](phase_31_platform_services_2.md).
+- **Phase 32 — Keycloak-owned ingress** (`linux-cpu`) → [phase_32](phase_32_keycloak_ingress.md).
+- **Phase 33 — Live DSL deploy via the replicas=1 singleton** (`linux-cpu`) → [phase_33](phase_33_live_dsl_singleton.md).
+- **Phase 34 — Tenant/provider provisioning** (`linux-cpu`) → [phase_34](phase_34_app_tenancy.md).
+- **Phase 35 — Native Pulsar client (CBOR)** (`linux-cpu`) → [phase_35](phase_35_pulsar_client.md).
+- **Phase 36 — Live subject/tenant isolation** (`linux-cpu`) → [phase_36](phase_36_user_tenant_isolation_live.md).
+- **Phase 37 — Content store + workflow runtime (Pulsar-Failover single-writer)** (`linux-cpu`) → [phase_37](phase_37_content_store_workflow.md).
+- **Phase 38 — Owner-scoped UI projection runtime** (`linux-cpu`) → [phase_38](phase_38_ui_projection_runtime.md).
+- **Phase 39 — Release lifecycle** (`linux-cpu`) → [phase_39](phase_39_release_lifecycle.md).
+- **Phase 40 — Atomic immutable UI-program release** (`linux-cpu`) → [phase_40](phase_40_ui_program_release.md).
+- **Phase 41 — WireGuard network fabric** (`linux-cpu`) → [phase_41](phase_41_network_fabric_wireguard.md).
+- **Phase 42 — Multi-cluster spawn + geo-replication** (`linux-cpu`) → [phase_42](phase_42_multicluster_spawn_georepl.md).
+- **Phase 43 — Gateway-migration drills + model-correspondence** (`linux-cpu`) → [phase_43](phase_43_gateway_migration_drills.md).
+- **Phase 44 — Provider Pulumi deploy-from-inside + enveloped checkpoint** (`linux-cpu → provider`) → [phase_44](phase_44_provider_deploy_checkpoint.md).
+- **Phase 45 — Hostless provider child + convergence + Lease handoff** (`linux-cpu → provider`) → [phase_45](phase_45_provider_child_bringup.md).
+- **Phase 46 — Per-PV EBS decoupling + create-vs-delete credential** (`linux-cpu → provider`) → [phase_46](phase_46_provider_ebs_credential.md).
+- **Phase 47 — Dynamic node provisioning by signal + leak-free provider gate** (`linux-cpu → provider`) → [phase_47](phase_47_provider_dynamic_nodes.md).
+- **Phase 48 — Determinism kernel + jit-build CacheBudget cache** (`linux-cpu`) → [phase_48](phase_48_determinism_jitcache.md).
+- **Phase 49 — infernix core artifact lift** (`linux-cpu`) → [phase_49](phase_49_infernix_lift.md).
+- **Phase 50 — infernix UI lift** (`linux-cpu`) → [phase_50](phase_50_infernix_ui_lift.md).
+- **Phase 51 — Core jitML CUDA artifact lift** (`linux-cuda`) → [phase_51](phase_51_jitml_lift_cuda.md).
+- **Phase 52 — jitML UI lift** (`linux-cuda`) → [phase_52](phase_52_jitml_ui_lift.md).
+- **Phase 53 — Apple-Metal host compute daemon** (`apple`) → [phase_53](phase_53_apple_metal_host_daemon.md).
+- **Phase 54 — Test-topology DSL + suggest-test + elevated harness** (`per generated test`) → [phase_54](phase_54_test_topology_dsl.md).
+- **Phase 55 — Single-tenant low-code UI live path** (`linux-cpu`) → [phase_55](phase_55_ui_single_tenant_live.md).
+- **Phase 56 — Multi-tenant low-code UI isolation** (`linux-cpu`) → [phase_56](phase_56_ui_multi_tenant_live.md).
+- **Phase 57 — UI rollout, projection catch-up, and reconnect** (`linux-cpu`) → [phase_57](phase_57_ui_rollout_reconnect.md).
+- **Phase 58 — UI multi-zone high availability** (`linux-cpu → provider`) → [phase_58](phase_58_ui_ha_multizone.md).
+- **Phases 59+ — Later phases** (`varies`) → [later_phases.md](later_phases.md).
 
 The substrate per gate is registered authoritatively in [substrates.md](substrates.md); the per-phase gate
 ideally *is* an `InForceSpec` topology that spins resources up, runs a workflow, and tears them down — the

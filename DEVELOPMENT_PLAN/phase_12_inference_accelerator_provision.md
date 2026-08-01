@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_38_determinism_jitcache.md
+**Referenced by**: DEVELOPMENT_PLAN/README.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_09_execution_accelerator_folds.md, DEVELOPMENT_PLAN/phase_10_capability_bind.md, DEVELOPMENT_PLAN/phase_11_provision_seal.md, DEVELOPMENT_PLAN/phase_48_determinism_jitcache.md
 **Generated sections**: none
 
 > **Purpose**: Fill the ninth (`InferenceEngine`) capability arm as a representational union and relation — the
@@ -66,7 +66,7 @@ object-store/observability/migration/scheduler-reservation expansion, and the op
 fold ([Phase 9](phase_09_execution_accelerator_folds.md)); the render of a provisioned deployment into
 `[K8sObject]` (the pure `renderAll` phase); and the **live** jit-build resolve of the named `EngineRuntime`
 identity into its `CacheBudget`-bounded content-addressed cache plus the runtime-checked cross-lane weight-load
-residue — the live band ([Phase 38](phase_38_determinism_jitcache.md)). This phase builds the *representational*
+residue — the live band ([Phase 48](phase_48_determinism_jitcache.md)). This phase builds the *representational*
 union + relation and the pure accelerator-provision fold only; it performs no live device read and claims no
 runtime proof.
 
@@ -207,7 +207,7 @@ Validations above.
   provider is the Tier-1 read-side of this lifecycle: an ML engine is a **named catalog identity** the shared
   jit-build resolver materializes on first miss into a `CacheBudget`-bounded content-addressed cache — never
   baked, never fetched by URL. This phase decodes that named identity; the resolve is
-  [Phase 38](phase_38_determinism_jitcache.md).
+  [Phase 48](phase_48_determinism_jitcache.md).
 - [`service_capability_doctrine.md §4`](../documents/engineering/service_capability_doctrine.md#4-capability--provider--shape-the-binding)
   and [`§3`](../documents/engineering/service_capability_doctrine.md#3-one-canonical-provider-the-type-admits-alternates)
   — **Capability → provider → shape: the binding**, and **one canonical provider (the type admits alternates).**
@@ -318,7 +318,7 @@ resolve.
   `renderAll`.
 - An in-file honesty note: this is the representational union + relation and the pure accelerator-provision fold
   only; the actual jit-build resolve into the `CacheBudget`-bounded content-addressed cache, and the
-  runtime-checked cross-lane weight-load residue, are the live band ([Phase 38](phase_38_determinism_jitcache.md))
+  runtime-checked cross-lane weight-load residue, are the live band ([Phase 48](phase_48_determinism_jitcache.md))
   — sibling evidence where infernix's `Worker.hs` selects (never fetches) its engine, not an amoebius result.
 
 ### Validation
@@ -467,5 +467,5 @@ The whole sprint (📋 Planned).
   head this phase fills), the representational `bind`, and the object-node-multiset shape oracle
 - [phase_11](phase_11_provision_seal.md) — the whole-deployment provision seal that constructs the accelerator
   epoch witnesses and returns the `provision-seal` `Left`s this phase exercises
-- [phase_38](phase_38_determinism_jitcache.md) — the live jit-build engine resolver + `CacheBudget` cache that
+- [phase_48](phase_48_determinism_jitcache.md) — the live jit-build engine resolver + `CacheBudget` cache that
   materializes the named `EngineRuntime` identity this phase only decodes
