@@ -19,7 +19,9 @@ queueable-port, and local-blob source types, and the Gate-2 relations that requi
 have finite count/byte/age bounds, idempotency, conflict, order, dependency, and authoritative-validation
 semantics. Binding emits matching `ClientPlan.offline` and `UiServerPlan.replay` projections; browser APIs,
 Redis, WebSocket routes, credentials, private policy, and provider coordinates remain unnameable in authored
-application source.
+application source. The representative catalog fixes the initial ML classification: infernix workflow start
+and jitML training start may opt into `QueuedPort`; workflow progress is a cached cursor projection; ML
+signals, cancellation, and artifact/model invocation are `OnlineOnly`.
 
 **Session scope:** Add and test only the language, decoder, binder, and generated-plan projection; browser
 persistence and live replay belong to later phases.
@@ -30,15 +32,18 @@ persistence and live replay belong to later phases.
 
 **Gate:** `cabal test offline-plan-spec` accepts the independently authored positive corpus, rejects each
 boundedness/plan-equality/security negative with its pinned tag, emits deterministic paired plans, and turns
-red for every named plan-compiler mutant.
+red for every named plan-compiler mutant. The corpus includes queueable infernix/jitML starts with complete
+identity/conflict/order/dependency/count/byte/age contracts and rejects attempts to queue any initial
+online-only ML operation.
 
 ## Gate integrity
 
-Phase 0 pins positive `OnlineOnly` and `Offline` programs, negative Dhall/Gate-2 fixtures, expected error tags,
-and an independently authored public/private key-set table. Mutants remove a queue bound, omit the server
-handler for a client codec, persist a forbidden private field, and add a browser/Redis product constructor.
-The oracle parses normalized plan values without invoking the compiler under test; no live authority or fresh
-challenge is applicable at Register 1.
+Phase 0 pins positive `OnlineOnly` and `Offline` programs, positive infernix-start and jitML-training queue
+contracts, negative Dhall/Gate-2 fixtures for every online-only ML operation and missing queue-contract field,
+expected error tags, and an independently authored public/private key-set table. Mutants remove a queue bound,
+omit the server handler for a client codec, make model invocation queueable, persist a forbidden private field,
+and add a browser/Redis product constructor. The oracle parses normalized plan values without invoking the
+compiler under test; no live authority or fresh challenge is applicable at Register 1.
 
 ## Doctrine adopted
 
@@ -63,13 +68,15 @@ Compile one bounded authored offline contract into coherent public and private p
 ### Deliverables
 
 - Closed continuity, projection, queued-port, blob-class, and queue-contract source/IR types.
+- Closed infernix/jitML operation classification plus paired-plan entries only for the two eligible start ports.
 - Structured Gate-1/Gate-2 errors for unbounded, mismatched, or forbidden fields.
 - Deterministic offline plan projections and generated-artifact commands.
 - Independent fixtures, expected tags, and mutants.
 
 ### Validation
 
-1. Run `cabal test offline-plan-spec`; require the canonical corpus green and every named mutant red.
+1. Run `cabal test offline-plan-spec`; require the canonical corpus green, each attempt to queue progress,
+   signal, cancellation, or invocation to fail at its pinned tag, and every named mutant to turn red.
 
 ### Remaining Work
 

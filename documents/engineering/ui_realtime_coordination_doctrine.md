@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_61_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_64_offline_multizone_continuity.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/testing_doctrine.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_61_offline_replay_receipts.md, DEVELOPMENT_PLAN/phase_64_offline_multizone_continuity.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/testing_doctrine.md
 **Generated sections**: none
 
 > **Purpose**: Define the browser transport, cross-pod WebSocket-routing protocol, ephemeral Redis topology,
@@ -162,8 +162,12 @@ command path is incorrectly designed.
 
 ## 6. Durable commands, receipts, and replay
 
-Every mutating or workflow-starting request has a scope-qualified `CommandId`/`RequestId`, an idempotency
-contract, and an authoritative receipt path colocated with or derived from the effect owner:
+Every mutating or workflow-starting request carries an opaque client `RequestId`. After current authentication,
+membership, authorization, program/ABI, port, and input validation, the UI server derives a scope-qualified
+`CommandId` from `(AppId, TenantId, Owner, PortId, RequestId)`. The client id is correlation, not authority;
+different replicas derive the same command identity only after the same trusted context validates. Each
+request also has an idempotency contract and an authoritative receipt path colocated with or derived from the
+effect owner:
 
 | Effect owner | Authoritative acceptance/receipt rule |
 |--------------|---------------------------------------|
@@ -171,6 +175,14 @@ contract, and an authoritative receipt path colocated with or derived from the e
 | Pulsar/workflow command | Producer resends use broker dedup; consumer redelivery uses the work-id-keyed idempotent fold. The effect worker durably records the scoped result in a compacted receipt projection queryable by every UI-server replica. |
 | Object mutation | The object provider's conditional write/CAS identity decides acceptance; the durable result projection records the observed version. |
 | Other typed handler | The handler contract names an equally coherent durable idempotency/receipt mechanism before binding succeeds. |
+
+For a workflow command, that server-derived scoped `CommandId` is also the application work-id carried
+unchanged in the canonical Pulsar command, every progress/terminal event, the `WorkflowHandle`, and the
+compacted receipt key.
+The terminal event supplies the effect-owner outcome folded into that receipt. A producer sequence id, Pulsar
+`MessageId`, pod/run identity, artifact digest, Redis correlation, or replacement UI-server request id cannot
+substitute for it. Exact scoped identity plus equal normalized input returns the same receipt; equal identity
+plus different normalized input is a typed pre-effect conflict.
 
 Redis may wake the pod waiting for a receipt, but it cannot be the only place the receipt or outcome exists.
 After reconnect—or after a bounded delivery timeout while the socket remains open—any replica can query the

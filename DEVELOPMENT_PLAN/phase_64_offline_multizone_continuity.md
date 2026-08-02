@@ -21,8 +21,9 @@ isolated including its UI-server and Redis/Sentinel members, a release advances,
 a surviving replica. Current OIDC/membership/policy gates replay; cursor repair and durable receipts recover
 across lost Redis Pub/Sub. The gate claims only the pinned single-zone/disconnection envelope.
 
-**Session scope:** Run one provider campaign for one offline projection, scalar command, workflow start, and
-blob-dependent command; additional providers or simultaneous-zone/disaster recovery require later phases.
+**Session scope:** Run one provider campaign for one offline projection, scalar command, infernix workflow
+start, and blob-dependent command; additional providers, live offline jitML/CUDA training, or
+simultaneous-zone/disaster recovery require later phases.
 
 **Substrate:** `linux-cpu → provider` — the parent drives one managed provider target.
 
@@ -30,7 +31,9 @@ blob-dependent command; additional providers or simultaneous-zone/disaster recov
 
 **Gate:** `cabal test offline-multizone-continuity` runs the pinned disconnection/queue/zone-isolation/release/
 reauth/reconnect/replay campaign and externally proves current-scope reads, one accepted durable effect per
-command, verified blob content, cursor continuity, and zero same-tenant-non-owner or foreign-tenant effect.
+command, verified blob content, cursor continuity, and zero same-tenant-non-owner or foreign-tenant effect. Its
+workflow row preserves the infernix start's scoped command/work-id into the recovered durable receipt; the gate
+does not promote Phase 59's structurally queueable jitML start to a tested offline CUDA claim.
 
 ## Gate integrity
 

@@ -106,6 +106,9 @@ data OfflineQueueContract = OfflineQueueContract
 Read-only ports and subscriptions are represented as cached projections with cursors, not queued reads.
 Uploads use the local-blob protocol in [§10](#10-offline-blobs). A port without authoritative validation,
 idempotency, conflict, ordering, dependency, count, byte, and age semantics cannot be marked queueable.
+The initial infernix/jitML operation classification is owned by
+[Low-Code UI Runtime §12](./low_code_ui_runtime_doctrine.md#12-workflows-and-artifact-lifting-into-the-ux):
+this doctrine supplies the queue machinery but cannot broaden an adapter's eligible port set.
 
 Local validation is advisory presentation. Reconnect always reruns server validation, authentication,
 authorization, membership, plan/contract compatibility, handle resolution, and provider preconditions. A
@@ -205,8 +208,11 @@ back to a safe single-tab/refuse-concurrent-tab posture; it never replays indepe
 
 Reconnect establishes a fresh online session and WebSocket before replay. The server validates the partition,
 program/ABI/contracts, current scope, membership, policy, and device limits. Commands then replay in the
-declared dependency/order relation under bounded concurrency. Each carries its immutable scope-qualified
-command identity and the digest/schema identities recorded when queued.
+declared dependency/order relation under bounded concurrency. Each carries its immutable opaque client
+`RequestId` and the digest/schema identities recorded when queued. Only after current-authority validation
+does the server derive the scope-qualified `CommandId` from
+`(AppId, TenantId, Owner, PortId, RequestId)`; the browser cannot author or retain execution authority merely
+by retaining the request id.
 
 The result is one of:
 

@@ -91,6 +91,15 @@ generic client/server runtime. The program contains no arbitrary browser code, p
 authorization decision, tenant claim, or deployment knob — see
 [`app_vs_deployment_doctrine.md` §6 — The proof case: a low-code workflow UI as application-logic-only](../documents/engineering/app_vs_deployment_doctrine.md#6-the-proof-case-a-low-code-workflow-ui-as-application-logic-only).
 
+Their shared execution path is fixed: a UI server admits a typed start under one scope-qualified `CommandId`;
+the infernix/jitML adapter preserves it as the Phase-37 work-id through native-CBOR Pulsar commands, redelivery,
+progress, and terminal events; the effect owner commits the artifact and Phase 38 folds the terminal event into
+a durable owner/command-qualified receipt. Redis only wakes or routes to the replica owning the authenticated
+WebSocket, and any replica repairs loss from the Pulsar-backed projection/receipt. For the initial offline
+surface, only infernix workflow start and jitML training start may opt into a complete bounded queue contract;
+progress is a cached cursor projection, and signals, cancellation, and model/artifact invocation are
+online-only.
+
 The unifying surface is the Dhall DSL: Dhall carries parameters, Haskell carries logic, and an app names
 *capabilities* (ObjectStore, Sql, MessageBus, …) rather than products — see
 [`service_capability_doctrine.md` §1 — Why capabilities, not products](../documents/engineering/service_capability_doctrine.md#1-why-capabilities-not-products)

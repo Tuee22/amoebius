@@ -20,8 +20,9 @@ browser reconnects by authenticated WebSocket; any UI-server replica can recover
 provider/Pulsar projections. Redis routes live outcomes only. Flushing Redis or dropping a socket may delay a
 result but cannot lose, invent, or duplicate an accepted effect.
 
-**Session scope:** Gate scalar commands and workflow starts with small result payloads; offline blob transfer is
-deferred to Phase 62.
+**Session scope:** Gate scalar commands and one infernix ready-artifact workflow start with a small result
+payload; offline blob transfer is deferred to Phase 62. Phase 59 structurally admits jitML training starts,
+but this linux-cpu gate does not claim a live offline CUDA training result.
 
 **Substrate:** `linux-cpu`.
 
@@ -29,13 +30,16 @@ deferred to Phase 62.
 
 **Gate:** `cabal test offline-replay-receipts-live` queues fresh commands while disconnected, reconnects to a
 different UI-server replica, faults Redis and the socket between effect and response, and externally proves
-the exact typed outcome and zero duplicate/foreign effect for every challenged command.
+the exact typed outcome and zero duplicate/foreign effect for every challenged command. The workflow row uses
+the infernix start port and must preserve one scoped command/work-id through Pulsar, Phase-38 receipt lookup,
+and ready-artifact outcome recovery.
 
 ## Gate integrity
 
-Phase 0 pins the command/dependency trace, replay concurrency and timeout budgets, typed outcome table, and
-same-owner/non-owner/foreign-tenant matrix. Distinct real OIDC identities issue fresh nonces. Independent SQL,
-MinIO, Pulsar, workflow, gateway, and Redis observers establish durable effect, route loss, and recovery.
+Phase 0 pins the command/dependency trace, the infernix start/input/receipt identity row, replay concurrency and
+timeout budgets, typed outcome table, and same-owner/non-owner/foreign-tenant matrix. Distinct real OIDC
+identities issue fresh nonces. Independent SQL, MinIO, Pulsar, workflow, gateway, and Redis observers establish
+durable effect, route loss, and recovery.
 Mutants acknowledge on Redis publish, omit durable lookup, drop current-membership validation, replay from two
 tabs, discard pending after disconnect, and remove scope from idempotency keys. Direct service/provider probes
 must remain denied.
@@ -73,6 +77,8 @@ Prove that every accepted replay has one recoverable durable receipt and current
 
 - Typed replay session and outcomes with current-authority validation.
 - Scope-qualified idempotency and durable receipt adapters.
+- One infernix queued-start adapter preserving its original command/work-id into the ready-artifact receipt;
+  no offline jitML live claim on this substrate.
 - Cross-replica outcome routing and cursor repair after Redis/socket loss.
 - Live challenge, denial, and mutant harness.
 

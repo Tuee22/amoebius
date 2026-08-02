@@ -24,6 +24,14 @@ Phase 37 continues to own Pulsar-Failover takeover and pointer-CAS safety; Phase
 determinism kernel and bounded first-miss cache. Phase 51 consumes those contracts without adding another
 coordinator, election, store, cache, or determinism implementation.
 
+Every scoped training start carries one server-derived `CommandId` unchanged as the Phase-37 workflow
+work-id through the canonical CBOR command, every progress/checkpoint event, and the terminal committed or
+failed event. The adapter cannot replace it with a trainer Pod UID, retry id, checkpoint digest, or pointer
+revision. Producer resends retain their Phase-35 producer/sequence identity; consumer redelivery and restart
+fold on the stable work-id. The same scoped command id plus normalized request returns the original workflow
+and committed-artifact outcome without launching another trainer; the same id with a changed normalized
+request is a typed pre-effect idempotency conflict.
+
 ## Phase Summary
 
 This phase owns one primary seam:
@@ -78,19 +86,24 @@ The fixtures, oracle, observers, and mutants are delegated to [Gate integrity](#
   `test/dhall/phase_51/jitml_cuda_artifact.dhall`,
   `test/fixtures/phase_51/cuda_capacity_matrix.tsv`,
   `test/fixtures/phase_51/committed_artifact_contract.tsv`, and
+  `test/fixtures/phase_51/command_identity_matrix.tsv`, plus
   `test/fixtures/phase_51/resource_shape.json`. The one positive workload is a pinned supervised training job
   with at least 200 optimizer steps and a multi-layer model of at least 10 million parameters; falling below
   either floor fails rather than substituting a token workload.
 - **Fresh challenge.** After the platform and subject processes are Ready, the harness creates an unpredictable
-  challenge-bearing final batch. An independent helper computes its content address. The pointer-reachable
-  manifest must name that address, and a host-side read/driver trace must bind the same trainer cgroup and Pod
-  UID to reading that batch, launching CUDA kernels, and writing the checkpoint before the pointer CAS.
+  command id and challenge-bearing final batch. An independent helper computes its content address. The
+  command and every derived event must retain that id; the pointer-reachable manifest must name the batch
+  address, and a host-side read/driver trace must bind the same trainer cgroup and Pod UID to reading that
+  batch, launching CUDA kernels, and writing the checkpoint before the pointer CAS.
 - **Positive commit chain.** A host-side NVML/driver probe supplies the observed device inventory. The
   Kubernetes API confirms the owner Pod's node, UID, affinity, and the named owner's exact full-device
   request/limit. Containerd/cache records confirm a first-miss materialization of the pinned CUDA catalog
   identity. Pulsar offsets and MinIO audit history establish command consumption, immutable blob/manifest
   writes, and the successful conditional pointer update. The harness fetches the artifact independently,
-  recomputes every object SHA, and checks its scope and provenance against the committed oracle.
+  recomputes every object SHA, and checks its scope and provenance against the committed oracle. An exact
+  resend returns the original workflow/artifact outcome with no second trainer, CUDA launch, object write, or
+  pointer advance; changed input under the same command id returns the pinned conflict with those same zero
+  effects.
 - **Paired capacity negatives with zero effects.** From a clean baseline, one case fits raw VRAM but is one
   byte over net allocatable VRAM after the mandatory reserve; another fits declared residual but is one byte
   over observed `currentFreeVram`. Each must fail at preflight with its pinned reason and produce no run-scoped
@@ -108,9 +121,10 @@ The fixtures, oracle, observers, and mutants are delegated to [Gate integrity](#
 - **Committed mutants.** Phase 0 commits
   `test/mutants/phase_51/mut-51-silent-cpu-fallback.patch` (effect swap),
   `test/mutants/phase_51/mut-51-spend-raw-vram.patch` (guard weakening), and
-  `test/mutants/phase_51/mut-51-mint-artifact-before-cas.patch` (guard weakening). The unchanged gate command
-  must turn the CUDA witness, reserve negative, and uncommitted-artifact row red respectively; any surviving
-  mutant fails the gate.
+  `test/mutants/phase_51/mut-51-mint-artifact-before-cas.patch` (guard weakening), plus
+  `test/mutants/phase_51/mut-51-regenerate-command-id.patch` (idempotency weakening). The unchanged gate
+  command must turn the CUDA witness, reserve negative, uncommitted-artifact, and redelivery rows red
+  respectively; any surviving mutant fails the gate.
 - **Independent oracle and honesty.** Capacity arithmetic, expected Kubernetes allocation, artifact scope,
   canonical-manifest predicates, and allowed state transitions are hand-authored before the implementation
   and do not call its planner, renderer, encoder, or artifact constructor. This gate establishes one bounded
@@ -145,7 +159,8 @@ The fixtures, oracle, observers, and mutants are delegated to [Gate integrity](#
 (target paths; not yet built)
 **Blocked by**: Phase 37 gate; Phase 48 gate; Phase 49 gate.
 **Independent Validation**: the single live command checks the positive CUDA-to-commit chain, both pre-effect
-capacity negatives, the pointer-conflict negative, and all three committed mutants against external evidence.
+capacity negatives, the pointer-conflict and command-id conflict negatives, and all four committed mutants
+against external evidence.
 **Docs to update**: `documents/engineering/lift_and_compose_doctrine.md`,
 `documents/engineering/capability_extension_doctrine.md`,
 `documents/engineering/content_addressing_doctrine.md`,
@@ -167,9 +182,11 @@ artifact carrying its trusted scope and provenance.
   fields absent from its authored surface.
 - The canonical checkpoint adapter and opaque `CommittedJitMLArtifact tenant app`, constructible only from a
   successful Phase-37 pointer-CAS witness.
+- One scope-qualified command/work-id preserved through the native CBOR command/event chain and the
+  idempotent training fold.
 - The substrate-selected CUDA engine binding and provision-derived accelerator-owner allocation, with no CPU
   fallback or arbitrary download path.
-- The Phase-0 oracle corpus, three committed mutants, live harness, and Register-3 evidence ledger with
+- The Phase-0 oracle corpus, four committed mutants, live harness, and Register-3 evidence ledger with
   challenge correlation and idempotent teardown.
 
 ### Validation
@@ -177,10 +194,12 @@ artifact carrying its trusted scope and provenance.
 1. Run `cabal test jitml-cuda-artifact-lift-live-gate` once on `linux-cuda`.
 2. Require the positive request to read the fresh batch, launch CUDA in the claimed owner, and yield a
    pointer-reachable artifact whose independently fetched bytes, scope, and provenance match the oracle.
-3. Run the reserve and current-free one-short twins from clean baselines and require their pinned preflight
+3. Resend the exact scoped command and require the original outcome with no second training effect; change its
+   normalized input under the same command id and require the pinned pre-effect conflict.
+4. Run the reserve and current-free one-short twins from clean baselines and require their pinned preflight
    errors plus zero run-scoped effects.
-4. Force the pre-CAS conflict and require that no committed artifact can be observed or constructed.
-5. Apply each named mutant and require the unchanged command to fail on its exact row before emitting a green
+5. Force the pre-CAS conflict and require that no committed artifact can be observed or constructed.
+6. Apply each named mutant and require the unchanged command to fail on its exact row before emitting a green
    ledger; always tear down and externally enumerate run-owned resources.
 
 ### Remaining Work

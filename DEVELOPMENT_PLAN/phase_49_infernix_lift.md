@@ -24,6 +24,13 @@ names; named engines resolve through the Phase-48 jit-build cache; CPU decode us
 `experimentHash` and derived SplitMix seed. The sibling inference algorithms remain linked Haskell library
 code and are not rewritten.
 
+Every workflow start enters the adapter with one server-derived, scope-qualified `CommandId`. The adapter
+preserves it unchanged as the Phase-37 work-id in the canonical command payload and in every progress or
+terminal event; it never derives a replacement from a pod, retry, run id, or artifact digest. Producer resends
+retain the producer identity/sequence required by Phase 35, while consumer redelivery folds on that stable
+work-id. Reusing the same scoped command id and normalized input returns the same workflow/artifact outcome;
+reusing it with a different normalized input is a typed idempotency conflict before inference or store effects.
+
 The adapter exposes only server-side, scope-indexed workflow and artifact values. A private-constructor
 `ReadyArtifactHandle scope` is minted only after blob and canonical-CBOR manifest verification and the final
 ready-pointer commit. It carries no client-chosen tenant, storage coordinate, engine address, credential, or
@@ -54,17 +61,22 @@ external observers, independent oracle, paired cases, and mutants are delegated 
   `test/fixtures/phase_49/request.cbor`,
   `test/fixtures/phase_49/sibling_golden.cbor`,
   `test/fixtures/phase_49/expected_hashes.tsv`,
+  `test/fixtures/phase_49/command_identity_matrix.tsv`,
   `test/fixtures/phase_49/artifact_scope_readiness_matrix.tsv`, and
   `test/fixtures/phase_49/frozen_sources.txt`. The fixed request uses the closed catalog identity
   `catalog/tinyllama-1.1b-cpu@<sha256>` and seed `0x0000000000000001`.
 - **Fresh authenticated challenge.** After Pulsar, MinIO, Vault, the cache owner, and workflow workers are
   Ready, the elevated harness obtains one-use least-privilege service credentials for tenant A and tenant B
-  and generates an unpredictable nonce. Tenant A's command envelope and committed result provenance must
-  contain that nonce; replayed evidence from an earlier run cannot pass.
+  and generates an unpredictable nonce and command id. Tenant A's command, every derived event, committed
+  result provenance, and terminal identity tuple must contain them unchanged; replayed evidence from an
+  earlier run cannot pass.
 - **Positive artifact flow.** Tenant A stages the pinned model as blob → canonical manifest → ready pointer,
   last, and obtains `ReadyArtifactHandle TenantA`. Two distinct run ids under one unchanged `experimentHash`
   begin without output keys, execute independently, and produce byte-identical outputs that also match the
-  Phase-0 sibling golden. A second invocation reuses the named engine cache without rematerialization.
+  Phase-0 sibling golden. A second invocation reuses the named engine cache without rematerialization. An
+  exact resend of the workflow-start command returns the original handle/outcome and causes no second workflow,
+  worker execution, pointer advance, or result object; the same command id with a changed input returns the
+  pinned idempotency conflict with the same zero-effect rule.
 - **Paired denials.** The identical ready reference, request, program identity, and nonce under tenant B differ
   only in authenticated scope and yield the pinned non-enumerating denial with zero worker dispatch, artifact
   read, or result write. Under tenant A, an otherwise identical pre-commit artifact differs only in readiness;
@@ -82,8 +94,9 @@ external observers, independent oracle, paired cases, and mutants are delegated 
 - **Committed mutants.** Phase 0 commits
   `test/mutants/phase_49/mut-49-drop-artifact-scope.patch`,
   `test/mutants/phase_49/mut-49-mint-ready-before-pointer-commit.patch`, and
-  `test/mutants/phase_49/mut-49-use-wallclock-seed.patch`. The unchanged gate must turn red on the exact scope,
-  readiness, and cold-recompute rows respectively.
+  `test/mutants/phase_49/mut-49-use-wallclock-seed.patch`, plus
+  `test/mutants/phase_49/mut-49-regenerate-command-id.patch`. The unchanged gate must turn red on the exact
+  scope, readiness, cold-recompute, and command-redelivery rows respectively.
 - **Independent oracle and reversibility.** The sibling golden is recorded from the frozen sibling binary;
   expected hashes and the scope/readiness matrix are hand-authored independently of the adapter. Switching
   legacy ↔ amoebius adapters must leave every pre-lift core source in `frozen_sources.txt` byte-unchanged.
@@ -110,7 +123,8 @@ external observers, independent oracle, paired cases, and mutants are delegated 
 - [Pulsar Client Doctrine §1 — One wire](../documents/engineering/pulsar_client_doctrine.md#1-one-client-one-wire-no-websockets),
   [§3.1 — CBOR payloads](../documents/engineering/pulsar_client_doctrine.md#31-payloads-are-exclusively-cbor),
   and [§7 — At-least-once with dedup](../documents/engineering/pulsar_client_doctrine.md#7-delivery-at-least-once-with-broker-side-dedup-the-robust-default):
-  remove the WebSocket/JSON envelope without weakening delivery semantics.
+  remove the WebSocket/JSON envelope, preserve the scope-qualified work id through every CBOR command/event,
+  and keep producer resend separate from consumer-redelivery idempotence.
 - [Vault / PKI Doctrine §3 — `SecretRef`](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)
   and [Tenancy Doctrine §7 — Two isolation layers](../documents/engineering/tenancy_doctrine.md#7-two-isolation-layers-and-the-honest-limit):
   derive scope from authenticated service context and keep secret values out of configuration.
@@ -128,7 +142,7 @@ external observers, independent oracle, paired cases, and mutants are delegated 
 **Blocked by**: Phase 29 gate; Phase 35 gate; Phase 37 gate; Phase 48 gate.
 **Independent Validation**: the one live gate compares two externally observed cold computations with the
 sibling golden and hand-authored identity/scope/readiness oracles, establishes that both denials have zero effect, and
-requires all three committed mutants to fail.
+requires all four committed mutants to fail.
 **Docs to update**: `documents/engineering/lift_and_compose_doctrine.md`,
 `documents/engineering/app_vs_deployment_doctrine.md`,
 `documents/engineering/content_addressing_doctrine.md`,
@@ -145,10 +159,10 @@ already-closed store, transport, secret, engine, workflow, determinism, and reso
 
 - One `Infernix.Adapter.Core` facade and narrow effect adapters, with the frozen sibling core unchanged.
 - Private-constructor staged/ready artifact states indexed by authenticated tenant scope and provenance.
-- Native CBOR commands, Vault secret names, named cached engines, deterministic CPU decode, and ready-last
-  content-store publication behind that facade.
+- Native CBOR commands/events preserving one scope-qualified command/work id, Vault secret names, named cached
+  engines, deterministic CPU decode, and ready-last content-store publication behind that facade.
 - A finite `CpuInferenceWorkBudget` merged into inherited workflow/cache/store resource owners.
-- Phase-0 fixtures, three named mutants, and a Register-3 evidence ledger with external-source digests.
+- Phase-0 fixtures, four named mutants, and a Register-3 evidence ledger with external-source digests.
 
 ### Validation
 
@@ -156,11 +170,13 @@ already-closed store, transport, secret, engine, workflow, determinism, and reso
    live dependencies and harness observers.
 2. Require ready-last staging, two independently executed cold results, byte equality with each other and the
    sibling golden, and warm reuse of the named engine.
-3. Replay the ready reference under tenant B and the pre-commit reference under tenant A; require their exact
+3. Resend the exact workflow-start command and require the original outcome with no duplicate effect; reuse its
+   command id with a changed input and require the pinned pre-effect idempotency conflict.
+4. Replay the ready reference under tenant B and the pre-commit reference under tenant A; require their exact
    denials and zero forbidden Pulsar, MinIO, cache, or worker effect.
-4. Require the URL-engine and one-short resource fixtures to refuse before effects, and verify the frozen core
+5. Require the URL-engine and one-short resource fixtures to refuse before effects, and verify the frozen core
    remains byte-unchanged across legacy/amoebius adapter selection.
-5. Apply each named mutant and require the unchanged command to fail before a leak-free evidence ledger can be
+6. Apply each named mutant and require the unchanged command to fail before a leak-free evidence ledger can be
    emitted.
 
 ### Remaining Work

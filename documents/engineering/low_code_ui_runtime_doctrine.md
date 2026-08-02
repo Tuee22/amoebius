@@ -570,6 +570,29 @@ jitML training run yields a `ReadyArtifactHandle Model`; `ModelInteractor` combi
 model input, invokes the bound inference port, and renders the typed result. It never receives a model path,
 engine address, storage credential, or unchecked response.
 
+The initial ML adapter offline classification is closed and opt-in:
+
+| Adapter operation | Offline classification | Required behavior |
+|-------------------|------------------------|-------------------|
+| infernix artifact/workflow start | Eligible `QueuedPort` | Replay the original normalized public input and immutable client `RequestId`; after validation the server derives the scoped `CommandId` and returns the existing workflow/receipt on exact replay. |
+| jitML training start | Eligible `QueuedPort` | Replay only after every declared dataset/local-blob dependency has an accepted verified-upload receipt; return the existing training workflow/receipt on exact replay. |
+| infernix/jitML workflow progress | Cached projection, not a queued read | Resume from the last server-validated cursor and repair from the authoritative projection. |
+| infernix/jitML signal or cancellation | `OnlineOnly` | Revalidate current workflow state and authority synchronously; the initial contract does not deliver a stale queued control operation. |
+| infernix/jitML artifact/model invocation | `OnlineOnly` | Require a current server-resolved `ReadyArtifactHandle`; the initial contract does not retain model inputs or inference results as offline commands. |
+
+“Eligible” does not make every application offline-capable. The checked program must explicitly select
+`UiSource.continuity = Offline` and attach a complete queue contract. The browser stores an immutable opaque
+`RequestId` inside its authenticated offline partition; it does not author scope. On replay the server derives
+the trusted `CommandId` from `(AppId, TenantId, Owner, PortId, RequestId)` and retains a normalized-input digest.
+Exact identity plus equal digest returns the same `WorkflowHandle` and durable receipt; equal identity plus a
+different digest yields a typed conflict before Pulsar publication. Starts are independent unless the
+authored bounded dependency DAG orders them; no same-owner global FIFO is inferred. Count, encoded-byte, and
+age limits are positive finite values in the bound port contract, never adapter defaults. Expiry produces
+`Expired` before publish. Reconnect rechecks the current program/ABI, authentication, membership, policy,
+scope, catalog identities, and dependency receipts before replay. `Accepted` comes only from the Phase-38
+effect-owner-derived receipt carrying the same command/workflow identity; Redis and WebSocket delivery remain
+non-authoritative.
+
 A specialized infernix or jitML interaction that the core algebra cannot express requires a named trusted
 component implemented in the generic PureScript runtime and a matching Haskell contract witness. Extension
 Dhall configures that component; it does not ship arbitrary JavaScript or a separately trusted browser bundle.
