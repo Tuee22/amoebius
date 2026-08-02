@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/backup_recovery_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/consistency_pacelc_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/single_logical_data_plane_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_multicluster.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single Source of Truth for how amoebius moves the wild-ingress gateway between clusters — the typed `GatewayMigration = <Planned | Failover>` taxonomy, the planned strong-consistency handover, the unplanned survivor-wins failover, and the client-rebind protocol that keeps a live session bindable throughout.
@@ -170,8 +170,10 @@ client is stranded. "A session that cannot rebind to the migrated gateway" is an
   browser state and does not broaden the cookie to a parent domain merely to make this redirect seamless.
   The fallback may therefore require reauthentication before any effect; the transparent proxy/stable origin
   is the session-preserving path and is preferred.
-- **Long-lived connections** (WebSocket/SSE) are forwarded by the old-gateway proxy, or sent a graceful close
-  so the client reconnects and re-resolves; the in-cluster backend cutover uses `HTTPRoute` weights.
+- **The browser WebSocket** is forwarded by the old-gateway proxy, or sent a graceful close so the client
+  reconnects and re-resolves; the in-cluster backend cutover uses `HTTPRoute` weights. The connection itself
+  carries no durable cursor or receipt truth, so reconnection resumes through the protocol in
+  [UI Realtime Coordination](./ui_realtime_coordination_doctrine.md).
 
 **On the `Failover` path** the active is down, so no old-gateway proxy exists. Clients cached to the dead
 address get connection errors, retry, re-resolve the **same active hostname** within the low TTL, and rebind to

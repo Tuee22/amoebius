@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_49_infernix_lift.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_62_offline_blobs_isolation.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/inforcespec_migration_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Single source of truth for the amoebius tenant and subject axes — first-class immutable
@@ -247,6 +247,20 @@ hostile or regulated tenant onto its **own child cluster** — the same `TenantI
 intermediate, and Transit root, so isolation rests on separate cryptographic roots. Because tenant identity is
 application logic and isolation shape is a deployment rule ([app_vs_deployment_doctrine.md §1](./app_vs_deployment_doctrine.md#1-two-surfaces-one-app-written-once)), this promotion is a `RolloutPhase` ([release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)) that moves the tenant's buckets, topics, and database under the same `TenantId` into a new child cluster, with **no change to the tenant/user/RBAC surface** above.
 
+### 7.1 Offline browser partitions preserve scope but cannot prove revocation while disconnected
+
+An offline-capable UI stores data only beneath an opaque partition identity bound to app, tenant, issuer-
+qualified subject, device, program, scope epoch, schema, and finite lease. Partition switching closes one
+keyspace and opens another; it never re-tags records or makes a tenant/subject field caller-selectable. Local
+records and an `OfflinePartitionHandle` are not credentials, membership evidence, or provider authority. On
+reconnect, the server re-establishes current Keycloak identity, `Membership`, scope epoch, policy, and every
+provider precondition before replay. Provider policies continue to supply the independent runtime denial.
+
+The honest limit is temporal: a disconnected browser cannot observe a server-side membership revocation. The
+finite offline lease and deployment flow-label policy bound that exposure; neither local wall-clock state nor
+encrypted possession upgrades it to an authorization proof. Encryption, browser mechanisms, replay, and wipe
+semantics are owned by [Browser Offline Runtime §§6–9](./browser_offline_runtime_doctrine.md#6-closed-browser-facilities-and-encrypted-storage).
+
 ## 8. What this doctrine owns, and what it defers
 
 This doctrine owns the tenant and subject axes: `TenantId`, issuer-qualified `SubjectId`, `TenantSpec`,
@@ -257,6 +271,7 @@ scoped-mutation surface. It defers, and cross-references rather than restates:
 
 - the phantom-tag *mechanism* and the cross-tenant-reference catalog entry → [illegal_state_catalog.md §3.8](../illegal_state/illegal_state_security.md#38-cross-tenant-references-and-literal-secrets), [§4.2](../illegal_state/illegal_state_techniques.md#42-capability-and-phantom-tenant-tags--cross-tenant-refs-are-uninhabitable);
 - the per-app namespace / `<app>/<bucket>` binding it extends → [service_capability_doctrine.md §4](./service_capability_doctrine.md#4-capability--provider--shape-the-binding);
+- the encrypted offline partition, finite lease, and current-authority replay protocol → [browser_offline_runtime_doctrine.md](./browser_offline_runtime_doctrine.md);
 - per-child Transit isolation and the `SecretRef` contract → [vault_pki_doctrine.md §6](./vault_pki_doctrine.md#6-parentchild-unseal-two-sanctioned-modes), [§3](./vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value);
 - the `dhall update` admin endpoint the tenant-admin surface targets → [bootstrap_sequence_doctrine.md §5](./bootstrap_sequence_doctrine.md#5-the-admin-control-plane-the-cli--the-singleton-rest-api);
 - the `InForceSpec` projection it mirrors → [dsl_doctrine.md §5](./dsl_doctrine.md#5-the-illegal-state-unrepresentable-contract);
@@ -288,6 +303,7 @@ Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — the `SecretRef`-by-name contract and the per-tenant/per-child Transit key isolation
 - [Platform Services Doctrine](./platform_services_doctrine.md) — Keycloak realms, the single wild-ingress ext-authz edge, and the per-consumer Postgres database
 - [Pulsar Client Doctrine](./pulsar_client_doctrine.md) — the tenant-namespace topology algebra
+- [Browser Offline Runtime](./browser_offline_runtime_doctrine.md) — offline partitions preserve this tenant/subject axis but never substitute for current authority
 - [Bootstrap Sequence Doctrine](./bootstrap_sequence_doctrine.md) — the singleton admin REST the scope-narrowed `dhall update` targets, and the admin-plane reach class
 - [InForceSpec Migration Doctrine](./inforcespec_migration_doctrine.md) — cross-tenant sharing as an append-only revocable capability edge, and the diff that realizes a tenant promotion without representing destruction
 - [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — the `RolloutPlan`/`RolloutPhase` apply that realizes a tenant promotion under the same `TenantId`

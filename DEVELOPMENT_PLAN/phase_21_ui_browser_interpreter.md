@@ -23,6 +23,9 @@ envelope/digest, decodes only public values, renders the trusted component catal
 bounded deterministic state/event/route instructions, and emits typed same-origin port requests. Application
 authors contribute no PureScript, JavaScript, HTML, CSS, fetch call, or browser-storage code, and an
 application-specific plan never rebuilds the generic bundle.
+The fixed online transport is HTTPS for bootstrap/assets/uploads/downloads and one authenticated same-origin
+WebSocket for ports, completions, subscriptions, replay outcomes, and cursor control. The browser has no
+transport selector, SSE fallback, direct Pulsar client, or Redis knowledge.
 
 The gate joins the generated enumeration of reachable events, routes, links, and ports to independently
 authored interactions and expected browser/transport observations. A small test-only Haskell interpreter,
@@ -101,6 +104,7 @@ authority-paired own/foreign enforcement is owned by the UI-server boundary and 
 - [`testing_doctrine.md` §9 — generated enumeration, authored expectation](../documents/engineering/testing_doctrine.md#9-derivation-generated-enumeration-authored-expectation): reachable surfaces are generated; interactions and expected outcomes are committed independent source.
 - [`testing_doctrine.md` §12 — spoof-resistant evidence](../documents/engineering/testing_doctrine.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect): the post-start nonce is recovered from an external OS-boundary observer.
 - [`low_code_ui_runtime_doctrine.md` §17 — verification obligations](../documents/engineering/low_code_ui_runtime_doctrine.md#17-verification-obligations): the Haskell/PureScript traces, keyboard/focus behavior, CSP, and artifact surface agree with independent pins.
+- [`ui_realtime_coordination_doctrine.md §3 — one browser transport contract`](../documents/engineering/ui_realtime_coordination_doctrine.md#3-one-browser-transport-contract): the interpreter uses the fixed authenticated same-origin WebSocket and reconnect/cursor protocol.
 - [`illegal_state_capability_messaging.md` §3.82](../documents/illegal_state/illegal_state_capability_messaging.md#382-a-browser-effect-or-provider-call-escaping-the-server-mediated-capability-boundary): packet capture and the direct-fetch mutant cover the browser escape residue.
 
 ## Sprints
@@ -116,6 +120,7 @@ authority-paired own/foreign enforcement is owned by the UI-server boundary and 
 authored Playwright interactions, reads DOM plus OS-boundary traffic, and requires every named mutant to fail.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/engineering/generated_artifacts_doctrine.md`,
+`documents/engineering/ui_realtime_coordination_doctrine.md`,
 `documents/illegal_state/illegal_state_capability_messaging.md`
 
 ### Objective
@@ -126,7 +131,8 @@ no raw rendering, network, authority, or persistence escape is available to app 
 ### Deliverables
 
 - Generic plan decoder/interpreter, trusted component renderer, deterministic event/update engine, route
-  machine, and same-origin typed transport.
+  machine, HTTPS bootstrap path, and authenticated same-origin WebSocket transport with bounded reconnect and
+  cursor-resume control frames.
 - Generated surface enumerator joined to authored interactions, fresh-challenge fake server, Playwright DOM/
   accessibility/keyboard reader, independent Haskell trace interpreter, and OS-boundary network observer.
 - Built-bundle scanner, exact CSP/security-header browser harness, boundary corpus, bypass probes, mutant
@@ -142,6 +148,8 @@ no raw rendering, network, authority, or persistence escape is available to app 
    provider/canary connection, unknown destination, or forbidden persistence path.
 4. Scan the built bundle, enforce the pinned CSP in Chromium, and exercise the exact named-link navigation;
    inline/eval/canary execution, remote imports, forbidden APIs, and link-as-fetch reuse stay absent.
+   The network trace contains the one expected same-origin WebSocket upgrade and no SSE, Redis, Pulsar, or
+   provider connection.
 5. Run every named semantic, accessibility, artifact, freshness, network, and canned-response mutant; each
    turns its distinct authored expectation red.
 6. Verify the ledger says browser behavior tested with fakes and leaves server authority, provider isolation,
@@ -176,3 +184,5 @@ The whole sprint (📋 Planned).
 - [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — generic-client boundary and verification obligations.
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — authored expectations and spoof-resistant evidence.
 - [Illegal-State Capability/Messaging Slice](../documents/illegal_state/illegal_state_capability_messaging.md) — browser/provider escape foreclosure.
+- [UI Realtime Coordination](../documents/engineering/ui_realtime_coordination_doctrine.md) — the fixed
+  browser wire and cursor-resume semantics interpreted here.

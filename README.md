@@ -24,7 +24,9 @@ A spec that mis-binds a PVC, opens a backdoor ingress, exposes a raw browser eff
 crosses a checked tenant/owner boundary is rejected at its declared validation or enforcement layer. That is a
 design claim about the modeled surface, not a claim that a live provider or implementation is defect-free; the boundary is
 stated precisely in the [verification doctrine](./documents/engineering/testing_doctrine.md), the
-[low-code UI doctrine](./documents/engineering/low_code_ui_runtime_doctrine.md), and the
+[low-code UI doctrine](./documents/engineering/low_code_ui_runtime_doctrine.md), the
+[realtime-coordination doctrine](./documents/engineering/ui_realtime_coordination_doctrine.md), the
+[browser-offline doctrine](./documents/engineering/browser_offline_runtime_doctrine.md), and the
 [honesty rule](./documents/documentation_standards.md#6-honesty-the-proventestedassumed-discipline).
 
 Its constituent capabilities are unified libraries, not separate products: **prodbox** supplies root
@@ -56,7 +58,11 @@ and reattaches retained backing
 - **How low-code applications work:**
   [`documents/engineering/low_code_ui_runtime_doctrine.md`](./documents/engineering/low_code_ui_runtime_doctrine.md)
   — bounded Dhall UI programs, one checked value projected into client/server plans, typed effects,
-  single-/multi-tenant isolation, workflow/model lifting, rollout, and the honest HA boundary.
+  single-/multi-tenant isolation, workflow/model lifting, rollout, and the honest HA boundary; its
+  [realtime companion](./documents/engineering/ui_realtime_coordination_doctrine.md) fixes replicated
+  WebSocket routing through ephemeral Redis, while its
+  [offline companion](./documents/engineering/browser_offline_runtime_doctrine.md) fixes bounded encrypted
+  local continuity and authoritative replay.
 
 ## Toolchain
 

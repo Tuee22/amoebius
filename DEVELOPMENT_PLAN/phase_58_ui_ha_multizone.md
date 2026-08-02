@@ -1,4 +1,4 @@
-# Phase 58: UI multi-zone high availability
+# Phase 58: Initial online UI multi-zone high availability
 
 **Status**: Authoritative source
 **Supersedes**: DEVELOPMENT_PLAN/phase_43_spa_live_deploy.md (HA/failover portion)
@@ -23,6 +23,10 @@ fresh read, idempotent mutation, workflow start, and subscription while a provid
 node and serving endpoint in one selected availability zone. Killing one Pod or node does not satisfy this
 gate. The gate observes that declared whole-zone fault only; it is not a proof against every correlated
 provider failure.
+Redis follows its distributed one-primary/two-replica/three-Sentinel topology across the admitted zones. The
+fault removes the selected-zone Redis/Sentinel members as well as application members; surviving UI servers
+reconnect through Sentinel, and any lost Pub/Sub hint repairs from Pulsar/projection cursors. This is the
+online HA gate. Offline outbox/blob continuity is not claimed until Phase 64.
 
 **Session scope:** Implement and run one provider multi-zone UI failover campaign with one acceptance command,
 `cabal test phase58-ui-ha-multizone`; split if validation adds another provider, substrate, simultaneous-zone
@@ -47,6 +51,8 @@ are deployed in the redundant shapes their owning phases admit, with the gate re
 has all serving members in the selected fault zone. Tenant A contains owner and non-owner subjects; tenant B
 contains a foreign owner with equal-shaped ids, data, action, and cursor. The inventory is captured from the
 Kubernetes and provider APIs before traffic begins.
+Redis has one primary, at least two replicas, and three Sentinel voters spread across the zones with no
+persistent volume. Its loss may close sockets but cannot change durable effects or cursor repair.
 
 **Pinned oracle and budgets.** Phase 0 commits `test/golden/phase_58_ha_timeline.tbl`,
 `test/golden/phase_58_placement.tbl`, `test/golden/phase_58_access_matrix.tbl`, and
@@ -91,6 +97,9 @@ an HTTP denial alone is insufficient. The gate must turn red for `test/mutants/p
 under-scoped faults; the external login/operation/reconnect trace catches identity unavailability and
 sticky-state dependence; and the cross-tenant broker/access oracle catches scope collapse. A Deployment status
 claiming three replicas is not placement or availability evidence.
+The gate also turns red for `test/mutants/phase_58_redis_one_node.dhall`,
+`test/mutants/phase_58_redis_persistent_receipt.patch`, and
+`test/mutants/phase_58_skip_cursor_repair.patch`.
 
 ## Doctrine adopted
 
@@ -98,13 +107,15 @@ claiming three replicas is not placement or availability evidence.
 - Adopt [`daemon_topology_doctrine.md` §4 — unelected workers](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected): scale UI workers without granting control-plane authority.
 - Adopt [`platform_services_doctrine.md` §2 — one topology across replica counts](../documents/engineering/platform_services_doctrine.md#2-ha-always--including-replicas1): distinguish an HA-capable shape from an observed HA outcome.
 - Adopt [`testing_doctrine.md` §12 — spoof-resistant evidence](../documents/engineering/testing_doctrine.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect): bind the claim to an off-cluster challenge and provider-observed fault.
+- Adopt [`ui_realtime_coordination_doctrine.md §§5–8`](../documents/engineering/ui_realtime_coordination_doctrine.md#5-redis-is-ephemeral-platform-internal-coordination): survive one-zone Redis/Sentinel and UI-server loss through bounded reconnect plus durable cursor/receipt repair.
 
 ## Resource provision — multi-zone UI fault envelope
 
 Before mutation, the provision seal accounts for all UI-server/projector replicas, topology and disruption
 constraints, post-fault Keycloak login/membership observation, gateway/auth/data/workflow dependency survival
 after removal of every selected-zone member, fault overlap, retry/idempotency buffers, subscription catch-up,
-and the external operation matrix. An
+Redis/Sentinel members, connection/key/client/output-buffer demand, failover and reconnect storms, cursor
+repair reads, and the external operation matrix. An
 unschedulable third zone, one-short post-fault dependency, one-short disruption budget, or unbounded replay
 buffer refuses before the first provider or Kubernetes mutation.
 
@@ -113,12 +124,12 @@ buffer refuses before the first provider or Kubernetes mutation.
 ## Sprint 58.1: Run the multi-zone UI failure campaign 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Ui/Ha/MultiZone.hs`, `test/live/Phase58UiHaSpec.hs` (planned; not built)
+**Implementation**: `src/Amoebius/Ui/Ha/MultiZone.hs`, `src/Amoebius/Ui/Realtime/RedisCoordination.hs`, `test/live/Phase58UiHaSpec.hs` (planned; not built)
 **Blocked by**: Phases 45, 47, 54, and 57
 **Independent Validation**: `cabal test phase58-ui-ha-multizone` from an off-cluster probe against provider-
 confirmed whole-zone isolation and pinned post-fault OIDC/membership/read/mutation/workflow/subscription/scope
 observations
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/daemon_topology_doctrine.md`, `documents/engineering/platform_services_doctrine.md`, `documents/engineering/testing_doctrine.md`
+**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/daemon_topology_doctrine.md`, `documents/engineering/platform_services_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
 ### Objective
 
@@ -127,11 +138,13 @@ Deliver one externally observed provider-zone failure result for the complete UI
 ### Deliverables
 
 - Provisioned multi-zone UI-server/projector topology with PDB and hard spread.
+- Multi-zone Redis primary/replicas/Sentinel with bounded client reconnect and durable cursor/receipt repair;
+  no Redis persistence or sticky-session dependency.
 - Off-cluster three-principal/two-tenant OIDC challenge probe, cookie-empty post-fault login/current-membership
   check, and provider-driven whole-zone isolation.
 - Read, idempotent mutation, workflow-start, reconnect, exactly-once accepted-action, cursor-resume, and
   same-owner/same-tenant/foreign-tenant denial observations.
-- Seven structural/behavioral/security mutants that independently defeat the HA claim.
+- Named structural, behavioral, and security mutants that independently defeat the HA claim.
 
 ### Validation
 
@@ -149,6 +162,8 @@ The whole sprint is planned; no provider HA evidence exists.
 - `documents/engineering/platform_services_doctrine.md` — distinguish topology parity from observed HA.
 - `documents/engineering/daemon_topology_doctrine.md` — record worker failover behavior without election.
 - `documents/engineering/testing_doctrine.md` — link the off-cluster challenge and raw observer digests.
+- `documents/engineering/ui_realtime_coordination_doctrine.md` — record the precise tested Redis/UI-server
+  zone-fault envelope and retain the lossy-routing/durable-repair boundary.
 
 **Cross-references to add:**
 - The phase tracker, substrate map, and component inventory must identify this as the first UI HA claim.
@@ -160,3 +175,4 @@ The whole sprint is planned; no provider HA evidence exists.
 - [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md)
 - [Daemon Topology Doctrine](../documents/engineering/daemon_topology_doctrine.md)
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md)
+- [UI Realtime Coordination](../documents/engineering/ui_realtime_coordination_doctrine.md)

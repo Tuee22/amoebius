@@ -158,6 +158,14 @@ The deployment-rules surface declares:
   type, the promotion pointer, and the immutable release ledger are owned by
   [release_lifecycle_doctrine.md §3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer). This is the type-level reason there is
   no separate "dev version" and "prod version" of an app ([§5](#5-why-the-split-matters--cashing-it-out)).
+- **Offline policy and realtime topology.** The application decides whether it is `OnlineOnly` or defines
+  offline projections, queueable ports, blob classes, and an offline view: those choices change what the app
+  does for a user. The deployment decides maximum offline lease, permitted persisted flow labels, local
+  unlock, device/count/byte/age limits, reconnect concurrency, receipt retention, compatibility horizon,
+  UI-server replica/spread counts, and Redis/Sentinel capacity/topology. Neither surface exposes Redis keys,
+  WebSocket routes, IndexedDB, OPFS, or service-worker mechanisms. The boundary is owned precisely by
+  [Browser Offline Runtime §§3 and 12](./browser_offline_runtime_doctrine.md#3-the-authored-continuity-surface)
+  and [UI Realtime Coordination](./ui_realtime_coordination_doctrine.md).
 
 This surface is **keyed by app**: a deployment-rules layer references an app by name and says *how to run
 it*. The same app name can appear in two different deployment-rules layers and run two completely different
@@ -187,6 +195,9 @@ deliberately tricky cases:
 | "Replicate the app across us-east and eu-west and fail over" | deployment rule | topology + robustness; the app is unchanged ([§9](#9-composition-one-cluster--n-geo-replicated-clusters-zero-app-change)) |
 | "Inject a broker kill at a bounded offset after the workflow's quiesce edge" | deployment rule | a typed `FaultSchedule` in logical/simulated time ([chaos_failover_doctrine.md §11.2](./chaos_failover_doctrine.md#112-the-typed-expectation-surface-expectation)); the app does not know it is being tested |
 | "Promote a build from staging to prod" | deployment rule | a pointer CAS over byte-identical app bytes; only the deployment rules differ ([§3](#3-the-deployment-rules-surface--how-the-same-app-runs)) |
+| "These projections and commands work offline" | application logic | it changes the user's available behavior and queue/conflict semantics |
+| "Permit those offline records for 24 hours on two devices" | deployment rule | lease, labels, device quota, retention, and reconnect capacity are robustness/security dials |
+| "Route sockets across three UI replicas with Redis/Sentinel" | deployment rule | transport coordination and replica topology do not change app semantics |
 | "A login requires MFA for the admin role" | application logic | an auth rule that *defines* the app's behaviour |
 
 **Misfiling is a bug, not a style preference.** A replica count that leaks into the app spec re-couples
@@ -441,5 +452,7 @@ status ledger; it states the target classification and links back for status.
 - [Resource Capacity Doctrine](./resource_capacity_doctrine.md) — capacity budgets and scaling policy are deployment rules
 - [Cluster Topology Doctrine](./cluster_topology_doctrine.md) — the compute engine and node topology are deployment rules
 - [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — the environment (dev/staging/prod) promotion pointer is a deployment rule
+- [Browser Offline Runtime](./browser_offline_runtime_doctrine.md) — offline app semantics versus deployment `OfflinePolicy`
+- [UI Realtime Coordination](./ui_realtime_coordination_doctrine.md) — WebSocket and Redis topology remain platform/deployment mechanisms
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

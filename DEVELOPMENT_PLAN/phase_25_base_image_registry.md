@@ -27,7 +27,8 @@ transitions are recorded reverse-chronologically here once work begins.
 
 This phase turns the empty `kind` cluster delivered by Phase 24 into a cluster that pulls only from itself. It
 delivers the **multi-arch base image** — every third-party platform-service binary (the `distribution`
-registry, MinIO, Vault, Pulsar, Keycloak, Prometheus/Grafana, Patroni/Percona Postgres, Envoy, MetalLB, and
+registry, MinIO, Vault, Pulsar, **Redis (`redis-server`/Sentinel mode plus `redis-cli`)**, Keycloak,
+Prometheus/Grafana, Patroni/Percona Postgres, Envoy, MetalLB, and
 the rest) baked in by the supply-chain preference ladder (apt → official binary/tarball → build-from-source,
 including a multi-arch Temurin JRE for the JVM services), **plus the shared jit-build resolver and its build
 toolchain** (`nvcc`, `g++`, the pinned compilers, and any linux cross-tooling — **not** the Apple-Metal bridge,
@@ -100,6 +101,11 @@ atomically** (all-or-nothing; a partial-arch push leaves the tag un-advertised) 
 single-binary `distribution` registry, with a deny-all egress test to `docker.io`/`quay.io`/`ghcr.io` proving
 **zero public-registry pulls** during registry standup or publication and both arches resolving under the one
 digest-pinned tag.
+
+The required service inventory explicitly includes Redis. Both architectures must execute
+`/usr/bin/redis-server --version` and `/usr/bin/redis-cli --version` at the independently pinned version; the
+SBOM/file-digest inventory must contain both paths, and a rendered Redis or Sentinel pod may reference only
+this published base-image digest, never an upstream Redis image.
 
 The gate's oracles are pinned and committed in **Phase 0**, before any implementation exists (§M.1), and are
 listed in [Gate integrity](#gate-integrity) below; every equivalence check names an
@@ -275,7 +281,7 @@ cache-write operands, observed resident cache + derived concurrent write delta, 
 `archConcurrency`/`stageConcurrency` — and returns a single-use
 token required to start BuildKit. One-field overdraw and changed-snapshot fixtures start no builder and write
 no scratch/cache.
-**Docs to update**: `documents/engineering/image_build_doctrine.md`, `documents/engineering/content_addressing_doctrine.md`, `documents/engineering/resource_capacity_doctrine.md`.
+**Docs to update**: `documents/engineering/image_build_doctrine.md`, `documents/engineering/content_addressing_doctrine.md`, `documents/engineering/resource_capacity_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`.
 
 ### Objective
 Adopt [`image_build_doctrine.md` §7 — what amoebius bakes vs builds](../documents/engineering/image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain)
@@ -292,6 +298,9 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
   amoebius binary alone (infernix and jitML are linked into the runtime image only when their lifts land, at
   [Phase 49](phase_49_infernix_lift.md) / [Phase 51](phase_51_jitml_lift_cuda.md), never here, so Phase 25
   carries no forward dependency on the extension lifts).
+- A mandatory Redis bake entry with a pinned per-architecture package identity. It installs
+  `/usr/bin/redis-server` (used for server and Sentinel modes) and `/usr/bin/redis-cli`, records their digests
+  in the inventory/SBOM, and admits no startup download or public `redis` image fallback.
 - A pure `BuildExecutionEnvelope` plus
   `observeBuildHost → deriveBuildTransition → validate → ValidatedBuildTarget` boundary. It includes
   a non-empty acyclic platform/stage graph with per-stage host/engine-VM CPU/memory reservation+ceiling,
@@ -319,6 +328,9 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
   a **byte-for-byte golden** pinning the emitted Dockerfile as a fixture of the *renderer's* behaviour. The
   Dockerfile is not committed as source; the catalog is.
 - A bake-inventory lint proving the resolver/toolchain are present and every ML engine payload is **absent**.
+- An architecture-native Redis probe on both image platforms: absolute-path `redis-server --version` and
+  `redis-cli --version` match the independent catalog pin, and the committed `mutant/phase25/omit-redis`
+  plus `mutant/phase25/redis-version-skew` each turn the gate red.
 - The Phase-0-committed oracle `test/fixtures/phase25/bake_inventory_expected.dhall` (the canonical
   standard-platform-services set + pinned per-arch versions) and the committed
   mutants `mutant/phase25/stub-arm64-binary`, `mutant/phase25/wrong-arch-layer`,
@@ -358,6 +370,9 @@ the shape jitML's resolver evidences and infernix's `curl`-tar-at-build is *sibl
    `mutant/phase25/wrong-arch-layer`, `mutant/phase25/gxx-version-skew` (the pinned-`g++`-version-skew that
    makes Validation 5's `<bin> --version` match bite), and `mutant/phase25/drop-build-scratch-accounting` turn
    the validation red (§M.2).
+7. Run both Redis binaries from each architecture by absolute path, verify their pinned versions and SBOM
+   digests, and prove that the generated Redis/Sentinel workload image identity is the published
+   monocontainer/base-image digest. The omit/version-skew/public-image mutants fail for their specific reasons.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -551,6 +566,9 @@ The whole sprint (📋 Planned).
   gain their first amoebius validation; the §5 (versioning) / §6 (host vs in-pod builder) decisions are recorded
   as taken; the §7 bake-vs-build split (services + resolver/toolchain baked, engine payloads not) is annotated
   as delivered on linux-cpu.
+- `documents/engineering/ui_realtime_coordination_doctrine.md` — record that the Redis/Sentinel executables
+  required by the later platform topology are present in both published architectures; no runtime HA claim is
+  made by this build-only evidence.
 - `documents/engineering/content_addressing_doctrine.md` — annotate §4.5 that the base image contributes the
   jit-build resolver + toolchain by OCI digest while the engine payloads remain content-addressed cache assets,
   resolved on first miss (the resolver's own live proof lands in Phase 48).
@@ -577,6 +595,8 @@ The whole sprint (📋 Planned).
 - [Image Build & Registry](../documents/engineering/image_build_doctrine.md) — the baked-binary base container + `distribution` registry adopted here ([§2](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster), [§3](../documents/engineering/image_build_doctrine.md#3-buildx-multi-arch--amd64-and-arm64-one-manifest-list), [§4](../documents/engineering/image_build_doctrine.md#4-atomic-publication--a-partial-multi-arch-upload-is-a-failed-upload), [§5](../documents/engineering/image_build_doctrine.md#5-versioning-vs-latest--development_plan-decision-recommended-default-immutable-never-latest), [§7](../documents/engineering/image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain), [§8](../documents/engineering/image_build_doctrine.md#8-build-mechanics-under-the-no-env--no-path-contract), [§9](../documents/engineering/image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves))
 - [Content Addressing Doctrine](../documents/engineering/content_addressing_doctrine.md) — [§4.5](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) the jit-resolved engine cache the base image does *not* bake
 - [Platform Services Doctrine](../documents/engineering/platform_services_doctrine.md) — [§3](../documents/engineering/platform_services_doctrine.md#3-the-registry--the-single-image-source) the registry as the single in-cluster image source
+- [UI Realtime Coordination](../documents/engineering/ui_realtime_coordination_doctrine.md) — the Redis/Sentinel
+  runtime topology whose mandatory executables this phase bakes into the monocontainer
 - [Substrate Doctrine](../documents/engineering/substrate_doctrine.md) — the per-distro registry plumbing and the lazy-tool-ensure contract the build obeys
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§2](../documents/engineering/testing_doctrine.md#2-the-registers-of-amoebius-testing) the registers (Register 3 reached here)
 - [phase_24](phase_24_midwife_bootstrap_kind.md) — the `pb` midwife + empty `kind` cluster this phase publishes into

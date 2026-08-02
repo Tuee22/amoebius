@@ -20,6 +20,9 @@ This phase owns one live release transition: projectors catch up to B's recorded
 traffic only afterward, old and new plan/ABI identities coexist only under a checked compatibility witness,
 subscriptions resume from owner-scoped cursors, and rollback returns to A's immutable release. It does not
 claim replica or zone failure tolerance; Phase 58 owns that fault boundary.
+Connection registrations and routed envelopes carry the admitted program/ABI epoch. Draining replicas stop
+accepting sockets, remove or expire Redis registrations, issue a bounded reconnect control frame, and retain
+old decoders until their compatibility window closes.
 
 **Session scope:** Implement and validate the single `A → B → A` UI release transition with one acceptance
 command, `cabal test phase57-ui-rollout-reconnect`; split if the work introduces another rollout algorithm,
@@ -78,6 +81,8 @@ and `test/mutants/phase_57_discard_resume_cursor.dhall` must fail the independen
 predicate. `test/mutants/phase_57_drop_tenant_cursor_key.patch` must leak or advance the equal-shaped
 foreign-tenant cursor and fail the access/broker oracle. A hardcoded success page cannot reproduce the
 post-start nonce across the API, broker, gateway, and browser observers.
+`test/mutants/phase_57_stale_redis_registration.patch` keeps an A registration routable after drain and must
+fail the backend/Redis/cursor timeline.
 
 ## Doctrine adopted
 
@@ -85,17 +90,18 @@ post-start nonce across the API, broker, gateway, and browser observers.
 - Adopt [`low_code_ui_runtime_doctrine.md` §15 — versioning and rollout](../documents/engineering/low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts): enforce exact plan/contract epochs or checked compatibility.
 - Adopt [`pulsar_client_doctrine.md` §5.1 — TableView projection](../documents/engineering/pulsar_client_doctrine.md#51-two-derived-capabilities-read-model-and-two-deliberately-absent-ones): catch up and resume owner-scoped projections.
 - Adopt [`testing_doctrine.md` §12 — spoof-resistant evidence](../documents/engineering/testing_doctrine.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect): observe the transition through independent live observers.
+- Adopt [`ui_realtime_coordination_doctrine.md §7`](../documents/engineering/ui_realtime_coordination_doctrine.md#7-replicas-drain-rollout-and-gateway-migration): drain connection ownership and preserve cursor/ABI compatibility without sticky sessions.
 
 ## Sprints
 
 ## Sprint 57.1: Execute and verify the coherent UI release transition 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Ui/ReleaseTransition.hs`, `test/live/Phase57UiRolloutSpec.hs` (planned; not built)
+**Implementation**: `src/Amoebius/Ui/ReleaseTransition.hs`, `src/Amoebius/Ui/Realtime/Drain.hs`, `test/live/Phase57UiRolloutSpec.hs` (planned; not built)
 **Blocked by**: Phases 40, 55, and 56
 **Independent Validation**: `cabal test phase57-ui-rollout-reconnect` against real Keycloak authority, pinned
 timeline/access/cursor tables, and broker/browser/API/CNI observations
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/release_lifecycle_doctrine.md`, `documents/engineering/pulsar_client_doctrine.md`
+**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/release_lifecycle_doctrine.md`, `documents/engineering/pulsar_client_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`
 
 ### Objective
 
@@ -108,6 +114,7 @@ Deliver one coherent, reversible UI release transition with scope-preserving rec
 - Real three-principal/two-tenant authority plus external API/Gateway/Pulsar/browser/CNI traces with fresh
   nonces.
 - Early-shift, cursor-discard, and tenant-cursor-key mutants.
+- Draining connection-registration lifecycle and stale-registration mutant.
 
 ### Validation
 
@@ -125,6 +132,8 @@ The whole sprint is planned; no live rollout evidence exists.
 - `documents/engineering/release_lifecycle_doctrine.md` — record the coherent rollout/rollback evidence.
 - `documents/engineering/low_code_ui_runtime_doctrine.md` — record stale-plan and compatibility behavior.
 - `documents/engineering/pulsar_client_doctrine.md` — record watermark and cursor-resume evidence.
+- `documents/engineering/ui_realtime_coordination_doctrine.md` — record program/ABI-bound connection drain
+  and non-sticky reconnect behavior.
 
 **Cross-references to add:**
 - The phase tracker, substrate map, and component inventory must link this transition and ledger.
@@ -136,3 +145,4 @@ The whole sprint is planned; no live rollout evidence exists.
 - [Phase 56 — multi-tenant UI](phase_56_ui_multi_tenant_live.md)
 - [Release Lifecycle Doctrine](../documents/engineering/release_lifecycle_doctrine.md)
 - [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md)
+- [UI Realtime Coordination](../documents/engineering/ui_realtime_coordination_doctrine.md)

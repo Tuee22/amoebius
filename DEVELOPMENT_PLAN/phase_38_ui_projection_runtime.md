@@ -24,6 +24,9 @@ builds a compacted latest-value projection. Every message key, subscription, sto
 query handle, and audit identity retains `(AppId, TenantId, Owner, ProjectionId)`. The worker receives a private
 `UiServerPlan` projection and server-held capabilities; the browser or caller never supplies a topic,
 subscription, tenant, owner, provider coordinate, or provider credential.
+Every owner stream also carries a monotonic `StreamCursor` and program/scope epochs suitable for WebSocket
+delivery. Redis may later wake a connection owner, but only this Pulsar-backed sequence/watermark can detect a
+gap and repair it.
 
 The live gate drives equal-shaped workflows for two subjects in one tenant and a third subject in a second
 tenant. It verifies current values and resume watermarks through a scoped server query while a separately
@@ -107,20 +110,22 @@ mutant results.
 - [`tenancy_doctrine.md` §4 — typed tenant and subject shapes](../documents/engineering/tenancy_doctrine.md#4-the-typed-shapes-tenantspec--subjectspec--membership--owner--rolebinding): retain app, tenant, and owner identity in every read-model coordinate.
 - [`testing_doctrine.md` §12 — spoof-resistant evidence](../documents/engineering/testing_doctrine.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect): require fresh challenges, real authority,
   external raw observation, paired negatives, direct bypass probes, and killed mutants.
+- [`ui_realtime_coordination_doctrine.md §4 — typed routing and resume envelope`](../documents/engineering/ui_realtime_coordination_doctrine.md#4-typed-routing-and-resume-envelope): produce the authoritative sequenced cursor stream from which lossy WebSocket fanout repairs gaps.
 
 ## Sprints
 
 ## Sprint 38.1: Build and independently verify the owner-scoped live projection 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Ui/Projection/{Worker,OwnerKey,Watermark}.hs` and
+**Implementation**: `src/Amoebius/Ui/Projection/{Worker,OwnerKey,Watermark,StreamCursor}.hs` and
 `test/live/Phase38UiProjectionRuntimeSpec.hs` (target authored sources; not yet built)
 **Blocked by**: Phase 22; Phase 36; Phase 37
 **Independent Validation**: one command recovers fresh per-owner challenges through a scoped server query and
 separately authenticated Pulsar/broker/edge observers, establishes foreign-scope non-disclosure and zero subscription
 effect, and kills both owner-collapse mutants.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/engineering/pulsar_client_doctrine.md`, `documents/engineering/tenancy_doctrine.md`, and
+`documents/engineering/pulsar_client_doctrine.md`, `documents/engineering/tenancy_doctrine.md`,
+`documents/engineering/ui_realtime_coordination_doctrine.md`, and
 `documents/engineering/testing_doctrine.md`
 
 ### Objective
@@ -174,3 +179,4 @@ The whole sprint (📋 Planned).
 - [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md)
 - [Native Pulsar Client Doctrine](../documents/engineering/pulsar_client_doctrine.md)
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md)
+- [UI Realtime Coordination](../documents/engineering/ui_realtime_coordination_doctrine.md)

@@ -334,7 +334,8 @@ image — are the two amoebius-built arms of the closed
 `ImageIdentity`; there is no third, app-supplied class. A low-code app supplies a checked program to a generic
 `Runtime` variant rather than an image or executable of its own.
 
-- **The amoebius base image carries every third-party service binary.** Vault, MinIO, Pulsar, Keycloak,
+- **The amoebius base image carries every third-party service binary.** Vault, MinIO, Pulsar, **Redis
+  (`redis-server`, including Sentinel mode and `redis-cli`)**, Keycloak,
   Prometheus/Grafana, **TensorBoard** (the jitML monitoring surface, baked like Grafana and never fetched at
   pod startup — [monitoring_doctrine.md](./monitoring_doctrine.md)), Patroni/Postgres, Envoy, cert-manager,
   MetalLB, the `distribution` registry, and provider-only infrastructure binaries such as the AWS EBS CSI
@@ -414,6 +415,21 @@ image — are the two amoebius-built arms of the closed
   ML tiers: base image (services + resolver) = image digest; engine / model / kernel = content-addressed
   cache/store hash.
 
+### The monocontainer build must prove Redis is present
+
+Redis is a mandatory `BakeCatalog` member, not an illustrative package-preference example. The catalog pins a
+Redis version and per-architecture package/repository identity, installs `redis-server` and `redis-cli` in the
+runtime stage, and records their file digests in the baked inventory/SBOM. Sentinel uses the same
+`redis-server` executable with a generated Sentinel configuration; no separate upstream container is pulled.
+
+The generated Dockerfile must contain only the typed Redis bake step emitted from that catalog. The
+monocontainer build fails unless an architecture-native container invocation of
+`/usr/bin/redis-server --version` and `/usr/bin/redis-cli --version` matches the pinned catalog version and the
+expected absolute paths. The multi-arch publication gate runs both probes on `linux/amd64` and `linux/arm64`,
+checks the SBOM/digest inventory, and verifies that the Redis/Sentinel manifests use the published
+monocontainer digest. A public `redis` image reference, a startup download, a missing CLI, a version mismatch,
+or a Dockerfile hand edit is a gate failure.
+
 **The seam to extend is already proven in hostbootstrap.** Baking a service binary is the same move
 hostbootstrap already uses for Go/helm/mc/pulumi — a mechanism amoebius reuses for its own baked binaries,
 though it does **not** bake `helm` ([manifest_generation_doctrine.md §1](./manifest_generation_doctrine.md#1-why-this-doctrine-exists-types-render-manifests-helm-does-not)):
@@ -424,6 +440,11 @@ add a per-arch asset map + a version resolver + a
 resolved on the host). Each baked binary also becomes a constructor of the closed `HostBootstrap.HostTool`
 enum (absolute-path `AbsExe`, probe-first `Ensure` reconcile), so it is discovered by full path, never via
 `PATH`.
+
+For amoebius, that sibling seam informs the implementation but does not become a second source of truth:
+`dhall/amoebius/BakeCatalog.dhall` is authoritative and emits the uncommitted Dockerfile. Redis is added to
+that catalog and its independent expected-service inventory; editing only a handwritten basecontainer file is
+non-conforming.
 
 **Harbor is retired.** The one service that did not fit a single binary — Harbor, a ~6-process registry
 stack — is replaced by the single-binary `distribution` registry ([§2](#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster)), so no third-party service resists

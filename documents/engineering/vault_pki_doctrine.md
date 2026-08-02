@@ -37,7 +37,7 @@ This document owns six things:
 
 It does **not** own: the DSL-surface rule that secrets are names not values
 ([dsl_doctrine.md §6](./dsl_doctrine.md#6-secrets-are-names-never-values)); the fact that Vault is one
-of the nine standard services ([platform_services_doctrine.md §5](./platform_services_doctrine.md#5-vault--the-secrets-root-reference-only));
+of the ten standard services ([platform_services_doctrine.md §5](./platform_services_doctrine.md#5-vault--the-secrets-root-reference-only));
 the retained Vault backing, deterministic PV rebind, and init-once/unseal-on-rebuild *storage* mechanics
 ([storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md)); the cluster bring-up/spawn/teardown
 *lifecycle verbs* ([cluster_lifecycle_doctrine.md](./cluster_lifecycle_doctrine.md)); the Pulumi

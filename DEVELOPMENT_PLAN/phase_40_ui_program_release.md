@@ -28,6 +28,8 @@ content artifacts and the release hash, never an app-specific image layer or a h
 Every effect request carries the exact current program, content, contract, policy, and scope identities.
 Without a checked compatibility witness, a stale authority or content digest returns `ReloadRequired` before
 dispatch; the browser's digest is an observation, not a capability.
+The pair also pins the WebSocket subprotocol, routing-envelope schema, and cursor codec. A rolling deployment
+cannot admit a frame whose program/ABI/routing epoch does not exact-match an active compatible plan.
 
 **Session scope:** In one uninterrupted engineering session, implement the UI-to-release artifact projection
 and stale-digest admission boundary, accepted only by `cabal test ui-program-release-live-gate`. Split if the work requires a new rollout engine, durable
@@ -89,6 +91,7 @@ fixtures, observers, oracle, and mutants are delegated to [Gate integrity](#gate
   carry UI content under the existing immutable release identity.
 - [Testing Doctrine §12 — Spoof-resistant evidence](../documents/engineering/testing_doctrine.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect):
   observe the fresh authorized action outside the UI server.
+- [UI Realtime Coordination §7 — replicas, drain, rollout, and gateway migration](../documents/engineering/ui_realtime_coordination_doctrine.md#7-replicas-drain-rollout-and-gateway-migration): pin the WebSocket/routing/cursor ABI needed during rolling overlap.
 
 ## Sprints
 
@@ -103,7 +106,8 @@ containerd observations with Phase-0 hand-authored manifests; all three committe
 unchanged command.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/engineering/generated_artifacts_doctrine.md`,
-`documents/engineering/release_lifecycle_doctrine.md`, and
+`documents/engineering/release_lifecycle_doctrine.md`,
+`documents/engineering/ui_realtime_coordination_doctrine.md`, and
 `documents/engineering/testing_doctrine.md`.
 
 ### Objective
@@ -160,3 +164,4 @@ The whole sprint (📋 Planned).
 - [Low-Code UI Runtime](../documents/engineering/low_code_ui_runtime_doctrine.md)
 - [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md)
 - [Release Lifecycle Doctrine](../documents/engineering/release_lifecycle_doctrine.md)
+- [UI Realtime Coordination](../documents/engineering/ui_realtime_coordination_doctrine.md)

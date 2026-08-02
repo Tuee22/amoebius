@@ -35,11 +35,17 @@ closed server defaults rather than application options, and their exact policy m
 Phase-21 fixture. The private `UiServerPlan`, dispatch table, policy graph, and server codecs have no asset
 route.
 
+The boundary also terminates the authenticated same-origin WebSocket. Before registration it verifies the
+secure session cookie, exact Origin, single-use session nonce, fixed subprotocol, current plan/ABI/scope epochs,
+and the complete typed routing envelope. A boundary-injected `UiRealtimeCoordination` interface registers
+connection ownership and fanout; the Register-2 gate uses an independent fake, while the real Redis adapter is
+stood up in Phase 31. Redis identifiers never enter handler input or establish authorization.
+
 The boundary returns sanitized structured refusal or `ReloadRequired` responses and records no handler effect
 on every denial. This phase does not implement the browser interpreter, a domain provider, deployment
 manifests, replicas, failover, or a separate server artifact.
 
-**Session scope:** one `serve-ui` HTTP/session-to-`AuthorizedAction`-to-handler boundary in the existing executable;
+**Session scope:** one `serve-ui` HTTPS/WebSocket/session-to-`AuthorizedAction`-to-handler boundary in the existing executable;
 acceptance command `cabal test ui-server-boundary-spec`; split immediately if work requires browser rendering,
 a live Keycloak/provider, deployment/HA, a second register, or a substrate.
 **Dependency:** Phase 20 — canonical `UiServerPlan`, public contracts, route dispatch, and authority digests.
@@ -83,6 +89,10 @@ harness processes; neither reads a decision trace emitted by the server under te
   incompatible handler contract, or the wrong `UiServerAbi` never become ready, serve a client plan, or emit
   handler bytes; an HTTP error from an already-serving worker is not equivalent. Extra linked handlers omitted
   from the sealed dispatch table remain legal and unreachable.
+- **WebSocket registration and routing:** valid session/Origin/nonce/subprotocol establishes one scoped
+  connection registration. Replayed nonce, stale scope/program/ABI, missing envelope field, cross-scope frame,
+  and unavailable coordinator refuse registration or delivery. A fake coordinator publish is a routing hint,
+  never a durable receipt.
 - **Private-plan non-disclosure:** authenticated and unauthenticated clients request guessed paths and the exact
   content-addressed path of the serialized `UiServerPlan`, with path/query/accept variants. An external HTTP
   transcript must match the pinned non-enumerating denial, contain none of the independently held server-plan
@@ -105,6 +115,7 @@ edge exclusivity, provider policy, storage isolation, and behavior after replica
 - [`low_code_ui_runtime_doctrine.md` §13 — generic client and UI server](../documents/engineering/low_code_ui_runtime_doctrine.md#13-generic-purescript-client-and-amoebius-ui-server): the server is an amoebius binary responsibility and the sole provider-dispatch edge.
 - [`low_code_ui_runtime_doctrine.md` §15 — versioning and rollout](../documents/engineering/low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts): current authority and contract identity is rechecked immediately before effects.
 - [`testing_doctrine.md` §12 — spoof-resistant evidence](../documents/engineering/testing_doctrine.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect): credentials, nonce, paired denial, external observer, and bypass probes are mandatory.
+- [`ui_realtime_coordination_doctrine.md §3`](../documents/engineering/ui_realtime_coordination_doctrine.md#3-one-browser-transport-contract) and [`§4`](../documents/engineering/ui_realtime_coordination_doctrine.md#4-typed-routing-and-resume-envelope): authenticated WebSocket admission and scoped routing are part of the server boundary; Redis remains behind an injected platform interface.
 - [`illegal_state_security.md` §3.79](../documents/illegal_state/illegal_state_security.md#379-a-ui-action-whose-server-authorization-does-not-match-its-declaration), [`§3.80`](../documents/illegal_state/illegal_state_security.md#380-a-subject-resolving-or-mutating-another-subjects-resource-without-a-grant), and [`§3.83`](../documents/illegal_state/illegal_state_security.md#383-a-ui-plan-executed-after-an-authority-bearing-source-changed): runtime refusal and zero-effect pairs cover the server residue.
 
 ## Sprints
@@ -112,14 +123,14 @@ edge exclusivity, provider policy, storage isolation, and behavior after replica
 ## Sprint 22.1: Authenticated scoped UI-server dispatch 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Ui/Server/{Main,Dispatch,RequestContext,SecurityHeaders}.hs` and
+**Implementation**: `src/Amoebius/Ui/Server/{Main,Dispatch,RequestContext,SecurityHeaders,WebSocket}.hs`, `src/Amoebius/Ui/Realtime/{Class,Envelope}.hs` and
 `test/ui/Phase22UiServerBoundarySpec.hs` (target authored sources; not yet built)
 **Blocked by**: Phase 20
 **Independent Validation**: `cabal test ui-server-boundary-spec` starts the authority/server/handler as
 separate processes, drives paired HTTP requests, reads independent raw effect/network observations, and
 requires every named mutant to fail.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
-`documents/engineering/daemon_topology_doctrine.md`, `documents/illegal_state/illegal_state_security.md`
+`documents/engineering/daemon_topology_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`, `documents/illegal_state/illegal_state_security.md`
 
 ### Objective
 
@@ -132,6 +143,9 @@ identity, compatible scope, explicit authorization, current plan identity, and t
   exact client-asset allowlisting/private-plan non-disclosure, session/origin/CSRF checks, current-authority
   transition, scoped handle resolution, fixed asset/plan security headers, sanitized errors, and handler
   dispatch requiring `AuthorizedAction`.
+- Authenticated WebSocket handshake, complete routing-envelope decoder, connection lifecycle/drain, and an
+  injected realtime-coordination interface whose fake proves cross-instance routing without becoming a
+  receipt store.
 - Ephemeral signing authority, separate handler process, paired access matrix, post-start challenge, OS-level
   network/effect observer, and direct-bypass probes.
 - Mutant configurations and Register-2 ledger carrying raw-observation digests and marking live layers
@@ -152,6 +166,9 @@ identity, compatible scope, explicit authorization, current plan identity, and t
    `M-new-idempotency-key-on-retry`; each turns a distinct pin red.
 5. Verify the ledger says UI-server boundary tested with fakes and does not claim live Keycloak, edge,
    provider, cluster, redundancy, or HA evidence.
+6. Pair a valid WebSocket handshake/frame with wrong-Origin, replayed-nonce, stale-program, cross-scope, and
+   coordinator-loss twins. Only the valid frame reaches the fake remote connection; no fake-coordinator
+   acknowledgement can satisfy the durable handler-effect oracle.
 
 ### Remaining Work
 
@@ -180,3 +197,5 @@ The whole sprint (📋 Planned).
 - [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — server role, authorization, scope, and freshness boundary.
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — authority-paired spoof-resistant evidence.
 - [Illegal-State Security Slice](../documents/illegal_state/illegal_state_security.md) — authorization, ownership, and stale-plan illegal states.
+- [UI Realtime Coordination](../documents/engineering/ui_realtime_coordination_doctrine.md) — WebSocket
+  authentication, typed routing envelope, and the Redis/durable-receipt boundary projected behind this seam.

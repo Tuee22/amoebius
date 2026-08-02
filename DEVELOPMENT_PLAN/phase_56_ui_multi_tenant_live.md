@@ -22,6 +22,9 @@ multi-tenant scope change using opaque `TenantChoiceHandle`s. A successful chang
 epoch, clears tenant state, invalidates handles and in-flight work, and reloads routes and authorization
 projections. Every subsequent action is resolved and authorized against current server truth; control visibility
 remains advisory.
+The scope epoch also keys WebSocket registrations, routed frames, Redis presence, and resume cursors. A scope
+change closes the old connection/registration before the new scope becomes routable; no Redis key or frame may
+retain or reveal a raw tenant identity supplied by the browser.
 
 **Session scope:** one live multi-tenant browser/session transition and its isolation gate; acceptance command
 `cabal test ui-multi-tenant-live`; split on workflow/artifact UX, replica failure/HA, a second substrate, or a
@@ -75,6 +78,8 @@ controls, but it is never the authority oracle and cannot satisfy a denial row b
   `drop_user_key` removes trusted subject/owner scope; `accept_unlisted_tenant_choice` skips current membership
   when selecting an opaque choice. All three variants are committed and must create a choice/session or
   cross-scope matrix/provider mismatch that turns the gate red.
+  `drop_scope_epoch_from_realtime_route` is an additional committed mutant and must deliver a stale old-scope
+  frame, turning the browser/provider/cursor oracle red.
 
 The gate always deletes the realm fixtures and test-owned tenant data and requires an authenticated postflight
 inventory equal to preflight. Phase 58, not this phase, owns whole-zone HA fault evidence.
@@ -96,6 +101,7 @@ inventory equal to preflight. Phase 58, not this phase, owns whole-zone HA fault
 - [`low_code_ui_runtime_doctrine.md` §15 — versioning and rollout](../documents/engineering/low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts): membership or policy changes invalidate stale authority.
 - [`illegal_state_catalog.md` §3.79](../documents/illegal_state/illegal_state_security.md#379-a-ui-action-whose-server-authorization-does-not-match-its-declaration), [`§3.80`](../documents/illegal_state/illegal_state_security.md#380-a-subject-resolving-or-mutating-another-subjects-resource-without-a-grant), [`§3.82`](../documents/illegal_state/illegal_state_capability_messaging.md#382-a-browser-effect-or-provider-call-escaping-the-server-mediated-capability-boundary), and [`§3.83`](../documents/illegal_state/illegal_state_security.md#383-a-ui-plan-executed-after-an-authority-bearing-source-changed): their live oracles and mutants are mandatory.
 - [`testing_doctrine.md` §12 — spoof-resistant evidence](../documents/engineering/testing_doctrine.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect): authority and effect evidence come from outside the UI runtime.
+- [`ui_realtime_coordination_doctrine.md §4`](../documents/engineering/ui_realtime_coordination_doctrine.md#4-typed-routing-and-resume-envelope): every routed frame/registration exact-matches current tenant/subject/scope/program epochs.
 
 ## Sprints
 
@@ -110,7 +116,7 @@ inventory equal to preflight. Phase 58, not this phase, owns whole-zone HA fault
 network, and provider observations with the independent Phase-0 matrices; every named mutant must turn red.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
 `documents/engineering/tenancy_doctrine.md`, `documents/illegal_state/illegal_state_security.md`,
-`documents/illegal_state/illegal_state_capability_messaging.md`, `documents/engineering/testing_doctrine.md`
+`documents/illegal_state/illegal_state_capability_messaging.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
 ### Objective
 
@@ -167,3 +173,5 @@ The whole sprint (📋 Planned).
 - [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — multi-tenant session, server boundary, and freshness rules.
 - [Tenancy Doctrine](../documents/engineering/tenancy_doctrine.md) — membership, ownership, grants, and provider policy source.
 - [Illegal-State Capability/Messaging Slice](../documents/illegal_state/illegal_state_capability_messaging.md) — browser/provider bypass foreclosure.
+- [UI Realtime Coordination](../documents/engineering/ui_realtime_coordination_doctrine.md) — scoped
+  connection routing and stale-registration refusal during tenant changes.

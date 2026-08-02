@@ -6,7 +6,7 @@
 **Generated sections**: none
 
 > **Purpose**: The plan-side substrate registry and the per-phase substrate map — which single substrate each
-> phase's acceptance gate keys to (phases 0–58), keyed to the closed substrate catalog owned by the substrate
+> phase's acceptance gate keys to (phases 0–64), keyed to the closed substrate catalog owned by the substrate
 > doctrine.
 
 ---
@@ -96,8 +96,8 @@ gates.
 | GPU axis | none |
 | Virtualization | none (native Linux); Incus / Colima where a nested Linux VM is wanted |
 | LoadBalancer | MetalLB |
-| What it validates | The **default validation substrate** — bootstrap, platform services and retained storage, the DSL/control-plane singleton, Pulsar/store/workflow, CPU inference, the generic low-code UI server/projector, authenticated single/multi-tenant isolation, rollout/reconnect, and multi-cluster migration |
-| Gate phase(s) | Phases 24–50 and 55–57, plus the `linux-cpu` parent side of Phase 58 — the live band's default substrate; the per-phase assignment is owned by [§4](#4-per-phase-substrate-map) |
+| What it validates | The **default validation substrate** — bootstrap, platform services and retained storage, the DSL/control-plane singleton, Pulsar/store/workflow, CPU inference, the generic low-code UI server/projector, authenticated single/multi-tenant isolation, rollout/reconnect, encrypted offline replay/blobs/release evolution, and multi-cluster migration |
+| Gate phase(s) | Phases 24–50, 55–57, and 61–63, plus the `linux-cpu` parent side of Phases 58 and 64 — the live path's default substrate; the per-phase assignment is owned by [§4](#4-per-phase-substrate-map) |
 | Status | 📋 Planned |
 
 ### linux-cuda
@@ -122,8 +122,8 @@ gates.
 | GPU axis | CUDA present ⇒ **on-host worker node** — CUDA does not run performantly inside WSL2 ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized)) |
 | Virtualization | WSL2 (Ubuntu-24.04 Linux distro) for the Linux-host role — see [§3](#3-virtualized-substrates-lima--wsl2) |
 | LoadBalancer | MetalLB (when acting as a Linux cluster host) |
-| What it validates | No phase gate in 0–58 keys its single substrate to `windows`: Windows participates either as a Linux host (via WSL2) or as the Windows-CUDA host-worker case, which shares the Phase 53 host-compute doctrine whose gate substrate is `apple`. This round elevates the Windows-CUDA host worker to a **first-class** case alongside Apple-Metal — role parity, not evidence parity ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized), [`daemon_topology_doctrine.md` §4](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected)). The standalone `windows` gate is a later-phase concern (README later phases) |
-| Gate phase(s) | none in 0–58 (host-worker doctrine shared with Phase 53) |
+| What it validates | No phase gate in 0–64 keys its single substrate to `windows`: Windows participates either as a Linux host (via WSL2) or as the Windows-CUDA host-worker case, which shares the Phase 53 host-compute doctrine whose gate substrate is `apple`. This round elevates the Windows-CUDA host worker to a **first-class** case alongside Apple-Metal — role parity, not evidence parity ([`substrate_doctrine.md` §5](../documents/engineering/substrate_doctrine.md#5-host-worker-nodes-substrate-specific-hardware-that-cannot-be-containerized), [`daemon_topology_doctrine.md` §4](../documents/engineering/daemon_topology_doctrine.md#4-worker-daemons--n-unelected)). The standalone `windows` gate is a later-phase concern (README later phases) |
+| Gate phase(s) | none in 0–64 (host-worker doctrine shared with Phase 53) |
 | Status | 📋 Planned |
 
 > **Honesty.** Detection and classification are seeded from the sibling `hostbootstrap` library (a closed
@@ -212,9 +212,11 @@ Lima VM on Apple presents as `linux-cpu` to everything above it.
 
 The single substrate each phase's acceptance gate keys to. Each row matches the substrate named in that
 phase's `Phase Summary`; the README Phase overview carries the same values
-([README.md Phase overview](README.md#phase-overview)). Phases **1–23** are the pre-cluster band (substrate
-`none`, Registers 1–2); phases **24–58** are the live band (Register 3). Each row's full objective, gate, and
-sprint breakdown lives in its phase document (`phase_00_documentation_suite.md` … `phase_58_ui_ha_multizone.md`).
+([README.md Phase overview](README.md#phase-overview)). Phases **1–23** are the initial pre-cluster band
+(substrate `none`, Registers 1–2); phases **24–58** are the initial live band (Register 3). The offline work
+then returns to pre-cluster Registers 1–2 in Phases **59–60** before its live gates in Phases **61–64**. Each
+row's full objective, gate, and sprint breakdown lives in its phase document
+(`phase_00_documentation_suite.md` … `phase_64_offline_multizone_continuity.md`).
 
 | Phase | Name | Substrate | Why this substrate |
 |-------|------|-----------|--------------------|
@@ -243,13 +245,13 @@ sprint breakdown lives in its phase document (`phase_00_documentation_suite.md` 
 | 22 | UI-server boundary | `none` | Register 2: pre-readiness referenced-handler/ABI admission, private-server-plan non-disclosure, and exact security-header/origin/CSRF enforcement against fake identity/workflow/storage processes; no cluster. |
 | 23 | Local UI composition | `none` | Register 2: generic browser/server plus infernix/jitML fake adapters for two users and two tenants; no cluster. |
 | 24 | Python midwife + substrate detect + single kind cluster | `linux-cpu` | The default substrate admits engine/process/etcd-transition demand, realizes the kubelet filesystem layout, and records logical ephemeral, physical content/snapshot, and presented backing inventory. |
-| 25 | Multi-arch base image + jit-build resolver + distribution registry | `linux-cpu` | Host build CPU/memory/scratch/cache/concurrency is snapshot-admitted; an explicit `ProvisionedBootstrapRegistry`/snapshot-bound action side-loads and initializes only registry/proxy objects, then equality-hands them into later whole-deployment ownership before atomic publication. |
+| 25 | Multi-arch base image + jit-build resolver + distribution registry | `linux-cpu` | Host build CPU/memory/scratch/cache/concurrency is snapshot-admitted; both architectures prove pinned `redis-server`/`redis-cli` plus the complete bake/SBOM inventory; an explicit `ProvisionedBootstrapRegistry` action side-loads and publishes without an upstream Redis image. |
 | 26 | Typed renderer + object reconciler | `linux-cpu` | The Phase-13 pure `renderAll` list is rendered and enacted on the live single-node `kind` cluster only through stage-eligible typed actions, validated against observed residual/filesystem/content/snapshot/durable supply; default substrate, no GPU. |
 | 27 | amoebius-capacity scheduler + bootstrap cutover | `linux-cpu` | The `amoebius-capacity` scheduler stands up from `CapacitySchedulerSystemDemand`, mints `BootstrapCapacitySchedulerReady`, and cuts the bootstrap-controller set over from the default scheduler on the live `kind` cluster; default substrate, no GPU. |
 | 28 | No-provisioner retained storage + lossless rebind | `linux-cpu` | A real cluster delete destroys the PVC/PV API objects; fresh deterministic PV bindings reattach the retained host backing after recreate. MetalLB is the bare-metal/kind LB ([`substrate_doctrine.md` §7](../documents/engineering/substrate_doctrine.md#7-the-loadbalancer-is-the-one-substrate-driven-platform-difference)). No GPU axis. |
 | 29 | Root Vault + PKI + built-in Haskell Vault client | `linux-cpu` | Vault init/unseal + PKI anchor + the Haskell Vault client, on the default substrate. |
 | 30 | Platform backbone (MetalLB + MinIO + Pulsar HA) | `linux-cpu` | The backbone comes up HA from generated manifests + baked binaries; the `distribution` registry re-homes onto the MinIO S3 driver and a size-triggered Pulsar S3 offload fires; no GPU. |
-| 31 | Platform services-2 (Percona/Patroni + pgAdmin + observability + readiness-DAG) | `linux-cpu` | Percona/Patroni + pgAdmin + Prometheus/Grafana come up HA in the derived readiness-DAG order, on the default substrate; no GPU. |
+| 31 | Platform services-2 (Redis/Sentinel + Percona/Patroni + pgAdmin + observability + readiness-DAG) | `linux-cpu` | Ephemeral Redis primary/replicas/Sentinel, Percona/Patroni, pgAdmin, and Prometheus/Grafana come up in the derived readiness-DAG order on the default substrate; no GPU. |
 | 32 | Keycloak-owned ingress | `linux-cpu` | The single wild-ingress path through Keycloak/Envoy, on the default substrate. |
 | 33 | Live DSL deploy via the replicas=1 singleton | `linux-cpu` | The Deployment-`replicas=1` singleton (single-instance from k8s/etcd, no election) drives a live deploy; no hardware axis. |
 | 34 | Tenant/provider provisioning | `linux-cpu` | Exact tenant-qualified policy objects applied and independently read back across all six provider control planes; application request isolation remains Phase 36. |
@@ -273,10 +275,16 @@ sprint breakdown lives in its phase document (`phase_00_documentation_suite.md` 
 | 52 | jitML UI lift | `linux-cuda` | The generic UI traverses live jitML train/commit/serve/interact with an external CUDA trace and same-tenant-owner/foreign-tenant denial matrix. |
 | 53 | Apple-Metal host compute daemon | `apple` | Physical CPU/unified memory and storage are carved across system reserve, a presentation/quantum-derived Lima VM disk, Metal worker, and host cache before launch. |
 | 54 | Test-topology DSL + suggest-test + elevated harness | `per generated test` | `suggest-test` detects CPU, memory, logical/physical node storage, presented durable/native cache, accelerator memory, distinct provider quotas, and credentials, then emits one fitting substrate. |
-| 55 | Single-tenant low-code UI live path | `linux-cpu` | Real OIDC/Envoy, origin/CSRF, data, workflow, projection, infernix dispatch/read, and provider-bypass observations on the default substrate. |
+| 55 | Single-tenant low-code UI live path | `linux-cpu` | At least two UI replicas exercise real OIDC/Envoy/WebSocket and Redis cross-pod event/receipt routing plus data, workflow, projection, infernix, and bypass observations. |
 | 56 | Multi-tenant low-code UI isolation | `linux-cpu` | Two tenants plus multi-member, revoked-member, and never-member subjects exercise the real tenant-choice, authority, session-epoch, and provider-isolation matrix. |
 | 57 | UI rollout, projection catch-up, and reconnect | `linux-cpu` | A live A→B→A program rollout exercises gateway shift, watermarks, exact paired plans, and same-owner cursor resume under real two-tenant authority. |
-| 58 | UI multi-zone high availability | `linux-cpu → provider` | The linux-cpu parent drives one multi-zone provider target and externally observes every selected-zone member isolated while post-fault OIDC/current-membership and the full UI operation/scope matrix continue through surviving zones. |
+| 58 | Initial online UI multi-zone high availability | `linux-cpu → provider` | The linux-cpu parent drives one multi-zone provider target and externally observes a selected-zone UI/Redis/Sentinel fault while durable cursor/receipt repair and the online operation/scope matrix continue. |
+| 59 | Offline language and paired plans | `none` | Register 1 pure source/decoder/binder tests; no browser, host, or cluster. |
+| 60 | Encrypted browser offline runtime | `none` | Register 2 hermetic Chromium boundary tests for encrypted stores, service worker, quota, partitioning, and fenced cross-tab ownership; no cluster. |
+| 61 | Offline replay and durable receipts | `linux-cpu` | Live current-authority replay crosses UI replicas and repairs Redis/socket loss from durable provider/Pulsar receipts. |
+| 62 | Offline blobs and partition isolation | `linux-cpu` | Live encrypted local-blob upload, MinIO content verification, quota/dependency ordering, and real tenant/subject denial. |
+| 63 | Offline release and schema evolution | `linux-cpu` | Live A→B→A migration/retained-handler compatibility, receipt retention, and incompatible-promotion refusal. |
+| 64 | Offline multi-zone continuity | `linux-cpu → provider` | The linux-cpu parent drives one multi-zone provider target through disconnection, complete selected-zone UI/Redis/Sentinel fault, release advance, current reauthentication, cursor/receipt repair, verified blob upload, and isolated replay. |
 
 The provider/host-side details under three of these rows are owned elsewhere: the cloud-LB and provider-cluster
 provisioning behind Phases 44–47 by the Pulumi IaC doctrine; the host-worker wire behind Phase 53 by the

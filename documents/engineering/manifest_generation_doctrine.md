@@ -170,6 +170,15 @@ Among those objects, the rendered **`ConfigMap`** is how an **in-cluster pod** f
 streaming used for the VM/container bootstrap-lift frames. [dsl_doctrine.md §3](./dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness) owns that
 frame-descent delivery contract; this doc owns only the ConfigMap render.
 
+The sealed service projection also emits the complete ephemeral Redis/Sentinel object set: one primary,
+admitted replicas, three Sentinel voters, Services, TLS/ACL secret-name mounts, NetworkPolicies, disruption
+and spread constraints, probes, and finite resource/config limits. It emits no Redis PVC, persistence flag,
+backup object, or application-facing credential. The UI edge projection emits the Gateway-API `HTTPRoute`
+WebSocket upgrade to the replicated UI-server Service under the same host/TLS/auth boundary as HTTPS; it does
+not emit a Pulsar WebSocket proxy, sticky-session correctness requirement, or direct Redis route. These shapes
+are total projections of provisioned realtime inputs owned by
+[UI Realtime Coordination](./ui_realtime_coordination_doctrine.md), not hand-authored YAML exceptions.
+
 Three properties make this the right shape:
 
 - **Pure and total.** `renderAll` performs no I/O, reaches no cluster, and (being a total function over an
@@ -812,6 +821,7 @@ lands in Phase 39 on the tier-(c) reconciler. This doc states the target shape a
 - [Release Lifecycle Doctrine](./release_lifecycle_doctrine.md) — `Release` / `releaseHash` ledger ([§2](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash)), the `Environment` promotion pointer / `PromotionGate` ([§3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer)–[§4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable)), and the `RolloutPlan` / `RolloutPhase` ([§5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)) this doc's tier-(c) reconciler enacts ([§5.1](#51-the-rolloutplan-ordered-readiness-gated-phases-on-this-same-reconciler-tier-c))
 - [Network Fabric Doctrine](./network_fabric_doctrine.md) — the Gateway-API `HTTPRoute` weight shift ([§6](./network_fabric_doctrine.md#6-the-service-mesh-verdict-no-linkerd-for-v1)) that is the canary `RolloutPhase` ([§5.1](#51-the-rolloutplan-ordered-readiness-gated-phases-on-this-same-reconciler-tier-c))
 - [Image Build Doctrine](./image_build_doctrine.md) — the build pipeline, baked base container, and registry refs
+- [UI Realtime Coordination](./ui_realtime_coordination_doctrine.md) — the Redis/Sentinel and authenticated WebSocket object shapes rendered here
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the control-plane singleton that runs the reconciler
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — the `discover → diff → enact` reconciler shape this specializes
 - [App vs Deployment Doctrine](./app_vs_deployment_doctrine.md) — replica counts and topology are deployment rules, not app logic

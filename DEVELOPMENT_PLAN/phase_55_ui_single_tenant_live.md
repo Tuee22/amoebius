@@ -22,6 +22,9 @@ interpreter and UI-server responsibility behind Keycloak and Envoy. Its typed po
 storage, Pulsar-backed workflow state, owner-scoped projections, and a ready infernix artifact. It tests the
 single-tenant path only; multiple tenants, rollout continuity, and failure-domain redundancy remain separate
 phases.
+The topology uses at least two ready UI-server replicas without sticky routing. The gate pins a browser socket
+to replica A, originates a projection event and command receipt through replica B, and requires scoped Redis
+fanout plus durable cursor/receipt repair to deliver them to A. This establishes cross-pod routing, not HA.
 
 **Session scope:** Wire and validate one single-tenant end-to-end topology with the acceptance command
 `cabal test phase55-ui-single-tenant-live`; split if completion requires a second tenant, a release transition,
@@ -43,6 +46,8 @@ subjects (`owner` and `other`), one generic UI-server Deployment, one UI project
 one MinIO bucket/prefix, one Pulsar workflow plus owner-keyed projection, and one Phase-49 infernix workflow
 whose committed output is converted to a `ReadyArtifactHandle`. Playwright enters only through the public
 Keycloak/Envoy origin. No fake provider or direct in-cluster browser route participates.
+The UI-server Deployment has at least two replicas. A harness-controlled backend selection proves the socket
+owner and event/receipt origin are different pods; a one-replica or local-only connection-map mutant fails.
 
 **Pinned oracles.** Phase 0 commits `test/golden/phase_55_single_tenant_access.tbl`,
 `test/golden/phase_55_effect_observations.json`, `test/golden/phase_55_origin_csrf.tbl`, and
@@ -74,7 +79,9 @@ must fail. Hiding a control is not authorization evidence.
 `test/mutants/phase_55_open_provider_edge.dhall`, and
 `test/mutants/phase_55_drop_ui_networkpolicy.dhall`, plus
 `test/mutants/phase_55_disable_csrf_check.patch` and
-`test/mutants/phase_55_dispatch_artifact_before_auth.patch`. The first cannot echo the post-start nonce from
+`test/mutants/phase_55_dispatch_artifact_before_auth.patch`, plus
+`test/mutants/phase_55_local_socket_map_only.patch` and
+`test/mutants/phase_55_redis_receipt_authority.patch`. The first cannot echo the post-start nonce from
 all provider observations; the edge mutants fail the independently observed forbidden-edge table; and the
 CSRF/dispatch mutants create forbidden handler or audit bytes even if the public denial is forged.
 
@@ -84,16 +91,17 @@ CSRF/dispatch mutants create forbidden handler or audit bytes even if the public
 - Adopt [`platform_services_doctrine.md` §9 — the single authenticated ingress](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path): every browser request crosses Keycloak and Envoy.
 - Adopt [`content_addressing_doctrine.md` §4.5 — ready artifact lifecycle](../documents/engineering/content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss): expose only an authorized ready infernix handle.
 - Adopt [`testing_doctrine.md` §12 — spoof-resistant evidence](../documents/engineering/testing_doctrine.md#12-spoof-resistant-evidence-a-gate-observes-an-unforgeable-fresh-effect): bind success to fresh provider-observed effects.
+- Adopt [`ui_realtime_coordination_doctrine.md` §§4–6](../documents/engineering/ui_realtime_coordination_doctrine.md#4-typed-routing-and-resume-envelope): force cross-pod WebSocket delivery while durable cursors and receipts remain outside Redis.
 
 ## Sprints
 
 ## Sprint 55.1: Complete single-tenant UI slice 📋
 
 **Status**: Planned
-**Implementation**: `src/Amoebius/Ui/Live/SingleTenant.hs`, `test/live/Phase55UiSingleTenantSpec.hs` (planned; not built)
+**Implementation**: `src/Amoebius/Ui/Live/SingleTenant.hs`, `src/Amoebius/Ui/Realtime/RedisCoordination.hs`, `test/live/Phase55UiSingleTenantSpec.hs` (planned; not built)
 **Blocked by**: Phases 32, 33, 38, 40, and 50
 **Independent Validation**: `cabal test phase55-ui-single-tenant-live` against the pinned tables and provider-owned observations
-**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/platform_services_doctrine.md`, `documents/engineering/testing_doctrine.md`
+**Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`, `documents/engineering/platform_services_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`, `documents/engineering/testing_doctrine.md`
 
 ### Objective
 
@@ -102,6 +110,8 @@ Deliver the one-tenant generic UI runtime path and its externally observed secur
 ### Deliverables
 
 - The resource-complete live topology and exact bound `ClientPlan`/`UiServerPlan` release.
+- At least two UI-server replicas, authenticated WebSocket connection ownership, cross-pod scoped Redis
+  fanout, cursor-gap repair, and durable provider/Pulsar receipt lookup without sticky sessions.
 - Real OIDC Playwright flow, owner/other-subject matrix, valid-session origin/CSRF negatives, and
   direct-provider denial probes.
 - Fresh-nonce SQL/S3/Pulsar/Envoy plus artifact-request/infernix-dispatch evidence capture and committed ledger.
@@ -112,6 +122,9 @@ Deliver the one-tenant generic UI runtime path and its externally observed secur
 
 1. Run `cabal test phase55-ui-single-tenant-live` on `linux-cpu`; require all canonical observations green and
    each named mutant red for its pinned reason.
+2. Force the browser WebSocket onto replica A and event/receipt production through replica B, then flush Redis
+   between publish and response. Reconnect/cursor/receipt lookup must recover the authoritative outcome once,
+   and neither local-only routing nor Redis-as-receipt may pass.
 
 ### Remaining Work
 
@@ -134,3 +147,4 @@ The whole sprint is planned; no amoebius implementation or Register-3 result exi
 - [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md)
 - [Tenancy Doctrine](../documents/engineering/tenancy_doctrine.md)
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md)
+- [UI Realtime Coordination](../documents/engineering/ui_realtime_coordination_doctrine.md)

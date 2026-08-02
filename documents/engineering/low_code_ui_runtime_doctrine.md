@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_16_ui_program_schema.md, DEVELOPMENT_PLAN/phase_17_scoped_identity_kernel.md, DEVELOPMENT_PLAN/phase_18_ui_authorization_kernel.md, DEVELOPMENT_PLAN/phase_19_ui_effect_binding.md, DEVELOPMENT_PLAN/phase_20_ui_plan_compiler.md, DEVELOPMENT_PLAN/phase_21_ui_browser_interpreter.md, DEVELOPMENT_PLAN/phase_22_ui_server_boundary.md, DEVELOPMENT_PLAN/phase_23_ui_local_composition.md, DEVELOPMENT_PLAN/phase_36_user_tenant_isolation_live.md, DEVELOPMENT_PLAN/phase_38_ui_projection_runtime.md, DEVELOPMENT_PLAN/phase_40_ui_program_release.md, DEVELOPMENT_PLAN/phase_50_infernix_ui_lift.md, DEVELOPMENT_PLAN/phase_52_jitml_ui_lift.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_56_ui_multi_tenant_live.md, DEVELOPMENT_PLAN/phase_57_ui_rollout_reconnect.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/phase_59_offline_language_plan.md, DEVELOPMENT_PLAN/system_components.md, README.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/browser_offline_runtime_doctrine.md, documents/engineering/capability_extension_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/lift_and_compose_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/platform_services_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/release_lifecycle_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/test_derivation_analysis.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/illegal_state/illegal_state_capability_messaging.md, documents/illegal_state/illegal_state_ml_asset.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define the bounded Dhall language, checked Haskell intermediate representation, generic
@@ -67,6 +67,8 @@ not redefine them.
 | Tenant identities, memberships, roles, grants, and provider RBAC | [Tenancy](./tenancy_doctrine.md) | The UI receives opaque scope witnesses derived from that model and never authors tenant authority. |
 | One executable and daemon role taxonomy | [Daemon Topology](./daemon_topology_doctrine.md) | The UI server is a worker responsibility of the same amoebius executable, not a second privileged executable. |
 | Keycloak/Envoy ingress and platform HA | [Platform Services](./platform_services_doctrine.md) | Every browser and UI API path traverses the platform-owned authenticated edge. |
+| Browser WebSocket transport and Redis routing | [UI Realtime Coordination](./ui_realtime_coordination_doctrine.md) | This doctrine declares typed ports/subscriptions; the realtime doctrine fixes their same-origin wire, cross-pod routing, and durable-replay boundary. |
+| Offline persistence, outbox replay, and local blobs | [Browser Offline Runtime](./browser_offline_runtime_doctrine.md) | `UiSource` selects offline semantics; the offline doctrine owns encrypted browser facilities, replay, compatibility, and quotas. |
 | Artifact identity, readiness, provenance, and compatibility | [Content Addressing & Determinism](./content_addressing_doctrine.md) | The UI can consume only a server-issued ready artifact handle. |
 | Workflow and extension monitoring | [Monitoring Doctrine](./monitoring_doctrine.md) | Workflow status views consume the mandatory authenticated monitoring surface. |
 | Generated-file policy | [Generated Artifacts](./generated_artifacts_doctrine.md) | Per-app plans/content manifests and the generic runtime's catalog codecs/bundle are generated and never committed. |
@@ -134,6 +136,7 @@ The top-level shape is conceptually:
 , routes          : List UiRouteSource
 , ports           : List UiPortRequirement
 , externalLinks   : List NamedExternalLinkRequirement
+, continuity      : < OnlineOnly | Offline : OfflineSource >
 , initialRoute    : RouteRef
 }
 ```
@@ -327,9 +330,11 @@ bounded values. There is no unbounded retry, unbounded fan-out, recursive event 
 timer loop. Optimistic presentation is allowed only as explicitly marked speculative state; it never changes
 the authoritative server version and must reconcile with a typed success or conflict result.
 
-Browser persistence is absent in the first runtime contract. Application state lives in memory; sensitive data
-is not stored in `localStorage`, IndexedDB, a service-worker cache, or an author-selected cookie. A later offline
-mode requires a new doctrine and a typed encrypted persistence protocol.
+`continuity = OnlineOnly` keeps application state in memory and forbids browser persistence. An
+offline-capable program selects `continuity = Offline ...`; its projections, queueable ports, local blobs,
+encrypted stores, cross-tab ownership, replay outcomes, and compatibility horizon are governed by
+[Browser Offline Runtime](./browser_offline_runtime_doctrine.md). `UiSource` declares offline semantics only;
+it never selects a browser API or transport product.
 
 ---
 
@@ -354,6 +359,7 @@ data EffectClass
   | MutateData
   | StartWorkflow
   | ObserveWorkflow
+  | Subscribe
   | SignalWorkflow
   | CancelWorkflow
   | InvokeArtifact
@@ -577,7 +583,9 @@ or a typed monitoring link. The UI cannot introduce a public monitoring surface 
 
 The client is one generic PureScript interpreter, versioned with the UI language and component catalog. It
 loads an immutable `ClientPlan`, verifies its envelope and digest, decodes public values, renders only trusted
-components, applies deterministic transitions, and invokes opaque ports through one same-origin transport.
+components, applies deterministic transitions, and invokes opaque ports through the fixed same-origin HTTPS
+plus authenticated-WebSocket contract owned by
+[UI Realtime Coordination](./ui_realtime_coordination_doctrine.md).
 Application authors do not write PureScript, JavaScript, HTML, CSS, fetch calls, or browser storage code.
 
 The server is a distinct **binary responsibility**, not a distinct binary artifact. The same amoebius
@@ -593,6 +601,8 @@ names the required behavior:
 - reauthorize and revalidate every effect;
 - sanitize and encode public output and errors; and
 - proxy resumable bounded subscriptions without becoming their durable owner.
+- register each authenticated WebSocket with the platform-internal realtime coordinator, route typed frames
+  across replicas, and repair every detected cursor gap from the durable projection.
 
 The UI server is a backend-for-frontend security boundary. It never accepts a user-supplied handler name,
 provider address, capability binding, tenant identity, or policy. Unknown plan digests, port identifiers,
@@ -620,9 +630,11 @@ The client and server responsibilities are intentionally asymmetric:
 ## 14. Runtime role, deployment, and high availability
 
 `UiServer app` is an unelected, horizontally scalable worker responsibility. It holds no durable application,
-workflow, authorization, or tenant truth in process memory. Durable data lives behind bound platform
-capabilities; session and subscription continuity use server-verified shared state or resumable tokens. Sticky
-sessions may improve efficiency but cannot be required for correctness.
+workflow, authorization, tenant, receipt, or cursor truth in process memory. Durable data lives behind bound
+platform capabilities. Short-lived session/connection routing uses the platform-internal Redis facility and
+subscription continuity uses server-verified cursors, as fixed by
+[UI Realtime Coordination](./ui_realtime_coordination_doctrine.md). Sticky sessions are not a correctness
+mechanism and are not part of the admitted topology.
 
 The application UI source contains no replica count, placement, topology-spread, disruption-budget, rollout,
 or failover field. Deployment rules select `ReplicaCardinality` and the applicable rollout and placement shape.
@@ -631,7 +643,9 @@ spread, disruption controls, and gateway backends from the provisioned deploymen
 
 With more than one admitted replica, requests may reach any ready replica. Mutations and workflow starts remain
 safe under gateway retries and replica loss because their port contracts are idempotent or explicitly
-conflict-detecting. Subscriptions resume from checked cursors. No UI-server replica performs leader election.
+conflict-detecting. A frame observed by one pod reaches a socket owned by another through scoped Redis fanout;
+missed lossy notifications are detected and repaired from checked durable cursors. No UI-server replica
+performs leader election.
 
 A deployment with one UI-server replica has the same stateless topology but no replica redundancy. It must not
 be described as highly available. End-to-end UI availability also depends on the platform edge, identity,
@@ -674,6 +688,12 @@ UI program text did not change. No constructor retags an old plan as current.
 State evolution is explicit. A changed client-state schema either has a total pure migration from the old
 schema or starts a fresh client state. Server-side durable schema changes remain release phases owned by the
 release/deployment system; UI Dhall cannot perform a migration.
+
+For an offline-capable program, starting fresh is not permitted while a persisted outbox or blob dependency
+exists. Persisted records carry the program/runtime/server ABI, public and port contract digests, and storage
+schema. A release retains a total migration or old decoder/replay handler for the declared maximum offline
+horizon; `ReloadRequired` cannot discard queued intent. The complete rule is owned by
+[Browser Offline Runtime §11](./browser_offline_runtime_doctrine.md#11-release-schema-and-compatibility-horizon).
 
 The committed sources are authored Dhall plus Haskell and PureScript runtime sources. The following are
 generated build/release artifacts and are never committed:
@@ -751,12 +771,15 @@ The implementation requires evidence at the repository's established verificatio
    grant revocation; stale epochs; idempotent retry; upload limits; sanitized errors; subscription resume; and
    artifact readiness changes.
 5. Browser tests exercise keyboard/focus semantics, escaped rendering, CSP, CSRF/origin behavior, route guards,
-   sign-out clearing, reload compatibility, and the absence of forbidden persistence.
+   sign-out clearing, reload compatibility, the `OnlineOnly` persistence prohibition, and the encrypted,
+   partitioned persistence contract for offline-capable plans.
 6. Live tests traverse Keycloak/Envoy and real bound services for single-tenant and multi-tenant applications,
    including valid-session wrong-origin/CSRF refusal, tenant-choice issuance/selection/revocation, a
    tenant/subject-isolation matrix with provider read/dispatch/effect audit, and a real infernix/jitML
    workflow-to-interaction path.
-7. HA tests use real authority while a provider-confirmed fault withdraws every member in one admitted failure
+7. Realtime tests force a socket onto one UI-server pod and originate its event or receipt on another, then
+   restart/flush Redis and require reconnect plus durable cursor/receipt repair with no duplicated effect.
+8. HA tests use real authority while a provider-confirmed fault withdraws every member in one admitted failure
    domain during reads, idempotent mutations, workflow starts, and subscriptions. A cookie-empty browser must
    also complete a new OIDC login and current membership/epoch check while the fault remains active. The tests
    externally verify identity availability, retry/resume, exactly-once accepted effects, and same-tenant/
@@ -766,8 +789,8 @@ The implementation requires evidence at the repository's established verificatio
 Public contract generators, Haskell server decoders, and PureScript client codecs are tested from the same
 reified contract value. Hand-maintained correspondence tables do not satisfy the obligation.
 
-The adopted implementation and validation work is distributed across Phases 16–23, 36, 38, 40, 50, 52, and
-55–58 in the [Development Plan](../../DEVELOPMENT_PLAN/README.md). That set identifies planning ownership; phase
+The adopted implementation and validation work is distributed across Phases 16–23, 36, 38, 40, 50, 52,
+55–58, and 59–64 in the [Development Plan](../../DEVELOPMENT_PLAN/README.md). That set identifies planning ownership; phase
 order, completion state, validation gates, and remaining work remain solely in the development-plan index.
 
 ---
@@ -820,3 +843,5 @@ tenancy, and capability escape arm.
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Engineering Doctrine Index](./README.md)
 - [Documentation Standards](../documentation_standards.md)
+- [UI Realtime Coordination](./ui_realtime_coordination_doctrine.md)
+- [Browser Offline Runtime](./browser_offline_runtime_doctrine.md)

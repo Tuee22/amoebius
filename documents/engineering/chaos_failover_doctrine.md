@@ -231,13 +231,13 @@ This section distinguishes amoebius's doctrine from a generic one: it is why the
 tractable.
 
 A naive reading of [§2](#2-when-this-applies--the-gate) suggests an unbounded obligation: amoebius runs Pulsar, MinIO, Vault, Postgres,
-nine standard services, N worker daemons, and an arbitrary app on every cluster in a recursive forest — so
+ten standard services, N worker daemons, and an arbitrary app on every cluster in a recursive forest — so
 it appears as if *every* component carries its own split-brain proof obligation. It does not. The obligation
 **concentrates**, because of two structural facts amoebius commits to.
 
-**Fact one: intra-cluster consensus and single-instance are delegated, not re-proved.** The standard platform
-services each run their own, already-proven distributed consensus and synchronous replication: MinIO
-erasure-codes and quorum-replicates within a cluster; Pulsar's brokers/bookies own subscription and
+**Fact one: intra-cluster consensus and single-instance are delegated, not re-proved.** The durable,
+consensus-bearing standard services delegate their own replication/failover mechanics: MinIO erasure-codes
+and quorum-replicates within a cluster; Pulsar's brokers/bookies own subscription and
 acknowledgment semantics ([platform_services_doctrine.md §6](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox));
 Percona/Patroni Postgres runs streaming replication with its own leader election. The Patroni delegation is
 *effectively lossless* only under an explicitly-mandated configuration, not by Patroni's default: Patroni
@@ -252,7 +252,10 @@ not left to Patroni's default. amoebius **delegates** the
 synchronous-HA correctness obligation to these systems rather than re-deriving it. Pulsar supplies any
 topic-lifecycle coordinator's sole-consumer behavior through its subscription and deduplicated-delivery
 contracts; amoebius introduces no coordinator election
-([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)). **Crucially, the control-plane singleton's
+([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)). Redis is deliberately outside this durability
+claim: its primary/replica/Sentinel topology improves
+availability of ephemeral WebSocket routing, while lost fanout repairs from durable cursors/receipts
+([ui_realtime_coordination_doctrine.md](./ui_realtime_coordination_doctrine.md)). **Crucially, the control-plane singleton's
 single-writer authority is likewise delegated — to Kubernetes/etcd.** The singleton is a Deployment
 `replicas=1` protected by the mandatory reconciler `Lease`, never a bespoke amoebius election
 ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)); amoebius does

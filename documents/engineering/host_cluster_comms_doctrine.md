@@ -124,9 +124,11 @@ Concretely:
   it is itself a Pulsar/MinIO client on
   channel 2 — no separate binary↔daemon RPC exists.
 
-No WebSockets anywhere: the daemon speaks the native Pulsar TCP binary protocol via the shared
-`amoebius-pulsar` client, which is a locked invariant of
-[pulsar_client_doctrine.md](./pulsar_client_doctrine.md).
+No WebSockets exist on this host/workload coordination channel: the daemon speaks the native Pulsar TCP binary
+protocol via the shared `amoebius-pulsar` client, which is a locked invariant of
+[pulsar_client_doctrine.md](./pulsar_client_doctrine.md). This does not prohibit the distinct browser-edge
+WebSocket terminated by replicated UI servers; that path never reaches a host worker and is owned by
+[UI Realtime Coordination](./ui_realtime_coordination_doctrine.md).
 
 **This is a workload-plane rule, not an admin-plane one** — [§1](#1-the-host-origin-surface-two-channels-both-localhost-only) draws that split up front. The operator admin control plane it excludes — administering the cluster's own configuration
 (Vault init/unseal, delivering a new `.dhall`), a *control* concern rather than worker coordination — rides the

@@ -69,7 +69,7 @@ state already unrepresentable in the pre-cluster band's Dhall Gate-1 schema and 
 
 Fourth, **the standard-HA convergence from typed manifests**. Through the child admin REST after handoff, the
 run initializes/unseals Vault, delivers the child's projected `.dhall`, and the singleton converges the
-**complete** standard HA platform-service stack — registry, MinIO, Vault, Pulsar, Prometheus/Grafana, Postgres,
+**complete** standard HA platform-service stack — registry, MinIO, Vault, Pulsar, Redis/Sentinel, Prometheus/Grafana, Postgres,
 Envoy/Gateway API, Keycloak, cloud LoadBalancer — through the Phase-26 reconciler, **not** a thinner or different
 service set, reachable and HA, with wild ingress only via Keycloak, with no Helm and no public-registry pull.
 
@@ -106,7 +106,7 @@ standard-service convergence and re-runs it; no register-1/2 in-process check di
 reaches `BootstrapCapacitySchedulerReady`, **cuts every default-scheduled bootstrap add-on over to joined
 custom-scheduler reservations**, installs the full managed taint/admission/exclusive-Binding writer authority and
 reaches `ManagedCapacityReady`, then converges the **complete** standard HA service set (registry, MinIO, Vault,
-Pulsar, Prometheus/Grafana, Postgres, Envoy/Gateway API, Keycloak, cloud LoadBalancer) from typed manifests —
+Pulsar, Redis/Sentinel, Prometheus/Grafana, Postgres, Envoy/Gateway API, Keycloak, cloud LoadBalancer) from typed manifests —
 reachable, HA, wild ingress only via Keycloak — where the **parent bootstrap Lease holder is released and
 observed absent before the authenticated child singleton acquires the same Lease** and reports `/readyz`. The
 child runs **no host worker daemon** and advertises **no host substrate** (the `Managed Eks` arm carries no
@@ -150,7 +150,7 @@ singleton wiring exist — no oracle is regenerated from the implementation's ow
   teardown-sweep members of that same committed topology belong to the sibling sub-phases named above and are not
   exercised here.
 - **The committed standard-service-set oracle** `test/goldens/standard_service_set.txt` (§M.7): the **explicit**
-  service list the converged child must present — registry, MinIO, Vault, Pulsar, Prometheus/Grafana, Postgres,
+  service list the converged child must present — registry, MinIO, Vault, Pulsar, Redis/Sentinel, Prometheus/Grafana, Postgres,
   Envoy/Gateway API, Keycloak, cloud LoadBalancer — authored independently of the reconciler, so "converges the
   full standard set" is a machine-checked exact-match against a hand-authored list, not a happy-path shape.
 - **The committed convergence-path argv/image-source oracle** `test/goldens/convergence_argv.txt` (§M.3/§M.5): the
@@ -387,11 +387,11 @@ built)
 `vault init/unseal`, `dhall update` — this sprint drives the child through); Phase 26 gate (the object
 reconciler — observe→diff→scoped-SSA→staged-enact — that converges the manifests); Phase 25 gate (the base image
 + in-cluster `distribution` registry the services are baked into); Phases 28–32 gates (retained storage, root
-Vault/PKI, the platform backbone MinIO/Pulsar, platform services-2 Postgres/observability, and Keycloak-owned
+Vault/PKI, the platform backbone MinIO/Pulsar, platform services-2 Redis/Sentinel/Postgres/observability, and Keycloak-owned
 ingress — the standard service set converged here) — all external earlier-phase prerequisites.
 **Independent Validation**: through the child admin REST after handoff, the run initializes/unseals Vault,
 delivers the child's projected `.dhall`, and the singleton converges the **complete** standard HA platform-service
-stack (registry, MinIO, Vault, Pulsar, Prometheus/Grafana, Postgres, Envoy/Gateway API, Keycloak, cloud
+stack (registry, MinIO, Vault, Pulsar, Redis/Sentinel, Prometheus/Grafana, Postgres, Envoy/Gateway API, Keycloak, cloud
 LoadBalancer) from typed manifests via the Phase-26 reconciler — reachable, HA, wild ingress only via Keycloak —
 **not** a thinner or different service set. The converged live inventory exact-matches the committed
 `test/goldens/standard_service_set.txt`; an OS-boundary observer records **zero** `helm` invocations and **zero**
@@ -412,7 +412,7 @@ is a structural invariant tested on the provider target.
 - Post-handoff child admin REST bring-up: initialize/unseal the child Vault, deliver the child's projected
   `.dhall`, and hand the singleton its converge loop.
 - Convergence of the **complete** standard HA platform-service stack — registry (`distribution`), MinIO, Vault,
-  Pulsar, Prometheus/Grafana, Percona/Patroni Postgres (with pgAdmin), Envoy/Gateway API, Keycloak, and the cloud
+  Pulsar, Redis/Sentinel, Prometheus/Grafana, Percona/Patroni Postgres (with pgAdmin), Envoy/Gateway API, Keycloak, and the cloud
   LoadBalancer — through the Phase-26 reconciler from typed manifests, using the same HA-capable topology at
   `replicas=1` without claiming replica redundancy, reachable, wild ingress only via Keycloak/Envoy; **not** a
   thinner or different set.
@@ -423,7 +423,7 @@ is a structural invariant tested on the provider target.
 
 ### Validation
 1. The child reaches the standard-service fungible shape — the **explicit** committed service set (registry,
-   MinIO, Vault, Pulsar, Prometheus/Grafana, Postgres, Envoy/Gateway API, Keycloak, cloud LoadBalancer, §M.7),
+   MinIO, Vault, Pulsar, Redis/Sentinel, Prometheus/Grafana, Postgres, Envoy/Gateway API, Keycloak, cloud LoadBalancer, §M.7),
    HA and reachable, wild ingress only via Keycloak — asserted by exact-match of the live inventory against
    `test/goldens/standard_service_set.txt`. "No Helm, no public-registry pulls" is read from an **OS-boundary
    observer** (an argv-recording shim on the convergence path plus a CNI/containerd image-pull log or an egress

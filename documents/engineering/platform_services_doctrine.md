@@ -2,7 +2,7 @@
 
 **Status**: Authoritative source
 **Supersedes**: N/A
-**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
+**Referenced by**: DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_13_render_manifest_goldens.md, DEVELOPMENT_PLAN/phase_25_base_image_registry.md, DEVELOPMENT_PLAN/phase_29_vault_pki.md, DEVELOPMENT_PLAN/phase_30_platform_backbone.md, DEVELOPMENT_PLAN/phase_31_platform_services_2.md, DEVELOPMENT_PLAN/phase_32_keycloak_ingress.md, DEVELOPMENT_PLAN/phase_33_live_dsl_singleton.md, DEVELOPMENT_PLAN/phase_34_app_tenancy.md, DEVELOPMENT_PLAN/phase_45_provider_child_bringup.md, DEVELOPMENT_PLAN/phase_55_ui_single_tenant_live.md, DEVELOPMENT_PLAN/phase_58_ui_ha_multizone.md, DEVELOPMENT_PLAN/substrates.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/app_vs_deployment_doctrine.md, documents/engineering/bootstrap_sequence_doctrine.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/cluster_lifecycle_doctrine.md, documents/engineering/content_addressing_doctrine.md, documents/engineering/daemon_topology_doctrine.md, documents/engineering/dsl_doctrine.md, documents/engineering/gateway_migration_doctrine.md, documents/engineering/host_cluster_comms_doctrine.md, documents/engineering/image_build_doctrine.md, documents/engineering/low_code_ui_runtime_doctrine.md, documents/engineering/manifest_generation_doctrine.md, documents/engineering/monitoring_doctrine.md, documents/engineering/namespace_layout_doctrine.md, documents/engineering/network_fabric_doctrine.md, documents/engineering/pulsar_client_doctrine.md, documents/engineering/pulumi_iac_doctrine.md, documents/engineering/readiness_ordering_doctrine.md, documents/engineering/resource_capacity_doctrine.md, documents/engineering/service_capability_doctrine.md, documents/engineering/storage_lifecycle_doctrine.md, documents/engineering/substrate_doctrine.md, documents/engineering/tenancy_doctrine.md, documents/engineering/ui_realtime_coordination_doctrine.md, documents/engineering/vault_pki_doctrine.md, documents/illegal_state/illegal_state_capacity.md, documents/illegal_state/illegal_state_catalog.md, documents/illegal_state/illegal_state_lifecycle.md, documents/illegal_state/illegal_state_security.md, documents/illegal_state/illegal_state_techniques.md
 **Generated sections**: none
 
 > **Purpose**: Define the fixed set of standard services every amoebius cluster runs (the concrete providers
@@ -43,6 +43,7 @@ The standard service set (DEVELOPMENT_PLAN "Standard platform services"):
 | **MinIO** | S3 object substrate: content store, Pulumi backend, app buckets | [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md), [content_addressing_doctrine.md](./content_addressing_doctrine.md), [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) |
 | **Vault** | Fail-closed secrets root + PKI trust anchor | [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | **Pulsar** | Native-protocol pub/sub event + workflow backbone (**new vs prodbox**) | [pulsar_client_doctrine.md](./pulsar_client_doctrine.md) |
+| **Redis + Sentinel** | Ephemeral UI-session/connection presence, cross-pod WebSocket routing, and rate counters; never durable application truth | [ui_realtime_coordination_doctrine.md](./ui_realtime_coordination_doctrine.md) |
 | **Prometheus / Grafana** | Cluster-local metrics + dashboards | (this doc, [§7](#7-prometheus--grafana--observability-is-not-an-add-on)) |
 | **Percona/Patroni Postgres + pgAdmin** | Relational store: **one Patroni cluster per consuming service** | [§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin); [storage_lifecycle_doctrine.md](./storage_lifecycle_doctrine.md) |
 
@@ -160,10 +161,11 @@ Pulsar carries workflow commands, lifecycle events, and geo-replication streams.
 **Flag explicitly: Pulsar is new relative to prodbox** — prodbox had no Pulsar — so
 everything here is forward design, not inherited-proven behaviour.
 
-- **Native TCP binary protocol, no WebSockets.** The client is `amoebius-pulsar`, forked from
+- **Native TCP binary protocol, no Pulsar WebSocket proxy.** The internal client is `amoebius-pulsar`, forked from
   `cr-org/supernova`, owned by [pulsar_client_doctrine.md](./pulsar_client_doctrine.md). The
-  no-WebSockets rule is a locked invariant: lookup / produce / consume / subscribe / seek all ride the
-  native protocol.
+  rule is scoped to Pulsar access: lookup / produce / consume / subscribe / seek all ride the native protocol.
+  Browser-facing WebSockets terminate at replicated UI servers and are governed separately by
+  [UI Realtime Coordination](./ui_realtime_coordination_doctrine.md).
 - **Topic lifecycles are declarative.** An app spec declares its topic lifecycles; the topology algebra
   and the at-least-once + dedup semantics are owned by the client doc and the DSL doc.
 - **Pulsar does its own intra-cluster consensus.** amoebius therefore *delegates* the synchronous HA
@@ -179,6 +181,20 @@ everything here is forward design, not inherited-proven behaviour.
   backing does not is undeployable; BookKeeper or MinIO storage cannot be silently reused.
 - **Host compute daemons join as Pulsar peers** over host-only NodePorts (no mTLS) — [§9](#9-the-loadbalancer-and-the-single-wild-ingress-path) and
   [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md).
+
+### 6.1 Redis and Sentinel — ephemeral UI realtime coordination
+
+Redis is a standard platform-internal service because any UI-server pod must be able to route a typed event to
+a WebSocket owned by another pod. It is not a ninth core application capability: `UiSource` cannot request,
+name, address, or select Redis, and a trusted handler cannot use it as application storage. The complete data
+classes, key/TTL/buffer bounds, one-primary/two-replica/three-Sentinel topology, TLS/Vault ACL boundary,
+no-persistence rule, cursor repair, and failure semantics are owned by
+[UI Realtime Coordination](./ui_realtime_coordination_doctrine.md).
+
+The service runs from the Phase-25 monocontainer/base image. It has no PVC, AOF, RDB snapshot, backup, or
+cross-cluster replication. Losing it may close sockets and discard presence/cache/fanout hints; it must not
+discard a durable receipt or change whether a provider effect occurred. The single-node deployment preserves
+the same role/configuration projection while making no HA claim.
 
 ---
 
@@ -481,6 +497,10 @@ into a foreclosed illegal state at
   wait on the registry: they run from the preloaded base image ([image_build_doctrine.md §9](./image_build_doctrine.md#9-bring-up-ordering--the-registry-chicken-and-egg-dissolves)).
 - **The Percona operator before any Postgres consumer** — a `PerconaPGCluster` has nothing to reconcile it
   otherwise ([§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin)).
+- **Vault before Redis credentials; Redis/Sentinel readiness before a UI-server accepts WebSockets** — Vault
+  supplies TLS/ACL material, and the server must be able to register/route its connection before advertising
+  realtime readiness. HTTPS health and immutable assets do not turn a disconnected WebSocket route into a
+  ready interactive backend.
 - **Vault initialized and unsealed before secret-dependent startup** — a sealed Vault fails secret-dependent
   Pod startup *closed*, with no plaintext fallback ([vault_pki_doctrine.md](./vault_pki_doctrine.md)).
 - **Keycloak before the authenticated edge admits wild traffic** — there is no un-authenticated wild path
@@ -492,12 +512,17 @@ flowchart TD
   scheduler --> minio[MinIO up: S3 on retained PVs]
   scheduler --> operator[Percona operator]
   scheduler --> vault[Vault initialized and unsealed]
+  scheduler --> redis[Redis primary, replicas, and Sentinel]
   lb -->|provides listener address| edge[Envoy and Gateway API]
   minio -->|registry stores its blobs via MinIO S3| reg[Registry up and responsive]
   reg -->|amoebius runtime and trusted-adapter image pulls resolve here| apppulls[Later runtime-image pulls]
   operator -->|reconciles| pg[Per-service Patroni clusters]
   vault -->|secrets resolve, else fail closed| secretdeps[Secret-dependent workloads]
-  edge -->|authenticated by| keycloak[Keycloak admits wild traffic]
+  vault -->|TLS and ACL credentials| redis
+  redis -->|connection routing ready| uiserver[Replicated UI-server WebSockets]
+  edge --> keycloak[Keycloak OIDC endpoint ready]
+  edge --> admitted[Authenticated wild traffic admitted]
+  keycloak -->|current authentication ready| admitted
 ```
 
 ---

@@ -26,7 +26,8 @@ illegal-state-unrepresentable contract; service capabilities and the capability�
 manifest generation and the SSA reconciler; the standard platform services; storage lifecycle; substrate,
 cluster-topology, and resource-capacity models; Vault/PKI and Pulumi-from-inside; the daemon-topology grid;
 host↔cluster comms; the native Pulsar client; content-addressing and determinism; tenancy; the verification
-layer; the bounded low-code UI language and generic browser/server runtime; and the cross-cutting method
+layer; the bounded low-code UI language and generic browser/server runtime; authenticated cross-pod
+WebSocket coordination; explicit encrypted browser-offline continuity and authoritative replay; and the cross-cutting method
 doctrines. It also authors the plan spine — the rulebook, the live
 tracker, and the target architecture/inventory/substrate documents — so every later phase cites doctrine by
 name when it schedules adoption work.
@@ -93,6 +94,14 @@ name.
 - [`low_code_ui_runtime_doctrine.md §3`](../documents/engineering/low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans) —
   *One checked value, two runtime plans*: bounded `UiSource` is checked and bound once, then projected into a
   public client plan and private server plan with no raw-code or provider escape.
+- [`ui_realtime_coordination_doctrine.md §5`](../documents/engineering/ui_realtime_coordination_doctrine.md#5-redis-is-ephemeral-platform-internal-coordination) —
+  *Redis is ephemeral platform-internal coordination*: replicated UI-server workers route authenticated
+  browser WebSockets across pods without sticky-session correctness, while durable cursors and receipts stay
+  in Pulsar, projections, or the effect-owning provider.
+- [`browser_offline_runtime_doctrine.md §3`](../documents/engineering/browser_offline_runtime_doctrine.md#3-the-authored-continuity-surface) —
+  *The authored continuity surface*: a checked `OnlineOnly | Offline OfflineSource` choice
+  compiles to bounded public persistence and private replay plans without exposing browser or Redis products
+  to authored applications.
 - [`conformance_harness_doctrine.md §2`](../documents/engineering/conformance_harness_doctrine.md#2-the-registers-as-amoebius-uses-them-for-pre-cluster-validation) —
   *The registers*: the three named validation registers (Register 1 pure/golden, Register 2 boundary-with-fakes,
   Register 3 live) — and
@@ -159,10 +168,10 @@ name.
 **Implementation**: `documents/documentation_standards.md`, `DEVELOPMENT_PLAN/development_plan_standards.md`,
 `DEVELOPMENT_PLAN/README.md`, `DEVELOPMENT_PLAN/overview.md`, `DEVELOPMENT_PLAN/system_components.md`,
 `DEVELOPMENT_PLAN/substrates.md`, `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`,
-`DEVELOPMENT_PLAN/later_phases.md`, and the `phase_00`…`phase_58` phase docs (authored; lint remediation remains)
+`DEVELOPMENT_PLAN/later_phases.md`, and the `phase_00`…`phase_64` phase docs (authored; artifact audit remains)
 **Blocked by**: none
 **Independent Validation**: lint the spine files in isolation — each carries a valid header block, the status
-vocabulary and per-phase/per-sprint skeletons are defined, the 59-phase overview table is internally
+vocabulary and per-phase/per-sprint skeletons are defined, the 65-phase overview table is internally
 consistent, and every intra-plan link resolves.
 **Docs to update**: the spine files above and `documents/engineering/README.md`
 
@@ -172,7 +181,7 @@ Adopt [`documentation_standards.md §3`](../documents/documentation_standards.md
 *Required header metadata* — with the SSoT-first philosophy and bidirectional cross-referencing: establish the
 header/link mechanics and the plan-suite structure every other document and phase obeys. The naming and header
 conventions adapt the sibling prodbox project's documentation discipline (sibling evidence, then specialized for
-amoebius's snake_case rule), and the tracker is rebuilt for 59 contiguous single-gate phases.
+amoebius's snake_case rule), and the tracker is rebuilt for 65 contiguous single-gate phases.
 
 ### Deliverables
 
@@ -181,7 +190,7 @@ amoebius's snake_case rule), and the tracker is rebuilt for 59 contiguous single
 - The plan rulebook (`development_plan_standards.md`): the [§A](development_plan_standards.md#a-header-metadata-same-block-as-the-doctrine-suite)–[§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) disciplines (header, snake_case layout, status
   vocabulary, per-phase skeleton, one-phase model, sprint block format, Documentation Requirements,
   doctrine-citation rule, generated markers, cross-ref path rules, honesty, one-substrate, gate integrity).
-- The live tracker (`README.md`): the Document Index, the 59-phase Overview table with its one-line gates and
+- The live tracker (`README.md`): the Document Index, the 65-phase Overview table with its one-line gates and
   substrate/register columns, the status vocabulary, the phase discipline, and the cross-cutting invariants.
 - `overview.md`, `system_components.md`, `substrates.md`, `legacy_tracking_for_deletion.md`, `later_phases.md`,
   and the per-phase docs' spine.
@@ -207,7 +216,8 @@ through Sprint 0.5.
 `illegal_state_capability_messaging.md`, `illegal_state_ml_asset.md`, `illegal_state_multicluster.md`,
 `illegal_state_lifecycle.md`) and the `illegal_state_techniques.md` coverage matrix, `service_capability_doctrine.md`,
 `tenancy_doctrine.md`, `lift_and_compose_doctrine.md`, `generated_artifacts_doctrine.md`,
-`conformance_harness_doctrine.md`, `low_code_ui_runtime_doctrine.md` (authored; lint remediation remains)
+`conformance_harness_doctrine.md`, `low_code_ui_runtime_doctrine.md`,
+`ui_realtime_coordination_doctrine.md`, `browser_offline_runtime_doctrine.md` (authored; artifact audit remains)
 **Blocked by**: Sprint 0.1
 **Independent Validation**: lint the DSL-core and method docs together — the illegal-state catalog links to the
 DSL contract rather than restating it; the register model and the generated-never-committed rule are each
@@ -235,7 +245,8 @@ doctrines (the three validation registers, the generated-never-committed rule, a
   `illegal_state_capacity.md`, `illegal_state_security.md`, `illegal_state_capability_messaging.md`,
   `illegal_state_ml_asset.md`, `illegal_state_multicluster.md`, `illegal_state_lifecycle.md`) and the
   `illegal_state_techniques.md` coverage matrix that check (g) validates,
-  `service_capability_doctrine.md`, `tenancy_doctrine.md`, `low_code_ui_runtime_doctrine.md`.
+  `service_capability_doctrine.md`, `tenancy_doctrine.md`, `low_code_ui_runtime_doctrine.md`,
+  `ui_realtime_coordination_doctrine.md`, `browser_offline_runtime_doctrine.md`.
 - `conformance_harness_doctrine.md`: the registers and the rendering-never-touches-live invariant.
 - `generated_artifacts_doctrine.md`: the emit-from-source, never-commit rule for manifests, the `.tla`/`.cfg`,
   the reflected Dhall schema, and the PureScript contracts.
@@ -243,7 +254,7 @@ doctrines (the three validation registers, the generated-never-committed rule, a
 
 ### Validation
 
-1. Lint resolves every cross-link among the eight docs and to the spine.
+1. Lint resolves every cross-link among the DSL-core and cross-cutting docs and to the spine.
 2. The catalog's foreclosure layers are stated honestly (proven-by-typecheck vs enforced-at-runtime), with no
    "it compiles ⇒ the cluster enforces it" overclaim.
 

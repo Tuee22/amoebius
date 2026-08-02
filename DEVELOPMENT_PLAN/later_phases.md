@@ -11,8 +11,8 @@
 
 ---
 
-Phases 0–58 each own a dedicated `phase_NN_<slug>.md`. Everything past Phase 58 is *in scope* but not yet
-detailed: the README phase index lists it as the single row **`59+ — Later phases`**. This document is that
+Phases 0–64 each own a dedicated `phase_NN_<slug>.md`. Everything past Phase 64 is *in scope* but not yet
+detailed: the README phase index lists it as the single row **`65+ — Later phases`**. This document is that
 row, expanded into a candidate pool.
 
 Read it as a **backlog of confirmed-but-unscheduled work**, governed by the same disciplines as the rest of
@@ -24,12 +24,12 @@ the suite:
   prodbox or hostbootstrap projects, that is *sibling evidence*, not amoebius proof.
 - **Promotion means a contiguous number.** When a candidate is picked up, it is appended as the next
   `phase_NN_<slug>.md` with a full skeleton ([development_plan_standards.md §D](development_plan_standards.md#d-the-per-phase-document-skeleton)),
-  a concrete single-substrate gate ([§L](development_plan_standards.md#l-one-substrate-discipline)), and a contiguous id — Phase 59, 60,
+  a concrete single-substrate gate ([§L](development_plan_standards.md#l-one-substrate-discipline)), and a contiguous id — Phase 65, 66,
   … with no gaps or fractional ids ([§E](development_plan_standards.md#e-one-canonical-phase-model)). The provisional numbers below are
   *ordering hints only*; the real id is assigned at promotion.
-- **No forward dependencies.** A later phase consumes earlier phases; nothing in Phases 0–58 is allowed to
+- **No forward dependencies.** A later phase consumes earlier phases; nothing in Phases 0–64 is allowed to
   declare a `Blocked by` that points here ([§E](development_plan_standards.md#e-one-canonical-phase-model)). These candidates sit strictly
-  *after* the multi-zone UI gate of Phase 58.
+  *after* the offline multi-zone continuity gate of Phase 64.
 - **One substrate per gate.** Each candidate names at most one provisional acceptance substrate; a candidate
   that would need more than one is split before promotion ([§L](development_plan_standards.md#l-one-substrate-discipline)).
 
@@ -38,7 +38,7 @@ provisional ids reflect a *likely* sequencing, not a dependency chain.
 
 ## Candidate phase: DB schema-migration automation + manifest-change correctness semantics
 
-**Status**: 📋 Planned (provisional Phase 59)
+**Status**: 📋 Planned (provisional Phase 65)
 **Provisional substrate**: linux-cpu
 **Scope** (one line): a typed, ordered, idempotent schema-migration engine for the Patroni-via-Percona
 Postgres clusters, unified with a precise account of what a *manifest change* means when the desired object
@@ -74,7 +74,7 @@ runs in a sibling, not an amoebius result.
 
 ## Candidate phase: The amoebius-native JIT (jitML absorbed)
 
-**Status**: 📋 Planned (provisional Phase 60)
+**Status**: 📋 Planned (provisional Phase 66)
 **Provisional substrate**: linux-cuda (the JIT path exercises the GPU compute substrate)
 **Scope** (one line): the *native JIT* half of the vision's second language — an amoebius-owned JIT into
 which jitML is absorbed, consumed through the constrained extension surface that Gate 3 already admits.
@@ -98,7 +98,7 @@ extension.
 
 ## Candidate phase: Native desktop + mobile application surfaces
 
-**Status**: 📋 Planned (provisional Phase 61)
+**Status**: 📋 Planned (provisional Phase 67)
 **Provisional substrate**: one client platform per eventual acceptance gate
 **Scope** (one line): extend the typed application-composition and generated-contract model beyond browser SPAs
 to native desktop applications on macOS, Windows, and Linux and native mobile applications on Apple and Android
@@ -134,7 +134,7 @@ client invents a separate wire schema or silently substitutes an incompatible co
 
 ## Candidate phase: Additional cloud providers
 
-**Status**: 📋 Planned (provisional Phase 62)
+**Status**: 📋 Planned (provisional Phase 68)
 **Provisional substrate**: provider (one provider per eventual acceptance gate)
 **Scope** (one line): extend the provider-native provisioning, observation, quota, credential, managed-cluster,
 node-supply, storage, networking, and teardown surfaces beyond AWS to GCP, Azure, and subsequently admitted
@@ -155,7 +155,7 @@ remain provider-indexed and single-use.
 
 ## Candidate phase: Additional GPU families + vendor-neutral compute protocols
 
-**Status**: 📋 Planned (provisional Phase 63)
+**Status**: 📋 Planned (provisional Phase 69)
 **Provisional substrate**: varies by GPU family (one family and one substrate per eventual acceptance gate)
 **Scope** (one line): extend the shared infernix/jitML engine and accelerator-owner model beyond NVIDIA CUDA
 to AMD and Intel GPUs and explicitly admitted open/vendor-neutral compute protocols, with observed
@@ -179,7 +179,7 @@ neither library may silently fall back to another engine.
 
 ## Candidate phase: Neural processing units / neural engines
 
-**Status**: 📋 Planned (provisional Phase 64)
+**Status**: 📋 Planned (provisional Phase 70)
 **Provisional substrate**: varies by NPU/SoC family (one family and one substrate per eventual acceptance gate)
 **Scope** (one line): add neural-engine execution for infernix and jitML across explicitly supported Apple
 Silicon, Qualcomm Snapdragon, Google Tensor, MediaTek, Intel Core Ultra, AMD Ryzen AI, and NVIDIA SoC families,
@@ -204,7 +204,7 @@ their engine catalog and the no-silent-fallback rule.
 
 ## Candidate phase: MoE teacher → student model-distillation framework
 
-**Status**: 📋 Planned (provisional Phase 65)
+**Status**: 📋 Planned (provisional Phase 71)
 **Provisional substrate**: one accelerator/engine family per eventual acceptance gate
 **Scope** (one line): use a large mixture-of-experts teacher model (for example, a DeepSeek-V3-class model) to
 generate a provenance-complete training corpus for fine-tuning a smaller student model, optimizing the offline
@@ -248,7 +248,7 @@ close over its examples cannot produce the opaque publishable dataset or fine-tu
 
 ## Candidate phase: Niche substrate — dual-boot same-cluster
 
-**Status**: 📋 Planned (provisional Phase 66)
+**Status**: 📋 Planned (provisional Phase 72)
 **Provisional substrate**: windows.
 **Scope** (one line): admit a *dual-boot, same-cluster* host into the substrate model.
 **Provisional gate**: a dual-boot host joins and rejoins the same cluster across an OS switch without
@@ -263,7 +263,7 @@ neither belongs in this candidate's gate.
 
 ## Candidate phase: Surgical proof-assistant track (`emitTLA` faithfulness + fold-closure)
 
-**Status**: 📋 Planned (provisional Phase 67)
+**Status**: 📋 Planned (provisional Phase 73)
 **Provisional substrate**: none (a pure-proof track, validated by the proof checker + the existing suite)
 **Scope** (one line): discharge — machine-checked — the **two** load-bearing meta-properties the rest of the
 suite currently only *tests*: (a) the `emitTLA`/`interpret` **faithfulness meta-theorem** (each `Expr`/`Temporal`
@@ -291,7 +291,8 @@ adoption is out of scope by design.
 
 The "one base container with everything" packaging question is sometimes mistaken for deferred work. It is
 **not**. It is **resolved and adopted in Phase 25**: every third-party service binary (the registry, MinIO,
-Vault, Pulsar, Postgres tooling, a Temurin JRE for the JVM services, …) is baked into the multi-arch base
+Vault, Pulsar, Redis (`redis-server` and `redis-cli`), Postgres tooling, a Temurin JRE for the JVM services, …)
+is baked into the multi-arch base
 container, and clusters pull images only from the in-cluster `distribution` registry — never from a public
 registry. That is the standing doctrine,
 [`image_build_doctrine.md` §2](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster) — the single distribution rule (bake the binaries, build the amoebius image,
@@ -304,7 +305,7 @@ re-open it as a candidate phase.
 
 ## Candidate phase: Live backup / restore / cold-DR seed
 
-**Status**: 📋 Planned (provisional Phase 68)
+**Status**: 📋 Planned (provisional Phase 74)
 **Provisional substrate**: linux-cpu → provider (the write-but-never-delete cloud credential is enacted on the
 provider substrate, as with the durable-EBS create-vs-delete model)
 **Scope** (one line): the live enactment of the backup surface — the put-only backup credential, the
@@ -363,7 +364,7 @@ enforcement. Promoting that gate is required before an rke2 mutation continuatio
 
 ## Related Documents
 
-- [README.md](README.md) — the live tracker; the `59+ — Later phases` row this document expands
+- [README.md](README.md) — the live tracker; the `65+ — Later phases` row this document expands
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook ([§D](development_plan_standards.md#d-the-per-phase-document-skeleton) skeleton, [§E](development_plan_standards.md#e-one-canonical-phase-model) one-phase
   model, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) honesty, [§L](development_plan_standards.md#l-one-substrate-discipline) one-substrate) every candidate obeys at promotion
 - [overview.md](overview.md) — target architecture and constraints these candidates extend

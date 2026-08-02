@@ -37,6 +37,9 @@ the host-origin, localhost-only NodePort that is a *different type* of endpoint,
 default-deny east-west NetworkPolicy posture, with allow-edges **derived from the declared dependency graph**,
 is applied and exercised live. Finally the phase re-runs the Phase-28 lossless-rebind proof behind the new
 edge, confirming the storage guarantee did not regress when the ingress door was added.
+The same authenticated route machinery explicitly admits the UI server's HTTP upgrade: a WebSocket handshake
+must traverse Keycloak/Envoy, exact-match Origin and the versioned subprotocol, and bind the secure session plus
+single-use nonce before Envoy forwards it. There is no unauthenticated, direct-Service, or alternate SSE route.
 
 The scope stops at *the ingress door and its guarantees*. The DSL deploy through the `replicas=1` singleton,
 app tenancy, and the Pulsar/workflow runtime are Phase 33+ concerns; this phase exercises the edge from the
@@ -58,6 +61,9 @@ publish its own wild ingress** or open a backdoor NodePort (the sole exception b
 localhost-only NodePort, a distinct endpoint type); and the **Phase-28 storage-rebind regression still holds**
 — a marker row in the Keycloak Patroni DB and a marker object in MinIO survive a cluster delete + recreate
 byte-for-byte.
+The committed authenticated-WebSocket probe upgrades and exchanges a fresh challenge only with the valid
+session/Origin/nonce/subprotocol tuple; unauthenticated, wrong-Origin, replayed-nonce, wrong-subprotocol, and
+direct-Service attempts produce no backend frame.
 
 The gate is not discharged by a deny-all edge, a self-authored clean scan, a circular "derived" assertion, or
 a skipped teardown. It positively exercises OIDC enforcement, validates its own scanners against committed
@@ -69,7 +75,7 @@ cluster came up (see [Gate integrity](#gate-integrity)).
 The gate's "every wild route / every surface" quantifies over an **explicitly enumerated, Phase-0-committed
 route inventory** — `test/fixtures/phase32/route-inventory.golden` — listing every browser surface on the
 Phase-30/31 standard service stack that the edge fronts: **Grafana, the Keycloak admin console, the Vault UI, the
-MinIO console, and the platform API surface** (the exact set is the golden; if the stack's surface set changes,
+MinIO console, the platform API surface, and a platform-owned authenticated-WebSocket upgrade probe** (the exact set is the golden; if the stack's surface set changes,
 the golden is re-authored and re-committed, never regenerated from the running edge). The three origin classes
 — WAN, LAN, localhost-browser — are each probed from a **distinct Linux network namespace / sidecar container**
 attached to a separate veth with a non-loopback source address for WAN/LAN and the host loopback for
@@ -89,6 +95,10 @@ three. The "test-realm user" is the Phase-0-committed `phase32-tester` realm/use
   independent graph-walk set-equality fails; (c) a regression-harness variant that no-ops `cluster delete`
   (dropped effect) so the recreate-witness check finds an identical cluster identity. Each is committed and
   re-run, not a one-off strawman.
+- **WebSocket bypass mutants (§M.11/§M.12):** committed variants drop exact-Origin checking, accept a reused
+  handshake nonce, or publish the upgrade backend directly. Authority-minted valid-session success is paired
+  with wrong-Origin/replayed-nonce/direct-Service denial, and an independent backend trace must contain no
+  forbidden challenge.
 - **Independent oracle (§M.3):** the derived-NetworkPolicy check and the route-coverage check compare against
   the committed hand tables / an independent graph-walker (a code path distinct from `renderAll`), never the
   reconciler's own fold.
@@ -149,6 +159,10 @@ before the first effect, while their exact-fit twins render and reconcile.
 
 ## Doctrine adopted
 
+- [`ui_realtime_coordination_doctrine.md §3 — one browser transport contract`](../documents/engineering/ui_realtime_coordination_doctrine.md#3-one-browser-transport-contract):
+  Envoy/Gateway API carries authenticated same-origin WebSocket upgrades through the same Keycloak-owned edge,
+  with exact Origin, session nonce, and versioned subprotocol checks and no direct backend route.
+
 - [`platform_services_doctrine.md` §9](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path)
   — **the LoadBalancer and the single wild-ingress path**: this phase materializes the one sanctioned ingress
   shape (`LoadBalancer → Envoy/Gateway API → Keycloak`), its **east-west connectivity derived from the declared
@@ -179,7 +193,7 @@ before the first effect, while their exact-fit twins render and reconcile.
 serves Keycloak's DB password and the edge TLS material as `SecretRef`s)
 **Independent Validation**: for every surface in the committed `route-inventory.golden`, a real OIDC login as the Phase-0 `phase32-tester` user yields the surface's content (2xx) **only** after traversing Keycloak, while an unauthenticated probe to the same route is rejected/redirected to the Keycloak login (positive enforcement, not a vacuous deny-all); the only reachable wild path is `LoadBalancer → Envoy/Gateway API → Keycloak`, confirmed per origin class from a distinct netns probe; the readiness DAG is proven by an **enforced-gating** experiment — the LB address and Keycloak readiness are withheld and the dependent step is observed (by an external harness) to block rather than proceed — not by post-hoc reading the implementation's own event log.
 
-**Docs to update**: `documents/engineering/platform_services_doctrine.md`
+**Docs to update**: `documents/engineering/platform_services_doctrine.md`, `documents/engineering/ui_realtime_coordination_doctrine.md`
 
 ### Objective
 Adopt [`platform_services_doctrine.md` §9 — the LoadBalancer and the single wild-ingress path](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path):
@@ -192,6 +206,9 @@ observed as readiness conditions, not durations.
   terminating TLS and routing, applied by the Phase-26 reconciler.
 - Keycloak deployed against its Phase-31 Patroni DB, owning OIDC/JWT enforcement in front of every platform
   browser surface, so an unauthenticated request never reaches a workload.
+- An authenticated WebSocket `HTTPRoute`/upgrade policy using the same host and TLS edge: secure session cookie,
+  exact Origin, single-use session nonce, and fixed versioned subprotocol are all required before forwarding;
+  direct-Service and alternate unauthenticated upgrade paths are absent.
 - The pure `EdgeResourceDemand` bound to complete envelopes for the Gateway controller, all derived Envoy
   children, Keycloak, and the ACME Job, plus a `PatroniSqlDemand` whose private provisioned result retains exact
   SQL objects, WAL, checkpoint/recovery, volume, admission proxy, failover, and rollout operands. No CR or Service stands in
@@ -222,6 +239,9 @@ observed as readiness conditions, not durations.
    proxy envelope, and admission witness with live readback;
    the omission mutants named in the phase contract must reject before any certificate, SQL, or apiserver
    mutation.
+5. Upgrade the platform-owned WebSocket probe with a valid Keycloak session and fresh nonce, exchange a fresh
+   challenge, then pair wrong-Origin, replayed-nonce, wrong-subprotocol, unauthenticated, and direct-Service
+   attempts. The independent backend/CNI trace observes the challenge only for the valid tuple.
 
 ### Remaining Work
 The whole sprint (📋 Planned).
@@ -395,6 +415,8 @@ The whole sprint (📋 Planned).
 - `documents/illegal_state/illegal_state_catalog.md` — record that §3.7 (backdoor ingress) and §3.6 (blocking
   NetworkPolicy) gain their first *live* confirmation here, complementing the render-time golden lock from
   Phase 13.
+- `documents/engineering/ui_realtime_coordination_doctrine.md` — record the live edge proof for authenticated
+  WebSocket upgrade routing; cross-pod routing and Redis failure behavior remain later gates.
 - `documents/engineering/pulumi_iac_doctrine.md` — note that the §5 public-edge TLS (ZeroSSL/route53)
   integration is first wired through a live edge in this phase, with the EAB material sourced from Vault.
 - `documents/engineering/storage_lifecycle_doctrine.md` — record that the §6 lossless-rebind guarantee is
@@ -427,3 +449,5 @@ The whole sprint (📋 Planned).
   guarantee re-exercised as the regression clause.
 - [Host ↔ Cluster Comms Doctrine](../documents/engineering/host_cluster_comms_doctrine.md) — the sole
   host-origin, localhost-only carve-out from "Keycloak owns all wild ingress".
+- [UI Realtime Coordination](../documents/engineering/ui_realtime_coordination_doctrine.md) — the fixed
+  authenticated browser-WebSocket handshake and direct-backend prohibition projected into this edge gate

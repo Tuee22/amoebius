@@ -158,6 +158,17 @@ SLOStatus = Fresh | Degraded BudgetRemaining | Breached BreachReason | NotYetObs
 `NotYetObserved` is the lag-tailed state past a replication watermark ([§6](#6-the-parent-monitoring-posture)); the read-model is
 eventually-consistent, never live truth.
 
+### 3.1 UI realtime and offline health are first-class derived signals
+
+For each admitted UI runtime, derivation includes bounded metrics and alerts for active WebSockets by scoped
+route class, handshake/origin/auth failures, reconnect/drain rate, Redis primary/Sentinel health, replication
+lag, client/output-buffer pressure, expired/stale connection registrations, Pub/Sub delivery failures, and
+cursor/receipt repair latency. It also includes offline replay backlog count/bytes/age, typed outcome counts,
+receipt lookup latency, migration failures, upload staging/chunk retry, quota refusal/eviction, and oldest
+compatible record age. Labels use bounded program/tenant/result classes; subject, device, command, connection,
+cursor, Redis key, and blob identities are never Prometheus labels. Redis loss is an availability signal, not
+proof that a durable command failed or succeeded.
+
 ---
 
 ## 4. Access: one admin, delegated per-user scope, no public arm
@@ -305,6 +316,10 @@ existing capacity machinery ([resource_capacity_doctrine.md](./resource_capacity
   ([§5](#5-extensible-surfaces-tensorboard)), not a pod per user, so it does not multiply `Demand`.
 - **No parent-rollup budget exists** — the forest rollup flow is foreclosed
   ([§6](#6-the-parent-monitoring-posture)), so there is no parent-side storage to budget.
+- WebSocket/Redis and offline signals from [§3.1](#31-ui-realtime-and-offline-health-are-first-class-derived-signals)
+  consume the same finite `MonitoringWorkBudget`; their derived series and scrape rate are included before
+  Prometheus placement. Per-connection, subject, command, device, cursor, and blob labels are forbidden, so
+  connection or outbox cardinality cannot silently become monitoring cardinality.
 
 The honest residue is narrower: the mandatory cardinality/work budget and conservative cost model bound the
 declared Prometheus CPU/memory provision, but actual query latency and transient engine overhead remain
@@ -365,3 +380,5 @@ ledger; it states the target shape and links back for status, per
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md)
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md)
 - [Image Build Doctrine](./image_build_doctrine.md)
+- [UI Realtime Coordination](./ui_realtime_coordination_doctrine.md)
+- [Browser Offline Runtime](./browser_offline_runtime_doctrine.md)

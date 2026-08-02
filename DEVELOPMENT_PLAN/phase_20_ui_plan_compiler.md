@@ -22,7 +22,9 @@ instruction/value plan and matching serializable server dispatch/policy manifest
 action/route/contract key parity,
 public-only payload schemas, canonical ordering, complete authority/content digests, a per-application content
 manifest, a navigation-only projection of the resolved external-link subset, and finite client/server runtime
-demand. The generic PureScript bundle is not rebuilt per app; these
+demand. Subscription/port projections include the complete application/session/scope/program/ABI/stream/cursor
+routing envelope required by the authenticated WebSocket and cross-pod dispatcher; no Redis key or product
+choice enters either application plan. The generic PureScript bundle is not rebuilt per app; these
 immutable plans and manifests are generated Release/content artifacts and are never treated as authored source.
 
 The compiler consumes only private checked/bound values and returns all projections together. The server
@@ -80,6 +82,7 @@ interpreter, release publication, transport security, or runtime freshness enfor
 - [`low_code_ui_runtime_doctrine.md` §3 — one checked value, two runtime plans](../documents/engineering/low_code_ui_runtime_doctrine.md#3-one-checked-value-two-runtime-plans): both plans are inseparable projections of one bound value.
 - [`low_code_ui_runtime_doctrine.md` §9 — routes, identity, authorization, and the edge](../documents/engineering/low_code_ui_runtime_doctrine.md#9-routes-identity-authorization-and-the-edge): route and action projections retain mandatory policy references.
 - [`low_code_ui_runtime_doctrine.md` §15 — versioning, rollout, and generated artifacts](../documents/engineering/low_code_ui_runtime_doctrine.md#15-versioning-rollout-and-generated-artifacts): complete authority/content identities and immutable per-app plans are derived.
+- [`ui_realtime_coordination_doctrine.md §4 — typed routing and resume envelope`](../documents/engineering/ui_realtime_coordination_doctrine.md#4-typed-routing-and-resume-envelope): both plan halves project the complete scoped routing/cursor identity while Redis remains platform-internal.
 - [`generated_artifacts_doctrine.md` §2 — what is generated](../documents/engineering/generated_artifacts_doctrine.md#2-what-is-generated-and-from-what) and [`§3 — the rule`](../documents/engineering/generated_artifacts_doctrine.md#3-the-rule): plans, manifests, codecs, and route projections are generated and never committed as product artifacts.
 - [`illegal_state_security.md` §3.79](../documents/illegal_state/illegal_state_security.md#379-a-ui-action-whose-server-authorization-does-not-match-its-declaration) and [`§3.83`](../documents/illegal_state/illegal_state_security.md#383-a-ui-plan-executed-after-an-authority-bearing-source-changed): exact projection parity and complete freshness identity are mandatory.
 
@@ -94,6 +97,7 @@ interpreter, release publication, transport security, or runtime freshness enfor
 **Independent Validation**: `cabal test ui-plan-compiler-spec` compares fresh compiler output with the
 Phase-0 tables/goldens and requires every named projection/determinism mutant to fail.
 **Docs to update**: `documents/engineering/low_code_ui_runtime_doctrine.md`,
+`documents/engineering/ui_realtime_coordination_doctrine.md`,
 `documents/engineering/generated_artifacts_doctrine.md`,
 `documents/illegal_state/illegal_state_security.md`
 
@@ -104,7 +108,7 @@ freshness identity, or per-application client build is representable in the emit
 
 ### Deliverables
 
-- Total paired compiler, canonical codecs, complete digest-source fold, finite demand projection, and
+- Total paired compiler, canonical WebSocket routing/cursor codecs, complete digest-source fold, finite demand projection, and
   structured `UiPlanError` values.
 - Exact key-set and public-projection checks performed before any artifact is returned.
 - Phase-0 golden/table readers, fresh-process determinism harness, mutant configurations, and Register-1 ledger.
@@ -146,4 +150,6 @@ The whole sprint (📋 Planned).
 - [Phase 19](phase_19_ui_effect_binding.md) — the required sealed bound program.
 - [Low-Code UI Runtime Doctrine](../documents/engineering/low_code_ui_runtime_doctrine.md) — paired-plan and versioning contract.
 - [Generated Artifacts Doctrine](../documents/engineering/generated_artifacts_doctrine.md) — generated-vs-authored boundary.
+- [UI Realtime Coordination](../documents/engineering/ui_realtime_coordination_doctrine.md) — typed
+  WebSocket/cross-pod routing envelope compiled without exposing Redis in application data.
 - [Illegal-State Security Slice](../documents/illegal_state/illegal_state_security.md) — projection parity and stale-plan foreclosure.
