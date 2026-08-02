@@ -226,7 +226,7 @@ The composed gate additionally re-runs (and requires red from) the sibling-owned
 ([Phase 46](phase_46_provider_ebs_credential.md)) mutants against the full-stack fixture, cited to their owning
 sub-phase and never re-authored here.
 
-**Machine-derived ledger + validator (§M.6, §K).** Each gate cycle emits a proven/tested/assumed ledger
+**Machine-derived ledger + validator (§M.6, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).** Each gate cycle emits a proven/tested/assumed ledger
 generated from the raw run record (the node-group `RunInstances` stack ids, the signal→scale correlation from the
 cloud-API audit trail, the joined-node capability readback, the no-op-reconcile mutating-call count, the
 run-owned sweep result and any leak list, the two-instance identity map, and the durable-EBS retention/identity/
@@ -588,9 +588,9 @@ correctly left retained.
    sweep — so a run that asserts leak-freedom from a tag-only sweep, or from the emptied checkpoint alone, is
    thereby foreclosed (§M.2).
 2. From the provider-stack-absent state left by Validation 1, with the durable EBS retained, run a second full
-   spin-up → run → teardown cycle. Constrain the recreated node group to the recorded EBS Availability Zone,
-   re-render the static PV with the same EBS volume ID as its CSI `volumeHandle`, reattach it, and read the
-   run-unique marker byte-for-byte before teardown ([Phase 46](phase_46_provider_ebs_credential.md)). Expected
+   spin-up → run → teardown cycle and repeat [Phase 46's retained-volume identity/readback oracle](phase_46_provider_ebs_credential.md)
+   against a node group recreated in the recorded Availability Zone. The marker must still match byte-for-byte
+   before teardown. Expected
    ephemeral-resource create/delete calls are permitted; the cycle must again finish with an empty
    ephemeral-resource run-owned sweep.
 3. Assert the run emits a proven/tested/assumed ledger per
@@ -670,8 +670,8 @@ The whole sprint (📋 Planned).
 ## Related Documents
 
 - [README.md](README.md) — the live tracker; the Phase 47 one-line gate and status
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this doc obeys (§D skeleton, §F
-  sprint format, §H citation rule, §K honesty, §L one-substrate discipline, §M gate integrity)
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook this doc obeys ([§D](development_plan_standards.md#d-the-per-phase-document-skeleton) skeleton, [§F](development_plan_standards.md#f-the-sprint-block-format)
+  sprint format, [§H](development_plan_standards.md#h-the-doctrine-citation-rule-cite-by-name) citation rule, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) honesty, [§L](development_plan_standards.md#l-one-substrate-discipline) one-substrate discipline, [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) gate integrity)
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (no bespoke election;
   single-instance delegated to k8s/etcd; ephemeral infrastructure, durable backing retained independently; no
   unbounded storage behind a quota-capped `ScalingPolicy`)

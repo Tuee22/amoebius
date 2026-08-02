@@ -152,7 +152,7 @@ Phase 24; no apple, linux-cuda, or windows substrate is touched (the CUDA/Metal 
 against deterministic observed-device models here, and their live substrate proof is owned by Phase 51 and
 Phase 53 respectively).
 
-**Register:** 3 — live infrastructure (§K).
+**Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** in **Register 3**, the Phase-13 pure deployment-global `renderAll` list for the pinned
 [representative reconcile corpus](#gate-integrity) is rendered in full and separately validated/indexed with its

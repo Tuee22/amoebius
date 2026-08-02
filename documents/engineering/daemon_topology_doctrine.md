@@ -11,14 +11,18 @@
 
 ---
 
-## 1. One binary, three contexts
+<a id="1-one-binary-three-contexts"></a>
 
-**Everything amoebius does is the same executable.** There is no "CLI package" and a separate "daemon
-package"; there is one Haskell binary that *runs* in three different ways:
+## 1. One runtime binary, three contexts
+
+**Every Haskell runtime role uses the same executable.** There is no Haskell CLI package and a separate daemon
+package; one Haskell binary runs in three different ways. The Python `pb` midwife/admin client is the explicit
+operator-frontend boundary: it builds and `exec`s the Haskell command mode during bootstrap, then calls the
+singleton REST API after handoff. It is not a fourth runtime role.
 
 | Context | How it runs | What it is for |
 |---------|-------------|----------------|
-| **CLI tool** | A one-shot invocation on a host, exits when done | Operator commands, `bootstrap`, reconcile triggers, status queries |
+| **Haskell command mode** | A one-shot invocation on a host, normally entered by `pb` during bootstrap, exits when done | `bootstrap` and host-local runtime commands; post-handoff status and administration stay in `pb` over REST |
 | **Sudo host daemon** | A long-running host process with `sudo` powers | Bring up the distro (kind / rke2) — including installing the **root rke2 server** ([§2.1](#21-a-third-orthogonal-axis-rke2-serveragent-declared)) — install host tooling, talk to `kube-apiserver` over distro mTLS, **supervise host-level worker subprocesses** |
 | **In-cluster pod** | Deployed as a generated typed manifest (no Helm) inside the cluster | Hosts the **control-plane singleton role** ([§3](#3-the-control-plane-singleton)), the dedicated **capacity-scheduler role** ([§3.3](#33-the-capacity-scheduler-a-separate-role-in-the-same-binary)), or a **worker role** ([§4](#4-worker-daemons--n-unelected)) |
 
@@ -99,38 +103,47 @@ Which roles run, how many replicas each gets, and which workers are host-level v
 **deployment-rules** decisions, never application logic — that orthogonal DSL split is owned by
 [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md).
 
-### 2.1 A third orthogonal axis: rke2 server/agent (declared)
+<a id="21-a-third-orthogonal-axis-rke2-serveragent-declared"></a>
 
-The grid above crosses two axes — **context** (where the binary runs) and **role** (what job it is doing).
-The rke2 distro adds a **third, fully independent typed axis** that this doctrine must keep from fusing with
-the other two:
+### 2.1 The rke2 server/agent node axis remains independent
 
-- **(i) Substrate — DETECTED.** kind / rke2 / EKS, discovered at bring-up
+The grid above already crosses **runtime context** (where the binary runs) with **daemon role** (what job it
+does). Cluster topology contributes two different axes, and rke2 adds one conditional node-role axis. Keeping
+all five names distinct prevents an engine choice from being mistaken for a detected host fact or a Kubernetes
+node role from being mistaken for an amoebius process role:
+
+- **(i) Substrate — detected.** `apple` / `linux-cpu` / `linux-cuda` / `windows`, derived from host facts
   ([cluster_topology_doctrine.md §1](./cluster_topology_doctrine.md#1-two-axes-the-substrate-is-detected-the-engine-is-declared),
   [substrate_doctrine.md](./substrate_doctrine.md)).
-- **(ii) amoebius daemon-role.** the control-plane singleton ([§3](#3-the-control-plane-singleton)), dedicated
+- **(ii) Compute engine — declared.** `Kind` / `Rke2` / `Managed Eks`, authored as deployment intent and
+  checked against the detected substrate
+  ([cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm)).
+- **(iii) Runtime context.** one-shot Haskell command mode, sudo host daemon, or in-cluster process
+  ([§1](#1-one-binary-three-contexts)).
+- **(iv) amoebius daemon role.** the control-plane singleton ([§3](#3-the-control-plane-singleton)), dedicated
   capacity scheduler ([§3.3](#33-the-capacity-scheduler-a-separate-role-in-the-same-binary)), or an unelected worker ([§4](#4-worker-daemons--n-unelected)). The singleton's
   single-instance is a k8s/etcd property ([§3.1](#31-exactly-one-pod-is-a-k8setcd-property-not-an-amoebius-election)), not an amoebius election, so this axis carries no
   election of its own.
-- **(iii) rke2 server/agent — DECLARED.** which *nodes* carry the Kubernetes control plane
+- **(v) rke2 server/agent — declared when the engine is `Rke2`.** which *nodes* carry the Kubernetes control plane
   (kube-apiserver + the etcd quorum) versus which are pure workload nodes. This is the `Rke2Servers` closed
   union — `Single` / `Ha3` / `Ha5`, the only legal odd etcd quorums {1,3,5} — plus
   `Rke2AgentPool = Fixed [Rke2AgentNode] | Autoscaled { floor : [Rke2AgentNode], policy : ScalingPolicy }`, owned by
-  [cluster_topology_doctrine.md [§2](#2-context--role-an-orthogonal-grid), [§4](#4-worker-daemons--n-unelected)](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm). An even- or zero-server (no-quorum /
+  [cluster_topology_doctrine.md §2](./cluster_topology_doctrine.md#2-computeengine-a-closed-union-eks-a-first-class-arm) and
+  [§4.1](./cluster_topology_doctrine.md#41-rke2-serveragent-cardinality-odd-quorum-by-union-distinctness-by-fold-taint-by-derivation). An even- or zero-server (no-quorum /
   split-brain) control plane has no constructor: **type-foreclosed unrepresentable**.
 
-(Two further declared axes exist system-wide — environment dev/staging/prod, and the engine/model/kernel asset
-tier — but they are owned by the release-lifecycle and content-addressing doctrines, not here; this document
-is normative only about axis (iii)'s orthogonality to (i) and (ii).)
+(Further axes such as environment and engine/model/kernel asset tier are owned by their respective doctrines;
+this document is normative only about keeping runtime context, daemon role, and the conditional rke2 node role
+separate from substrate and compute engine.)
 
-**The three axes never fuse.** An rke2 *server* node is **not** the amoebius control-plane singleton, and an
-rke2 *agent* is **not** an amoebius worker. Axis (iii) is a property of *Kubernetes nodes* (which host runs
-etcd / kube-apiserver); axis (ii) is a property of *amoebius daemon pods* (which pod holds cluster + secret
+**The five axes never fuse.** An rke2 *server* node is **not** the amoebius control-plane singleton, and an
+rke2 *agent* is **not** an amoebius worker. Axis (v) is a property of *Kubernetes nodes* (which host runs
+etcd / kube-apiserver); axis (iv) is a property of *amoebius daemon processes* (which process holds cluster + secret
 authority, [§3](#3-the-control-plane-singleton)). They are independent: a worker pod may be scheduled onto an rke2 server node, and the
 singleton pod may be scheduled onto an rke2 agent — the Kubernetes scheduler places pods without regard to the
-etcd quorum, and the singleton's node is chosen by the scheduler without regard to its rke2 kind. Axis (iii) is
-equally independent of axis (i): rke2 server/agent is meaningful *only* on the rke2 substrate — it does not
-exist on kind or on EKS (which owns its own managed control plane) — so a detected substrate never *implies* a
+etcd quorum, and the singleton's node is chosen by the scheduler without regard to its rke2 kind. Axis (v) is
+conditioned by axis (ii), not axis (i): rke2 server/agent is meaningful only when the declared engine is
+`Rke2`; it does not exist for `Kind` or `Managed Eks`. A detected substrate therefore never implies a
 server/agent split.
 
 **Enactment splits across exactly the two daemon contexts ([§1](#1-one-binary-three-contexts)).** This is the one place the rke2 axis touches
@@ -357,12 +370,12 @@ Properties shared by all workers:
 - **Unelected and horizontally scaled.** Workers do not run a leadership election among themselves. They
   coordinate through the shared **coordination plane** — Pulsar + MinIO + the commit log ([§5](#5-single-instance-and-coordination--delegated-not-elected)) — whose
   intra-system consensus is *delegated* to those systems, not re-proved by amoebius
-  ([platform_services_doctrine.md [§6](#6-the-shared-daemon-spine), [§8](#8-planning-ownership)](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox)). A Pulsar topic-lifecycle
+  ([platform_services_doctrine.md §6](./platform_services_doctrine.md#6-pulsar--the-event-and-workflow-backbone-new-vs-prodbox)). A Pulsar topic-lifecycle
   coordinator that needs single-consumer semantics gets it from Pulsar's subscription model and the
   at-least-once + dedup discipline ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)), not from a
   bespoke amoebius election.
 - **One topology across replica counts; redundancy requires multiple failure domains.** A worker Deployment
-  runs the same HA-capable chart at every configurable replica count, including `replicas=1`
+  uses the same HA-capable typed projection at every configurable replica count, including `replicas=1`
   ([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1)). One
   replica has restart semantics but no replica redundancy; an HA claim additionally requires an admitted
   replica/failure-domain placement and a live fault gate. Every worker

@@ -65,7 +65,7 @@ UID changes fail closed and re-observe; they never infer handoff from time.
 **Substrate:** linux-cpu — the single-node `kind` cluster from Phases 24–32; no apple, linux-cuda, or windows
 substrate is exercised by this phase's gate.
 
-**Register:** 3 — live infrastructure (§K).
+**Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** on a single-node linux-cpu `kind` cluster, one `.dhall` decodes and the **Deployment-`replicas=1`
 control-plane singleton** — single-writer authority delegated to k8s/etcd, with **no amoebius election** — reconciles
@@ -80,7 +80,7 @@ operator password never persisted, every seal-critical verb refused from a non-n
 contact, and every named `SecretRef` whose capability probe fails rejected before any reconcile with its own
 distinct reason tag.
 
-**Gate-integrity clauses (§M).** The gate is hardened as follows and passes only when every clause below holds:
+**Gate-integrity clauses ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** The gate is hardened as follows and passes only when every clause below holds:
 
 - **Attribution via an OS-boundary observer (§M.5, forecloses the decorative-singleton cheat).** The gate
   harness (`test/integration/Phase33Gate.hs`) runs under a kubeconfig whose RBAC (a committed
@@ -562,7 +562,7 @@ Two properties are load-bearing and are what this sprint's gate actually proves:
   Unseal is **never** over the fabric: the fabric's peer keys are themselves Vault-KV
   ([`vault_pki_doctrine.md` §3.1](../documents/engineering/vault_pki_doctrine.md#31-the-parent-custody-kv-secret-family-ssh-keys-wireguard-keys-and-the-rke2nodetoken)),
   so a fabric reach presupposes the unsealed Vault it is trying to produce.
-- **`dhall update` admission is runtime-checked, and honestly labelled so (§K).** A named `SecretRef`'s
+- **`dhall update` admission is runtime-checked, and honestly labelled so ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).** A named `SecretRef`'s
   *existence* is a decode-time check; its *capability* is proven **live at upload**, against real hosts and
   cloud APIs. This is the one place in the phase where a gate reaches outside the cluster, and the ledger must
   say so rather than reporting it alongside the decode-time foreclosures.
@@ -584,9 +584,9 @@ is untouched by its existence.
   pod-ephemeral/durable/native-cache pools, accelerator device vector and per-device memory match observation,
   and a cloud credential carries the IAM permissions and compute/storage/accelerator quotas to provision what
   the spec declares. Rejection is fail-fast, before any reconcile.
-- **`kv put/get/list/delete`** — secret KV-CRUD by name, the path by which a production `InForceSpec`'s named
-  `SecretRef`s come to exist in Vault *before* the `.dhall` is uploaded. Secret material crosses **by value**
-  here and is stored enveloped; the `.dhall` itself still carries only the name
+- **`kv put/get/list/delete`** — secret KV-CRUD by name. Operators populate every production `SecretRef` target
+  in Vault before uploading the `.dhall`; this command transports the value into envelope storage, while the
+  specification continues to contain only its name
   ([`vault_pki_doctrine.md` §3](../documents/engineering/vault_pki_doctrine.md#3-the-secretref-contract-a-name-never-a-value)).
 - **The `pb` admin-REST client mode** — the second mode of the two-mode Python CLI, completing the deferral
   Phase 24 Sprint 24.3 records. It is a client of this surface and adds no second control path.

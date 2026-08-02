@@ -94,7 +94,7 @@ flowchart LR
 
 *Design intent for a Register-3 live bring-up: the readiness milestones (BootstrapCapacitySchedulerReady, ManagedCapacityReady) are success seals reached through effectful cloud/K8s seams; the no-op re-run witness is runtime-checked at the OS boundary, not proven here.*
 
-**Substrate:** linux-cpu → provider — the §L Parent-drives-provider escape form. The acceptance gate runs on
+**Substrate:** linux-cpu → provider — the [§L](development_plan_standards.md#l-one-substrate-discipline) Parent-drives-provider escape form. The acceptance gate runs on
 exactly one hardware substrate, the linux-cpu parent `kind` cluster from inside which the singleton drove the
 Phase-44 deploy and now drives this convergence; `→ provider` (EKS) is the deploy target class, not a hardware
 substrate ([development_plan_standards.md §L](development_plan_standards.md#l-one-substrate-discipline)).
@@ -536,8 +536,8 @@ The whole sprint (📋 Planned).
 
 ## Related Documents
 - [README.md](README.md) — the live tracker; Phase 45 objective, gate, and substrate
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this doc obeys (§D skeleton, §F
-  sprint format, §H citation rule, §K honesty, §L one-substrate discipline, §M gate integrity)
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook this doc obeys ([§D](development_plan_standards.md#d-the-per-phase-document-skeleton) skeleton, [§F](development_plan_standards.md#f-the-sprint-block-format)
+  sprint format, [§H](development_plan_standards.md#h-the-doctrine-citation-rule-cite-by-name) citation rule, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) honesty, [§L](development_plan_standards.md#l-one-substrate-discipline) one-substrate discipline, [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) gate integrity)
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (no bespoke election;
   single-instance delegated to k8s/etcd; standard platform services on every cluster, HA always)
 - [system_components.md](system_components.md) — the target component inventory (the Implementation paths above

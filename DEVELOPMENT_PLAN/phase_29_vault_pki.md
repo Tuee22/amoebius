@@ -54,7 +54,7 @@ single-node Vault, its self-signed anchor, and the in-cluster read path are in s
 **Substrate:** linux-cpu — the whole gate runs on a single-node `kind` cluster on a linux-cpu host; no apple,
 linux-cuda, or windows substrate is touched.
 
-**Register:** 3 — live infrastructure (§K).
+**Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** on a single-node linux-cpu cluster, the root single-node password-encrypted Vault **inits exactly once
 and unseals fail-closed** (an empty correctly provisioned PV inits and password-seals its unlock material without

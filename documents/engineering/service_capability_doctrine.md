@@ -106,7 +106,7 @@ operator choice:
 | Identity | **Keycloak** | owns all wild ingress through the Edge ([§7](#7-expressing-a-capability-in-the-dsl)); the single baked, offline-capable OSS identity provider that both **issues and validates** the OIDC/JWT tokens the Envoy ext-authz path enforces on every wild route, and performs realm/user-federation/RBAC administration in one binary — lighter proxies (Dex/oauth2-proxy) validate but do not manage identities, forcing a second identity store |
 | Observability | **Prometheus / Grafana** | reachable only through the Identity-owned edge; its pull/scrape model matches the no-wild-ingress posture (targets sit behind the Identity edge, nothing is pushed outward), and amoebius must run identically on an offline laptop kind cluster, which rules out any SaaS/push-agent stack |
 | Registry | **`distribution`** (the `registry:2` single-binary OCI registry) | **replaces Harbor** — see below |
-| Edge | **Envoy + Gateway API** | the L4 LoadBalancer beneath it (MetalLB or cloud LB) is the one substrate-driven choice — MetalLB is the one mature OSS implementation of LoadBalancer-type Services on bare metal (L2/BGP), filling the exact gap cloud substrates get from their provider LB |
+| Edge | **Envoy + Gateway API** | the L4 backend is derived from the materialized target: MetalLB for self-managed engines, provider LB for `Managed Eks`; detected substrate alone does not choose it |
 
 Canonical does not mean capacity-free. Binding `MessageBus` expands brokers, BookKeeper, offload, and the
 closed `PulsarMetadataStoreDemand = ZooKeeper`: exact znode/session/watch/transaction operands, member
@@ -477,8 +477,9 @@ structural shapes ([§5](#5-per-cluster-structural-shapes--beyond-values)) are *
 The reversal is clean, not a contradiction, because **fungibility moves up a level.** What is fungible is no
 longer "every cluster runs the identical manifest graph"; it is:
 
-- **The application is cluster-invariant.** The app's capability needs ([§2](#2-the-capability-set)) are byte-identical on every
-  cluster. The app runs the same everywhere — same bytes, same capabilities, same surfaces. This is the
+- **The application requirement is cluster-invariant.** The app's capability needs ([§2](#2-the-capability-set))
+  are byte-identical for every target; binding admits only targets that provide all of them. A target without
+  an optional `InferenceEngine` offering rejects the unchanged ML app rather than rewriting it. This is the
   invariant that actually matters, and it is owned as a classification by
   [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md).
 - **The capability set is cluster-invariant.** Every amoebius cluster offers all eight **cluster-invariant**
@@ -487,16 +488,16 @@ longer "every cluster runs the identical manifest graph"; it is:
   ([§4.1](#41-the-inferenceengine-capability--the-engine-is-target-offering-selected-and-jit-resolved-never-authored)),
   which is offered where an ML extension provides it rather than on every cluster. "Eight" is the
   cluster-invariant set; "nine" is the union's arity — a count in this corpus always says which it means. This is the residue of [platform_services_doctrine.md §1](./platform_services_doctrine.md#1-the-invariant-every-cluster-is-the-same-cluster)
-  fungibility, refined from "same shape" to "same *capability set*."
+  fungibility, refined from "same shape" to "same *core capability set*."
 - **The platform realization varies.** The capability → provider → **shape** binding is a deployment-rules
   concern that legitimately differs per cluster. The shape is *supposed* to vary; that is what lets one app
   spec run on a laptop and across a production forest unchanged.
 
 **The substrate-equivalence lint is replaced by "app
 surface invariant; shape deployment-ruled."** The lint that forbade per-substrate divergence is retired *for
-shape*; what remains enforced is that the *capability set* and the *app surface* do not vary. amoebius still
-refuses a different *capability set* per cluster (no "no-Registry" cluster); it now embraces a different
-*shape* per cluster.
+shape*; what remains enforced is that the *eight-core capability set* and the *app requirement surface* do not
+vary. Optional extension offerings may vary and are checked during binding; amoebius still refuses a core
+"no-Registry" cluster while embracing a different deployment *shape* per cluster.
 
 ```mermaid
 flowchart TD
@@ -582,7 +583,7 @@ surface, never asserted here.
 | The app-logic-vs-deployment-rules classification | [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md) |
 | The DSL grammar, total composability, the typed spec gates | [dsl_doctrine.md](./dsl_doctrine.md) |
 | Which capability invariants are type-enforced (made unrepresentable) | [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) |
-| The substrate catalog and the substrate-driven LoadBalancer choice beneath Edge | [substrate_doctrine.md](./substrate_doctrine.md) |
+| The substrate catalog and the engine/provider-derived LoadBalancer choice beneath Edge | [substrate_doctrine.md](./substrate_doctrine.md) |
 
 > **Honesty.** The sibling **prodbox** project is *evidence* that the binding can be rendered and reconciled:
 > `prodbox/src/Prodbox/CLI/Rke2.hs` (sibling source)
@@ -620,7 +621,7 @@ status.
 - [Image Build Doctrine](./image_build_doctrine.md) — the build pipeline, the `distribution` registry refs, the base container ([§7](./image_build_doctrine.md#7-what-amoebius-bakes-vs-builds--the-base-container-is-the-supply-chain) bakes the jit-build resolver + toolchain that materializes every `EngineRuntime` arm), and the Temurin JVM toolchain
 - [Content Addressing Doctrine](./content_addressing_doctrine.md) — the ML-asset lifecycle ([§4.5](./content_addressing_doctrine.md#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss)) whose Tier-1 jit-resolved engine is the `InferenceEngine` provider; `ModelArtifact`/`.ready` and the JIT kernel
 - [Vault / PKI Doctrine](./vault_pki_doctrine.md) — secrets-by-name, `SecretRef`, and Vault Kubernetes auth for provider credentials
-- [Substrate Doctrine](./substrate_doctrine.md) — the substrate catalog, the DETECTED substrate that selects an `EngineRuntime`, and the substrate-driven LoadBalancer choice beneath Edge
+- [Substrate Doctrine](./substrate_doctrine.md) — the detected substrate catalog, substrate-indexed `EngineRuntime` offerings, and the engine/provider-derived LoadBalancer choice beneath Edge
 - [Illegal State Catalog](../illegal_state/illegal_state_catalog.md) — best-practice-by-construction, which capability invariants are type-enforced, and the engine-fetch / unmatched-model states ([§3.25](../illegal_state/illegal_state_ml_asset.md#325-an-ml-asset-named-by-arbitrary-url-or-an-unready--unlanded-model))
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md)
 - [Documentation Standards](../documentation_standards.md)

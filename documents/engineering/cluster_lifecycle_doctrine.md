@@ -68,7 +68,7 @@ the standard service set, initialized, and reconciling toward its `.dhall`.
   **naming** (never embedding) every credential the cluster needs to provision nodes: SSH keys for
   self-managed kind/rke2 nodes, cloud API keys for provider clusters.
 - **`bootstrap --distro={kind,rke2}`**, with `kind` accepting `--replicas=n` (default `1`). The replica
-  count is a deployment-rules knob; the HA charts are identical across values of `n`
+  count is a deployment-rules knob; the HA-capable typed service projections keep the same shape across values of `n`
   ([platform_services_doctrine.md §2](./platform_services_doctrine.md#2-ha-always--including-replicas1)).
 - **The root cluster is single-node, on purpose.** A multi-node bring-up would need secrets — SSH keys or
   cloud credentials for the additional nodes — and that would violate the secrets-never-in-Dhall rule. Constraining the root to a single node lets it be bootstrapped with **zero

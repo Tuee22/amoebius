@@ -141,9 +141,9 @@ the formal model is [gateway_migration_model_doctrine.md](./gateway_migration_mo
 [chaos_failover_doctrine.md Appendix B](./chaos_failover_doctrine.md#appendix-b--worked-example-fenced-cross-cluster-geo-replication-failover-the-open-cross-cluster-failover-question)):
 Keycloak **configuration** state (realms, clients, roles, users) is a deterministic projection of the
 authoritative `InForceSpec` — re-derived on the survivor rather than merged. **Runtime session** state is
-held survivor-wins; sessions on the lost fork past the divergence point re-authenticate. The recovered old
-active **rewinds to the fork point**, re-syncs as a replica of the new primary, and quarantines its
-un-replicated writes to an **audited RPO-gap log** rather than merging them silently. The reconciliation is
+held survivor-wins; sessions on the lost fork past the divergence point re-authenticate. Per Appendix B, the
+former primary is rolled back, rejoined as a replica, and its divergent suffix is isolated in the audited
+RPO-gap log instead of being silently combined. The reconciliation is
 therefore guaranteed to converge on a single gateway owner, with the un-replicated suffix accounted for only
 by the data-loss budget.
 
@@ -238,7 +238,7 @@ status.
   principle of [chaos_failover_doctrine.md](./chaos_failover_doctrine.md): the `Failover` async correctness via
   `NoWriteAfterStaleFailover` (safety) and `MergeConverges` (liveness), and the `Planned` handover via
   `PlannedIsLossless` — one reifiable `Model`, simulated (io-sim) and proven (TLC) at design time, with
-  model↔code correspondence **by construction** (no deferred correspondence table). What remains for Phase 43
+  spec↔decision-core correspondence differentially checked and no deferred prose table. What remains for Phase 43
   is Register-3 chaos injection against the running forest — confirming the abstracted physics hold — never a
   paper correspondence.
 - The typed `GatewayFailover { active : ClusterId, standby : ClusterId, dnsRecord, hubRole }` forest relation

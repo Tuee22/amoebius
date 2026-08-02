@@ -24,7 +24,7 @@ result**, and the implementation is what this phase delivers.
 
 This phase delivers the **formal-model kernel** amoebius's one proof obligation will later be expressed in:
 a single reifiable Haskell `Model` value from which both the runtime decision core and the TLA+ specification
-are total functions, so the model↔code correspondence holds by construction. It stands up three things and
+are total functions, so the model↔code correspondence is differentially checked. It stands up three things and
 nothing more. First, the `Model` fragment itself — a deliberately small, first-order, side-effect-free
 transition-system EDSL (named state variables, an initial assignment, guarded parameterized actions, named
 boolean *safety* invariants, per-action *fairness* annotations, named *liveness* (temporal) properties, and
@@ -45,7 +45,7 @@ runs on the emitted spec through the version-stable JVM `tla2tools` toolchain. T
 (pure/golden, in-process, no cluster) design-proof phase.
 
 **Substrate:** none
-**Register:** 1 — pure/golden, in-process, no cluster (§K).
+**Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** The reifiable `Model` explorer (`interpret` plus the in-process bounded-reachability checker) and
 the `emitTLA` renderer round-trip a single small transition-system model — the in-process explorer and TLC
@@ -98,7 +98,7 @@ byte-for-byte golden, and the mutation-operator/renderer-mutant catalog with the
 **authored and committed in Phase 0 before `interpret`/`emitTLA` exist** (§M.1); a golden regenerated from the
 renderer's own output does not satisfy the gate. The emitted `.tla`/`.cfg` are rendered fresh from the
 committed `Model` source and are **never committed** to the repository. The run emits a **committed, schema-checked
-Register-1 ledger** (§K): its rows — safety proven-for-the-model at the declared bound *with the recorded
+Register-1 ledger** ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)): its rows — safety proven-for-the-model at the declared bound *with the recorded
 distinct-state count*; liveness proven under the named fairness *with the recorded fairness-sensitivity
 outcome*; the differential-test case count and per-constructor coverage percentages; and model-correspondence-to-
 Phase-3-code and runtime fidelity marked **UNVERIFIED** — are each **machine-derived from the corresponding
@@ -114,9 +114,10 @@ renderings agree, not that any cluster enforces anything.
   is *reified* so it can be walked structurally rather than run as an opaque Haskell function.
 - [`formal_model_doctrine.md §3`](../documents/engineering/formal_model_doctrine.md#3-two-total-renderings) —
   **two total renderings**: `interpret` as the runtime decision core and `emitTLA` as the structural emitter,
-  the only two consumers of the fragment, each a faithful denotation of every constructor.
-- [`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-correspondence-by-construction)
-  — **correspondence by construction**: a validated model is one where the in-process explorer and TLC agree
+  the only two consumers of the fragment, each intended to denote every constructor identically and checked by
+  the differential suite.
+- [`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-single-source-correspondence)
+  — **single-source correspondence**: a validated model is one where the in-process explorer and TLC agree
   on the correct model *and* both go red under the same seeded mutation — agreement plus shared fault
   sensitivity, in place of a hand-maintained variable→code correspondence table.
 - [`formal_model_doctrine.md §5`](../documents/engineering/formal_model_doctrine.md#5-the-tlacfg-are-generated-never-committed)
@@ -179,7 +180,7 @@ emitting faithful TLA+ rather than hand-writing it.
    round-trip and mutation checks cannot pass while quantifier/function/fairness translation stays stubbed, and
    so the Sprint 2.3 byte golden pins the rendered bytes of **all five** liveness/fairness constructors
    (`WF_vars`/`SF_vars` conjuncts, `[]`/`<>`/`~>` operators), not just the `WeakFair`+`LeadsTo` pair. This
-   closes a faithfulness gap the **safety-scoped** differential test (§M) cannot: because that round-trip
+   closes a faithfulness gap the **safety-scoped** differential test ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)) cannot: because that round-trip
    oracle is safety-only, a renderer that emits `StrongFair` as `WF_vars` or swaps `[]`↔`<>` is invisible to
    it and is caught **only** by the byte golden over a `ToyModel` that actually carries those constructors.
    This is a committed structural assertion over the `ToyModel` value (a test that walks its
@@ -295,7 +296,7 @@ never committed.
 ### Remaining Work
 The whole sprint (📋 Planned).
 
-## Sprint 2.4: Round-trip + correspondence-by-construction on `ToyModel` 📋
+## Sprint 2.4: Round-trip + single-source correspondence on `ToyModel` 📋
 
 **Status**: Planned
 **Implementation**: `test/formal/RoundTripSpec.hs` (drives the explorer and TLC over the same `Model`), a
@@ -327,7 +328,7 @@ in-process explorer + TLC pairing as a no-live-infrastructure instance). The Pha
 phase's Documentation Requirements (Cross-references to add), not here.
 
 ### Objective
-Adopt [`formal_model_doctrine.md §4 — correspondence by construction`](../documents/engineering/formal_model_doctrine.md#4-correspondence-by-construction)
+Adopt [`formal_model_doctrine.md §4 — single-source correspondence`](../documents/engineering/formal_model_doctrine.md#4-single-source-correspondence)
 and [`§6 — what a green model-check proves`](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not):
 validate the kernel by running *both* readings of the same `Model` — the in-process explorer and TLC on the
 emitted spec — and require agreement on the correct model plus shared sensitivity to one seeded fault, the
@@ -362,12 +363,12 @@ operational form of "the two renderings mean the same thing."
   differential robust when liveness annotations are present; liveness rendering faithfulness is validated on
   `ToyModel` alone — round-trip, fairness-sensitivity, and the fairness-drop mutants — not across the generated
   distribution)
-  ([`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-correspondence-by-construction)).
+  ([`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-single-source-correspondence)).
 - **Two committed seeded renderer mutants** proving the differential suite has teeth against `emitTLA` bugs (not
   only model bugs): `emitTLA-mut-01` (a deliberately dropped `UNCHANGED` conjunct) and `emitTLA-mut-02` (a
   finite quantifier `\A`↔`\E` mistranslation), committed under `test/formal/mutants/`, each of which the
   differential generator must expose as an explorer/TLC divergence — a surviving renderer mutant fails the gate.
-- The **committed, schema-checked Register-1 ledger** (§K; its schema, linter, and commit status owned by
+- The **committed, schema-checked Register-1 ledger** ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed); its schema, linter, and commit status owned by
   `testing_doctrine.md` and Phase 0), whose Phase-2 rows are:
   (a) safety proven-for-the-model at the declared bound with the recorded reachable-distinct-state count; (b)
   liveness proven under the named fairness with the recorded fairness-sensitivity outcome; (c) the

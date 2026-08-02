@@ -68,7 +68,7 @@ typeclass, and SplitMix seed derivation are the Phase 48 determinism kernel, not
 Register 3 (live infrastructure); no apple, linux-cuda, or windows substrate is touched, and the store's CAS
 protocol and worker failover are substrate-agnostic in design but validated only here.
 
-**Register:** 3 — live infrastructure (§K).
+**Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** an `InForceSpec` test topology on the linux-cpu kind cluster **stores and fetches a content-addressed
 artifact by its manifest SHA** — a worker writes the artifact into the three-tier MinIO store and the
@@ -127,11 +127,9 @@ work overlap. Any artifact cache is a bounded `InClusterCacheDemand` (otherwise
 For each planned orchestrator, worker, mutation-gateway, or collector/verification Pod slot, provision derives
 one `KubeletRuntimeMetadataShape` from that exact source, its complete container/volume graph, and the selected
 node's pinned `kubeletMetadataModel`; live normalization instead keys the observed form by authenticated
-`PodUid` plus owner/source witness. The private fold derives each component's bytes and
-`KubeletNodefs | CriRuntimeRoot` role, resolves it through the selected filesystem layout, and groups aliases
-by physical carve once. SplitRuntime charges kubelet components to nodefs and CRI components to
-imagefs/containerfs; Unified and SplitImage sum forced aliases before one backing check. These physical bytes
-are not repeated as logical Pod ephemeral demand.
+`PodUid` plus owner/source witness. The Pulumi runtime-storage rule then derives the component roles, routes
+them through the selected layout, and collapses aliases so each physical carve is debited once. That physical
+accounting is disjoint from logical Pod ephemeral demand.
 
 Pure provision gives each planned epoch, and live preflight each observed snapshot, one
 `ProvisionedNodeRuntimeStorageAccounting` per node: exact planned-slot/observed-UID domain, a disjoint and
@@ -256,7 +254,7 @@ them.
 **Blocked by**: Phase 26 gate (the modeled typed Job-terminal protocol), Phase 30 gate (MinIO reachable as a standard HA platform service) and Phase 28 gate (the
 `no-provisioner` retained PV the MinIO bytes land on); Phase 34 gate (the `<app>/<bucket>` ObjectStore the
 store keys under) — all external earlier-phase prerequisites.
-**Independent Validation**: this suite runs in **Register 3** against the **live single-node kind-cluster MinIO**
+**Live oracle and register**: run this suite at **Register 3** against the **single-node kind cluster's live MinIO**
 (the standing Phase-30 HA service on the Phase-28 retained PV), never an in-process or local S3 fake — the
 register is stated so its evidential weight is unambiguous. A gateway-admitted blob PUT under
 `If-None-Match: *` returns success

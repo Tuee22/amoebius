@@ -147,8 +147,8 @@ target shape fitting alone is insufficient
   no normal credential, migration reconciler, `.dhall` value, or elevated **test** harness may delete a
   production backing. A human operator may later perform an audited external break-glass reclaim against the
   exact `ReclaimEligible` target. Until that happens, the retired backing remains intact.
-- **A failed verification retires nothing.** A `Shrink` that cannot verify its copy leaves *both* coordinates
-  intact and fails loud; it never trades the old bytes for an unverified new home. Both volumes/schemas,
+- **A failed verification retires nothing.** A `Shrink` with an unverified copy aborts without detaching either
+  coordinate; preserving the old data takes precedence over accepting the replacement. Both volumes/schemas,
   partial target/workspace/temp/WAL, and the executor remain live commitments until a fresh observation proves
   cleanup.
 - **A rename is a move over a fixed identity, never a delete-then-create.** A coordinate's identity is a total

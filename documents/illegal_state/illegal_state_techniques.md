@@ -25,9 +25,8 @@ The **catalog index** — the enumerated `### 3.x` illegal-state entries themsel
 limit (a type-check proves the *spec composes*, not that the *running cluster enforces it*) are owned by
 [`illegal_state_catalog.md`](./illegal_state_catalog.md); this document *references* them and does **not** restate
 them. The DSL surface and the contract "a valid spec cannot represent illegal state" are owned by
-[`dsl_doctrine.md`](../engineering/dsl_doctrine.md); the *normative rule* behind each catalog entry lives in that entry's owning
-doctrine (storage, gateway/ingress, secrets, capacity, topology, …), named — never restated — where the techniques
-below cite it.
+[`dsl_doctrine.md`](../engineering/dsl_doctrine.md). Each catalog entry points to, rather than duplicates, the
+subsystem doctrine that defines its storage, gateway, secret, capacity, topology, or other rule.
 
 Everything here is **design intent**, not a tested amoebius result: the type discipline it describes (the spec
 composes; no illegal value is constructible) is a **Tier-1** (design-time / in-process) property targeted for

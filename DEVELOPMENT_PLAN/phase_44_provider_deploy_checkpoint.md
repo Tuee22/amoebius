@@ -93,7 +93,7 @@ flowchart LR
 ```
 *Design intent. `observeProviderAccount` and `pulumi up` are the effectful seams and the ValidatedInfrastructurePlan gate proves fit at Tier-1; the provisioned executor is a constructor-private seal, while the running EKS control plane and base node group are runtime-checked, not proven here.*
 
-**Substrate:** linux-cpu → provider — the §L Parent-drives-provider escape form. The acceptance gate runs on
+**Substrate:** linux-cpu → provider — the [§L](development_plan_standards.md#l-one-substrate-discipline) Parent-drives-provider escape form. The acceptance gate runs on
 exactly one hardware substrate, the linux-cpu parent `kind` cluster from inside which the Pulumi engine issues
 the deploy; `→ provider` (EKS) is the deploy target class, not a hardware substrate
 ([development_plan_standards.md §L](development_plan_standards.md#l-one-substrate-discipline)).
@@ -459,8 +459,8 @@ The whole sprint (📋 Planned).
 ## Related Documents
 
 - [README.md](README.md) — the live tracker; the Phase 44 objective, gate, and substrate
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this doc obeys (§D skeleton, §F
-  sprint format, §H citation rule, §K honesty, §L one-substrate discipline, §M gate integrity)
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook this doc obeys ([§D](development_plan_standards.md#d-the-per-phase-document-skeleton) skeleton, [§F](development_plan_standards.md#f-the-sprint-block-format)
+  sprint format, [§H](development_plan_standards.md#h-the-doctrine-citation-rule-cite-by-name) citation rule, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) honesty, [§L](development_plan_standards.md#l-one-substrate-discipline) one-substrate discipline, [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) gate integrity)
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (no bespoke election;
   single-instance delegated to k8s/etcd; Pulumi runs only from inside a cluster)
 - [system_components.md](system_components.md) — the target component inventory (the Implementation paths above

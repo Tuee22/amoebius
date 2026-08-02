@@ -95,7 +95,7 @@ and Helm is never ensured or invoked (no `helm` `execve`, no `helm` trap fired);
 the cluster down (`kind delete cluster`) and asserting a **leak-free postflight sweep** (no residual kind
 cluster, node container, or kubeconfig context).
 
-The committed fixtures, seeded mutants, and independent observers this gate is checked against are named in the [`## Gate integrity`](#gate-integrity) section below (§M Gate → Gate-integrity delegation).
+The committed fixtures, seeded mutants, and independent observers this gate is checked against are named in the [`## Gate integrity`](#gate-integrity) section below ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) Gate → Gate-integrity delegation).
 
 ## Gate integrity
 
@@ -137,8 +137,8 @@ layout readback must catch it. A gate run in which any of M1–M6 stays green is
 ## Doctrine adopted
 
 - **Substrate doctrine [§6](../documents/engineering/substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off) — the midwife contract (a Python `pb` CLI, not `bootstrap.sh`).** This phase
-  implements [`substrate_doctrine.md` §6 — the midwife contract: a Python CLI ensures a toolchain, builds the
-  binary, hands off](../documents/engineering/substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off):
+  implements [`substrate_doctrine.md` §6](../documents/engineering/substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off) — the midwife contract: a Python CLI ensures a toolchain, builds the
+  binary, and hands off:
   the thin pre-binary driver that ensures the package-manager root, installs the pinned toolchain via `ghcup`,
   `cabal build`s, and `exec`s `amoebius bootstrap --distro=…`. It is Python because it runs on a bare host
   before any Haskell toolchain exists and because it is unified with the operator CLI — one `pb` with two modes,
@@ -162,8 +162,8 @@ layout readback must catch it. A gate run in which any of M1–M6 stays green is
   [`cluster_lifecycle_doctrine.md` §2 — bring-up and bootstrap](../documents/engineering/cluster_lifecycle_doctrine.md#2-bring-up-and-bootstrap)
   (whose load-bearing claim for this gate is "bring-up is itself a reconcile" — re-running when already
   converged is a no-op), and the reconciler shape of
-  [`cluster_lifecycle_doctrine.md` §9 — how bring-up and teardown are implemented: the reconciler, not a state
-  machine](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine)
+  [`cluster_lifecycle_doctrine.md` §9](../documents/engineering/cluster_lifecycle_doctrine.md#9-how-bring-up-and-teardown-are-implemented-the-reconciler-not-a-state-machine) — how bring-up and teardown are implemented: the reconciler, not a state
+  machine
   (`discover → diff → enact → re-observe`). The provider-managed half and post-bring-up init (Vault, the
   `.dhall` handoff) are later phases.
 - **DSL doctrine [§3](../documents/engineering/dsl_doctrine.md#3-the-orchestration-surface-parameters-context-witness) — the orchestration surface: parameters, context, witness.** The in-binary `bootstrap`
@@ -315,8 +315,8 @@ contains no `bootstrap.sh` and no shell script.
 `documents/engineering/bootstrap_sequence_doctrine.md`, `DEVELOPMENT_PLAN/legacy_tracking_for_deletion.md`.
 
 ### Objective
-Adopt [`substrate_doctrine.md` §6 — the midwife contract: a Python CLI ensures a toolchain, builds the binary,
-hands off](../documents/engineering/substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off):
+Adopt [`substrate_doctrine.md` §6](../documents/engineering/substrate_doctrine.md#6-the-midwife-contract-a-python-cli-ensures-a-toolchain-builds-the-binary-hands-off) — the midwife contract: a Python CLI ensures a toolchain, builds the binary,
+and hands off:
 the midwife exists because the no-`PATH` / no-env discipline cannot start until there is a Haskell binary to
 enforce it, so a thin Python driver ensures the package-manager root pre-binary, then hands off. It is unified
 with the operator CLI as `pb`'s midwife mode, the second mode being the admin-REST client of
@@ -587,7 +587,7 @@ and discharging the live-inventory cross-check of
    kubeconfig file bytes)` is byte-identical before and after the re-run, and the re-run's `execve` audit log
    contains zero `kind create` and zero mutating package-manager calls** — leaving the single node `Ready`, and
    printing the per-managed-resource empty-diff discover result.
-5. **Divergence-repair (§M — forecloses the one-shot-guard stub).** From each Phase-0-committed
+5. **Divergence-repair ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) — forecloses the one-shot-guard stub).** From each Phase-0-committed
    partially-converged start state — at minimum (a) the kind cluster exists but its node container is stopped /
    `NotReady`, and (b) the kubeconfig context is missing — run the identical command; assert it converges to
    exactly one `Ready` node **without recreating the cluster** (no `kind create` for an existing cluster in the

@@ -81,7 +81,7 @@ in-process `cabal test boundary-spec` battery driving the real binary against fa
 directory (Part B).
 
 **Register:** 1/2 — a two-register gate: **Part A is Register 1** (pure/golden, in-process, no cluster) and
-**Part B is Register 2** (boundary integration with fake tools, no cluster), both in-process, no cluster (§K).
+**Part B is Register 2** (boundary integration with fake tools, no cluster), both in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** two in-process registers pass together over the representative corpora pinned in
 [Gate integrity](#gate-integrity), on **no substrate** — **(Part A · Register 1)** `cabal test chain-spec`, run

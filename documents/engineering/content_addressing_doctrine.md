@@ -262,7 +262,8 @@ Ownership and honesty for the registry:
   `jitML/documents/engineering/determinism_contract.md`. `kernelKey` is consumed by Tier 3 in [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss).
 - `releaseHash` and the `environment` pointer are **defined here** (this table is their canonical registry), but
   their *lifecycle* — the immutable release ledger, the promotion CAS, the `PromotionGate` — is owned by
-  [`release_lifecycle_doctrine.md` [§2](#2-the-three-tier-store-blobs--manifests--pointers)/[§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash). "Promote to prod" is an
+  [release_lifecycle_doctrine.md §2](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash) and
+  [§3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer). "Promote to prod" is an
   `environment`-pointer CAS onto a `Release`, exactly the ETag-CAS discipline of a `trial` pointer flip ([§2.2](#22-why-this-shape-removes-the-races)).
 - The **OCI image digest** is registry-owned, not computed by amoebius; it appears here only so `releaseHash`
   can pin it. Its format and build path are owned by [`image_build_doctrine.md`](./image_build_doctrine.md).
@@ -462,7 +463,7 @@ writable-layer and log headroom; "the final files fit but the build scratch or l
 admitted.
 The same capacity fold that bounds every other budget rejects an over-budget peak at the post-bind
 `provision-seal` before any effect
-([resource_capacity_doctrine.md [§3](#3-experimenthash-identity-is-what-was-requested--where-it-ran)–[§4](#4-determinism-by-construction-pinned-inputs--pure-stages--derived-seed)](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)).
+([resource_capacity_doctrine.md §3](./resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)–[§4](./resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting)).
 
 For an in-cluster node, a typed per-node cache-owner pod owns the pool. Its pure resource envelope renders
 CPU/memory/`ephemeral-storage` requests+limits and a disk-backed `emptyDir.sizeLimit` derived from the
@@ -697,7 +698,8 @@ collision), **not impossible** — so a redundant retrain is at most **runtime-c
 therefore a **design policy**, and it inherits the [§6.1](#61-proven--tested--assumed-spelled-out) ledger: the confluence-safety is proven-in-types for the
 store **algebra** only, **not** a built amoebius replication run. The **async geo-replication transport / trigger**
 and the First-Axis coordinator fact are owned by [`chaos_failover_doctrine.md`](./chaos_failover_doctrine.md)
-(this doc states them as cross-refs, not assertions). One composition obligation makes the policy sound: §H's
+(this doc states them as cross-refs, not assertions). One composition obligation makes the policy sound: the
+[§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) serving contract's
 **provenance witness must be a content-addressed manifest field** ([§2.1](#21-three-object-classes-two-write-protocols)) so it crosses under this confluence
 **alongside** the bytes — otherwise cluster B receives the weights but not the witness and the [§4.5](#45-the-ml-asset-lifecycle-one-bounded-content-addressed-cache-resolved-on-first-miss) serve gate
 rejects them.

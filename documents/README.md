@@ -20,8 +20,8 @@
   [family router](./illegal_state/README.md) and authoritative
   [index](./illegal_state/illegal_state_catalog.md) (the themed map of *which* states a valid `InForceSpec`
   cannot represent), eight themed sub-catalogs (storage · topology · capacity · security · capability-messaging ·
-  ml-asset · multi-cluster · lifecycle), and the [techniques doc](./illegal_state/illegal_state_techniques.md)
-  (the seven typing techniques, the coverage matrix, the three foreclosure layers, and the validation-locus axis).
+  ml-asset · multi-cluster · lifecycle), and the [techniques doc](./illegal_state/illegal_state_techniques.md),
+  which maps enforcement technique, foreclosure layer, and validation locus.
 
 ## Shared standards
 

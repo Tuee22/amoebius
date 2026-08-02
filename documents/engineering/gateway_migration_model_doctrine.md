@@ -60,12 +60,12 @@ Following [formal_model_doctrine.md](./formal_model_doctrine.md), the protocol i
 state variables (per-cluster replication offset/log, gateway owner, DNS record, migration phase, branch), the
 `Planned` and `Failover` transitions as guarded actions, and the invariants below — from which `interpret`
 (the runtime decision core) and `emitTLA` (the generated, never-committed `.tla`) are total renderings, so the
-model↔code correspondence holds by construction (no hand-maintained variable→module table, unlike the
+model↔code correspondence is differentially checked (no hand-maintained variable→module table, unlike the
 superseded doc).
 
 The model asserts properties of **two kinds** — safety (nothing bad ever happens; checked on every reachable
 state) and liveness (something good eventually happens; a temporal `modelProperties` goal checked by TLC under a
-named fairness assumption `F`, per [formal_model_doctrine.md [§2](#2-the-two-branches-the-state-machine-this-model-checks)–[§3](#3-the-model)](./formal_model_doctrine.md#2-the-model-is-data)).
+named fairness assumption `F`, per [formal_model_doctrine.md §2](./formal_model_doctrine.md#2-the-model-is-data)–[§3](./formal_model_doctrine.md#3-two-total-renderings).
 The distinction is load-bearing here: the anti-split-brain guarantee is *both* "never two owners" (safety) *and*
 "eventually exactly one owner" (liveness) — a stalled state with **zero** owners satisfies the first and violates
 the second, so safety alone would not catch a failover that deadlocks.
@@ -186,7 +186,7 @@ it: it removes the one shared-resource class the decoder can see, and leaves the
 Two things keep the residue honest, and neither may be reported as more than it is: (a) the **decomposition
 lemma** — that the N-instance product refines the 2-instance model under the decoder's independence predicate —
 is a named obligation, discharged either by a machine-checked proof (TLAPS/Lean,
-[formal_model_doctrine.md §4](./formal_model_doctrine.md#4-correspondence-by-construction)) or by an over-scope
+[formal_model_doctrine.md §4](./formal_model_doctrine.md#4-single-source-correspondence)) or by an over-scope
 TLC run (scope 3–4) that **models the shared resources in**; (b) until either lands, at least one over-scope
 stress run (3 clusters, chained) is checked ([§6](#6-modelling-bounds-and-honesty)) and the cutoff is recorded
 **argued/tested**, never *proven*.
@@ -214,8 +214,9 @@ Per [documentation_standards.md §6](../documentation_standards.md#6-honesty-the
   decomposition lemma is discharged, and until then the shape is unavailable rather than unsound. The
   over-scope stress run still *models* a shared survivor in, so the stress model retains the ability to detect
   a cutoff violation the fold now forecloses.
-- **Correspondence is by construction; runtime fidelity is bridged, not only sampled.** Because `interpret` and
-  `emitTLA` render one `Model`, there is no separate variable→module correspondence table to complete later —
+- **Single-source correspondence narrows drift; runtime fidelity is bridged, not only sampled.** Because
+  `interpret` and `emitTLA` consume one `Model`, there is no separate variable→module correspondence table to
+  complete later, but renderer faithfulness remains a differential-test obligation —
   the inversion the superseded doc left "empty and UNVERIFIED until Phase 42" is dissolved. The residual
   **runtime-fidelity** obligation (that the effectful daemon only takes transitions the `Model` sanctions) is
   discharged in two stages, not one: **trace validation**

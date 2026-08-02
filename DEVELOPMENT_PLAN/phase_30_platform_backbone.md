@@ -71,10 +71,10 @@ Deployment-`replicas=1` control-plane singleton that will eventually *own* this 
 fixed, hand-assembled service set so the backbone exists before the DSL and the singleton that will describe
 it.
 
-**Substrate:** linux-cpu (§L) — the whole gate runs on a single-node `kind` cluster on a linux-cpu host; no
+**Substrate:** linux-cpu ([§L](development_plan_standards.md#l-one-substrate-discipline)) — the whole gate runs on a single-node `kind` cluster on a linux-cpu host; no
 apple, linux-cuda, or windows substrate is touched in Phase 30.
 
-**Register:** 3 — live infrastructure (§K); this is not a pure/golden or fake-tool check but a real bring-up
+**Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)); this is not a pure/golden or fake-tool check but a real bring-up
 on a real cluster, emitting a proven/tested/assumed ledger that names Register 3 and marks the runtime layer
 *tested*, never *proven*.
 
@@ -113,7 +113,7 @@ hot-tier size bound, the offload fires and the hot tier never exceeds its cap, r
 on MinIO (offloaded ledger objects appear) and broker/BookKeeper metrics (hot-tier occupancy stays under the
 high-water mark).
 
-**Gate integrity (§M).** The gate is closed to a stub by seven pinned cross-checks, all authored and committed
+**Gate integrity ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** The gate is closed to a stub by seven pinned cross-checks, all authored and committed
 in **Phase 0** before any `src/Amoebius/Platform/*` implementation exists (§M.1 oracle-pinning), and named as
 gate oracles in the Sprint 30.1–26.3 Deliverables:
 

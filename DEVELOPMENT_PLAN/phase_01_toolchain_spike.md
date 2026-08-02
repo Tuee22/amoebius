@@ -46,7 +46,7 @@ suite), not an amoebius result.
 **Substrate:** `none` — no host, no cluster; the gate resolves and compiles Hackage packages on the developer
 toolchain only.
 
-**Register:** 1 — pure/build, in-process, no cluster (§K).
+**Register:** 1 — pure/build, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** a single throwaway probe package that build-depends on `dhall`, `io-sim`, `io-classes`, the
 `purescript-bridge` contract generator, the native Pulsar client's `supernova` fork plus its `proto-lens`
@@ -82,7 +82,7 @@ a §M.2 schedule-perturbation operator) MUST drive `probe:sim` to a **different*
 `check-sim-terminal` harness fails at a terminal-state mismatch — the mutant that gives the `probe:sim` leg its
 teeth, turning it red at the oracle diff independent of the probe's exit code; all three are re-run each gate,
 not once. The
-gate emits the retained proven/tested/assumed ledger (§K) naming **Register 1** and marking every runtime,
+gate emits the retained proven/tested/assumed ledger ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)) naming **Register 1** and marking every runtime,
 cluster, and Gate-2-semantics layer **UNVERIFIED** — a green build is a buildability result only, never a
 runtime or deployability claim (Register 1).
 
@@ -296,7 +296,7 @@ dependency universe — the phase gate.
   `probe/oracle/check-sim-terminal` harness with its `probe/fixtures/sim-terminal.expected` oracle, and **both**
   seeded mutants `probe/mutants/drop-allow-newer` and `probe/mutants/perturb-sim-schedule`, under
   `DEVELOPMENT_PLAN/evidence/phase_01/` (or CI-archived and linked), kept until Phase 5 supersedes them.
-- A first-class proven/tested/assumed ledger artifact (§K) — naming **Register 1**, recording the green build +
+- A first-class proven/tested/assumed ledger artifact ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)) — naming **Register 1**, recording the green build +
   executed-fixture results as *tested*, and marking every runtime, cluster, and Gate-2-semantics layer
   **UNVERIFIED** — retained even though the probe package itself is deleted after resolution.
 

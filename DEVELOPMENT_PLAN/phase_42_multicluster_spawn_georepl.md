@@ -140,7 +140,7 @@ the following named, committed artifacts so no self-authored harness or post-hoc
 - **Idempotent-write golden.** A committed content-addressed golden: replaying a duplicate or reordered
   cross-cluster batch yields the **identical fold result and identical blob keys** (exactly-once for
   replicated-or-recovered effects), authored in Phase 0.
-- **Committed seeded mutants (≥ 1 must go red).** From the §M operator set: (a) `classifier-default-confluent` —
+- **Committed seeded mutants (≥ 1 must go red).** From the [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) operator set: (a) `classifier-default-confluent` —
   the unclassified default flipped from non-confluent to confluent (union-arm addition / guard weakening); the
   committed unclassified fixture is then wrongly admitted for active-active wiring and the classification oracle
   must go red. (b) `project-identity` — the `project(subtree)` projection weakened toward identity so a child's
@@ -192,8 +192,8 @@ the following named, committed artifacts so no self-authored harness or post-hoc
   and [`§17`](../documents/engineering/chaos_failover_doctrine.md#17-the-boundary-and-its-classifier)
   — the Second Axis (one cluster becomes a forest) and the invariant-confluence classifier (R1/[§17](../documents/engineering/chaos_failover_doctrine.md#17-the-boundary-and-its-classifier)) that sorts
   every crossing mutable invariant into confluent (crosses freely) or non-confluent (held by bounded authority),
-  the unclassified default = non-confluent — with the [proven/tested/assumed ledger
-  (§12)](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed) kept
+  the unclassified default = non-confluent — with the
+  [proven/tested/assumed ledger (§12)](../documents/engineering/chaos_failover_doctrine.md#12-the-moral-core--proven-tested-assumed) kept
   honest. The R7/R8/R9 boundary rules and the [§19](../documents/engineering/chaos_failover_doctrine.md#19-the-cross-boundary-ledger-and-conformance-rows) cross-boundary ledger are consumed by [Phase
   33](phase_43_gateway_migration_drills.md).
 - [`testing_doctrine.md §3`](../documents/engineering/testing_doctrine.md#3-the-test-topology-contract-spin-up--run--always-tear-down)

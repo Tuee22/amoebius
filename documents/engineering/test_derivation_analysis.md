@@ -69,7 +69,7 @@ Descriptive only. Each concept is owned by the document named; nothing here rest
 | The `ChaosSchedule` / `FaultKind` types and the `FaultKind`→invariant map | [chaos_failover_doctrine.md §11](./chaos_failover_doctrine.md#11-move-iii--inject-break-the-running-thing-on-purpose) |
 | The simulated-substrate fault model | [deterministic_simulation_doctrine.md §3](./deterministic_simulation_doctrine.md#3-the-simulated-environment-and-its-fault-model) |
 | The no-cluster spine and its honesty boundary | [conformance_harness_doctrine.md §5](./conformance_harness_doctrine.md#5-honesty-what-the-harness-does-and-does-not-establish) |
-| Generated artifacts are never committed; the ledger carve-out | [generated_artifacts_doctrine.md §3](./generated_artifacts_doctrine.md#3-the-rule) |
+| Production generated artifacts are never committed; independently authored oracles and run ledgers are committed non-production records | [generated_artifacts_doctrine.md §3](./generated_artifacts_doctrine.md#3-the-rule) |
 | `PromotionGate` and per-environment evidence strength | [release_lifecycle_doctrine.md §4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable) |
 
 Sequencing and status are owned by [../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md).
@@ -299,9 +299,9 @@ The honest limit narrows but does not vanish, and
 reuse removes the one shared-resource class the decoder can see, while the classes it cannot see — one
 route53 hosted zone and its write rate-limit, one Vault, one commit log — remain shared across vertex-disjoint
 instances, so the shared-resource independence premise survives in narrowed form. The excluded
-shared-survivor topology is recorded as a named deferred obligation gated on the decomposition lemma, and the
-over-scope stress run still models a shared survivor in, so the stress model retains the ability to detect a
-cutoff violation the fold now forecloses.
+shared-survivor topology is recorded as a named deferred obligation gated on the decomposition lemma. A stress
+case nevertheless includes that otherwise-rejected topology, preserving a detector for mistakes in the scope
+cutoff.
 
 ### 6.3 `Staging` had no evidence mapping — resolved
 

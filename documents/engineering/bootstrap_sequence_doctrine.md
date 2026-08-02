@@ -178,8 +178,8 @@ The handoff is **one-way, observed-gated, and transfers control-surface authorit
 
 After handoff, the operator drives the cluster through **one surface**: the operator CLI (`pb`) → the
 **amoebius NodePort service** → a **REST API on the in-cluster singleton**. This is the vision's *"thin cli
-tool [that] interact[s] with the amoebius daemon api"* — and the answer is a typed REST control plane, not a
-second binary.
+tool [that] interact[s] with the amoebius daemon api"* — and the answer is a thin Python frontend over the
+typed REST control plane, not a second runtime daemon or control plane.
 
 - **The endpoints.** The load-bearing ones:
   - **`vault init/unseal`** — authenticated by the **operator password** (Argon2id→AEAD unlock material,

@@ -92,11 +92,11 @@ flowchart LR
 ```
 *Design intent. Detect, spin-up, run/inject, kill, teardown and sweep are the effectful seams; the inventory diff is the decision that either seals a clean run with its ledger or refuses fail-closed on a leak; the Pulsar-delegated standby takeover is runtime-checked on the running cluster, not proven here.*
 
-**Substrate:** per generated test (§L) — each emitted test `.dhall` is substrate-locked to exactly one substrate
+**Substrate:** per generated test ([§L](development_plan_standards.md#l-one-substrate-discipline)) — each emitted test `.dhall` is substrate-locked to exactly one substrate
 with no silent fallback; the canonical Register-3 gate run is exercised on `linux-cpu`, where an intra-cluster
 failover simulation needs no accelerator, while the harness itself is substrate-parametric.
 
-**Register:** 3 (§K) — live infrastructure; the substrate is chosen per generated test (§L).
+**Register:** 3 ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)) — live infrastructure; the substrate is chosen per generated test ([§L](development_plan_standards.md#l-one-substrate-discipline)).
 
 **Gate:** a generated test `.dhall` — produced by executing `amoebius suggest-test` for real on the gate host
 (real Phase-24 host classification; the SSH/AWS credential probe run for real, or its layer explicitly
@@ -133,7 +133,7 @@ The gate is checked against these committed, Phase-0-pinned criteria (see
    substrate; that run's ledger therefore records the **AWS/cloud leak leg UNVERIFIED** (never green), and the
    cloud red-test is carried instead by a provider-substrate generated test — the sanctioned
    parent-drives-provider form over Phase 47's leak-free provider teardown, still one substrate per generated
-   test (§L) — via the committed mutant `test/mutants/phase_54_cloud_leak_untyped.dhall`, an untagged AWS
+   test ([§L](development_plan_standards.md#l-one-substrate-discipline)) — via the committed mutant `test/mutants/phase_54_cloud_leak_untyped.dhall`, an untagged AWS
    resource allocated outside the typed path that MUST surface through that same service-native
    `List*`/`Describe*` inventory plus Resource Explorer `tag:none` cross-check.
 2. **Committed seeded mutant that must go red (Cheat-1 operator: dropped effect).** The committed mutant
@@ -301,9 +301,8 @@ plus owner/source witness. A planned slot id is never reused as a live identity.
 mount-metadata structure into exact components; callers cannot author metadata bytes or routes.
 
 The private fold assigns each component exactly one `KubeletNodefs | CriRuntimeRoot` role, proves role sums,
-resolves each role through `Unified | SplitRuntime | SplitImage`, and groups aliases once by physical carve.
-SplitRuntime charges kubelet components to nodefs and CRI components to imagefs/containerfs; Unified and
-SplitImage sum their forced aliases before one backing check. Pure provision then builds one
+and resolves the roles through the closed filesystem-layout union. Alias groups collapse to one physical-carve
+debit; in `SplitRuntime` the kubelet and CRI roles route independently. Pure provision then builds one
 `ProvisionedNodeRuntimeStorageAccounting` per node and planned epoch fingerprint; live preflight builds the
 observed-inventory-fingerprint form. The metadata-id domain equals assigned planned slots or eligible observed Pod UIDs exactly;
 qualified Pod component keys and node image-model component keys form a disjoint exhaustive partition; and the
@@ -818,7 +817,7 @@ untagged and backing-only leaks are visible.
    untagged-AWS-resource mutant `test/mutants/phase_54_cloud_leak_untyped.dhall` that MUST surface via
    `List*`/`Describe*` + Resource Explorer `tag:none`, paired with a clean run whose AWS enumeration diff is
    empty — is carried by a provider-substrate generated test in the sanctioned parent-drives-provider form
-   (Phase 44), keeping this single-substrate `linux-cpu` run's own scope intact (§L).
+   (Phase 44), keeping this single-substrate `linux-cpu` run's own scope intact ([§L](development_plan_standards.md#l-one-substrate-discipline)).
 4. A retained-by-design (unflagged) volume present in *both* the pre-run and post-run enumeration is not
    reported as a leak; a resource absent pre-run but present post-run is.
 

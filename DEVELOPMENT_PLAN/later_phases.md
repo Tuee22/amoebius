@@ -48,10 +48,10 @@ a populated database forward idempotently (re-apply is a no-op), and a manifest 
 field is reconciled by the typed diff with **zero silent data loss**.
 
 The reconcile half of this is a hardening of the typed reconciler's state model:
-[`manifest_generation_doctrine.md` §6 — the reconcile state model (desired is the pure
+[`manifest_generation_doctrine.md` §6](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed) — the reconcile state model (desired is the pure
 `bind/expand → plan/resolve infrastructure → provision → renderAll` result for the authenticated
 materialization, observed is
-etcd, a diff is typed)](../documents/engineering/manifest_generation_doctrine.md#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)
+etcd, a diff is typed)
 already frames the diff as a *typed* value; this candidate extends that diff to classify schema-affecting and
 immutable-field changes so a change that would otherwise drop rows cannot be applied as a silent replace. The
 database half adds the migration ordering and idempotence on top of the per-consumer Postgres model. It is a
@@ -275,12 +275,12 @@ deliberately broken variant (a mistranslated quantifier in `emitTLA`; a non-comm
 after which the corresponding
 [`chaos_failover_doctrine.md §19`](../documents/engineering/chaos_failover_doctrine.md#19-the-cross-boundary-ledger-and-conformance-rows)
 confluence ledger rows and the
-[`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-correspondence-by-construction)
+[`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-single-source-correspondence)
 faithfulness claim may move from **tested** to **proven**.
 
 This is a **surgical** track, not a broad proof-assistant layer — those two properties are the only places a
 proof assistant earns its keep, precisely because they are small, closed, and load-bearing, and are today only
-property-tested ([`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-correspondence-by-construction); the confluence ledger's own rule that a closure claim "is proof
+property-tested ([`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-single-source-correspondence); the confluence ledger's own rule that a closure claim "is proof
 only when its closure argument is shown"). It is explicitly deferred because it *hardens* claims the Phase-2/3/7
 differential and closure property-tests already exercise; the property tests are the affordable first line, and
 this candidate upgrades them to proof only where the payoff is a genuine ledger promotion. A first sprint is an
@@ -294,8 +294,8 @@ The "one base container with everything" packaging question is sometimes mistake
 Vault, Pulsar, Postgres tooling, a Temurin JRE for the JVM services, …) is baked into the multi-arch base
 container, and clusters pull images only from the in-cluster `distribution` registry — never from a public
 registry. That is the standing doctrine,
-[`image_build_doctrine.md` §2 — the single distribution rule (bake the binaries, build the amoebius image,
-pull only in-cluster)](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster),
+[`image_build_doctrine.md` §2](../documents/engineering/image_build_doctrine.md#2-the-single-distribution-rule-bake-the-binaries-build-the-amoebius-image-pull-only-in-cluster) — the single distribution rule (bake the binaries, build the amoebius image,
+pull only in-cluster),
 delivered by [phase_25_base_image_registry.md](phase_25_base_image_registry.md) and
 recorded as resolved in the README "Later phases" note. It is named here only to close the question: do not
 re-open it as a candidate phase.
@@ -364,8 +364,8 @@ enforcement. Promoting that gate is required before an rke2 mutation continuatio
 ## Related Documents
 
 - [README.md](README.md) — the live tracker; the `59+ — Later phases` row this document expands
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook (§D skeleton, §E one-phase
-  model, §K honesty, §L one-substrate) every candidate obeys at promotion
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook ([§D](development_plan_standards.md#d-the-per-phase-document-skeleton) skeleton, [§E](development_plan_standards.md#e-one-canonical-phase-model) one-phase
+  model, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) honesty, [§L](development_plan_standards.md#l-one-substrate-discipline) one-substrate) every candidate obeys at promotion
 - [overview.md](overview.md) — target architecture and constraints these candidates extend
 - [system_components.md](system_components.md) — target component inventory a promoted candidate adds to
 - [substrates.md](substrates.md) — substrate registry; each candidate's provisional substrate is recorded here

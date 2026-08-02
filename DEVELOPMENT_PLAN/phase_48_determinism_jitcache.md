@@ -34,10 +34,14 @@ transitions are recorded reverse-chronologically here once work begins.
 
 ## Phase Summary
 
-This phase turns the content-addressed store delivered in Phase 37 into a reusable **determinism kernel** and,
-on top of that kernel, delivers the first live amoebius realization of the ML-asset lifecycle's Tier 1 — the
-**engine** — as one bounded, content-addressed, resolve-on-first-miss cache. It owns two seams that meet at the
-`ContentAddress` primitive and stops there.
+This phase turns the content-addressed store delivered in Phase 37 into one cohesive **reproducible resolved-
+asset lifecycle**. Its ordered sprint seams first establish the shared determinism identity and then use that
+identity in the first live ML-engine cache; the integrated claim is that a named engine is reproducibly
+identified, bounded, materialized once, and reused by content address. The phase stops before model/kernel
+artifact lifts.
+
+**Phase scope:** the reproducible resolved-engine lifecycle on one linux-cpu cluster, ending in one Register-3
+gate; split if work adds another asset tier, substrate, final register, or independently useful live capability.
 
 **The determinism kernel.** First, it lifts Phase 37's concrete blob/manifest key renderers into a kernel-level
 `ContentAddress` typeclass, so the rule that *a content-derived name cannot be forged* is one reusable primitive
@@ -115,7 +119,7 @@ behaviour is explicitly out of contract. Nothing about deriving `experimentHash`
 provision-derived peak `≤ CacheBudget` rejection requires live infrastructure — those stay pure (Registers 1–2)
 — but the phase gate is the live linux-cpu proof.
 
-**Register:** 3 — live infrastructure (§K): the reproducibility recomputes, the first-miss materialization, and
+**Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)): the reproducibility recomputes, the first-miss materialization, and
 the second-pod reuse run against real pods on the live cluster, and the run emits a proven/tested/assumed ledger
 naming that register.
 
@@ -265,10 +269,9 @@ backendQuotaBytes` may continue, and physical capacity separately fits backend-a
 retained/saving snapshots, and defrag old+new workspace. One-byte logical/physical shortages and
 `drop_api_object_demand.dhall`, `drop_etcd_churn.dhall`, or `drop_etcd_model.dhall` reject before any Pod
 creation. `provision` derives one `KubeletRuntimeMetadataShape` per planned Pod slot from that Pod's exact
-runtime-metadata source and container/volume graph under the selected node's pinned `kubeletMetadataModel`;
-SplitRuntime charges kubelet components to nodefs and CRI components to imagefs/containerfs, Unified and
-SplitImage sum forced aliases before one backing check, and no physical runtime-metadata debit is repeated as
-logical Pod ephemeral storage. The gate harness and its filesystem/network/argv observer are a bounded
+runtime-metadata source and container/volume graph under the selected node's pinned `kubeletMetadataModel`.
+The canonical role/layout projection maps those components to named carves and collapses aliases before the
+capacity check; its physical debit remains separate from logical Pod ephemeral storage. The gate harness and its filesystem/network/argv observer are a bounded
 `HostResourceEnvelope` (executable digest, CPU/memory, capture/log/scratch bytes on a named backing, finite
 probe concurrency, no cache or accelerator); the absolute-path substrate-fingerprint probes, `strace`, and
 egress/CNI capture execute within that envelope, never in sidecar Pods or as resource-free subprocesses.

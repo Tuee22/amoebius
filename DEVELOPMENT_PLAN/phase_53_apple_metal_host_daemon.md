@@ -70,9 +70,9 @@ network restriction, not from transport crypto. The representative fixture expos
 NodePort. A future raw-GET endpoint must be a separately counted read-only Service with read-only credentials,
 no PUT/DELETE/multipart authority and no mutation route; it cannot share the gateway Service identity.
 
-The scope stops at the host-worker shell and its wire. The Metal ML kernel it runs is a **named catalog
-identity the shared jit-build resolver materializes on first miss into the `CacheBudget`-bounded
-content-addressed cache** (Phase 48), never a baked or URL-fetched payload; on the Apple substrate the cache
+The scope stops at the host-worker shell and its wire. [Phase 48](phase_48_determinism_jitcache.md) owns resolution
+of the Metal ML kernel's named catalog entry into the bounded content-addressed jit cache; it is never baked or
+URL-fetched. On the Apple substrate the cache
 artifact is content-addressed source metadata — the rendered MSL plus launch/determinism metadata — not a
 compiled dylib. The daemon carries no cluster-control authority: state-changing coordination flows through the
 same Pulsar/gateway-backed-content-store nervous system every in-cluster worker uses, and the durable side of
@@ -102,7 +102,7 @@ flowchart LR
 single-node cluster in Register 3 (live infrastructure); no linux-cpu, linux-cuda, or windows substrate is
 touched by the gate, and the windows-CUDA host worker is named only as the structurally identical non-gate case.
 
-**Register:** 3 — live infrastructure (§K).
+**Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** an Apple-Silicon host daemon runs a Metal ML workload as a cluster Pulsar/content-store peer over
 host-only NodePorts — one `InForceSpec` in Register 3 brings up the apple-substrate cluster on Lima, exposes
@@ -119,7 +119,7 @@ emits a proven/tested/assumed ledger recording that host-only reachability was
 *tested* (reachable from `127.0.0.1`, unreachable from the LAN) and that no mTLS or bespoke RPC was introduced
 on channel 2, with Apple-Metal physics marked *assumed* (sibling evidence, not an amoebius measurement).
 
-**Gate-integrity clauses (§M).** The gate passes only when all of the following hold; each is authored under
+**Gate-integrity clauses ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** The gate passes only when all of the following hold; each is authored under
 the [§M gate-integrity standard](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)
 and its concrete fixtures are pinned per the [Phase-0 oracle-pinning obligation](#gate-integrity).
 
@@ -168,7 +168,7 @@ and its concrete fixtures are pinned per the [Phase-0 oracle-pinning obligation]
   short raw disk, omitted filesystem/sparse overhead, or one-byte-across-quantum boundary turns the gate red;
   no check may substitute the authorable guest-usable sum for the raw disk or charge the sparse high-water
   twice.
-- **Leak-free, defined (§M).** "Tears down leak-free" at Phase 53 means, asserted by the postflight probe:
+- **Leak-free, defined ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** "Tears down leak-free" at Phase 53 means, asserted by the postflight probe:
   after teardown (a) `limactl list` shows the named VM absent; (b) no worker/bridge subprocess of the host
   binary survives (checked by pgrep of the recorded child PIDs); and (c) the host-side residue set — the
   bridge dylib path, the jit MSL cache dir, and any brew-installed `limactl` marked ephemeral by this run — is
@@ -265,12 +265,10 @@ dispatches and current allocated unified memory to that witness. Omitting a work
 policy domain, supplying a favorable epoch list, or dropping a co-resident overlap so the host fits by one byte
 rejects before bridge/cache/worker effects.
 
-After controller expansion, the binder serializes exhaustive `desiredObjects` for all rendered and derived
-Kubernetes objects, not selected kinds, and joins observed survivors with old/new/apply-before-prune.
-`EtcdLogicalDemand { desiredObjects, churn, model }` includes revisions, Leases and Events; only private
-`ProvisionedEtcdLogicalDemand.derivedPeak <= backendQuotaBytes` may continue. Physical capacity separately fits
-backend-at-quota plus WALs, retained/saving snapshots and defrag old+new workspace. Live object/quota/backend
-readback must equal the witness. One-byte logical/physical shortages and `drop_api_object_demand.dhall`,
+This phase applies the exhaustive desired-object and etcd-capacity protocol established in Phase 41 to the
+Metal worker's complete expanded object set. The private logical witness accounts for revision, Lease, and Event
+churn under the backend quota, while the physical witness separately covers the quota-sized backend, WALs,
+snapshots, and defrag overlap; live readback must equal both. One-byte logical/physical shortages and `drop_api_object_demand.dhall`,
 `drop_etcd_churn.dhall` or `drop_etcd_model.dhall` reject before Lima workload/NodePort apply.
 
 Only the snapshot-bound private provision projections authorize `brew`, Lima, clang, bridge/cache writes,
@@ -670,7 +668,7 @@ transport crypto, close the carve-out so its boundaries cannot be drawn wrong, a
   mutation authority is unrepresentable; an optional raw-GET Service is a distinct read-only arm.
 - The gate `.dhall` (`test/dhall/phase_53_apple_metal_peer.dhall`) is a **generated artifact emitted from
   Haskell at gate-run time and never committed** — its byte-authority is the authored Haskell emitter in
-  `src/Amoebius/HostWorker/Peer.hs` / `HostComms/Illegal.hs`, per development_plan_standards §B (Implementation
+  `src/Amoebius/HostWorker/Peer.hs` / `HostComms/Illegal.hs`, per development_plan_standards [§B](development_plan_standards.md#b-canonical-file-layout-snake_case) (Implementation
   names authored source, never a generated artifact). The committed byte-authority for the type-check negatives is
   instead the green host-comms spec and the four one-field-mutant illegal fixtures under
   `test/dhall/phase_53_illegal/` (authored, committed in Phase 0). The gate `.dhall`, once emitted, drives:

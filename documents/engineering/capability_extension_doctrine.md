@@ -227,10 +227,9 @@ containment edge — a `jit-build` used *by* `jitML` is a peer `jitML` requires,
 ## 6. The merge: total, acyclic, anti-shadow
 
 The extension set is assembled by a single compile/link-time merge. The **anti-shadow** half of that merge is
-already owned by [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability): amoebius adopts hostbootstrap's
-additive `ProjectSpec` stream algebra and its anti-shadow `validateProjectSpec` — the duplicate-id,
-constructor-collision, and empty-suite rejections — so two extensions cannot silently shadow each other's ids or
-constructors. This doctrine extends that merge with the **provide/require graph** checks:
+already owned by [dsl_doctrine.md §4](./dsl_doctrine.md#4-total-composability): its `validateProjectSpec` rules
+are authoritative here and prevent one extension from hiding another. This doctrine adds the
+**provide/require graph** checks:
 
 - **Total.** Every capability named in some extension's `extRequires` is provided by some extension's
   `extCapabilities` or by the core. A required-but-unprovided capability has **no inhabitant** — the merge

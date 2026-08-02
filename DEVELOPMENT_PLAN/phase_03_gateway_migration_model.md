@@ -45,7 +45,7 @@ the spec-decode path.
 **Substrate:** `none` — no host, no cluster. The gate is an in-process check battery (TLC + io-sim +
 explorer), analogous to the Phase-0 documentation lint and the Phase-2 kernel round-trip.
 
-**Register:** 1 — pure/golden, in-process, no cluster (§K).
+**Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** `emitTLA` renders the concrete `GatewayMigration` `Model` to a generated, never-committed
 `.tla`/`.cfg` on which TLC reaches every named **safety** invariant — `UniqueGatewayOwner`,
@@ -77,9 +77,9 @@ seeded shared-resource mutant goes red**, and the decomposition lemma recorded a
 in-process io-sim / reachability explorer over the same `Model`'s `interpret` agrees on the **safety**
 predicates (liveness is TLC-only), io-sim exploring schedules **exhaustively within a committed IOSimPOR
 depth/interleaving bound recorded in the harness and ledger** (not N random seeds), labeled
-**TESTED (bounded-exhaustive schedules)**; and **every** mutant of a mechanical mutation-operator set over the
-fragment (guard negation/weakening, effect swap, dropped effect entry/`UNCHANGED`, quantifier flip, fairness
-drop, invariant-clause delete) is caught, **including a committed per-invariant mutant catalogue (§M.2) that
+**TESTED (bounded-exhaustive schedules)**; and **every operator in the mechanical model-mutation family fixed by
+[Phase 2](phase_02_formal_model_kernel.md#phase-summary)** is caught on this concrete model, **including a committed
+per-invariant mutant catalogue (§M.2) that
 names, for each of the five safety invariants, at least one seeded mutant violating exactly that invariant and
 red in all safety instruments — specifically a `verify-caught-up`-passes-while-offsets-lag mutant caught by the
 data-aware `PlannedIsLossless`, an over-budget-divergence mutant caught by `NoWriteAfterStaleFailover`, and a
@@ -123,7 +123,7 @@ Register 1, in-process, substrate `none`.
   regime, `ColdSeedFromBackup` `freshnessBound` in the modelled freshness regime, offset/log domains within the
   model `CONSTANTS`) together make scope 2 a genuine cutoff, with [§6](../documents/engineering/gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty) (*modelling bounds and honesty*) supplying
   the one over-scope stress run.
-- [`formal_model_doctrine.md §4 — correspondence by construction`](../documents/engineering/formal_model_doctrine.md#4-correspondence-by-construction)
+- [`formal_model_doctrine.md §4 — single-source correspondence`](../documents/engineering/formal_model_doctrine.md#4-single-source-correspondence)
   and [`§6 — what a green model-check proves`](../documents/engineering/formal_model_doctrine.md#6-what-a-green-model-check-proves-and-what-it-does-not):
   because `interpret` and `emitTLA` render one value, there is no variable→module table to maintain; a green
   TLC run is *proven-for-the-model at the bound*, generalized only by the stated [§5](../documents/engineering/formal_model_doctrine.md#5-the-tlacfg-are-generated-never-committed) cutoff.
@@ -225,7 +225,7 @@ proven-for-the-model when green), `documents/engineering/generated_artifacts_doc
 
 ### Objective
 Adopt [`gateway_migration_model_doctrine.md §4`](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove)
-and [`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-correspondence-by-construction):
+and [`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-single-source-correspondence):
 render the one `Model` to a spec via `emitTLA` — a structural walk, never a hand-written `.tla` — and
 exhaustively model-check it at the bounded scope, proving both branches reach every invariant.
 
@@ -279,10 +279,10 @@ ledger variant).
 
 ### Objective
 Adopt [`gateway_migration_model_doctrine.md §4`](../documents/engineering/gateway_migration_model_doctrine.md#4-simulate-and-prove)
-and [`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-correspondence-by-construction):
+and [`formal_model_doctrine.md §4`](../documents/engineering/formal_model_doctrine.md#4-single-source-correspondence):
 drive the lifted pure decision core against `io-classes`/`IOSimPOR`'s deterministic, partial-order-reduced
 scheduler over adversarial interleavings, and demonstrate that both readings of the one value agree — and share
-sensitivity to one seeded fault — the operational form of correspondence-by-construction.
+sensitivity to one seeded fault — the operational form of single-source correspondence.
 
 ### Deliverables
 - The `IOSimPOR` harness asserting the TLC-mirrored **safety** predicates on schedules explored
@@ -443,7 +443,8 @@ The whole sprint (📋 Planned).
   **proven-for-the-model** (TLC) / **tested-for-design** (io-sim) at green, for both branches; keep the §6
   Register-3 chaos injection against a running forest deferred to the multi-cluster phase.
 - `documents/engineering/formal_model_doctrine.md` — record the concrete `GatewayMigration` `Model` as
-  authored and validated, and correspondence-by-construction discharged for this one model.
+  authored and validated, with single-source correspondence checked for this model and across the generated
+  fragment corpus.
 - `documents/engineering/backup_recovery_doctrine.md` — the §8 gateway dovetail: at green, the
   `FreshnessWitness` / `NoTakeWithoutProvenFreshness` proof flips to proven-for-the-model at model scope.
 - `documents/engineering/generated_artifacts_doctrine.md` — register the emitted `GatewayMigration.{tla,cfg}`
@@ -471,7 +472,7 @@ The whole sprint (📋 Planned).
 - [Gateway Migration Model Doctrine](../documents/engineering/gateway_migration_model_doctrine.md) — the one
   obligation, both branches, the `Model`, the cutoff, and the per-`InForceSpec` structural fit
 - [Formal Model Doctrine](../documents/engineering/formal_model_doctrine.md) — the one `Model` →
-  {`interpret`, `emitTLA`} pattern and correspondence-by-construction
+  {`interpret`, `emitTLA`} pattern and single-source correspondence
 - [Chaos & Failover Doctrine](../documents/engineering/chaos_failover_doctrine.md) — the Extract→Model→Inject
   methodology and the proven/tested/assumed ledger
 - [Conformance Harness Doctrine](../documents/engineering/conformance_harness_doctrine.md) — the Register-1

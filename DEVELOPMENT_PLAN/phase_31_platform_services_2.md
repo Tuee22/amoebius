@@ -67,14 +67,14 @@ The scope stops at *standing these services up HA, bringing the whole stack up i
 proving the mandated Patroni configuration and DAG derivation*. The **Keycloak-owned ingress edge** — the
 browser surface Grafana and pgAdmin reach a user through — is [Phase 32](phase_32_keycloak_ingress.md); this
 phase brings the observability surfaces up behind no public edge, and they reach a user only once that edge
-exists. The Deployment-`replicas=1` control-plane singleton that will eventually *own* this reconcile loop is
-[Phase 33](phase_33_live_dsl_singleton.md); here the reconciler is driven from the operator/host path against a
-fixed, hand-assembled service set.
+exists. The Deployment-`replicas=1` control-plane singleton does not assume ownership until
+[Phase 33](phase_33_live_dsl_singleton.md). Until then, a host-side operator drives this phase's fixed service
+set.
 
-**Substrate:** linux-cpu (§L) — the whole gate runs on a single-node `kind` cluster on a linux-cpu host; no
+**Substrate:** linux-cpu ([§L](development_plan_standards.md#l-one-substrate-discipline)) — the whole gate runs on a single-node `kind` cluster on a linux-cpu host; no
 apple, linux-cuda, or windows substrate is touched in Phase 31.
 
-**Register:** 3 — live infrastructure (§K); a real bring-up on a real cluster, emitting the honesty ledger
+**Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)); a real bring-up on a real cluster, emitting the honesty ledger
 that names Register 3 and marks the runtime layer *tested*, not proved.
 
 **Gate:** on the Phase-30 backbone cluster the remaining standard services — the Percona operator, the
@@ -92,7 +92,7 @@ the reconciler's wait-for-ready, the bring-up order asserted a pure function of 
 **external-observer bring-up trace** (not a self-report), with a hardcoded sequential list foreclosed by a
 committed mutant and the async-default Patroni configuration foreclosed by a committed mutant.
 
-**Gate integrity (§M).** The gate is closed to a stub by the pinned cross-checks below, all authored and
+**Gate integrity ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** The gate is closed to a stub by the pinned cross-checks below, all authored and
 committed in **Phase 0** before any `src/Amoebius/Platform/*` implementation exists (§M.1 oracle-pinning), and
 named as gate oracles in the Sprint 31.1–27.3 Deliverables:
 
@@ -124,24 +124,21 @@ named as gate oracles in the Sprint 31.1–27.3 Deliverables:
   catalog; any digest not in that catalog, or any `docker.io`/`quay.io`/other public-registry reference (including
   an upstream image pre-side-loaded with `kind load`), fails. The pull-observation window is the
   containerd/CRI image-pull event log on the kind node read from the OS boundary over the whole gate window.
-- **Render byte-identity (§M.3 independent provenance).** At gate time the pure `renderAll` is re-run in-process
-  and the SSA-applied object bytes under the `amoebius` field manager MUST be byte-identical to that fresh
-  `renderAll` output — pinning applied manifests to the Phase-26 renderer, so hand-written or `helm
-  template`-derived YAML embedded as string constants fails.
-- **Exact resource-provision identity (§M.3 independent projection).** For every amoebius-owned app, init, and
-  sidecar container, the applied CPU/memory/ephemeral-storage requests and limits are byte-for-byte the
-  projection of the opaque `ProvisionedServiceSpec`; every disk-backed `emptyDir` has a `sizeLimit` covered by
-  that ephemeral-storage ceiling (a kubelet measurement/eviction boundary, not a synchronous quota); every
-  cache owner also enforces its private admission bound, and every PVC/PV presentation and capacity equal the
+- **Applied-manifest oracle (§M.3 independent provenance).** Recompute `renderAll` during the gate and compare its
+  bytes with the normalized SSA objects owned by the `amoebius` field manager. Any hand-authored or embedded
+  third-party YAML therefore diverges from the Phase-26 renderer and fails.
+- **Phase-31 resource witness readback (§M.3 independent projection).** Normalize every live resource-bearing
+  field in this service set and require it to match the opaque `ProvisionedServiceSpec` projection: container
+  CPU/memory/ephemeral bounds, disk-backed `emptyDir` limits, cache admission, and PVC/PV presentation and
+  capacity. The volume fields must equal the
   private `ProvisionedVolumeDemand`'s presentation and backing-rounded `provisionedBytes`, which witness the
   service-derived required usable demand and retained backing;
   every Percona controller, validating webhook, Patroni member, backup/recovery unit, and pgAdmin pod is
   included with its exact old/new/surge/failover envelope, and the database volume peak includes data, WAL,
   checkpoint, failover replay, and recovery overlap;
   and every service in this linux-cpu corpus carries cache `None` and accelerator `None` with no device
-  extended-resource claim. The checker independently recomputes the effective pod reservation/ceiling from
-  app-container sums, sequential and restartable-init-sidecar semantics, and pod/runtime overhead and matches
-  the provisioned placement witness. Presence-only checks over a subset of resources are insufficient.
+  extended-resource claim. An independent calculation combines app containers, both forms of init container,
+  and pod/runtime overhead, then exact-matches the placement witness; a presence-only subset check is insufficient.
 - **Prometheus retained-state identity and boundary (§M.3 independent projection, §M.5 OS-boundary
   observer).** A Phase-0-pinned monitoring oracle independently folds the bounded scrape-sample rate and
   retention into resident blocks, WAL/head, old+new compaction overlap, and derives query/temp headroom from
@@ -152,10 +149,9 @@ named as gate oracles in the Sprint 31.1–27.3 Deliverables:
   WAL/config settings must equal the private witness; NetworkPolicy denies direct query API access. The
   one-byte-under case records zero apiserver/backing effects; the positive
   drives a compaction/restart/query high-water and reads filesystem usage from the mounted-volume boundary.
-- **HA predicate (disambiguation).** "Its HA topology even at `replicas=1`" means the rendered manifest is
-  **byte-identical modulo the replica-count field(s)** to the same service rendered at `replicas=n` (Patroni
-  multi-member) — asserted by a render-diff whose only tolerated difference is the replica count — NOT a
-  standalone/single-member variant that merely avoids a bare Pod.
+- **Replica-count topology parity.** Render-diff the one-replica and multi-replica Patroni projections; only
+  replica-count fields may differ. A separate standalone/single-member configuration therefore cannot masquerade
+  as the HA-capable topology.
 - **Consumer end-to-end (§M.7 concrete corpus).** A `PerconaPGCluster` consumed by nothing does not satisfy
   the gate: the named consumer set is observed to **use** its cluster — authenticating with the credential
   resolved from its Vault `SecretRef` and reading back a SQL row it wrote — not merely that an unattached
@@ -360,10 +356,10 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
   dependency's observed-ready edge (a `runtime-checked` observation from the live object), never a duration;
   the singleton that will later own this loop is [Phase 33](phase_33_live_dsl_singleton.md) (Deployment
   `replicas=1`, no election).
-- The phase-gate harness: bring the whole standard stack up on the Phase-30 backbone cluster and assert the
-  complete set is up, HA-shaped, from generated (never-committed) manifests and baked binaries, with a
-  proven/tested/assumed Register-3 ledger (runtime layer *tested*), and assert every applied execution
-  unit/volume is an exact projection of its complete `ProvisionedServiceSpec`.
+- The phase-gate harness brings the standard stack onto Phase 30's live backbone and observes every required
+  service in its HA-capable shape. It also verifies generated-manifest and baked-binary provenance, exact
+  execution-unit/volume projection from `ProvisionedServiceSpec`, and a Register-3 ledger that labels only the
+  observed runtime layer *tested*.
 - The gate oracles, **authored and committed in Phase 0 before any implementation** (§M.1): a Register-1
   property `prop_bringUpOrderDerivedFromEdges` asserting the derived bring-up order is a pure function of the
   *declared* dependency edges (adding or removing a declared edge changes the order; an introduced cycle is
@@ -392,22 +388,15 @@ phase with the full-stack HA gate whose ordering claim is read from an external-
    hardcoded sequential list with wait-for-ready between steps does not satisfy this and MUST fail the property.
 2. Round-trip MinIO put/get and Pulsar produce/consume against the assembled stack; assert Postgres is a
    Patroni cluster, never a bare Pod, carrying the mandated synchronous config (the Sprint 31.1 oracle).
-3. Assert the whole standard stack is up and HA-shaped from generated manifests + baked-binary images.
-   "HA-shaped" is the render-diff predicate: each service's applied manifest is byte-identical **modulo the
-   replica-count field(s)** to the same service rendered at `replicas=n` (MinIO erasure-set, Pulsar
-   multi-broker/ZooKeeper/bookie, Patroni multi-member), not a standalone/single-broker variant. **Manifest provenance
-   (§M.3):** re-run the pure `renderAll` in-process at gate time and assert the SSA-applied object bytes under the
-   `amoebius` field manager are byte-identical to that output, foreclosing hand-written or `helm
-   template`-derived YAML. **Image provenance (§M.5):** "no public-registry pull recorded" is read from the
-   containerd/CRI image-pull event log on the kind node (the OS-boundary observer) over the whole gate window,
-   **and** every running container's `imageID` digest MUST equal the Phase-25 baked base digest committed in
-   `test/fixtures/phase31/expected-base-digest.txt` and present in the in-cluster `distribution` catalog — any
-   other digest or public-registry reference (including a `kind load` side-load) fails. **Resource-provision
-   identity:** compare every applied app/init/sidecar CPU/memory/ephemeral-storage request+limit, bounded
-   `emptyDir`, PVC/PV capacity, cache-`None`, and accelerator-`None` projection to the opaque
-   `ProvisionedServiceSpec`; recompute each effective pod envelope including ordinary and restartable-init
-   sidecar semantics plus overhead; and
-   require exact equality, not field presence. Emit the Register-3
+3. Assert the complete standard stack is ready and preserves Phase 30's already-gated backbone topology and
+   provenance. For the Phase-31 additions, a one-versus-many replica render diff may change only count fields;
+   Patroni must remain the multi-member projection rather than switch to a standalone variant. Recompute
+   `renderAll` and exact-match its bytes to the normalized SSA objects. Separately, observe the kind node's CRI
+   pull log and require every live `imageID` to equal the Phase-25 base digest in
+   `test/fixtures/phase31/expected-base-digest.txt` and the in-cluster catalog; public or side-loaded alternatives
+   fail. Finally, exact-match every applied resource field to `ProvisionedServiceSpec`, including app/init/sidecar
+   envelopes, bounded `emptyDir`, PVC/PV capacity, the two init-container lifecycle modes, overhead, and the
+   cache-`None`/accelerator-`None` arms. Emit the Register-3
    ledger, runtime layer *tested* not *proven* (Keycloak edge + singleton-owned reconcile marked UNVERIFIED).
 
 ### Remaining Work

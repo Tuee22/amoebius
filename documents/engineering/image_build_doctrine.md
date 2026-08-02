@@ -435,8 +435,8 @@ platform-services adoption work in
 
 ## 8. Build mechanics under the no-env / no-`PATH` contract
 
-amoebius forbids environment variables entirely — including `PATH` — and discovers host tools lazily
-through the substrate's package manager, invoking them by full path
+The host-side build orchestrator accepts no ambient-environment configuration and never searches host `PATH`.
+It discovers tools lazily through the substrate's package manager and invokes them by full path
 ([../../DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md) cross-cutting invariants;
 [substrate_doctrine.md](./substrate_doctrine.md)). The build pipeline lives entirely under that contract,
 which forces a concrete divergence from prodbox's mechanics:

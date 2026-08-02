@@ -98,7 +98,7 @@ are Phases 11/12.
 
 ## Gate integrity
 
-This section is the §M apparatus for the Phase-10 gate — the **bind-core slice** of the source corpus, partitioned
+This section is the [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) apparatus for the Phase-10 gate — the **bind-core slice** of the source corpus, partitioned
 along this seam. It does not duplicate the provision-seal or accelerator corpora, which are owned by
 [Phase 11](phase_11_provision_seal.md) and [Phase 12](phase_12_inference_accelerator_provision.md) respectively.
 
@@ -138,8 +138,8 @@ from the defined operator set — that the gate **must** turn red when substitut
 **Independent reference predicates (§M.3).** Every equivalence/exact-match check defines its reference side
 independently of the code under test:
 
-- The **object-node-multiset oracle** is a deep structural diff (per [`service_capability_doctrine.md
-  §5`](../documents/engineering/service_capability_doctrine.md#5-per-cluster-structural-shapes--beyond-values))
+- The **object-node-multiset oracle** is a deep structural diff (per
+  [`service_capability_doctrine.md §5`](../documents/engineering/service_capability_doctrine.md#5-per-cluster-structural-shapes--beyond-values))
   that counts the provider object graph's member elements (`Distributed { nodes = n }` → n member elements,
   `SingleNode` → 1) — **not** `bind`'s own fold or case analysis; it **fails on a plain `/=`, a scalar-only edit,
   or a copied shape tag**.
@@ -219,8 +219,8 @@ the engine actually resolving into its bounded cache) deferred to the live band,
   jit-resolve of any engine) marked UNVERIFIED, owned by the live band.
 
 The provision/fold ordering — expand every provider/shape first, then run the capacity folds, then hand only the
-checked result to render ([`resource_capacity_doctrine.md
-§3`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)/[`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting))
+checked result to render
+([`resource_capacity_doctrine.md §3`](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)/[`§4`](../documents/engineering/resource_capacity_doctrine.md#4-the-total-fold-fits-carve-place-and-the-nesting))
 — is deliberately **not** adopted here; it is owned by [Phase 11](phase_11_provision_seal.md). This phase stops
 at the wholly unprovisioned `BoundDeployment`.
 
@@ -409,8 +409,8 @@ illegal_product_in_app,illegal_engine_by_url,illegal_shape_in_app,illegal_unboun
 illegal_unbuilt_provider,illegal_cyclic_extension,illegal_shadowing_extension}.dhall` — target paths, not yet
 built. The `illegal_cyclic_extension` (a provide-and-require self-loop) and `illegal_shadowing_extension` (an
 anti-shadow merge) negatives each pair with a minimal legal `{infernix, jitML}` positive and fail Gate 2 at the
-committed `extRequires`-graph locus ([`capability_extension_doctrine.md
-§3`](../documents/engineering/capability_extension_doctrine.md#3-the-provide-and-require-contract)).
+committed `extRequires`-graph locus
+([`capability_extension_doctrine.md §3`](../documents/engineering/capability_extension_doctrine.md#3-the-provide-and-require-contract)).
 **Blocked by**: Sprint 10.1, Sprint 10.2; Phase 4 gate (the positive Gate-1 corpus); Phase 6 gate (the
 validation-locus ledger + coverage-assertion machinery this gate reuses).
 **Independent Validation**: `cabal test capability-bind-spec` is green — see below.

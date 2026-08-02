@@ -34,13 +34,13 @@ Two facts from the doctrine make this discipline enforceable rather than aspirat
   architecture, GPU presence) and classified into one of four members; it is never an operator knob
   ([`substrate_doctrine.md` §1](../documents/engineering/substrate_doctrine.md#1-the-substrate-is-a-fact-about-the-host-not-a-knob)).
   A `.dhall` therefore cannot assert a substrate a machine does not have.
-- **Substrate equivalence is near-total.** Every cluster on every substrate stands up the identical standard
-  service set; the *single* lower-layer difference the substrate dictates is the LoadBalancer
-  ([`substrate_doctrine.md` §7 — the LoadBalancer is the one substrate-driven platform difference](../documents/engineering/substrate_doctrine.md#7-the-loadbalancer-is-the-one-substrate-driven-platform-difference),
+- **The standard service contract is target-independent.** The lower-layer LoadBalancer backend is derived from
+  the materialized compute engine/provider, not from the detected substrate alone
+  ([`substrate_doctrine.md` §7 — the LoadBalancer backend mapping](../documents/engineering/substrate_doctrine.md#7-the-loadbalancer-is-the-one-substrate-driven-platform-difference),
   reinforced by
   [`platform_services_doctrine.md` §12 — substrate equivalence as a structural invariant](../documents/engineering/platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant)).
-  So a gate written for `linux-cpu` differs from the same work on a provider substrate only at the LB and DNS
-  layers, never in the service set.
+  Thus a managed-provider gate retains the same core service set as a `linux-cpu` self-managed gate; provider
+  LB/DNS integrations do not create a different platform inventory.
 
 > **Honesty.** The whole amoebius suite is greenfield: nothing in the table below is implemented. Every
 > `Status` cell is 📋 Planned and every substrate row is a **target gate**, not an exercised result. Where
@@ -156,7 +156,7 @@ it has no host to detect and no `LinuxHost` witness. It is the `Managed Eks` arm
 | Provider account | Required authored `Managed Eks.account : CloudAccountId`; it exact-joins the account quota ledger, credentials, observation, and every derived `ProviderInstanceId` |
 | Node capacity | From exact declared `ProviderNodeClass { name, sku, allocatable, quotaVcpu, zones, price, baseCount, maxCount }` values, not the managed control plane. `allocatable` is the complete `ProviderNodeCapacityTemplate { allocatableCpu, allocatableMemory, podSlots, cniSlots, attachableVolumes, localDisks, cpuOvercommit, localStorage, accelerator }`; each `localDisks` entry is a `PerInstanceDiskTemplate` with raw `InstanceStore.provisionedRawBytes` or an `EphemeralRootEbs` policy and usable `ProviderUsableDiskCarveTemplate.requiredUsableBytes` system/layout carves. Each selected instance becomes a distinct privately provisioned capacity before folding ([`resource_capacity_doctrine.md` §3](../documents/engineering/resource_capacity_doctrine.md#3-the-types-quantity-capacity-demand-budget)) |
 | Storage ceiling | Three non-interchangeable cases: SKU-pinned `InstanceStore.provisionedRawBytes` is per-instance raw supply and spends no EBS quota; an `EphemeralRootEbs` root derives and spends a provider-rounded raw request under `ProviderQuota.nodeRootStorage`; retained durable EBS uses the `Ebs` `StorageBacking` arm and spends `ProviderQuota.durable`. For either node-disk arm, private `ProvisionedPerInstanceDiskTemplate` derives presentation-pinned `mountedUsableBytes` before proving the usable system reserve plus unique usable carves fit. The `CloudQuota` arm is only provider-object byte/count quota. The never-sum-raw-and-usable ceiling and the quota-bounded `ScalingPolicy` escape valve are owned by [`resource_capacity_doctrine.md` §5](../documents/engineering/resource_capacity_doctrine.md#5-storagebudget-bounded-by-construction-single-owner-ceiling-per-arm) / [§6](../documents/engineering/resource_capacity_doctrine.md#6-growable--scalingpolicy-the-quota-bounded-dynamic-provisioning-arm) |
-| LoadBalancer | Cloud LoadBalancer (the one substrate-driven difference, [`substrate_doctrine.md` §7](../documents/engineering/substrate_doctrine.md#7-the-loadbalancer-is-the-one-substrate-driven-platform-difference)) |
+| LoadBalancer | Cloud LoadBalancer (derived from the `Managed Eks` provider materialization; [`substrate_doctrine.md` §7](../documents/engineering/substrate_doctrine.md#7-the-loadbalancer-is-the-one-substrate-driven-platform-difference)) |
 | Gate phase(s) | Phases 44–47 (the four provider split phases; the `linux-cpu` parent drives the deploy; the provider target is not a hardware substrate) — owned by [§4](#4-per-phase-substrate-map) |
 | Status | 📋 Planned |
 
@@ -165,7 +165,7 @@ it has no host to detect and no `LinuxHost` witness. It is the `Managed Eks` arm
 ## 3. Virtualized substrates: Lima / WSL2
 
 When the host is not natively Linux, amoebius synthesizes a Linux host in a VM and then treats it as an
-ordinary Linux substrate — same charts, same services, same DSL — per
+ordinary Linux substrate — same typed service projections, same services, same DSL — per
 [`substrate_doctrine.md` §4 — virtualized substrates: synthesizing a Linux host where the host is not Linux](../documents/engineering/substrate_doctrine.md#4-virtualized-substrates-synthesizing-a-linux-host-where-the-host-is-not-linux).
 The VM is plumbing; the substrate the cluster sees is Linux. These are **providers**, not catalog members — a
 Lima VM on Apple presents as `linux-cpu` to everything above it.

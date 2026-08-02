@@ -74,7 +74,7 @@ runtime proof.
 accelerator-provision fold + property/corpus battery, analogous to the Phase-9 accelerator fold and the
 Phase-11 provision seal.
 
-**Register:** 1 — pure/golden, in-process, no cluster (§K).
+**Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** the `InferenceEngine` capability and its accelerator provision are green under `cabal test` — the
 `legal_inference_cuda` positive (and the `legal_inference_{singlenode,distributed}` shape pair) binds to a
@@ -189,7 +189,7 @@ Validations above.
   `checkCoverage`, so a generator emitting only a near-constant favorable epoch fails coverage rather than
   vacuously passing.
 
-- **Boundary directions (§M).** Exact-fit accelerator-epoch boundaries **accept** (the largest policy-permitted
+- **Boundary directions ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** Exact-fit accelerator-epoch boundaries **accept** (the largest policy-permitted
   co-resident epoch equals net allocatable VRAM to the byte; the shard sum equals the residency total; the
   device count equals the owner requirement) and each minimally-differing one-device/one-byte-short pair
   **rejects**, exercising both directions of every boundary.

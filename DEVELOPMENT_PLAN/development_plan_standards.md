@@ -94,7 +94,7 @@ Every `phase_NN_<slug>.md` follows this skeleton:
 
 ## Phase Summary
 <what this phase owns, declarative; the objective and scope>
-**Session scope:** <one primary implementation seam, one acceptance command, and the explicit split trigger>
+**Phase scope:** <one cohesive capability claim, its sprint seams, one acceptance command, and the explicit split trigger>
 **Substrate:** <none | apple | linux-cpu | linux-cuda | windows> ([§L](#l-one-substrate-discipline))
 **Register:** <1 pure/golden · 2 boundary-with-fakes · 3 live · 1/2 only for Phase 14 · — for Phase 0> ([§K](#k-honesty-proven--tested--assumed))
 **Gate:** <the concrete acceptance test that must pass before the next phase opens>
@@ -114,9 +114,9 @@ Every `phase_NN_<slug>.md` follows this skeleton:
 
 `Phase Summary` is declarative present tense ("this phase stands up …"), not a promise log. The **Gate** is a
 single, checkable acceptance condition — ideally an `InForceSpec` topology that spins resources up, runs a
-workflow, and tears them down. **Session scope** is the enforceable phase-size declaration owned by
-[§O](#o-single-session-phase-scope); omitting it or naming more than one independently releasable seam makes the
-phase incomplete.
+workflow, and tears them down. A phase may state an optional **Phase scope** or legacy **Session scope** note;
+the enforceable sizing rules are owned by [§O](#o-single-session-phase-scope) and apply whether or not that
+summary note is present.
 
 **Two optional sections have fixed slots and fixed names**, both in the gate-detail block between
 `## Phase Summary` and `## Doctrine adopted`, in this order. A phase whose gate-integrity apparatus (the
@@ -441,37 +441,38 @@ complete has a documented reverse move rather than an ad-hoc one.
 
 ---
 
-## O. Single-session phase scope
+<a id="o-single-session-phase-scope"></a>
 
-A phase is an implementation session, not a milestone container. A phase that requires several independently
-reviewable implementations makes failure localization ambiguous and leaves the next phase blocked on an
-unbounded work packet.
+## O. Sprint-sized seams and bounded phase gates
 
-The tempting alternative is to retain a broad phase and divide it into many sprints. That preserves a short
-tracker but not a short gate: the phase cannot complete until every independent seam lands, and its acceptance
-command can pass while hiding which seam supplied the observed behaviour.
+A **sprint** is the implementation-session unit; a **phase** is the smallest cohesive capability claim that
+needs an integrated acceptance gate. This matches the plan's existing hierarchy: a phase may require several
+ordered implementation seams, but each sprint isolates one seam and its independent validation so the final
+gate cannot hide which part supplied the behaviour.
 
-amoebius applies the following phase-size contract:
+amoebius applies the following scope contract:
 
-1. A phase owns **one primary implementation seam**: one algebra, one interpreter, one boundary adapter, one
-   live deployment transition, or one fault/isolation claim.
-2. A phase has **one acceptance command in one register on at most one substrate**. Pure semantics and a
-   boundary fake, or functional deployment and HA failover, are separate phases.
-3. The phase may include supporting fixtures, tests, docs, and mechanical wiring required to validate that
-   seam. It may not absorb another artifact that has its own useful independent gate.
-4. The planned work must be completable in one uninterrupted engineering session. The `Session scope` field
-   names the seam and a concrete split trigger, such as a second public algebra, second runtime process,
-   second register, second substrate, or second independently meaningful acceptance claim.
-5. One sprint is the default. More than one sprint is permitted only when each later sprint is test/docs
-   support for the same seam and none has an independently useful completion state. A phase with two
-   implementation sprints is split.
-6. A phase that discovers its split trigger during implementation stops without widening its gate; the plan is
-   amended into contiguous successor phases before work resumes.
+1. Each sprint owns **one primary implementation seam**: one algebra, interpreter, boundary adapter, runtime
+   process change, live transition, or fault/isolation claim. Supporting fixtures, tests, documentation, and
+   mechanical wiring may ride that sprint.
+2. A phase groups only seams needed for **one cohesive end-to-end capability claim**. The phase summary names
+   that claim; every implementation sprint must be necessary to its gate or be moved to another phase.
+3. A phase has **one acceptance command in one register on at most one substrate**. Sprint validations may be
+   pure or boundary-local prerequisites, but the phase's claimed evidentiary strength is only the named final
+   register. A second final register, second substrate, or independently useful acceptance claim triggers a
+   phase split.
+4. Every implementation sprint has an independently checkable validation and a concrete completion state.
+   The phase gate enumerates or composes those validations; it may not replace them with one broad success bit.
+5. A sprint must be completable in one uninterrupted engineering session. If a sprint acquires a second
+   public algebra, runtime process, or independently meaningful validation, that sprint is split before work
+   continues.
+6. A phase that discovers a second capability claim during implementation stops without widening its gate;
+   the plan is amended into contiguous successor phases before work resumes.
 
-The contract forecloses milestone-sized phases and multi-register acceptance batteries. It does not impose a
-source-line estimate: generated fixtures, exhaustive negative corpora, and doctrinal explanation can be large
-while the implementation seam remains singular. The README tracker and every phase's `Session scope` field are
-the auditable sizing record.
+The contract forecloses unbounded milestone phases while permitting a dependency-ordered seam chain such as a
+typed kernel followed by the one live consumer that establishes the phase's integrated claim. It does not
+impose a source-line estimate: generated fixtures, exhaustive negative corpora, and doctrinal explanation can
+be large. The sprint blocks, phase summary, and phase gate are the auditable sizing record.
 
 ---
 

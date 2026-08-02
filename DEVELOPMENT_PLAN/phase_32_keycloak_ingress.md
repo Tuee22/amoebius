@@ -44,7 +44,7 @@ host binary against the fixed standard service set that Phases 30–31 stood up.
 piece — the Envoy + Gateway API data plane replacing a hand-configured proxy — is the least evidence-backed
 part of the set.
 
-**Substrate:** linux-cpu (§L) — the edge is wired and gated on a single-node `kind` cluster on a linux-cpu
+**Substrate:** linux-cpu ([§L](development_plan_standards.md#l-one-substrate-discipline)) — the edge is wired and gated on a single-node `kind` cluster on a linux-cpu
 host, tracked in [substrates.md](substrates.md); no apple, linux-cuda, or windows substrate is touched.
 
 **Register:** 3 (live infrastructure) — the gate drives a real edge on a real cluster and re-exercises a live
@@ -184,7 +184,7 @@ serves Keycloak's DB password and the edge TLS material as `SecretRef`s)
 ### Objective
 Adopt [`platform_services_doctrine.md` §9 — the LoadBalancer and the single wild-ingress path](../documents/engineering/platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path):
 make Keycloak the single authenticated ingress point, fronted by Envoy + the Gateway API, atop the
-MetalLB LoadBalancer — the one substrate-driven difference — with the [§11 ordering edges](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering)
+MetalLB backend selected for this phase's self-managed `kind` engine, with the [§11 ordering edges](../documents/engineering/platform_services_doctrine.md#11-bring-up-and-dependency-ordering)
 observed as readiness conditions, not durations.
 
 ### Deliverables

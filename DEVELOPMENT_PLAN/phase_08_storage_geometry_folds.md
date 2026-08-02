@@ -74,8 +74,8 @@ byte requirement against a named backing, and the closed storage-budget arithmet
   `NoChange | AllocateWithinRetainedCarve | CreateProviderCapacity | ShrinkByVerifiedMigration`, witnessing
   current allocation, residual/quota, and old+new migration high-water.
 
-In the catalog's historical layer taxonomy these are **decode-foreclosed** total checks over constructible
-values, never type-inhabitance claims; their concrete validation locus is `provision-seal`. Because the storage
+These storage checks consume constructible values and may reject them at `provision-seal`; in the catalog
+vocabulary they are **decode-foreclosed**, not type-inhabitance claims. Because the storage
 `Σ ≤ backing` sum is decidable in **both** directions (unlike the sound-not-complete compute `place`), this
 phase proves the stronger **accept ⟺ in-envelope** equivalence for the geometry fold.
 
@@ -96,7 +96,7 @@ arms, and [Phase 47](phase_47_provider_dynamic_nodes.md) enacts the `CreateProvi
 **Substrate:** none — no host, no cluster, no backing; the gate is an in-process `cabal test` storage-geometry
 fold + QuickCheck battery, analogous to the Phase 5 decode battery and the Phase 6 property suite.
 
-**Register:** 1 — pure/golden, in-process, no cluster (§K).
+**Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** the logical→physical storage-geometry fold holds under QuickCheck — every generated in-envelope
 producer yields a physical demand that fits its single-owner backing and the fold is **provably total**
@@ -210,10 +210,9 @@ duplicate that corpus — it partitions it along the storage seam.
   Field-deletion operators are explicit members of this battery: delete one OCI stored object, snapshot chain,
   registry upload bound, root-backing policy/quota, or Vault Raft/audit operand and require a **structured
   rejection** rather than treating absence as zero or falling back to an aggregate.
-- **Provably total (§M totality honesty).** Discharged by *both* a compile-time gate
-  (`-Werror=incomplete-patterns` / `-Werror=incomplete-uni-patterns` on every storage fold module, no `error`,
-  no partial `head`/`fromJust`) **and** the sampled QuickCheck no-crash run; a green sample alone does not
-  satisfy the gate.
+- **Totality gate ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** Every storage fold module must compile with
+  `-Werror=incomplete-patterns` and `-Werror=incomplete-uni-patterns`, without `error`, partial `head`, or
+  `fromJust`; the QuickCheck no-crash sample is an additional check and cannot satisfy totality on its own.
 - **Independent reference predicate (§M.3).** Defined in Sprint 8.3 Deliverables; it never calls
   `bookKeeperPhysicalDemand`, `minioPhysicalDemand`, `provisionObjectStoreProducer`, `registryStoragePeak`,
   `vaultStoragePeak`, `uniformStatefulSetClaims`, or the Pulsar/cache/provider-root folds, deriving the complete
@@ -381,8 +380,8 @@ declared logical numbers only (the substrate backing inventory and PV sizes are 
    old+new/temp/WAL, and Vault Raft/compaction/recovery/audit peaks. An over-backing or un-tiered topic returns
    its tagged `Left`; a cache over its named pool, an in-cluster cache nesting violation, an under-sized
    instance-store root, a root-EBS request outside its separate byte/volume-count quota, and a control-plane
-   transition overrun each return their specific tag naming the offending backing/axis. Exact-fit demand returns
-   `Right Zero`/`Right`, a second debit from that residual rejects, and the folds never throw. Each negative
+   transition overrun each return their specific tag naming the offending backing/axis. Exact fit consumes the
+   available residual exactly; attempting another debit then rejects without any exception. Each negative
    asserts **which tag and which axis** it fails on (§M.8), each paired with a store-fits row differing only in
    that one axis being in-backing.
 
@@ -503,12 +502,11 @@ compute `place`.
   healing workspace, one MinIO object whose parity padding rounds over its backing, and a topic whose logical
   hot bytes fit but whose write-quorum placement exceeds one bookie are each rejected independently of the fold
   under test.
-- A totality guard discharged **both ways** (§M totality honesty): (a) a compile-time exhaustiveness gate —
+- A totality guard discharged **both ways** ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) totality honesty): (a) a compile-time exhaustiveness gate —
   every `Amoebius.Capacity.{Storage,StorageGeometry,ServiceStorage,Growable,StorageScaling}` module compiles
   under `-Werror=incomplete-patterns` / `-Werror=incomplete-uni-patterns` with no `error` and no partial
-  `head`/`fromJust`; **and** (b) the sampled QuickCheck run in which every generator exercises the fold on
-  arbitrary constructible inputs and no input yields an exception, `error`, or partial match. A green sample
-  alone does not satisfy this guard.
+  `head`/`fromJust`; **and** (b) a QuickCheck sample that drives every generator through the fold and observes no
+  partial match, explicit `error`, or exception. Sampling is corroborating evidence, not the totality proof.
 
 ### Validation
 1. The property battery is green with every fold meeting its coverage minimum; and **each committed mutant in
@@ -533,9 +531,9 @@ committed in Phase 0 before the implementation exists (§M.1, [Gate integrity](#
 forty-one-fixture corpus.
 **Blocked by**: Sprint 8.1, Sprint 8.2, Sprint 8.3; Phase 4 gate (the positive Gate-1 corpus).
 **Independent Validation**: the gate applies the Phase-8 storage-geometry folds directly to each hand-authored
-logical-demand/backing fixture — no `bind`, `planInfrastructure`, `ProvisionContext`, or `provision` call (those
-are [Phase 10](phase_10_capability_bind.md)/[Phase 11](phase_11_provision_seal.md) deliverables, and the
-Phase-11 gate re-exercises these same folds through its post-bind provision seal) — so each positive row fits
+logical-demand/backing fixture. Binding and whole-deployment provisioning belong to
+[Phase 10](phase_10_capability_bind.md) and [Phase 11](phase_11_provision_seal.md); this gate intentionally tests
+the lower fold boundary. Each positive row fits
 its backing feasibly and each negative fixture returns the fold's structured `ProvisionError`/`Left` on its
 isolated over-backing axis — **each negative asserting its specific expected tag** (e.g.
 `illegal_store_over_backing` → `Left (StorageOverBacking …)`, `illegal_hot_tier_over_bookie` →
@@ -602,9 +600,8 @@ honest foreclosure layer of each.
    ([Gate integrity](#gate-integrity) representative set) returns its **specific committed** tagged `Left`, both
    positive fixtures' storage-geometry rows fit feasibly, the QuickCheck battery holds at its coverage minima,
    and the committed per-geometry seeded-mutant battery ([Gate integrity](#gate-integrity)) turns the suite red
-   individually; the suite is red if any storage-geometry negative provisions to `Right` or to the wrong tag;
-   the validation-locus ledger is present and honestly classifies each foreclosure, marking the runtime residue
-   UNVERIFIED.
+   individually. A negative that provisions successfully or returns the wrong tag is a failure; the ledger must
+   keep live-only storage behavior explicitly UNVERIFIED.
 
 ### Remaining Work
 The whole sprint (📋 Planned).

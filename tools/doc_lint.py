@@ -195,6 +195,84 @@ class Doc:
         self._index_headings()
         self.header = "\n".join(self.lines[:40])
         self.section_of = self._index_sections()
+        self.task_note_lines = self._index_task_notes()
+        self.non_normative_lines = self._index_non_normative_lines()
+
+    def _index_non_normative_lines(self):
+        """Index structural plan metadata that is repeated by the required skeleton."""
+        if not self.is_plan:
+            return set()
+        marked = set()
+        count = len(self.stripped_lines)
+
+        i = 0
+        while i < count:
+            if re.match(r"^\s*\*\*(Substrate|Register):\*\*", self.stripped_lines[i]):
+                end = i + 1
+                while end < count and self.stripped_lines[end].strip():
+                    end += 1
+                marked.update(range(i + 1, end + 1))
+                i = end
+                continue
+            i += 1
+
+        i = 0
+        while i < count:
+            if not re.match(r"^###\s+Remaining Work\s*$", self.stripped_lines[i]):
+                i += 1
+                continue
+            end = i + 1
+            while end < count and not self.stripped_lines[end].lstrip().startswith("#"):
+                end += 1
+            marked.update(range(i + 1, end + 1))
+            i = end
+        return marked
+
+    def _index_task_notes(self):
+        """Index complete multi-line task-note entries sanctioned by section 4.
+
+        A Docs-to-update field and a Documentation Requirements bullet routinely
+        wrap across lines. The exemption belongs to the whole entry, not only the
+        physical line that happens to contain the `.md` owner name.
+        """
+        marked = set()
+        count = len(self.stripped_lines)
+
+        i = 0
+        while i < count:
+            line = self.stripped_lines[i]
+            if re.match(r"^\s*\*\*Docs to update\*\*\s*:", line):
+                end = i + 1
+                while end < count and self.stripped_lines[end].strip():
+                    end += 1
+                if any(".md" in self.stripped_lines[j] for j in range(i, end)):
+                    marked.update(range(i + 1, end + 1))
+                i = end
+                continue
+            i += 1
+
+        i = 0
+        while i < count:
+            section = self.section_of.get(i + 1, "")
+            if not section.startswith(("Documentation Requirements", "Docs to update")):
+                i += 1
+                continue
+            if not re.match(r"^\s*[-*]\s+", self.stripped_lines[i]):
+                i += 1
+                continue
+            end = i + 1
+            while end < count:
+                candidate = self.stripped_lines[end]
+                if not candidate.strip() or candidate.lstrip().startswith("#"):
+                    break
+                if re.match(r"^\s*[-*]\s+", candidate):
+                    break
+                end += 1
+            if any(".md" in self.stripped_lines[j] for j in range(i, end)):
+                marked.update(range(i + 1, end + 1))
+            i = end
+
+        return marked
 
     def _index_sections(self):
         """Map each line number to the nearest preceding H2 heading text."""
@@ -214,6 +292,8 @@ class Doc:
         bullet, or a `(section-N backlink)` parenthetical is build-task shorthand, not a
         reader cross-reference — provided the owning document is named in that same entry.
         """
+        if i in self.task_note_lines:
+            return True
         section = self.section_of.get(i, "")
         line = self.stripped_lines[i - 1] if 0 < i <= len(self.stripped_lines) else ""
         names_doc = ".md" in line
@@ -397,7 +477,20 @@ NON_NORMATIVE_SECTIONS = (
     "Document index",
     "Phase Status",         # the mandated section-D template line, repeated by design
     "Doctrine adopted",     # citation boilerplate the skeleton prescribes
+    "Planning ownership",   # tracker/status ownership boilerplate, never subsystem doctrine
 )
+
+PLAN_TEMPLATE_PREFIXES = (
+    "This phase instantiates the canonical resource matrix and sealed whole-deployment provision boundary",
+    "This section carries this sub-phase's **slice** of the provider gate apparatus",
+    "Independent reference predicates (§M.3).",
+)
+
+
+def _section_is_non_normative(section):
+    """Recognize a structural section whether or not its heading is numbered."""
+    name = re.sub(r"^\d+(?:\.\d+)*\.\s+", "", section)
+    return name.startswith(NON_NORMATIVE_SECTIONS)
 
 
 def _prose_units(line):
@@ -419,12 +512,19 @@ def _prose_units(line):
 def _normalized_sentences(doc):
     """Yield (line_number, normalized_words) for governed prose sentences."""
     for i, raw in enumerate(doc.stripped_lines, 1):
-        if doc.section_of.get(i, "").startswith(NON_NORMATIVE_SECTIONS):
+        if i in doc.non_normative_lines:
+            continue
+        section = doc.section_of.get(i, "")
+        if _section_is_non_normative(section):
+            continue
+        if doc.is_catalog_slice and section.startswith("1. Scope"):
             continue
         for s in _prose_units(raw):
             if not s or s.startswith((">", "#")):
                 continue                  # quotations and headings are exempt
-            if re.match(r"^\*\*(Status|Supersedes|Referenced by|Generated sections)\*\*:", s):
+            if re.match(r"^\*\*(Status|Supersedes|Referenced by|Generated sections|Substrate|Register)(?:\*\*:|:\*\*)", s):
+                continue
+            if doc.is_plan and s.lstrip("-* ").startswith(PLAN_TEMPLATE_PREFIXES):
                 continue
             if re.match(r"^[-*]\s*\[", s):
                 continue                  # a bullet that is a link citation

@@ -68,7 +68,7 @@ bind/expansion. Phase 7 does not move the folds into `Dhall.inputFile`.
 **Substrate:** none — no host, no cluster; the gate is an in-process `cabal test` fold + QuickCheck battery,
 analogous to the Phase 5 decode battery and the Phase 6 property suite.
 
-**Register:** 1 — pure/golden, in-process, no cluster (§K).
+**Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** `cabal test dsl-spec` is green on the base slice — the `fits`/`podFits`/`carve`/`place` capacity
 fold and the `ComputeEngine`/`Topology` relation are **provably total** (interpreted concretely in
@@ -152,7 +152,7 @@ re-checked here.
   policy) are additional and separately required. The storage-geometry, cache, execution-epoch, runtime-metadata,
   accelerator, and provider-root mutants of the source battery are the property of phases 8 and 9 and are not
   named here.
-- **Provably total (§M totality honesty).** Discharged by *both* a compile-time gate
+- **Provably total ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) totality honesty).** Discharged by *both* a compile-time gate
   (`-Werror=incomplete-patterns` / `-Werror=incomplete-uni-patterns` on every base fold module, no `error`,
   no partial `head`/`fromJust`) **and** the sampled QuickCheck no-crash run; a green sample alone does not
   satisfy the gate.

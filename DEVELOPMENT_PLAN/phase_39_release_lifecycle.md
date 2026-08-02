@@ -34,7 +34,8 @@ composition on primitives amoebius already owns, with **no external CI/CD contro
 Tekton). It composes four values on one substrate. First, the immutable **`Release` ledger**: every built
 generation is an append-only, content-addressed entry keyed by
 `releaseHash = sha256(resolved-deployment-dhall ‖ image-digests ‖ substrate-fp)`, written into the Phase-37
-store — promoting the manifest reconciler's *optional* applied-log to THE canonical, immutable release record.
+store before promotion. The manifest reconciler separately appends an immutable `AppliedGeneration` after the
+selected release converges; candidate identity and application history are not the same record.
 Second, the per-**`Environment`** (`Dev`/`Staging`/`Prod`) **ETag-CAS promotion pointer**: "promote to prod"
 is a compare-and-swap of that environment's pointer from the old `releaseHash` to the new one — not a rebuild;
 app bytes are byte-identical across environments. Third, the **`PromotionGate`**: a typed precondition whose
@@ -51,8 +52,8 @@ The load-bearing property this phase proves live is that **an under-verified `Re
 and a satisfied gate can** — the evidence edge, not an operator's discretion, is what moves the pointer. A
 `Release` whose ledger records the Runtime/chaos layer UNVERIFIED yields no Runtime `EvidenceWitness`, so the
 `Prod` `PromotionGate` supplies no `advance` value and the pointer does not move; a `Release` carrying the
-required evidence strength advances the ETag-CAS pointer, after which the SSA reconciler converges
-`render(release)` through the ordered `RolloutPlan`. The scope deliberately consumes upstream primitives as
+required evidence strength advances the ETag-CAS pointer, after which the SSA reconciler resolves the selected
+release's `deploymentDhallRef` and recomputes desired objects through the ordered `RolloutPlan`. The scope deliberately consumes upstream primitives as
 given: the `releaseHash` formula and the hash/pointer master registry are the Phase-37/Phase-48 store's
 (consumed here as an opaque content-address protocol); the proven/tested/assumed evidence ledger the gate
 reads is the contract owned by `testing_doctrine` (consumed here as an opaque witness; Phase 54 later automates
@@ -63,7 +64,7 @@ work, and the cross-cluster/geo promotion boundary is exercised in Phase 42 — 
 Register 3 (live infrastructure); no apple, linux-cuda, or windows substrate is touched. The ledger/pointer
 protocols and the `PromotionGate` are substrate-agnostic in design but validated only here.
 
-**Register:** 3 — live infrastructure (§K).
+**Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** an `InForceSpec` test topology on the linux-cpu kind cluster exercises the four delivery values
 end-to-end and passes only when all hold. (i) A **live `Release`-ledger write produces a content-addressed
@@ -184,14 +185,14 @@ the section it adopts; individual sprints cite the same sections where they buil
 - [`release_lifecycle_doctrine.md §1`](../documents/engineering/release_lifecycle_doctrine.md#1-no-external-cicd-control-plane--delivery-is-typed-composition-on-primitives-amoebius-owns)
   — *no external CI/CD control plane — delivery is typed composition*: this phase installs no second control
   plane; the whole lifecycle is a handful of typed values composed over the Phase-33 reconciler and the
-  Phase-37 store, with the desired state recomputed as `render(release)` from an immutable value, never polled
-  from a controller's opinion.
+  Phase-37 store, with desired state recomputed from the immutable release's authenticated Dhall reference,
+  never polled from a controller's opinion or replayed from stored YAML.
 - [`release_lifecycle_doctrine.md §2`](../documents/engineering/release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash)
   — *`Release` and the immutable release ledger (`releaseHash`)*: every built generation is an append-only,
-  content-addressed `Release` entry keyed by `releaseHash`, promoting the manifest reconciler's optional
-  applied-log
-  ([`manifest_generation_doctrine.md §6.1`](../documents/engineering/manifest_generation_doctrine.md#61-the-release-ledger-the-applied-log-is-canonical-not-optional))
-  to THE canonical immutable ledger, immutability enforced as runtime-checked content-addressed-write residue.
+  content-addressed `Release` entry keyed by `releaseHash`, written before promotion. After convergence the
+  manifest reconciler appends the distinct `AppliedGeneration` application-history record
+  ([`manifest_generation_doctrine.md §6.1`](../documents/engineering/manifest_generation_doctrine.md#61-the-release-ledger-the-applied-log-is-canonical-not-optional));
+  both records are immutable runtime-checked content-addressed-write residue.
 - [`release_lifecycle_doctrine.md §3`](../documents/engineering/release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer)
   — *`Environment` and the ETag-CAS promotion pointer*: `Dev`/`Staging`/`Prod` is a closed union each naming a
   mutable pointer into the immutable ledger; promotion is an ETag-CAS of that pointer
@@ -230,22 +231,22 @@ the section it adopts; individual sprints cite the same sections where they buil
 **Blocked by**: Phase 37 gate (the three-tier content-addressed store the ledger writes into — blobs ←
 manifests ← pointers); Phase 33 gate (the reconciler whose rendered generations the ledger records) — both
 external earlier-phase prerequisites.
-**Independent Validation**: this suite runs in **Register 3** against the **live single-node kind-cluster
-MinIO** store stood up in Phase 37, never an in-process fake — the register is stated so its evidential weight
+**Live oracle and register**: execute at **Register 3** against the Phase-37 single-node kind cluster's live
+MinIO store, never an in-process fake — the register is stated so its evidential weight
 is unambiguous. A `Release` write emits a `releaseHash` **recomputed by an independent sha256** over
 `resolved-deployment-dhall ‖ image-digests ‖ substrate-fp` (not the amoebius folder's own output) and equal to
 the Phase-0-committed golden key; two writes of the same logical `Release` deduplicate to one entry and return
 the same hash; a second write attempting to edit a field of an existing `releaseHash` entry is **rejected** by
 the content-addressed write protocol (immutability is runtime-checked residue).
 **Docs to update**: `documents/engineering/release_lifecycle_doctrine.md` (§2),
-`documents/engineering/manifest_generation_doctrine.md` (§6.1 — the applied-log promoted to canonical),
+`documents/engineering/manifest_generation_doctrine.md` (§6.1 — append the application record after convergence),
 `DEVELOPMENT_PLAN/system_components.md`, this document.
 
 ### Objective
-Adopt [`release_lifecycle_doctrine.md §2 — the immutable release ledger (`releaseHash`)`](../documents/engineering/release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash),
-promoting the optional applied-log of
-[`manifest_generation_doctrine.md §6.1`](../documents/engineering/manifest_generation_doctrine.md#61-the-release-ledger-the-applied-log-is-canonical-not-optional)
-to THE canonical, content-addressed, append-only release record keyed by `releaseHash`.
+Adopt [`release_lifecycle_doctrine.md §2 — the immutable release ledger (`releaseHash`)`](../documents/engineering/release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash):
+write the canonical, content-addressed candidate before promotion, then append the distinct application record
+owned by [`manifest_generation_doctrine.md §6.1`](../documents/engineering/manifest_generation_doctrine.md#61-the-release-ledger-the-applied-log-is-canonical-not-optional)
+after convergence.
 
 ### Deliverables
 - A `Release` value — `{ releaseHash, deploymentDhallRef, imageDigests, substrateFp }` — written as an
@@ -508,7 +509,7 @@ values end-to-end.
   finalize, where the `finalize` phase enacts retire-old)** over the standing platform stack plus one Postgres — and its `ReleaseLifecycleSpec`: write the
   ledger, refuse the under-verified promotion, advance the satisfied one, roll out in order, and always tear
   down, emitting a per-run ledger artifact.
-- **Phase-0-pinned oracles and committed mutants (authored before the runtime exists):** the committed
+- **Pre-runtime evidence pinned in Phase 0:** the committed
   ordered-apply reference `test/golden/rollout_order.txt` (the expected phase-apply sequence, authored
   independently and matched against the API-server audit observer, not the reconciler's self-report); the
   committed post-migration verify oracle `test/golden/migrated_rows.txt` (the expected verified row set of the
@@ -546,7 +547,7 @@ values end-to-end.
    idempotently under a distinct per-run store namespace** (a cache-bypassing independent recompute of the
    `releaseHash`, never a store-hit), the compute path asserted to have executed.
 5. Assert the run emits a committed **proven/tested/assumed ledger** naming its register (3) and substrate
-   (linux-cpu), marking the **runtime layer tested — never proven** (§K, a live-band Register-3 gate), the
+   (linux-cpu), marking the **runtime layer tested — never proven** ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed), a live-band Register-3 gate), the
    type-foreclosure of promote-unverified→prod proven-in-types but its live wiring tested, and the
    **cross-cluster/geo promotion and the Gateway-API canary weight-shift layers UNVERIFIED** (deferred to
    Phase 42 and a later phase, respectively); skipping an applicable move marks that layer UNVERIFIED, never
@@ -578,9 +579,9 @@ The whole sprint (📋 Planned).
   with the Gateway-API canary weight-shift, the Pulsar consumer-group cutover, and the cross-cluster/geo
   promotion boundary explicitly still deferred (later phase / Phase 42); flip the Phase-0 reference-only honesty
   note to live-proof status for the exercised values (status itself stays in this plan).
-- `documents/engineering/manifest_generation_doctrine.md` — record that §6.1's optional applied-log is
-  promoted to THE canonical release ledger by this phase, and that the §5 SSA reconciler is the tier-(c) engine
-  the `RolloutPlan` enacts on.
+- `documents/engineering/manifest_generation_doctrine.md` — record that §6.1 appends an immutable
+  `AppliedGeneration` after convergence, distinct from the pre-promotion `Release` candidate, and that the §5
+  SSA reconciler is the tier-(c) engine the `RolloutPlan` enacts on.
 - `documents/engineering/testing_doctrine.md` — record that the §4 per-run proven/tested/assumed evidence
   ledger is consumed by the `PromotionGate` as the `EvidenceWitness`, and that a Tier-1-only in-process ledger
   supplies no Runtime witness for `Prod`.
@@ -604,7 +605,7 @@ The whole sprint (📋 Planned).
 - [README.md](README.md) — the live tracker; Phase 39 objective, gate, and substrate
 - [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (skeleton,
   sprint format, the doctrine-citation rule, the register + honesty + one-substrate disciplines, and the
-  §M gate-integrity clauses)
+  [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) gate-integrity clauses)
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (no external CI/CD control
   plane; single-instance delegated to k8s/etcd; the content-addressed store)
 - [system_components.md](system_components.md) — the target component inventory for the module paths above
@@ -613,7 +614,7 @@ The whole sprint (📋 Planned).
   `RolloutPlan`/`RolloutPhase` this phase realizes
 - [Manifest Generation Doctrine](../documents/engineering/manifest_generation_doctrine.md) — [§5](../documents/engineering/manifest_generation_doctrine.md#5-the-applyreconcile-engine-snapshot-bound-typed-actions)
   the SSA reconciler the `RolloutPlan` enacts on, [§6.1](../documents/engineering/manifest_generation_doctrine.md#61-the-release-ledger-the-applied-log-is-canonical-not-optional)
-  the applied-log promoted to the canonical ledger
+  the post-convergence `AppliedGeneration` record
 - [Content Addressing & Determinism Doctrine](../documents/engineering/content_addressing_doctrine.md) — [§2.3](../documents/engineering/content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)
   the hash/pointer master table (`releaseHash`, the `environment` pointer kind) reused for promotion
 - [Testing Doctrine](../documents/engineering/testing_doctrine.md) — [§4](../documents/engineering/testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact)

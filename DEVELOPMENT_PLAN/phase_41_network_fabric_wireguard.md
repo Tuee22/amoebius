@@ -57,7 +57,7 @@ later move.
 module; the representative fabric is two peers (a gateway-role hub node and one spoke) each in its own Linux
 network namespace on that host. No apple, linux-cuda, or windows substrate is exercised by this phase's gate.
 
-**Register:** 3 — live infrastructure (§K). The type-foreclosed and decode-foreclosed layers were proven for
+**Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)). The type-foreclosed and decode-foreclosed layers were proven for
 the model in the pre-cluster band; the runtime layer (the tunnel coming up and carrying traffic) and live
 resource-control/readback layer are **tested** on linux-cpu, never *proven*.
 
@@ -75,7 +75,7 @@ seeded mutants) is itemised in [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
-The gate is hardened as follows (§M) and passes only when every clause below holds:
+The gate is hardened as follows ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)) and passes only when every clause below holds:
 
 - **Concrete representative set (§M.7).** "the fabric" is exactly the two-peer topology of
   `dhall/examples/wireguard_fabric.dhall`: one **gateway-role hub** node (holding a stable hub VPN-IP + stable

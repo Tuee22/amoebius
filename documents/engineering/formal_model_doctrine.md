@@ -5,7 +5,7 @@
 **Referenced by**: DEVELOPMENT_PLAN/later_phases.md, DEVELOPMENT_PLAN/overview.md, DEVELOPMENT_PLAN/phase_00_documentation_suite.md, DEVELOPMENT_PLAN/phase_01_toolchain_spike.md, DEVELOPMENT_PLAN/phase_02_formal_model_kernel.md, DEVELOPMENT_PLAN/phase_03_gateway_migration_model.md, DEVELOPMENT_PLAN/phase_43_gateway_migration_drills.md, DEVELOPMENT_PLAN/system_components.md, documents/engineering/README.md, documents/engineering/chaos_failover_doctrine.md, documents/engineering/conformance_harness_doctrine.md, documents/engineering/deterministic_simulation_doctrine.md, documents/engineering/gateway_migration_model_doctrine.md, documents/engineering/generated_artifacts_doctrine.md, documents/engineering/preflight_validation_doctrine.md, documents/engineering/tla_modelling_assumptions.md
 **Generated sections**: none
 
-> **Purpose**: Single source of truth for how amoebius expresses a concurrent protocol as **one reifiable Haskell `Model` value** from which both the runtime decision function (`interpret`) and the TLA+ specification (`emitTLA`) are total renderings — so the model↔code correspondence holds *by construction*, and the `.tla`/`.cfg` are **generated, never-committed** artifacts.
+> **Purpose**: Single source of truth for how amoebius expresses a concurrent protocol as **one reifiable Haskell `Model` value** from which both the runtime decision function (`interpret`) and the TLA+ specification (`emitTLA`) are total renderings — minimizing drift while differential checks test their correspondence — and the `.tla`/`.cfg` are **generated, never-committed** artifacts.
 
 ---
 
@@ -113,23 +113,23 @@ One `Model` value is consumed by two total functions:
   listed as a `PROPERTY` in the `.cfg` — so TLC checks liveness under the declared fairness, not merely safety.
 
 **Safety is checked by both readings; liveness is checked by TLC only.** The in-process explorer
-([§4](#4-correspondence-by-construction)) is a bounded *reachability* search — it evaluates every safety
+([§4](#4-single-source-correspondence)) is a bounded *reachability* search — it evaluates every safety
 invariant on every reachable state, but it does **not** detect infinite/lasso behaviours and so does **not**
 check `modelProperties`. Liveness is therefore a **TLC-only** verdict; the explorer↔TLC agreement cross-check
 covers safety only. This asymmetry is deliberate (a lasso/SCC liveness checker in-process is a large lift for
 little marginal assurance) and is carried into the honesty ledger ([§6](#6-what-a-green-model-check-proves-and-what-it-does-not)).
 
-The interpreter and the emitter are the *only* two consumers, and each is a faithful denotation of the fragment.
-Their agreement on the meaning of every constructor is what makes the single source trustworthy.
+The interpreter and the emitter are the *only* two consumers, and each is intended to denote the same fragment.
+Their checked agreement on the meaning of every constructor is what makes the single source trustworthy.
 
 ---
 
-## 4. Correspondence by construction
+## 4. Single-source correspondence
 
-Because `interpret` and `emitTLA` are two renderings of one `Model`, there is **no variable→code correspondence
-table and no divergence log** — the artifacts amoebius does not inherit from the prodbox practice. The
-correspondence is a property of the rendering functions, discharged once for all models, not a per-model prose
-obligation.
+Because `interpret` and `emitTLA` are two renderings of one `Model`, there is **no per-model
+variable→code correspondence table and no divergence log**. Sharing the source removes one class of manual
+drift, but it does not prove the two rendering functions semantically equivalent. Renderer faithfulness is one
+reusable meta-obligation, checked across the fragment rather than asserted separately in prose for each model.
 
 Correspondence is made *testable* by a second in-process reading of the same value: a bounded reachability
 explorer over `interpret` (breadth-first over reachable states, pruned by the constraint, checking every
@@ -146,8 +146,8 @@ thing." This agreement is a **safety** cross-check: both the explorer and TLC ev
 their agreement catches an `emitTLA`/`interpret` divergence on the safety semantics. Liveness has no such
 cross-check ([§3](#3-two-total-renderings)) — it is checked by TLC alone.
 
-**Assurance accounting — what "by construction" does and does not buy.** Two precisions keep the guarantee from
-being over-read. First, correspondence-by-construction is between the TLA+ spec and the **decision core**
+**Assurance accounting — what the single source does and does not buy.** Two precisions keep the guarantee from
+being over-read. First, checked correspondence is between the TLA+ spec and the **decision core**
 (`interpret`), *not* between the spec and the effectful **daemon**: `interpret` is the pure function a daemon
 *calls*, but whether the daemon captures its inputs with the right freshness/fencing and applies the decision
 faithfully is a separate, **runtime-fidelity** obligation (Register-2.5 deterministic simulation and Register-3
@@ -192,7 +192,7 @@ subcommand and stamped as generated. They are **not** committed to the repositor
 Kubernetes manifests and the Dhall schema reflected from Haskell types
 ([generated_artifacts_doctrine.md](./generated_artifacts_doctrine.md)). Model-checking regenerates them from the
 current `Model` and runs TLC; a stale committed `.tla` cannot exist because there is no committed `.tla`. This is
-the mechanical guarantee behind [§4](#4-correspondence-by-construction): the only authored artifact is the
+the mechanical guarantee behind [§4](#4-single-source-correspondence): the only authored artifact is the
 Haskell `Model`.
 
 ---
@@ -252,7 +252,8 @@ phase ([DEVELOPMENT_PLAN/README.md](../../DEVELOPMENT_PLAN/README.md)).
 
 ## 8. Trace validation: the earlier code↔model bridge
 
-Correspondence-by-construction ([§4](#4-correspondence-by-construction)) closes the spec↔decision-core gap, but
+Single-source correspondence ([§4](#4-single-source-correspondence)) removes the hand-maintained mapping and
+differentially checks the spec↔decision-core gap, but
 the spec↔**daemon** gap — that the *effectful* runtime only ever takes transitions the `Model` sanctions — is a
 runtime-fidelity obligation. The design's default instrument for it is Register-3 chaos injection, which is
 *sampled* and *late*. **Trace validation** is a formal, earlier bridge that reuses the same `Model`: the daemon

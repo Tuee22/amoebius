@@ -133,15 +133,16 @@ Two classification rules are load-bearing and stated as hard failures, not warni
 
 ## 3. The no-environment / no-`PATH` lazy tool-ensure contract
 
-**amoebius never reads an environment variable — including `PATH` — directly or indirectly, ever**
-(DEVELOPMENT_PLAN cross-cutting invariants). This is one of the project's locked
-invariants, and it has a precise positive form: when a host tool is needed, amoebius **lazily ensures and
-resolves it through the substrate's package manager, then invokes it by absolute path.** No bare command
-name is ever handed to the OS to resolve against a search path. This lazy package-manager scheme is proven
+**The Haskell host-invocation layer takes no configuration from ambient environment variables and never
+resolves an external tool against the host's `PATH`.** This is one of the project's locked invariants, and it
+has a precise positive form: when a host tool is needed, amoebius **lazily ensures and resolves it through the
+substrate's package manager, then invokes it by absolute path.** No bare host command name is handed to the OS
+for search-path resolution. Guest commands run after a VM/container boundary may use that guest's environment,
+as [the exact boundary](#the-exact-boundary-of-the-no-path-rule) states. This lazy package-manager scheme is proven
 prior art — the sibling ML projects already run a two-tiered version of it in which, on Apple silicon, a
 host-level Haskell binary manages the toolchain by lazily installing the brew packages it needs on demand.
 
-Cashing out "lazily ensures" — the four-step contract:
+The four-step ensure contract is:
 
 1. **Probe.** Ask the substrate's package manager whether the tool is installed.
 2. **Install if absent.** Use the package manager to install it.
@@ -219,7 +220,7 @@ own `PATH`, which is legitimate because it is that guest's environment, not the 
 
 amoebius is Kubernetes-centric and does not support Windows containers; the unit of compute it actually
 wants is a **Linux host**. On a substrate that is not natively Linux, amoebius synthesizes one in a VM and
-then treats it as an ordinary Linux substrate — the same charts, the same services, the same DSL.
+then treats it as an ordinary Linux substrate — the same typed service projections, the same services, the same DSL.
 The VM is plumbing; the substrate the cluster sees is Linux.
 
 | Host substrate | VM provider | What it synthesizes | Seed module |
@@ -415,21 +416,23 @@ cluster bring-up, the `--distro` / `--replicas` orchestration — is owned by
 
 ---
 
-## 7. The LoadBalancer is the one substrate-driven platform difference
+<a id="7-the-loadbalancer-is-the-one-substrate-driven-platform-difference"></a>
 
-Substrate equivalence is near-total: every cluster on every substrate stands up the identical service set
-([platform_services_doctrine.md](./platform_services_doctrine.md)). The **single** lower-layer difference
-the substrate dictates is the **LoadBalancer implementation**:
+## 7. The LoadBalancer backend follows the materialized compute engine and provider
 
-- **MetalLB** on bare-metal / kind / rke2 substrates (no cloud LB to lean on).
-- A **cloud LoadBalancer** (e.g. the AWS Load Balancer Controller) on provider-managed substrates.
+Every target stands up the same core service set
+([platform_services_doctrine.md](./platform_services_doctrine.md)). Its lower-layer **LoadBalancer backend** is
+derived after compute-engine selection and provider materialization, not from the detected host substrate alone:
+
+- **MetalLB** for self-managed `Kind` and `Rke2` engines, which have no managed provider LB.
+- A **cloud LoadBalancer** (for example, AWS Load Balancer Controller) for `Managed Eks`.
 
 Everything *above* the LB — Envoy + Gateway API, Keycloak-owns-all-wild-ingress, the whole standard service
-set — is substrate-identical. This doc owns the **LB-choice-by-substrate** mapping; the LB's role as a
+set — is target-invariant. This doc owns the derived **engine/provider → LB backend** mapping; the LB's role as a
 standard service and the ingress shape it fronts are owned by
 [platform_services_doctrine.md §9](./platform_services_doctrine.md#9-the-loadbalancer-and-the-single-wild-ingress-path), and cloud-LB provisioning is owned by
-[pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). When a provider substrate appears to be "missing" a
-piece the local cluster has, the fix is to extend the shared platform installer for that substrate — never
+[pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md). When a managed target appears to be "missing" a
+piece the local cluster has, the fix is to extend the shared platform installer for that target — never
 to render a different service set (the structural-equivalence rule,
 [platform_services_doctrine.md §12](./platform_services_doctrine.md#12-substrate-equivalence-as-a-structural-invariant)).
 

@@ -81,7 +81,7 @@ authored before `amoebius-pulsar` exists (§M.1), not a value regenerated from t
   asserts `validateTopology` refuses it **before any broker socket is opened**.
 - **Non-CBOR foreclosure is checked by reason (§M.8).** The gate's non-CBOR clause passes only when the
   compile-fail harness matches each fixture's committed expected diagnostic and the API-surface golden of
-  §M below holds; an ill-typed file failing for an unrelated reason does not satisfy it.
+  [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) below holds; an ill-typed file failing for an unrelated reason does not satisfy it.
 - **Committed seeded mutants must go red (§M.2).** The gate re-runs a committed mutant set and asserts each
   turns it red: (i) a `topicFor` mutant that emits a literal topic string instead of the derived name;
   (ii) a `validateTopology` mutant with the one-sided-link clause deleted (invariant-clause delete);
@@ -119,10 +119,10 @@ bounded backoff, and finite terminal retention; it does not carry Deployment rol
 `BoundExecutionUnit` is expanded, `provision` derives one `KubeletRuntimeMetadataShape` per planned Pod slot
 from that source and the complete container/volume graph under the selected node's pinned
 `kubeletMetadataModel`; live readback constructs the observed form under the authenticated Pod UID and source
-witness. The private fold derives each component's bytes and `KubeletNodefs | CriRuntimeRoot` role, resolves
-the role through the selected filesystem layout, and groups aliases by physical carve once. SplitRuntime
-charges kubelet components to nodefs and CRI components to imagefs/containerfs; Unified and SplitImage sum
-forced aliases before one backing check. These physical bytes are not repeated as logical Pod ephemeral demand.
+witness. The private fold derives each component's bytes and `KubeletNodefs | CriRuntimeRoot` role, then applies
+the canonical filesystem routing and alias-group accounting. `SplitRuntime` sends the two roles to distinct
+backings; layouts that share a carve aggregate it before the capacity comparison. These physical bytes are not
+repeated as logical Pod ephemeral demand.
 
 Pure provision represents each planned epoch, and live preflight each observed snapshot, by one
 `ProvisionedNodeRuntimeStorageAccounting` per node. Its planned-slot/observed-UID domain equals the assigned
@@ -178,8 +178,8 @@ provision.
   namespace deduplication on `(producer_name, sequence_id)`; intra-cluster consensus is delegated, not
   re-proven.
 - [`substrate_doctrine.md`](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) [§3](../documents/engineering/substrate_doctrine.md#3-the-no-environment--no-path-lazy-tool-ensure-contract) — *the no-environment / no-`PATH` lazy tool-ensure contract*: the supernova fork's `protoc`/`proto-lens` codegen is discovered lazily by full path through the
-  substrate package manager — no `PATH` lookup and no environment variable anywhere in the build or runtime
-  path.
+  substrate package manager — no host-`PATH` lookup for code generation and no ambient-environment client
+  configuration.
 
 ## Sprints
 
@@ -506,8 +506,8 @@ The whole sprint (📋 Planned).
 
 ## Related Documents
 - [README.md](README.md) — the live tracker and phase order this document serves
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys (§D
-  skeleton, §F sprint format, §H citation rule, §K honesty/registers, §L one-substrate discipline)
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook this document obeys ([§D](development_plan_standards.md#d-the-per-phase-document-skeleton)
+  skeleton, [§F](development_plan_standards.md#f-the-sprint-block-format) sprint format, [§H](development_plan_standards.md#h-the-doctrine-citation-rule-cite-by-name) citation rule, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) honesty/registers, [§L](development_plan_standards.md#l-one-substrate-discipline) one-substrate discipline)
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (the CBOR-only payload and
   no-WebSockets rules)
 - [substrates.md](substrates.md) — the substrate registry and per-phase substrate map

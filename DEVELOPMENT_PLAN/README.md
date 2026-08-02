@@ -32,8 +32,9 @@ These rules are absolute and govern all work:
 2. **Independently validatable.** Each phase ends with **one** concrete acceptance gate that passes before the
    next phase opens — a Register-1/2 in-process check for the pre-cluster band, or a live `InForceSpec`
    topology that spins up resources, runs a workflow, and tears down for the live band.
-   Each phase owns one primary implementation seam and one acceptance command sized for one uninterrupted
-   engineering session; discovering a second seam triggers a split before implementation continues.
+   Each sprint owns one implementation seam sized for one uninterrupted engineering session. A phase may
+   compose an ordered seam chain only for one cohesive capability claim and one acceptance command; discovering
+   a second capability claim triggers a phase split before implementation continues.
 3. **At most one substrate per validation.** A phase's acceptance gate requires **at most one** substrate
    (`none` | `apple` | `linux-cuda` | `linux-cpu` | `windows`). This prevents cross-substrate flip-flopping
    during development. The required substrate is named in each phase below.
@@ -82,9 +83,10 @@ This is a large body of work spanning many small, individually-gated phases; tha
   [`illegal_state_techniques.md §6.1`](../documents/illegal_state/illegal_state_techniques.md#61-the-validation-locus-axis--where-each-illegal-state-is-caught-orthogonal-to-the-foreclosure-layer);
   this tracker does not restate per-entry loci. The governing caveat: Dhall has no opaque types, so a
   foreclosure that *reads* as type-level may only fully bite at the Gate-2 decoder.
-- **Generated artifacts are never committed.** The k8s manifests, the emitted TLA+ `.tla`/`.cfg`, the reflected
+- **Production generated artifacts are never committed.** The k8s manifests, the emitted TLA+ `.tla`/`.cfg`, the reflected
   Dhall schema, and the PureScript frontend contracts are rendered from a Haskell source of truth and never
-  committed; only the source is versioned
+  committed. Independently authored test oracles and run-evidence ledgers are versioned non-production
+  records, never copies regenerated from the subject under test
   ([`generated_artifacts_doctrine.md`](../documents/engineering/generated_artifacts_doctrine.md)).
 - **The control-plane singleton is a Deployment `replicas=1`.** Single-writer authority is **delegated to
   k8s/etcd through the mandatory reconciler `Lease`** — **no bespoke election**; the singleton is stateless (no PVC), its
@@ -205,7 +207,7 @@ This is a large body of work spanning many small, individually-gated phases; tha
   Static engine processes are named `EngineSystemReserve` components, and BuildKit/buildx, the scheduler,
   singleton Lease, admission gateways, observers, and the topology-derived network fabric all carry the same
   explicit compute/storage/slot cost rather than hiding as overhead.
-- **Keycloak owns all wild ingress** via the LB + Gateway API; the sole exception is host-origin, localhost-only traffic (host-only NodePorts).
+- **Wild ingress is centralized at Keycloak.** Only host-origin, localhost-only NodePorts bypass the LB/Gateway API path.
 - **Pulsar payloads are exclusively CBOR** (canonical where content-addressed) — a non-CBOR application payload
   (JSON/base64/protobuf/raw) is unrepresentable; the protocol framing stays protobuf.
 

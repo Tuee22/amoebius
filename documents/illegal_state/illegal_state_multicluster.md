@@ -140,9 +140,9 @@ DNS) → unfreeze → drain-monitor → decommission(old-ingress)` — in which 
 reachable **only** from an observed `drain-monitor` edge (old-gateway traffic ≈ 0). No transition removes the
 last working endpoint for a live session: while DNS drains, the old gateway survives as a transparent reverse
 proxy to the new, and the per-cluster stable address never migrates — so "a session in limbo that cannot
-rebind" has no representable path. On the `Failover` path (the active has vanished, no proxy) the guarantee
-weakens honestly to bounded rebind: clients error, re-resolve within the already-low TTL, and rebind to the
-survivor. **Owner:** [`gateway_migration_doctrine.md`](../engineering/gateway_migration_doctrine.md) (the migration state
+rebind" has no representable path. On the `Failover` path (the active has vanished, no proxy), only time-bounded
+recovery is promised: after an error, clients honor the low TTL, resolve again, and connect to the survivor.
+**Owner:** [`gateway_migration_doctrine.md`](../engineering/gateway_migration_doctrine.md) (the migration state
 machine and the client-rebind protocol). **Technique:** [§4.3](./illegal_state_techniques.md#43-gadt-indexed-state-machines--only-legal-transitions-are-typed)
 (the migration GADT — the `decommission` handle exists only from a `drain-complete` index). **Layer:**
 `type-foreclosed` for the transition ordering (no path decommissions the last endpoint); `runtime-checked`

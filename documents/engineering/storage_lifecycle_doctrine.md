@@ -643,7 +643,7 @@ To keep the SSoT boundaries crisp:
 | The elevated harness as sole storage deleter; flagged test resources; leak-free cycles | [testing_doctrine.md](./testing_doctrine.md) |
 | Vault seal/unseal, secret-by-name, PKI trust anchor | [vault_pki_doctrine.md](./vault_pki_doctrine.md) |
 | Making "a PVC that can't bind" / "durable storage without a StatefulSet" unrepresentable | [dsl_doctrine.md](./dsl_doctrine.md), [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md) |
-| Substrate catalog and the host-path vs cloud-LB/EBS substrate split | [substrate_doctrine.md](./substrate_doctrine.md) |
+| Substrate catalog and the self-managed-host vs managed-provider LB/EBS split | [substrate_doctrine.md](./substrate_doctrine.md) |
 | App-level durable-storage requests vs deployment-rules replica counts | [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md) |
 | The aggregate capacity fold over the `StorageBacking` (`Σ` sizes `≤` backing); the `Growable` escape valve | [resource_capacity_doctrine.md](./resource_capacity_doctrine.md) |
 

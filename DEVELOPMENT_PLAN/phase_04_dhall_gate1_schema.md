@@ -36,7 +36,7 @@ corpus and touches no infrastructure.
 **Substrate:** none — no host, no cluster; the gate is an in-process `dhall type` battery over the fixture
 corpus.
 
-**Register:** 1 — pure/golden, in-process, no cluster (§K).
+**Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** `dhall type` over the Gate-1 corpus is green — each positive cluster / app / deployment fixture
 type-checks, and each Gate-1-class negative fixture fails `dhall type` at authoring time, in the operator's
@@ -654,12 +654,12 @@ at Gate 2.
   in Phase 0) pinning each failure's targeted union/arm/field.
 - The committed seeded mutant `mutants/gate1_capability_custom_arm.dhall` (union-arm-addition operator) that
   the harness re-runs and MUST report red.
-- The **partial-foreclosure ledger** is the §K proven/tested/assumed artifact this phase emits — a committed
+- The **partial-foreclosure ledger** is the [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) proven/tested/assumed artifact this phase emits — a committed
   file at `DEVELOPMENT_PLAN/ledgers/phase_04_gate1.md`, schema per `testing_doctrine.md`. It names Register 1,
   carries the acceptance token *spec-composition proven*, maps each of the eight negatives to its catalog
   entry and foreclosure layer (fully no-arm/required-field vs. conventional binding/index residue), marks
   layer-2/3 residue UNVERIFIED, and routes that residue to [Phase 5](phase_05_gadt_decoder_gate2.md). This
-  ledger is the single §K artifact the Definition of Done requires; there is no separate coverage note.
+  ledger is the single [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) artifact the Definition of Done requires; there is no separate coverage note.
 
 ### Validation
 1. Every one of the eight canonical Gate-1-class negatives fails `dhall type` at authoring time with no

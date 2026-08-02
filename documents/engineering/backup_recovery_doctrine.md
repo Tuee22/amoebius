@@ -333,9 +333,9 @@ never an authored `mode` field ([`consistency_pacelc_doctrine.md` §3.4](./consi
 built in the formal-model phase).** The gateway migration model already makes cutover reachable only after an
 observed `verify-caught-up` edge (`PlannedIsLossless`). That precondition is **generalized** to a
 `FreshnessWitness` guard on the promote / gateway-take transition, dischargeable two ways: a warm replica that
-is caught up (today), or a cold seed proven within `freshnessBound` (new). The model gains one safety
-invariant — **`NoTakeWithoutProvenFreshness`**: no cluster takes the wild-ingress role from a data plane whose
-freshness is unproven. Because a stalled state with zero gateway owners satisfies safety and only violates
+is caught up (today), or a cold seed proven within `freshnessBound` (new). The model doctrine defines the added
+**`NoTakeWithoutProvenFreshness`** safety invariant; this recovery doctrine supplies its cold-seed witness arm.
+Because a stalled state with zero gateway owners satisfies safety and only violates
 liveness, the consistency-over-availability choice is exactly this shape: staying down is *safe*, and liveness
 convergence requires freshness to become reachable. The invariant is proven for safety and, under the fairness
 assumption, for liveness (TLC), with io-sim agreement and a per-invariant mutant, and the structural-fit fold

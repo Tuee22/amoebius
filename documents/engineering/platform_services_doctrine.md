@@ -14,10 +14,12 @@
 
 ## 1. The Invariant: every cluster is the same cluster
 
-An amoebius cluster is **fungible** — fungible in its *capability set*, not necessarily in its every
-manifest. Tear one down and spin another up — on a different substrate, at a different replica count — and it
-offers the **same standard services / capabilities, wired the same way**. There is no "lite" cluster, no
-"no-registry" cluster, no missing-capability cluster. What may legitimately differ between clusters is the
+An amoebius cluster is **fungible** in its **eight-core capability set**, not necessarily in every manifest.
+Tear one down and spin another up — on a different substrate, at a different replica count — and it offers the
+**same eight core services/capabilities, wired the same way**. There is no "lite" cluster, no "no-registry"
+cluster, and no cluster missing a core capability. Extension-provided capabilities such as `InferenceEngine`
+are additional target offerings and are not part of this core-set invariant
+([service_capability_doctrine.md §2](./service_capability_doctrine.md#2-the-capability-set)). What may legitimately differ between clusters is the
 *deployment shape* of a service (single-node vs distributed) — a deployment-rules concern owned by
 [service_capability_doctrine.md](./service_capability_doctrine.md): the *set* is invariant, the *shape* may
 vary. This refines the prodbox **substrate-equivalence** rule (`home` vs `AWS`): amoebius keeps "every
@@ -34,7 +36,7 @@ The standard service set (DEVELOPMENT_PLAN "Standard platform services"):
 
 | Service | Role on every cluster | Deeper mechanics owned by |
 |---------|-----------------------|---------------------------|
-| **LoadBalancer** (MetalLB *or* cloud LB) | The single L4 entry point to the cluster | [substrate_doctrine.md](./substrate_doctrine.md) (the LB choice is the one substrate-driven difference) |
+| **LoadBalancer** (MetalLB *or* cloud LB) | The single L4 entry point to the cluster | [substrate_doctrine.md](./substrate_doctrine.md) (the backend is derived from the materialized engine/provider) |
 | **Envoy + Gateway API** | L7 routing and edge TLS termination | [§9](#9-the-loadbalancer-and-the-single-wild-ingress-path); [host_cluster_comms_doctrine.md](./host_cluster_comms_doctrine.md) (the carve-out) |
 | **Keycloak** | OIDC identity; **owns all wild ingress** | [§9](#9-the-loadbalancer-and-the-single-wild-ingress-path) |
 | **Registry** (`distribution`) | The single-binary OCI image registry; **every image is pulled from here** (replaces Harbor) | [image_build_doctrine.md](./image_build_doctrine.md), [service_capability_doctrine.md](./service_capability_doctrine.md) |
@@ -55,18 +57,17 @@ linked siblings and only referenced here.
 
 ## 2. HA always — including `replicas=1`
 
-There is no separate "dev topology." A kind cluster on an admin's laptop at `replicas=1` runs the
-byte-identical HA charts a production cluster runs — only the replica count changes. This kills the entire
-class of *works-in-dev, breaks-in-prod-because-the-topology-differs* bugs: the chart debugged at one
-replica is the chart that runs at five.
+There is no separate "dev topology." A kind cluster on an admin's laptop at `replicas=1` uses the same typed
+HA-capable deployment projection as a production cluster — only the declared replica count changes. The
+object kinds, dependency edges, and safety policies exercised at one replica are the ones used at five.
 
 Concretely (DEVELOPMENT_PLAN cross-cutting invariants):
 
-- **Replica count is a deployment-rules knob, not a chart fork.** The midwife's `bootstrap` hand-off requires
-  `--distro={kind,rke2}`; `kind` accepts `--replicas=n` (default `1`). The HA charts are identical across
-  values of `n`. The application-logic-vs-deployment-rules split that makes replicas a separate orthogonal
+- **Replica count is a deployment-rules knob, not a renderer fork.** The midwife's `bootstrap` hand-off requires
+  `--distro={kind,rke2}`; `kind` accepts `--replicas=n` (default `1`). The typed deployment projection is shared
+  across values of `n`. The application-logic-vs-deployment-rules split that makes replicas a separate orthogonal
   surface is owned by [app_vs_deployment_doctrine.md](./app_vs_deployment_doctrine.md).
-- **HA chart even at `replicas=1`.** A single-replica deployment is still the HA chart with one replica —
+- **HA-capable projection even at `replicas=1`.** A single-replica deployment is still the same HA-capable object shape with one replica —
   never a hand-special-cased single-pod variant. Postgres at one node is still a Patroni-via-Percona
   cluster ([§8](#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin)), not a bare `postgres` Pod.
 - **HA-capable shape is not an HA claim.** `replicas=1` has no replica redundancy and must never be reported as
@@ -212,9 +213,8 @@ independent version and lifecycle, and clean per-namespace teardown.
 
 - **The Percona operator is itself a platform component**, drawn from the shared inventory ([§12](#12-substrate-equivalence-as-a-structural-invariant)) so it
   installs identically on every substrate. A service needing SQL renders a `PerconaPGCluster` in its own
-  namespace; the cluster-wide operator reconciles it. (This generalizes the prodbox
-  `helm_chart_platform_doctrine.md` [§4](#4-minio--the-object-substrate) Patroni dependency contract, where Keycloak is the proven
-  consumer — without restating its prodbox-specific naming.)
+  namespace; the cluster-wide operator reconciles it. This generalizes the prodbox Patroni dependency
+  contract, where Keycloak is the proven consumer, without retaining its Helm-specific implementation.
 - **HA always applies here too ([§2](#2-ha-always--including-replicas1)).** At its configured steady state a Patroni cluster runs multiple
   replicas; at `replicas=1` it is still a Patroni cluster, never a bare Pod. This doc deliberately fixes
   **no specific replica count** — the count is a deployment-rules value, not a doctrine constant.
@@ -285,13 +285,13 @@ Phase 34 must not be reported as proof of the Phase-35 data path.
 The Keycloak-owned identity edge is the **single sanctioned ingress point** for all external traffic. All wild traffic —
 WAN, LAN, and even a localhost *browser* connection — enters through the LoadBalancer, is routed by Envoy
 through the Gateway API, and is authenticated by Keycloak before it reaches any workload. No app publishes
-its own ingress; no chart opens a backdoor NodePort to the wild. Keycloak owning all wild ingress is
+its own ingress; no generated object set opens a backdoor NodePort to the wild. Keycloak owning all wild ingress is
 the only sanctioned ingress shape, and the DSL makes the alternatives unrepresentable
 (see [dsl_doctrine.md](./dsl_doctrine.md) and [illegal_state_catalog.md](../illegal_state/illegal_state_catalog.md)).
 
-- **The LoadBalancer is the one substrate-driven difference.** MetalLB on bare-metal / kind; a cloud LB
-  (e.g. the AWS Load Balancer Controller) on provider-managed substrates. The *choice* of LB is owned by
-  [substrate_doctrine.md](./substrate_doctrine.md); everything above it is substrate-identical.
+- **The LoadBalancer backend follows the materialized target.** Self-managed `Kind`/`Rke2` use MetalLB;
+  `Managed Eks` uses its provider integration. [substrate_doctrine.md](./substrate_doctrine.md) owns that
+  derived mapping; everything above it is target-invariant.
 - **Envoy + Gateway API** terminate TLS and route. TLS certificate provisioning (zerossl) and DNS
   (route53) integration are owned by [pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md) and the DSL.
 
@@ -505,30 +505,28 @@ flowchart TD
 ## 12. Substrate equivalence as a structural invariant
 
 "Same service set on every cluster" is **enforced structurally**, not maintained by parallel hand-edited
-installers. This generalizes the prodbox substrate-equivalence mechanism (prodbox CLAUDE.md "Substrate
-Equivalence" and `helm_chart_platform_doctrine.md` [§3](#3-the-registry--the-single-image-source)A) from two substrates to all of them. The three
-mechanisms, adapted:
+installers. This generalizes the prodbox substrate-equivalence mechanism from two substrates to all of them,
+while replacing its Helm-specific realization with typed object generation. The three mechanisms are:
 
 1. **One release/version value per platform-component image, shared across substrates.** A platform
    component (Envoy control plane, Envoy data plane, the operators, the registries) is pinned to exactly
    one release value used by every substrate. There is no per-substrate version. This kills
-   control-plane-vs-data-plane version skew at the root: a single value pins chart, control plane, and data
-   plane together.
-2. **A check forbids substrate-keyed re-pinning.** No code path may re-pin a chart version or image ref
+   control-plane-vs-data-plane version skew at the root: one value pins the component image, control plane, and
+   data plane together.
+2. **A check forbids substrate-keyed re-pinning.** No code path may re-pin a component version or image ref
    conditionally on the active substrate. Divergence is a build-time error, never a silent drift — "the
-   cloud substrate needs a different Envoy" cannot be expressed.
-3. **One platform-component inventory drives every substrate's installer.** A coverage check asserts that
-   no substrate silently drops a component another installs. Each substrate keeps its own *ordering* ([§11](#11-bring-up-and-dependency-ordering)),
-   but never a different *set*. The cloud substrate is **not** a "no-registry" cluster — when a managed
-   substrate looks like it is missing a piece the local cluster has, the fix is to extend the shared
-   inventory and that substrate's installer, never to render a different service set. **This equivalence
+   managed target needs a different Envoy" cannot be expressed.
+3. **One platform-component inventory drives every target's installer.** A coverage check asserts that
+   no target silently drops a component another installs. Each engine/provider path keeps its own *ordering* ([§11](#11-bring-up-and-dependency-ordering)),
+   but never a different *set*. A managed target is **not** a "no-registry" cluster — when it appears to miss
+   a component present locally, extend the shared inventory and that target's installer rather than rendering a different service set. **This equivalence
    governs the service *set* and *image refs*, not the deployment *shape*: a service may legitimately take a
    different shape per cluster (single-node vs distributed), owned by
    [service_capability_doctrine.md §6](./service_capability_doctrine.md#6-fungibility-reconciled-app-surface-invariant-shape-deployment-ruled), and that is not a violation of this
    rule.**
 
-The substrate *catalog* itself (apple / linux-cpu / linux-cuda / windows, virtualized substrates, the LB
-choice, the no-env/no-PATH lazy-tool-ensure contract) is owned by
+The substrate *catalog* itself (apple / linux-cpu / linux-cuda / windows), virtualized substrates, the
+engine/provider-derived LB mapping, and the no-env/no-PATH lazy-tool-ensure contract are owned by
 [substrate_doctrine.md](./substrate_doctrine.md). Note the no-environment-variables / no-`PATH` rule: all
 host tooling that brings these services up is discovered lazily through the substrate's package manager and
 invoked by full path — there is no `PATH`-based discovery anywhere in the bring-up sequence.

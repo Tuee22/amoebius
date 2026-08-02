@@ -79,10 +79,10 @@ set, proves CPU/memory, pod-CNI and CSI slots, logical and physical node storage
 durable/cache demand (Phase 8), accelerator devices plus every identity-complete owner residency epoch, and every
 execution/admission envelope all fit simultaneously — the componentwise peak, never a CPU-only or steady-only
 multiplier — and, for an elastic node set, the capability-aware growth envelope over the same vector. In the
-catalog's historical layer taxonomy these are **decode-foreclosed** total checks over constructible values, never
-type-inhabitance claims; their concrete validation locus is `provision-seal`. The phase proves the folds are
-total, sound (they never admit an over-committed or incompatible spec), and structurally rejecting on the
-execution/accelerator/provider-root/runtime-metadata negatives.
+catalog's vocabulary, every check here is a total, **decode-foreclosed** decision over a constructible input at
+`provision-seal`, not a type-inhabitance claim. Soundness means every accepted result satisfies the combined
+resource envelope; each named execution, accelerator, provider-root, and runtime-metadata negative must instead
+produce its structured rejection.
 
 What is *not* here: the base `fits`/`carve`/`place`, `Quantity`/`Capacity`/`Demand`/`Budget`, the
 CPU-limit/pod-ephemeral/tmpfs/memory-volume negatives, and the topology relation
@@ -107,7 +107,7 @@ representation and fold only; it cannot validate or enact a live transition.
 **Substrate:** none — no host, no cluster; the gate is an in-process `cabal test` fold + QuickCheck battery,
 analogous to the Phase 5 decode battery, the Phase 6 property suite, and the sibling Phase 7/8 fold gates.
 
-**Register:** 1 — pure/golden, in-process, no cluster (§K).
+**Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** the **composed full-resource-vector `place` witness** proves every axis on the positive corpus and
 each execution/accelerator/provider-root/runtime-metadata negative returns the fold's structured
@@ -124,8 +124,8 @@ image content/snapshot/model joins and filesystem-layout alias/swap/SplitImage f
 alias double-spend, the provider-root under/over-quota failures, the control-plane etcd-transition overrun, and
 the cuda-on-cpu, accelerator-count/vram-fragmentation/vram-reserve-boundary, apple-metal-profile, and
 shared-accelerator-double-owner failures — with its **specific committed tag** when the fold is applied
-**directly on the hand-authored demand/capacity fixture that isolates its insufficient axis** (no `bind`/
-`provision` call; the Phase-11 gate re-exercises these same folds through its post-bind provision seal);
+**directly on the hand-authored demand/capacity fixture that isolates its insufficient axis**. Bind/provision
+integration is a later Phase-11 responsibility;
 (iii) is **provably total** — compile-time exhaustiveness under `-Werror=incomplete-patterns` on every
 `Amoebius.Capacity.*` execution/accelerator/provider-root module **and** a sampled QuickCheck no-crash run,
 both, not either; and (iv) turns red under the **committed per-fold seeded-mutant battery named in
@@ -203,8 +203,8 @@ only its seam's slice.
     `illegal_apple_metal_profile_mismatch`, and shared-device for `illegal_shared_accelerator_double_owner`).
     Each negative is asserted to return its **specific** committed tag, **not merely "some `Left`"**, and each
     is paired with a positive differing only in the foreclosed dimension.
-- **Committed per-fold seeded-mutant battery (§M.2).** This phase's slice of the one-mutant-per-fold battery,
-  each individually required to turn the suite red, drawn from the operator set:
+- **Committed per-fold seeded-mutant battery (§M.2).** Every listed execution/accelerator mutation is an
+  independently required red case from the operator set:
   - **kind-indexed execution expansion** (admit a zero-progress `{ 0, 0 }` Deployment rolling policy or a policy
     field from the wrong controller kind; copy the desired envelope/revision into a prior row; drop a
     removed-prior unit, desired replica, selector-matched DaemonSet/host slot, surge instance, or retained
@@ -262,12 +262,9 @@ only its seam's slice.
   filesystem-layout reference, root-backing policy/quota, presentation/allocation rule, or etcd WAL/defrag
   operand and require a structured rejection rather than treating absence as zero or falling back to an
   aggregate. The per-axis/per-capability validator mutants of Sprint 9.4 are additional and separately required.
-- **Provably total (§M totality honesty).** Discharged by *both* a compile-time gate
-  (`-Werror=incomplete-patterns` / `-Werror=incomplete-uni-patterns` on every execution/accelerator/
-  provider-root fold module — `Scheduler`, `HostReservation`, `NodeLocalStorage`, `RuntimeStorage`,
-  `ProviderRoot`, `Etcd`, `PulumiExecution`, and the execution/accelerator branches of `Types`/`Fold` — no
-  `error`, no partial `head`/`fromJust`) **and** the sampled QuickCheck no-crash run; a green sample alone does
-  not satisfy the gate.
+- **Totality gate ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)).** Compile every execution, accelerator, and provider-root
+  fold module with both incomplete-pattern warnings promoted to errors, and reject `error`, partial `head`, and
+  `fromJust`. The QuickCheck no-crash sample supplements that exhaustiveness result; it cannot replace it.
 - **Independent witness validator (§M.3).** Defined in Sprint 9.4 Deliverables; the composed validator never
   calls `podFits` or `place`, computing residuals directly from the generated fixture's declared allocatables
   across every axis — CPU/memory, pod-CNI/CSI slots, logical+physical node storage, OCI/snapshot/workspace,
@@ -739,8 +736,8 @@ may reject a packable one) for the composed compute `place`, and never claim com
   input yields an exception, `error`, or partial match. A green sample alone does not satisfy this guard.
 
 ### Validation
-1. The property battery is green with every fold meeting its coverage minimum; and each committed mutant in the
-   per-fold seeded-mutant battery ([Gate integrity](#gate-integrity)) — including the kind-indexed execution,
+1. Every fold reaches its declared property-coverage floor. Re-run the complete seeded battery from
+   [Gate integrity](#gate-integrity) — including the kind-indexed execution,
    scheduler-CAS, runtime-metadata, node-local, physical-partition, accelerator-residency, and
    provider-template mutants, not one hand-picked strawman — makes a property red when re-run individually. The
    validator carries the reference side of every `accepts ⟺ in-envelope` property as a **committed
@@ -773,9 +770,8 @@ slice the composed vector consumes).
 **Independent Validation**: the gate applies the Phase-9 folds (the execution expansion, scheduler-reservation
 algebra, runtime-metadata/node-local, accelerator-residency, provider-root, and engine/etcd/build/monitoring
 helper folds, composed with the Phase-7 base `fits`/`podFits`/`carve`/`place` and the Phase-8 storage folds)
-**directly to each hand-authored demand/capacity fixture** — no `bind`, `planInfrastructure`, `ProvisionContext`,
-or `provision` call (those are Phase-10/11 deliverables, and the Phase-11 gate re-exercises these same folds
-through its post-bind provision seal) — so the composed positives place feasibly across every axis and each
+**directly to each hand-authored demand/capacity fixture**. The higher-level bind, infrastructure-plan, context,
+and provision path is outside this phase and covered by phases 10–11. The composed positives place feasibly across every axis and each
 negative returns the fold's structured `ProvisionError`/`Left` on its isolated insufficient axis — **each
 negative asserting its specific expected tag** (e.g. `illegal_filesystem_layout_swapped` →
 `Left FilesystemLayoutMismatch`, `illegal_image_content_join_missing` → `Left ImageMetadataMissing`,
@@ -834,8 +830,8 @@ axis — and emit the per-entry validation-locus ledger that names the honest fo
   `illegal_accelerator_vram_reserve_boundary` ([§3.30](../documents/illegal_state/illegal_state_capacity.md#330-an-accelerator-memory-envelope-that-cannot-fit-the-selected-devices-or-unified-memory-pool) — the demand fits raw `memory.total` but exceeds
   `allocatableVram` after the mandatory driver/runtime reserve); `illegal_apple_metal_profile_mismatch` (host
   Metal demand has no compatible offering); and `illegal_shared_accelerator_double_owner` (two cluster budgets
-  claim one physical device id) — each asserted to return its **specific** tagged `Left` at the fold and paired
-  with a positive differing only in the foreclosed dimension, with the type-foreclosed neighbours
+  claim one physical device id). Every case asserts its **specific** tagged `Left` and has a control that changes
+  only the rejected axis. Compile-time-foreclosed neighbours
   ([§3.14](../documents/illegal_state/illegal_state_topology.md#314-rke2kind-on-a-host-with-no-linux-node-applewindows-without-an-interposed-linux-vm)/[§3.15](../documents/illegal_state/illegal_state_topology.md#315-a-multi-node-kind-cluster-not-on-a-single-linux-host)/[§3.18](../documents/illegal_state/illegal_state_storage.md#318-unbounded-storage-anywhere)/[§3.21](../documents/illegal_state/illegal_state_storage.md#321-capacity-growth-without-an-amoebius-owned-scaling-policy)/[§3.24](../documents/illegal_state/illegal_state_topology.md#324-an-evenzero-server-rke2-control-plane-no-etcd-quorum--split-brain)) noted as already foreclosed upstream and the base-fold/storage-geometry
   neighbours cross-referenced to [phase_07_capacity_core_folds.md](phase_07_capacity_core_folds.md) and
   [phase_08_storage_geometry_folds.md](phase_08_storage_geometry_folds.md).
@@ -855,8 +851,8 @@ axis — and emit the per-entry validation-locus ledger that names the honest fo
   composed positives, not additions to the exact representative set. `legal_tmpfs_two_concurrent_writers_single_debit`
   is owned by [phase_07_capacity_core_folds.md](phase_07_capacity_core_folds.md) but also places feasibly through
   the composed witness here.
-- A Register-1 validation-locus ledger mapping every entry to its catalog id, checked-rejection layer, and
-  `provision-seal` locus, explicitly marking the runtime residue (VM boot, pod schedule, node join, accelerator
+- The Register-1 ledger gives each exercised entry its catalog identity, rejection layer, and `provision-seal`
+  locus. It separately marks the runtime residue (VM boot, pod schedule, node join, accelerator
   device attach, S3 offload, autoscaler growth) deferred to the live band — sibling evidence where the capacity
   arithmetic generalizes prodbox's teardown push-back soundness, not an amoebius result.
 
@@ -865,9 +861,8 @@ axis — and emit the per-entry validation-locus ledger that names the honest fo
    fold negatives ([Gate integrity](#gate-integrity) representative set) returns its **specific committed** tagged
    `Left`, both composed positives place feasibly across every axis, the QuickCheck battery holds at its coverage
    minima, and the committed per-fold seeded-mutant battery ([Gate integrity](#gate-integrity)) turns the suite
-   red individually; the suite is red if any negative provisions to `Right` or to the wrong tag; the
-   validation-locus ledger is present and honestly classifies each foreclosure, marking the runtime residue
-   UNVERIFIED.
+   red individually. Any negative that produces `Right` or the wrong tag fails the suite. The emitted ledger must
+   retain an UNVERIFIED row for every effect that only a runtime observation can settle.
 
 ### Remaining Work
 The whole sprint (📋 Planned).

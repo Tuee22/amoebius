@@ -94,7 +94,7 @@ arrives in Phase 33.
 **Substrate:** linux-cpu — the whole gate runs on the single-node `kind` cluster on a linux-cpu host from
 Phase 24, layered on the Phase-26 reconciler; no apple, linux-cuda, or windows substrate is touched.
 
-**Register:** 3 — live infrastructure (§K).
+**Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** in **Register 3** on the live single-node `kind` cluster, layered on the converged Phase-26
 reconciler holding the mandatory reconciler `Lease`: the `amoebius-capacity` scheduler stands up from
@@ -110,7 +110,7 @@ bootstrap→steady cutover leaving **no double-bind**; a guarded workload submit
 **no-op** (byte-stable reservation records/CAS version, no new Binding, same `Lease` holder) by the independent
 observer; and every committed scheduler mutant turns the suite red. The scheduler slice of the Phase-0-pinned
 fixtures, the committed seeded mutant set, and the independent reference oracle are named in
-[Gate integrity](#gate-integrity) below (§M delegation).
+[Gate integrity](#gate-integrity) below ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) delegation).
 
 ## Gate integrity
 
@@ -121,10 +121,9 @@ scheduler-role fixtures that depend on the Phase-25 registry/preloaded image and
 which are committed at the start of this phase before the implementation that consumes them (§M.1 named
 exception).
 
-**Inherited committed fixtures (§M.1/§M.7 concrete corpus).** The corpus is the committed
-`test/live/fixtures/reconcile-corpus/` — a subset of the Phase-13 byte-for-byte `renderAll` golden corpus
-(`test/golden/render/` service specs, referenced by their golden IDs, never a freshly hand-picked spec). This
-phase inherits exactly these members:
+**Inherited committed fixtures (§M.1/§M.7 concrete corpus).** This phase reuses
+[Phase 26's concrete reconcile corpus](phase_26_object_reconciler.md) rather than selecting new service specs. It
+inherits exactly these members:
 - the **scheduler-role system** — the `CapacitySchedulerSystemDemand` Pod/config/reservation-CRD/RBAC/
   admission set — which must pass `BootstrapCapacitySchedulerReady`, the bootstrap-controller UID cutover, and
   `ManagedCapacityReady`, in order, before any guarded Pod;
@@ -302,9 +301,9 @@ double-debited, no absent Pod makes a debit disappear, and no unclassified recor
    state/node/template/generation/axes, a `Bound` Pod plus ledger double debit, reservation-only omission, and
    an incorrect terminal released/retained partition — each fail to construct a `ValidatedLiveTarget`.
 2. Positive recovery fixtures cover absent-Pod rows in **every** closed ledger state and prove each remains
-   charged until its state-specific CAS. Host negatives cover omission of `Reserved`/`LaunchInFlight`/
-   retained-artifact `HostReservationId`, use of a fake process id for a ledger-only row, and double debit after
-   process join. Exact-fit controls debit each identity once.
+   charged until its state-specific CAS. The host-ledger controls reuse the Phase-26 failure classes: missing
+   reservation/artifact identities, fabricated process evidence, and post-join double charging. Exact-fit
+   controls debit each identity once.
 3. A confirmed-bound-but-still-`BindingInFlight` fixture must use the observed Pod-UID runtime row; the
    planned-only omission and the planned+observed double-debit mutants both turn red. The
    `same-UID-double-debit` mutant is caught at normalization by the external "every UID debited once" oracle.
@@ -552,10 +551,9 @@ writer, an unguarded Pod, overspend, or a double-bind; counterexamples replay by
 ### Objective
 
 Adopt [`deterministic_simulation_doctrine.md §4`](../documents/engineering/deterministic_simulation_doctrine.md#4-register-25--where-deterministic-simulation-sits):
-validate the *built* scheduler under injected faults **in-process and deterministically replayable**, at
-Register 2.5 — one rung below the Sprint 27.4 Register-3 gate in the register ladder, not chronologically ahead
-of it — closing the code-schedule gap the pure-value tests and the live gate each leave open for the
-scheduling authority.
+exercise the *built* scheduler under replayable in-process fault schedules at Register 2.5. This register sits
+below, rather than earlier in time than, Sprint 27.4's live Register-3 gate and covers concurrency behavior that
+neither pure-value checks nor the live sample exhausts.
 
 ### Deliverables
 
@@ -571,15 +569,14 @@ scheduling authority.
 - Committed mutants for lost-`Lease`/resourceVersion retry (against the reconciler holder the scheduler depends
   on), collapsed scheduler-readiness stages, premature managed taint/full RBAC, bind-before-CAS, same-UID double
   debit, crash recovery dropping `Bound`, and cached observation. Every mutant must turn red.
-- A Register-2.5 proven/tested/assumed ledger — the scheduler upholds convergence + fail-closed under the
-  modeled schedules and faults; honest limit: modeled-apiserver fidelity is **assumed**, discharged by the
-  Sprint-27.4 Register-3 live gate.
+- A Register-2.5 ledger records convergence and fail-closed outcomes only for the explored scheduler traces.
+  Fidelity of the simulated apiserver remains **assumed** until Sprint 27.4's live Register-3 observations.
 
 ### Validation
 
-1. `cabal test scheduler-sim` is green at the documented exploration bound. Coverage proves every fault enters
-   its critical section; every safety invariant holds; every committed mutant is caught; and each discovered
-   counterexample replays identically under its seed.
+1. `cabal test scheduler-sim` is green at the documented exploration bound. Coverage must place each injected
+   fault inside the intended critical section, preserve all safety predicates, kill every committed mutant, and
+   deterministically replay any counterexample from its seed.
 
 ### Remaining Work
 

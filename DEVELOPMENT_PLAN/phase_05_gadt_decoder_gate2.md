@@ -81,7 +81,7 @@ container, volume, cache owner, and accelerator owner explicit.
 **Substrate:** `none` — no host, no cluster; the gate is an in-process `cabal test` battery analogous to the
 Phase-0 documentation lint and the Phase-4 `dhall type` corpus.
 
-**Register:** 1 — pure/golden, in-process, no cluster (§K).
+**Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** `cabal test dsl-spec` is green — each positive fixture decodes through the fail-closed `decodeCluster`
 into its `ClusterIR`, each Gate-2-class negative fixture **first passes `dhall type` (Gate-1-green
@@ -95,7 +95,7 @@ retained. This is a **Register-1** in-process check that runs on no substrate. I
 pure code and fail-closure on thrown exceptions; it is not a proof of termination or of exception-freedom of
 the underlying `dhall` library.
 
-**Committed oracle, corpus, and mutants (§M clauses 1/2/7/8).** The gate's oracle side is authored and
+**Committed oracle, corpus, and mutants ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clauses 1/2/7/8).** The gate's oracle side is authored and
 committed in **Phase 0 before the decoder exists** — never regenerated from `decodeCluster`'s own output. It
 comprises: (a) the **representative Gate-2 negative set**, defined concretely as **exactly one negative fixture
 per named `DecodeError` failure class** — `SchemaMismatch`, `OutOfDomainArm`, `UnspellableCombination` — each
@@ -124,7 +124,7 @@ cost, provider root backing policy, node-root-storage quota arm, `VolumePresenta
 registry upload operands, or Vault Raft/audit operands. Each must fail the independent positive-tree
 traversal/type inventory.
 The expected-tag reference table and expected resource-field inventory are committed Phase-0 oracles,
-independent of the decoder's own output (§M clause 3).
+independent of the decoder's own output ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 3).
 
 ## Doctrine adopted
 
@@ -168,7 +168,7 @@ Phase 1 toolchain spike's recorded `allow-newer`/patch/pin for `dhall` under GHC
 succeed under GHC 9.12.4 / Cabal 3.16.1.0 using the Phase-1 pin. Disambiguation of "no `PATH`-resolved tool"
 (the one interpretation both engineers now share, since this validation has no amoebius binary): the harness
 resolves `ghc`/`cabal`/`dhall` to the **absolute paths recorded in the Phase-1 pin manifest** and invokes them
-by absolute path, and an **OS-boundary argv observer** (an argv-recording shim on `PATH`, per §M clause 5)
+by absolute path, and an **OS-boundary argv observer** (an argv-recording shim on `PATH`, per [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 5)
 records that every toolchain and `dhall` invocation during this sprint's build/test carried an absolute
 program path — the shim's own log is red if any invocation resolved a bare name via ambient `PATH`. This is an
 external-observer trace, not a self-report by the build script.
@@ -590,7 +590,7 @@ if any negative fails `dhall type` (so the rejection is Gate-2's, not Gate-1's �
 are merely ill-typed Dhall), red if any Gate-2-illegal fixture decodes, and red if any of the three
 `DecodeError` tag arms has zero fixtures. The "red if any illegal fixture decodes" polarity is proven by an
 **executed committed mutant** (below), not a restated assertion. The expected-tag oracle is the committed
-Phase-0 fixture-header table, independent of the decoder's own fold (§M clause 3).
+Phase-0 fixture-header table, independent of the decoder's own fold ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 3).
 **Docs to update**: `documents/illegal_state/illegal_state_catalog.md` (backlink: the decode-foreclosed entries
 exercised here → layer-2 Register-1), `documents/engineering/testing_doctrine.md`,
 `DEVELOPMENT_PLAN/README.md` (flip the Phase-5 status when the gate passes).
@@ -669,16 +669,16 @@ provisioning boundary.
   upload, object-store resident/retention/admission/producer identity, Vault Raft/audit, or host enforcement
   fields; the
   traversal/type inventory must reject each mutant independently.
-- The **concretely named representative Gate-2 negative set** (§M clause 7), committed in Phase 0: **exactly
+- The **concretely named representative Gate-2 negative set** ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 7), committed in Phase 0: **exactly
   one `illegal_decode_*.dhall` fixture per named `DecodeError` class** — `illegal_decode_schema.dhall`
   (`SchemaMismatch`), `illegal_decode_domain.dhall` (`OutOfDomainArm`), `illegal_decode_unspellable.dhall`
   (`UnspellableCombination`, a raw
   `RawDeploymentRolloutPolicy.RollingUpdate { maxSurge = 0, maxUnavailable = 0 }`) — each header citing
   the `illegal_state_catalog.md` entry it targets and each
-  paired with a positive `legal_*.dhall` differing only in the foreclosed dimension (§M clause 8). Every one
+  paired with a positive `legal_*.dhall` differing only in the foreclosed dimension ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 8). Every one
   passes `dhall type` (Gate-1-green) by construction; the rollout case has both `{ 1, 0 }` and `{ 0, 1 }`
   legal controls.
-- **A committed seeded mutant** (§M clause 2), committed and re-run: a legalized twin of
+- **A committed seeded mutant** ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clause 2), committed and re-run: a legalized twin of
   `illegal_decode_schema.dhall` whose Gate-2-illegal index is corrected so the value would decode; the suite
   **must go red** when the mutant replaces its negative, demonstrating the "any illegal fixture decodes ⇒ red"
   check actually executes.

@@ -64,7 +64,7 @@ the recipe becomes a projection of typed data and the committed artifact is the 
 
 ## 3. The rule
 
-- **No generated artifact lives in the repository.** No `spec/tla/*.tla`, rendered manifest YAML, reflected
+- **No production generated artifact lives in the repository.** No `spec/tla/*.tla`, rendered manifest YAML, reflected
   `*.dhall` schema, checked `ClientPlan`/`UiServerPlan`, per-app content manifest, generated `*.purs` catalog
   codec, or compiled generic client bundle is committed. The repository holds Haskell and generic PureScript
   source, authored Dhall (see
@@ -72,18 +72,24 @@ the recipe becomes a projection of typed data and the committed artifact is the 
 - **Each artifact is emitted by an `amoebius` subcommand** and stamped with a generated-by header ("do not edit
   by hand; edit the source and re-emit"). The Dhall-generation pattern already proven in the siblings stamps
   its output `-- GENERATED … Do not edit by hand`.
-- **Regeneration is deterministic and reproducible.** The same source renders byte-identical output, so a
-  golden test can pin the rendering (a Register-1 check, [conformance_harness_doctrine.md](./conformance_harness_doctrine.md))
-  without the artifact itself being committed as anything other than a golden fixture of the *renderer's*
-  behaviour.
-- **The one committed exception: a gate's proven/tested/assumed ledger.** The honesty ledger a gate emits
+- **Independent expected-output fixtures are authored test inputs, not captured generated artifacts.** A
+  Register-1 golden may pin a renderer only when it is independently authored before or apart from the
+  renderer and committed under `test/` as an oracle
+  ([conformance_harness_doctrine.md](./conformance_harness_doctrine.md)). Copying the renderer's own output into
+  the golden is prohibited: that copy is a generated artifact and supplies no independent expectation.
+- **Run-evidence ledgers are committed records.** The honesty ledger a gate emits
   ([testing_doctrine.md §4](./testing_doctrine.md#4-no-skips-fail-fast-and-the-per-run-ledger-artifact),
   [development_plan_standards.md §K](../../DEVELOPMENT_PLAN/development_plan_standards.md#k-honesty-proven--tested--assumed))
-  **is committed**, deliberately, and is the sole carve-out from the never-commit rule. It is *not* a rendering
+  **is committed**, deliberately. It is the second non-production committed class, alongside independently
+  authored test oracles. It is *not* a rendering
   of a committed source that can be regenerated on demand — it is the durable record of *what a gate run
   established and by what means*, whose evidentiary value depends on being version-controlled and externally
   lint-checked, pinned to the run that produced it. A regenerable-from-source artifact goes stale silently and
   so is never committed; a run-evidence ledger is worthless unless committed.
+
+The distinction is therefore source-based rather than directory-based: an independently authored expected
+fixture and an observed run ledger may be committed; output copied from the system under test may not, even if
+renamed as a golden.
 
 ---
 

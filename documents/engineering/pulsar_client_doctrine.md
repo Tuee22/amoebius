@@ -112,8 +112,8 @@ Implementation rules for `amoebius-pulsar`:
   per-publish-connection cost of the old WebSocket path vanishes ([§1](#1-one-client-one-wire-no-websockets)).
 - **Toolchain & discovery.** The fork builds on **GHC 9.12.4** (the repo-wide pin). Any code-generation
   tool it needs (e.g. `protoc` for `proto-lens`) is discovered **lazily through the substrate's package
-  manager and invoked by full path** — there is **no `PATH` lookup and no environment variable** anywhere
-  in the build or runtime path. That no-env/no-`PATH` contract is owned by
+  manager and invoked by full path**. Host-side code generation never searches `PATH`, and client configuration
+  does not come from ambient environment variables. That no-env/no-`PATH` contract is owned by
   [substrate_doctrine.md](./substrate_doctrine.md); it is named here only because the supernova fork must
   conform to it.
 
@@ -367,9 +367,9 @@ flowchart TD
 A topic that keeps bytes forever, or offloads on a **time-only** trigger, can drive the hot tier to a
 disk-full outage. Pulsar's hot tier is BookKeeper (bookies on retained PVs); tiered storage offloads only **closed**
 ledgers to S3 and does **not** free BookKeeper until retention deletes them (there is a deletion lag), and the
-currently-open ledger can never be offloaded. So a time-only offload does not bound occupancy: if ingest ×
-offload-lag exceeds the bookie disk, BookKeeper fills, bookies go read-only, and the topic — often the
-broker — becomes **unavailable**. amoebius makes that state unrepresentable
+currently-open ledger can never be offloaded. So a time-only trigger cannot cap occupancy: once retained hot
+data plus deletion lag exhausts BookKeeper capacity, writes stop and the topic becomes **unavailable**.
+amoebius makes that state unrepresentable
 ([illegal_state_catalog.md §3.20](../illegal_state/illegal_state_storage.md#320-a-pulsar-topic-without-a-bounded--tiered--retained-lifecycle)) by making a topic's lifecycle a **pure typed
 policy**, not an operator afterthought. This is the SSoT for that policy; the DSL *surface* that carries it is
 owned by [dsl_doctrine.md](./dsl_doctrine.md), and the two-ceiling *arithmetic* by
@@ -402,7 +402,8 @@ Every topic carries three mandatory, non-optional fields and folds against **two
   physical sum are never sufficient. A logical-fit/physical-overflow, rounded-template overflow, or omitted
   required recovery case is a post-bind `provision-seal` rejection
   ([resource_capacity_doctrine.md §5.1](./resource_capacity_doctrine.md#51-durable-demand-is-logical-first-physical-only-after-geometry)).
-- **The durable-total fit.** The total retained bytes fold against the selected offload target's ceiling — a
+- **The durable-total fit.** Aggregate all retained topic bytes, then compare that demand with the bound owned by
+  the selected offload target — a
   provider-S3 quota ([pulumi_iac_doctrine.md](./pulumi_iac_doctrine.md)) for cloud clusters, or the MinIO
   content store ([content_addressing_doctrine.md](./content_addressing_doctrine.md)) for host-bounded ones
   — the `StorageBacking` arm ([storage_lifecycle_doctrine.md §5.2](./storage_lifecycle_doctrine.md#52-the-storage-backing-is-bounded--the-closed-storagebacking-union)) selecting
@@ -419,8 +420,8 @@ Every topic carries three mandatory, non-optional fields and folds against **two
   object gateway; direct broker S3 PUT credentials/routes are denied.
 - **A mandatory backlog quota (runtime fail-safe).** A burst, or a stalled/S3-unreachable offload, can still
   race the cap at runtime — no spec-layer check prevents that. So the policy carries a mandatory backlog
-  quota (`producer_request_hold` / back-pressure at the high-water mark), so overflow degrades to **per-topic
-  producer throttling, never a disk-full broker outage**. The two-ceiling fit is a pure post-bind
+  quota. At its high-water mark, `producer_request_hold` applies back-pressure to that topic's producers instead
+  of letting the broker exhaust its disk. The two-ceiling fit is a pure post-bind
   `provision-seal` rejection; the
   back-pressure actually holding is runtime-checked, owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md).
 

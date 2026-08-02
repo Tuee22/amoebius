@@ -76,7 +76,7 @@ volume holder while the control plane is only a client of that bucket.
 Register 3 (live infrastructure); no apple, linux-cuda, or windows substrate is touched, and no live
 infrastructure is required to *render* the StorageClass or PV objects (that stays pure, Registers 1–2).
 
-**Register:** 3 — live infrastructure (§K).
+**Register:** 3 — live infrastructure ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** durable **storage rebinds after a cluster delete + recreate with no data loss** — a marker row
 written into a Postgres witness StatefulSet and a marker object written into a MinIO witness bucket both

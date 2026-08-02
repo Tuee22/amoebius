@@ -109,7 +109,7 @@ flowchart LR
   claim --> gate["Gate: cluster pulumi destroy leaves EBS intact; real ec2:DeleteVolume denied; second bring-up reattaches over same volumeHandle; marker byte-for-byte"]
 ```
 
-**Substrate:** linux-cpu → provider — the §L Parent-drives-provider escape form. The acceptance gate runs on
+**Substrate:** linux-cpu → provider — the [§L](development_plan_standards.md#l-one-substrate-discipline) Parent-drives-provider escape form. The acceptance gate runs on
 exactly one hardware substrate, the `linux-cpu` parent `kind` cluster from inside which the Pulumi engine issues
 the deploy; `→ provider` (EKS) is the declared managed-engine deploy target, not a fifth hardware substrate
 ([`substrates.md` §2](substrates.md#2-substrate-inventory),
@@ -718,8 +718,8 @@ The whole sprint (📋 Planned).
 
 ## Related Documents
 - [README.md](README.md) — the live tracker; Phase 46 objective, gate, and substrate
-- [development_plan_standards.md](development_plan_standards.md) — the rulebook this doc obeys (§D skeleton, §F
-  sprint format, §H citation rule, §K honesty, §L one-substrate discipline, §M gate integrity)
+- [development_plan_standards.md](development_plan_standards.md) — the rulebook this doc obeys ([§D](development_plan_standards.md#d-the-per-phase-document-skeleton) skeleton, [§F](development_plan_standards.md#f-the-sprint-block-format)
+  sprint format, [§H](development_plan_standards.md#h-the-doctrine-citation-rule-cite-by-name) citation rule, [§K](development_plan_standards.md#k-honesty-proven--tested--assumed) honesty, [§L](development_plan_standards.md#l-one-substrate-discipline) one-substrate discipline, [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) gate integrity)
 - [overview.md](overview.md) — the target architecture and cross-cutting invariants (cluster infrastructure is
   ephemeral; durable backing is retained independently; only `no-provisioner` retained PVs; 1:1:1 PVC/PV/EBS)
 - [system_components.md](system_components.md) — the target component inventory (the Implementation paths above

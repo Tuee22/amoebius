@@ -526,15 +526,10 @@ schema migration, a canary, a message-bus consumer cutover need **ordered, readi
 gated on the *previous* step's live readiness before the next is applied. amoebius expresses that as a typed
 value the reconciler folds — not an imperative script and not a Helm release list:
 
-```haskell
--- Conceptual shape. A RolloutPlan is data; the tier-(c) reconciler folds it phase by phase.
-type RolloutPlan  = [RolloutPhase]            -- ordered; phase n+1 waits on phase n's readiness
-data RolloutPhase = RolloutPhase
-  { phaseProjection :: DesiredObjectSubset    -- owned subset of renderAll(ProvisionedSpec) (§2)
-  , phaseTransition :: ProvisionedTransition  -- pure inputs; live capabilities are minted later
-  , phaseReadiness  :: ReadinessGate          -- observed before the next phase
-  }
-```
+The canonical `RolloutPlan` and `RolloutPhase` declarations live in
+[release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply).
+For enactment, each phase supplies an owner-closed desired-object projection, a provisioned transition, and a
+live readiness gate; this doctrine consumes those fields without redeclaring their types.
 
 - **Same reconciler, no new one.** Each `RolloutPhase` selects an exact owner-closed subset of the global
   desired union and pure transition inputs. The live engine re-observes and mints the applicable SSA,
@@ -546,7 +541,7 @@ data RolloutPhase = RolloutPhase
   control-plane singleton ([daemon_topology_doctrine.md §3](./daemon_topology_doctrine.md#3-the-control-plane-singleton)).
 - **Where the plan is owned.** The typed `RolloutPlan` / `RolloutPhase`, the `Environment` promotion pointer,
   and the `Release` a rollout advances are owned by [release_lifecycle_doctrine.md §5](./release_lifecycle_doctrine.md#5-rolloutplan--rolloutphase-the-readiness-gated-apply)
-  (and [§2](#2-the-typed-manifest-model-renderall-is-the-sole-public-pure-function-to-objects) for the ledger it advances); **this doc owns only their *enactment* on the tier-(c) reconciler.**
+  (and [release_lifecycle_doctrine.md §2](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash) for the ledger it advances); **this doc owns only their *enactment* on the tier-(c) reconciler.**
 - **DB-schema migration is a `RolloutPhase` (runtime-checked residue; deferred).** A schema change is a
   phase sequence obeying **create-new → verified-migrate → retire-old** — the exact anti-in-place-destruction
   ordering owned by [storage_lifecycle_doctrine.md §8](./storage_lifecycle_doctrine.md#8-shrinking-storage-without-representing-data-destruction):
@@ -601,19 +596,22 @@ flowchart TD
 
 ## 6. The reconcile state model: desired is `renderAll(ProvisionedSpec)`, observed is live inventory, actions are typed
 
-This is the decision that makes "no Helm" coherent: **amoebius keeps no release store.** Helm persists each
-release as an opaque gzipped Secret holding the rendered manifests, and the cluster's "desired state" is
-*that stored blob*. amoebius does not. Its model is:
+This is the decision that makes "no Helm" coherent: **amoebius keeps no mutable rendered-manifest
+desired-state store.** Helm persists each release as an opaque gzipped Secret holding the rendered manifests,
+and the cluster's "desired state" is *that stored blob*. amoebius instead recomputes objects from an immutable
+release input:
 
-- **Desired state is a pure function of the `InForceSpec`, its declared target, and authenticated
+- **Desired state is a pure function of the selected `Release`'s authenticated `InForceSpec`, its declared target, and authenticated
   infrastructure materialization.** The non-bypass path is `decode → bind/expand →
   planInfrastructure → (explicit already-materialized arm or validate + CAS-enact the one batch +
   receipt-bound readback) → ProvisionContext → provision → renderAll`, where the planning result cannot
   render and `provision` must construct the opaque whole-deployment `ProvisionedSpec` before `renderAll` can
   run. `planInfrastructure` derives demand from the exact `BoundDeployment`; a caller cannot substitute a
   second request vector. The
-  *home* of that scope's `InForceSpec` is the Vault-Transit-enveloped MinIO object/ref that is the cluster's
-  single source of truth — owned by [vault_pki_doctrine.md](./vault_pki_doctrine.md) (decrypt-in-process,
+  *home* of that scope's `InForceSpec` is the Vault-Transit-enveloped MinIO object named by the selected
+  `Release.deploymentDhallRef`; the environment pointer plus immutable release is the authoritative selection,
+  while the enveloped object is its authenticated materialization — owned by
+  [vault_pki_doctrine.md](./vault_pki_doctrine.md) (decrypt-in-process,
   never plaintext at rest) and the Pulumi/MinIO backend. There is no flat `in-force.dhall` file and no
   second desired-state store to drift out of sync with the spec, because the exact keyed object union is *recomputed* from
   the source and checked declarations, not stored. Current observed inventory and allocations gate mutation
@@ -646,27 +644,25 @@ release as an opaque gzipped Secret holding the rendered manifests, and the clus
   `BindingInFlight→Bound` after exact UID/node readback, with idempotent same-UID and crash recovery. A
   confirmed Bound Pod with an in-flight ledger row is the observed-Pod-UID `BindingRecovery` arm, not a
   second planned debit. The observed Pod/ledger exact join is part of every new `ValidatedLiveTarget`.
-- **Each applied generation is persisted content-addressed — the canonical release ledger.** amoebius writes
-  each rendered generation into the content-addressed MinIO store (pointers → manifests → blobs), reusing the
-  mechanism owned by [content_addressing_doctrine.md](./content_addressing_doctrine.md). That buys a **typed
-  revision history**, **rollback** to any prior generation ([§5](#5-the-applyreconcile-engine-snapshot-bound-typed-actions)), and **drift detection** (diff live objects
-  against the recorded generation) — and it is strictly *more* than Helm offers: typed, content-addressed,
-  deduplicated, and confluent across clusters, where Helm's release Secret is an opaque gzip blob with no
-  cross-cluster story. **[§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional) promotes this applied-log from *optional* to THE canonical immutable release
-  ledger keyed by `releaseHash`** — a durable record of *what was applied*, never a second desired-state
-  store. Persistence is capacity-admitted: exact release blob/manifest/ledger and environment-pointer
-  identities form an `ObjectStoreDemand` in the closed `Content` producer arm, with `StorageBudgetId`,
-  retention/concurrency/failure/orphan bounds, and writer admission. The release write is not exposed until
-  the live snapshot proves that structured peak and the sole object gateway's complete pod envelope fit.
+- **Each convergence appends an immutable application record.** The selected `Release` already exists in the
+  canonical release ledger before promotion. After convergence, amoebius writes an `AppliedGeneration`
+  referencing that `releaseHash`, environment, and exact applied-object-set hash into the content-addressed
+  MinIO store, reusing the mechanism owned by
+  [content_addressing_doctrine.md](./content_addressing_doctrine.md). The release ledger supplies candidate and
+  rollback identity; the application records supply typed deployment history and drift comparison without
+  becoming stored desired YAML. Persistence is capacity-admitted: exact application-record object identities
+  form an `ObjectStoreDemand` in the closed `Content` producer arm, with `StorageBudgetId`,
+  retention/concurrency/failure/orphan bounds, and writer admission. The record write is not exposed until the
+  live snapshot proves that structured peak and the sole object gateway's complete pod envelope fit.
 
 The contrast is direct. Helm's release store has well-known desync failure modes — the stored release and
 the live cluster disagree after a manual `kubectl edit`, a `helm rollback` to a release whose manifests no
 longer match the chart, or a half-applied upgrade that leaves the release marked `deployed` over a broken
-object set. amoebius has **no release store to desync**: desired state is always exactly the result of the
+object set. amoebius has **no mutable rendered-manifest store to desynchronize**: desired state is always exactly the result of the
 conditional `decode → bind/expand → planInfrastructure → authenticated materialization →
 ProvisionContext → provision → renderAll` path, and
-the only persisted history is the immutable, content-addressed release ledger ([§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional)) — a record of *what was
-applied*, not a competing source of desired state.
+persisted history is split between the immutable `Release` candidates and immutable `AppliedGeneration`
+records ([§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional)); neither is a stored rendered-object source of desired state.
 
 ```mermaid
 flowchart TD
@@ -687,7 +683,7 @@ flowchart TD
   preflight -->|mismatch or changed snapshot| refuse>"Refuse or replan with zero writes"]:::refuse
   token --> enact[/"SSA, scheduler CAS/Binding, staged action, or authenticated delete"/]:::effect
   enact --> live
-  live -->|after convergence, content-addressed applied-generation record| log[Release ledger: history, rollback, drift]:::intent
+  live -->|after convergence, content-addressed AppliedGeneration| log[Application history and drift evidence]:::intent
   classDef intent   fill:#e8eef7,stroke:#33587a,color:#12283f,stroke-width:1px
   classDef gate     fill:#fde9c8,stroke:#b8791b,color:#5c3a06,stroke-width:2px
   classDef effect   fill:#e7ddf5,stroke:#6b3fa0,color:#2f1a52,stroke-width:2px
@@ -697,50 +693,43 @@ flowchart TD
 ```
 *Design intent. Desired state is the Tier-1 `decode → provision → renderAll` result sealing on `ProvisionedSpec`; the observed Pod/ledger/allocation inputs are runtime-checked residue, the preflight gate mints the `ValidatedLiveTarget` seal or refuses with zero writes, and the single enact seam is the one effect — not proven in amoebius here.*
 
-### 6.1 The release ledger: the applied-log is canonical, not optional
+<a id="61-the-release-ledger-the-applied-log-is-canonical-not-optional"></a>
 
-[§6](#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)'s applied-log is described as *optional*. **This subsection promotes it: the immutable, content-addressed
-applied-log is THE canonical release ledger** — the one durable record of what amoebius has deployed. The
-promotion changes *nothing* about desired state: **desired is still the checked conditional
+### 6.1 The release application record: every convergence is recorded
+
+[release_lifecycle_doctrine.md §2](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash)
+owns the `Release`, `AppliedGeneration`, and canonical immutable-ledger contracts. This subsection owns the
+writer rule: after a selected release converges, the reconciler appends the exact `AppliedGeneration`. The
+write changes nothing about object derivation: **desired is still the checked conditional
 `decode → bind/expand → planInfrastructure → authenticated materialization → ProvisionContext →
 provision → renderAll` result, and there is
-still no separate desired-state store** ([§6](#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)). The ledger records *what was applied*; it never becomes a thing
-the reconciler converges *toward*.
+still no stored rendered-object desired-state copy** ([§6](#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)). The active environment pointer selects the immutable
+`Release` input; the reconciler resolves its `deploymentDhallRef` and recomputes the desired objects rather than
+replaying stored YAML.
 
-- **A `Release` is one immutable ledger entry, keyed by `releaseHash`.** Each converged generation is written
-  content-addressed as a `Release = { releaseHash, deploymentDhallRef, imageDigests, substrateFp }`, where
-  `releaseHash = sha256(resolved-deployment-dhall ‖ image-digests ‖ substrate-fp)` — a hash **class**
-  registered in the
-  [content_addressing_doctrine.md §2.3 master table](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds),
-  namespaced away from `experimentHash` / `kernelKey` / the OCI image digest and never shared with them. The
-  ledger reuses the same pointer → manifest → blob store [§6](#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed) already names; the `Release` type, the ledger, the
-  `Environment` promotion pointer, and the `PromotionGate` are owned by
-  [release_lifecycle_doctrine.md §2](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash) (ledger) and [§3](#3-best-practice-by-construction-an-unsafe-manifest-is-not-constructible)–[§4](#4-no-third-party-charts--no-third-party-software-operators-are-generated) (pointer, gate) —
-  **this doc owns only that the reconciler *writes* the entry on convergence.**
-- **Writing the ledger is itself provisioned.** The exact release blob, manifest, entry, and three
-  environment-pointer old/new/CAS identities are the `Content` arm of the six-arm object-store producer
-  inventory. Source↔producer equality, one resolved `StorageBudgetId`, MinIO/object-quota fit, failed-CAS
+- **The existing `Release` is the input; `AppliedGeneration` is the output record.** Release lifecycle writes
+  the immutable candidate before promotion and owns the environment pointer and gate
+  ([release_lifecycle_doctrine.md §2](./release_lifecycle_doctrine.md#2-release-and-the-immutable-release-ledger-releasehash)–[§4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable)).
+  This reconciler neither creates nor mutates that candidate. It appends an `AppliedGeneration` only after the
+  exact selected `releaseHash` has converged.
+- **Writing the application record is itself provisioned.** The exact record blob, manifest, and entry
+  identities are the `Content` arm of the six-arm object-store producer inventory. Source↔producer equality,
+  one resolved `StorageBudgetId`, MinIO/object-quota fit, failed-write
   orphan exposure, and the mutation gateway's image/CPU/memory/ephemeral/log/pod-slot envelope are checked
   before the first PUT. Direct backend credentials/routes are denied. A one-byte-short store or one-unit-short
-  gateway rejects the rollout before its first live mutation and records zero ledger/pointer writes; a runtime
-  partial/failed CAS makes the generation ineligible for promotion and remains charged until observed deletion.
-- **Why canonical, not optional.** An append-only `releaseHash`-keyed ledger is what makes rollback ([§5](#5-the-applyreconcile-engine-snapshot-bound-typed-actions)),
-  drift detection (diff live objects against a recorded `Release`), typed revision history, and cross-cluster
-  confluence *always* available rather than best-effort — and it is the auditability substrate that lets
-  amoebius refuse an external CI/CD control plane (no Argo/Flux/Tekton), owned by
-  [release_lifecycle_doctrine.md §1](./release_lifecycle_doctrine.md#1-no-external-cicd-control-plane--delivery-is-typed-composition-on-primitives-amoebius-owns). Leaving it optional would reintroduce a
-  "sometimes there is no history" mode; promoting it closes that.
-- **Still not a Helm release store.** The ledger is immutable and content-addressed — a *new* `releaseHash`
-  per generation, never an in-place-mutated blob — so it has none of the desync modes of Helm's gzipped
-  release Secret ([§6](#6-the-reconcile-state-model-desired-is-renderallprovisionedspec-observed-is-live-inventory-actions-are-typed)). The environment pointers that *select* a `Release` (dev / staging / prod, advanced by
-  ETag-CAS under a `PromotionGate`) are pointer kinds in the same
-  [§2.3 master table](./content_addressing_doctrine.md#23-the-hashpointer-master-table-four-hash-classes-three-pointer-kinds)
-  and are owned by release_lifecycle_doctrine.md [§3](./release_lifecycle_doctrine.md#3-environment-and-the-etag-cas-promotion-pointer)–[§4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable), not here.
+  gateway leaves the release unrecorded as applied; a partial write remains charged until observed deletion.
+- **Application history is mandatory.** Rollback identity comes from the `Release` ledger; drift detection
+  compares live objects with the exact `AppliedGeneration` object-set hash. Recording every successful
+  convergence makes deployment history available rather than best-effort and supports the no-external-CI/CD
+  auditability contract owned by
+  [release_lifecycle_doctrine.md §1](./release_lifecycle_doctrine.md#1-no-external-cicd-control-plane--delivery-is-typed-composition-on-primitives-amoebius-owns).
+- **Still not a Helm release store.** Neither immutable record stores mutable rendered YAML. The environment
+  pointer selects a `Release`; object derivation is recomputed; the application record is append-only evidence.
 
-> **Honesty.** The release ledger is **Phase-N design intent** — it composes with the content-store phase
+> **Honesty.** The release application record is **Phase-N design intent** — it composes with the content-store phase
 > ([§9](#9-planning-ownership)) and the tier-(c) reconciler (Phase 26), neither built in amoebius. Content-addressed immutable storage
-> is proven mechanism; *that amoebius records each converged generation as a `releaseHash`-keyed `Release` and
-> promotes environments by CAS over it* is specified across this [§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional) and release_lifecycle_doctrine.md and is
+> is proven mechanism; *that amoebius appends an `AppliedGeneration` after convergence and promotes
+> environments by CAS over an existing `Release`* is specified across this [§6.1](#61-the-release-ledger-the-applied-log-is-canonical-not-optional) and release_lifecycle_doctrine.md and is
 > unbuilt.
 
 ---

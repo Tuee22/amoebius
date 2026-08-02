@@ -80,7 +80,7 @@ locks the **`renderAll`** step of the pre-cluster spine.
 **Substrate:** `none` — no host, no cluster; the gate is an in-process `cabal test` render-and-golden battery
 analogous to the Phase-5 decode battery and the Phase-4 `dhall type` corpus.
 
-**Register:** 1 — pure/golden, in-process, no cluster (§K).
+**Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** `cabal test render-golden` is green against Phase-0-pinned oracles — the pure, total
 `renderAll :: ProvisionedSpec -> [K8sObject]` emits, **for the concrete corpus** (the full Phase-11 provisioned output set:

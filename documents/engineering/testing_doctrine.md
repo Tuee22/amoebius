@@ -230,7 +230,7 @@ machine-visible by emitting a ledger.
   advance constructor to consume, so *in-process validation of the DSL* cannot mean *the cluster enforces it*.
   The two-tier split (Tier-1 design-time integrity vs. Tier-2 runtime-enforcement / runtime fidelity) — and the
   Tier-1/Tier-2 vocabulary itself — is owned by [chaos_failover_doctrine.md](./chaos_failover_doctrine.md)
-  (model↔code correspondence holds by construction and is not a deferred tier,
+  (model↔code correspondence is differentially checked and is not a deferred tier,
   [gateway_migration_model_doctrine.md §6](./gateway_migration_model_doctrine.md#6-modelling-bounds-and-honesty)); the promotion-gate face of this
   fence is owned by
   [release_lifecycle_doctrine.md §4](./release_lifecycle_doctrine.md#4-promotiongate-promote-unverifiedprod-is-unrepresentable).

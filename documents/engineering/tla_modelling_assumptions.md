@@ -33,7 +33,7 @@ completed later. That framing is retired for two reasons converged during the DS
 
 - **The system model, invariant catalog, modelling bounds, and one-and-done + per-`InForceSpec` structural-fit**
   → [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md).
-- **The model-as-data pattern, `interpret`/`emitTLA`, correspondence-by-construction, generated-not-committed**
+- **The model-as-data pattern, `interpret`/`emitTLA`, single-source correspondence, generated-not-committed**
   → [formal_model_doctrine.md](./formal_model_doctrine.md).
 - **The Extract → Model → Inject methodology and the proven/tested/assumed ledger** remain owned by
   [chaos_failover_doctrine.md](./chaos_failover_doctrine.md).

@@ -249,9 +249,9 @@ stance (with the named behavior when no synchronous standby exists), and `maximu
 **required typed platform-service invariant** — owned by
 [platform_services_doctrine.md §8](./platform_services_doctrine.md#8-postgres--patroni-via-percona-one-cluster-per-consumer-with-pgadmin) —
 not left to Patroni's default. amoebius **delegates** the
-synchronous-HA correctness obligation to these systems rather than re-deriving it. A Pulsar
-topic-lifecycle coordinator that needs single-consumer semantics gets it from Pulsar's subscription model
-and the at-least-once + dedup discipline, not from a bespoke amoebius election
+synchronous-HA correctness obligation to these systems rather than re-deriving it. Pulsar supplies any
+topic-lifecycle coordinator's sole-consumer behavior through its subscription and deduplicated-delivery
+contracts; amoebius introduces no coordinator election
 ([pulsar_client_doctrine.md](./pulsar_client_doctrine.md)). **Crucially, the control-plane singleton's
 single-writer authority is likewise delegated — to Kubernetes/etcd.** The singleton is a Deployment
 `replicas=1` protected by the mandatory reconciler `Lease`, never a bespoke amoebius election
@@ -438,8 +438,9 @@ self-healing** rather than permanent.
 are owned by
 [gateway_migration_model_doctrine.md](./gateway_migration_model_doctrine.md), and split across the two tiers: the
 **design-model and invariant catalog** are authored and TLC-checked design-first in **Phase 3** (Tier 1 —
-proven for the model at scope, needing no runtime); model↔code correspondence **holds by construction** there
-(`interpret` and `emitTLA` render one `Model`, so no correspondence table or divergence record is deferred),
+proven for the model at scope, needing no runtime); model↔decision-core correspondence is **differentially
+checked** there (`interpret` and `emitTLA` render one `Model`, eliminating a per-model correspondence table but
+still requiring renderer-faithfulness tests),
 while the residual **runtime-fidelity** check — that the built forest's real physics hold — is the **Tier-2**
 obligation confirmed by **Register-3 chaos injection** in **Phase 43**. The sibling prodbox spec
 (`/home/matthewnowak/prodbox/documents/engineering/tla/gateway_orders_rule.tla`, six invariants explored to
@@ -671,7 +672,7 @@ reported as proven. Keep this ledger explicitly:
 |---|---|---|---|
 | GADT-indexed state machine | Illegal in-process transitions are compile errors | **Proven** (machine-checked, exhaustive) | Anything across processes |
 | **Extract** — pure decision + property test | The branch is a total function of typed inputs; unknowns and distinguished states are explicit; safety-critical freshness is fenced | **Proven** for purity / totality / fence wiring; **tested** (sampled) for the property unless the input space is finite and exhausted | That the protocol composing these decisions is sound; that an unfenced observation is current |
-| **Model** — design model-checking | The *algorithm* upholds the (possibly *conditional*, R7) **safety** invariant and, under a named fairness, the **liveness** property, under modeled crash/reorder, within scope | **Proven for the model** at TLC-green — safety on every reachable state, liveness (TLC-only) **under the assumed fairness `F`** (fairness-sensitivity checked); correspondence holds **by construction** but only between the spec and the **decision core** `interpret` (one `Model` → `interpret` + `emitTLA`), **not** the effectful daemon; the three instruments over one `Model` = **one** protocol proof (TLC) + renderer cross-checks, not three; **assumed** for runtime fidelity — bridged early by **trace validation** (Register 2.5 sim, Register 3 live) and confirmed by Register-3 chaos (Phase 43) — and for actor counts beyond scope | That the built runtime's real physics refine the model; behaviour above scope; real-time / clock-skew / fairness premises (R8, F) |
+| **Model** — design model-checking | The *algorithm* upholds the (possibly *conditional*, R7) **safety** invariant and, under a named fairness, the **liveness** property, under modeled crash/reorder, within scope | **Proven for the model** at TLC-green — safety on every reachable state, liveness (TLC-only) **under the assumed fairness `F`** (fairness-sensitivity checked); one shared `Model` removes the manual mapping, while differential checks test the spec↔decision-core `interpret` correspondence, **not** the effectful daemon; the three instruments over one `Model` = **one** protocol proof (TLC) + renderer cross-checks, not three; **assumed** for runtime fidelity — bridged early by **trace validation** (Register 2.5 sim, Register 3 live) and confirmed by Register-3 chaos (Phase 43) — and for actor counts beyond scope | That the built runtime's real physics refine the model; behaviour above scope; real-time / clock-skew / fairness premises (R8, F) |
 | **Simulate** — deterministic simulation (Register 2.5) | The pure decision upholds the invariant under in-process schedules against peer stubs (Tier-1, Phase 3); **and** the *built daemon/reconciler code*, run under `IOSim`/`IOSimPOR` against a **modeled faulty environment** (fake Pulsar/MinIO/apiserver/route53/Vault/clock), upholds the invariants under injected partition/reorder/redelivery/crash — deterministically replayable, no cluster | **Tested** — sampled schedules + injected environment faults; the modeled-environment's fidelity to the real substrate is **assumed** (discharged by a narrow Register-3 conformance suite) | Schedules/faults not explored; that the real Pulsar/k8s behave as the sim models them (Register 3); real-time physics |
 | **Inject** — live fault injection | The deployed forest survived the injected faults | **Tested** (the faults chosen), never proven | Faults/interleavings not injected; that the invariant is *sound* |
 | Synchrony / real-time assumption (R8) | The timing premise (clock skew, lease, heartbeat) is named, bounded, monitored | **Assumed** — monitored at runtime, never proven by any move | Behaviour when the bound is exceeded; that it holds in the field |
@@ -1018,7 +1019,8 @@ Each first-axis rule ([§13](#13-the-supporting-rules--the-conditions-the-moves-
   **assumed** under real disaster. Every other rule's violation is transient and heals; R9's data-loss
   dimension is permanent, accepted, and never heals — which is why no other rule can host it. The
   declarative **push-back on an unsatisfiable root `InForceSpec`**, and the data-loss-budget thresholds, are
-  configured as deployment-rules ([cluster_lifecycle_doctrine.md [§5](#5-three-layers-and-the-blindness-that-binds-them), [§6](#6-the-concentration-principle--where-the-obligation-lives)](./cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction));
+  configured as deployment-rules ([cluster_lifecycle_doctrine.md §5](./cluster_lifecycle_doctrine.md#5-teardown-with-cleanup-vs-chaos-failover-the-central-distinction) and
+  [§6](./cluster_lifecycle_doctrine.md#6-push-back-when-teardown-would-break-the-root-inforcespec));
   this doctrine owns the *proof obligation* that the declared budget actually holds.
 
 ---
@@ -1050,7 +1052,7 @@ confluent-bucket ([§17](#17-the-boundary-and-its-classifier)) merges and the R3
 are today property-tested; the sanctioned way to *upgrade* a specific confluence row from **assumed** to
 **proven** is a machine-checked proof of the laws (Lean or Liquid Haskell), scoped surgically to that fold — the
 deferred proof-assistant track ([later_phases.md](../../DEVELOPMENT_PLAN/later_phases.md),
-[formal_model_doctrine.md §4](./formal_model_doctrine.md#4-correspondence-by-construction)), never a broad
+[formal_model_doctrine.md §4](./formal_model_doctrine.md#4-single-source-correspondence)), never a broad
 proof layer.
 
 ---
@@ -1190,9 +1192,9 @@ derived, not stored; the spec lives in the immutable `Release` ledger and geo-re
 MinIO), so on promotion the survivor **re-derives** it from that single authority — confluent by restructuring,
 bucket (i), no divergence-merge. **Runtime session** state is the non-confluent singleton: held
 **survivor-wins** under R7, the survivor's timeline is authoritative, and sessions on the lost fork past the
-divergence point re-authenticate (acceptable for an emergency failover) and are audited. The recovered old
-active **rewinds to the fork point**, re-syncs as a replica of the new primary, and quarantines its
-un-replicated writes to an **audited RPO-gap log** rather than merging them (Postgres is relational, not a
+divergence point re-authenticate (acceptable for an emergency failover) and are audited. Recovery rolls the
+former active back to the divergence point, attaches it to the promoted primary as a replica, and places its
+un-replicated writes in an **audited RPO-gap log** rather than merging them (Postgres is relational, not a
 CRDT) — accounted for only by the R9 data-loss budget. Convergence is therefore survivor-wins + rewind +
 config-re-derive + audited RPO gap, with no fabricated per-record merge.
 
@@ -1225,7 +1227,7 @@ replication-lag/promotion-gate, and failback-idempotency drills. *Assumed* — t
 replication-lag bound (R8/R9), monitored never proven; the PACELC latency-for-consistency posture (R7);
 runtime fidelity and behaviour beyond 2 clusters. **Under the two-tier schedule, the two-cluster
 design-model's safety/liveness properties are *proven for the model at scope 2* in Phase 3 (design-first), and
-model↔code correspondence holds by construction; the runtime fidelity (real physics) and live
+model↔code correspondence is differentially checked; the runtime fidelity (real physics) and live
 cross-cluster-failover-in-a-running-forest remain UNVERIFIED — the Tier-2 Phase-43 obligation, and the single
 place the per-system proof concentrates.**
 
@@ -1386,7 +1388,7 @@ needs it.
 - [Development Plan](../../DEVELOPMENT_PLAN/README.md) — phase order, adoption ownership, and validation closure (Phase 43 carries the cross-cluster failover proof). This doctrine maintains no competing status ledger.
 - [Documentation Standards](../documentation_standards.md) — the proven/tested/assumed honesty rule this doctrine owns.
 - [Engineering Doctrine Index](./README.md)
-- [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — SSoT for the concrete formal spec and invariant catalog (the Tier-1 design-model, authored design-first in Phase 3, covering **both** the `Planned` and `Failover` branches); model↔code correspondence holds by construction, and the runtime-fidelity confirmation is the deferred Tier-2 obligation (Phase 43, via Register-3 chaos) this doctrine's Model move requires.
+- [Gateway Migration Model Doctrine](./gateway_migration_model_doctrine.md) — SSoT for the concrete formal spec and invariant catalog (the Tier-1 design-model, authored design-first in Phase 3, covering **both** the `Planned` and `Failover` branches); model↔code correspondence is differentially checked, and the runtime-fidelity confirmation is the deferred Tier-2 obligation (Phase 43, via Register-3 chaos) this doctrine's Model move requires.
 - [Daemon Topology Doctrine](./daemon_topology_doctrine.md) — the control-plane singleton (a Deployment `replicas=1`, single-instance delegated to k8s/etcd, no election).
 - [Cluster Lifecycle Doctrine](./cluster_lifecycle_doctrine.md) — graceful teardown (lossless) versus chaos-failover (bounded loss), and push-back on an unsatisfiable root `InForceSpec`.
 - [Gateway Migration Doctrine](./gateway_migration_doctrine.md) — the `GatewayMigration = <Planned | Failover>` taxonomy; the `Failover` branch is this doctrine's Second-Axis obligation, and its reconciliation-on-return is worked in Appendix B.

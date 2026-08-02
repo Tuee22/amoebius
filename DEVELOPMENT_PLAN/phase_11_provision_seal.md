@@ -567,11 +567,10 @@ UNVERIFIED.
   `mutant_drop_execution_surge`, `mutant_drop_execution_old_revision`, `mutant_wrong_execution_revision_join`,
   `mutant_double_debit_controller_child`, `mutant_drop_largest_kubelet_metadata`, and
   `mutant_missing_kubelet_metadata_model`. The gate re-runs each and asserts red.
-- A Register-1 validation-locus ledger mapping every entry to its catalog id and layer, backed by
-  Phase-6-style coverage-assertion machinery (the ledger is not a static hand-written file: the suite goes
-  **red** if any corpus entry, negative reason, or seeded mutant named above is absent), explicitly marking the
-  runtime residue (the provider actually coming up, the engine actually resolving into its bounded cache)
-  deferred to the live band — never reported as proven.
+- Its Register-1 ledger is generated from this sprint's executed cases. Coverage assertions require every corpus
+  entry, negative reason, and seeded mutant above to contribute a row naming its catalog id and foreclosure
+  layer; provider bring-up and bounded-cache resolution remain explicitly deferred live residues, never proof
+  claims.
 
 ### Validation
 1. `cabal test provision-seal-spec` is green — each of the nine per-arm positives provisions (both shapes) to

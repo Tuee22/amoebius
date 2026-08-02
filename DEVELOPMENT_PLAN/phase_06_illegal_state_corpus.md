@@ -46,7 +46,7 @@ the representational SPA-composition corpus (Phase 16), and every `live-effect` 
 **Substrate:** `none` — no host, no cluster; the gate is an in-process `cabal test` + `dhall type` +
 `ghc -fno-code` corpus battery analogous to the Phase-0 documentation lint.
 
-**Register:** 1 — pure/golden, in-process, no cluster (§K).
+**Register:** 1 — pure/golden, in-process, no cluster ([§K](development_plan_standards.md#k-honesty-proven--tested--assumed)).
 
 **Gate:** every negative fixture is rejected at its tagged locus — each Gate-1-class negative fails
 `dhall type` at authoring time with the error pinned to a **Phase-0-committed** `dhall type` error-locus golden
@@ -60,12 +60,12 @@ and the per-entry validation-locus ledger (`Gate-1-editor` / `Gate-2-decoder` / 
 `provision-seal` / `rendered-output-golden` / `live-effect`) is emitted with every catalog entry mapped to its truth-maker locus and a separate
 `owner_phase` / `case_family` disposition, with both **reconciled against the catalog-reconciled committed
 `locus_registry.tsv`** (the independent oracle of §M.3), red on any divergence — a **Register-1** in-process
-check that runs on no substrate. The committed gate-integrity apparatus (§M) that discharges the eight clauses
+check that runs on no substrate. The committed gate-integrity apparatus ([§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub)) that discharges the eight clauses
 — the representative set, oracle pins, and seeded mutants — is itemised in [Gate integrity](#gate-integrity).
 
 ## Gate integrity
 
-This gate satisfies the eight §M clauses through the following committed apparatus.
+This gate satisfies the eight [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) clauses through the following committed apparatus.
 The existing fixture/error oracles are Phase-0-pinned; the owner/family catalog enrichment identified below
 must be hand-authored and committed at the start of Phase 6, before the corpus/ledger implementation that
 consumes it (§M.1 oracle-pinning):
@@ -121,7 +121,7 @@ alone, before any fixture exists to join against.
   `dhall/examples/locus_registry.tsv`. Those catalog tags are authored independently of
   `ValidationLocusLedger.hs`; the coverage assertion reads that registry, never the emitter's own
   classification or a hard-coded section-number range.
-- **Committed mutation quota (§M.2).** Four committed seeded mutants (from the §M operator set) MUST turn the gate
+- **Committed mutation quota (§M.2).** Four committed seeded mutants (from the [§M](development_plan_standards.md#m-gate-integrity-a-gate-cannot-be-passed-by-a-stub) operator set) MUST turn the gate
   red, re-run each gate run: (a) a **union-arm-addition** schema mutant admitting a product-named capability →
   `CorpusSpec` red; (b) a **dropped-resource-normalization guard** decoder mutant that admits a zero/incomplete
   resource declaration or discards one normalized resource field → the corresponding Gate-2 negative or

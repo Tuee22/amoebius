@@ -46,9 +46,9 @@ the spec composes; it does not prove the cluster enforces it ([`illegal_state_te
 In raw k8s a nodeSelector / affinity can match **no** node, *or* a taint no workload
 tolerates, *or* a toleration for a taint no node declares — the pod is admitted and then never schedules.
 amoebius constrains placement so that a workload's substrate/affinity requirement **and** its taint
-tolerations are checked against the *declared* node inventory of the cluster spec: post-bind provision rejects a
-workload unless **there exists** a node satisfying its affinity **and** tolerating all its taints — a
-schedulability *existence fold* over the single node inventory. Placement is expressed as a capability the
+tolerations are checked against the *declared* node inventory of the cluster spec: post-bind provision requires
+at least one inventory node whose capabilities satisfy the requested affinity and whose taints are all covered
+by the derived tolerations. Placement is expressed as a capability the
 workload *requests* and a node *offers*; an unmatchable request/topology pair is constructible input but
 cannot produce `ProvisionedSpec`. A **toleration is never
 hand-authored** — it is *derived* from a declared node taint (the same "derived, never written" discipline as
@@ -248,8 +248,8 @@ capacity nesting: a host worker's CPU, memory/unified-memory, and host-cache sto
 **physical-host `Capacity`** (distinct from the VM's kube-allocatable) alongside the VM and system-reserved
 carves, with its cache charged once to the named native-host-cache carve and the host binary's own footprint
 **netted into system-reserved** so it is counted exactly once.
-VM-carve + host-worker + cache demand exceeding any physical-host axis is a
-**decode-foreclosed `Left Overcommit`** at the provision seal — the host-tier analogue of the pod-tier aggregate overcommit
+VM-carve + host-worker + cache demand exceeding any physical-host axis fails at `provision-seal` with a
+**decode-foreclosed `Left Overcommit`** — the physical-host counterpart of aggregate pod overcommit
 ([§3.17](#317-an-over-committed-deploy-or-workload-host--vm--cluster-capacity-exceeded)); a host running a host
 worker with **no** declared physical-host `Capacity` leaves the Demand unfoldable and is likewise a
 decode-foreclosed provision rejection. **Owner:** [`resource_capacity_doctrine.md`](../engineering/resource_capacity_doctrine.md) (the

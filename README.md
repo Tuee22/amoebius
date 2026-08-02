@@ -9,8 +9,10 @@
 > Dhall DSLs make illegal deployment and application states unrepresentable where their modeled boundaries
 > permit that claim.
 
-amoebius is a single Haskell binary with closed responsibilities for its **CLI**, **sudo-capable host daemon**,
-**in-cluster control-plane singleton**, **capacity scheduler**, and **unelected workers**. The worker set
+amoebius has one Haskell **runtime binary** with closed responsibilities for its bootstrap/host command mode,
+**sudo-capable host daemon**, **in-cluster control-plane singleton**, **capacity scheduler**, and **unelected
+workers**. A separate thin Python `pb` program is the pre-binary midwife and post-handoff admin-REST client; it
+is an operator frontend, not another runtime role or control plane. The worker set
 includes the generic UI server and owner-scoped UI projector as well as linked workflow and ML roles; an
 application does not introduce another executable or privileged server.
 
@@ -58,7 +60,8 @@ and reattaches retained backing
 
 ## Toolchain
 
-GHC 9.12.4, Cabal 3.16.1.0 (one shared pin across all packages).
+GHC 9.12.4, Cabal 3.16.1.0 (one shared pin across all packages). Python `pb` is the pre-binary launcher and
+post-handoff operator client.
 
 ## Working agreement
 
